@@ -1,7 +1,3 @@
-/*
-.
-*/
-
 // Package v1alpha1 contains API Schema definitions for the containerregistry v1alpha1 API group
 // +kubebuilder:object:generate=true
 // +groupName=containerregistry.ovhcloud.com

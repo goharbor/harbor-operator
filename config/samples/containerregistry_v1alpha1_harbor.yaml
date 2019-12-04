@@ -3,5 +3,36 @@ kind: Harbor
 metadata:
   name: harbor-sample
 spec:
-  # Add fields here
-  foo: bar
+  publicURL: 'https://{{ env.Getenv "LBAAS_DOMAIN" }}'
+  tlsSecretName: public-certificate
+  version: "1.9.1"
+  adminPasswordSecret: admin-password-secret
+  components:
+    core:
+      databaseSecret: core-database
+      image:        "goharbor/harbor-core:v1.9.0"
+    registryCtl:
+      image: "goharbor/harbor-registryctl:v1.9.0"
+    registry:
+      storageSecret: registry-storage
+      cacheSecret: registry-cache
+      image: goharbor/registry-photon:v2.7.1-patch-2819-v1.9.0
+    jobService:
+      redisSecret: jobservice-redis
+      image: goharbor/harbor-jobservice:v1.9.0
+    clair:
+      databaseSecret: clair-database
+      image: goharbor/clair-photon:v2.0.9-v1.9.0
+      vulnerabilitySources: # https://github.com/quay/clair/blob/master/config.yaml.sample#L62
+      - debian
+      - ubuntu
+      - rhel
+      - oracle
+      - alpine
+      - suse
+    portal:
+      image: goharbor/harbor-portal:v1.9.0
+    chartMuseum:
+      image: goharbor/chartmuseum-photon:v0.9.0-v1.9.0
+  certificateIssuerRef:
+    name: harbor-sample

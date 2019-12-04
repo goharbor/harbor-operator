@@ -1,0 +1,15 @@
+- key: jaeger
+  priority: 10
+  value: |
+    reporter:
+      localAgentHostPort: "localhost:6831"
+      user: ""
+      password: ""
+
+- key: operator
+  priority: 10
+  value: |
+    {
+      "leaderElection": true,
+      "leaderElectionNamespace": "default"
+    }

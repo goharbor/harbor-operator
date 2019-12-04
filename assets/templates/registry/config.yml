@@ -1,0 +1,76 @@
+version: 0.1
+log:
+  accesslog:
+    disabled: true
+  level: info
+  formatter: json
+http:
+  debug:
+    addr: :5001
+    prometheus:
+      enabled: true
+      path: /metrics
+  headers:
+    X-Content-Type-Options: [nosniff]
+  net: tcp
+  addr: :5000
+  prefix: /
+health:
+  storagedriver:
+    enabled: false
+    interval: 10s
+    threshold: 3
+notifications:
+  endpoints:
+  - name: harbor
+    disabled: false
+    timeout: 3000ms
+    threshold: 5
+    backoff: 1s
+auth:
+  token:
+    issuer: harbor-token-issuer
+    rootcertbundle: /etc/registry/root.crt
+    service: harbor-registry
+{{- $redisUrl := env.Getenv "REDIS_URL" }}
+{{- if gt ( len $redisUrl ) 0 }}
+  {{- with (conv.URL $redisUrl) }}
+redis:
+  addr: {{ .Host | quote }}
+  {{- if strings.Contains "@" . }}
+    {{- /* cannot get password from $redis.User.Password, only a single non error result is permitted */ -}}
+    {{- with ( index ( strings.SplitN "@" 2 ( index ( strings.SplitN "/" 2 ( index ( strings.SplitN "://" 2 .String ) 1 ) ) 0 ) ) 0 ) }}
+  password: {{ index ( strings.SplitN ":" 2 . ) 1 | quote }}
+    {{- end }}
+  {{- end }}
+  db: {{ conv.ToInt .Path }}
+  dialtimeout: 10ms
+  readtimeout: 10ms
+  writetimeout: 10ms
+  pool:
+    maxidle: 16
+    maxactive: 64
+    idletimeout: 300s
+  {{- end }}
+{{- end }}
+storage:
+  delete:
+    enabled: true
+  redirect:
+    disable: false
+  cache:
+    blobdescriptor: {{ if gt ( len $redisUrl ) 0 -}} redis {{- else -}} inmemory {{- end }}
+  maintenance:
+    uploadpurging:
+      enabled: true
+      age: 168h
+      interval: 24h
+      dryrun: false
+    readonly:
+      enabled: false
+{{ range file.Walk ( env.Getenv "STORAGE_CONFIG" ) }}
+  {{- if not (file.IsDir .) }}
+{{- filepath.Base . | strings.Indent 1 "  " }}:
+{{ file.Read . | data.YAML | data.ToYAML | strings.Indent 2 "  " }}
+  {{- end }}
+{{- end }}

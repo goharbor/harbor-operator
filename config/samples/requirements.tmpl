@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: core-database
+data:
+    host: '{{ base64.Encode "core-database-postgresql" }}'
+    port: '{{ base64.Encode "5432" }}'
+    database: '{{ base64.Encode "postgres" }}'
+    username: '{{ base64.Encode "postgres" }}'
+    password: '{{ env.Getenv "CORE_DATABASE_SECRET" | base64.Encode }}'
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: clair-database
+data:
+    host: '{{ base64.Encode "clair-database-postgresql" }}'
+    port: '{{ base64.Encode "5432" }}'
+    database: '{{ base64.Encode "postgres" }}'
+    username: '{{ base64.Encode "postgres" }}'
+    password: '{{ env.Getenv "CLAIR_DATABASE_SECRET" | base64.Encode }}'
+    ssl: '{{ base64.Encode "disable" }}'
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: admin-password-secret
+data:
+    password: '{{ env.Getenv "USER" | base64.Encode }}'

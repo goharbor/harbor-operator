@@ -1,0 +1,17 @@
+apiVersion: cert-manager.io/v1alpha2
+kind: Issuer
+metadata:
+  name: harbor-sample
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: harbor-sample-public
+spec:
+  secretName: public-certificate
+  dnsNames:
+    - '{{ env.Getenv "LBAAS_DOMAIN" }}'
+  issuerRef:
+    name: harbor-sample

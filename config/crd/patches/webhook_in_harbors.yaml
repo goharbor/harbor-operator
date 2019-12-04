@@ -5,6 +5,8 @@ kind: CustomResourceDefinition
 metadata:
   name: harbors.containerregistry.ovhcloud.com
 spec:
+  # https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/#pruning-versus-preserving-unknown-fields
+  preserveUnknownFields: false
   conversion:
     strategy: Webhook
     webhookClientConfig:
