@@ -1,3 +1,7 @@
 domain: ovhcloud.com
 repo: github.com/ovh/harbor-operator
+resources:
+- group: containerregistry
+  kind: Harbor
+  version: v1alpha1
 version: "2"

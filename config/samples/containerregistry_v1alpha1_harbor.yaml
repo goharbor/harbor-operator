@@ -1,0 +1,7 @@
+apiVersion: containerregistry.ovhcloud.com/v1alpha1
+kind: Harbor
+metadata:
+  name: harbor-sample
+spec:
+  # Add fields here
+  foo: bar
