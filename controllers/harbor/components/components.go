@@ -9,7 +9,7 @@ import (
 	"golang.org/x/sync/errgroup"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	extv1 "k8s.io/api/extensions/v1beta1"
+	netv1 "k8s.io/api/networking/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -48,7 +48,7 @@ type Component interface {
 	GetSecrets(context.Context) []*corev1.Secret
 	GetServices(context.Context) []*corev1.Service
 	GetCertificates(context.Context) []*certv1.Certificate
-	GetIngresses(context.Context) []*extv1.Ingress
+	GetIngresses(context.Context) []*netv1.Ingress
 	GetDeployments(context.Context) []*appsv1.Deployment
 }
 
