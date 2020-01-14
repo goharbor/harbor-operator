@@ -61,6 +61,7 @@ var _ = Context("Inside of a new namespace", func() {
 						PublicURL:     publicURL.String(),
 					},
 				}
+				harbor.Default()
 
 				Expect(k8sClient.Create(ctx, harbor)).Should(WithTransform(apierrs.IsInvalid, BeTrue()))
 			})
@@ -78,6 +79,7 @@ var _ = Context("Inside of a new namespace", func() {
 						PublicURL:     "123::bad::dns",
 					},
 				}
+				harbor.Default()
 
 				Expect(k8sClient.Create(ctx, harbor)).Should(WithTransform(apierrs.IsInvalid, BeTrue()))
 			})
@@ -182,17 +184,29 @@ func newValidHarborTest(ns string) (*containerregistryv1alpha1.Harbor, client.Ob
 		Host:   "the.dns",
 	}
 
-	return &containerregistryv1alpha1.Harbor{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: ns,
-			},
-			Spec: containerregistryv1alpha1.HarborSpec{
-				HarborVersion: "1.9.1",
-				PublicURL:     publicURL.String(),
-			},
-		}, client.ObjectKey{
+	harbor := &containerregistryv1alpha1.Harbor{
+		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: ns,
-		}
+		},
+		Spec: containerregistryv1alpha1.HarborSpec{
+			HarborVersion:       "1.9.1",
+			PublicURL:           publicURL.String(),
+			AdminPasswordSecret: "admin-secret",
+			Components: containerregistryv1alpha1.HarborComponents{
+				Core: containerregistryv1alpha1.CoreComponent{
+					DatabaseSecret: "core-database-secret",
+				},
+				JobService: containerregistryv1alpha1.JobServiceComponent{
+					RedisSecret: "jobservice-redis-secret",
+				},
+			},
+		},
+	}
+	harbor.Default()
+
+	return harbor, client.ObjectKey{
+		Name:      name,
+		Namespace: ns,
+	}
 }
