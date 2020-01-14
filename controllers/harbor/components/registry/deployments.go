@@ -47,6 +47,15 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 		}
 	}
 
+	var storageVolumeSource corev1.VolumeSource
+	if r.harbor.Spec.Components.Registry.StorageSecret == "" {
+		storageVolumeSource.EmptyDir = &corev1.EmptyDirVolumeSource{}
+	} else {
+		storageVolumeSource.Secret = &corev1.SecretVolumeSource{
+			SecretName: r.harbor.Spec.Components.Registry.StorageSecret,
+		}
+	}
+
 	return []*appsv1.Deployment{
 		{
 			ObjectMeta: metav1.ObjectMeta{
@@ -97,12 +106,8 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 									},
 								},
 							}, {
-								Name: "config-storage",
-								VolumeSource: corev1.VolumeSource{
-									Secret: &corev1.SecretVolumeSource{
-										SecretName: r.harbor.Spec.Components.Registry.StorageSecret,
-									},
-								},
+								Name:         "config-storage",
+								VolumeSource: storageVolumeSource,
 							}, {
 								Name: "certificate",
 								VolumeSource: corev1.VolumeSource{
