@@ -12,6 +12,10 @@ import (
 	"github.com/ovh/harbor-operator/pkg/factories/application"
 )
 
+const (
+	port = 8080
+)
+
 var (
 	revisionHistoryLimit int32 = 0 // nolint:golint
 )
@@ -59,7 +63,7 @@ func (p *Portal) GetDeployments(ctx context.Context) []*appsv1.Deployment { // n
 								Image: p.harbor.Spec.Components.Portal.Image,
 								Ports: []corev1.ContainerPort{
 									{
-										ContainerPort: 8080,
+										ContainerPort: port,
 									},
 								},
 
@@ -68,7 +72,7 @@ func (p *Portal) GetDeployments(ctx context.Context) []*appsv1.Deployment { // n
 									Handler: corev1.Handler{
 										HTTPGet: &corev1.HTTPGetAction{
 											Path: "/",
-											Port: intstr.FromInt(8080),
+											Port: intstr.FromInt(port),
 										},
 									},
 								},
@@ -76,7 +80,7 @@ func (p *Portal) GetDeployments(ctx context.Context) []*appsv1.Deployment { // n
 									Handler: corev1.Handler{
 										HTTPGet: &corev1.HTTPGetAction{
 											Path: "/",
-											Port: intstr.FromInt(8080),
+											Port: intstr.FromInt(port),
 										},
 									},
 								},

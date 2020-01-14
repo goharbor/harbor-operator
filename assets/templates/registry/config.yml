@@ -6,14 +6,14 @@ log:
   formatter: json
 http:
   debug:
-    addr: :5001
+    addr: {{ env.Getenv "METRICS_ADDRESS" | quote }}
     prometheus:
       enabled: true
       path: /metrics
   headers:
     X-Content-Type-Options: [nosniff]
   net: tcp
-  addr: :5000
+  addr: {{ env.Getenv "API_ADDRESS" | quote }}
   prefix: /
 health:
   storagedriver:

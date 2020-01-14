@@ -203,7 +203,7 @@ endif
 golangci-lint:
 ifeq (, $(shell which golangci-lint))
 	# https://github.com/golangci/golangci-lint#install
-	go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.21.0
+	go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.22.2
 GOLANGCI_LINT=$(GOBIN)/golangci-lint
 else
 GOLANGCI_LINT=$(shell which golangci-lint)

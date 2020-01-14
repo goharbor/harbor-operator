@@ -2,6 +2,7 @@ package manager
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	nettracing "github.com/opentracing-contrib/go-stdlib/nethttp"
@@ -15,11 +16,16 @@ import (
 	"github.com/ovh/harbor-operator/pkg/factories/logger"
 )
 
+const (
+	WebHookPort = 9443
+	MetricsPort = 8080
+)
+
 func New(ctx context.Context, scheme *runtime.Scheme) (manager.Manager, error) {
 	var mgrConfig *manager.Options = &ctrl.Options{
-		MetricsBindAddress: ":8080",
+		MetricsBindAddress: fmt.Sprintf(":%d", MetricsPort),
 		LeaderElection:     false,
-		Port:               9443,
+		Port:               WebHookPort,
 	}
 
 	log := logger.Get(ctx)

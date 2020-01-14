@@ -24,6 +24,8 @@ import (
 	"github.com/ovh/harbor-operator/pkg/factories/logger"
 )
 
+const PriorityBase = 100
+
 type Resource interface {
 	metav1.Object
 	runtime.Object
@@ -60,7 +62,7 @@ func GetComponents(ctx context.Context, harbor *containerregistryv1alpha1.Harbor
 	g.Go(func() error {
 		var corePriority *int32
 		if harbor.Spec.Priority != nil {
-			priority := *harbor.Spec.Priority - 100 + CorePriority
+			priority := *harbor.Spec.Priority - PriorityBase + CorePriority
 			corePriority = &priority
 		}
 
@@ -75,7 +77,7 @@ func GetComponents(ctx context.Context, harbor *containerregistryv1alpha1.Harbor
 	g.Go(func() error {
 		var registryPriority *int32
 		if harbor.Spec.Priority != nil {
-			priority := *harbor.Spec.Priority - 100 + RegistryPriority
+			priority := *harbor.Spec.Priority - PriorityBase + RegistryPriority
 			registryPriority = &priority
 		}
 
@@ -90,7 +92,7 @@ func GetComponents(ctx context.Context, harbor *containerregistryv1alpha1.Harbor
 	g.Go(func() error {
 		var portalPriority *int32
 		if harbor.Spec.Priority != nil {
-			priority := *harbor.Spec.Priority - 100 + PortalPriority
+			priority := *harbor.Spec.Priority - PriorityBase + PortalPriority
 			portalPriority = &priority
 		}
 
@@ -105,7 +107,7 @@ func GetComponents(ctx context.Context, harbor *containerregistryv1alpha1.Harbor
 	g.Go(func() error {
 		var jobServicePriority *int32
 		if harbor.Spec.Priority != nil {
-			priority := *harbor.Spec.Priority - 100 + JobServicePriority
+			priority := *harbor.Spec.Priority - PriorityBase + JobServicePriority
 			jobServicePriority = &priority
 		}
 
@@ -121,7 +123,7 @@ func GetComponents(ctx context.Context, harbor *containerregistryv1alpha1.Harbor
 		g.Go(func() error {
 			var chartMuseumPriority *int32
 			if harbor.Spec.Priority != nil {
-				priority := *harbor.Spec.Priority - 100 + ChartMuseumPriority
+				priority := *harbor.Spec.Priority - PriorityBase + ChartMuseumPriority
 				chartMuseumPriority = &priority
 			}
 
@@ -138,7 +140,7 @@ func GetComponents(ctx context.Context, harbor *containerregistryv1alpha1.Harbor
 		g.Go(func() error {
 			var clairPriority *int32
 			if harbor.Spec.Priority != nil {
-				priority := *harbor.Spec.Priority - 100 + ClairPriority
+				priority := *harbor.Spec.Priority - PriorityBase + ClairPriority
 				clairPriority = &priority
 			}
 

@@ -25,6 +25,10 @@ import (
 	"github.com/ovh/harbor-operator/pkg/factories/logger"
 )
 
+const (
+	DefaultRequeueWait = 2 * time.Second
+)
+
 // Reconciler reconciles a Harbor object
 type Reconciler struct {
 	client.Client
@@ -126,7 +130,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			// Hide error, just try again later
 			reqLogger.Info("not ready yet, trying again later")
 
-			result.RequeueAfter = 2 * time.Second
+			result.RequeueAfter = DefaultRequeueWait
 
 			err = r.UpdateCondition(ctx, harbor, containerregistryv1alpha1.ReadyConditionType, corev1.ConditionFalse, "harbor-component", fmt.Sprintf("at least an Harbor component failed: %+v", health.GetUnhealthyComponents()))
 			if err != nil {

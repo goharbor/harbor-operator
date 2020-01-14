@@ -21,7 +21,7 @@ const (
 	registryCtlConfigName = "ctl-config.yml"
 	registryCtlConf       = `
 protocol: "http"
-port: 8080
+port: %d
 log_level: info
 `
 )
@@ -62,7 +62,7 @@ func (r *Registry) GetConfigMaps(ctx context.Context) []*corev1.ConfigMap {
 				},
 			},
 			Data: map[string]string{
-				registryCtlConfigName: registryCtlConf,
+				registryCtlConfigName: fmt.Sprintf(registryCtlConf, ctlAPIPort),
 			},
 			BinaryData: map[string][]byte{
 				registryConfigName: config,

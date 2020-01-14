@@ -35,6 +35,7 @@ func (r *Reconciler) ApplyMutationFunc(ctx context.Context, harbor *containerreg
 			for key, value := range result.GetAnnotations() {
 				annotations[key] = value
 			}
+
 			result.SetAnnotations(annotations)
 
 			r.MutateAnnotations(ctx, result)
@@ -50,6 +51,7 @@ func (r *Reconciler) ApplyMutationFunc(ctx context.Context, harbor *containerreg
 			for key, value := range result.GetLabels() {
 				labels[key] = value
 			}
+
 			result.SetLabels(labels)
 
 			r.MutateLabels(ctx, result)

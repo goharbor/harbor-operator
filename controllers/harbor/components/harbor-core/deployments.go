@@ -23,6 +23,7 @@ var (
 const (
 	coreConfigPath = "/etc/core/app.conf"
 	keyFileName    = "key"
+	port           = 8080 // https://github.com/goharbor/harbor/blob/2fb1cc89d9ef9313842cc68b4b7c36be73681505/src/common/const.go#L127
 )
 
 func (c *HarborCore) GetDeployments(ctx context.Context) []*appsv1.Deployment { // nolint:funlen
@@ -122,7 +123,7 @@ func (c *HarborCore) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 								Image: c.harbor.Spec.Components.Core.Image,
 								Ports: []corev1.ContainerPort{
 									{
-										ContainerPort: 8080,
+										ContainerPort: int32(port),
 									},
 								},
 
@@ -289,7 +290,7 @@ func (c *HarborCore) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 									Handler: corev1.Handler{
 										HTTPGet: &corev1.HTTPGetAction{
 											Path: "/api/ping",
-											Port: intstr.FromInt(8080),
+											Port: intstr.FromInt(port),
 										},
 									},
 								},
@@ -297,7 +298,7 @@ func (c *HarborCore) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 									Handler: corev1.Handler{
 										HTTPGet: &corev1.HTTPGetAction{
 											Path: "/api/ping",
-											Port: intstr.FromInt(8080),
+											Port: intstr.FromInt(port),
 										},
 									},
 								},

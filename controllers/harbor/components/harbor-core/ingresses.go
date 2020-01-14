@@ -11,7 +11,14 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
+	"github.com/ovh/harbor-operator/controllers/harbor/components/chartmuseum"
+	"github.com/ovh/harbor-operator/controllers/harbor/components/portal"
+	"github.com/ovh/harbor-operator/controllers/harbor/components/registry"
 	"github.com/ovh/harbor-operator/pkg/factories/application"
+)
+
+const (
+	emptyPort = 1
 )
 
 func (c *HarborCore) GetIngresses(ctx context.Context) []*netv1.Ingress { // nolint:funlen
@@ -23,7 +30,7 @@ func (c *HarborCore) GetIngresses(ctx context.Context) []*netv1.Ingress { // nol
 		panic(errors.Wrap(err, "invalid url"))
 	}
 
-	host := strings.SplitN(u.Host, ":", 1)
+	host := strings.SplitN(u.Host, ":", 1) // nolint:mnd
 
 	var tls []netv1.IngressTLS
 	if u.Scheme == "https" {
@@ -49,7 +56,7 @@ func (c *HarborCore) GetIngresses(ctx context.Context) []*netv1.Ingress { // nol
 				TLS: tls,
 				Backend: &netv1.IngressBackend{
 					ServiceName: c.harbor.NormalizeComponentName(containerregistryv1alpha1.PortalName),
-					ServicePort: intstr.FromInt(80),
+					ServicePort: intstr.FromInt(portal.PublicPort),
 				},
 				Rules: []netv1.IngressRule{
 					{
@@ -61,43 +68,43 @@ func (c *HarborCore) GetIngresses(ctx context.Context) []*netv1.Ingress { // nol
 										Path: "/api",
 										Backend: netv1.IngressBackend{
 											ServiceName: c.harbor.NormalizeComponentName(containerregistryv1alpha1.CoreName),
-											ServicePort: intstr.FromInt(80),
+											ServicePort: intstr.FromInt(PublicPort),
 										},
 									}, {
 										Path: "/c",
 										Backend: netv1.IngressBackend{
 											ServiceName: c.harbor.NormalizeComponentName(containerregistryv1alpha1.CoreName),
-											ServicePort: intstr.FromInt(80),
+											ServicePort: intstr.FromInt(PublicPort),
 										},
 									}, {
 										Path: "/chartrepo",
 										Backend: netv1.IngressBackend{
 											ServiceName: c.harbor.NormalizeComponentName(containerregistryv1alpha1.ChartMuseumName),
-											ServicePort: intstr.FromInt(80),
+											ServicePort: intstr.FromInt(chartmuseum.PublicPort),
 										},
 									}, {
 										Path: "/service",
 										Backend: netv1.IngressBackend{
 											ServiceName: c.harbor.NormalizeComponentName(containerregistryv1alpha1.CoreName),
-											ServicePort: intstr.FromInt(80),
+											ServicePort: intstr.FromInt(PublicPort),
 										},
 									}, {
 										Path: "/service/notification",
 										Backend: netv1.IngressBackend{
 											ServiceName: "dev-null",
-											ServicePort: intstr.FromInt(1),
+											ServicePort: intstr.FromInt(emptyPort),
 										},
 									}, {
 										Path: "/v1",
 										Backend: netv1.IngressBackend{
 											ServiceName: "dev-null",
-											ServicePort: intstr.FromInt(1),
+											ServicePort: intstr.FromInt(emptyPort),
 										},
 									}, {
 										Path: "/v2",
 										Backend: netv1.IngressBackend{
 											ServiceName: c.harbor.NormalizeComponentName(containerregistryv1alpha1.RegistryName),
-											ServicePort: intstr.FromInt(80),
+											ServicePort: intstr.FromInt(registry.PublicPort),
 										},
 									},
 								},

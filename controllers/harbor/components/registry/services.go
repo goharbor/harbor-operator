@@ -11,6 +11,10 @@ import (
 	"github.com/ovh/harbor-operator/pkg/factories/application"
 )
 
+const (
+	PublicPort = 80
+)
+
 func (r *Registry) GetServices(ctx context.Context) []*corev1.Service {
 	operatorName := application.GetName(ctx)
 	harborName := r.harbor.Name
@@ -30,14 +34,14 @@ func (r *Registry) GetServices(ctx context.Context) []*corev1.Service {
 				Ports: []corev1.ServicePort{
 					{
 						Name:       "registry",
-						TargetPort: intstr.FromInt(5000),
-						Port:       80,
+						TargetPort: intstr.FromInt(apiPort),
+						Port:       PublicPort,
 					}, {
 						Name: "registry-debug",
-						Port: 5001,
+						Port: metricsPort,
 					}, {
 						Name: "controller",
-						Port: 8080,
+						Port: ctlAPIPort,
 					},
 				},
 				Selector: map[string]string{

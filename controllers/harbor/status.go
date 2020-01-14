@@ -31,10 +31,10 @@ func (r *Reconciler) UpdateCondition(ctx context.Context, harbor *containerregis
 	var reason, message string
 
 	switch len(reasons) {
-	case 0:
-	case 1:
+	case 0: // nolint:mnd
+	case 1: // nolint:mnd
 		reason = reasons[0]
-	case 2:
+	case 2: // nolint:mnd
 		reason = reasons[0]
 		message = reasons[1]
 	default:

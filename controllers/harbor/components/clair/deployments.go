@@ -16,7 +16,9 @@ import (
 )
 
 const (
-	initImage = "hairyhenderson/gomplate"
+	initImage  = "hairyhenderson/gomplate"
+	apiPort    = 6060 // https://github.com/quay/clair/blob/c39101e9b8206401d8b9cb631f3aee47a24ab889/cmd/clair/config.go#L64
+	healthPort = 6061 // https://github.com/quay/clair/blob/c39101e9b8206401d8b9cb631f3aee47a24ab889/cmd/clair/config.go#L63
 )
 
 var (
@@ -129,9 +131,9 @@ func (c *Clair) GetDeployments(ctx context.Context) []*appsv1.Deployment { // no
 								Image: c.harbor.Spec.Components.Clair.Image,
 								Ports: []corev1.ContainerPort{
 									{
-										ContainerPort: 6060,
+										ContainerPort: apiPort,
 									}, {
-										ContainerPort: 6061,
+										ContainerPort: healthPort,
 									},
 								},
 
@@ -163,7 +165,7 @@ func (c *Clair) GetDeployments(ctx context.Context) []*appsv1.Deployment { // no
 									Handler: corev1.Handler{
 										HTTPGet: &corev1.HTTPGetAction{
 											Path: "/health",
-											Port: intstr.FromInt(6061),
+											Port: intstr.FromInt(healthPort),
 										},
 									},
 								},
@@ -171,7 +173,7 @@ func (c *Clair) GetDeployments(ctx context.Context) []*appsv1.Deployment { // no
 									Handler: corev1.Handler{
 										HTTPGet: &corev1.HTTPGetAction{
 											Path: "/health",
-											Port: intstr.FromInt(6061),
+											Port: intstr.FromInt(healthPort),
 										},
 									},
 								},

@@ -23,6 +23,10 @@ const (
 	OperatorVersion = "devel"
 )
 
+const (
+	exitCodeFailure = 1
+)
+
 func getLogger() logr.Logger {
 	development, err := configstore.Filter().GetItemValueBool("dev-mode")
 	if err != nil {
@@ -50,19 +54,19 @@ func main() {
 	scheme, err := scheme.New(ctx)
 	if err != nil {
 		setupLog.Error(err, "unable to create scheme")
-		os.Exit(1)
+		os.Exit(exitCodeFailure)
 	}
 
 	mgr, err := manager.New(ctx, scheme)
 	if err != nil {
 		setupLog.Error(err, "unable to create manager")
-		os.Exit(1)
+		os.Exit(exitCodeFailure)
 	}
 
 	traCon, err := tracing.New(ctx, OperatorName, OperatorVersion)
 	if err != nil {
 		setupLog.Error(err, "unable to create tracer")
-		os.Exit(1)
+		os.Exit(exitCodeFailure)
 	}
 	defer traCon.Close()
 
@@ -76,12 +80,12 @@ func main() {
 	}
 	if err := reconciler.SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Harbor")
-		os.Exit(1)
+		os.Exit(exitCodeFailure)
 	}
 
 	if err := (&containerregistryv1alpha1.Harbor{}).SetupWebhookWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create webhook", "webhook", "Harbor")
-		os.Exit(1)
+		os.Exit(exitCodeFailure)
 	}
 
 	// +kubebuilder:scaffold:builder
@@ -90,6 +94,6 @@ func main() {
 
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 		setupLog.Error(err, "cannot start manager")
-		os.Exit(1)
+		os.Exit(exitCodeFailure)
 	}
 }
