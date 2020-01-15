@@ -142,6 +142,9 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 									{
 										Name:  "STORAGE_CONFIG",
 										Value: "/opt/configuration/storage",
+									}, {
+										Name:  "CORE_HOSTNAME",
+										Value: r.harbor.NormalizeComponentName(containerregistryv1alpha1.CoreName),
 									},
 									cacheEnv,
 								},
