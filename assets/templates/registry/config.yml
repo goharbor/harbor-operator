@@ -22,10 +22,10 @@ health:
     threshold: 3
 notifications:
   endpoints:
-  - name: harbor
+  - name: harbor-core
     disabled: false
     timeout: 3000ms
-    url: {{ printf "http://%s/service/notifications" env.Getenv "CORE_HOSTNAME" | quote }}
+    url: "http://{{ env.Getenv "CORE_HOSTNAME" }}/service/notifications"
     threshold: 5
     backoff: 1s
 auth:
