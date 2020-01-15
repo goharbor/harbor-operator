@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	OperatorName    = "harboperator"
+	OperatorName    = "harbor-operator"
 	OperatorVersion = "devel"
 )
 
