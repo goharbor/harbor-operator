@@ -188,10 +188,10 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 										Value: "",
 									}, {
 										Name:  "REGISTRY_HTTP_HOST",
-										Value: fmt.Sprintf("https://%s", r.harbor.Spec.PublicURL),
+										Value: r.harbor.Spec.PublicURL,
 									}, {
 										Name:  "REGISTRY_AUTH_TOKEN_REALM",
-										Value: fmt.Sprintf("https://%s/service/token", r.harbor.Spec.PublicURL),
+										Value: fmt.Sprintf("%s/service/token", r.harbor.Spec.PublicURL),
 									}, {
 										Name:  "REGISTRY_NOTIFICATION_ENDPOINTS_0_URL",
 										Value: r.harbor.NormalizeComponentName(containerregistryv1alpha1.CoreName),
@@ -249,10 +249,10 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 								Env: []corev1.EnvVar{
 									{
 										Name:  "REGISTRY_HTTP_HOST",
-										Value: fmt.Sprintf("https://%s", r.harbor.Spec.PublicURL),
+										Value: r.harbor.Spec.PublicURL,
 									}, {
 										Name:  "REGISTRY_AUTH_TOKEN_REALM",
-										Value: fmt.Sprintf("https://%s/service/token", r.harbor.Spec.PublicURL),
+										Value: fmt.Sprintf("%s/service/token", r.harbor.Spec.PublicURL),
 									}, {
 										Name:  "REGISTRY_NOTIFICATION_ENDPOINTS_0_URL",
 										Value: r.harbor.NormalizeComponentName(containerregistryv1alpha1.CoreName),
