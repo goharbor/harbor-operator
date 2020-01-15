@@ -25,6 +25,7 @@ notifications:
   - name: harbor
     disabled: false
     timeout: 3000ms
+    url: {{ printf "http://%s/service/notifications" env.Getenv "CORE_HOSTNAME" | quote }}
     threshold: 5
     backoff: 1s
 auth:
@@ -70,7 +71,7 @@ storage:
       enabled: false
 {{ range file.Walk ( env.Getenv "STORAGE_CONFIG" ) }}
   {{- if not (file.IsDir .) }}
-{{- filepath.Base . | strings.Indent 1 "  " }}:
-{{ file.Read . | data.YAML | data.ToYAML | strings.Indent 2 "  " }}
+    {{- filepath.Base . | strings.Indent 1 "  " }}:
+    {{- file.Read . | data.YAML | data.ToYAML | strings.Indent 2 "  " }}
   {{- end }}
 {{- end }}
