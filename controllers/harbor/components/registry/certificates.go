@@ -14,6 +14,7 @@ import (
 
 const (
 	defaultKeyAlgorithm = certv1.RSAKeyAlgorithm
+	defaultKeySize      = 4096
 )
 
 type certificateEncryption struct {
@@ -28,6 +29,7 @@ func (r *Registry) GetCertificates(ctx context.Context) []*certv1.Certificate {
 	url := r.harbor.Spec.PublicURL
 
 	encryption := &certificateEncryption{
+		KeySize:      defaultKeySize,
 		KeyAlgorithm: defaultKeyAlgorithm,
 	}
 
@@ -61,9 +63,10 @@ func (r *Registry) GetCertificates(ctx context.Context) []*certv1.Certificate {
 				SecretName:   r.harbor.NormalizeComponentName(containerregistryv1alpha1.CertificateName),
 				KeySize:      encryption.KeySize,
 				KeyAlgorithm: encryption.KeyAlgorithm,
-				KeyEncoding:  certv1.PKCS8, // TODO check that Harbor & registry Handle this format
-				DNSNames:     []string{url},
-				IssuerRef:    r.harbor.Spec.CertificateIssuerRef,
+				// https://github.com/goharbor/harbor/blob/ba4764c61d7da76f584f808f7d16b017db576fb4/src/jobservice/generateCerts.sh#L24-L26
+				KeyEncoding: certv1.PKCS1,
+				DNSNames:    []string{url},
+				IssuerRef:   r.harbor.Spec.CertificateIssuerRef,
 			},
 		},
 	}
