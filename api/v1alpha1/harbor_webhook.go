@@ -18,7 +18,7 @@ func (r *Harbor) SetupWebhookWithManager(mgr ctrl.Manager) error {
 		Complete()
 }
 
-// +kubebuilder:webhook:path=/mutate-containerregistry-cloud-ovh-com-v1alpha1-harbor,mutating=true,failurePolicy=fail,groups=containerregistry.ovhcloud.com,resources=harbors,verbs=create;update,versions=v1alpha1,name=mharbor.kb.io
+// +kubebuilder:webhook:path=/mutate-containerregistry-ovhcloud-com-v1alpha1-harbor,mutating=true,failurePolicy=fail,groups=containerregistry.ovhcloud.com,resources=harbors,verbs=create;update,versions=v1alpha1,name=mharbor.kb.io
 
 var _ webhook.Defaulter = &Harbor{}
 
