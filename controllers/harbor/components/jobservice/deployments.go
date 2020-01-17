@@ -21,6 +21,7 @@ var (
 
 const (
 	confPath = "/etc/jobservice/config.yml"
+	port     = 8080
 )
 
 func (j *JobService) GetDeployments(ctx context.Context) []*appsv1.Deployment { // nolint:funlen
@@ -84,7 +85,7 @@ func (j *JobService) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 								Image: j.harbor.Spec.Components.JobService.Image,
 								Ports: []corev1.ContainerPort{
 									{
-										ContainerPort: 8080,
+										ContainerPort: port,
 									},
 								},
 
@@ -158,7 +159,7 @@ func (j *JobService) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 									Handler: corev1.Handler{
 										HTTPGet: &corev1.HTTPGetAction{
 											Path: "/api/v1/stats",
-											Port: intstr.FromInt(8080),
+											Port: intstr.FromInt(port),
 										},
 									},
 								},
@@ -166,7 +167,7 @@ func (j *JobService) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 									Handler: corev1.Handler{
 										HTTPGet: &corev1.HTTPGetAction{
 											Path: "/api/v1/stats",
-											Port: intstr.FromInt(8080),
+											Port: intstr.FromInt(port),
 										},
 									},
 								},

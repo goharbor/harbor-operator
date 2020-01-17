@@ -11,6 +11,10 @@ import (
 	"github.com/ovh/harbor-operator/pkg/factories/application"
 )
 
+const (
+	PublicPort = 80
+)
+
 func (c *Clair) GetServices(ctx context.Context) []*corev1.Service {
 	operatorName := application.GetName(ctx)
 	harborName := c.harbor.Name
@@ -31,11 +35,11 @@ func (c *Clair) GetServices(ctx context.Context) []*corev1.Service {
 				Ports: []corev1.ServicePort{
 					{
 						Name:       "api",
-						Port:       80,
-						TargetPort: intstr.FromInt(6060),
+						Port:       PublicPort,
+						TargetPort: intstr.FromInt(apiPort),
 					}, {
 						Name: "healthcheck",
-						Port: 6061,
+						Port: healthPort,
 					},
 				},
 				Selector: map[string]string{

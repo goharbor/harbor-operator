@@ -17,6 +17,10 @@ var (
 	varFalse                   = false
 )
 
+const (
+	port = 8080 // https://github.com/helm/chartmuseum/blob/969515a51413e1f1840fb99509401aa3c63deccd/pkg/config/vars.go#L135
+)
+
 func (c *ChartMuseum) GetDeployments(ctx context.Context) []*appsv1.Deployment { // nolint:funlen
 	operatorName := application.GetName(ctx)
 	harborName := c.harbor.GetName()
@@ -111,7 +115,7 @@ func (c *ChartMuseum) GetDeployments(ctx context.Context) []*appsv1.Deployment {
 									Handler: corev1.Handler{
 										HTTPGet: &corev1.HTTPGetAction{
 											Path: "/health",
-											Port: intstr.FromInt(8080),
+											Port: intstr.FromInt(port),
 										},
 									},
 								},
@@ -119,7 +123,7 @@ func (c *ChartMuseum) GetDeployments(ctx context.Context) []*appsv1.Deployment {
 									Handler: corev1.Handler{
 										HTTPGet: &corev1.HTTPGetAction{
 											Path: "/health",
-											Port: intstr.FromInt(8080),
+											Port: intstr.FromInt(port),
 										},
 									},
 								},

@@ -15,7 +15,10 @@ import (
 )
 
 const (
-	initImage = "hairyhenderson/gomplate"
+	initImage   = "hairyhenderson/gomplate"
+	apiPort     = 5000 // https://github.com/docker/distribution/blob/749f6afb4572201e3c37325d0ffedb6f32be8950/contrib/compose/docker-compose.yml#L15
+	metricsPort = 5001 // https://github.com/docker/distribution/blob/b12bd4004afc203f1cbd2072317c8fda30b89710/cmd/registry/config-dev.yml#L34
+	ctlAPIPort  = 8080 // https://github.com/goharbor/harbor/blob/2fb1cc89d9ef9313842cc68b4b7c36be73681505/src/common/const.go#L134
 )
 
 var (
@@ -145,6 +148,12 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 									}, {
 										Name:  "CORE_HOSTNAME",
 										Value: r.harbor.NormalizeComponentName(containerregistryv1alpha1.CoreName),
+									}, {
+										Name:  "METRICS_ADDRESS",
+										Value: fmt.Sprintf(":%d", metricsPort),
+									}, {
+										Name:  "API_ADDRESS",
+										Value: fmt.Sprintf(":%d", apiPort),
 									},
 									cacheEnv,
 								},
@@ -156,7 +165,7 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 								Image: r.harbor.Spec.Components.RegistryCtl.Image,
 								Ports: []corev1.ContainerPort{
 									{
-										ContainerPort: 8080,
+										ContainerPort: ctlAPIPort,
 									},
 								},
 								Env: []corev1.EnvVar{
@@ -208,7 +217,7 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 									Handler: corev1.Handler{
 										HTTPGet: &corev1.HTTPGetAction{
 											Path: "/api/health",
-											Port: intstr.FromInt(8080),
+											Port: intstr.FromInt(ctlAPIPort),
 										},
 									},
 								},
@@ -216,7 +225,7 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 									Handler: corev1.Handler{
 										HTTPGet: &corev1.HTTPGetAction{
 											Path: "/api/health",
-											Port: intstr.FromInt(8080),
+											Port: intstr.FromInt(ctlAPIPort),
 										},
 									},
 								},
@@ -241,9 +250,9 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 								Image: r.harbor.Spec.Components.Registry.Image,
 								Ports: []corev1.ContainerPort{
 									{
-										ContainerPort: 5000,
+										ContainerPort: apiPort,
 									}, {
-										ContainerPort: 5001,
+										ContainerPort: metricsPort,
 									},
 								},
 								Env: []corev1.EnvVar{
@@ -269,21 +278,19 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 									Handler: corev1.Handler{
 										HTTPGet: &corev1.HTTPGetAction{
 											Path:   "/",
-											Port:   intstr.FromInt(5000),
+											Port:   intstr.FromInt(apiPort),
 											Scheme: corev1.URISchemeHTTP,
 										},
 									},
-									InitialDelaySeconds: 20,
 								},
 								ReadinessProbe: &corev1.Probe{
 									Handler: corev1.Handler{
 										HTTPGet: &corev1.HTTPGetAction{
 											Path:   "/",
-											Port:   intstr.FromInt(5000),
+											Port:   intstr.FromInt(apiPort),
 											Scheme: corev1.URISchemeHTTP,
 										},
 									},
-									InitialDelaySeconds: 20,
 								},
 								VolumeMounts: []corev1.VolumeMount{
 									{

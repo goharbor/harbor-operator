@@ -14,7 +14,6 @@ import (
 
 const (
 	maxUploadSize = 20 * units.MiB
-	port          = 8080
 )
 
 // https://github.com/goharbor/harbor/blob/master/make/photon/prepare/templates/chartserver/env.jinja

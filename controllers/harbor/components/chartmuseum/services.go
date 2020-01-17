@@ -11,6 +11,10 @@ import (
 	"github.com/ovh/harbor-operator/pkg/factories/application"
 )
 
+const (
+	PublicPort = 80
+)
+
 func (c *ChartMuseum) GetServices(ctx context.Context) []*corev1.Service {
 	operatorName := application.GetName(ctx)
 	harborName := c.harbor.Name
@@ -29,7 +33,7 @@ func (c *ChartMuseum) GetServices(ctx context.Context) []*corev1.Service {
 			Spec: corev1.ServiceSpec{
 				Ports: []corev1.ServicePort{
 					{
-						Port:       80,
+						Port:       PublicPort,
 						TargetPort: intstr.FromInt(port),
 					},
 				},

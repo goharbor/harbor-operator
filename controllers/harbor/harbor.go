@@ -12,7 +12,7 @@ import (
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	extv1 "k8s.io/api/extensions/v1beta1"
+	netv1 "k8s.io/api/networking/v1beta1"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/rest"
@@ -23,6 +23,10 @@ import (
 	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
 	"github.com/ovh/harbor-operator/pkg/factories/application"
 	"github.com/ovh/harbor-operator/pkg/factories/logger"
+)
+
+const (
+	DefaultRequeueWait = 2 * time.Second
 )
 
 // Reconciler reconciles a Harbor object
@@ -126,7 +130,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			// Hide error, just try again later
 			reqLogger.Info("not ready yet, trying again later")
 
-			result.RequeueAfter = 2 * time.Second
+			result.RequeueAfter = DefaultRequeueWait
 
 			err = r.UpdateCondition(ctx, harbor, containerregistryv1alpha1.ReadyConditionType, corev1.ConditionFalse, "harbor-component", fmt.Sprintf("at least an Harbor component failed: %+v", health.GetUnhealthyComponents()))
 			if err != nil {
@@ -189,7 +193,7 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Owns(&appsv1.Deployment{}).
 		Owns(&certv1.Certificate{}).
 		Owns(&corev1.ConfigMap{}).
-		Owns(&extv1.Ingress{}).
+		Owns(&netv1.Ingress{}).
 		Owns(&corev1.Secret{}).
 		Owns(&corev1.Service{}).
 		Complete(r)

@@ -152,6 +152,8 @@ func randStringRunes(n int) string {
 	return string(b)
 }
 
+const prefixLength = 8
+
 func newName(prefix string) string {
-	return fmt.Sprintf("%s-%s", prefix, randStringRunes(8))
+	return fmt.Sprintf("%s-%s", prefix, randStringRunes(prefixLength))
 }

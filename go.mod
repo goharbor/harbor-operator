@@ -7,7 +7,6 @@ require (
 	github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd // indirect
 	github.com/go-kit/kit v0.8.0
 	github.com/go-logr/logr v0.1.0
-	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
 	github.com/jaegertracing/jaeger-lib v2.2.0+incompatible
 	github.com/jetstack/cert-manager v0.12.0
 	github.com/markbates/pkger v0.12.8

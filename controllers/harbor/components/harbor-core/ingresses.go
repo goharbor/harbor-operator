@@ -6,15 +6,22 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	extv1 "k8s.io/api/extensions/v1beta1"
+	netv1 "k8s.io/api/networking/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
+	"github.com/ovh/harbor-operator/controllers/harbor/components/chartmuseum"
+	"github.com/ovh/harbor-operator/controllers/harbor/components/portal"
+	"github.com/ovh/harbor-operator/controllers/harbor/components/registry"
 	"github.com/ovh/harbor-operator/pkg/factories/application"
 )
 
-func (c *HarborCore) GetIngresses(ctx context.Context) []*extv1.Ingress { // nolint:funlen
+const (
+	emptyPort = 1
+)
+
+func (c *HarborCore) GetIngresses(ctx context.Context) []*netv1.Ingress { // nolint:funlen
 	operatorName := application.GetName(ctx)
 	harborName := c.harbor.Name
 
@@ -23,18 +30,18 @@ func (c *HarborCore) GetIngresses(ctx context.Context) []*extv1.Ingress { // nol
 		panic(errors.Wrap(err, "invalid url"))
 	}
 
-	host := strings.SplitN(u.Host, ":", 1)
+	host := strings.SplitN(u.Host, ":", 1) // nolint:mnd
 
-	var tls []extv1.IngressTLS
+	var tls []netv1.IngressTLS
 	if u.Scheme == "https" {
-		tls = []extv1.IngressTLS{
+		tls = []netv1.IngressTLS{
 			{
 				SecretName: c.harbor.Spec.TLSSecretName,
 			},
 		}
 	}
 
-	return []*extv1.Ingress{
+	return []*netv1.Ingress{
 		{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      c.harbor.NormalizeComponentName(containerregistryv1alpha1.CoreName),
@@ -45,59 +52,59 @@ func (c *HarborCore) GetIngresses(ctx context.Context) []*extv1.Ingress { // nol
 					"operator": operatorName,
 				},
 			},
-			Spec: extv1.IngressSpec{
+			Spec: netv1.IngressSpec{
 				TLS: tls,
-				Backend: &extv1.IngressBackend{
+				Backend: &netv1.IngressBackend{
 					ServiceName: c.harbor.NormalizeComponentName(containerregistryv1alpha1.PortalName),
-					ServicePort: intstr.FromInt(80),
+					ServicePort: intstr.FromInt(portal.PublicPort),
 				},
-				Rules: []extv1.IngressRule{
+				Rules: []netv1.IngressRule{
 					{
 						Host: host[0],
-						IngressRuleValue: extv1.IngressRuleValue{
-							HTTP: &extv1.HTTPIngressRuleValue{
-								Paths: []extv1.HTTPIngressPath{
+						IngressRuleValue: netv1.IngressRuleValue{
+							HTTP: &netv1.HTTPIngressRuleValue{
+								Paths: []netv1.HTTPIngressPath{
 									{
 										Path: "/api",
-										Backend: extv1.IngressBackend{
+										Backend: netv1.IngressBackend{
 											ServiceName: c.harbor.NormalizeComponentName(containerregistryv1alpha1.CoreName),
-											ServicePort: intstr.FromInt(80),
+											ServicePort: intstr.FromInt(PublicPort),
 										},
 									}, {
 										Path: "/c",
-										Backend: extv1.IngressBackend{
+										Backend: netv1.IngressBackend{
 											ServiceName: c.harbor.NormalizeComponentName(containerregistryv1alpha1.CoreName),
-											ServicePort: intstr.FromInt(80),
+											ServicePort: intstr.FromInt(PublicPort),
 										},
 									}, {
 										Path: "/chartrepo",
-										Backend: extv1.IngressBackend{
+										Backend: netv1.IngressBackend{
 											ServiceName: c.harbor.NormalizeComponentName(containerregistryv1alpha1.ChartMuseumName),
-											ServicePort: intstr.FromInt(80),
+											ServicePort: intstr.FromInt(chartmuseum.PublicPort),
 										},
 									}, {
 										Path: "/service",
-										Backend: extv1.IngressBackend{
+										Backend: netv1.IngressBackend{
 											ServiceName: c.harbor.NormalizeComponentName(containerregistryv1alpha1.CoreName),
-											ServicePort: intstr.FromInt(80),
+											ServicePort: intstr.FromInt(PublicPort),
 										},
 									}, {
 										Path: "/service/notification",
-										Backend: extv1.IngressBackend{
+										Backend: netv1.IngressBackend{
 											ServiceName: "dev-null",
-											ServicePort: intstr.FromInt(1),
+											ServicePort: intstr.FromInt(emptyPort),
 										},
 									}, {
 										Path: "/v1",
-										Backend: extv1.IngressBackend{
+										Backend: netv1.IngressBackend{
 											ServiceName: "dev-null",
-											ServicePort: intstr.FromInt(1),
+											ServicePort: intstr.FromInt(emptyPort),
 										},
 									}, {
 										Path: "/v2",
-										Backend: extv1.IngressBackend{
+										Backend: netv1.IngressBackend{
 											ServiceName: c.harbor.NormalizeComponentName(containerregistryv1alpha1.RegistryName),
-											ServicePort: intstr.FromInt(80),
+											ServicePort: intstr.FromInt(registry.PublicPort),
 										},
 									},
 								},

@@ -9,7 +9,7 @@ import (
 	"golang.org/x/sync/errgroup"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	extv1 "k8s.io/api/extensions/v1beta1"
+	netv1 "k8s.io/api/networking/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
@@ -35,6 +35,7 @@ func (r *Reconciler) ApplyMutationFunc(ctx context.Context, harbor *containerreg
 			for key, value := range result.GetAnnotations() {
 				annotations[key] = value
 			}
+
 			result.SetAnnotations(annotations)
 
 			r.MutateAnnotations(ctx, result)
@@ -50,6 +51,7 @@ func (r *Reconciler) ApplyMutationFunc(ctx context.Context, harbor *containerreg
 			for key, value := range result.GetLabels() {
 				labels[key] = value
 			}
+
 			result.SetLabels(labels)
 
 			r.MutateLabels(ctx, result)
@@ -190,8 +192,8 @@ func mutateService(serviceResource, result components.Resource) controllerutil.M
 }
 
 func mutateIngress(ingressResource, result components.Resource) controllerutil.MutateFn {
-	ingressResult, ok := result.(*extv1.Ingress)
-	ingress := ingressResource.(*extv1.Ingress)
+	ingressResult, ok := result.(*netv1.Ingress)
+	ingress := ingressResource.(*netv1.Ingress)
 
 	return func() error {
 		if !ok {
@@ -249,7 +251,7 @@ func (r *Reconciler) ApplyComponent(ctx context.Context, harbor *containerregist
 		return r.ApplyResources(ctx, harbor, resources, func() components.Resource { return &corev1.ConfigMap{} }, mutateConfigMap)
 	}
 	ingress := func(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, resources []components.Resource) error {
-		return r.ApplyResources(ctx, harbor, resources, func() components.Resource { return &extv1.Ingress{} }, mutateIngress)
+		return r.ApplyResources(ctx, harbor, resources, func() components.Resource { return &netv1.Ingress{} }, mutateIngress)
 	}
 	secret := func(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, resources []components.Resource) error {
 		return r.ApplyResources(ctx, harbor, resources, func() components.Resource { return &corev1.Secret{} }, mutateSecret)
