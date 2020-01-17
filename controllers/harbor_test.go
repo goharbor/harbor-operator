@@ -129,11 +129,13 @@ var _ = Context("Inside of a new namespace", func() {
 				Eventually(getResourceFunc(ctx, key, harbor, getObservedGeneration), applyTimeoutInterval).Should(BeNumerically(">=", harbor.GetGeneration()), "ObservedGeneration should math Generation")
 			})
 
-			It("should update Generation at most once", func() {
+			It("should not update Generation", func() {
+				const defaultGenerationNumber int64 = 1
+
 				harbor, key := newValidHarborTest(ns.Name)
 
 				Expect(k8sClient.Create(ctx, harbor)).To(Succeed())
-				Consistently(getResourceFunc(ctx, key, harbor, metav1.Object.GetGeneration), applyTimeoutInterval).Should(BeNumerically("<=", 2), "harbor Generation should be < 2 on creation")
+				Consistently(getResourceFunc(ctx, key, harbor, metav1.Object.GetGeneration), applyTimeoutInterval).Should(Equal(defaultGenerationNumber), "harbor Generation should not be updated")
 			})
 		})
 	})
