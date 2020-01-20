@@ -6,6 +6,7 @@ import (
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	ctrl "sigs.k8s.io/controller-runtime"
 
 	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
 )
@@ -75,11 +76,15 @@ func (r *Reconciler) UpdateCondition(ctx context.Context, harbor *containerregis
 	return nil
 }
 
-func (r *Reconciler) UpdateStatus(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, conditionType containerregistryv1alpha1.HarborConditionType, status corev1.ConditionStatus, reasons ...string) error {
-	err := r.UpdateCondition(ctx, harbor, conditionType, status, reasons...)
+// UpdateStatus applies current in-memory statuses to the remote resource
+// https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/#status-subresource
+func (r *Reconciler) UpdateStatus(ctx context.Context, result *ctrl.Result, harbor *containerregistryv1alpha1.Harbor) error {
+	err := r.Status().Update(ctx, harbor)
 	if err != nil {
-		return errors.Wrapf(err, "cannot update condition %s", conditionType)
+		result.Requeue = true
+
+		return errors.Wrap(err, "cannot update status field")
 	}
 
-	return r.Client.Status().Update(ctx, harbor)
+	return nil
 }
