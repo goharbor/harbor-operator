@@ -61,6 +61,7 @@ var _ = Context("Inside of a new namespace", func() {
 						PublicURL:     publicURL.String(),
 					},
 				}
+				harbor.Default()
 
 				Expect(k8sClient.Create(ctx, harbor)).Should(WithTransform(apierrs.IsInvalid, BeTrue()))
 			})
@@ -78,6 +79,7 @@ var _ = Context("Inside of a new namespace", func() {
 						PublicURL:     "123::bad::dns",
 					},
 				}
+				harbor.Default()
 
 				Expect(k8sClient.Create(ctx, harbor)).Should(WithTransform(apierrs.IsInvalid, BeTrue()))
 			})
@@ -127,11 +129,13 @@ var _ = Context("Inside of a new namespace", func() {
 				Eventually(getResourceFunc(ctx, key, harbor, getObservedGeneration), applyTimeoutInterval).Should(BeNumerically(">=", harbor.GetGeneration()), "ObservedGeneration should math Generation")
 			})
 
-			It("should update Generation at most once", func() {
+			It("should not update Generation", func() {
+				const defaultGenerationNumber int64 = 1
+
 				harbor, key := newValidHarborTest(ns.Name)
 
 				Expect(k8sClient.Create(ctx, harbor)).To(Succeed())
-				Consistently(getResourceFunc(ctx, key, harbor, metav1.Object.GetGeneration), applyTimeoutInterval).Should(BeNumerically("<=", 2), "harbor Generation should be < 2 on creation")
+				Consistently(getResourceFunc(ctx, key, harbor, metav1.Object.GetGeneration), applyTimeoutInterval).Should(Equal(defaultGenerationNumber), "harbor Generation should not be updated")
 			})
 		})
 	})
@@ -182,17 +186,29 @@ func newValidHarborTest(ns string) (*containerregistryv1alpha1.Harbor, client.Ob
 		Host:   "the.dns",
 	}
 
-	return &containerregistryv1alpha1.Harbor{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: ns,
-			},
-			Spec: containerregistryv1alpha1.HarborSpec{
-				HarborVersion: "1.9.1",
-				PublicURL:     publicURL.String(),
-			},
-		}, client.ObjectKey{
+	harbor := &containerregistryv1alpha1.Harbor{
+		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: ns,
-		}
+		},
+		Spec: containerregistryv1alpha1.HarborSpec{
+			HarborVersion:       "1.9.1",
+			PublicURL:           publicURL.String(),
+			AdminPasswordSecret: "admin-secret",
+			Components: containerregistryv1alpha1.HarborComponents{
+				Core: containerregistryv1alpha1.CoreComponent{
+					DatabaseSecret: "core-database-secret",
+				},
+				JobService: containerregistryv1alpha1.JobServiceComponent{
+					RedisSecret: "jobservice-redis-secret",
+				},
+			},
+		},
+	}
+	harbor.Default()
+
+	return harbor, client.ObjectKey{
+		Name:      name,
+		Namespace: ns,
+	}
 }
