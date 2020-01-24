@@ -26,6 +26,7 @@ var (
 	registryConfigPath          = "/etc/registry/"
 	registryCtlConfigPath       = "/etc/registryctl/"
 	varFalse                    = false
+	varTrue                     = true
 )
 
 func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { // nolint:funlen
@@ -39,7 +40,7 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 		cacheEnv.ValueFrom = &corev1.EnvVarSource{
 			SecretKeyRef: &corev1.SecretKeySelector{
 				Key:      containerregistryv1alpha1.HarborRegistryURLKey,
-				Optional: &varFalse,
+				Optional: &varTrue,
 				LocalObjectReference: corev1.LocalObjectReference{
 					Name: r.harbor.Spec.Components.Registry.CacheSecret,
 				},
