@@ -1,2 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+images:
+- name: controller
+  newName: controller
+  newTag: latest
+
+configMapGenerator:
+- literals:
+  - HARBOR_CONTROLLER_MAX_RECONCILE=1
+  - HARBOR_CONTROLLER_WATCH_CHILDREN=true
+  name: operator-config
+
+patchesStrategicMerge:
+- patches-configuration.yaml
+
 resources:
 - manager.yaml
