@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"time"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -24,6 +25,8 @@ const (
 	coreConfigPath = "/etc/core/app.conf"
 	keyFileName    = "key"
 	port           = 8080 // https://github.com/goharbor/harbor/blob/2fb1cc89d9ef9313842cc68b4b7c36be73681505/src/common/const.go#L127
+
+	healthCheckPeriod = 90 * time.Second
 )
 
 func (c *HarborCore) GetDeployments(ctx context.Context) []*appsv1.Deployment { // nolint:funlen
@@ -293,6 +296,7 @@ func (c *HarborCore) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 											Port: intstr.FromInt(port),
 										},
 									},
+									PeriodSeconds: int32(healthCheckPeriod.Seconds()),
 								},
 								ReadinessProbe: &corev1.Probe{
 									Handler: corev1.Handler{
