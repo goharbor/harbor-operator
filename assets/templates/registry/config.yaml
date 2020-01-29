@@ -24,15 +24,26 @@ notifications:
   endpoints:
   - name: harbor-core
     disabled: false
-    timeout: 3000ms
     url: "http://{{ env.Getenv "CORE_HOSTNAME" }}/service/notifications"
+    timeout: 3000ms
     threshold: 5
     backoff: 1s
+    ignoredmediatypes:
+        - application/vnd.docker.image.rootfs.diff.tar.gzip
+        - application/vnd.docker.image.rootfs.foreign.diff.tar.gzip
+        - application/vnd.oci.image.layer.v1.tar
+        - application/vnd.oci.image.layer.v1.tar+gzip
+        - application/vnd.oci.image.layer.v1.tar+zstd
+        - application/vnd.oci.image.layer.nondistributable.v1.tar
+        - application/vnd.oci.image.layer.nondistributable.v1.tar+gzip
+        - application/vnd.oci.image.layer.nondistributable.v1.tar+zstd
+        - application/octet-stream
 auth:
   token:
     issuer: harbor-token-issuer
     rootcertbundle: /etc/registry/root.crt
     service: harbor-registry
+
 {{- $redisUrl := env.Getenv "REDIS_URL" }}
 {{- if gt ( len $redisUrl ) 0 }}
   {{- with (conv.URL $redisUrl) }}
@@ -54,6 +65,13 @@ redis:
     idletimeout: 300s
   {{- end }}
 {{- end }}
+
+validation:
+  disabled: true
+compatibility:
+  schema1:
+    enabled: true
+
 storage:
   delete:
     enabled: true
@@ -63,10 +81,7 @@ storage:
     blobdescriptor: {{ if gt ( len $redisUrl ) 0 -}} redis {{- else -}} inmemory {{- end }}
   maintenance:
     uploadpurging:
-      enabled: true
-      age: 168h
-      interval: 24h
-      dryrun: false
+      enabled: false
     readonly:
       enabled: false
 {{- range file.Walk ( env.Getenv "STORAGE_CONFIG" ) }}
