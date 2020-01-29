@@ -2,6 +2,8 @@
 # Image URL to use all building/pushing image targets
 IMG ?= controller:latest
 
+SHELL = /bin/sh
+
 all: manager
 
 # Run tests
@@ -110,13 +112,14 @@ deploy: manifests
 	$(KUSTOMIZE) build config/default \
 		| kubectl apply --validate=false -f -
 
-NAMESPACE_NAME=harboperator-system
-
 sample: gomplate
 	export \
 		LBAAS_DOMAIN=$$(kubectl get svc nginx-nginx-ingress-controller -o jsonpath='{.status.loadBalancer.ingress[0].hostname}') \
+		NOTARY_DOMAIN=$$(kubectl get svc nginx-nginx-ingress-controller-notary -o jsonpath='{.status.loadBalancer.ingress[0].hostname}') \
 		CORE_DATABASE_SECRET=$$(kubectl get secret core-database-postgresql -o jsonpath='{.data.postgresql-password}' | base64 --decode) \
-		CLAIR_DATABASE_SECRET=$$(kubectl get secret clair-database-postgresql -o jsonpath='{.data.postgresql-password}' | base64 --decode) ; \
+		CLAIR_DATABASE_SECRET=$$(kubectl get secret clair-database-postgresql -o jsonpath='{.data.postgresql-password}' | base64 --decode) \
+		NOTARY_SERVER_DATABASE_SECRET=$$(kubectl get secret notary-server-database-postgresql -o jsonpath='{.data.postgresql-password}' | base64 --decode) \
+		NOTARY_SIGNER_DATABASE_SECRET=$$(kubectl get secret notary-signer-database-postgresql -o jsonpath='{.data.postgresql-password}' | base64 --decode) ; \
 	kubectl kustomize config/samples \
 		| gomplate \
 		| kubectl apply -f -
@@ -126,6 +129,10 @@ install-dependencies: helm
 		|| $(HELM) install core-database stable/postgresql
 	$(HELM) get notes clair-database \
 		|| $(HELM) install clair-database stable/postgresql
+	$(HELM) get notes notary-server-database \
+		|| $(HELM) install notary-server-database stable/postgresql
+	$(HELM) get notes notary-signer-database \
+		|| $(HELM) install notary-signer-database stable/postgresql
 	$(HELM) get notes jobservice-broker \
 		|| $(HELM) install jobservice-broker stable/redis-ha
 	$(HELM) get notes clair-adapter-broker \
@@ -133,7 +140,8 @@ install-dependencies: helm
 	$(HELM) get notes registry-cache \
 		|| $(HELM) install registry-cache stable/redis-ha
 	$(HELM) get notes nginx \
-		|| $(HELM) install nginx stable/nginx-ingress
+		|| $(HELM) install nginx stable/nginx-ingress \
+	kubectl apply -f config/samples/notary-ingress-service.yaml
 
 # Install local certificate
 # Required for webhook server to start
@@ -242,7 +250,7 @@ ifeq (, $(shell which kustomize))
 	# https://github.com/kubernetes-sigs/kustomize/blob/master/docs/INSTALL.md
 	curl -sSL https://api.github.com/repos/kubernetes-sigs/kustomize/releases/latest \
 		| grep browser_download \
-		| grep linux \
+		| grep $(shell go env GOOS) \
 		| cut -d '"' -f 4 \
 		| xargs curl -sSL \
 		| tar -xz -C /tmp/

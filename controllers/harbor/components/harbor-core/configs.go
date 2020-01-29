@@ -16,6 +16,7 @@ import (
 	"github.com/markbates/pkger"
 	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
 	"github.com/ovh/harbor-operator/controllers/harbor/components/clair"
+	"github.com/ovh/harbor-operator/controllers/harbor/components/notary"
 	"github.com/ovh/harbor-operator/pkg/factories/application"
 	"github.com/pkg/errors"
 )
@@ -89,7 +90,7 @@ func (c *HarborCore) GetConfigMaps(ctx context.Context) []*corev1.ConfigMap { //
 				"CORE_LOCAL_URL":                fmt.Sprintf("http://%s", c.harbor.NormalizeComponentName(containerregistryv1alpha1.CoreName)),
 				"CORE_URL":                      fmt.Sprintf("http://%s", c.harbor.NormalizeComponentName(containerregistryv1alpha1.CoreName)),
 				"JOBSERVICE_URL":                fmt.Sprintf("http://%s", c.harbor.NormalizeComponentName(containerregistryv1alpha1.JobServiceName)),
-				"NOTARY_URL":                    fmt.Sprintf("http://%s", c.harbor.NormalizeComponentName(containerregistryv1alpha1.NotaryServerName)),
+				"NOTARY_URL":                    fmt.Sprintf("http://%s", c.harbor.NormalizeComponentName(notary.NotaryServerName)),
 				"PORTAL_URL":                    fmt.Sprintf("http://%s", c.harbor.NormalizeComponentName(containerregistryv1alpha1.PortalName)),
 				"REGISTRY_URL":                  fmt.Sprintf("http://%s", c.harbor.NormalizeComponentName(containerregistryv1alpha1.RegistryName)),
 				"REGISTRYCTL_URL":               fmt.Sprintf("http://%s:8080", c.harbor.NormalizeComponentName(containerregistryv1alpha1.RegistryName)),

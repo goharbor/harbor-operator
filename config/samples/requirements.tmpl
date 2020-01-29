@@ -24,6 +24,30 @@ data:
 apiVersion: v1
 kind: Secret
 metadata:
+  name: notary-server-database
+data:
+    host: '{{ base64.Encode "notary-server-database-postgresql" }}'
+    port: '{{ base64.Encode "5432" }}'
+    database: '{{ base64.Encode "postgres" }}'
+    username: '{{ base64.Encode "postgres" }}'
+    password: '{{ env.Getenv "NOTARY_SERVER_DATABASE_SECRET" | base64.Encode }}'
+    ssl: '{{ base64.Encode "disable" }}'
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: notary-signer-database
+data:
+    host: '{{ base64.Encode "notary-signer-database-postgresql" }}'
+    port: '{{ base64.Encode "5432" }}'
+    database: '{{ base64.Encode "postgres" }}'
+    username: '{{ base64.Encode "postgres" }}'
+    password: '{{ env.Getenv "NOTARY_SIGNER_DATABASE_SECRET" | base64.Encode }}'
+    ssl: '{{ base64.Encode "disable" }}'
+---
+apiVersion: v1
+kind: Secret
+metadata:
   name: admin-password-secret
 data:
     password: '{{ env.Getenv "USER" | base64.Encode }}'

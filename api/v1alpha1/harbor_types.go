@@ -195,8 +195,18 @@ type ChartMuseumComponent struct {
 }
 
 type NotaryComponent struct {
+	// The url exposed to clients to access notary
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Pattern="^https?://.*$"
+	PublicURL string `json:"publicURL"`
+
+	// +optional
+	NotaryDBMigratorImage string `json:"notaryDBMigratorImage,omitempty"`
+
+	// +kubebuilder:validation:Required
 	Signer NotarySignerComponent `json:"signer"`
 
+	// +kubebuilder:validation:Required
 	Server NotaryServerComponent `json:"server"`
 }
 
@@ -204,12 +214,18 @@ type NotarySignerComponent struct {
 	HarborDeployment `json:",inline"`
 	// +optional
 	Image string `json:"image,omitempty"`
+
+	// +kubebuilder:validation:Required
+	DatabaseSecret string `json:"databaseSecret"`
 }
 
 type NotaryServerComponent struct {
 	HarborDeployment `json:",inline"`
 	// +optional
 	Image string `json:"image,omitempty"`
+
+	// +kubebuilder:validation:Required
+	DatabaseSecret string `json:"databaseSecret"`
 }
 
 // HarborStatus defines the observed state of Harbor

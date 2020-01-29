@@ -11,6 +11,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
+
 	"github.com/ovh/harbor-operator/controllers/harbor/components/chartmuseum"
 	"github.com/ovh/harbor-operator/controllers/harbor/components/portal"
 	"github.com/ovh/harbor-operator/controllers/harbor/components/registry"
@@ -54,10 +55,6 @@ func (c *HarborCore) GetIngresses(ctx context.Context) []*netv1.Ingress { // nol
 			},
 			Spec: netv1.IngressSpec{
 				TLS: tls,
-				Backend: &netv1.IngressBackend{
-					ServiceName: c.harbor.NormalizeComponentName(containerregistryv1alpha1.PortalName),
-					ServicePort: intstr.FromInt(portal.PublicPort),
-				},
 				Rules: []netv1.IngressRule{
 					{
 						Host: host[0],
@@ -105,6 +102,12 @@ func (c *HarborCore) GetIngresses(ctx context.Context) []*netv1.Ingress { // nol
 										Backend: netv1.IngressBackend{
 											ServiceName: c.harbor.NormalizeComponentName(containerregistryv1alpha1.RegistryName),
 											ServicePort: intstr.FromInt(registry.PublicPort),
+										},
+									}, {
+										Path: "/",
+										Backend: netv1.IngressBackend{
+											ServiceName: c.harbor.NormalizeComponentName(containerregistryv1alpha1.PortalName),
+											ServicePort: intstr.FromInt(portal.PublicPort),
 										},
 									},
 								},
