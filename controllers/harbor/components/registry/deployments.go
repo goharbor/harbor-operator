@@ -76,7 +76,7 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 						"operator": operatorName,
 					},
 				},
-				Replicas: r.harbor.Spec.Components.Core.Replicas,
+				Replicas: r.harbor.Spec.Components.Registry.Replicas,
 				Template: corev1.PodTemplateSpec{
 					ObjectMeta: metav1.ObjectMeta{
 						Annotations: map[string]string{

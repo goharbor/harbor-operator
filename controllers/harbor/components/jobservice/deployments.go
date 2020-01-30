@@ -49,7 +49,7 @@ func (j *JobService) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 						"operator": operatorName,
 					},
 				},
-				Replicas: j.harbor.Spec.Components.Core.Replicas,
+				Replicas: j.harbor.Spec.Components.JobService.Replicas,
 				Template: corev1.PodTemplateSpec{
 					ObjectMeta: metav1.ObjectMeta{
 						Annotations: map[string]string{
