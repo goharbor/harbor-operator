@@ -208,9 +208,6 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 										Name:  "REGISTRY_AUTH_TOKEN_REALM",
 										Value: fmt.Sprintf("%s/service/token", r.harbor.Spec.PublicURL),
 									}, {
-										Name:  "REGISTRY_NOTIFICATION_ENDPOINTS_0_URL",
-										Value: r.harbor.NormalizeComponentName(containerregistryv1alpha1.CoreName),
-									}, {
 										Name:  "REGISTRY_LOG_FIELDS_OPERATOR",
 										Value: operatorName,
 									}, {
@@ -268,9 +265,6 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 									}, {
 										Name:  "REGISTRY_AUTH_TOKEN_REALM",
 										Value: fmt.Sprintf("%s/service/token", r.harbor.Spec.PublicURL),
-									}, {
-										Name:  "REGISTRY_NOTIFICATION_ENDPOINTS_0_URL",
-										Value: r.harbor.NormalizeComponentName(containerregistryv1alpha1.CoreName),
 									}, {
 										Name:  "REGISTRY_LOG_FIELDS_OPERATOR",
 										Value: operatorName,
