@@ -6,18 +6,24 @@ auth.anonymous.get: false
 basic.auth.user: chart_controller
 bearerauth: 0
 
+context.path: ''
+
 debug: true
 
 depth: 1
 
 disable:
-  metrics: false
   api: false
+  delete: false
+  force.overwrite: false
+  metrics: false
   statefiles: false
 
 index.limit: 0
 
-log.json: true
+log:
+  health: false
+  json: true
 
 max:
   storage.objects: 0

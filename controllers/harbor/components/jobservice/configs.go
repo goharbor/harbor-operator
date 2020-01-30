@@ -68,5 +68,5 @@ func (j *JobService) GetConfigMaps(ctx context.Context) []*corev1.ConfigMap {
 
 func (j *JobService) GetConfigCheckSum() string {
 	h := sha256.New()
-	return fmt.Sprintf("%x", h.Sum([]byte(j.harbor.Spec.PublicURL)))
+	return fmt.Sprintf("%x", h.Sum([]byte(fmt.Sprintf("%s\n%s", j.harbor.Spec.PublicURL, logsDirectory))))
 }

@@ -69,6 +69,10 @@ type HarborSpec struct {
 	// +kubebuilder:validation:Optional
 	Priority *int32 `json:"priority,omitempty"`
 
+	// The option to set repository read only.
+	// +kubebuilder:validation:Optional
+	ReadOnly bool `json:"readOnly,omitempty"`
+
 	// Indicates that the harbor is paused.
 	// +optional
 	Paused bool `json:"paused,omitempty"`
