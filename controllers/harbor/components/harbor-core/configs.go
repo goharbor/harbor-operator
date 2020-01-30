@@ -4,29 +4,45 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
+	"io/ioutil"
 	"strconv"
 	"strings"
+	"sync"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	"github.com/markbates/pkger"
 	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
 	"github.com/ovh/harbor-operator/pkg/factories/application"
+	"github.com/pkg/errors"
 )
 
 const (
-	// https://github.com/goharbor/harbor/blob/master/make/photon/prepare/templates/core/app.conf.jinja
-	appConf = `
-appname = Harbor
-runmode = prod
-enablegzip = true
-
-[prod]
-httpport = 8080
-`
+	configName = "app.conf"
 )
 
+var (
+	once   sync.Once
+	config []byte
+)
+
+func InitConfigMaps() {
+	file, err := pkger.Open("/assets/templates/core/app.conf")
+	if err != nil {
+		panic(errors.Wrapf(err, "cannot open Core configuration template %s", "/assets/templates/core/app.conf"))
+	}
+	defer file.Close()
+
+	config, err = ioutil.ReadAll(file)
+	if err != nil {
+		panic(errors.Wrapf(err, "cannot read Core configuration template %s", "/assets/templates/core/app.conf"))
+	}
+}
+
 func (c *HarborCore) GetConfigMaps(ctx context.Context) []*corev1.ConfigMap {
+	once.Do(InitConfigMaps)
+
 	operatorName := application.GetName(ctx)
 	harborName := c.harbor.Name
 
@@ -42,9 +58,12 @@ func (c *HarborCore) GetConfigMaps(ctx context.Context) []*corev1.ConfigMap {
 				},
 			},
 
+			BinaryData: map[string][]byte{
+				configName: config,
+			},
+
 			// https://github.com/goharbor/harbor/blob/master/make/photon/prepare/templates/core/env.jinja
 			Data: map[string]string{
-				"app.conf":    appConf,
 				"CONFIG_PATH": coreConfigPath,
 
 				"AUTH_MODE":                      "db_auth",

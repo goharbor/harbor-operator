@@ -186,8 +186,7 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 												},
 											},
 										},
-									},
-									{
+									}, {
 										Name: "JOBSERVICE_SECRET", // TODO check if it is necessary
 										ValueFrom: &corev1.EnvVarSource{
 											SecretKeyRef: &corev1.SecretKeySelector{

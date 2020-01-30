@@ -3,7 +3,6 @@ module github.com/ovh/harbor-operator
 go 1.13
 
 require (
-	github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf
 	github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd // indirect
 	github.com/go-kit/kit v0.8.0
 	github.com/go-logr/logr v0.1.0

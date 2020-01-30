@@ -172,6 +172,9 @@ type ClairComponent struct {
 type ChartMuseumComponent struct {
 	HarborDeployment `json:",inline"`
 	Image            string `json:"image,omitempty"`
+
+	// +optional
+	StorageSecret string `json:"storageSecret,omitempty"`
 }
 
 type NotaryComponent struct {

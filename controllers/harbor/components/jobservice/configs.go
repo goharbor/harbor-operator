@@ -4,48 +4,47 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
+	"io/ioutil"
+	"sync"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	"github.com/markbates/pkger"
 	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
 	"github.com/ovh/harbor-operator/pkg/factories/application"
+	"github.com/pkg/errors"
+)
+
+const (
+	configName = "config.yaml"
 )
 
 const (
 	logsDirectory = "/var/log/jobs"
-
-	// https://github.com/goharbor/harbor/blob/master/make/photon/prepare/templates/jobservice/config.yml.jinja
-	config = `
-protocol: "http"
-port: 8080
-
-worker_pool:
-  backend: "redis"
-
-  redis_pool:
-    namespace: jobservice
-
-job_loggers:
-  - name: STD_OUTPUT
-    level: INFO # INFO/DEBUG/WARNING/ERROR/FATAL
-
-    # JobService read files to expose logs
-  - name: FILE
-    level: INFO
-    settings: # Customized settings of logger
-      base_dir: "` + logsDirectory + `"
-    sweeper:
-      duration: 7 #days
-      settings: # Customized settings of sweeper
-        work_dir: "` + logsDirectory + `"
-
-loggers:
-  - name: STD_OUTPUT
-    level: INFO`
 )
 
+var (
+	once   sync.Once
+	config []byte
+)
+
+func InitConfigMaps() {
+	file, err := pkger.Open("/assets/templates/jobservice/config.yaml")
+	if err != nil {
+		panic(errors.Wrapf(err, "cannot open JobService configuration template %s", "/assets/templates/jobservice/config.yaml"))
+	}
+	defer file.Close()
+
+	config, err = ioutil.ReadAll(file)
+	if err != nil {
+		panic(errors.Wrapf(err, "cannot read JobService configuration template %s", "/assets/templates/jobservice/config.yaml"))
+	}
+}
+
 func (j *JobService) GetConfigMaps(ctx context.Context) []*corev1.ConfigMap {
+	once.Do(InitConfigMaps)
+
 	operatorName := application.GetName(ctx)
 	harborName := j.harbor.Name
 
@@ -60,8 +59,8 @@ func (j *JobService) GetConfigMaps(ctx context.Context) []*corev1.ConfigMap {
 					"operator": operatorName,
 				},
 			},
-			Data: map[string]string{
-				"config.yml": config,
+			BinaryData: map[string][]byte{
+				configName: config,
 			},
 		},
 	}
