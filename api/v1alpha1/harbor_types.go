@@ -162,6 +162,14 @@ type JobServiceComponent struct {
 	WorkerCount int32 `json:"workerCount"`
 }
 
+type ClairAdapterComponent struct {
+	// +optional
+	Image string `json:"image,omitempty"`
+
+	// +kubebuilder:validation:Required
+	RedisSecret string `json:"redisSecret"`
+}
+
 type ClairComponent struct {
 	HarborDeployment `json:",inline"`
 	// +optional
@@ -171,6 +179,8 @@ type ClairComponent struct {
 	DatabaseSecret string `json:"databaseSecret"`
 
 	VulnerabilitySources []string `json:"vulnerabilitySources"`
+
+	Adapter ClairAdapterComponent `json:"adapter"`
 }
 
 type ChartMuseumComponent struct {

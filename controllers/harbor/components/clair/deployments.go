@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"path"
+	"time"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -16,9 +17,12 @@ import (
 )
 
 const (
-	initImage  = "hairyhenderson/gomplate"
-	apiPort    = 6060 // https://github.com/quay/clair/blob/c39101e9b8206401d8b9cb631f3aee47a24ab889/cmd/clair/config.go#L64
-	healthPort = 6061 // https://github.com/quay/clair/blob/c39101e9b8206401d8b9cb631f3aee47a24ab889/cmd/clair/config.go#L63
+	initImage   = "hairyhenderson/gomplate"
+	apiPort     = 6060 // https://github.com/quay/clair/blob/c39101e9b8206401d8b9cb631f3aee47a24ab889/cmd/clair/config.go#L64
+	healthPort  = 6061 // https://github.com/quay/clair/blob/c39101e9b8206401d8b9cb631f3aee47a24ab889/cmd/clair/config.go#L63
+	adapterPort = 8080
+
+	livenessProbeInitialDelay = 300 * time.Second
 )
 
 var (
@@ -174,6 +178,78 @@ func (c *Clair) GetDeployments(ctx context.Context) []*appsv1.Deployment { // no
 										HTTPGet: &corev1.HTTPGetAction{
 											Path: "/health",
 											Port: intstr.FromInt(healthPort),
+										},
+									},
+								},
+								VolumeMounts: []corev1.VolumeMount{
+									{
+										MountPath: path.Join("/etc/clair", configKey),
+										Name:      "config",
+										SubPath:   configKey,
+									},
+								},
+							}, {
+								Name:  "clair-adapter",
+								Image: c.harbor.Spec.Components.Clair.Adapter.Image,
+								Ports: []corev1.ContainerPort{
+									{
+										ContainerPort: adapterPort,
+									},
+								},
+
+								Env: []corev1.EnvVar{
+									{
+										Name: "SCANNER_STORE_REDIS_URL",
+										ValueFrom: &corev1.EnvVarSource{
+											SecretKeyRef: &corev1.SecretKeySelector{
+												Key:      containerregistryv1alpha1.HarborClairAdapterBrokerURLKey,
+												Optional: &varFalse,
+												LocalObjectReference: corev1.LocalObjectReference{
+													Name: c.harbor.Spec.Components.Clair.Adapter.RedisSecret,
+												},
+											},
+										},
+									}, {
+										Name: "SCANNER_STORE_REDIS_NAMESPACE",
+										ValueFrom: &corev1.EnvVarSource{
+											SecretKeyRef: &corev1.SecretKeySelector{
+												Key:      containerregistryv1alpha1.HarborClairAdapterBrokerNamespaceKey,
+												Optional: &varFalse,
+												LocalObjectReference: corev1.LocalObjectReference{
+													Name: c.harbor.Spec.Components.Clair.Adapter.RedisSecret,
+												},
+											},
+										},
+									},
+								},
+
+								EnvFrom: []corev1.EnvFromSource{
+									{
+										Prefix: "clair_db_",
+										SecretRef: &corev1.SecretEnvSource{
+											Optional: &varFalse,
+											LocalObjectReference: corev1.LocalObjectReference{
+												Name: c.harbor.Spec.Components.Clair.DatabaseSecret,
+											},
+										},
+									},
+								},
+
+								ImagePullPolicy: corev1.PullAlways,
+								LivenessProbe: &corev1.Probe{
+									Handler: corev1.Handler{
+										HTTPGet: &corev1.HTTPGetAction{
+											Path: "/probe/healthy",
+											Port: intstr.FromInt(adapterPort),
+										},
+									},
+									InitialDelaySeconds: int32(livenessProbeInitialDelay.Seconds()),
+								},
+								ReadinessProbe: &corev1.Probe{
+									Handler: corev1.Handler{
+										HTTPGet: &corev1.HTTPGetAction{
+											Path: "/probe/healthy",
+											Port: intstr.FromInt(adapterPort),
 										},
 									},
 								},

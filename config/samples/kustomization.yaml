@@ -18,6 +18,10 @@ secretGenerator:
     literals:
       - url=redis://jobservice-broker-redis-ha-announce-0:6379/0
       - namespace=
+  - name: clair-adapter-redis
+    literals:
+      - url=redis://clair-adapter-broker-redis-ha-announce-0:6379/0
+      - namespace=harbor.scanner.clair:store
 
 resources:
   - containerregistry_v1alpha1_harbor.yaml

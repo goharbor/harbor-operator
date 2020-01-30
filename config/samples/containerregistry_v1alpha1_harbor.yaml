@@ -30,6 +30,9 @@ spec:
       - oracle
       - alpine
       - suse
+      adapter:
+        image: holyhope/clair-adapter-wih-config:latest
+        redisSecret: clair-adapter-redis
     portal:
       image: goharbor/harbor-portal:v1.10.0
     chartMuseum:
