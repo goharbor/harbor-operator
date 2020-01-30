@@ -1,0 +1,35 @@
+{{- /* https://github.com/helm/chartmuseum#configuration */ }}
+{{- /* https://github.com/goharbor/harbor/blob/master/make/photon/prepare/templates/chartserver/env.jinja */ }}
+allow.overwrite: true
+
+auth.anonymous.get: false
+basic.auth.user: chart_controller
+bearerauth: 0
+
+debug: true
+
+depth: 1
+
+disable:
+  metrics: false
+  api: false
+  statefiles: false
+
+index.limit: 0
+
+log.json: true
+
+max:
+  storage.objects: 0
+  upload.size: 20971520
+
+chart.post.form.field.name: chart
+prov.post.form.field.name: prov
+
+storage:
+{{- range file.Walk ( env.Getenv "STORAGE_CONFIG" ) }}
+  {{- if not ( file.IsDir . ) }}
+  backend: {{ filepath.Base . | strings.Indent 2 "  " }}
+  {{- "\n" -}}{{ file.Read . | data.YAML | data.ToYAML | strings.Indent 1 "  " }}
+  {{- end }}
+{{- end }}

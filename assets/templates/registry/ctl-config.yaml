@@ -1,0 +1,3 @@
+protocol: "http"
+port: {{ env.Getenv "PORT" }}
+log_level: info

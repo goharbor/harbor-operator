@@ -17,30 +17,40 @@ import (
 )
 
 const (
-	registryConfigName    = "config.yml"
-	registryCtlConfigName = "ctl-config.yml"
-	registryCtlConf       = `
-protocol: "http"
-port: %d
-log_level: info
-`
+	registryConfigName    = "config.yaml"
+	registryCtlConfigName = "ctl-config.yaml"
 )
 
 var (
-	once   sync.Once
-	config []byte
+	once              sync.Once
+	registryConfig    []byte
+	registryCtlConfig []byte
 )
 
 func InitConfigMaps() {
-	file, err := pkger.Open("/assets/templates/registry/config.yml")
-	if err != nil {
-		panic(errors.Wrapf(err, "cannot open Registry configuration template %s", "/assets/templates/registry/config.yml"))
-	}
-	defer file.Close()
+	{
+		file, err := pkger.Open("/assets/templates/registry/config.yaml")
+		if err != nil {
+			panic(errors.Wrapf(err, "cannot open Registry configuration template %s", "/assets/templates/registry/config.yaml"))
+		}
+		defer file.Close()
 
-	config, err = ioutil.ReadAll(file)
-	if err != nil {
-		panic(errors.Wrapf(err, "cannot read Registry configuration template %s", "/assets/templates/registry/config.yml"))
+		registryConfig, err = ioutil.ReadAll(file)
+		if err != nil {
+			panic(errors.Wrapf(err, "cannot read Registry configuration template %s", "/assets/templates/registry/config.yaml"))
+		}
+	}
+	{
+		file, err := pkger.Open("/assets/templates/registry/ctl-config.yaml")
+		if err != nil {
+			panic(errors.Wrapf(err, "cannot open Registry configuration template %s", "/assets/templates/registry/ctl-config.yaml"))
+		}
+		defer file.Close()
+
+		registryCtlConfig, err = ioutil.ReadAll(file)
+		if err != nil {
+			panic(errors.Wrapf(err, "cannot read Registry configuration template %s", "/assets/templates/registry/ctl-config.yaml"))
+		}
 	}
 }
 
@@ -61,11 +71,10 @@ func (r *Registry) GetConfigMaps(ctx context.Context) []*corev1.ConfigMap {
 					"opeartor": operatorName,
 				},
 			},
-			Data: map[string]string{
-				registryCtlConfigName: fmt.Sprintf(registryCtlConf, ctlAPIPort),
-			},
+
 			BinaryData: map[string][]byte{
-				registryConfigName: config,
+				registryConfigName:    registryConfig,
+				registryCtlConfigName: registryCtlConfig,
 			},
 		},
 	}

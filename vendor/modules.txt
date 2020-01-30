@@ -1,7 +1,5 @@
 # cloud.google.com/go v0.38.0
 cloud.google.com/go/compute/metadata
-# github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf
-github.com/alecthomas/units
 # github.com/beorn7/perks v1.0.0
 github.com/beorn7/perks/quantile
 # github.com/davecgh/go-spew v1.1.1

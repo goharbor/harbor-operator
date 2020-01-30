@@ -2,6 +2,7 @@ package chartmuseum
 
 import (
 	"context"
+	"path"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -18,12 +19,38 @@ var (
 )
 
 const (
-	port = 8080 // https://github.com/helm/chartmuseum/blob/969515a51413e1f1840fb99509401aa3c63deccd/pkg/config/vars.go#L135
+	initImage  = "hairyhenderson/gomplate"
+	configPath = "/etc/chartmuseum/"
+	port       = 8080 // https://github.com/helm/chartmuseum/blob/969515a51413e1f1840fb99509401aa3c63deccd/pkg/config/vars.go#L135
 )
 
 func (c *ChartMuseum) GetDeployments(ctx context.Context) []*appsv1.Deployment { // nolint:funlen
 	operatorName := application.GetName(ctx)
 	harborName := c.harbor.GetName()
+
+	volumes := []corev1.Volume{}
+	volumeMounts := []corev1.VolumeMount{}
+
+	var storageVolumeSource corev1.VolumeSource
+	if c.harbor.Spec.Components.ChartMuseum.StorageSecret == "" {
+		storageVolumeSource.EmptyDir = &corev1.EmptyDirVolumeSource{}
+	} else {
+		volumes = append(volumes, corev1.Volume{
+			Name: "chartmuseum",
+			VolumeSource: corev1.VolumeSource{
+				EmptyDir: &corev1.EmptyDirVolumeSource{
+					Medium: corev1.StorageMediumMemory,
+				},
+			},
+		})
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{
+			MountPath: "/mnt/chartmuseum",
+			Name:      "chartmuseum",
+		})
+		storageVolumeSource.Secret = &corev1.SecretVolumeSource{
+			SecretName: c.harbor.Spec.Components.ChartMuseum.StorageSecret,
+		}
+	}
 
 	return []*appsv1.Deployment{
 		{
@@ -57,12 +84,54 @@ func (c *ChartMuseum) GetDeployments(ctx context.Context) []*appsv1.Deployment {
 						},
 					},
 					Spec: corev1.PodSpec{
-						Volumes: []corev1.Volume{
+						Volumes: append([]corev1.Volume{
 							{
-								Name: "chartmuseum",
+								Name: "config",
 								VolumeSource: corev1.VolumeSource{
-									EmptyDir: &corev1.EmptyDirVolumeSource{
-										Medium: corev1.StorageMediumMemory,
+									EmptyDir: &corev1.EmptyDirVolumeSource{},
+								},
+							}, {
+								Name:         "config-storage",
+								VolumeSource: storageVolumeSource,
+							}, {
+								Name: "config-template",
+								VolumeSource: corev1.VolumeSource{
+									ConfigMap: &corev1.ConfigMapVolumeSource{
+										LocalObjectReference: corev1.LocalObjectReference{
+											Name: c.harbor.NormalizeComponentName(containerregistryv1alpha1.ChartMuseumName),
+										},
+									},
+								},
+							},
+						}, volumes...),
+						InitContainers: []corev1.Container{
+							{
+								Name:            "registry-configuration",
+								Image:           initImage,
+								WorkingDir:      "/workdir",
+								Args:            []string{"--input-dir", "/workdir", "--output-dir", "/processed"},
+								SecurityContext: &corev1.SecurityContext{},
+
+								VolumeMounts: []corev1.VolumeMount{
+									{
+										Name:      "config-template",
+										MountPath: path.Join("/workdir", configPath),
+										ReadOnly:  true,
+										SubPath:   configName,
+									}, {
+										Name:      "config-storage",
+										MountPath: "/opt/configuration/storage",
+										ReadOnly:  true,
+									}, {
+										Name:      "config",
+										MountPath: "/processed",
+										ReadOnly:  false,
+									},
+								},
+								Env: []corev1.EnvVar{
+									{
+										Name:  "STORAGE_CONFIG",
+										Value: "/opt/configuration/storage",
 									},
 								},
 							},
@@ -77,12 +146,17 @@ func (c *ChartMuseum) GetDeployments(ctx context.Context) []*appsv1.Deployment {
 									},
 								},
 
-								VolumeMounts: []corev1.VolumeMount{
-									{
-										MountPath: "/mnt/chartmuseum",
-										Name:      "chartmuseum",
-									},
+								Args: []string{
+									"--config", path.Join(configPath, configName),
 								},
+
+								VolumeMounts: append([]corev1.VolumeMount{
+									{
+										MountPath: path.Join(configPath, configName),
+										Name:      "config",
+										SubPath:   configName,
+									},
+								}, volumeMounts...),
 
 								Env: []corev1.EnvVar{
 									{
