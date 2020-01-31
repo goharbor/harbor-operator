@@ -1,5 +1,5 @@
-{{ /* https://github.com/coreos/clair/blob/master/config.yaml.sample */ }}
-{{ /* https://github.com/goharbor/harbor/blob/master/make/photon/prepare/templates/clair/config.yaml.jinja */ }}
+{{ /* https://github.com/coreos/clair/blob/master/config.yaml.sample */ -}}
+{{ /* https://github.com/goharbor/harbor/blob/master/make/photon/prepare/templates/clair/config.yaml.jinja */ -}}
 clair:
   database:
     type: pgsql

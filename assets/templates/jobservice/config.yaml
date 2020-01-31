@@ -1,4 +1,4 @@
-{{- /* https://github.com/goharbor/harbor/blob/master/make/photon/prepare/templates/jobservice/config.yml.jinja */ }}
+{{- /* https://github.com/goharbor/harbor/blob/master/make/photon/prepare/templates/jobservice/config.yml.jinja */ -}}
 protocol: "http"
 port: {{ env.Getenv "PORT" }}
 

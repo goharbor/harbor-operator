@@ -25,8 +25,9 @@ var (
 
 const (
 	initImage      = "hairyhenderson/gomplate"
-	coreConfigPath = "/etc/core/"
+	coreConfigPath = "/etc/core"
 	keyFileName    = "key"
+	configFileName = "app.conf"
 	port           = 8080 // https://github.com/goharbor/harbor/blob/2fb1cc89d9ef9313842cc68b4b7c36be73681505/src/common/const.go#L127
 
 	healthCheckPeriod = 90 * time.Second
@@ -346,22 +347,22 @@ func (c *HarborCore) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 									{
 										Name:      "config",
 										ReadOnly:  true,
-										MountPath: coreConfigPath,
-										SubPath:   "app.conf",
+										MountPath: path.Join(coreConfigPath, configFileName),
+										SubPath:   configFileName,
 									}, {
 										Name:      "secret-key",
 										ReadOnly:  true,
-										MountPath: "/etc/core/" + keyFileName,
+										MountPath: path.Join(coreConfigPath, keyFileName),
 										SubPath:   keyFileName,
 									}, {
 										Name:      "certificate",
 										ReadOnly:  true,
-										MountPath: "/etc/core/private_key.pem",
+										MountPath: path.Join(coreConfigPath, "private_key.pem"),
 										SubPath:   "tls.key",
 									}, {
 										Name:      "psc",
 										ReadOnly:  false,
-										MountPath: "/etc/core/token",
+										MountPath: path.Join(coreConfigPath, "token"),
 									},
 								},
 							},

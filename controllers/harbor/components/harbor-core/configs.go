@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"io/ioutil"
+	"path"
 	"strconv"
 	"strings"
 	"sync"
@@ -65,7 +66,7 @@ func (c *HarborCore) GetConfigMaps(ctx context.Context) []*corev1.ConfigMap { //
 
 			// https://github.com/goharbor/harbor/blob/master/make/photon/prepare/templates/core/env.jinja
 			Data: map[string]string{
-				"CONFIG_PATH": coreConfigPath,
+				"CONFIG_PATH": path.Join(coreConfigPath, configFileName),
 
 				"AUTH_MODE":                      "db_auth",
 				"CFG_EXPIRATION":                 "5",

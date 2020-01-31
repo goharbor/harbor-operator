@@ -1,5 +1,5 @@
-{{- /* https://github.com/helm/chartmuseum#configuration */ }}
-{{- /* https://github.com/goharbor/harbor/blob/master/make/photon/prepare/templates/chartserver/env.jinja */ }}
+{{- /* https://github.com/helm/chartmuseum#configuration */ -}}
+{{- /* https://github.com/goharbor/harbor/blob/master/make/photon/prepare/templates/chartserver/env.jinja */ -}}
 allow.overwrite: true
 
 auth.anonymous.get: false
