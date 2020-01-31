@@ -160,6 +160,9 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 									}, {
 										Name:  "API_ADDRESS",
 										Value: fmt.Sprintf(":%d", apiPort),
+									}, {
+										Name:  "REGISTRYCTL_PORT",
+										Value: fmt.Sprintf("%d", ctlAPIPort),
 									},
 									cacheEnv,
 								},
@@ -198,9 +201,6 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 											},
 										},
 									}, {
-										Name:  "REGISTRY_STORAGE_INMEMORY",
-										Value: "",
-									}, {
 										Name:  "REGISTRY_HTTP_HOST",
 										Value: r.harbor.Spec.PublicURL,
 									}, {
@@ -233,7 +233,7 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 								},
 								VolumeMounts: []corev1.VolumeMount{
 									{
-										MountPath: path.Join(registryCtlConfigPath, registryConfigName),
+										MountPath: path.Join(registryCtlConfigPath, registryCtlConfigName),
 										Name:      "config",
 										SubPath:   registryCtlConfigName,
 									}, {
@@ -246,8 +246,9 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 										SubPath:   "ca.crt",
 									},
 								},
-							},
-							{
+								Command: []string{"/home/harbor/harbor_registryctl"},
+								Args:    []string{"-c", path.Join(registryCtlConfigPath, registryCtlConfigName)},
+							}, {
 								Name:  "registry",
 								Image: r.harbor.Spec.Components.Registry.Image,
 								Ports: []corev1.ContainerPort{
@@ -306,7 +307,8 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 										SubPath:   "ca.crt",
 									},
 								},
-								Args: []string{"serve", path.Join(registryConfigPath, registryConfigName)},
+								Command: []string{"/usr/bin/registry"},
+								Args:    []string{"serve", path.Join(registryConfigPath, registryConfigName)},
 							},
 						},
 						Priority: r.Option.Priority,

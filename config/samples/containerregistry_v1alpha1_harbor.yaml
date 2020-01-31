@@ -16,7 +16,7 @@ spec:
     registry:
       storageSecret: registry-storage
       cacheSecret: registry-cache
-      image: goharbor/registry-photon:v2.7.1-patch-2819-v1.10.0
+      image: goharbor/registry-photon:v2.7.1-patch-2819-2553-v1.10.0
     jobService:
       redisSecret: jobservice-redis
       image: goharbor/harbor-jobservice:v1.10.0
