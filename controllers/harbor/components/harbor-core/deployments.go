@@ -2,6 +2,8 @@ package core
 
 import (
 	"context"
+	"fmt"
+	"path"
 	"time"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -22,7 +24,8 @@ var (
 )
 
 const (
-	coreConfigPath = "/etc/core/app.conf"
+	initImage      = "hairyhenderson/gomplate"
+	coreConfigPath = "/etc/core/"
 	keyFileName    = "key"
 	port           = 8080 // https://github.com/goharbor/harbor/blob/2fb1cc89d9ef9313842cc68b4b7c36be73681505/src/common/const.go#L127
 
@@ -86,6 +89,11 @@ func (c *HarborCore) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 							{
 								Name: "config",
 								VolumeSource: corev1.VolumeSource{
+									EmptyDir: &corev1.EmptyDirVolumeSource{},
+								},
+							}, {
+								Name: "config-template",
+								VolumeSource: corev1.VolumeSource{
 									ConfigMap: &corev1.ConfigMapVolumeSource{
 										LocalObjectReference: corev1.LocalObjectReference{
 											Name: c.harbor.NormalizeComponentName(containerregistryv1alpha1.CoreName),
@@ -117,6 +125,34 @@ func (c *HarborCore) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 								Name: "psc",
 								VolumeSource: corev1.VolumeSource{
 									EmptyDir: &corev1.EmptyDirVolumeSource{},
+								},
+							},
+						},
+						InitContainers: []corev1.Container{
+							{
+								Name:            "registry-configuration",
+								Image:           initImage,
+								WorkingDir:      "/workdir",
+								Args:            []string{"--input-dir", "/workdir", "--output-dir", "/processed"},
+								SecurityContext: &corev1.SecurityContext{},
+
+								VolumeMounts: []corev1.VolumeMount{
+									{
+										Name:      "config-template",
+										MountPath: path.Join("/workdir", configName),
+										ReadOnly:  true,
+										SubPath:   configName,
+									}, {
+										Name:      "config",
+										MountPath: "/processed",
+										ReadOnly:  false,
+									},
+								},
+								Env: []corev1.EnvVar{
+									{
+										Name:  "PORT",
+										Value: fmt.Sprintf("%d", port),
+									},
 								},
 							},
 						},
