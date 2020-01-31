@@ -24,7 +24,7 @@ notifications:
   endpoints:
   - name: harbor-core
     disabled: false
-    url: "http://{{ env.Getenv "CORE_HOSTNAME" }}/service/notifications"
+    url: {{ env.Getenv "CORE_HOSTNAME" | print "http://%s/service/notifications" | quote }}
     timeout: 3000ms
     threshold: 5
     backoff: 1s
@@ -48,7 +48,7 @@ auth:
 {{- if gt ( len $redisUrl ) 0 }}
   {{- with (conv.URL $redisUrl) }}
 redis:
-  addr: {{ .Host | quote }}
+  addr: {{ quote .Host }}
   {{- if strings.Contains "@" . }}
     {{- /* cannot get password from $redis.User.Password, only a single non error result is permitted */ -}}
     {{- with ( index ( strings.SplitN "@" 2 ( index ( strings.SplitN "/" 2 ( index ( strings.SplitN "://" 2 .String ) 1 ) ) 0 ) ) 0 ) }}
