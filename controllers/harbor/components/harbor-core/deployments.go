@@ -85,7 +85,8 @@ func (c *HarborCore) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 						},
 					},
 					Spec: corev1.PodSpec{
-						NodeSelector: c.harbor.Spec.Components.Core.NodeSelector,
+						NodeSelector:                 c.harbor.Spec.Components.Core.NodeSelector,
+						AutomountServiceAccountToken: &varFalse,
 						Volumes: []corev1.Volume{
 							{
 								Name: "config",
@@ -131,7 +132,7 @@ func (c *HarborCore) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 						},
 						InitContainers: []corev1.Container{
 							{
-								Name:            "registry-configuration",
+								Name:            "configuration",
 								Image:           initImage,
 								WorkingDir:      "/workdir",
 								Args:            []string{"--input-dir", "/workdir", "--output-dir", "/processed"},

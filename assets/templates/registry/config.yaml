@@ -24,7 +24,7 @@ notifications:
   endpoints:
   - name: harbor-core
     disabled: false
-    url: {{ env.Getenv "CORE_HOSTNAME" | print "http://%s/service/notifications" | quote }}
+    url: {{ env.Getenv "CORE_HOSTNAME" | printf "http://%s/service/notifications" | quote }}
     timeout: 3000ms
     threshold: 5
     backoff: 1s

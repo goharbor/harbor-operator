@@ -17,8 +17,9 @@ import (
 )
 
 const (
-	registryConfigName    = "config.yaml"
-	registryCtlConfigName = "ctl-config.yaml"
+	defaultRegistryConfigName = "config.yml"
+	registryConfigName        = "config.yaml"
+	registryCtlConfigName     = "ctl-config.yaml"
 )
 
 var (

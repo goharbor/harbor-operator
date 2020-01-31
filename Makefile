@@ -128,6 +128,8 @@ install-dependencies: helm
 		|| $(HELM) install clair-database stable/postgresql
 	$(HELM) get notes jobservice-broker \
 		|| $(HELM) install jobservice-broker stable/redis-ha
+	$(HELM) get notes clair-adapter-broker \
+		|| $(HELM) install clair-adapter-broker stable/redis-ha
 	$(HELM) get notes registry-cache \
 		|| $(HELM) install registry-cache stable/redis-ha
 	$(HELM) get notes nginx \

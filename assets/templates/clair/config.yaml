@@ -1,10 +1,10 @@
-{{ /* https://github.com/coreos/clair/blob/master/config.yaml.sample */ -}}
-{{ /* https://github.com/goharbor/harbor/blob/master/make/photon/prepare/templates/clair/config.yaml.jinja */ -}}
+{{- /* https://github.com/coreos/clair/blob/master/config.yaml.sample */ -}}
+{{- /* https://github.com/goharbor/harbor/blob/master/make/photon/prepare/templates/clair/config.yaml.jinja */ -}}
 clair:
   database:
     type: pgsql
     options:
-      source: {{ print "postgresql://%s:%s@%s:%d/%s?sslmode=%s" (env.Getenv "username") (env.Getenv "password") (env.Getenv "host") (env.Getenv "port" "5432") (env.Getenv "database") (env.Getenv "ssl") | quote }}
+      source: {{ printf "postgresql://%s:%s@%s:%s/%s?sslmode=%s" (env.Getenv "username") (env.Getenv "password") (env.Getenv "host") (env.Getenv "port" "5432") (env.Getenv "database") (env.Getenv "ssl") | quote }}
   updater:
     interval: 0s
     enabledupdaters:

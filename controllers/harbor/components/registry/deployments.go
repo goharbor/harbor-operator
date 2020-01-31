@@ -90,7 +90,8 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 						},
 					},
 					Spec: corev1.PodSpec{
-						NodeSelector: r.harbor.Spec.Components.Registry.NodeSelector,
+						NodeSelector:                 r.harbor.Spec.Components.Registry.NodeSelector,
+						AutomountServiceAccountToken: &varFalse,
 						Volumes: []corev1.Volume{
 							{
 								Name: "config",
@@ -120,12 +121,11 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 						},
 						InitContainers: []corev1.Container{
 							{
-								Name:            "registry-configuration",
+								Name:            "configuration",
 								Image:           initImage,
 								WorkingDir:      "/workdir",
 								Args:            []string{"--input-dir", "/workdir", "--output-dir", "/processed"},
 								SecurityContext: &corev1.SecurityContext{},
-
 								VolumeMounts: []corev1.VolumeMount{
 									{
 										Name:      "config-template",
@@ -233,6 +233,10 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 								},
 								VolumeMounts: []corev1.VolumeMount{
 									{
+										MountPath: path.Join(registryConfigPath, defaultRegistryConfigName),
+										Name:      "config",
+										SubPath:   registryConfigName,
+									}, {
 										MountPath: path.Join(registryCtlConfigPath, registryCtlConfigName),
 										Name:      "config",
 										SubPath:   registryCtlConfigName,

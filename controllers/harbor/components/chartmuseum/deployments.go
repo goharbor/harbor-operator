@@ -32,11 +32,26 @@ func (c *ChartMuseum) GetDeployments(ctx context.Context) []*appsv1.Deployment {
 	volumes := []corev1.Volume{}
 	volumeMounts := []corev1.VolumeMount{}
 	envs := []corev1.EnvVar{}
+	envFroms := []corev1.EnvFromSource{}
+
+	templateEnvFroms := []corev1.EnvFromSource{}
+
+	if c.harbor.Spec.Components.ChartMuseum.CacheSecret != "" {
+		templateEnvFroms = append(templateEnvFroms, corev1.EnvFromSource{
+			Prefix: "cache_",
+			SecretRef: &corev1.SecretEnvSource{
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: c.harbor.Spec.Components.ChartMuseum.CacheSecret,
+				},
+				Optional: &varTrue,
+			},
+		})
+	}
 
 	var storageVolumeSource corev1.VolumeSource
 	if c.harbor.Spec.Components.ChartMuseum.StorageSecret == "" {
 		storageVolumeSource.EmptyDir = &corev1.EmptyDirVolumeSource{}
-	} else {
+
 		volumes = append(volumes, corev1.Volume{
 			Name: "chartmuseum",
 			VolumeSource: corev1.VolumeSource{
@@ -45,10 +60,12 @@ func (c *ChartMuseum) GetDeployments(ctx context.Context) []*appsv1.Deployment {
 				},
 			},
 		})
+
 		volumeMounts = append(volumeMounts, corev1.VolumeMount{
 			MountPath: "/mnt/chartmuseum",
 			Name:      "chartmuseum",
 		})
+
 		envs = append(envs, corev1.EnvVar{
 			Name:  "STORAGE",
 			Value: "local",
@@ -56,9 +73,20 @@ func (c *ChartMuseum) GetDeployments(ctx context.Context) []*appsv1.Deployment {
 			Name:  "STORAGE_LOCAL_ROOTDIR",
 			Value: "/mnt/chartmuseum",
 		})
+	} else {
 		storageVolumeSource.Secret = &corev1.SecretVolumeSource{
 			SecretName: c.harbor.Spec.Components.ChartMuseum.StorageSecret,
 		}
+		envFroms = append(envFroms, corev1.EnvFromSource{
+			// Some storage driver requires environment variable, add it from secret data
+			// See https://chartmuseum.com/docs/#using-with-openstack-object-storage
+			SecretRef: &corev1.SecretEnvSource{
+				Optional: &varTrue,
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: c.harbor.Spec.Components.ChartMuseum.StorageSecret,
+				},
+			},
+		})
 	}
 
 	return []*appsv1.Deployment{
@@ -93,6 +121,8 @@ func (c *ChartMuseum) GetDeployments(ctx context.Context) []*appsv1.Deployment {
 						},
 					},
 					Spec: corev1.PodSpec{
+						NodeSelector:                 c.harbor.Spec.Components.ChartMuseum.NodeSelector,
+						AutomountServiceAccountToken: &varFalse,
 						Volumes: append([]corev1.Volume{
 							{
 								Name: "config",
@@ -115,7 +145,7 @@ func (c *ChartMuseum) GetDeployments(ctx context.Context) []*appsv1.Deployment {
 						}, volumes...),
 						InitContainers: []corev1.Container{
 							{
-								Name:            "registry-configuration",
+								Name:            "configuration",
 								Image:           initImage,
 								WorkingDir:      "/workdir",
 								Args:            []string{"--input-dir", "/workdir", "--output-dir", "/processed"},
@@ -124,7 +154,7 @@ func (c *ChartMuseum) GetDeployments(ctx context.Context) []*appsv1.Deployment {
 								VolumeMounts: []corev1.VolumeMount{
 									{
 										Name:      "config-template",
-										MountPath: path.Join("/workdir", configPath),
+										MountPath: path.Join("/workdir", configName),
 										ReadOnly:  true,
 										SubPath:   configName,
 									}, {
@@ -143,17 +173,7 @@ func (c *ChartMuseum) GetDeployments(ctx context.Context) []*appsv1.Deployment {
 										Value: "/opt/configuration/storage",
 									},
 								},
-								EnvFrom: []corev1.EnvFromSource{
-									{
-										Prefix: "cache_",
-										SecretRef: &corev1.SecretEnvSource{
-											LocalObjectReference: corev1.LocalObjectReference{
-												Name: c.harbor.Spec.Components.ChartMuseum.CacheSecret,
-											},
-											Optional: &varTrue,
-										},
-									},
-								},
+								EnvFrom: templateEnvFroms,
 							},
 						},
 						Containers: []corev1.Container{
@@ -165,10 +185,8 @@ func (c *ChartMuseum) GetDeployments(ctx context.Context) []*appsv1.Deployment {
 										ContainerPort: port,
 									},
 								},
-
-								Args: []string{
-									"--config", path.Join(configPath, configName),
-								},
+								Command: []string{"/home/chart/chartm"},
+								Args:    []string{"-c", path.Join(configPath, configName)},
 
 								VolumeMounts: append([]corev1.VolumeMount{
 									{
@@ -193,7 +211,7 @@ func (c *ChartMuseum) GetDeployments(ctx context.Context) []*appsv1.Deployment {
 									},
 								}, envs...),
 
-								EnvFrom: []corev1.EnvFromSource{
+								EnvFrom: append([]corev1.EnvFromSource{
 									{
 										ConfigMapRef: &corev1.ConfigMapEnvSource{
 											Optional: &varFalse,
@@ -201,17 +219,8 @@ func (c *ChartMuseum) GetDeployments(ctx context.Context) []*appsv1.Deployment {
 												Name: c.harbor.NormalizeComponentName(containerregistryv1alpha1.ChartMuseumName),
 											},
 										},
-									}, {
-										// Some storage driver requires environment variable, add it from secret data
-										// See https://chartmuseum.com/docs/#using-with-openstack-object-storage
-										SecretRef: &corev1.SecretEnvSource{
-											Optional: &varTrue,
-											LocalObjectReference: corev1.LocalObjectReference{
-												Name: c.harbor.Spec.Components.ChartMuseum.StorageSecret,
-											},
-										},
 									},
-								},
+								}, envFroms...),
 
 								ImagePullPolicy: corev1.PullAlways,
 								LivenessProbe: &corev1.Probe{

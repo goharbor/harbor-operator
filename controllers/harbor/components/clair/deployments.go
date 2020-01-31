@@ -17,10 +17,11 @@ import (
 )
 
 const (
-	initImage   = "hairyhenderson/gomplate"
-	apiPort     = 6060 // https://github.com/quay/clair/blob/c39101e9b8206401d8b9cb631f3aee47a24ab889/cmd/clair/config.go#L64
-	healthPort  = 6061 // https://github.com/quay/clair/blob/c39101e9b8206401d8b9cb631f3aee47a24ab889/cmd/clair/config.go#L63
-	adapterPort = 8080
+	initImage       = "hairyhenderson/gomplate"
+	apiPort         = 6060 // https://github.com/quay/clair/blob/c39101e9b8206401d8b9cb631f3aee47a24ab889/cmd/clair/config.go#L64
+	healthPort      = 6061 // https://github.com/quay/clair/blob/c39101e9b8206401d8b9cb631f3aee47a24ab889/cmd/clair/config.go#L63
+	adapterPort     = 8080
+	clairConfigPath = "/etc/clair"
 
 	livenessProbeInitialDelay = 300 * time.Second
 )
@@ -72,7 +73,8 @@ func (c *Clair) GetDeployments(ctx context.Context) []*appsv1.Deployment { // no
 						},
 					},
 					Spec: corev1.PodSpec{
-						NodeSelector: c.harbor.Spec.Components.Clair.NodeSelector,
+						NodeSelector:                 c.harbor.Spec.Components.Clair.NodeSelector,
+						AutomountServiceAccountToken: &varFalse,
 						Volumes: []corev1.Volume{
 							{
 								Name: "config-template",
@@ -164,6 +166,8 @@ func (c *Clair) GetDeployments(ctx context.Context) []*appsv1.Deployment { // no
 										},
 									},
 								},
+								Command:         []string{"/home/clair/clair"},
+								Args:            []string{"-config", path.Join(clairConfigPath, configKey)},
 								ImagePullPolicy: corev1.PullAlways,
 								LivenessProbe: &corev1.Probe{
 									Handler: corev1.Handler{
@@ -183,7 +187,7 @@ func (c *Clair) GetDeployments(ctx context.Context) []*appsv1.Deployment { // no
 								},
 								VolumeMounts: []corev1.VolumeMount{
 									{
-										MountPath: path.Join("/etc/clair", configKey),
+										MountPath: path.Join(clairConfigPath, configKey),
 										Name:      "config",
 										SubPath:   configKey,
 									},
@@ -222,7 +226,6 @@ func (c *Clair) GetDeployments(ctx context.Context) []*appsv1.Deployment { // no
 										},
 									},
 								},
-
 								EnvFrom: []corev1.EnvFromSource{
 									{
 										Prefix: "clair_db_",
@@ -230,6 +233,13 @@ func (c *Clair) GetDeployments(ctx context.Context) []*appsv1.Deployment { // no
 											Optional: &varFalse,
 											LocalObjectReference: corev1.LocalObjectReference{
 												Name: c.harbor.Spec.Components.Clair.DatabaseSecret,
+											},
+										},
+									}, {
+										ConfigMapRef: &corev1.ConfigMapEnvSource{
+											Optional: &varFalse,
+											LocalObjectReference: corev1.LocalObjectReference{
+												Name: c.harbor.NormalizeComponentName(containerregistryv1alpha1.ClairName),
 											},
 										},
 									},
@@ -255,7 +265,7 @@ func (c *Clair) GetDeployments(ctx context.Context) []*appsv1.Deployment { // no
 								},
 								VolumeMounts: []corev1.VolumeMount{
 									{
-										MountPath: path.Join("/etc/clair", configKey),
+										MountPath: path.Join(clairConfigPath, configKey),
 										Name:      "config",
 										SubPath:   configKey,
 									},
