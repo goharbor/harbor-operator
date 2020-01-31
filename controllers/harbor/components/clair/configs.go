@@ -58,6 +58,16 @@ func (c *Clair) GetConfigMaps(ctx context.Context) []*corev1.ConfigMap {
 			BinaryData: map[string][]byte{
 				configKey: config,
 			},
+			// https://github.com/goharbor/harbor-scanner-clair#configuration
+			// https://github.com/goharbor/harbor/blob/master/make/photon/prepare/templates/clair/clair_env.jinja
+			Data: map[string]string{
+				"SCANNER_CLAIR_URL":                   fmt.Sprintf("http://%s", c.harbor.NormalizeComponentName(containerregistryv1alpha1.ClairName)),
+				"SCANNER_LOG_LEVEL":                   "debug",
+				"SCANNER_STORE_REDIS_POOL_MAX_ACTIVE": "5",
+				"SCANNER_STORE_REDIS_POOL_MAX_IDLE":   "5",
+				"SCANNER_STORE_REDIS_SCAN_JOB_TTL":    "1h",
+				"SCANNER_API_SERVER_ADDR":             fmt.Sprintf(":%d", adapterPort),
+			},
 		},
 	}
 }

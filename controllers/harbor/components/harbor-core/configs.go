@@ -14,6 +14,7 @@ import (
 
 	"github.com/markbates/pkger"
 	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
+	"github.com/ovh/harbor-operator/controllers/harbor/components/clair"
 	"github.com/ovh/harbor-operator/pkg/factories/application"
 	"github.com/pkg/errors"
 )
@@ -83,6 +84,7 @@ func (c *HarborCore) GetConfigMaps(ctx context.Context) []*corev1.ConfigMap { //
 				"CHART_REPOSITORY_URL":          fmt.Sprintf("http://%s", c.harbor.NormalizeComponentName(containerregistryv1alpha1.ChartMuseumName)),
 				"CLAIR_HEALTH_CHECK_SERVER_URL": fmt.Sprintf("http://%s:6061", c.harbor.NormalizeComponentName(containerregistryv1alpha1.ClairName)),
 				"CLAIR_URL":                     fmt.Sprintf("http://%s", c.harbor.NormalizeComponentName(containerregistryv1alpha1.ClairName)),
+				"CLAIR_URL_ADAPTER":             fmt.Sprintf("http://%s:%d", c.harbor.NormalizeComponentName(containerregistryv1alpha1.ClairName), clair.AdapterPublicPort),
 				"CORE_LOCAL_URL":                fmt.Sprintf("http://%s", c.harbor.NormalizeComponentName(containerregistryv1alpha1.CoreName)),
 				"CORE_URL":                      fmt.Sprintf("http://%s", c.harbor.NormalizeComponentName(containerregistryv1alpha1.CoreName)),
 				"JOBSERVICE_URL":                fmt.Sprintf("http://%s", c.harbor.NormalizeComponentName(containerregistryv1alpha1.JobServiceName)),

@@ -37,3 +37,8 @@ const (
 	HarborClairDatabasePasswordKey = "password"
 	HarborClairDatabaseSSLKey      = "ssl"
 )
+
+const (
+	HarborClairAdapterBrokerURLKey       = "url"
+	HarborClairAdapterBrokerNamespaceKey = "namespace"
+)

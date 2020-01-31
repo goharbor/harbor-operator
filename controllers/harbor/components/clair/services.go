@@ -12,7 +12,8 @@ import (
 )
 
 const (
-	PublicPort = 80
+	PublicPort        = 80
+	AdapterPublicPort = 8080
 )
 
 func (c *Clair) GetServices(ctx context.Context) []*corev1.Service {
@@ -40,6 +41,10 @@ func (c *Clair) GetServices(ctx context.Context) []*corev1.Service {
 					}, {
 						Name: "healthcheck",
 						Port: healthPort,
+					}, {
+						Name:       "adapter",
+						Port:       AdapterPublicPort,
+						TargetPort: intstr.FromInt(adapterPort),
 					},
 				},
 				Selector: map[string]string{
