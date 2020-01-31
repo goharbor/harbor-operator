@@ -4,8 +4,7 @@ clair:
   database:
     type: pgsql
     options:
-      source: postgresql://{{ env.Getenv "username" }}:{{ env.Getenv "password" }}@{{ env.Getenv "host" }}:{{ env.Getenv "port" "5432" }}/{{ env.Getenv "database" }}
-        {{- if gt ( len ( env.Getenv "ssl" ) ) 0 -}}?sslmode={{ env.Getenv "ssl" }}{{- end }}
+      source: {{ print "postgresql://%s:%s@%s:%d/%s?sslmode=%s" (env.Getenv "username") (env.Getenv "password") (env.Getenv "host") (env.Getenv "port" "5432") (env.Getenv "database") (env.Getenv "ssl") | quote }}
   updater:
     interval: 0s
     enabledupdaters:

@@ -50,7 +50,7 @@ prov.post.form.field.name: prov
 storage:
 {{- range file.Walk ( env.Getenv "STORAGE_CONFIG" ) }}
   {{- if not ( file.IsDir . ) }}
-  backend: {{ filepath.Base . | strings.Indent 2 "  " }}
+  backend: {{ filepath.Base . | strings.quote }}
   {{- "\n" -}}{{ file.Read . | data.YAML | data.ToYAML | strings.Indent 1 "  " }}
   {{- end }}
 {{- end }}
