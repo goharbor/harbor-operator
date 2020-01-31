@@ -16,6 +16,7 @@ import (
 var (
 	revisionHistoryLimit int32 = 0 // nolint:golint
 	varFalse                   = false
+	varTrue                    = true
 )
 
 const (
@@ -30,6 +31,7 @@ func (c *ChartMuseum) GetDeployments(ctx context.Context) []*appsv1.Deployment {
 
 	volumes := []corev1.Volume{}
 	volumeMounts := []corev1.VolumeMount{}
+	envs := []corev1.EnvVar{}
 
 	var storageVolumeSource corev1.VolumeSource
 	if c.harbor.Spec.Components.ChartMuseum.StorageSecret == "" {
@@ -46,6 +48,13 @@ func (c *ChartMuseum) GetDeployments(ctx context.Context) []*appsv1.Deployment {
 		volumeMounts = append(volumeMounts, corev1.VolumeMount{
 			MountPath: "/mnt/chartmuseum",
 			Name:      "chartmuseum",
+		})
+		envs = append(envs, corev1.EnvVar{
+			Name:  "STORAGE",
+			Value: "local",
+		}, corev1.EnvVar{
+			Name:  "STORAGE_LOCAL_ROOTDIR",
+			Value: "/mnt/chartmuseum",
 		})
 		storageVolumeSource.Secret = &corev1.SecretVolumeSource{
 			SecretName: c.harbor.Spec.Components.ChartMuseum.StorageSecret,
@@ -134,6 +143,17 @@ func (c *ChartMuseum) GetDeployments(ctx context.Context) []*appsv1.Deployment {
 										Value: "/opt/configuration/storage",
 									},
 								},
+								EnvFrom: []corev1.EnvFromSource{
+									{
+										Prefix: "cache_",
+										SecretRef: &corev1.SecretEnvSource{
+											LocalObjectReference: corev1.LocalObjectReference{
+												Name: c.harbor.Spec.Components.ChartMuseum.CacheSecret,
+											},
+											Optional: &varTrue,
+										},
+									},
+								},
 							},
 						},
 						Containers: []corev1.Container{
@@ -158,7 +178,7 @@ func (c *ChartMuseum) GetDeployments(ctx context.Context) []*appsv1.Deployment {
 									},
 								}, volumeMounts...),
 
-								Env: []corev1.EnvVar{
+								Env: append([]corev1.EnvVar{
 									{
 										Name: "BASIC_AUTH_PASS",
 										ValueFrom: &corev1.EnvVarSource{
@@ -171,7 +191,7 @@ func (c *ChartMuseum) GetDeployments(ctx context.Context) []*appsv1.Deployment {
 											},
 										},
 									},
-								},
+								}, envs...),
 
 								EnvFrom: []corev1.EnvFromSource{
 									{
@@ -179,6 +199,15 @@ func (c *ChartMuseum) GetDeployments(ctx context.Context) []*appsv1.Deployment {
 											Optional: &varFalse,
 											LocalObjectReference: corev1.LocalObjectReference{
 												Name: c.harbor.NormalizeComponentName(containerregistryv1alpha1.ChartMuseumName),
+											},
+										},
+									}, {
+										// Some storage driver requires environment variable, add it from secret data
+										// See https://chartmuseum.com/docs/#using-with-openstack-object-storage
+										SecretRef: &corev1.SecretEnvSource{
+											Optional: &varTrue,
+											LocalObjectReference: corev1.LocalObjectReference{
+												Name: c.harbor.Spec.Components.ChartMuseum.StorageSecret,
 											},
 										},
 									},

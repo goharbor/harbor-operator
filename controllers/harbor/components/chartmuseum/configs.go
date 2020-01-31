@@ -60,10 +60,8 @@ func (c *ChartMuseum) GetConfigMaps(ctx context.Context) []*corev1.ConfigMap {
 				configName: config,
 			},
 			Data: map[string]string{
-				"PORT":                  fmt.Sprintf("%d", port),
-				"STORAGE":               "local",
-				"STORAGE_LOCAL_ROOTDIR": "/mnt/chartmuseum",
-				"CHART_URL":             fmt.Sprintf("%s/chartrepo", c.harbor.Spec.PublicURL),
+				"PORT":      fmt.Sprintf("%d", port),
+				"CHART_URL": fmt.Sprintf("%s/chartrepo", c.harbor.Spec.PublicURL),
 			},
 		},
 	}

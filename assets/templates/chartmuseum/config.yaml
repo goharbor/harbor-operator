@@ -6,6 +6,21 @@ auth.anonymous.get: false
 basic.auth.user: chart_controller
 bearerauth: 0
 
+{{- $redisUrl := env.Getenv "cache_url" }}
+{{- if gt ( len $redisUrl ) 0 }}
+  {{- with (conv.URL $redisUrl) }}
+cache: redis
+cache.redis:
+  addr: {{ quote .Host }}
+  {{- if strings.Contains "@" . }}
+    {{- /* cannot get password from $redis.User.Password, only a single non error result is permitted */ -}}
+    {{- with ( index ( strings.SplitN "@" 2 ( index ( strings.SplitN "/" 2 ( index ( strings.SplitN "://" 2 .String ) 1 ) ) 0 ) ) 0 ) }}
+  password: {{ index ( strings.SplitN ":" 2 . ) 1 | quote }}
+    {{- end }}
+  {{- end }}
+  db: {{ conv.ToInt .Path }}
+{{- end }}
+
 context.path: ''
 
 debug: true

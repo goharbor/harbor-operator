@@ -179,6 +179,9 @@ type ChartMuseumComponent struct {
 
 	// +optional
 	StorageSecret string `json:"storageSecret,omitempty"`
+
+	// +optional
+	CacheSecret string `json:"cacheSecret,omitempty"`
 }
 
 type NotaryComponent struct {
