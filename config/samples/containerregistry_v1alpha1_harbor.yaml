@@ -31,7 +31,7 @@ spec:
       - alpine
       - suse
       adapter:
-        image: holyhope/clair-adapter-wih-config:latest
+        image: holyhope/clair-adapter-with-config:latest
         redisSecret: clair-adapter-redis
     portal:
       image: goharbor/harbor-portal:v1.10.0

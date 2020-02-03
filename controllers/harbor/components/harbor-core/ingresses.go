@@ -79,7 +79,7 @@ func (c *HarborCore) GetIngresses(ctx context.Context) []*netv1.Ingress { // nol
 									}, {
 										Path: "/chartrepo",
 										Backend: netv1.IngressBackend{
-											ServiceName: c.harbor.NormalizeComponentName(containerregistryv1alpha1.ChartMuseumName),
+											ServiceName: c.harbor.NormalizeComponentName(containerregistryv1alpha1.CoreName),
 											ServicePort: intstr.FromInt(chartmuseum.PublicPort),
 										},
 									}, {

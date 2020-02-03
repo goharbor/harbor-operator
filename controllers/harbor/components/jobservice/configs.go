@@ -25,8 +25,9 @@ const (
 )
 
 var (
-	once   sync.Once
-	config []byte
+	once         sync.Once
+	config       []byte
+	hookMaxRetry = 5
 )
 
 func InitConfigMaps() {
@@ -61,6 +62,11 @@ func (j *JobService) GetConfigMaps(ctx context.Context) []*corev1.ConfigMap {
 			},
 			BinaryData: map[string][]byte{
 				configName: config,
+			},
+			Data: map[string]string{
+				"REGISTRY_CONTROLLER_URL":          fmt.Sprintf("http://%s:8080", j.harbor.NormalizeComponentName(containerregistryv1alpha1.RegistryName)),
+				"JOBSERVICE_WEBHOOK_JOB_MAX_RETRY": fmt.Sprintf("%d", hookMaxRetry),
+				"JOB_SERVICE_POOL_WORKERS":         fmt.Sprintf("%d", j.harbor.Spec.Components.JobService.WorkerCount),
 			},
 		},
 	}

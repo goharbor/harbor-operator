@@ -18,6 +18,7 @@ const (
 
 var (
 	revisionHistoryLimit int32 = 0 // nolint:golint
+	varFalse                   = false
 )
 
 func (p *Portal) GetDeployments(ctx context.Context) []*appsv1.Deployment { // nolint:funlen
@@ -56,7 +57,8 @@ func (p *Portal) GetDeployments(ctx context.Context) []*appsv1.Deployment { // n
 						},
 					},
 					Spec: corev1.PodSpec{
-						NodeSelector: p.harbor.Spec.Components.Portal.NodeSelector,
+						NodeSelector:                 p.harbor.Spec.Components.Portal.NodeSelector,
+						AutomountServiceAccountToken: &varFalse,
 						Containers: []corev1.Container{
 							{
 								Name:  "portal",

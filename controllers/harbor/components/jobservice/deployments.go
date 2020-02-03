@@ -16,7 +16,6 @@ import (
 
 var (
 	revisionHistoryLimit int32 = 0 // nolint:golint
-	hookMaxRetry               = 5
 	varFalse                   = false
 )
 
@@ -63,7 +62,8 @@ func (j *JobService) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 						},
 					},
 					Spec: corev1.PodSpec{
-						NodeSelector: j.harbor.Spec.Components.JobService.NodeSelector,
+						NodeSelector:                 j.harbor.Spec.Components.JobService.NodeSelector,
+						AutomountServiceAccountToken: &varFalse,
 						Volumes: []corev1.Volume{
 							{
 								Name: "config",
@@ -88,7 +88,7 @@ func (j *JobService) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 						},
 						InitContainers: []corev1.Container{
 							{
-								Name:            "registry-configuration",
+								Name:            "configuration",
 								Image:           initImage,
 								WorkingDir:      "/workdir",
 								Args:            []string{"--input-dir", "/workdir", "--output-dir", "/processed"},
@@ -97,7 +97,7 @@ func (j *JobService) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 								VolumeMounts: []corev1.VolumeMount{
 									{
 										Name:      "config-template",
-										MountPath: path.Join("/workdir", configPath),
+										MountPath: path.Join("/workdir", configName),
 										ReadOnly:  true,
 										SubPath:   configName,
 									}, {
@@ -163,9 +163,6 @@ func (j *JobService) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 											},
 										},
 									}, {
-										Name:  "JOBSERVICE_WEBHOOK_JOB_MAX_RETRY",
-										Value: fmt.Sprintf("%d", hookMaxRetry),
-									}, {
 										Name: "JOB_SERVICE_POOL_REDIS_URL",
 										ValueFrom: &corev1.EnvVarSource{
 											SecretKeyRef: &corev1.SecretKeySelector{
@@ -187,11 +184,20 @@ func (j *JobService) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 												},
 											},
 										},
-									}, {
-										Name:  "JOB_SERVICE_POOL_WORKERS",
-										Value: fmt.Sprintf("%d", j.harbor.Spec.Components.JobService.WorkerCount),
 									},
 								},
+								EnvFrom: []corev1.EnvFromSource{
+									{
+										ConfigMapRef: &corev1.ConfigMapEnvSource{
+											Optional: &varFalse,
+											LocalObjectReference: corev1.LocalObjectReference{
+												Name: j.harbor.NormalizeComponentName(containerregistryv1alpha1.JobServiceName),
+											},
+										},
+									},
+								},
+								Command:         []string{"/harbor/harbor_jobservice"},
+								Args:            []string{"-c", path.Join(configPath, configName)},
 								ImagePullPolicy: corev1.PullAlways,
 								LivenessProbe: &corev1.Probe{
 									Handler: corev1.Handler{
@@ -211,7 +217,7 @@ func (j *JobService) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 								},
 								VolumeMounts: []corev1.VolumeMount{
 									{
-										MountPath: configPath,
+										MountPath: path.Join(configPath, configName),
 										Name:      "config",
 										SubPath:   configName,
 									}, {
