@@ -13,5 +13,6 @@ spec:
   secretName: public-certificate
   dnsNames:
     - '{{ env.Getenv "LBAAS_DOMAIN" }}'
+    - '{{ env.Getenv "NOTARY_DOMAIN" }}'
   issuerRef:
     name: harbor-sample

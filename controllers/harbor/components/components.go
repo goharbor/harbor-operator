@@ -19,6 +19,7 @@ import (
 	harbor_clair "github.com/ovh/harbor-operator/controllers/harbor/components/clair"
 	harbor_core "github.com/ovh/harbor-operator/controllers/harbor/components/harbor-core"
 	harbor_jobservice "github.com/ovh/harbor-operator/controllers/harbor/components/jobservice"
+	harbor_notary "github.com/ovh/harbor-operator/controllers/harbor/components/notary"
 	harbor_portal "github.com/ovh/harbor-operator/controllers/harbor/components/portal"
 	harbor_registry "github.com/ovh/harbor-operator/controllers/harbor/components/registry"
 	"github.com/ovh/harbor-operator/pkg/factories/logger"
@@ -39,6 +40,7 @@ type Components struct {
 	Portal      *ComponentRunner
 	ChartMuseum *ComponentRunner
 	Clair       *ComponentRunner
+	Notary      *ComponentRunner
 }
 
 type ComponentRunner struct {
@@ -54,7 +56,7 @@ type Component interface {
 	GetDeployments(context.Context) []*appsv1.Deployment
 }
 
-func GetComponents(ctx context.Context, harbor *containerregistryv1alpha1.Harbor) (*Components, error) { // nolint:funlen
+func GetComponents(ctx context.Context, harbor *containerregistryv1alpha1.Harbor) (*Components, error) { // nolint:funlen,gocognit
 	harborResource := &Components{}
 
 	var g errgroup.Group
@@ -153,6 +155,23 @@ func GetComponents(ctx context.Context, harbor *containerregistryv1alpha1.Harbor
 		})
 	}
 
+	if harbor.Spec.Components.Notary != nil {
+		g.Go(func() error {
+			var notaryPriority *int32
+			if harbor.Spec.Priority != nil {
+				priority := *harbor.Spec.Priority - PriorityBase + NotaryPriority
+				notaryPriority = &priority
+			}
+
+			notary, err := harbor_notary.New(ctx, harbor, harbor_notary.Option{Priority: notaryPriority})
+			if err != nil {
+				return errors.Wrap(err, containerregistryv1alpha1.NotaryName)
+			}
+			harborResource.Notary = &ComponentRunner{notary}
+			return nil
+		})
+	}
+
 	err := g.Wait()
 
 	return harborResource, errors.Wrap(err, "cannot get resources")
@@ -243,6 +262,21 @@ func (r *Components) ParallelRun(ctx context.Context, harbor *containerregistryv
 
 			err := run(ctx, harbor, r.Clair)
 			return errors.Wrap(err, containerregistryv1alpha1.ClairName)
+		})
+	}
+
+	if r.Notary != nil {
+		g.Go(func() error {
+			ctx := withComponent(ctx, containerregistryv1alpha1.NotaryName)
+			span, ctx := opentracing.StartSpanFromContext(ctx, "run", opentracing.Tags{
+				"component": containerregistryv1alpha1.NotaryName,
+			})
+			defer span.Finish()
+
+			logger.Set(&ctx, logger.Get(ctx).WithValues("Component", containerregistryv1alpha1.NotaryName))
+
+			err := run(ctx, harbor, r.Notary)
+			return errors.Wrap(err, containerregistryv1alpha1.NotaryName)
 		})
 	}
 

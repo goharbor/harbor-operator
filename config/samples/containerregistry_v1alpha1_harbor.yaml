@@ -37,5 +37,14 @@ spec:
       image: goharbor/harbor-portal:v1.10.0
     chartMuseum:
       image: goharbor/chartmuseum-photon:v0.9.0-v1.10.0
+    notary:
+      publicURL: 'https://{{ env.Getenv "NOTARY_DOMAIN" }}'
+      notaryDBMigratorImage: jmonsinjon/notary-db-migrator:v0.6.1
+      server:
+        databaseSecret: notary-server-database
+        image: goharbor/notary-server-photon:v0.6.1-v1.10.0
+      signer:
+        databaseSecret: notary-signer-database
+        image: goharbor/notary-signer-photon:v0.6.1-v1.10.0
   certificateIssuerRef:
     name: harbor-sample

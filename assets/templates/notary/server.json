@@ -1,0 +1,29 @@
+{
+  "server": {
+    "http_addr": {{ printf ":%s" (env.Getenv "notary_server_port") | quote }}
+  },
+  "trust_service": {
+    "type": "remote",
+    "hostname": {{ env.Getenv "notary_signer_url" | quote }},
+    "port": "80",
+    "tls_ca_file": "/etc/ssl/notary/ca.crt",
+    "key_algorithm": {{ env.Getenv "notary_signer_key_algorithm" | quote }}
+  },
+  "logging": {
+    "level": "info"
+  },
+  "storage": {
+    "backend": "postgres",
+    "db_url": {{ printf "postgresql://%s:%s@%s:%s/%s?sslmode=%s" (env.Getenv "username") (env.Getenv "password") (env.Getenv "host") (env.Getenv "port" "5432") (env.Getenv "database") (env.Getenv "ssl") | quote }}
+  },
+  "auth": {
+    "type": "token",
+    "options": {
+      "realm": {{ printf "%s/service/token" (env.Getenv "core_public_url") | quote }},
+      {{- /* https://github.com/goharbor/harbor/blob/b1437c1341c32d94a5cde1f6438c772dcfff2c78/src/core/service/token/creator.go#L39 */ -}}
+      "service": "harbor-notary",
+      "issuer": "harbor-token-issuer",
+      "rootcertbundle": "/etc/ssl/notary/auth-token.crt"
+    }
+  }
+}

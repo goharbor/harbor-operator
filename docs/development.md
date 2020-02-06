@@ -19,7 +19,7 @@ make dev-tools
 ### Services
 
 - Kubernetes cluster. You can order a Kubernetes cluster on [ovh.com](https://www.ovh.com/fr/public-cloud/kubernetes/).
-- [CertManager](https://github.com/jetstack/cert-manager/) >= 0.11
+- [CertManager](https://cert-manager.io/docs/installation/kubernetes/#steps) >= 0.11
 
   ```bash
   helm install cert-manager \
@@ -54,6 +54,8 @@ make run
 export LBAAS_DOMAIN=$(kubectl get svc nginx-nginx-ingress-controller -o jsonpath={.status.loadBalancer.ingress[0].hostname})
 export CORE_DATABASE_SECRET=$(kubectl get secret core-database-postgresql -o jsonpath={.data.postgresql-password} | base64 --decode)
 export CLAIR_DATABASE_SECRET=$(kubectl get secret clair-database-postgresql -o jsonpath={.data.postgresql-password} | base64 --decode)
+export NOTARY_SERVER_DATABASE_SECRET=$(kubectl get secret notary-server-database-postgresql -o jsonpath={.data.postgresql-password} | base64 --decode)
+export NOTARY_SIGNER_DATABASE_SECRET=$(kubectl get secret notary-signer-database-postgresql -o jsonpath={.data.postgresql-password} | base64 --decode)
 kubectl kustomize config/samples | gomplate | kubectl apply -f -
 
 cat <<EOF

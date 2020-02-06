@@ -284,6 +284,13 @@ func (r *Reconciler) Apply(ctx context.Context, harbor *containerregistryv1alpha
 		})
 	}
 
+	if harbor.Spec.Components.Notary == nil {
+		g.Go(func() error {
+			err := r.DeleteComponent(ctx, harbor, containerregistryv1alpha1.NotaryName)
+			return errors.Wrap(err, "cannot delete notary")
+		})
+	}
+
 	g.Go(func() error {
 		err = harborResource.ParallelRun(ctx, harbor, r.ApplyComponent)
 		return errors.Wrap(err, "cannot deploy component")

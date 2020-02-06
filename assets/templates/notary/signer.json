@@ -1,0 +1,15 @@
+{
+  "server": {
+    "grpc_addr": {{ printf ":%s" (env.Getenv "notary_signer_port") | quote }},
+    "tls_cert_file": "/etc/ssl/notary/tls.crt",
+    "tls_key_file": "/etc/ssl/notary/tls.key"
+  },
+  "logging": {
+    "level": "info"
+  },
+  "storage": {
+    "backend": "postgres",
+    "db_url": {{ printf "postgresql://%s:%s@%s:%s/%s?sslmode=%s" (env.Getenv "username") (env.Getenv "password") (env.Getenv "host") (env.Getenv "port" "5432") (env.Getenv "database") (env.Getenv "ssl") | quote }},
+    "default_alias": "defaultalias"
+  }
+}

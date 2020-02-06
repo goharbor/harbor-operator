@@ -244,10 +244,6 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 										MountPath: "/etc/registry/root.crt",
 										Name:      "certificate",
 										SubPath:   "tls.crt",
-									}, {
-										MountPath: "/etc/ssl/certs/harbor.pem",
-										Name:      "certificate",
-										SubPath:   "ca.crt",
 									},
 								},
 								Command: []string{"/home/harbor/harbor_registryctl"},
@@ -305,10 +301,6 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 										MountPath: "/etc/registry/root.crt",
 										Name:      "certificate",
 										SubPath:   "tls.crt",
-									}, {
-										MountPath: "/etc/ssl/certs/harbor.pem",
-										Name:      "certificate",
-										SubPath:   "ca.crt",
 									},
 								},
 								Command: []string{"/usr/bin/registry"},

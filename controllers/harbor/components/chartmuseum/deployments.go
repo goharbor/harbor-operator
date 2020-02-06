@@ -150,7 +150,6 @@ func (c *ChartMuseum) GetDeployments(ctx context.Context) []*appsv1.Deployment {
 								WorkingDir:      "/workdir",
 								Args:            []string{"--input-dir", "/workdir", "--output-dir", "/processed"},
 								SecurityContext: &corev1.SecurityContext{},
-
 								VolumeMounts: []corev1.VolumeMount{
 									{
 										Name:      "config-template",

@@ -79,5 +79,19 @@ func (r *Harbor) DefaultImages() error {
 		}
 	}
 
+	if r.Spec.Components.Notary != nil {
+		if r.Spec.Components.Notary.NotaryDBMigratorImage == "" {
+			r.Spec.Components.Notary.NotaryDBMigratorImage = images.NotaryDBMigrator
+		}
+
+		if r.Spec.Components.Notary.Server.Image == "" {
+			r.Spec.Components.Notary.Server.Image = images.NotaryServer
+		}
+
+		if r.Spec.Components.Notary.Signer.Image == "" {
+			r.Spec.Components.Notary.Signer.Image = images.NotarySigner
+		}
+	}
+
 	return nil
 }
