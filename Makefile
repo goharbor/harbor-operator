@@ -248,13 +248,8 @@ endif
 kustomize:
 ifeq (, $(shell which kustomize))
 	# https://github.com/kubernetes-sigs/kustomize/blob/master/docs/INSTALL.md
-	curl -sSL https://api.github.com/repos/kubernetes-sigs/kustomize/releases/latest \
-		| grep browser_download \
-		| grep $(shell go env GOOS) \
-		| cut -d '"' -f 4 \
-		| xargs curl -sSL \
-		| tar -xz -C /tmp/
-	mv /tmp/kustomize $(KUSTOMIZE)
+	curl -s https://raw.githubusercontent.com/kubernetes-sigs/kustomize/04bfb3e94d0a4b740dcb426c23018cb041c8398d/hack/install_kustomize.sh | bash
+	mv ./kustomize $(KUSTOMIZE)
 	chmod u+x $(KUSTOMIZE)
 KUSTOMIZE=$(GOBIN)/kustomize
 else
