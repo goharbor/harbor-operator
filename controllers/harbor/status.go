@@ -2,13 +2,16 @@ package harbor
 
 import (
 	"context"
+	"time"
 
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
+	"github.com/ovh/harbor-operator/pkg/factories/logger"
 )
 
 func (r *Reconciler) GetCondition(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, conditionType containerregistryv1alpha1.HarborConditionType) containerregistryv1alpha1.HarborCondition {
@@ -82,6 +85,17 @@ func (r *Reconciler) UpdateStatus(ctx context.Context, result *ctrl.Result, harb
 	err := r.Status().Update(ctx, harbor)
 	if err != nil {
 		result.Requeue = true
+
+		seconds, needWait := apierrors.SuggestsClientDelay(err)
+		if needWait {
+			result.RequeueAfter = time.Second * time.Duration(seconds)
+		}
+
+		if apierrors.IsConflict(err) {
+			// the object has been modified; please apply your changes to the latest version and try again
+			logger.Get(ctx).Error(err, "cannot update status field")
+			return nil
+		}
 
 		return errors.Wrap(err, "cannot update status field")
 	}
