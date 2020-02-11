@@ -16,6 +16,10 @@ cd harbor-operator
 make deploy
 ```
 
+## Compatibility
+
+This Operator currently only support Harbor version > 1.10.
+
 ## Howto's
 
 ## Configuration
