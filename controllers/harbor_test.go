@@ -192,7 +192,7 @@ func newValidHarborTest(ns string) (*containerregistryv1alpha1.Harbor, client.Ob
 			Namespace: ns,
 		},
 		Spec: containerregistryv1alpha1.HarborSpec{
-			HarborVersion:       "1.9.1",
+			HarborVersion:       "1.10.0",
 			PublicURL:           publicURL.String(),
 			AdminPasswordSecret: "admin-secret",
 			Components: containerregistryv1alpha1.HarborComponents{
