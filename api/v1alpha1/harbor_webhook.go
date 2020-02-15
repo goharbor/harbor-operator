@@ -77,6 +77,10 @@ func (r *Harbor) DefaultImages() error {
 		if r.Spec.Components.Clair.Image == "" {
 			r.Spec.Components.Clair.Image = images.Clair
 		}
+
+		if r.Spec.Components.Clair.Adapter.Image == "" {
+			r.Spec.Components.Clair.Adapter.Image = images.ClairAdapter
+		}
 	}
 
 	if r.Spec.Components.Notary != nil {
