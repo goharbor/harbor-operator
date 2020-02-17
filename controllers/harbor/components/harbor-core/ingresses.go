@@ -11,15 +11,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
-
-	"github.com/ovh/harbor-operator/controllers/harbor/components/chartmuseum"
-	"github.com/ovh/harbor-operator/controllers/harbor/components/portal"
-	"github.com/ovh/harbor-operator/controllers/harbor/components/registry"
 	"github.com/ovh/harbor-operator/pkg/factories/application"
-)
-
-const (
-	emptyPort = 1
 )
 
 func (c *HarborCore) GetIngresses(ctx context.Context) []*netv1.Ingress { // nolint:funlen
@@ -74,40 +66,10 @@ func (c *HarborCore) GetIngresses(ctx context.Context) []*netv1.Ingress { // nol
 											ServicePort: intstr.FromInt(PublicPort),
 										},
 									}, {
-										Path: "/chartrepo",
-										Backend: netv1.IngressBackend{
-											ServiceName: c.harbor.NormalizeComponentName(containerregistryv1alpha1.CoreName),
-											ServicePort: intstr.FromInt(chartmuseum.PublicPort),
-										},
-									}, {
 										Path: "/service",
 										Backend: netv1.IngressBackend{
 											ServiceName: c.harbor.NormalizeComponentName(containerregistryv1alpha1.CoreName),
 											ServicePort: intstr.FromInt(PublicPort),
-										},
-									}, {
-										Path: "/service/notification",
-										Backend: netv1.IngressBackend{
-											ServiceName: "dev-null",
-											ServicePort: intstr.FromInt(emptyPort),
-										},
-									}, {
-										Path: "/v1",
-										Backend: netv1.IngressBackend{
-											ServiceName: "dev-null",
-											ServicePort: intstr.FromInt(emptyPort),
-										},
-									}, {
-										Path: "/v2",
-										Backend: netv1.IngressBackend{
-											ServiceName: c.harbor.NormalizeComponentName(containerregistryv1alpha1.RegistryName),
-											ServicePort: intstr.FromInt(registry.PublicPort),
-										},
-									}, {
-										Path: "/",
-										Backend: netv1.IngressBackend{
-											ServiceName: c.harbor.NormalizeComponentName(containerregistryv1alpha1.PortalName),
-											ServicePort: intstr.FromInt(portal.PublicPort),
 										},
 									},
 								},
