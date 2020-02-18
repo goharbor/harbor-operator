@@ -55,8 +55,9 @@ func (n *Notary) GetDeployments(ctx context.Context) []*appsv1.Deployment { // n
 				Template: corev1.PodTemplateSpec{
 					ObjectMeta: metav1.ObjectMeta{
 						Annotations: map[string]string{
-							"checksum":         n.GetConfigCheckSum(),
-							"operator/version": application.GetVersion(ctx),
+							"configuration/checksum": n.GetConfigMapsCheckSum(),
+							"secret/checksum":        n.GetSecretsCheckSum(),
+							"operator/version":       application.GetVersion(ctx),
 						},
 						Labels: map[string]string{
 							"app":      NotaryServerName,
@@ -221,8 +222,9 @@ func (n *Notary) GetDeployments(ctx context.Context) []*appsv1.Deployment { // n
 				Template: corev1.PodTemplateSpec{
 					ObjectMeta: metav1.ObjectMeta{
 						Annotations: map[string]string{
-							"checksum":         n.GetConfigCheckSum(),
-							"operator/version": application.GetVersion(ctx),
+							"configuration/checksum": n.GetConfigMapsCheckSum(),
+							"secret/checksum":        n.GetSecretsCheckSum(),
+							"operator/version":       application.GetVersion(ctx),
 						},
 						Labels: map[string]string{
 							"app":      NotarySignerName,

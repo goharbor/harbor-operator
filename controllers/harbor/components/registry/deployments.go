@@ -80,8 +80,9 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 				Template: corev1.PodTemplateSpec{
 					ObjectMeta: metav1.ObjectMeta{
 						Annotations: map[string]string{
-							"checksum":         r.GetConfigCheckSum(),
-							"operator/version": application.GetVersion(ctx),
+							"configuration/checksum": r.GetConfigMapsCheckSum(),
+							"secret/checksum":        r.GetSecretsCheckSum(),
+							"operator/version":       application.GetVersion(ctx),
 						},
 						Labels: map[string]string{
 							"app":      containerregistryv1alpha1.RegistryName,

@@ -72,7 +72,9 @@ func (j *JobService) GetConfigMaps(ctx context.Context) []*corev1.ConfigMap {
 	}
 }
 
-func (j *JobService) GetConfigCheckSum() string {
-	h := sha256.New()
-	return fmt.Sprintf("%x", h.Sum([]byte(fmt.Sprintf("%s\n%s", j.harbor.Spec.PublicURL, logsDirectory))))
+func (j *JobService) GetConfigMapsCheckSum() string {
+	value := fmt.Sprintf("%d\n%d\n%x", hookMaxRetry, j.harbor.Spec.Components.JobService.WorkerCount, config)
+	sum := sha256.New().Sum([]byte(value))
+
+	return fmt.Sprintf("%x", sum)
 }

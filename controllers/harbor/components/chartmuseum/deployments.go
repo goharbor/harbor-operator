@@ -112,7 +112,9 @@ func (c *ChartMuseum) GetDeployments(ctx context.Context) []*appsv1.Deployment {
 				Template: corev1.PodTemplateSpec{
 					ObjectMeta: metav1.ObjectMeta{
 						Annotations: map[string]string{
-							"operator/version": application.GetVersion(ctx),
+							"configuration/checksum": c.GetConfigMapsCheckSum(),
+							"secret/checksum":        c.GetSecretsCheckSum(),
+							"operator/version":       application.GetVersion(ctx),
 						},
 						Labels: map[string]string{
 							"app":      containerregistryv1alpha1.ChartMuseumName,

@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"path"
 	"strconv"
-	"strings"
 	"sync"
 
 	corev1 "k8s.io/api/core/v1"
@@ -108,13 +107,10 @@ func (c *HarborCore) GetConfigMaps(ctx context.Context) []*corev1.ConfigMap { //
 	}
 }
 
-func (c *HarborCore) GetConfigCheckSum() string {
-	checksum := strings.Join([]string{
-		c.harbor.Spec.PublicURL,
-		strconv.FormatBool(c.harbor.Spec.Components.Clair != nil),
-	}, "\n")
+func (c *HarborCore) GetConfigMapsCheckSum() string {
+	value := fmt.Sprintf("%s\n%+v\n%x", c.harbor.Spec.PublicURL, c.harbor.Spec.Components.Clair != nil, config)
+	sum := sha256.New().Sum([]byte(value))
 
-	h := sha256.New()
-
-	return fmt.Sprintf("%x", h.Sum([]byte(checksum)))
+	// todo get generation of the secret
+	return fmt.Sprintf("%x", sum)
 }

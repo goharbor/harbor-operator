@@ -63,8 +63,9 @@ func (c *Clair) GetDeployments(ctx context.Context) []*appsv1.Deployment { // no
 				Template: corev1.PodTemplateSpec{
 					ObjectMeta: metav1.ObjectMeta{
 						Annotations: map[string]string{
-							"checksum":         c.GetConfigCheckSum(),
-							"operator/version": application.GetVersion(ctx),
+							"configuration/checksum": c.GetConfigMapsCheckSum(),
+							"secret/checksum":        c.GetSecretsCheckSum(),
+							"operator/version":       application.GetVersion(ctx),
 						},
 						Labels: map[string]string{
 							"app":      containerregistryv1alpha1.ClairName,

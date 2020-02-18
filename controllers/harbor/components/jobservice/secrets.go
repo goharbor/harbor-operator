@@ -2,6 +2,8 @@ package jobservice
 
 import (
 	"context"
+	"crypto/sha256"
+	"fmt"
 
 	"github.com/sethvargo/go-password/password"
 	corev1 "k8s.io/api/core/v1"
@@ -37,4 +39,12 @@ func (j *JobService) GetSecrets(ctx context.Context) []*corev1.Secret {
 			},
 		},
 	}
+}
+
+func (j *JobService) GetSecretsCheckSum() string {
+	// TODO get generation of the secrets
+	value := j.harbor.Spec.Components.JobService.RedisSecret
+	sum := sha256.New().Sum([]byte(value))
+
+	return fmt.Sprintf("%x", sum)
 }
