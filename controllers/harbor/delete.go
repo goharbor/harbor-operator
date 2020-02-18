@@ -62,7 +62,7 @@ func (r *Reconciler) DeleteResourceCollection(ctx context.Context, harbor *conta
 	u.SetGroupVersionKind(gvk)
 
 	matchingLabel := client.MatchingLabels{
-		ComponentNameLabel: componentName,
+		containerregistryv1alpha1.ComponentNameLabel: componentName,
 	}
 	inNamespace := client.InNamespace(harbor.GetNamespace())
 

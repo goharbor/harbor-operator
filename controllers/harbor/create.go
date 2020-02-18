@@ -16,20 +16,13 @@ import (
 	"github.com/ovh/harbor-operator/pkg/factories/logger"
 )
 
-const (
-	WarningLabel         = "operator/warning"
-	OperatorNameLabel    = "operator/name"
-	OperatorVersionLabel = "operator/version"
-	ComponentNameLabel   = "operator/component"
-)
-
 func (r *Reconciler) MutateAnnotations(ctx context.Context, resource metav1.Object) {
 	annotations := resource.GetAnnotations()
 	if annotations == nil {
 		annotations = map[string]string{}
 	}
 	// Warning annotation
-	annotations[WarningLabel] = fmt.Sprintf("⚠️ This Resource is managed by *%s* ⚠️", r.GetName())
+	annotations[containerregistryv1alpha1.WarningLabel] = fmt.Sprintf("⚠️ This Resource is managed by *%s* ⚠️", r.GetName())
 	resource.SetAnnotations(annotations)
 }
 
@@ -39,10 +32,10 @@ func (r *Reconciler) MutateLabels(ctx context.Context, resource metav1.Object) {
 		labels = map[string]string{}
 	}
 
-	labels[OperatorNameLabel] = r.GetName()
-	labels[OperatorVersionLabel] = r.GetVersion()
+	labels[containerregistryv1alpha1.OperatorNameLabel] = r.GetName()
+	labels[containerregistryv1alpha1.OperatorVersionLabel] = r.GetVersion()
 
-	labels[ComponentNameLabel] = components.ComponentName(ctx)
+	labels[containerregistryv1alpha1.ComponentNameLabel] = components.ComponentName(ctx)
 
 	resource.SetLabels(labels)
 }
