@@ -120,7 +120,7 @@ func (j *JobService) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 						Containers: []corev1.Container{
 							{
 								Name:  "jobservice",
-								Image: j.harbor.Spec.Components.JobService.Image,
+								Image: j.harbor.Spec.Components.JobService.GetImage(),
 								Ports: []corev1.ContainerPort{
 									{
 										ContainerPort: port,

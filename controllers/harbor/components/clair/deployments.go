@@ -134,7 +134,7 @@ func (c *Clair) GetDeployments(ctx context.Context) []*appsv1.Deployment { // no
 						Containers: []corev1.Container{
 							{
 								Name:  "clair",
-								Image: c.harbor.Spec.Components.Clair.Image,
+								Image: c.harbor.Spec.Components.Clair.GetImage(),
 								Ports: []corev1.ContainerPort{
 									{
 										ContainerPort: apiPort,
@@ -194,7 +194,7 @@ func (c *Clair) GetDeployments(ctx context.Context) []*appsv1.Deployment { // no
 								},
 							}, {
 								Name:  "clair-adapter",
-								Image: c.harbor.Spec.Components.Clair.Adapter.Image,
+								Image: c.harbor.Spec.Components.Clair.Adapter.GetImage(),
 								Ports: []corev1.ContainerPort{
 									{
 										ContainerPort: adapterPort,

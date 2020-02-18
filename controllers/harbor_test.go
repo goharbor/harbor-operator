@@ -199,12 +199,14 @@ func newValidHarborTest(ns string) (*containerregistryv1alpha1.Harbor, client.Ob
 			PublicURL:           publicURL.String(),
 			AdminPasswordSecret: "admin-secret",
 			Components: containerregistryv1alpha1.HarborComponents{
-				Core: containerregistryv1alpha1.CoreComponent{
+				Core: &containerregistryv1alpha1.CoreComponent{
 					DatabaseSecret: "core-database-secret",
 				},
-				JobService: containerregistryv1alpha1.JobServiceComponent{
+				JobService: &containerregistryv1alpha1.JobServiceComponent{
 					RedisSecret: "jobservice-redis-secret",
 				},
+				Portal:   &containerregistryv1alpha1.PortalComponent{},
+				Registry: &containerregistryv1alpha1.RegistryComponent{},
 			},
 		},
 	}

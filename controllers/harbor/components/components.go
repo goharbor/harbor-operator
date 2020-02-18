@@ -50,39 +50,64 @@ type Component interface {
 	GetDeployments(context.Context) []*appsv1.Deployment
 }
 
-func GetComponents(ctx context.Context, harbor *containerregistryv1alpha1.Harbor) (*Components, error) {
+func GetComponents(ctx context.Context, harbor *containerregistryv1alpha1.Harbor) (*Components, error) { // nolint:funlen
 	harborResource := &Components{}
 
 	var g errgroup.Group
 
-	g.Go(harborResource.Core.getInitFunc(ctx, harbor, CorePriority, containerregistryv1alpha1.CoreName, func(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, option *Option) (Component, error) {
-		return harbor_core.New(ctx, harbor, option)
-	}))
-	g.Go(harborResource.Registry.getInitFunc(ctx, harbor, RegistryPriority, containerregistryv1alpha1.RegistryName, func(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, option *Option) (Component, error) {
-		return harbor_registry.New(ctx, harbor, option)
-	}))
-	g.Go(harborResource.Portal.getInitFunc(ctx, harbor, PortalPriority, containerregistryv1alpha1.PortalName, func(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, option *Option) (Component, error) {
-		return harbor_portal.New(ctx, harbor, option)
-	}))
-	g.Go(harborResource.JobService.getInitFunc(ctx, harbor, JobServicePriority, containerregistryv1alpha1.JobServiceName, func(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, option *Option) (Component, error) {
-		return harbor_jobservice.New(ctx, harbor, option)
-	}))
-
 	if harbor.Spec.Components.ChartMuseum != nil {
+		harborResource.ChartMuseum = &ComponentRunner{}
+
 		g.Go(harborResource.ChartMuseum.getInitFunc(ctx, harbor, ChartMuseumPriority, containerregistryv1alpha1.ChartMuseumName, func(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, option *Option) (Component, error) {
 			return harbor_chartmuseum.New(ctx, harbor, option)
 		}))
 	}
 
 	if harbor.Spec.Components.Clair != nil {
+		harborResource.Clair = &ComponentRunner{}
+
 		g.Go(harborResource.Clair.getInitFunc(ctx, harbor, ClairPriority, containerregistryv1alpha1.ClairName, func(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, option *Option) (Component, error) {
 			return harbor_clair.New(ctx, harbor, option)
 		}))
 	}
 
+	if harbor.Spec.Components.Core != nil {
+		harborResource.Core = &ComponentRunner{}
+
+		g.Go(harborResource.Core.getInitFunc(ctx, harbor, CorePriority, containerregistryv1alpha1.CoreName, func(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, option *Option) (Component, error) {
+			return harbor_core.New(ctx, harbor, option)
+		}))
+	}
+
+	if harbor.Spec.Components.JobService != nil {
+		harborResource.JobService = &ComponentRunner{}
+
+		g.Go(harborResource.JobService.getInitFunc(ctx, harbor, JobServicePriority, containerregistryv1alpha1.JobServiceName, func(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, option *Option) (Component, error) {
+			return harbor_jobservice.New(ctx, harbor, option)
+		}))
+	}
+
 	if harbor.Spec.Components.Notary != nil {
+		harborResource.Notary = &ComponentRunner{}
+
 		g.Go(harborResource.Notary.getInitFunc(ctx, harbor, NotaryPriority, containerregistryv1alpha1.NotaryName, func(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, option *Option) (Component, error) {
 			return harbor_notary.New(ctx, harbor, option)
+		}))
+	}
+
+	if harbor.Spec.Components.Portal != nil {
+		harborResource.Portal = &ComponentRunner{}
+
+		g.Go(harborResource.Portal.getInitFunc(ctx, harbor, PortalPriority, containerregistryv1alpha1.PortalName, func(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, option *Option) (Component, error) {
+			return harbor_portal.New(ctx, harbor, option)
+		}))
+	}
+
+	if harbor.Spec.Components.Registry != nil {
+		harborResource.Registry = &ComponentRunner{}
+
+		g.Go(harborResource.Registry.getInitFunc(ctx, harbor, RegistryPriority, containerregistryv1alpha1.RegistryName, func(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, option *Option) (Component, error) {
+			return harbor_registry.New(ctx, harbor, option)
 		}))
 	}
 
@@ -106,6 +131,10 @@ func (c *ComponentRunner) getOption(harbor *containerregistryv1alpha1.Harbor, co
 
 func (c *ComponentRunner) getInitFunc(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, componentPriority int32, name string, factory func(context.Context, *containerregistryv1alpha1.Harbor, *Option) (Component, error)) func() error {
 	return func() error {
+		if c == nil {
+			return nil
+		}
+
 		options := c.getOption(harbor, componentPriority)
 
 		ctx := withComponent(ctx, name)

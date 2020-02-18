@@ -105,7 +105,7 @@ func (n *Notary) GetDeployments(ctx context.Context) []*appsv1.Deployment { // n
 						InitContainers: []corev1.Container{
 							{
 								Name:  "init-db",
-								Image: n.harbor.Spec.Components.Notary.NotaryDBMigratorImage,
+								Image: n.harbor.Spec.Components.Notary.DBMigrator.GetImage(),
 								Args: []string{
 									"-c",
 									"server",
@@ -168,7 +168,7 @@ func (n *Notary) GetDeployments(ctx context.Context) []*appsv1.Deployment { // n
 						Containers: []corev1.Container{
 							{
 								Name:  "notary-server",
-								Image: n.harbor.Spec.Components.Notary.Server.Image,
+								Image: n.harbor.Spec.Components.Notary.Server.GetImage(),
 								Args: []string{
 									"notary-server",
 									"-config",
@@ -264,7 +264,7 @@ func (n *Notary) GetDeployments(ctx context.Context) []*appsv1.Deployment { // n
 						InitContainers: []corev1.Container{
 							{
 								Name:  "init-db",
-								Image: n.harbor.Spec.Components.Notary.NotaryDBMigratorImage,
+								Image: n.harbor.Spec.Components.Notary.DBMigrator.GetImage(),
 								Args: []string{
 									"-c",
 									"signer",
@@ -318,7 +318,7 @@ func (n *Notary) GetDeployments(ctx context.Context) []*appsv1.Deployment { // n
 						Containers: []corev1.Container{
 							{
 								Name:  "notary-signer",
-								Image: n.harbor.Spec.Components.Notary.Signer.Image,
+								Image: n.harbor.Spec.Components.Notary.Signer.GetImage(),
 								Args: []string{
 									"notary-signer",
 									"-config",

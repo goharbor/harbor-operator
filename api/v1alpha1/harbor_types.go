@@ -87,11 +87,17 @@ type HarborSpec struct {
 }
 
 type HarborComponents struct {
-	Core        CoreComponent        `json:"core,omitempty"`
-	Portal      PortalComponent      `json:"portal,omitempty"`
-	Registry    RegistryComponent    `json:"registry,omitempty"`
-	RegistryCtl RegistryCtlComponent `json:"registryCtl,omitempty"`
-	JobService  JobServiceComponent  `json:"jobService,omitempty"`
+	// +optional
+	Core *CoreComponent `json:"core,omitempty"`
+
+	// +optional
+	Portal *PortalComponent `json:"portal,omitempty"`
+
+	// +optional
+	Registry *RegistryComponent `json:"registry,omitempty"`
+
+	// +optional
+	JobService *JobServiceComponent `json:"jobService,omitempty"`
 
 	// +optional
 	ChartMuseum *ChartMuseumComponent `json:"chartMuseum,omitempty"`
@@ -111,6 +117,9 @@ type HarborDeployment struct {
 	Replicas *int32 `json:"replicas,omitempty"`
 
 	// +optional
+	Image *string `json:"image,omitempty"`
+
+	// +optional
 	NodeSelector     NodeSelector                  `json:"nodeSelector,omitempty"`
 	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets,omitempty" patchStrategy:"merge" patchMergeKey:"name"`
 }
@@ -119,8 +128,6 @@ type NodeSelector map[string]string
 
 type CoreComponent struct {
 	HarborDeployment `json:",inline"`
-	// +optional
-	Image string `json:"image,omitempty"`
 
 	// +kubebuilder:validation:Required
 	DatabaseSecret string `json:"databaseSecret"`
@@ -128,14 +135,12 @@ type CoreComponent struct {
 
 type PortalComponent struct {
 	HarborDeployment `json:",inline"`
-	// +optional
-	Image string `json:"image,omitempty"`
 }
 
 type RegistryComponent struct {
 	HarborDeployment `json:",inline"`
-	// +optional
-	Image string `json:"image,omitempty"`
+
+	Controller RegistryControllerComponent `json:"controller,omitempty"`
 
 	// +optional
 	StorageSecret string `json:"storageSecret,omitempty"`
@@ -144,16 +149,13 @@ type RegistryComponent struct {
 	CacheSecret string `json:"cacheSecret,omitempty"`
 }
 
-type RegistryCtlComponent struct {
-	HarborDeployment `json:",inline"`
+type RegistryControllerComponent struct {
 	// +optional
-	Image string `json:"image,omitempty"`
+	Image *string `json:"image,omitempty"`
 }
 
 type JobServiceComponent struct {
 	HarborDeployment `json:",inline"`
-	// +optional
-	Image string `json:"image,omitempty"`
 
 	// +kubebuilder:validation:Required
 	RedisSecret string `json:"redisSecret"`
@@ -164,7 +166,7 @@ type JobServiceComponent struct {
 
 type ClairAdapterComponent struct {
 	// +optional
-	Image string `json:"image,omitempty"`
+	Image *string `json:"image,omitempty"`
 
 	// +kubebuilder:validation:Required
 	RedisSecret string `json:"redisSecret"`
@@ -172,8 +174,6 @@ type ClairAdapterComponent struct {
 
 type ClairComponent struct {
 	HarborDeployment `json:",inline"`
-	// +optional
-	Image string `json:"image,omitempty"`
 
 	// +kubebuilder:validation:Required
 	DatabaseSecret string `json:"databaseSecret"`
@@ -185,7 +185,6 @@ type ClairComponent struct {
 
 type ChartMuseumComponent struct {
 	HarborDeployment `json:",inline"`
-	Image            string `json:"image,omitempty"`
 
 	// +optional
 	StorageSecret string `json:"storageSecret,omitempty"`
@@ -201,7 +200,7 @@ type NotaryComponent struct {
 	PublicURL string `json:"publicURL"`
 
 	// +optional
-	NotaryDBMigratorImage string `json:"notaryDBMigratorImage,omitempty"`
+	DBMigrator NotaryDBMigrator `json:"dbMigrator,omitempty"`
 
 	// +kubebuilder:validation:Required
 	Signer NotarySignerComponent `json:"signer"`
@@ -210,10 +209,13 @@ type NotaryComponent struct {
 	Server NotaryServerComponent `json:"server"`
 }
 
+type NotaryDBMigrator struct {
+	// +optional
+	Image *string `json:"image,omitempty"`
+}
+
 type NotarySignerComponent struct {
 	HarborDeployment `json:",inline"`
-	// +optional
-	Image string `json:"image,omitempty"`
 
 	// +kubebuilder:validation:Required
 	DatabaseSecret string `json:"databaseSecret"`
@@ -221,8 +223,6 @@ type NotarySignerComponent struct {
 
 type NotaryServerComponent struct {
 	HarborDeployment `json:",inline"`
-	// +optional
-	Image string `json:"image,omitempty"`
 
 	// +kubebuilder:validation:Required
 	DatabaseSecret string `json:"databaseSecret"`

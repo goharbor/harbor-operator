@@ -178,7 +178,7 @@ func (c *ChartMuseum) GetDeployments(ctx context.Context) []*appsv1.Deployment {
 						Containers: []corev1.Container{
 							{
 								Name:  "chartmuseum",
-								Image: c.harbor.Spec.Components.ChartMuseum.Image,
+								Image: c.harbor.Spec.Components.ChartMuseum.GetImage(),
 								Ports: []corev1.ContainerPort{
 									{
 										ContainerPort: port,

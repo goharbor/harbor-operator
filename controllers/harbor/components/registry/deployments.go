@@ -171,7 +171,7 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 						Containers: []corev1.Container{
 							{
 								Name:  "registryctl",
-								Image: r.harbor.Spec.Components.RegistryCtl.Image,
+								Image: r.harbor.Spec.Components.Registry.Controller.GetImage(),
 								Ports: []corev1.ContainerPort{
 									{
 										ContainerPort: ctlAPIPort,
@@ -250,7 +250,7 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 								Args:    []string{"-c", path.Join(registryCtlConfigPath, registryCtlConfigName)},
 							}, {
 								Name:  "registry",
-								Image: r.harbor.Spec.Components.Registry.Image,
+								Image: r.harbor.Spec.Components.Registry.GetImage(),
 								Ports: []corev1.ContainerPort{
 									{
 										ContainerPort: apiPort,
