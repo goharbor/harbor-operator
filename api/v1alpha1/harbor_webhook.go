@@ -28,4 +28,8 @@ func (r *Harbor) Default() {
 			r.Spec.Components.JobService.WorkerCount = 3
 		}
 	}
+
+	if r.Spec.HarborVersion == "" {
+		r.Spec.HarborVersion = "1.10.0"
+	}
 }
