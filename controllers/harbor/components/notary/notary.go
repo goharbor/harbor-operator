@@ -16,8 +16,8 @@ type Notary struct {
 	Option Option
 }
 
-type Option struct {
-	Priority *int32
+type Option interface {
+	GetPriority() *int32
 }
 
 func New(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, opt Option) (*Notary, error) {

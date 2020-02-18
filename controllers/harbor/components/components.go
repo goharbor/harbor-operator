@@ -25,8 +25,6 @@ import (
 	"github.com/ovh/harbor-operator/pkg/factories/logger"
 )
 
-const PriorityBase = 100
-
 type Resource interface {
 	metav1.Object
 	runtime.Object
@@ -43,10 +41,6 @@ type Components struct {
 	Notary      *ComponentRunner
 }
 
-type ComponentRunner struct {
-	Component
-}
-
 type Component interface {
 	GetConfigMaps(context.Context) []*corev1.ConfigMap
 	GetSecrets(context.Context) []*corev1.Secret
@@ -56,120 +50,40 @@ type Component interface {
 	GetDeployments(context.Context) []*appsv1.Deployment
 }
 
-func GetComponents(ctx context.Context, harbor *containerregistryv1alpha1.Harbor) (*Components, error) { // nolint:funlen,gocognit
+func GetComponents(ctx context.Context, harbor *containerregistryv1alpha1.Harbor) (*Components, error) {
 	harborResource := &Components{}
 
 	var g errgroup.Group
 
-	g.Go(func() error {
-		var corePriority *int32
-		if harbor.Spec.Priority != nil {
-			priority := *harbor.Spec.Priority - PriorityBase + CorePriority
-			corePriority = &priority
-		}
-
-		core, err := harbor_core.New(ctx, harbor, harbor_core.Option{Priority: corePriority})
-		if err != nil {
-			return errors.Wrap(err, containerregistryv1alpha1.CoreName)
-		}
-		harborResource.Core = &ComponentRunner{core}
-		return nil
-	})
-
-	g.Go(func() error {
-		var registryPriority *int32
-		if harbor.Spec.Priority != nil {
-			priority := *harbor.Spec.Priority - PriorityBase + RegistryPriority
-			registryPriority = &priority
-		}
-
-		reg, err := harbor_registry.New(ctx, harbor, harbor_registry.Option{Priority: registryPriority})
-		if err != nil {
-			return errors.Wrap(err, containerregistryv1alpha1.RegistryName)
-		}
-		harborResource.Registry = &ComponentRunner{reg}
-		return nil
-	})
-
-	g.Go(func() error {
-		var portalPriority *int32
-		if harbor.Spec.Priority != nil {
-			priority := *harbor.Spec.Priority - PriorityBase + PortalPriority
-			portalPriority = &priority
-		}
-
-		portal, err := harbor_portal.New(ctx, harbor, harbor_portal.Option{Priority: portalPriority})
-		if err != nil {
-			return errors.Wrap(err, containerregistryv1alpha1.PortalName)
-		}
-		harborResource.Portal = &ComponentRunner{portal}
-		return nil
-	})
-
-	g.Go(func() error {
-		var jobServicePriority *int32
-		if harbor.Spec.Priority != nil {
-			priority := *harbor.Spec.Priority - PriorityBase + JobServicePriority
-			jobServicePriority = &priority
-		}
-
-		jobService, err := harbor_jobservice.New(ctx, harbor, harbor_jobservice.Option{Priority: jobServicePriority})
-		if err != nil {
-			return errors.Wrap(err, containerregistryv1alpha1.JobServiceName)
-		}
-		harborResource.JobService = &ComponentRunner{jobService}
-		return nil
-	})
+	g.Go(harborResource.Core.getInitFunc(ctx, harbor, CorePriority, containerregistryv1alpha1.CoreName, func(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, option *Option) (Component, error) {
+		return harbor_core.New(ctx, harbor, option)
+	}))
+	g.Go(harborResource.Registry.getInitFunc(ctx, harbor, RegistryPriority, containerregistryv1alpha1.RegistryName, func(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, option *Option) (Component, error) {
+		return harbor_registry.New(ctx, harbor, option)
+	}))
+	g.Go(harborResource.Portal.getInitFunc(ctx, harbor, PortalPriority, containerregistryv1alpha1.PortalName, func(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, option *Option) (Component, error) {
+		return harbor_portal.New(ctx, harbor, option)
+	}))
+	g.Go(harborResource.JobService.getInitFunc(ctx, harbor, JobServicePriority, containerregistryv1alpha1.JobServiceName, func(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, option *Option) (Component, error) {
+		return harbor_jobservice.New(ctx, harbor, option)
+	}))
 
 	if harbor.Spec.Components.ChartMuseum != nil {
-		g.Go(func() error {
-			var chartMuseumPriority *int32
-			if harbor.Spec.Priority != nil {
-				priority := *harbor.Spec.Priority - PriorityBase + ChartMuseumPriority
-				chartMuseumPriority = &priority
-			}
-
-			chartMuseum, err := harbor_chartmuseum.New(ctx, harbor, harbor_chartmuseum.Option{Priority: chartMuseumPriority})
-			if err != nil {
-				return errors.Wrap(err, containerregistryv1alpha1.ChartMuseumName)
-			}
-			harborResource.ChartMuseum = &ComponentRunner{chartMuseum}
-			return nil
-		})
+		g.Go(harborResource.ChartMuseum.getInitFunc(ctx, harbor, ChartMuseumPriority, containerregistryv1alpha1.ChartMuseumName, func(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, option *Option) (Component, error) {
+			return harbor_chartmuseum.New(ctx, harbor, option)
+		}))
 	}
 
 	if harbor.Spec.Components.Clair != nil {
-		g.Go(func() error {
-			var clairPriority *int32
-			if harbor.Spec.Priority != nil {
-				priority := *harbor.Spec.Priority - PriorityBase + ClairPriority
-				clairPriority = &priority
-			}
-
-			clair, err := harbor_clair.New(ctx, harbor, harbor_clair.Option{Priority: clairPriority})
-			if err != nil {
-				return errors.Wrap(err, containerregistryv1alpha1.ClairName)
-			}
-			harborResource.Clair = &ComponentRunner{clair}
-			return nil
-		})
+		g.Go(harborResource.Clair.getInitFunc(ctx, harbor, ClairPriority, containerregistryv1alpha1.ClairName, func(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, option *Option) (Component, error) {
+			return harbor_clair.New(ctx, harbor, option)
+		}))
 	}
 
 	if harbor.Spec.Components.Notary != nil {
-		g.Go(func() error {
-			var notaryPriority *int32
-			if harbor.Spec.Priority != nil {
-				priority := *harbor.Spec.Priority - PriorityBase + NotaryPriority
-				notaryPriority = &priority
-			}
-
-			notary, err := harbor_notary.New(ctx, harbor, harbor_notary.Option{Priority: notaryPriority})
-			if err != nil {
-				return errors.Wrap(err, containerregistryv1alpha1.NotaryName)
-			}
-			harborResource.Notary = &ComponentRunner{notary}
-			return nil
-		})
+		g.Go(harborResource.Notary.getInitFunc(ctx, harbor, NotaryPriority, containerregistryv1alpha1.NotaryName, func(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, option *Option) (Component, error) {
+			return harbor_notary.New(ctx, harbor, option)
+		}))
 	}
 
 	err := g.Wait()
@@ -177,257 +91,39 @@ func GetComponents(ctx context.Context, harbor *containerregistryv1alpha1.Harbor
 	return harborResource, errors.Wrap(err, "cannot get resources")
 }
 
-type Run func(context.Context, *containerregistryv1alpha1.Harbor, *ComponentRunner) error
+type ComponentFactory func(context.Context, *containerregistryv1alpha1.Harbor, OptionGetter) (Component, error)
 
-// nolint:funlen
-func (r *Components) ParallelRun(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, run Run) error {
-	var g errgroup.Group
+func (c *ComponentRunner) getOption(harbor *containerregistryv1alpha1.Harbor, componentPriority int32) *Option {
+	option := &Option{}
 
-	g.Go(func() error {
-		ctx := withComponent(ctx, containerregistryv1alpha1.CoreName)
-		span, ctx := opentracing.StartSpanFromContext(ctx, "run", opentracing.Tags{
-			"component": containerregistryv1alpha1.CoreName,
-		})
-		defer span.Finish()
-
-		logger.Set(&ctx, logger.Get(ctx).WithValues("Component", containerregistryv1alpha1.CoreName))
-
-		err := run(ctx, harbor, r.Core)
-		return errors.Wrap(err, containerregistryv1alpha1.CoreName)
-	})
-
-	g.Go(func() error {
-		ctx := withComponent(ctx, containerregistryv1alpha1.RegistryName)
-		span, ctx := opentracing.StartSpanFromContext(ctx, "run", opentracing.Tags{
-			"component": containerregistryv1alpha1.RegistryName,
-		})
-		defer span.Finish()
-
-		logger.Set(&ctx, logger.Get(ctx).WithValues("Component", containerregistryv1alpha1.RegistryName))
-
-		err := run(ctx, harbor, r.Registry)
-		return errors.Wrap(err, containerregistryv1alpha1.RegistryName)
-	})
-
-	g.Go(func() error {
-		ctx := withComponent(ctx, containerregistryv1alpha1.JobServiceName)
-		span, ctx := opentracing.StartSpanFromContext(ctx, "run", opentracing.Tags{
-			"component": containerregistryv1alpha1.JobServiceName,
-		})
-		defer span.Finish()
-
-		logger.Set(&ctx, logger.Get(ctx).WithValues("Component", containerregistryv1alpha1.JobServiceName))
-
-		err := run(ctx, harbor, r.JobService)
-		return errors.Wrap(err, containerregistryv1alpha1.JobServiceName)
-	})
-
-	g.Go(func() error {
-		ctx := withComponent(ctx, containerregistryv1alpha1.PortalName)
-		span, ctx := opentracing.StartSpanFromContext(ctx, "run", opentracing.Tags{
-			"component": containerregistryv1alpha1.PortalName,
-		})
-		defer span.Finish()
-
-		logger.Set(&ctx, logger.Get(ctx).WithValues("Component", containerregistryv1alpha1.PortalName))
-
-		err := run(ctx, harbor, r.Portal)
-		return errors.Wrap(err, containerregistryv1alpha1.PortalName)
-	})
-
-	if r.ChartMuseum != nil {
-		g.Go(func() error {
-			ctx := withComponent(ctx, containerregistryv1alpha1.ChartMuseumName)
-			span, ctx := opentracing.StartSpanFromContext(ctx, "run", opentracing.Tags{
-				"component": containerregistryv1alpha1.ChartMuseumName,
-			})
-			defer span.Finish()
-
-			logger.Set(&ctx, logger.Get(ctx).WithValues("Component", containerregistryv1alpha1.ChartMuseumName))
-
-			err := run(ctx, harbor, r.ChartMuseum)
-			return errors.Wrap(err, containerregistryv1alpha1.ChartMuseumName)
-		})
+	if harbor.Spec.Priority != nil {
+		priority := *harbor.Spec.Priority - PriorityBase + componentPriority
+		option.SetPriority(&priority)
 	}
 
-	if r.Clair != nil {
-		g.Go(func() error {
-			ctx := withComponent(ctx, containerregistryv1alpha1.ClairName)
-			span, ctx := opentracing.StartSpanFromContext(ctx, "run", opentracing.Tags{
-				"component": containerregistryv1alpha1.ClairName,
-			})
-			defer span.Finish()
-
-			logger.Set(&ctx, logger.Get(ctx).WithValues("Component", containerregistryv1alpha1.ClairName))
-
-			err := run(ctx, harbor, r.Clair)
-			return errors.Wrap(err, containerregistryv1alpha1.ClairName)
-		})
-	}
-
-	if r.Notary != nil {
-		g.Go(func() error {
-			ctx := withComponent(ctx, containerregistryv1alpha1.NotaryName)
-			span, ctx := opentracing.StartSpanFromContext(ctx, "run", opentracing.Tags{
-				"component": containerregistryv1alpha1.NotaryName,
-			})
-			defer span.Finish()
-
-			logger.Set(&ctx, logger.Get(ctx).WithValues("Component", containerregistryv1alpha1.NotaryName))
-
-			err := run(ctx, harbor, r.Notary)
-			return errors.Wrap(err, containerregistryv1alpha1.NotaryName)
-		})
-	}
-
-	return g.Wait()
+	return option
 }
 
-type ComponentRun func(context.Context, *containerregistryv1alpha1.Harbor, []Resource) error
+func (c *ComponentRunner) getInitFunc(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, componentPriority int32, name string, factory func(context.Context, *containerregistryv1alpha1.Harbor, *Option) (Component, error)) func() error {
+	return func() error {
+		options := c.getOption(harbor, componentPriority)
 
-// ParallelRun run a function over all resources of a component.
-// This is a wrapper which use errgroup.
-// The main goal of this method is to centralize action over Resource
-// and not forget any resources anywhere else in the code.
-func (c *ComponentRunner) ParallelRun(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, servicesRun, configMapsRun, ingressesRun, secretRun, certificatesRun, deploymentsRun ComponentRun, waitBeforeDeployments bool) error { // nolint:funlen
-	if c == nil {
+		ctx := withComponent(ctx, name)
+
+		span, ctx := opentracing.StartSpanFromContext(ctx, "init", opentracing.Tags{
+			"component": name,
+		})
+		defer span.Finish()
+
+		logger.Set(&ctx, logger.Get(ctx).WithValues("Component", name))
+
+		component, err := factory(ctx, harbor, options)
+		if err != nil {
+			return errors.Wrap(err, name)
+		}
+
+		c.Component = component
+
 		return nil
 	}
-
-	var g errgroup.Group
-
-	if servicesRun != nil {
-		g.Go(func() error {
-			services := c.GetServices(ctx)
-			resources := make([]Resource, len(services))
-			for i, d := range services {
-				resources[i] = d
-			}
-
-			ctx := withResource(ctx, "services")
-			span, ctx := opentracing.StartSpanFromContext(ctx, "run", opentracing.Tags{
-				"Resource.Kind": "services",
-			})
-			defer span.Finish()
-
-			logger.Set(&ctx, logger.Get(ctx).WithValues("Resource.Kind", "services"))
-
-			err := servicesRun(ctx, harbor, resources)
-			return errors.Wrap(err, "services")
-		})
-	}
-
-	if configMapsRun != nil {
-		g.Go(func() error {
-			configmaps := c.GetConfigMaps(ctx)
-			resources := make([]Resource, len(configmaps))
-			for i, d := range configmaps {
-				resources[i] = d
-			}
-
-			ctx := withResource(ctx, "configmaps")
-			span, ctx := opentracing.StartSpanFromContext(ctx, "run", opentracing.Tags{
-				"Resource.Kind": "configmaps",
-			})
-			defer span.Finish()
-
-			logger.Set(&ctx, logger.Get(ctx).WithValues("Resource.Kind", "configmaps"))
-
-			err := configMapsRun(ctx, harbor, resources)
-			return errors.Wrap(err, "configmaps")
-		})
-	}
-
-	if ingressesRun != nil {
-		g.Go(func() error {
-			ingresses := c.GetIngresses(ctx)
-			resources := make([]Resource, len(ingresses))
-			for i, d := range ingresses {
-				resources[i] = d
-			}
-
-			ctx := withResource(ctx, "ingresses")
-			span, ctx := opentracing.StartSpanFromContext(ctx, "run", opentracing.Tags{
-				"Resource.Kind": "ingresses",
-			})
-			defer span.Finish()
-
-			logger.Set(&ctx, logger.Get(ctx).WithValues("Resource.Kind", "ingresses"))
-
-			err := ingressesRun(ctx, harbor, resources)
-			return errors.Wrap(err, "ingresses")
-		})
-	}
-
-	if secretRun != nil {
-		g.Go(func() error {
-			secrets := c.GetSecrets(ctx)
-			resources := make([]Resource, len(secrets))
-			for i, d := range secrets {
-				resources[i] = d
-			}
-
-			ctx := withResource(ctx, "secrets")
-			span, ctx := opentracing.StartSpanFromContext(ctx, "run", opentracing.Tags{
-				"Resource.Kind": "secrets",
-			})
-			defer span.Finish()
-
-			logger.Set(&ctx, logger.Get(ctx).WithValues("Resource.Kind", "secrets"))
-
-			err := secretRun(ctx, harbor, resources)
-			return errors.Wrap(err, "secrets")
-		})
-	}
-
-	if certificatesRun != nil {
-		g.Go(func() error {
-			certificates := c.GetCertificates(ctx)
-			resources := make([]Resource, len(certificates))
-			for i, d := range certificates {
-				resources[i] = d
-			}
-
-			ctx := withResource(ctx, "certificates")
-			span, ctx := opentracing.StartSpanFromContext(ctx, "run", opentracing.Tags{
-				"Resource.Kind": "certificates",
-			})
-			defer span.Finish()
-
-			logger.Set(&ctx, logger.Get(ctx).WithValues("Resource.Kind", "certificates"))
-
-			err := certificatesRun(ctx, harbor, resources)
-			return errors.Wrap(err, "certificates")
-		})
-	}
-
-	if waitBeforeDeployments {
-		err := g.Wait()
-		if err != nil {
-			return err
-		}
-	}
-
-	if deploymentsRun != nil {
-		g.Go(func() error {
-			deployments := c.GetDeployments(ctx)
-			resources := make([]Resource, len(deployments))
-			for i, d := range deployments {
-				resources[i] = d
-			}
-
-			ctx := withResource(ctx, "deployments")
-			span, ctx := opentracing.StartSpanFromContext(ctx, "run", opentracing.Tags{
-				"Resource.Kind": "deployments",
-			})
-			defer span.Finish()
-
-			logger.Set(&ctx, logger.Get(ctx).WithValues("Resource.Kind", "deployments"))
-
-			err := deploymentsRun(ctx, harbor, resources)
-			return errors.Wrap(err, "deployments")
-		})
-	}
-
-	return g.Wait()
 }

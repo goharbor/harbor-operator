@@ -227,7 +227,7 @@ func (j *JobService) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 								},
 							},
 						},
-						Priority: j.Option.Priority,
+						Priority: j.Option.GetPriority(),
 					},
 				},
 				RevisionHistoryLimit: &revisionHistoryLimit,

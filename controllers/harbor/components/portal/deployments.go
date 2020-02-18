@@ -88,7 +88,7 @@ func (p *Portal) GetDeployments(ctx context.Context) []*appsv1.Deployment { // n
 								},
 							},
 						},
-						Priority: p.Option.Priority,
+						Priority: p.Option.GetPriority(),
 					},
 				},
 				RevisionHistoryLimit: &revisionHistoryLimit,

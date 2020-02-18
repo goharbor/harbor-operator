@@ -307,7 +307,7 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 								Args:    []string{"serve", path.Join(registryConfigPath, registryConfigName)},
 							},
 						},
-						Priority: r.Option.Priority,
+						Priority: r.Option.GetPriority(),
 					},
 				},
 				RevisionHistoryLimit: &revisionHistoryLimit,

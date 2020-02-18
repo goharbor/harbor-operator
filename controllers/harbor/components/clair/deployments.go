@@ -272,7 +272,7 @@ func (c *Clair) GetDeployments(ctx context.Context) []*appsv1.Deployment { // no
 								},
 							},
 						},
-						Priority: c.Option.Priority,
+						Priority: c.Option.GetPriority(),
 					},
 				},
 				RevisionHistoryLimit: &revisionHistoryLimit,

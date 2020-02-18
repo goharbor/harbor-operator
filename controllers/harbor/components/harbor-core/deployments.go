@@ -368,7 +368,7 @@ func (c *HarborCore) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 								},
 							},
 						},
-						Priority: c.Option.Priority,
+						Priority: c.Option.GetPriority(),
 					},
 				},
 				RevisionHistoryLimit: &revisionHistoryLimit,
