@@ -6,7 +6,7 @@ auth.anonymous.get: false
 basic.auth.user: chart_controller
 bearerauth: 0
 
-{{- $redisUrl := env.Getenv "cache_url" }}
+{{- $redisUrl := env.Getenv "CACHE_URL" }}
 {{- if gt ( len $redisUrl ) 0 }}
   {{- with (conv.URL $redisUrl) }}
 cache: redis
@@ -47,12 +47,3 @@ max:
 
 chart.post.form.field.name: chart
 prov.post.form.field.name: prov
-
-storage:
-{{- range file.Walk ( env.Getenv "STORAGE_CONFIG" ) }}
-  {{- if not ( file.IsDir . ) }}
-  backend: {{ filepath.Base . | quote }}
-  {{- "\n" -}}{{ file.Read . | data.YAML | data.ToYAML | strings.Indent 1 "  " }}
-  {{- end }}
-
-{{- end }}

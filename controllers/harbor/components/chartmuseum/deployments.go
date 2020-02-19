@@ -29,64 +29,61 @@ func (c *ChartMuseum) GetDeployments(ctx context.Context) []*appsv1.Deployment {
 	operatorName := application.GetName(ctx)
 	harborName := c.harbor.GetName()
 
-	volumes := []corev1.Volume{}
-	volumeMounts := []corev1.VolumeMount{}
-	envs := []corev1.EnvVar{}
+	volumes := []corev1.Volume{{
+		Name: "chartmuseum",
+		VolumeSource: corev1.VolumeSource{
+			EmptyDir: &corev1.EmptyDirVolumeSource{
+				Medium: corev1.StorageMediumMemory,
+			},
+		},
+	}}
+	volumeMounts := []corev1.VolumeMount{{
+		MountPath: "/mnt/chartmuseum",
+		Name:      "chartmuseum",
+	}}
+	envs := []corev1.EnvVar{{
+		Name:  "STORAGE",
+		Value: "local",
+	}, {
+		Name:  "STORAGE_LOCAL_ROOTDIR",
+		Value: "/mnt/chartmuseum",
+	}}
 	envFroms := []corev1.EnvFromSource{}
 
-	templateEnvFroms := []corev1.EnvFromSource{}
+	if c.harbor.Spec.Components.ChartMuseum.StorageSecret != "" {
+		volumes = []corev1.Volume{}
+		volumeMounts = []corev1.VolumeMount{}
 
-	if c.harbor.Spec.Components.ChartMuseum.CacheSecret != "" {
-		templateEnvFroms = append(templateEnvFroms, corev1.EnvFromSource{
-			Prefix: "cache_",
-			SecretRef: &corev1.SecretEnvSource{
-				LocalObjectReference: corev1.LocalObjectReference{
-					Name: c.harbor.Spec.Components.ChartMuseum.CacheSecret,
-				},
-				Optional: &varTrue,
-			},
-		})
-	}
-
-	var storageVolumeSource corev1.VolumeSource
-	if c.harbor.Spec.Components.ChartMuseum.StorageSecret == "" {
-		storageVolumeSource.EmptyDir = &corev1.EmptyDirVolumeSource{}
-
-		volumes = append(volumes, corev1.Volume{
-			Name: "chartmuseum",
-			VolumeSource: corev1.VolumeSource{
-				EmptyDir: &corev1.EmptyDirVolumeSource{
-					Medium: corev1.StorageMediumMemory,
+		envs = []corev1.EnvVar{{
+			Name: "STORAGE",
+			ValueFrom: &corev1.EnvVarSource{
+				SecretKeyRef: &corev1.SecretKeySelector{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: c.harbor.Spec.Components.ChartMuseum.StorageSecret,
+					},
+					Key: containerregistryv1alpha1.HarborChartMuseumStorageKindKey,
 				},
 			},
-		})
+		}}
 
-		volumeMounts = append(volumeMounts, corev1.VolumeMount{
-			MountPath: "/mnt/chartmuseum",
-			Name:      "chartmuseum",
-		})
-
-		envs = append(envs, corev1.EnvVar{
-			Name:  "STORAGE",
-			Value: "local",
-		}, corev1.EnvVar{
-			Name:  "STORAGE_LOCAL_ROOTDIR",
-			Value: "/mnt/chartmuseum",
-		})
-	} else {
-		storageVolumeSource.Secret = &corev1.SecretVolumeSource{
-			SecretName: c.harbor.Spec.Components.ChartMuseum.StorageSecret,
-		}
-		envFroms = append(envFroms, corev1.EnvFromSource{
-			// Some storage driver requires environment variable, add it from secret data
-			// See https://chartmuseum.com/docs/#using-with-openstack-object-storage
+		envFroms = []corev1.EnvFromSource{{
 			SecretRef: &corev1.SecretEnvSource{
-				Optional: &varTrue,
+				Optional: &varFalse,
 				LocalObjectReference: corev1.LocalObjectReference{
 					Name: c.harbor.Spec.Components.ChartMuseum.StorageSecret,
 				},
 			},
-		})
+			Prefix: "STORAGE_",
+		}, {
+			// Some storage driver requires environment variable, add it from secret data
+			// See https://chartmuseum.com/docs/#using-with-openstack-object-storage
+			SecretRef: &corev1.SecretEnvSource{
+				Optional: &varFalse,
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: c.harbor.Spec.Components.ChartMuseum.StorageSecret,
+				},
+			},
+		}}
 	}
 
 	return []*appsv1.Deployment{
@@ -132,9 +129,6 @@ func (c *ChartMuseum) GetDeployments(ctx context.Context) []*appsv1.Deployment {
 									EmptyDir: &corev1.EmptyDirVolumeSource{},
 								},
 							}, {
-								Name:         "config-storage",
-								VolumeSource: storageVolumeSource,
-							}, {
 								Name: "config-template",
 								VolumeSource: corev1.VolumeSource{
 									ConfigMap: &corev1.ConfigMapVolumeSource{
@@ -159,10 +153,6 @@ func (c *ChartMuseum) GetDeployments(ctx context.Context) []*appsv1.Deployment {
 										ReadOnly:  true,
 										SubPath:   configName,
 									}, {
-										Name:      "config-storage",
-										MountPath: "/opt/configuration/storage",
-										ReadOnly:  true,
-									}, {
 										Name:      "config",
 										MountPath: "/processed",
 										ReadOnly:  false,
@@ -170,11 +160,18 @@ func (c *ChartMuseum) GetDeployments(ctx context.Context) []*appsv1.Deployment {
 								},
 								Env: []corev1.EnvVar{
 									{
-										Name:  "STORAGE_CONFIG",
-										Value: "/opt/configuration/storage",
+										Name: "CACHE_URL",
+										ValueFrom: &corev1.EnvVarSource{
+											SecretKeyRef: &corev1.SecretKeySelector{
+												LocalObjectReference: corev1.LocalObjectReference{
+													Name: c.harbor.Spec.Components.ChartMuseum.CacheSecret,
+												},
+												Key:      containerregistryv1alpha1.HarborChartMuseumCacheURLKey,
+												Optional: &varTrue,
+											},
+										},
 									},
 								},
-								EnvFrom: templateEnvFroms,
 							},
 						},
 						Containers: []corev1.Container{
@@ -189,13 +186,11 @@ func (c *ChartMuseum) GetDeployments(ctx context.Context) []*appsv1.Deployment {
 								Command: []string{"/home/chart/chartm"},
 								Args:    []string{"-c", path.Join(configPath, configName)},
 
-								VolumeMounts: append([]corev1.VolumeMount{
-									{
-										MountPath: path.Join(configPath, configName),
-										Name:      "config",
-										SubPath:   configName,
-									},
-								}, volumeMounts...),
+								VolumeMounts: append(volumeMounts, corev1.VolumeMount{
+									MountPath: path.Join(configPath, configName),
+									Name:      "config",
+									SubPath:   configName,
+								}),
 
 								Env: append([]corev1.EnvVar{
 									{
@@ -212,16 +207,14 @@ func (c *ChartMuseum) GetDeployments(ctx context.Context) []*appsv1.Deployment {
 									},
 								}, envs...),
 
-								EnvFrom: append([]corev1.EnvFromSource{
-									{
-										ConfigMapRef: &corev1.ConfigMapEnvSource{
-											Optional: &varFalse,
-											LocalObjectReference: corev1.LocalObjectReference{
-												Name: c.harbor.NormalizeComponentName(containerregistryv1alpha1.ChartMuseumName),
-											},
+								EnvFrom: append(envFroms, corev1.EnvFromSource{
+									ConfigMapRef: &corev1.ConfigMapEnvSource{
+										Optional: &varFalse,
+										LocalObjectReference: corev1.LocalObjectReference{
+											Name: c.harbor.NormalizeComponentName(containerregistryv1alpha1.ChartMuseumName),
 										},
 									},
-								}, envFroms...),
+								}),
 
 								ImagePullPolicy: corev1.PullAlways,
 								LivenessProbe: &corev1.Probe{

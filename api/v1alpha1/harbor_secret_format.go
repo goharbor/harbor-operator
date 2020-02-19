@@ -44,6 +44,11 @@ const (
 )
 
 const (
+	HarborChartMuseumStorageKindKey = "kind"
+	HarborChartMuseumCacheURLKey    = "url"
+)
+
+const (
 	HarborNotaryServerDatabaseHostKey     = "host"
 	HarborNotaryServerDatabasePortKey     = "port"
 	HarborNotaryServerDatabaseNameKey     = "database"
