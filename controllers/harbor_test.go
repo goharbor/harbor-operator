@@ -31,8 +31,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
+	"github.com/ovh/harbor-operator/pkg/factories/logger"
 )
 
 const (
@@ -40,7 +42,8 @@ const (
 )
 
 var _ = Context("Inside of a new namespace", func() {
-	ctx := context.TODO()
+	log := zap.LoggerTo(GinkgoWriter, true)
+	ctx := logger.Context(log)
 	ns := SetupTest(ctx)
 
 	publicURL := url.URL{
@@ -196,12 +199,14 @@ func newValidHarborTest(ns string) (*containerregistryv1alpha1.Harbor, client.Ob
 			PublicURL:           publicURL.String(),
 			AdminPasswordSecret: "admin-secret",
 			Components: containerregistryv1alpha1.HarborComponents{
-				Core: containerregistryv1alpha1.CoreComponent{
+				Core: &containerregistryv1alpha1.CoreComponent{
 					DatabaseSecret: "core-database-secret",
 				},
-				JobService: containerregistryv1alpha1.JobServiceComponent{
+				JobService: &containerregistryv1alpha1.JobServiceComponent{
 					RedisSecret: "jobservice-redis-secret",
 				},
+				Portal:   &containerregistryv1alpha1.PortalComponent{},
+				Registry: &containerregistryv1alpha1.RegistryComponent{},
 			},
 		},
 	}

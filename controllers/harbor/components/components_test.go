@@ -39,7 +39,7 @@ var _ = Context("With minimal harbor", func() {
 
 	Measure("get components", func(b Benchmarker) {
 		runtime := b.Time("runtime", func() {
-			components, err := GetComponents(context.TODO(), harbor)
+			components, err := GetComponents(logger.Context(log), harbor)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(components).ToNot(BeNil())
 		})
@@ -50,7 +50,7 @@ var _ = Context("With minimal harbor", func() {
 	var components *Components
 	It("get components should succeed", func() {
 		var err error
-		components, err = GetComponents(context.TODO(), harbor)
+		components, err = GetComponents(logger.Context(log), harbor)
 		Expect(err).ToNot(HaveOccurred())
 	})
 
@@ -84,7 +84,7 @@ var _ = Context("With full harbor", func() {
 
 	Measure("get components", func(b Benchmarker) {
 		runtime := b.Time("runtime", func() {
-			components, err := GetComponents(context.TODO(), harbor)
+			components, err := GetComponents(logger.Context(log), harbor)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(components).ToNot(BeNil())
 		})
@@ -95,7 +95,7 @@ var _ = Context("With full harbor", func() {
 	var components *Components
 	It("get components should succeed", func() {
 		var err error
-		components, err = GetComponents(context.TODO(), harbor)
+		components, err = GetComponents(logger.Context(log), harbor)
 		Expect(err).ToNot(HaveOccurred())
 	})
 

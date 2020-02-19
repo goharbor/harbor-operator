@@ -62,7 +62,7 @@ func (p *Portal) GetDeployments(ctx context.Context) []*appsv1.Deployment { // n
 						Containers: []corev1.Container{
 							{
 								Name:  "portal",
-								Image: p.harbor.Spec.Components.Portal.Image,
+								Image: p.harbor.Spec.Components.Portal.GetImage(),
 								Ports: []corev1.ContainerPort{
 									{
 										ContainerPort: port,
@@ -88,7 +88,7 @@ func (p *Portal) GetDeployments(ctx context.Context) []*appsv1.Deployment { // n
 								},
 							},
 						},
-						Priority: p.Option.Priority,
+						Priority: p.Option.GetPriority(),
 					},
 				},
 				RevisionHistoryLimit: &revisionHistoryLimit,

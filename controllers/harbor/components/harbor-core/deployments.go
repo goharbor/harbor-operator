@@ -161,7 +161,7 @@ func (c *HarborCore) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 						Containers: []corev1.Container{
 							{
 								Name:  "core",
-								Image: c.harbor.Spec.Components.Core.Image,
+								Image: c.harbor.Spec.Components.Core.GetImage(),
 								Ports: []corev1.ContainerPort{
 									{
 										ContainerPort: int32(port),
@@ -368,7 +368,7 @@ func (c *HarborCore) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 								},
 							},
 						},
-						Priority: c.Option.Priority,
+						Priority: c.Option.GetPriority(),
 					},
 				},
 				RevisionHistoryLimit: &revisionHistoryLimit,
