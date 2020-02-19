@@ -24,6 +24,7 @@ const (
 )
 
 type Config struct {
+	ClassName            string
 	ConcurrentReconciles int
 	WatchChildren        bool
 }
@@ -57,6 +58,7 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 	r.RestConfig = mgr.GetConfig()
 
 	return ctrl.NewControllerManagedBy(mgr).
+		WithEventFilter(r.GetEventFilter()).
 		For(&containerregistryv1alpha1.Harbor{}).
 		Owns(&appsv1.Deployment{}).
 		Owns(&certv1.Certificate{}).

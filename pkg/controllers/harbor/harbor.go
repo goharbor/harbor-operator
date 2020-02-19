@@ -13,41 +13,77 @@ const (
 	ConfigPrefix      = "harbor-controller"
 	ReconciliationKey = ConfigPrefix + "-max-reconcile"
 	WatchChildrenKey  = ConfigPrefix + "-watch-children"
+	HarborClassKey    = ConfigPrefix + "-class"
 )
 
 const (
-	defaultConcurrentReconcile = 1
-	defaultWatchChildren       = true
+	DefaultConcurrentReconcile = 1
+	DefaultWatchChildren       = true
+	DefaultHarborClass         = ""
 )
 
-func GetConfig() (*harbor.Config, error) {
+func getWatchChildrenConfiguration() (bool, error) {
 	watchChildren, err := configstore.Filter().GetItemValueBool(WatchChildrenKey)
 	if err != nil {
 		_, ok := err.(configstore.ErrItemNotFound)
 		if !ok {
-			return nil, errors.Wrapf(err, "key %s", WatchChildrenKey)
+			return false, errors.Wrapf(err, "key %s", WatchChildrenKey)
 		}
 
-		watchChildren = defaultWatchChildren
+		watchChildren = DefaultWatchChildren
 	}
 
-	var concurrentReconciles int
+	return watchChildren, nil
+}
 
-	concurrentReconcilesValue, err := configstore.Filter().GetItemValueInt(ReconciliationKey)
+func getConcurrentConfiguration() (int, error) {
+	concurrentReconciles, err := configstore.Filter().GetItemValueInt(ReconciliationKey)
 	if err != nil {
 		_, ok := err.(configstore.ErrItemNotFound)
 		if !ok {
-			return nil, errors.Wrapf(err, "key %s", ReconciliationKey)
+			return 0, errors.Wrapf(err, "key %s", ReconciliationKey)
 		}
 
-		concurrentReconciles = defaultConcurrentReconcile
-	} else {
-		concurrentReconciles = int(concurrentReconcilesValue)
+		concurrentReconciles = DefaultConcurrentReconcile
+	}
+
+	return int(concurrentReconciles), nil
+}
+
+func getHarborClassConfiguration() (string, error) {
+	harborClass, err := configstore.Filter().GetItemValue(HarborClassKey)
+	if err != nil {
+		_, ok := err.(configstore.ErrItemNotFound)
+		if !ok {
+			return "", errors.Wrapf(err, "key %s", HarborClassKey)
+		}
+
+		harborClass = DefaultHarborClass
+	}
+
+	return harborClass, nil
+}
+
+func GetConfig() (*harbor.Config, error) {
+	watchChildren, err := getWatchChildrenConfiguration()
+	if err != nil {
+		return nil, errors.Wrap(err, "fail to get watch children configuration")
+	}
+
+	concurrentReconciles, err := getConcurrentConfiguration()
+	if err != nil {
+		return nil, errors.Wrap(err, "fail to get concurrent reconciles configuration")
+	}
+
+	className, err := getHarborClassConfiguration()
+	if err != nil {
+		return nil, errors.Wrap(err, "fail to get harbor class configuration")
 	}
 
 	return &harbor.Config{
 		ConcurrentReconciles: concurrentReconciles,
 		WatchChildren:        watchChildren,
+		ClassName:            className,
 	}, nil
 }
 
