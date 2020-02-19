@@ -16,3 +16,11 @@ service:
   golangci-lint-version: 1.22.x
   prepare:
     - make generate
+
+issues:
+  exclude-rules:
+    # Exclude some linters from running on tests files.
+    - path: _test\.go
+      linters:
+      - funlen
+      - dupl
