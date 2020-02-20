@@ -72,8 +72,9 @@ func (c *Clair) GetConfigMaps(ctx context.Context) []*corev1.ConfigMap {
 	}
 }
 
-func (c *Clair) GetConfigCheckSum() string {
-	h := sha256.New()
-	// todo get generation of the secret
-	return fmt.Sprintf("%x", h.Sum([]byte(c.harbor.Spec.Components.Clair.DatabaseSecret)))
+func (c *Clair) GetConfigMapsCheckSum() string {
+	value := fmt.Sprintf("%d\n%+v\n%x", adapterPort, c.harbor.Spec.Components.Clair.VulnerabilitySources, config)
+	sum := sha256.New().Sum([]byte(value))
+
+	return fmt.Sprintf("%x", sum)
 }

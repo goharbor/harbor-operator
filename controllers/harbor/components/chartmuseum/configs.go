@@ -2,6 +2,7 @@ package chartmuseum
 
 import (
 	"context"
+	"crypto/sha256"
 	"fmt"
 	"io/ioutil"
 	"sync"
@@ -65,4 +66,12 @@ func (c *ChartMuseum) GetConfigMaps(ctx context.Context) []*corev1.ConfigMap {
 			},
 		},
 	}
+}
+
+func (c *ChartMuseum) GetConfigMapsCheckSum() string {
+	value := fmt.Sprintf("%s\n%d\n%x", c.harbor.Spec.PublicURL, port, config)
+	sum := sha256.New().Sum([]byte(value))
+
+	// todo get generation of the secret
+	return fmt.Sprintf("%x", sum)
 }

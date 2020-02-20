@@ -2,6 +2,8 @@ package registry
 
 import (
 	"context"
+	"crypto/sha256"
+	"fmt"
 
 	"github.com/sethvargo/go-password/password"
 	corev1 "k8s.io/api/core/v1"
@@ -36,4 +38,12 @@ func (r *Registry) GetSecrets(ctx context.Context) []*corev1.Secret {
 			},
 		},
 	}
+}
+
+func (r *Registry) GetSecretsCheckSum() string {
+	// TODO get generation of the secrets
+	value := fmt.Sprintf("%s\n%s", r.harbor.Spec.Components.Registry.CacheSecret, r.harbor.Spec.Components.Registry.StorageSecret)
+	sum := sha256.New().Sum([]byte(value))
+
+	return fmt.Sprintf("%x", sum)
 }

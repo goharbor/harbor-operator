@@ -41,7 +41,10 @@ func (c *HarborCore) GetSecrets(ctx context.Context) []*corev1.Secret {
 	}
 }
 
-func (c *HarborCore) GetSecretCheckSum() string {
-	h := sha256.New()
-	return fmt.Sprintf("%x", h.Sum([]byte(c.harbor.Spec.PublicURL)))
+func (c *HarborCore) GetSecretsCheckSum() string {
+	// TODO get generation of the secrets
+	value := fmt.Sprintf("%s\n%s", c.harbor.Spec.Components.Core.DatabaseSecret, c.harbor.Spec.Components.Registry.CacheSecret)
+	sum := sha256.New().Sum([]byte(value))
+
+	return fmt.Sprintf("%x", sum)
 }

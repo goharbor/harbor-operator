@@ -52,8 +52,9 @@ func (j *JobService) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 				Template: corev1.PodTemplateSpec{
 					ObjectMeta: metav1.ObjectMeta{
 						Annotations: map[string]string{
-							"checksum":         j.GetConfigCheckSum(),
-							"operator/version": application.GetVersion(ctx),
+							"configuration/checksum": j.GetConfigMapsCheckSum(),
+							"secret/checksum":        j.GetSecretsCheckSum(),
+							"operator/version":       application.GetVersion(ctx),
 						},
 						Labels: map[string]string{
 							"app":      containerregistryv1alpha1.JobServiceName,

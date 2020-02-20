@@ -10,23 +10,11 @@ const (
 )
 
 const (
-	// ipaddress:port[,weight,password,database_index]
-	HarborRegistryURLKey       = "url"
-	HarborRegistryNamespaceKey = "namespace"
+	HarborChartMuseumStorageKindKey = "kind"
 )
 
 const (
-	HarborCoreDatabaseHostKey     = "host"
-	HarborCoreDatabasePortKey     = "port"
-	HarborCoreDatabaseNameKey     = "database"
-	HarborCoreDatabaseUserKey     = "username"
-	HarborCoreDatabasePasswordKey = "password"
-)
-
-const (
-	// ipaddress:port[,weight,password,database_index]
-	HarborJobServiceBrokerURLKey       = "url"
-	HarborJobServiceBrokerNamespaceKey = "namespace"
+	HarborChartMuseumCacheURLKey = "url"
 )
 
 const (
@@ -41,6 +29,20 @@ const (
 const (
 	HarborClairAdapterBrokerURLKey       = "url"
 	HarborClairAdapterBrokerNamespaceKey = "namespace"
+)
+
+const (
+	HarborCoreDatabaseHostKey     = "host"
+	HarborCoreDatabasePortKey     = "port"
+	HarborCoreDatabaseNameKey     = "database"
+	HarborCoreDatabaseUserKey     = "username"
+	HarborCoreDatabasePasswordKey = "password"
+)
+
+const (
+	// ipaddress:port[,weight,password,database_index]
+	HarborJobServiceBrokerURLKey       = "url"
+	HarborJobServiceBrokerNamespaceKey = "namespace"
 )
 
 const (
@@ -59,4 +61,9 @@ const (
 	HarborNotarySignerDatabaseUserKey     = "username"
 	HarborNotarySignerDatabasePasswordKey = "password"
 	HarborNotarySignerDatabaseSSLKey      = "ssl"
+)
+
+const (
+	// ipaddress:port[,weight,password,database_index]
+	HarborRegistryURLKey = "url"
 )

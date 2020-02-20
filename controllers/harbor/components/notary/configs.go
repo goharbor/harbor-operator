@@ -91,7 +91,9 @@ func (n *Notary) GetConfigMaps(ctx context.Context) []*corev1.ConfigMap {
 	}
 }
 
-func (n *Notary) GetConfigCheckSum() string {
-	h := sha256.New()
-	return fmt.Sprintf("%x-%x", h.Sum([]byte(n.harbor.Spec.Components.Notary.Server.DatabaseSecret)), h.Sum([]byte(n.harbor.Spec.Components.Notary.Signer.DatabaseSecret)))
+func (n *Notary) GetConfigMapsCheckSum() string {
+	value := fmt.Sprintf("%x\n%x", serverConfig, signerConfig)
+	sum := sha256.New().Sum([]byte(value))
+
+	return fmt.Sprintf("%x", sum)
 }

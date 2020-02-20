@@ -48,7 +48,9 @@ func (p *Portal) GetDeployments(ctx context.Context) []*appsv1.Deployment { // n
 				Template: corev1.PodTemplateSpec{
 					ObjectMeta: metav1.ObjectMeta{
 						Annotations: map[string]string{
-							"operator/version": application.GetVersion(ctx),
+							"configuration/checksum": "",
+							"secret/checksum":        "",
+							"operator/version":       application.GetVersion(ctx),
 						},
 						Labels: map[string]string{
 							"app":      containerregistryv1alpha1.PortalName,

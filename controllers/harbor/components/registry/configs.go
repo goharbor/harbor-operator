@@ -81,7 +81,9 @@ func (r *Registry) GetConfigMaps(ctx context.Context) []*corev1.ConfigMap {
 	}
 }
 
-func (r *Registry) GetConfigCheckSum() string {
-	h := sha256.New()
-	return fmt.Sprintf("%x", h.Sum([]byte(r.harbor.Spec.PublicURL)))
+func (r *Registry) GetConfigMapsCheckSum() string {
+	value := fmt.Sprintf("%x\n%x", registryCtlConfig, registryConfig)
+	sum := sha256.New().Sum([]byte(value))
+
+	return fmt.Sprintf("%x", sum)
 }
