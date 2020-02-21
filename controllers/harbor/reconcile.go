@@ -147,7 +147,7 @@ func (r *Reconciler) UpdateAppliedStatus(ctx context.Context, result *ctrl.Resul
 func (r *Reconciler) UpdateReadyStatus(ctx context.Context, result *ctrl.Result, harbor *goharborv1alpha1.Harbor) error {
 	// TODO do it asynchronously but do not
 	// forget to wait for completion before return
-	health, err := r.GetHealth(ctx, harbor)
+	health, err := r.HealthClient.GetByProxy(ctx, harbor)
 	if err != nil {
 		result.Requeue = true
 
