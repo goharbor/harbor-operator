@@ -1,4 +1,4 @@
-package harbor
+package common
 
 import (
 	"context"
@@ -17,7 +17,7 @@ import (
 	"github.com/goharbor/harbor-operator/controllers/harbor/components"
 )
 
-func (r *Reconciler) ApplyMutationFunc(ctx context.Context, harbor *goharborv1alpha1.Harbor, resource components.Resource, result metav1.Object, mutate controllerutil.MutateFn) func() error {
+func (r *Controller) ApplyMutationFunc(ctx context.Context, harbor *goharborv1alpha1.Harbor, resource components.Resource, result metav1.Object, mutate controllerutil.MutateFn) func() error {
 	return func() error {
 		// Immutable field
 		resourceVersion := result.GetResourceVersion()
@@ -69,7 +69,7 @@ func (r *Reconciler) ApplyMutationFunc(ctx context.Context, harbor *goharborv1al
 	}
 }
 
-func (r *Reconciler) ApplyResource(ctx context.Context, harbor *goharborv1alpha1.Harbor, resource components.Resource, objectFactory components.ResourceFactory, objectMutation components.ResourceMutationGetter) (components.Resource, error) {
+func (r *Controller) ApplyResource(ctx context.Context, harbor *goharborv1alpha1.Harbor, resource components.Resource, objectFactory components.ResourceFactory, objectMutation components.ResourceMutationGetter) (components.Resource, error) {
 	kind, version := resource.GetObjectKind().GroupVersionKind().ToAPIVersionAndKind()
 
 	span, ctx := opentracing.StartSpanFromContext(ctx, "deployResource", opentracing.Tags{
@@ -93,7 +93,7 @@ func (r *Reconciler) ApplyResource(ctx context.Context, harbor *goharborv1alpha1
 	return result, nil
 }
 
-func (r *Reconciler) ApplyResources(ctx context.Context, harbor *goharborv1alpha1.Harbor, resources []components.Resource, objectFactory func() components.Resource, objectMutation func(components.Resource, components.Resource) controllerutil.MutateFn) error {
+func (r *Controller) ApplyResources(ctx context.Context, harbor *goharborv1alpha1.Harbor, resources []components.Resource, objectFactory func() components.Resource, objectMutation func(components.Resource, components.Resource) controllerutil.MutateFn) error {
 	var g errgroup.Group
 
 	for _, resource := range resources {
@@ -254,7 +254,7 @@ func mutateConfigMap(configResource, result components.Resource) controllerutil.
 // +kubebuilder:rbac:groups="networking.k8s.io",resources="ingresses",verbs=get;list;watch;update;patch;create
 // +kubebuilder:rbac:groups="apps",resources="deployments",verbs=get;list;watch;update;patch;create
 
-func (r *Reconciler) ApplyComponent(ctx context.Context, harbor *goharborv1alpha1.Harbor, component *components.ComponentRunner) error {
+func (r *Controller) ApplyComponent(ctx context.Context, harbor *goharborv1alpha1.Harbor, component *components.ComponentRunner) error {
 	service := func(ctx context.Context, harbor *goharborv1alpha1.Harbor, resources []components.Resource) error {
 		return r.ApplyResources(ctx, harbor, resources, func() components.Resource { return &corev1.Service{} }, mutateService)
 	}
@@ -277,7 +277,7 @@ func (r *Reconciler) ApplyComponent(ctx context.Context, harbor *goharborv1alpha
 	return component.ParallelRun(ctx, harbor, service, configMap, ingress, secret, certificate, deployment, true)
 }
 
-func (r *Reconciler) Apply(ctx context.Context, harbor *goharborv1alpha1.Harbor) error {
+func (r *Controller) Apply(ctx context.Context, harbor *goharborv1alpha1.Harbor) error {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "apply")
 	defer span.Finish()
 

@@ -1,4 +1,4 @@
-package harbor
+package common
 
 import (
 	"context"
@@ -57,7 +57,7 @@ var (
 // +kubebuilder:rbac:groups="cert-manager.io",resources="certificates",verbs=delete
 // +kubebuilder:rbac:groups="networking.k8s.io",resources="ingresses",verbs=delete
 
-func (r *Reconciler) DeleteResourceCollection(ctx context.Context, harbor *goharborv1alpha1.Harbor, componentName string, gvk schema.GroupVersionKind) error {
+func (r *Controller) DeleteResourceCollection(ctx context.Context, harbor *goharborv1alpha1.Harbor, componentName string, gvk schema.GroupVersionKind) error {
 	u := &unstructured.UnstructuredList{}
 	u.SetGroupVersionKind(gvk)
 
@@ -105,7 +105,7 @@ func (r *Reconciler) DeleteResourceCollection(ctx context.Context, harbor *gohar
 	return nil
 }
 
-func (r *Reconciler) DeleteComponent(ctx context.Context, harbor *goharborv1alpha1.Harbor, componentName string) error {
+func (r *Controller) DeleteComponent(ctx context.Context, harbor *goharborv1alpha1.Harbor, componentName string) error {
 	var g errgroup.Group
 
 	l := logger.Get(ctx).WithValues("Component", componentName)
