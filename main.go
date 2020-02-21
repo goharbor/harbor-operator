@@ -11,7 +11,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	// +kubebuilder:scaffold:imports
-	"github.com/goharbor/harbor-operator/pkg/controllers/harbor"
+
+	goharborv1alpha1 "github.com/goharbor/harbor-operator/api/v1alpha1"
+	"github.com/goharbor/harbor-operator/pkg/controllers"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	"github.com/goharbor/harbor-operator/pkg/manager"
 	"github.com/goharbor/harbor-operator/pkg/scheme"
@@ -70,7 +72,7 @@ func main() {
 	}
 	defer traCon.Close()
 
-	reconciler, err := harbor.New(ctx, OperatorName, OperatorVersion)
+	reconciler, err := controllers.New(ctx, OperatorName, OperatorVersion)
 	if err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Harbor")
 		os.Exit(exitCodeFailure)
