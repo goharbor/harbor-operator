@@ -263,8 +263,8 @@ type HarborCondition struct {
 type HarborConditionType string
 
 const (
-	AppliedConditionType = "Applied"
-	ReadyConditionType   = "Ready"
+	AppliedConditionType HarborConditionType = "Applied"
+	ReadyConditionType   HarborConditionType = "Ready"
 )
 
 func init() { // nolint:gochecknoinits
