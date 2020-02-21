@@ -8,6 +8,9 @@ spec:
     spec:
       containers:
       - name: manager
+        env:
+        - name: 'CONFIGURATION_FROM'
+          value: 'env:'
         envFrom:
           - configMapRef:
               name: operator-config
