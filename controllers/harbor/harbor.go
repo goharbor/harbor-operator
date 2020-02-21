@@ -12,10 +12,12 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/rest"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 
 	goharborv1alpha1 "github.com/goharbor/harbor-operator/api/v1alpha1"
+	"github.com/goharbor/harbor-operator/pkg/controllers/common"
+	"github.com/goharbor/harbor-operator/pkg/controllers/health"
+	"github.com/goharbor/harbor-operator/pkg/event-filter/class"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 )
 
@@ -31,15 +33,13 @@ type Config struct {
 
 // Reconciler reconciles a Harbor object
 type Reconciler struct {
-	client.Client
-
-	Name    string
-	Version string
+	common.Controller
 
 	Log    logr.Logger
 	Scheme *runtime.Scheme
 
-	RestConfig *rest.Config
+	RestConfig   *rest.Config
+	HealthClient health.Client
 
 	Config Config
 }
@@ -56,9 +56,15 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 	r.Client = mgr.GetClient()
 	r.Scheme = mgr.GetScheme()
 	r.RestConfig = mgr.GetConfig()
+	r.HealthClient = health.Client{
+		RestConfig: r.RestConfig,
+		Scheme:     r.Scheme,
+	}
 
 	return ctrl.NewControllerManagedBy(mgr).
-		WithEventFilter(r.GetEventFilter()).
+		WithEventFilter(&class.Filter{
+			ClassName: r.Config.ClassName,
+		}).
 		For(&goharborv1alpha1.Harbor{}).
 		Owns(&appsv1.Deployment{}).
 		Owns(&certv1.Certificate{}).
@@ -74,9 +80,11 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 func New(ctx context.Context, name, version string, config *Config) (*Reconciler, error) {
 	return &Reconciler{
-		Name:    name,
-		Version: version,
-		Log:     logger.Get(ctx).WithName("controller").WithName(name),
-		Config:  *config,
+		Controller: common.Controller{
+			Name:    name,
+			Version: version,
+		},
+		Log:    logger.Get(ctx).WithName("controller").WithName(name),
+		Config: *config,
 	}, nil
 }
