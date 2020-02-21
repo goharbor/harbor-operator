@@ -1,4 +1,4 @@
-package harbor
+package common
 
 import (
 	"context"
@@ -16,7 +16,7 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 )
 
-func (r *Reconciler) MutateAnnotations(ctx context.Context, resource metav1.Object) {
+func (r *Controller) MutateAnnotations(ctx context.Context, resource metav1.Object) {
 	annotations := resource.GetAnnotations()
 	if annotations == nil {
 		annotations = map[string]string{}
@@ -26,7 +26,7 @@ func (r *Reconciler) MutateAnnotations(ctx context.Context, resource metav1.Obje
 	resource.SetAnnotations(annotations)
 }
 
-func (r *Reconciler) MutateLabels(ctx context.Context, resource metav1.Object) {
+func (r *Controller) MutateLabels(ctx context.Context, resource metav1.Object) {
 	labels := resource.GetLabels()
 	if labels == nil {
 		labels = map[string]string{}
@@ -40,7 +40,7 @@ func (r *Reconciler) MutateLabels(ctx context.Context, resource metav1.Object) {
 	resource.SetLabels(labels)
 }
 
-func (r *Reconciler) CreateResource(ctx context.Context, harbor *goharborv1alpha1.Harbor, resource components.Resource) error {
+func (r *Controller) CreateResource(ctx context.Context, harbor *goharborv1alpha1.Harbor, resource components.Resource) error {
 	kind, version := resource.
 		GetObjectKind().
 		GroupVersionKind().
@@ -75,7 +75,7 @@ func (r *Reconciler) CreateResource(ctx context.Context, harbor *goharborv1alpha
 	return nil
 }
 
-func (r *Reconciler) CreateResources(ctx context.Context, harbor *goharborv1alpha1.Harbor, resources []components.Resource) error {
+func (r *Controller) CreateResources(ctx context.Context, harbor *goharborv1alpha1.Harbor, resources []components.Resource) error {
 	var g errgroup.Group
 
 	for _, resource := range resources {
@@ -96,11 +96,11 @@ func (r *Reconciler) CreateResources(ctx context.Context, harbor *goharborv1alph
 // +kubebuilder:rbac:groups="cert-manager.io",resources="certificates",verbs=create
 // +kubebuilder:rbac:groups="networking.k8s.io",resources="ingresses",verbs=create
 
-func (r *Reconciler) CreateComponent(ctx context.Context, harbor *goharborv1alpha1.Harbor, component *components.ComponentRunner) error {
+func (r *Controller) CreateComponent(ctx context.Context, harbor *goharborv1alpha1.Harbor, component *components.ComponentRunner) error {
 	return component.ParallelRun(ctx, harbor, r.CreateResources, r.CreateResources, r.CreateResources, r.CreateResources, r.CreateResources, r.CreateResources, true)
 }
 
-func (r *Reconciler) Create(ctx context.Context, harbor *goharborv1alpha1.Harbor) error {
+func (r *Controller) Create(ctx context.Context, harbor *goharborv1alpha1.Harbor) error {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "apply")
 	defer span.Finish()
 
