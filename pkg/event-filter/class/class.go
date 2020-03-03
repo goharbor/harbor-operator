@@ -4,7 +4,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 
-	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
+	goharborv1alpha2 "github.com/goharbor/harbor-operator/api/v1alpha2"
 )
 
 type Filter struct {
@@ -33,7 +33,7 @@ func (cf *Filter) Generic(e event.GenericEvent) bool {
 
 func (cf *Filter) HarborClassAnnotationMatch(meta metav1.Object) bool {
 	annotations := meta.GetAnnotations()
-	value, ok := annotations[containerregistryv1alpha1.HarborClassAnnotation]
+	value, ok := annotations[goharborv1alpha2.HarborClassAnnotation]
 
 	return value == cf.ClassName || (!ok && cf.ClassName == "")
 }

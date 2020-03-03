@@ -1,0 +1,162 @@
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.2.4
+  creationTimestamp: null
+  name: jobservices.goharbor.io
+spec:
+  additionalPrinterColumns:
+  - JSONPath: .spec.version
+    description: The semver Harbor version
+    name: Version
+    priority: 5
+    type: string
+  - JSONPath: .spec.replicas
+    description: The number of replicas
+    name: Replicas
+    type: string
+  group: goharbor.io
+  names:
+    kind: JobService
+    listKind: JobServiceList
+    plural: jobservices
+    singular: jobservice
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      description: JobService is the Schema for the registries API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: JobServiceSpec defines the desired state of JobService
+          properties:
+            coreSecret:
+              type: string
+            coreURL:
+              pattern: ^https?://.*$
+              type: string
+            imagePullSecrets:
+              items:
+                description: LocalObjectReference contains enough information to let
+                  you locate the referenced object inside the same namespace.
+                properties:
+                  name:
+                    description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                      TODO: Add other useful fields. apiVersion, kind, uid?'
+                    type: string
+                type: object
+              type: array
+            logLevel:
+              enum:
+              - INFO,DEBUG,WARNING,ERROR,FATAL
+              type: string
+            nodeSelector:
+              additionalProperties:
+                type: string
+              type: object
+            priority:
+              format: int32
+              type: integer
+            publicLogLevel:
+              enum:
+              - INFO,DEBUG,WARNING,ERROR,FATAL
+              type: string
+            redisSecret:
+              type: string
+            replicas:
+              description: Number of desired pods. This is a pointer to distinguish
+                between explicit zero and not specified. Defaults to 1.
+              format: int32
+              minimum: 1
+              type: integer
+            version:
+              type: string
+            webHookMaxRetry:
+              format: int32
+              minimum: 0
+              type: integer
+            workerCount:
+              format: int32
+              minimum: 1
+              type: integer
+          required:
+          - coreSecret
+          - coreURL
+          - redisSecret
+          - replicas
+          - version
+          - webHookMaxRetry
+          - workerCount
+          type: object
+        status:
+          description: Most recently observed status of the Harbor.
+          properties:
+            conditions:
+              description: Conditions list of extracted conditions from Resource
+              items:
+                description: Condition defines the general format for conditions on
+                  Kubernetes resources. In practice, each kubernetes resource defines
+                  their own format for conditions, but most (maybe all) follows this
+                  structure.
+                properties:
+                  message:
+                    description: Message Human readable reason string
+                    type: string
+                  reason:
+                    description: Reason one work CamelCase reason
+                    type: string
+                  status:
+                    description: Status String that describes the condition status
+                    type: string
+                  type:
+                    description: Type condition type
+                    type: string
+                required:
+                - message
+                - reason
+                - status
+                - type
+                type: object
+              type: array
+            message:
+              description: Message
+              type: string
+            observedGeneration:
+              format: int64
+              type: integer
+            status:
+              description: Status
+              type: string
+          required:
+          - conditions
+          - message
+          - status
+          type: object
+      type: object
+  version: v1alpha2
+  versions:
+  - name: v1alpha2
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

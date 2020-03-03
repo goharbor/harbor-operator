@@ -1,12 +1,10 @@
 package controllers
 
 import (
-	"context"
-
 	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
 
-	"github.com/goharbor/harbor-operator/controllers/harbor"
+	"github.com/goharbor/harbor-operator/pkg/controllers/config"
 )
 
 const (
@@ -64,7 +62,7 @@ func getHarborClassConfiguration() (string, error) {
 	return harborClass, nil
 }
 
-func GetConfig() (*harbor.Config, error) {
+func GetConfig() (*config.Config, error) {
 	watchChildren, err := getWatchChildrenConfiguration()
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to get watch children configuration")
@@ -80,18 +78,9 @@ func GetConfig() (*harbor.Config, error) {
 		return nil, errors.Wrap(err, "fail to get harbor class configuration")
 	}
 
-	return &harbor.Config{
+	return &config.Config{
 		ConcurrentReconciles: concurrentReconciles,
 		WatchChildren:        watchChildren,
 		ClassName:            className,
 	}, nil
-}
-
-func New(ctx context.Context, name, version string) (*harbor.Reconciler, error) {
-	config, err := GetConfig()
-	if err != nil {
-		return nil, errors.Wrap(err, "cannot get configuration")
-	}
-
-	return harbor.New(ctx, name, version, config)
 }

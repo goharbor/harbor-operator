@@ -78,6 +78,7 @@ var _ = BeforeSuite(func(done Done) {
 
 	s, err := scheme.New(ctx)
 	Expect(err).ToNot(HaveOccurred())
+
 	// +kubebuilder:scaffold:scheme
 
 	k8sClient, err = client.New(cfg, client.Options{Scheme: s})
@@ -94,13 +95,8 @@ var _ = BeforeSuite(func(done Done) {
 		HealthClient: health.Client{
 			Scheme: s,
 		},
-		Log: logf.Log,
-		Controller: common.Controller{
-			Name:    "test-operator",
-			Version: "test",
-			Client:  mgr.GetClient(),
-			Scheme:  s,
-		},
+		Log:        logf.Log,
+		Controller: common.NewController("test-operator", "test"),
 		Scheme:     s,
 		RestConfig: mgr.GetConfig(),
 	}
