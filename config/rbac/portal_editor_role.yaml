@@ -1,0 +1,26 @@
+# permissions to do edit portals.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: portal-editor-role
+rules:
+- apiGroups:
+  - containerregistry.ovhcloud.com
+  resources:
+  - portals
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - containerregistry.ovhcloud.com
+  resources:
+  - portals/status
+  verbs:
+  - get
+  - patch
+  - update
