@@ -24,6 +24,6 @@ secretGenerator:
       - namespace=harbor.scanner.clair:store
 
 resources:
-  - goharbor_v1alpha1_harbor.yaml
+  - goharbor_v1alpha2_harbor.yaml
   - certificate.yaml
   - requirements.tmpl

@@ -3,5 +3,8 @@ repo: github.com/goharbor/harbor-operator
 resources:
 - group: containerregistry
   kind: Harbor
-  version: v1alpha1
+  version: v1alpha2
+- group: containerregistry
+  kind: Portal
+  version: v1alpha2
 version: "2"
