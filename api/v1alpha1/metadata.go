@@ -1,12 +1,12 @@
 package v1alpha1
 
 const (
-	HarborClassAnnotation = "goharbor.io/harbor-class"
+	HarborClassAnnotation = "containerregistry.ovhcloud.com/harbor-class"
 )
 
 const (
-	WarningLabel         = "goharbor.io/warning"
-	OperatorNameLabel    = "goharbor.io/name"
-	OperatorVersionLabel = "goharbor.io/version"
-	ComponentNameLabel   = "goharbor.io/component"
+	WarningLabel         = "containerregistry.ovhcloud.com/warning"
+	OperatorNameLabel    = "containerregistry.ovhcloud.com/name"
+	OperatorVersionLabel = "containerregistry.ovhcloud.com/version"
+	ComponentNameLabel   = "containerregistry.ovhcloud.com/component"
 )

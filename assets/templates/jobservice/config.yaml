@@ -10,11 +10,11 @@ worker_pool:
 
 job_loggers:
 - name: STD_OUTPUT
-  level: DEBUG # INFO/DEBUG/WARNING/ERROR/FATAL
+  level: {{ env.Getenv "LOG_LEVEL" "INFO" | toUpper | quote }}
 
     # JobService read files to expose logs
 - name: FILE
-  level: INFO
+  level: {{ env.Getenv "LOG_LEVEL" ( env.Getenv "PUBLIC_LOG_LEVEL" "INFO") | toUpper | quote }}
   settings: # Customized settings of logger
     base_dir: {{ env.Getenv "LOGS_DIR" | quote }}
   sweeper:
@@ -24,7 +24,7 @@ job_loggers:
 
 loggers:
 - name: STD_OUTPUT
-  level: DEBUG
+  level: {{ env.Getenv "LOG_LEVEL" "INFO" | toUpper | quote }}
 
 webhook:
   job_max_retry: 10
