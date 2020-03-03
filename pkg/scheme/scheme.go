@@ -8,7 +8,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 
-	goharborv1alpha1 "github.com/goharbor/harbor-operator/api/v1alpha1"
+	goharborv1alpha2 "github.com/goharbor/harbor-operator/api/v1alpha2"
 )
 
 func New(ctx context.Context) (*runtime.Scheme, error) {
@@ -24,9 +24,9 @@ func New(ctx context.Context) (*runtime.Scheme, error) {
 		return nil, errors.Wrap(err, "unable to configure certificate-manager scheme")
 	}
 
-	err = goharborv1alpha1.AddToScheme(scheme)
+	err = goharborv1alpha2.AddToScheme(scheme)
 	if err != nil {
-		return nil, errors.Wrap(err, "unable to configure OVH scheme")
+		return nil, errors.Wrap(err, "unable to configure Harbor scheme")
 	}
 
 	// +kubebuilder:scaffold:scheme

@@ -11,7 +11,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/client-go/rest"
 
-	goharborv1alpha1 "github.com/goharbor/harbor-operator/api/v1alpha1"
+	goharborv1alpha2 "github.com/goharbor/harbor-operator/api/v1alpha2"
 )
 
 type Client struct {
@@ -20,7 +20,7 @@ type Client struct {
 	Scheme *runtime.Scheme
 }
 
-func (r *Client) GetByProxy(ctx context.Context, harbor *goharborv1alpha1.Harbor) (*APIHealth, error) {
+func (r *Client) GetByProxy(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*APIHealth, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "check")
 	defer span.Finish()
 
@@ -40,7 +40,7 @@ func (r *Client) GetByProxy(ctx context.Context, harbor *goharborv1alpha1.Harbor
 		Context(ctx).
 		Resource("services").
 		Namespace(harbor.GetNamespace()).
-		Name(harbor.NormalizeComponentName(goharborv1alpha1.CoreName)).
+		Name(harbor.NormalizeComponentName(goharborv1alpha2.CoreName)).
 		SubResource("proxy").
 		Suffix(HarborHealthEndpoint).
 		DoRaw()

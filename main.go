@@ -4,7 +4,6 @@ import (
 	"os"
 
 	"github.com/go-logr/logr"
-	harbor1alpha1 "github.com/goharbor/harbor-operator/api/v1alpha1"
 	"github.com/ovh/configstore"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -12,8 +11,8 @@ import (
 
 	// +kubebuilder:scaffold:imports
 
-	goharborv1alpha1 "github.com/goharbor/harbor-operator/api/v1alpha1"
-	"github.com/goharbor/harbor-operator/pkg/controllers"
+	goharborv1alpha2 "github.com/goharbor/harbor-operator/api/v1alpha2"
+	"github.com/goharbor/harbor-operator/pkg/controllers/setup"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	"github.com/goharbor/harbor-operator/pkg/manager"
 	"github.com/goharbor/harbor-operator/pkg/scheme"
@@ -72,19 +71,13 @@ func main() {
 	}
 	defer traCon.Close()
 
-	reconciler, err := controllers.New(ctx, OperatorName, OperatorVersion)
-	if err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "Harbor")
-		os.Exit(exitCodeFailure)
-	}
-
-	if err := reconciler.SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to setup controller", "controller", "Harbor")
-		os.Exit(exitCodeFailure)
-	}
-
-	if err := (&harbor1alpha1.Harbor{}).SetupWebhookWithManager(mgr); err != nil {
+	if err := (&goharborv1alpha2.Harbor{}).SetupWebhookWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create webhook", "webhook", "Harbor")
+		os.Exit(exitCodeFailure)
+	}
+
+	if err := (setup.SetupWithManager(ctx, mgr, OperatorVersion)); err != nil {
+		setupLog.Error(err, "unable to setup controllers")
 		os.Exit(exitCodeFailure)
 	}
 

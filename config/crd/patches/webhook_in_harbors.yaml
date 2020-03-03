@@ -6,7 +6,6 @@ metadata:
   name: harbors.goharbor.io
 spec:
   # https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/#pruning-versus-preserving-unknown-fields
-  preserveUnknownFields: false
   conversion:
     strategy: Webhook
     webhookClientConfig:

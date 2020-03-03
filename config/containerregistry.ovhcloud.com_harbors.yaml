@@ -1,0 +1,453 @@
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.2.4
+  creationTimestamp: null
+  name: harbors.containerregistry.ovhcloud.com
+spec:
+  additionalPrinterColumns:
+  - JSONPath: .spec.version
+    description: The semver Harbor version
+    name: Version
+    priority: 5
+    type: string
+  - JSONPath: .spec.publicURL
+    description: The public URL to the Harbor application
+    name: Public URL
+    type: string
+  - JSONPath: .status.conditions[?(@.type=="Applied")].status
+    description: The current status of the new Harbor spec
+    name: Applied
+    priority: 20
+    type: string
+  - JSONPath: .status.conditions[?(@.type=="Ready")].status
+    description: The current status of the Harbor application
+    name: Ready
+    priority: 10
+    type: string
+  group: containerregistry.ovhcloud.com
+  names:
+    kind: Harbor
+    listKind: HarborList
+    plural: harbors
+    shortNames:
+    - h
+    singular: harbor
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      description: Harbor is the Schema for the harbors API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: HarborSpec defines the desired state of Harbor
+          properties:
+            adminPasswordSecret:
+              description: The name of the secret containing the password for root
+                user
+              type: string
+            certificateIssuerRef:
+              description: The issuer for Harbor certificates. If the 'kind' field
+                is not set, or set to 'Issuer', an Issuer resource with the given
+                name in the same namespace as the Certificate will be used. If the
+                'kind' field is set to 'ClusterIssuer', a ClusterIssuer with the provided
+                name will be used. The 'name' field in this stanza is required at
+                all times.
+              properties:
+                group:
+                  type: string
+                kind:
+                  type: string
+                name:
+                  type: string
+              required:
+              - name
+              type: object
+            components:
+              properties:
+                chartMuseum:
+                  properties:
+                    cacheSecret:
+                      type: string
+                    image:
+                      type: string
+                    imagePullSecrets:
+                      items:
+                        description: LocalObjectReference contains enough information
+                          to let you locate the referenced object inside the same
+                          namespace.
+                        properties:
+                          name:
+                            description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                              TODO: Add other useful fields. apiVersion, kind, uid?'
+                            type: string
+                        type: object
+                      type: array
+                    nodeSelector:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    replicas:
+                      description: Number of desired pods. This is a pointer to distinguish
+                        between explicit zero and not specified. Defaults to 1.
+                      format: int32
+                      minimum: 1
+                      type: integer
+                    storageSecret:
+                      type: string
+                  type: object
+                clair:
+                  properties:
+                    adapter:
+                      properties:
+                        image:
+                          type: string
+                        redisSecret:
+                          type: string
+                      required:
+                      - redisSecret
+                      type: object
+                    databaseSecret:
+                      type: string
+                    image:
+                      type: string
+                    imagePullSecrets:
+                      items:
+                        description: LocalObjectReference contains enough information
+                          to let you locate the referenced object inside the same
+                          namespace.
+                        properties:
+                          name:
+                            description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                              TODO: Add other useful fields. apiVersion, kind, uid?'
+                            type: string
+                        type: object
+                      type: array
+                    nodeSelector:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    replicas:
+                      description: Number of desired pods. This is a pointer to distinguish
+                        between explicit zero and not specified. Defaults to 1.
+                      format: int32
+                      minimum: 1
+                      type: integer
+                    vulnerabilitySources:
+                      items:
+                        type: string
+                      type: array
+                  required:
+                  - adapter
+                  - databaseSecret
+                  - vulnerabilitySources
+                  type: object
+                core:
+                  properties:
+                    databaseSecret:
+                      type: string
+                    image:
+                      type: string
+                    imagePullSecrets:
+                      items:
+                        description: LocalObjectReference contains enough information
+                          to let you locate the referenced object inside the same
+                          namespace.
+                        properties:
+                          name:
+                            description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                              TODO: Add other useful fields. apiVersion, kind, uid?'
+                            type: string
+                        type: object
+                      type: array
+                    nodeSelector:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    replicas:
+                      description: Number of desired pods. This is a pointer to distinguish
+                        between explicit zero and not specified. Defaults to 1.
+                      format: int32
+                      minimum: 1
+                      type: integer
+                  required:
+                  - databaseSecret
+                  type: object
+                jobService:
+                  properties:
+                    image:
+                      type: string
+                    imagePullSecrets:
+                      items:
+                        description: LocalObjectReference contains enough information
+                          to let you locate the referenced object inside the same
+                          namespace.
+                        properties:
+                          name:
+                            description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                              TODO: Add other useful fields. apiVersion, kind, uid?'
+                            type: string
+                        type: object
+                      type: array
+                    nodeSelector:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    redisSecret:
+                      type: string
+                    replicas:
+                      description: Number of desired pods. This is a pointer to distinguish
+                        between explicit zero and not specified. Defaults to 1.
+                      format: int32
+                      minimum: 1
+                      type: integer
+                    workerCount:
+                      format: int32
+                      type: integer
+                  required:
+                  - redisSecret
+                  type: object
+                notary:
+                  properties:
+                    dbMigrator:
+                      properties:
+                        image:
+                          type: string
+                      type: object
+                    publicURL:
+                      description: The url exposed to clients to access notary
+                      pattern: ^https?://.*$
+                      type: string
+                    server:
+                      properties:
+                        databaseSecret:
+                          type: string
+                        image:
+                          type: string
+                        imagePullSecrets:
+                          items:
+                            description: LocalObjectReference contains enough information
+                              to let you locate the referenced object inside the same
+                              namespace.
+                            properties:
+                              name:
+                                description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                  TODO: Add other useful fields. apiVersion, kind,
+                                  uid?'
+                                type: string
+                            type: object
+                          type: array
+                        nodeSelector:
+                          additionalProperties:
+                            type: string
+                          type: object
+                        replicas:
+                          description: Number of desired pods. This is a pointer to
+                            distinguish between explicit zero and not specified. Defaults
+                            to 1.
+                          format: int32
+                          minimum: 1
+                          type: integer
+                      required:
+                      - databaseSecret
+                      type: object
+                    signer:
+                      properties:
+                        databaseSecret:
+                          type: string
+                        image:
+                          type: string
+                        imagePullSecrets:
+                          items:
+                            description: LocalObjectReference contains enough information
+                              to let you locate the referenced object inside the same
+                              namespace.
+                            properties:
+                              name:
+                                description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                  TODO: Add other useful fields. apiVersion, kind,
+                                  uid?'
+                                type: string
+                            type: object
+                          type: array
+                        nodeSelector:
+                          additionalProperties:
+                            type: string
+                          type: object
+                        replicas:
+                          description: Number of desired pods. This is a pointer to
+                            distinguish between explicit zero and not specified. Defaults
+                            to 1.
+                          format: int32
+                          minimum: 1
+                          type: integer
+                      required:
+                      - databaseSecret
+                      type: object
+                  required:
+                  - publicURL
+                  - server
+                  - signer
+                  type: object
+                portal:
+                  properties:
+                    image:
+                      type: string
+                    imagePullSecrets:
+                      items:
+                        description: LocalObjectReference contains enough information
+                          to let you locate the referenced object inside the same
+                          namespace.
+                        properties:
+                          name:
+                            description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                              TODO: Add other useful fields. apiVersion, kind, uid?'
+                            type: string
+                        type: object
+                      type: array
+                    nodeSelector:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    replicas:
+                      description: Number of desired pods. This is a pointer to distinguish
+                        between explicit zero and not specified. Defaults to 1.
+                      format: int32
+                      minimum: 1
+                      type: integer
+                  type: object
+                registry:
+                  properties:
+                    cacheSecret:
+                      type: string
+                    controller:
+                      properties:
+                        image:
+                          type: string
+                      type: object
+                    image:
+                      type: string
+                    imagePullSecrets:
+                      items:
+                        description: LocalObjectReference contains enough information
+                          to let you locate the referenced object inside the same
+                          namespace.
+                        properties:
+                          name:
+                            description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                              TODO: Add other useful fields. apiVersion, kind, uid?'
+                            type: string
+                        type: object
+                      type: array
+                    nodeSelector:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    replicas:
+                      description: Number of desired pods. This is a pointer to distinguish
+                        between explicit zero and not specified. Defaults to 1.
+                      format: int32
+                      minimum: 1
+                      type: integer
+                    storageSecret:
+                      type: string
+                  type: object
+              type: object
+            paused:
+              description: Indicates that the harbor is paused.
+              type: boolean
+            priority:
+              description: The Maximum priority. Deployments may be created with priority
+                in interval ] priority - 100 ; priority ]
+              format: int32
+              type: integer
+            publicURL:
+              description: The url exposed to clients to access harbor
+              pattern: ^https?://.*$
+              type: string
+            readOnly:
+              description: The option to set repository read only.
+              type: boolean
+            tlsSecretName:
+              description: The name of the secret containing the TLS secret used for
+                ingresses
+              type: string
+            version:
+              description: The Harbor semver version https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
+              pattern: ^(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
+              type: string
+          required:
+          - adminPasswordSecret
+          - certificateIssuerRef
+          - publicURL
+          - version
+          type: object
+        status:
+          description: Most recently observed status of the Harbor.
+          properties:
+            conditions:
+              description: Represents the latest available observations of a harbor's
+                current state.
+              items:
+                description: HarborCondition describes the state of a Harbor at a
+                  certain point.
+                properties:
+                  lastTransitionTime:
+                    description: Last time the condition transitioned from one status
+                      to another.
+                    format: date-time
+                    type: string
+                  lastUpdateTime:
+                    description: The last time this condition was updated.
+                    format: date-time
+                    type: string
+                  message:
+                    description: A human readable message indicating details about
+                      the transition.
+                    type: string
+                  reason:
+                    description: The reason for the condition's last transition.
+                    type: string
+                  status:
+                    description: Status of the condition, one of True, False, Unknown.
+                    type: string
+                  type:
+                    description: Type of harhor condition.
+                    type: string
+                required:
+                - status
+                - type
+                type: object
+              type: array
+            observedGeneration:
+              format: int64
+              type: integer
+          type: object
+      type: object
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
