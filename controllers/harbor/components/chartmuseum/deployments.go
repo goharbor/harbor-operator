@@ -49,6 +49,7 @@ func (c *ChartMuseum) GetDeployments(ctx context.Context) []*appsv1.Deployment {
 		Value: "/mnt/chartmuseum",
 	}}
 	envFroms := []corev1.EnvFromSource{}
+	initEnv := []corev1.EnvVar{}
 
 	if c.harbor.Spec.Components.ChartMuseum.StorageSecret != "" {
 		volumes = []corev1.Volume{}
@@ -84,6 +85,23 @@ func (c *ChartMuseum) GetDeployments(ctx context.Context) []*appsv1.Deployment {
 				},
 			},
 		}}
+	}
+
+	if c.harbor.Spec.Components.ChartMuseum.CacheSecret != "" {
+		initEnv = []corev1.EnvVar{
+			{
+				Name: "CACHE_URL",
+				ValueFrom: &corev1.EnvVarSource{
+					SecretKeyRef: &corev1.SecretKeySelector{
+						LocalObjectReference: corev1.LocalObjectReference{
+							Name: c.harbor.Spec.Components.ChartMuseum.CacheSecret,
+						},
+						Key:      containerregistryv1alpha1.HarborChartMuseumCacheURLKey,
+						Optional: &varTrue,
+					},
+				},
+			},
+		}
 	}
 
 	return []*appsv1.Deployment{
@@ -158,20 +176,7 @@ func (c *ChartMuseum) GetDeployments(ctx context.Context) []*appsv1.Deployment {
 										ReadOnly:  false,
 									},
 								},
-								Env: []corev1.EnvVar{
-									{
-										Name: "CACHE_URL",
-										ValueFrom: &corev1.EnvVarSource{
-											SecretKeyRef: &corev1.SecretKeySelector{
-												LocalObjectReference: corev1.LocalObjectReference{
-													Name: c.harbor.Spec.Components.ChartMuseum.CacheSecret,
-												},
-												Key:      containerregistryv1alpha1.HarborChartMuseumCacheURLKey,
-												Optional: &varTrue,
-											},
-										},
-									},
-								},
+								Env: initEnv,
 							},
 						},
 						Containers: []corev1.Container{
