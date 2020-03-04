@@ -16,7 +16,8 @@ manager: generate fmt vet
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 run: generate fmt vet manifests
-	go run ./main.go
+	CONFIGURATION_FROM='env:' \
+	go run *.go
 
 # Run linters against all files
 lint: \
