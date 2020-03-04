@@ -178,11 +178,22 @@ func mutateService(serviceResource, result components.Resource) controllerutil.M
 
 		defer func() { serviceResult.Spec.ClusterIP = clusterIP }()
 
-		for i, port := range serviceResult.Spec.Ports {
-			nodeIndex := i
-			nodePort := port.NodePort
+		for _, port := range serviceResult.Spec.Ports {
+			port := port
 
-			defer func() { serviceResult.Spec.Ports[nodeIndex].NodePort = nodePort }()
+			defer func() {
+				ports := make([]corev1.ServicePort, len(serviceResult.Spec.Ports))
+
+				for i, p := range serviceResult.Spec.Ports {
+					if p.Name == port.Name {
+						p.NodePort = port.NodePort
+					}
+
+					ports[i] = p
+				}
+
+				serviceResult.Spec.Ports = ports
+			}()
 		}
 
 		service.DeepCopyInto(serviceResult)
