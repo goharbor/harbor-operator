@@ -9,17 +9,17 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
-	"github.com/ovh/harbor-operator/pkg/controllers/harbor"
-	"github.com/ovh/harbor-operator/pkg/factories/logger"
-	"github.com/ovh/harbor-operator/pkg/manager"
-	"github.com/ovh/harbor-operator/pkg/scheme"
-	"github.com/ovh/harbor-operator/pkg/tracing"
+	containerregistryv1alpha1 "github.com/goharbor/harbor-core-operator/api/v1alpha1"
+	"github.com/goharbor/harbor-core-operator/pkg/controllers/harbor"
+	"github.com/goharbor/harbor-core-operator/pkg/factories/logger"
+	"github.com/goharbor/harbor-core-operator/pkg/manager"
+	"github.com/goharbor/harbor-core-operator/pkg/scheme"
+	"github.com/goharbor/harbor-core-operator/pkg/tracing"
 	// +kubebuilder:scaffold:imports
 )
 
 const (
-	OperatorName    = "harbor-operator"
+	OperatorName    = "harbor-core-operator"
 	OperatorVersion = "devel"
 )
 

@@ -7,7 +7,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
-	"github.com/ovh/harbor-operator/pkg/factories/application"
+	"github.com/goharbor/harbor-core-operator/pkg/factories/application"
 )
 
 const (

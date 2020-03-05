@@ -16,7 +16,7 @@ import (
 	jaeger_prom "github.com/uber/jaeger-lib/metrics/prometheus"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	"github.com/ovh/harbor-operator/pkg/factories/logger"
+	"github.com/goharbor/harbor-core-operator/pkg/factories/logger"
 )
 
 func Init(jaegerConfig *jaeger_cnf.Configuration, logger jaeger_client.Logger, metrics jaeger_metrics.Factory) (io.Closer, error) {

@@ -4,15 +4,15 @@
 
 Harbor Operator is a [Kubernetes Operator](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/) which manage Harbor applications. Deploy harbor easily with a single Custom Resource.
 
-[![Docker Hub](https://d36jcksde1wxzq.cloudfront.net/saas-mega/blueFingerprint.png)](https://hub.docker.com/r/ovhcom/harbor-operator)
+[![Docker Hub](https://d36jcksde1wxzq.cloudfront.net/saas-mega/blueFingerprint.png)](https://hub.docker.com/r/goharbor/harbor-core-operator)
 
 ## Installation
 
 Currently working on a Helm Chart, meanwhile you can use the `make` command.
 
 ```bash
-git clone https://github.com/ovh/harbor-operator.git
-cd harbor-operator
+git clone https://github.com/goharbor/harbor-core-operator.git
+cd harbor-core-operator
 make deploy
 ```
 
@@ -28,19 +28,19 @@ Generate resources using `make generate`
 
 ## Hacking
 
-Follow the [Development guide](https://github.com/ovh/harbor-operator/blob/master/docs/development.md) to start on the project.
+Follow the [Development guide](https://github.com/goharbor/harbor-core-operator/blob/master/docs/development.md) to start on the project.
 
 ## Get the sources
 
 ```bash
-git clone https://github.com/ovh/harbor-operator.git
-cd harbor-operator
+git clone https://github.com/goharbor/harbor-core-operator.git
+cd harbor-core-operator
 ```
 
 You've developed a new cool feature ? Fixed an annoying bug ? We'd be happy
 to hear from you!
 
-Have a look in [CONTRIBUTING.md](https://github.com/ovh/harbor-operator/blob/master/CONTRIBUTING.md)
+Have a look in [CONTRIBUTING.md](https://github.com/goharbor/harbor-core-operator/blob/master/CONTRIBUTING.md)
 
 ## Run the tests
 
@@ -59,15 +59,15 @@ Have a look in [CONTRIBUTING.md](https://github.com/ovh/harbor-operator/blob/mas
 
 ## Additional documentation
 
- 1. [Learn how reconciliation works](https://github.com/ovh/harbor-operator/blob/master/docs/reconciler.md)
- 2. [Custom Resource Definition](https://github.com/ovh/harbor-operator/blob/master/docs/custom-resource-definition.md)
+ 1. [Learn how reconciliation works](https://github.com/goharbor/harbor-core-operator/blob/master/docs/reconciler.md)
+ 2. [Custom Resource Definition](https://github.com/goharbor/harbor-core-operator/blob/master/docs/custom-resource-definition.md)
 
 ## Related links
 
-* Contribute: <https://github.com/ovh/harbor-operator/blob/master/CONTRIBUTING.md>
-* Report bugs: <https://github.com/ovh/harbor-operator/issues>
-* Get latest version: <https://hub.docker.com/r/ovhcom/harbor-operator>
+* Contribute: <https://github.com/goharbor/harbor-core-operator/blob/master/CONTRIBUTING.md>
+* Report bugs: <https://github.com/goharbor/harbor-core-operator/issues>
+* Get latest version: <https://hub.docker.com/r/goharbor/harbor-core-operator>
 
 ## License
 
-See <https://github.com/ovh/harbor-operator/blob/master/LICENSE>
+See <https://github.com/goharbor/harbor-core-operator/blob/master/LICENSE>

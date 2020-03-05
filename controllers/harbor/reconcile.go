@@ -13,9 +13,9 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
-	"github.com/ovh/harbor-operator/pkg/factories/application"
-	"github.com/ovh/harbor-operator/pkg/factories/logger"
+	containerregistryv1alpha1 "github.com/goharbor/harbor-core-operator/api/v1alpha1"
+	"github.com/goharbor/harbor-core-operator/pkg/factories/application"
+	"github.com/goharbor/harbor-core-operator/pkg/factories/logger"
 )
 
 // +kubebuilder:rbac:groups=containerregistry.ovhcloud.com,resources=harbors,verbs=get;list;watch
