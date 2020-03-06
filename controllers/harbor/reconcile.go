@@ -18,8 +18,8 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 )
 
-// +kubebuilder:rbac:groups=containerregistry.ovhcloud.com,resources=harbors,verbs=get;list;watch
-// +kubebuilder:rbac:groups=containerregistry.ovhcloud.com,resources=harbors/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=goharbor.io,resources=harbors,verbs=get;list;watch
+// +kubebuilder:rbac:groups=goharbor.io,resources=harbors/status,verbs=get;update;patch
 
 func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.TODO()
