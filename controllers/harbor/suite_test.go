@@ -12,8 +12,8 @@ import (
 
 	// +kubebuilder:scaffold:imports
 
-	"github.com/ovh/harbor-operator/pkg/factories/logger"
-	"github.com/ovh/harbor-operator/pkg/scheme"
+	"github.com/goharbor/harbor-operator/pkg/factories/logger"
+	"github.com/goharbor/harbor-operator/pkg/scheme"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to

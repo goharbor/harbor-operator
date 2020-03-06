@@ -10,8 +10,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
-	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
-	"github.com/ovh/harbor-operator/pkg/factories/application"
+	goharborv1alpha1 "github.com/goharbor/harbor-operator/api/v1alpha1"
+	"github.com/goharbor/harbor-operator/pkg/factories/application"
 )
 
 func (c *ChartMuseum) GetIngresses(ctx context.Context) []*netv1.Ingress { // nolint:funlen
@@ -37,10 +37,10 @@ func (c *ChartMuseum) GetIngresses(ctx context.Context) []*netv1.Ingress { // no
 	return []*netv1.Ingress{
 		{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      c.harbor.NormalizeComponentName(containerregistryv1alpha1.ChartMuseumName),
+				Name:      c.harbor.NormalizeComponentName(goharborv1alpha1.ChartMuseumName),
 				Namespace: c.harbor.Namespace,
 				Labels: map[string]string{
-					"app":      containerregistryv1alpha1.ChartMuseumName,
+					"app":      goharborv1alpha1.ChartMuseumName,
 					"harbor":   harborName,
 					"operator": operatorName,
 				},
@@ -56,7 +56,7 @@ func (c *ChartMuseum) GetIngresses(ctx context.Context) []*netv1.Ingress { // no
 									{
 										Path: "/chartrepo",
 										Backend: netv1.IngressBackend{
-											ServiceName: c.harbor.NormalizeComponentName(containerregistryv1alpha1.CoreName),
+											ServiceName: c.harbor.NormalizeComponentName(goharborv1alpha1.CoreName),
 											ServicePort: intstr.FromInt(PublicPort),
 										},
 									},

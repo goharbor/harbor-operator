@@ -9,13 +9,14 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
-	"github.com/ovh/harbor-operator/pkg/controllers/harbor"
-	"github.com/ovh/harbor-operator/pkg/factories/logger"
-	"github.com/ovh/harbor-operator/pkg/manager"
-	"github.com/ovh/harbor-operator/pkg/scheme"
-	"github.com/ovh/harbor-operator/pkg/tracing"
 	// +kubebuilder:scaffold:imports
+
+	goharborv1alpha1 "github.com/goharbor/harbor-operator/api/v1alpha1"
+	"github.com/goharbor/harbor-operator/pkg/controllers/harbor"
+	"github.com/goharbor/harbor-operator/pkg/factories/logger"
+	"github.com/goharbor/harbor-operator/pkg/manager"
+	"github.com/goharbor/harbor-operator/pkg/scheme"
+	"github.com/goharbor/harbor-operator/pkg/tracing"
 )
 
 const (
@@ -81,7 +82,7 @@ func main() {
 		os.Exit(exitCodeFailure)
 	}
 
-	if err := (&containerregistryv1alpha1.Harbor{}).SetupWebhookWithManager(mgr); err != nil {
+	if err := (&goharborv1alpha1.Harbor{}).SetupWebhookWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create webhook", "webhook", "Harbor")
 		os.Exit(exitCodeFailure)
 	}

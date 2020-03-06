@@ -11,8 +11,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
-	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
-	"github.com/ovh/harbor-operator/pkg/factories/application"
+	goharborv1alpha1 "github.com/goharbor/harbor-operator/api/v1alpha1"
+	"github.com/goharbor/harbor-operator/pkg/factories/application"
 )
 
 var (
@@ -43,7 +43,7 @@ func (c *HarborCore) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 	if len(c.harbor.Spec.Components.Registry.CacheSecret) > 0 {
 		cacheEnv.ValueFrom = &corev1.EnvVarSource{
 			SecretKeyRef: &corev1.SecretKeySelector{
-				Key:      containerregistryv1alpha1.HarborRegistryURLKey,
+				Key:      goharborv1alpha1.HarborRegistryURLKey,
 				Optional: &varTrue,
 				LocalObjectReference: corev1.LocalObjectReference{
 					Name: c.harbor.Spec.Components.Registry.CacheSecret,
@@ -55,10 +55,10 @@ func (c *HarborCore) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 	return []*appsv1.Deployment{
 		{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      c.harbor.NormalizeComponentName(containerregistryv1alpha1.CoreName),
+				Name:      c.harbor.NormalizeComponentName(goharborv1alpha1.CoreName),
 				Namespace: c.harbor.Namespace,
 				Labels: map[string]string{
-					"app":      containerregistryv1alpha1.CoreName,
+					"app":      goharborv1alpha1.CoreName,
 					"harbor":   harborName,
 					"operator": operatorName,
 				},
@@ -66,7 +66,7 @@ func (c *HarborCore) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 			Spec: appsv1.DeploymentSpec{
 				Selector: &metav1.LabelSelector{
 					MatchLabels: map[string]string{
-						"app":      containerregistryv1alpha1.CoreName,
+						"app":      goharborv1alpha1.CoreName,
 						"harbor":   harborName,
 						"operator": operatorName,
 					},
@@ -80,7 +80,7 @@ func (c *HarborCore) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 							"operator/version":       application.GetVersion(ctx),
 						},
 						Labels: map[string]string{
-							"app":      containerregistryv1alpha1.CoreName,
+							"app":      goharborv1alpha1.CoreName,
 							"harbor":   harborName,
 							"operator": operatorName,
 						},
@@ -99,7 +99,7 @@ func (c *HarborCore) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 								VolumeSource: corev1.VolumeSource{
 									ConfigMap: &corev1.ConfigMapVolumeSource{
 										LocalObjectReference: corev1.LocalObjectReference{
-											Name: c.harbor.NormalizeComponentName(containerregistryv1alpha1.CoreName),
+											Name: c.harbor.NormalizeComponentName(goharborv1alpha1.CoreName),
 										},
 									},
 								},
@@ -114,14 +114,14 @@ func (c *HarborCore) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 											},
 										},
 										Optional:   &varFalse,
-										SecretName: c.harbor.NormalizeComponentName(containerregistryv1alpha1.CoreName),
+										SecretName: c.harbor.NormalizeComponentName(goharborv1alpha1.CoreName),
 									},
 								},
 							}, {
 								Name: "certificate",
 								VolumeSource: corev1.VolumeSource{
 									Secret: &corev1.SecretVolumeSource{
-										SecretName: c.harbor.NormalizeComponentName(containerregistryv1alpha1.CertificateName),
+										SecretName: c.harbor.NormalizeComponentName(goharborv1alpha1.CertificateName),
 									},
 								},
 							}, {
@@ -178,7 +178,7 @@ func (c *HarborCore) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 												Key:      "secret",
 												Optional: &varFalse,
 												LocalObjectReference: corev1.LocalObjectReference{
-													Name: c.harbor.NormalizeComponentName(containerregistryv1alpha1.CoreName),
+													Name: c.harbor.NormalizeComponentName(goharborv1alpha1.CoreName),
 												},
 											},
 										},
@@ -189,7 +189,7 @@ func (c *HarborCore) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 												Key:      "secret",
 												Optional: &varFalse,
 												LocalObjectReference: corev1.LocalObjectReference{
-													Name: c.harbor.NormalizeComponentName(containerregistryv1alpha1.JobServiceName),
+													Name: c.harbor.NormalizeComponentName(goharborv1alpha1.JobServiceName),
 												},
 											},
 										},
@@ -197,7 +197,7 @@ func (c *HarborCore) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 										Name: "HARBOR_ADMIN_PASSWORD",
 										ValueFrom: &corev1.EnvVarSource{
 											SecretKeyRef: &corev1.SecretKeySelector{
-												Key:      containerregistryv1alpha1.HarborAdminPasswordKey,
+												Key:      goharborv1alpha1.HarborAdminPasswordKey,
 												Optional: &varFalse,
 												LocalObjectReference: corev1.LocalObjectReference{
 													Name: c.harbor.Spec.AdminPasswordSecret,
@@ -208,7 +208,7 @@ func (c *HarborCore) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 										Name: "POSTGRESQL_HOST",
 										ValueFrom: &corev1.EnvVarSource{
 											SecretKeyRef: &corev1.SecretKeySelector{
-												Key:      containerregistryv1alpha1.HarborCoreDatabaseHostKey,
+												Key:      goharborv1alpha1.HarborCoreDatabaseHostKey,
 												Optional: &varFalse,
 												LocalObjectReference: corev1.LocalObjectReference{
 													Name: c.harbor.Spec.Components.Core.DatabaseSecret,
@@ -219,7 +219,7 @@ func (c *HarborCore) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 										Name: "POSTGRESQL_PORT",
 										ValueFrom: &corev1.EnvVarSource{
 											SecretKeyRef: &corev1.SecretKeySelector{
-												Key:      containerregistryv1alpha1.HarborCoreDatabasePortKey,
+												Key:      goharborv1alpha1.HarborCoreDatabasePortKey,
 												Optional: &varFalse,
 												LocalObjectReference: corev1.LocalObjectReference{
 													Name: c.harbor.Spec.Components.Core.DatabaseSecret,
@@ -230,7 +230,7 @@ func (c *HarborCore) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 										Name: "POSTGRESQL_DATABASE",
 										ValueFrom: &corev1.EnvVarSource{
 											SecretKeyRef: &corev1.SecretKeySelector{
-												Key:      containerregistryv1alpha1.HarborCoreDatabaseNameKey,
+												Key:      goharborv1alpha1.HarborCoreDatabaseNameKey,
 												Optional: &varFalse,
 												LocalObjectReference: corev1.LocalObjectReference{
 													Name: c.harbor.Spec.Components.Core.DatabaseSecret,
@@ -241,7 +241,7 @@ func (c *HarborCore) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 										Name: "POSTGRESQL_USERNAME",
 										ValueFrom: &corev1.EnvVarSource{
 											SecretKeyRef: &corev1.SecretKeySelector{
-												Key:      containerregistryv1alpha1.HarborCoreDatabaseUserKey,
+												Key:      goharborv1alpha1.HarborCoreDatabaseUserKey,
 												Optional: &varFalse,
 												LocalObjectReference: corev1.LocalObjectReference{
 													Name: c.harbor.Spec.Components.Core.DatabaseSecret,
@@ -252,7 +252,7 @@ func (c *HarborCore) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 										Name: "POSTGRESQL_PASSWORD",
 										ValueFrom: &corev1.EnvVarSource{
 											SecretKeyRef: &corev1.SecretKeySelector{
-												Key:      containerregistryv1alpha1.HarborCoreDatabasePasswordKey,
+												Key:      goharborv1alpha1.HarborCoreDatabasePasswordKey,
 												Optional: &varFalse,
 												LocalObjectReference: corev1.LocalObjectReference{
 													Name: c.harbor.Spec.Components.Core.DatabaseSecret,
@@ -263,7 +263,7 @@ func (c *HarborCore) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 										Name: "CLAIR_DB_HOST",
 										ValueFrom: &corev1.EnvVarSource{
 											SecretKeyRef: &corev1.SecretKeySelector{
-												Key:      containerregistryv1alpha1.HarborCoreDatabaseHostKey,
+												Key:      goharborv1alpha1.HarborCoreDatabaseHostKey,
 												Optional: &varFalse,
 												LocalObjectReference: corev1.LocalObjectReference{
 													Name: c.harbor.Spec.Components.Core.DatabaseSecret,
@@ -274,7 +274,7 @@ func (c *HarborCore) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 										Name: "CLAIR_DB_PORT",
 										ValueFrom: &corev1.EnvVarSource{
 											SecretKeyRef: &corev1.SecretKeySelector{
-												Key:      containerregistryv1alpha1.HarborCoreDatabasePortKey,
+												Key:      goharborv1alpha1.HarborCoreDatabasePortKey,
 												Optional: &varFalse,
 												LocalObjectReference: corev1.LocalObjectReference{
 													Name: c.harbor.Spec.Components.Core.DatabaseSecret,
@@ -285,7 +285,7 @@ func (c *HarborCore) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 										Name: "CLAIR_DB_DATABASE",
 										ValueFrom: &corev1.EnvVarSource{
 											SecretKeyRef: &corev1.SecretKeySelector{
-												Key:      containerregistryv1alpha1.HarborCoreDatabaseNameKey,
+												Key:      goharborv1alpha1.HarborCoreDatabaseNameKey,
 												Optional: &varFalse,
 												LocalObjectReference: corev1.LocalObjectReference{
 													Name: c.harbor.Spec.Components.Core.DatabaseSecret,
@@ -296,7 +296,7 @@ func (c *HarborCore) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 										Name: "CLAIR_DB_USERNAME",
 										ValueFrom: &corev1.EnvVarSource{
 											SecretKeyRef: &corev1.SecretKeySelector{
-												Key:      containerregistryv1alpha1.HarborCoreDatabaseUserKey,
+												Key:      goharborv1alpha1.HarborCoreDatabaseUserKey,
 												Optional: &varFalse,
 												LocalObjectReference: corev1.LocalObjectReference{
 													Name: c.harbor.Spec.Components.Core.DatabaseSecret,
@@ -307,7 +307,7 @@ func (c *HarborCore) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 										Name: "CLAIR_DB_PASSWORD",
 										ValueFrom: &corev1.EnvVarSource{
 											SecretKeyRef: &corev1.SecretKeySelector{
-												Key:      containerregistryv1alpha1.HarborCoreDatabasePasswordKey,
+												Key:      goharborv1alpha1.HarborCoreDatabasePasswordKey,
 												Optional: &varFalse,
 												LocalObjectReference: corev1.LocalObjectReference{
 													Name: c.harbor.Spec.Components.Core.DatabaseSecret,
@@ -322,7 +322,7 @@ func (c *HarborCore) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 										ConfigMapRef: &corev1.ConfigMapEnvSource{
 											Optional: &varFalse,
 											LocalObjectReference: corev1.LocalObjectReference{
-												Name: c.harbor.NormalizeComponentName(containerregistryv1alpha1.CoreName),
+												Name: c.harbor.NormalizeComponentName(goharborv1alpha1.CoreName),
 											},
 										},
 									},

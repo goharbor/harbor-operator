@@ -13,9 +13,9 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
-	"github.com/ovh/harbor-operator/pkg/factories/application"
-	"github.com/ovh/harbor-operator/pkg/factories/logger"
+	goharborv1alpha1 "github.com/goharbor/harbor-operator/api/v1alpha1"
+	"github.com/goharbor/harbor-operator/pkg/factories/application"
+	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 )
 
 // +kubebuilder:rbac:groups=containerregistry.ovhcloud.com,resources=harbors,verbs=get;list;watch
@@ -42,7 +42,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	logger.Set(&ctx, reqLogger)
 
 	// Fetch the Harbor instance
-	harbor := &containerregistryv1alpha1.Harbor{}
+	harbor := &goharborv1alpha1.Harbor{}
 
 	err := r.Client.Get(ctx, req.NamespacedName, harbor)
 	if err != nil {
@@ -68,12 +68,12 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	g.Go(func() error {
 		err = r.UpdateReadyStatus(ctx, &result, harbor)
-		return errors.Wrapf(err, "type=%s", containerregistryv1alpha1.ReadyConditionType)
+		return errors.Wrapf(err, "type=%s", goharborv1alpha1.ReadyConditionType)
 	})
 
 	g.Go(func() error {
 		err = r.UpdateAppliedStatus(ctx, &result, harbor)
-		return errors.Wrapf(err, "type=%s", containerregistryv1alpha1.AppliedConditionType)
+		return errors.Wrapf(err, "type=%s", goharborv1alpha1.AppliedConditionType)
 	})
 
 	err = g.Wait()
@@ -84,11 +84,11 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	return result, r.UpdateStatus(ctx, &result, harbor)
 }
 
-func (r *Reconciler) UpdateAppliedStatus(ctx context.Context, result *ctrl.Result, harbor *containerregistryv1alpha1.Harbor) error {
+func (r *Reconciler) UpdateAppliedStatus(ctx context.Context, result *ctrl.Result, harbor *goharborv1alpha1.Harbor) error {
 	if harbor.Status.ObservedGeneration != harbor.ObjectMeta.Generation {
 		harbor.Status.ObservedGeneration = harbor.ObjectMeta.Generation
 
-		err := r.UpdateCondition(ctx, harbor, containerregistryv1alpha1.AppliedConditionType, corev1.ConditionFalse, "new", "new generation detected")
+		err := r.UpdateCondition(ctx, harbor, goharborv1alpha1.AppliedConditionType, corev1.ConditionFalse, "new", "new generation detected")
 		if err != nil {
 			result.Requeue = true
 
@@ -96,7 +96,7 @@ func (r *Reconciler) UpdateAppliedStatus(ctx context.Context, result *ctrl.Resul
 		}
 	}
 
-	switch r.GetConditionStatus(ctx, harbor, containerregistryv1alpha1.AppliedConditionType) {
+	switch r.GetConditionStatus(ctx, harbor, goharborv1alpha1.AppliedConditionType) {
 	case corev1.ConditionTrue: // Already applied
 		// Anyway, reconciler is triggered, so at least one child resource has been deleted
 		// Try to recreate children
@@ -104,7 +104,7 @@ func (r *Reconciler) UpdateAppliedStatus(ctx context.Context, result *ctrl.Resul
 		if err != nil {
 			result.Requeue = true
 
-			err := r.UpdateCondition(ctx, harbor, containerregistryv1alpha1.AppliedConditionType, corev1.ConditionFalse, err.Error())
+			err := r.UpdateCondition(ctx, harbor, goharborv1alpha1.AppliedConditionType, corev1.ConditionFalse, err.Error())
 			if err != nil {
 				result.Requeue = true
 
@@ -114,7 +114,7 @@ func (r *Reconciler) UpdateAppliedStatus(ctx context.Context, result *ctrl.Resul
 			return nil
 		}
 	default: // Not yet applied
-		err := r.UpdateCondition(ctx, harbor, containerregistryv1alpha1.AppliedConditionType, corev1.ConditionFalse)
+		err := r.UpdateCondition(ctx, harbor, goharborv1alpha1.AppliedConditionType, corev1.ConditionFalse)
 		if err != nil {
 			result.Requeue = true
 
@@ -123,7 +123,7 @@ func (r *Reconciler) UpdateAppliedStatus(ctx context.Context, result *ctrl.Resul
 
 		err = r.Apply(ctx, harbor)
 		if err != nil {
-			err := r.UpdateCondition(ctx, harbor, containerregistryv1alpha1.AppliedConditionType, corev1.ConditionFalse, err.Error())
+			err := r.UpdateCondition(ctx, harbor, goharborv1alpha1.AppliedConditionType, corev1.ConditionFalse, err.Error())
 			if err != nil {
 				result.Requeue = true
 
@@ -133,7 +133,7 @@ func (r *Reconciler) UpdateAppliedStatus(ctx context.Context, result *ctrl.Resul
 			return nil
 		}
 
-		err = r.UpdateCondition(ctx, harbor, containerregistryv1alpha1.AppliedConditionType, corev1.ConditionTrue)
+		err = r.UpdateCondition(ctx, harbor, goharborv1alpha1.AppliedConditionType, corev1.ConditionTrue)
 		if err != nil {
 			result.Requeue = true
 
@@ -144,14 +144,14 @@ func (r *Reconciler) UpdateAppliedStatus(ctx context.Context, result *ctrl.Resul
 	return nil
 }
 
-func (r *Reconciler) UpdateReadyStatus(ctx context.Context, result *ctrl.Result, harbor *containerregistryv1alpha1.Harbor) error {
+func (r *Reconciler) UpdateReadyStatus(ctx context.Context, result *ctrl.Result, harbor *goharborv1alpha1.Harbor) error {
 	// TODO do it asynchronously but do not
 	// forget to wait for completion before return
 	health, err := r.GetHealth(ctx, harbor)
 	if err != nil {
 		result.Requeue = true
 
-		err = r.UpdateCondition(ctx, harbor, containerregistryv1alpha1.ReadyConditionType, corev1.ConditionFalse, errors.Cause(err).Error(), err.Error())
+		err = r.UpdateCondition(ctx, harbor, goharborv1alpha1.ReadyConditionType, corev1.ConditionFalse, errors.Cause(err).Error(), err.Error())
 		if err != nil {
 			result.Requeue = true
 
@@ -159,7 +159,7 @@ func (r *Reconciler) UpdateReadyStatus(ctx context.Context, result *ctrl.Result,
 		}
 	} else {
 		if health.IsHealthy() {
-			err = r.UpdateCondition(ctx, harbor, containerregistryv1alpha1.ReadyConditionType, corev1.ConditionTrue)
+			err = r.UpdateCondition(ctx, harbor, goharborv1alpha1.ReadyConditionType, corev1.ConditionTrue)
 			if err != nil {
 				result.Requeue = true
 
@@ -171,7 +171,7 @@ func (r *Reconciler) UpdateReadyStatus(ctx context.Context, result *ctrl.Result,
 
 			result.RequeueAfter = DefaultRequeueWait
 
-			err = r.UpdateCondition(ctx, harbor, containerregistryv1alpha1.ReadyConditionType, corev1.ConditionFalse, "harbor-component", fmt.Sprintf("at least an Harbor component failed: %+v", health.GetUnhealthyComponents()))
+			err = r.UpdateCondition(ctx, harbor, goharborv1alpha1.ReadyConditionType, corev1.ConditionFalse, "harbor-component", fmt.Sprintf("at least an Harbor component failed: %+v", health.GetUnhealthyComponents()))
 			if err != nil {
 				result.Requeue = true
 

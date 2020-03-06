@@ -14,15 +14,15 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
-	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
-	harbor_chartmuseum "github.com/ovh/harbor-operator/controllers/harbor/components/chartmuseum"
-	harbor_clair "github.com/ovh/harbor-operator/controllers/harbor/components/clair"
-	harbor_core "github.com/ovh/harbor-operator/controllers/harbor/components/harbor-core"
-	harbor_jobservice "github.com/ovh/harbor-operator/controllers/harbor/components/jobservice"
-	harbor_notary "github.com/ovh/harbor-operator/controllers/harbor/components/notary"
-	harbor_portal "github.com/ovh/harbor-operator/controllers/harbor/components/portal"
-	harbor_registry "github.com/ovh/harbor-operator/controllers/harbor/components/registry"
-	"github.com/ovh/harbor-operator/pkg/factories/logger"
+	goharborv1alpha1 "github.com/goharbor/harbor-operator/api/v1alpha1"
+	harbor_chartmuseum "github.com/goharbor/harbor-operator/controllers/harbor/components/chartmuseum"
+	harbor_clair "github.com/goharbor/harbor-operator/controllers/harbor/components/clair"
+	harbor_core "github.com/goharbor/harbor-operator/controllers/harbor/components/harbor-core"
+	harbor_jobservice "github.com/goharbor/harbor-operator/controllers/harbor/components/jobservice"
+	harbor_notary "github.com/goharbor/harbor-operator/controllers/harbor/components/notary"
+	harbor_portal "github.com/goharbor/harbor-operator/controllers/harbor/components/portal"
+	harbor_registry "github.com/goharbor/harbor-operator/controllers/harbor/components/registry"
+	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 )
 
 type Resource interface {
@@ -50,7 +50,7 @@ type Component interface {
 	GetDeployments(context.Context) []*appsv1.Deployment
 }
 
-func GetComponents(ctx context.Context, harbor *containerregistryv1alpha1.Harbor) (*Components, error) { // nolint:funlen
+func GetComponents(ctx context.Context, harbor *goharborv1alpha1.Harbor) (*Components, error) { // nolint:funlen
 	harborResource := &Components{}
 
 	var g errgroup.Group
@@ -58,7 +58,7 @@ func GetComponents(ctx context.Context, harbor *containerregistryv1alpha1.Harbor
 	if harbor.Spec.Components.ChartMuseum != nil {
 		harborResource.ChartMuseum = &ComponentRunner{}
 
-		g.Go(harborResource.ChartMuseum.getInitFunc(ctx, harbor, ChartMuseumPriority, containerregistryv1alpha1.ChartMuseumName, func(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, option *Option) (Component, error) {
+		g.Go(harborResource.ChartMuseum.getInitFunc(ctx, harbor, ChartMuseumPriority, goharborv1alpha1.ChartMuseumName, func(ctx context.Context, harbor *goharborv1alpha1.Harbor, option *Option) (Component, error) {
 			return harbor_chartmuseum.New(ctx, harbor, option)
 		}))
 	}
@@ -66,7 +66,7 @@ func GetComponents(ctx context.Context, harbor *containerregistryv1alpha1.Harbor
 	if harbor.Spec.Components.Clair != nil {
 		harborResource.Clair = &ComponentRunner{}
 
-		g.Go(harborResource.Clair.getInitFunc(ctx, harbor, ClairPriority, containerregistryv1alpha1.ClairName, func(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, option *Option) (Component, error) {
+		g.Go(harborResource.Clair.getInitFunc(ctx, harbor, ClairPriority, goharborv1alpha1.ClairName, func(ctx context.Context, harbor *goharborv1alpha1.Harbor, option *Option) (Component, error) {
 			return harbor_clair.New(ctx, harbor, option)
 		}))
 	}
@@ -74,7 +74,7 @@ func GetComponents(ctx context.Context, harbor *containerregistryv1alpha1.Harbor
 	if harbor.Spec.Components.Core != nil {
 		harborResource.Core = &ComponentRunner{}
 
-		g.Go(harborResource.Core.getInitFunc(ctx, harbor, CorePriority, containerregistryv1alpha1.CoreName, func(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, option *Option) (Component, error) {
+		g.Go(harborResource.Core.getInitFunc(ctx, harbor, CorePriority, goharborv1alpha1.CoreName, func(ctx context.Context, harbor *goharborv1alpha1.Harbor, option *Option) (Component, error) {
 			return harbor_core.New(ctx, harbor, option)
 		}))
 	}
@@ -82,7 +82,7 @@ func GetComponents(ctx context.Context, harbor *containerregistryv1alpha1.Harbor
 	if harbor.Spec.Components.JobService != nil {
 		harborResource.JobService = &ComponentRunner{}
 
-		g.Go(harborResource.JobService.getInitFunc(ctx, harbor, JobServicePriority, containerregistryv1alpha1.JobServiceName, func(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, option *Option) (Component, error) {
+		g.Go(harborResource.JobService.getInitFunc(ctx, harbor, JobServicePriority, goharborv1alpha1.JobServiceName, func(ctx context.Context, harbor *goharborv1alpha1.Harbor, option *Option) (Component, error) {
 			return harbor_jobservice.New(ctx, harbor, option)
 		}))
 	}
@@ -90,7 +90,7 @@ func GetComponents(ctx context.Context, harbor *containerregistryv1alpha1.Harbor
 	if harbor.Spec.Components.Notary != nil {
 		harborResource.Notary = &ComponentRunner{}
 
-		g.Go(harborResource.Notary.getInitFunc(ctx, harbor, NotaryPriority, containerregistryv1alpha1.NotaryName, func(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, option *Option) (Component, error) {
+		g.Go(harborResource.Notary.getInitFunc(ctx, harbor, NotaryPriority, goharborv1alpha1.NotaryName, func(ctx context.Context, harbor *goharborv1alpha1.Harbor, option *Option) (Component, error) {
 			return harbor_notary.New(ctx, harbor, option)
 		}))
 	}
@@ -98,7 +98,7 @@ func GetComponents(ctx context.Context, harbor *containerregistryv1alpha1.Harbor
 	if harbor.Spec.Components.Portal != nil {
 		harborResource.Portal = &ComponentRunner{}
 
-		g.Go(harborResource.Portal.getInitFunc(ctx, harbor, PortalPriority, containerregistryv1alpha1.PortalName, func(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, option *Option) (Component, error) {
+		g.Go(harborResource.Portal.getInitFunc(ctx, harbor, PortalPriority, goharborv1alpha1.PortalName, func(ctx context.Context, harbor *goharborv1alpha1.Harbor, option *Option) (Component, error) {
 			return harbor_portal.New(ctx, harbor, option)
 		}))
 	}
@@ -106,7 +106,7 @@ func GetComponents(ctx context.Context, harbor *containerregistryv1alpha1.Harbor
 	if harbor.Spec.Components.Registry != nil {
 		harborResource.Registry = &ComponentRunner{}
 
-		g.Go(harborResource.Registry.getInitFunc(ctx, harbor, RegistryPriority, containerregistryv1alpha1.RegistryName, func(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, option *Option) (Component, error) {
+		g.Go(harborResource.Registry.getInitFunc(ctx, harbor, RegistryPriority, goharborv1alpha1.RegistryName, func(ctx context.Context, harbor *goharborv1alpha1.Harbor, option *Option) (Component, error) {
 			return harbor_registry.New(ctx, harbor, option)
 		}))
 	}
@@ -116,9 +116,9 @@ func GetComponents(ctx context.Context, harbor *containerregistryv1alpha1.Harbor
 	return harborResource, errors.Wrap(err, "cannot get resources")
 }
 
-type ComponentFactory func(context.Context, *containerregistryv1alpha1.Harbor, OptionGetter) (Component, error)
+type ComponentFactory func(context.Context, *goharborv1alpha1.Harbor, OptionGetter) (Component, error)
 
-func (c *ComponentRunner) getOption(harbor *containerregistryv1alpha1.Harbor, componentPriority int32) *Option {
+func (c *ComponentRunner) getOption(harbor *goharborv1alpha1.Harbor, componentPriority int32) *Option {
 	option := &Option{}
 
 	if harbor.Spec.Priority != nil {
@@ -129,7 +129,7 @@ func (c *ComponentRunner) getOption(harbor *containerregistryv1alpha1.Harbor, co
 	return option
 }
 
-func (c *ComponentRunner) getInitFunc(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, componentPriority int32, name string, factory func(context.Context, *containerregistryv1alpha1.Harbor, *Option) (Component, error)) func() error {
+func (c *ComponentRunner) getInitFunc(ctx context.Context, harbor *goharborv1alpha1.Harbor, componentPriority int32, name string, factory func(context.Context, *goharborv1alpha1.Harbor, *Option) (Component, error)) func() error {
 	return func() error {
 		if c == nil {
 			return nil

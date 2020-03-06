@@ -7,8 +7,8 @@ import (
 	"github.com/ovh/configstore"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/ovh/harbor-operator/pkg/factories/application"
-	"github.com/ovh/harbor-operator/pkg/factories/logger"
+	"github.com/goharbor/harbor-operator/pkg/factories/application"
+	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 )
 
 const (

@@ -15,8 +15,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 
-	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
-	"github.com/ovh/harbor-operator/pkg/factories/logger"
+	goharborv1alpha1 "github.com/goharbor/harbor-operator/api/v1alpha1"
+	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 )
 
 const (
@@ -59,7 +59,7 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 	return ctrl.NewControllerManagedBy(mgr).
 		WithEventFilter(r.GetEventFilter()).
-		For(&containerregistryv1alpha1.Harbor{}).
+		For(&goharborv1alpha1.Harbor{}).
 		Owns(&appsv1.Deployment{}).
 		Owns(&certv1.Certificate{}).
 		Owns(&corev1.ConfigMap{}).

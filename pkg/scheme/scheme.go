@@ -8,7 +8,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 
-	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
+	goharborv1alpha1 "github.com/goharbor/harbor-operator/api/v1alpha1"
 )
 
 func New(ctx context.Context) (*runtime.Scheme, error) {
@@ -24,7 +24,7 @@ func New(ctx context.Context) (*runtime.Scheme, error) {
 		return nil, errors.Wrap(err, "unable to configure certificate-manager scheme")
 	}
 
-	err = containerregistryv1alpha1.AddToScheme(scheme)
+	err = goharborv1alpha1.AddToScheme(scheme)
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to configure OVH scheme")
 	}

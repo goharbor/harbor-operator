@@ -7,9 +7,9 @@ import (
 	"github.com/ovh/configstore"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
-	"github.com/ovh/harbor-operator/pkg/factories/application"
-	"github.com/ovh/harbor-operator/pkg/factories/logger"
+	goharborv1alpha1 "github.com/goharbor/harbor-operator/api/v1alpha1"
+	"github.com/goharbor/harbor-operator/pkg/factories/application"
+	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 )
 
 const (
@@ -49,10 +49,10 @@ func (r *Registry) GetCertificates(ctx context.Context) []*certv1.Certificate {
 	return []*certv1.Certificate{
 		{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      r.harbor.NormalizeComponentName(containerregistryv1alpha1.RegistryName),
+				Name:      r.harbor.NormalizeComponentName(goharborv1alpha1.RegistryName),
 				Namespace: r.harbor.Namespace,
 				Labels: map[string]string{
-					"app":      containerregistryv1alpha1.RegistryName,
+					"app":      goharborv1alpha1.RegistryName,
 					"harbor":   harborName,
 					"operator": operatorName,
 				},
@@ -60,7 +60,7 @@ func (r *Registry) GetCertificates(ctx context.Context) []*certv1.Certificate {
 			Spec: certv1.CertificateSpec{
 				CommonName:   url,
 				Organization: []string{"Harbor Operator"},
-				SecretName:   r.harbor.NormalizeComponentName(containerregistryv1alpha1.CertificateName),
+				SecretName:   r.harbor.NormalizeComponentName(goharborv1alpha1.CertificateName),
 				KeySize:      encryption.KeySize,
 				KeyAlgorithm: encryption.KeyAlgorithm,
 				// https://github.com/goharbor/harbor/blob/ba4764c61d7da76f584f808f7d16b017db576fb4/src/jobservice/generateCerts.sh#L24-L26

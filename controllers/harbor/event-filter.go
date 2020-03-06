@@ -6,7 +6,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 
-	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
+	goharborv1alpha1 "github.com/goharbor/harbor-operator/api/v1alpha1"
 	"github.com/pkg/errors"
 )
 
@@ -38,7 +38,7 @@ func (ef *EventFilter) Generic(e event.GenericEvent) bool {
 
 func (ef *EventFilter) HarborClassAnnotationMatch(meta metav1.Object) bool {
 	annotations := meta.GetAnnotations()
-	value, ok := annotations[containerregistryv1alpha1.HarborClassAnnotation]
+	value, ok := annotations[goharborv1alpha1.HarborClassAnnotation]
 
 	return value == ef.ClassName || (!ok && ef.ClassName == "")
 }

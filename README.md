@@ -86,8 +86,8 @@ Follow the [Development guide](https://github.com/goharbor/harbor-operator/blob/
 
 ## Additional documentation
 
- 1. [Learn how reconciliation works](https://github.com/ovh/harbor-operator/blob/master/docs/reconciler.md)
- 2. [Custom Resource Definition](https://github.com/ovh/harbor-operator/blob/master/docs/custom-resource-definition.md)
+ 1. [Learn how reconciliation works](https://github.com/goharbor/harbor-operator/blob/master/docs/reconciler.md)
+ 2. [Custom Resource Definition](https://github.com/goharbor/harbor-operator/blob/master/docs/custom-resource-definition.md)
 
 ## Related links
 
@@ -97,4 +97,4 @@ Follow the [Development guide](https://github.com/goharbor/harbor-operator/blob/
 
 ## License
 
-See <https://github.com/ovh/harbor-operator/blob/master/LICENSE>
+See <https://github.com/goharbor/harbor-operator/blob/master/LICENSE>

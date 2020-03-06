@@ -11,8 +11,8 @@ import (
 
 	// +kubebuilder:scaffold:imports
 
-	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
-	"github.com/ovh/harbor-operator/pkg/factories/logger"
+	goharborv1alpha1 "github.com/goharbor/harbor-operator/api/v1alpha1"
+	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to
@@ -29,8 +29,8 @@ func TestComponents(t *testing.T) {
 var _ = Context("With minimal harbor", func() {
 	log := zap.LoggerTo(GinkgoWriter, true)
 
-	harbor := &containerregistryv1alpha1.Harbor{
-		Spec: containerregistryv1alpha1.HarborSpec{
+	harbor := &goharborv1alpha1.Harbor{
+		Spec: goharborv1alpha1.HarborSpec{
 			HarborVersion: "1.9.1",
 			PublicURL:     "http://localhost",
 		},
@@ -56,7 +56,7 @@ var _ = Context("With minimal harbor", func() {
 
 	Measure("parallel run", func(b Benchmarker) {
 		runtime := b.Time("runtime", func() {
-			err := components.ParallelRun(logger.Context(log), harbor, func(context.Context, *containerregistryv1alpha1.Harbor, *ComponentRunner) error {
+			err := components.ParallelRun(logger.Context(log), harbor, func(context.Context, *goharborv1alpha1.Harbor, *ComponentRunner) error {
 				return nil
 			})
 			Expect(err).ToNot(HaveOccurred())
@@ -69,14 +69,14 @@ var _ = Context("With minimal harbor", func() {
 var _ = Context("With full harbor", func() {
 	log := zap.LoggerTo(GinkgoWriter, true)
 
-	harbor := &containerregistryv1alpha1.Harbor{
-		Spec: containerregistryv1alpha1.HarborSpec{
+	harbor := &goharborv1alpha1.Harbor{
+		Spec: goharborv1alpha1.HarborSpec{
 			HarborVersion: "1.9.1",
 			PublicURL:     "http://localhost",
-			Components: containerregistryv1alpha1.HarborComponents{
-				ChartMuseum: &containerregistryv1alpha1.ChartMuseumComponent{},
-				Clair:       &containerregistryv1alpha1.ClairComponent{},
-				Notary:      &containerregistryv1alpha1.NotaryComponent{},
+			Components: goharborv1alpha1.HarborComponents{
+				ChartMuseum: &goharborv1alpha1.ChartMuseumComponent{},
+				Clair:       &goharborv1alpha1.ClairComponent{},
+				Notary:      &goharborv1alpha1.NotaryComponent{},
 			},
 		},
 	}
@@ -101,7 +101,7 @@ var _ = Context("With full harbor", func() {
 
 	Measure("parallel run", func(b Benchmarker) {
 		runtime := b.Time("runtime", func() {
-			err := components.ParallelRun(logger.Context(log), harbor, func(context.Context, *containerregistryv1alpha1.Harbor, *ComponentRunner) error {
+			err := components.ParallelRun(logger.Context(log), harbor, func(context.Context, *goharborv1alpha1.Harbor, *ComponentRunner) error {
 				return nil
 			})
 			Expect(err).ToNot(HaveOccurred())

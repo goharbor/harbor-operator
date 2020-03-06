@@ -10,9 +10,9 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	goharborv1alpha1 "github.com/goharbor/harbor-operator/api/v1alpha1"
+	"github.com/goharbor/harbor-operator/pkg/factories/application"
 	"github.com/markbates/pkger"
-	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
-	"github.com/ovh/harbor-operator/pkg/factories/application"
 	"github.com/pkg/errors"
 )
 
@@ -52,10 +52,10 @@ func (j *JobService) GetConfigMaps(ctx context.Context) []*corev1.ConfigMap {
 	return []*corev1.ConfigMap{
 		{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      j.harbor.NormalizeComponentName(containerregistryv1alpha1.JobServiceName),
+				Name:      j.harbor.NormalizeComponentName(goharborv1alpha1.JobServiceName),
 				Namespace: j.harbor.Namespace,
 				Labels: map[string]string{
-					"app":      containerregistryv1alpha1.JobServiceName,
+					"app":      goharborv1alpha1.JobServiceName,
 					"harbor":   harborName,
 					"operator": operatorName,
 				},
@@ -64,7 +64,7 @@ func (j *JobService) GetConfigMaps(ctx context.Context) []*corev1.ConfigMap {
 				configName: config,
 			},
 			Data: map[string]string{
-				"REGISTRY_CONTROLLER_URL":          fmt.Sprintf("http://%s:8080", j.harbor.NormalizeComponentName(containerregistryv1alpha1.RegistryName)),
+				"REGISTRY_CONTROLLER_URL":          fmt.Sprintf("http://%s:8080", j.harbor.NormalizeComponentName(goharborv1alpha1.RegistryName)),
 				"JOBSERVICE_WEBHOOK_JOB_MAX_RETRY": fmt.Sprintf("%d", hookMaxRetry),
 				"JOB_SERVICE_POOL_WORKERS":         fmt.Sprintf("%d", j.harbor.Spec.Components.JobService.WorkerCount),
 			},

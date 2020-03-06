@@ -11,7 +11,7 @@ import (
 
 	// +kubebuilder:scaffold:imports
 
-	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
+	goharborv1alpha1 "github.com/goharbor/harbor-operator/api/v1alpha1"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to
@@ -32,10 +32,10 @@ var _ = Describe("status", func() {
 	})
 
 	Describe("An Harbor resource", func() {
-		var h *containerregistryv1alpha1.Harbor
+		var h *goharborv1alpha1.Harbor
 
 		BeforeEach(func() {
-			h = &containerregistryv1alpha1.Harbor{}
+			h = &goharborv1alpha1.Harbor{}
 		})
 
 		Context("With no conditions", func() {
@@ -44,11 +44,11 @@ var _ = Describe("status", func() {
 			})
 
 			Describe("Update Ready condition to False", func() {
-				var conditionType containerregistryv1alpha1.HarborConditionType
+				var conditionType goharborv1alpha1.HarborConditionType
 				var conditionValue corev1.ConditionStatus
 
 				JustBeforeEach(func() {
-					conditionType = containerregistryv1alpha1.ReadyConditionType
+					conditionType = goharborv1alpha1.ReadyConditionType
 					conditionValue = corev1.ConditionFalse
 				})
 
@@ -98,15 +98,15 @@ var _ = Describe("status", func() {
 			})
 
 			Describe("Get Ready condition", func() {
-				var conditionType containerregistryv1alpha1.HarborConditionType
+				var conditionType goharborv1alpha1.HarborConditionType
 
 				JustBeforeEach(func() {
-					conditionType = containerregistryv1alpha1.ReadyConditionType
+					conditionType = goharborv1alpha1.ReadyConditionType
 				})
 
 				It("Should return unknown status", func() {
 					result := r.GetCondition(ctx, h, conditionType)
-					Expect(result).To(BeEquivalentTo(containerregistryv1alpha1.HarborCondition{
+					Expect(result).To(BeEquivalentTo(goharborv1alpha1.HarborCondition{
 						Type:   conditionType,
 						Status: corev1.ConditionUnknown,
 					}))
@@ -115,34 +115,34 @@ var _ = Describe("status", func() {
 
 			Describe("Get Ready status", func() {
 				BeforeEach(func() {
-					h = &containerregistryv1alpha1.Harbor{}
+					h = &goharborv1alpha1.Harbor{}
 				})
 
 				It("Should return unknown", func() {
-					result := r.GetConditionStatus(ctx, h, containerregistryv1alpha1.ReadyConditionType)
+					result := r.GetConditionStatus(ctx, h, goharborv1alpha1.ReadyConditionType)
 					Expect(result).To(BeEquivalentTo(corev1.ConditionUnknown))
 				})
 			})
 		})
 
 		Context("With Applied condition to True", func() {
-			var condition containerregistryv1alpha1.HarborCondition
+			var condition goharborv1alpha1.HarborCondition
 
 			JustBeforeEach(func() {
-				condition = containerregistryv1alpha1.HarborCondition{
-					Type:   containerregistryv1alpha1.AppliedConditionType,
+				condition = goharborv1alpha1.HarborCondition{
+					Type:   goharborv1alpha1.AppliedConditionType,
 					Reason: "",
 					Status: corev1.ConditionTrue,
 				}
-				h.Status.Conditions = []containerregistryv1alpha1.HarborCondition{*condition.DeepCopy()}
+				h.Status.Conditions = []goharborv1alpha1.HarborCondition{*condition.DeepCopy()}
 			})
 
 			Describe("Update Ready condition to False", func() {
-				var conditionType containerregistryv1alpha1.HarborConditionType
+				var conditionType goharborv1alpha1.HarborConditionType
 				var conditionValue corev1.ConditionStatus
 
 				JustBeforeEach(func() {
-					conditionType = containerregistryv1alpha1.ReadyConditionType
+					conditionType = goharborv1alpha1.ReadyConditionType
 					conditionValue = corev1.ConditionFalse
 				})
 
@@ -174,7 +174,7 @@ var _ = Describe("status", func() {
 							Expect(err).ToNot(HaveOccurred())
 
 							Expect(h.Status.Conditions).To(ConsistOf(condition, gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
-								"Type":    BeEquivalentTo(containerregistryv1alpha1.ReadyConditionType),
+								"Type":    BeEquivalentTo(goharborv1alpha1.ReadyConditionType),
 								"Status":  BeEquivalentTo(corev1.ConditionFalse),
 								"Reason":  BeEquivalentTo(reason),
 								"Message": BeEquivalentTo(message),
@@ -198,15 +198,15 @@ var _ = Describe("status", func() {
 			})
 
 			Describe("Get Ready condition", func() {
-				var conditionType containerregistryv1alpha1.HarborConditionType
+				var conditionType goharborv1alpha1.HarborConditionType
 
 				JustBeforeEach(func() {
-					conditionType = containerregistryv1alpha1.ReadyConditionType
+					conditionType = goharborv1alpha1.ReadyConditionType
 				})
 
 				It("Should return unknown", func() {
 					result := r.GetCondition(ctx, h, conditionType)
-					Expect(result).To(BeEquivalentTo(containerregistryv1alpha1.HarborCondition{
+					Expect(result).To(BeEquivalentTo(goharborv1alpha1.HarborCondition{
 						Type:   conditionType,
 						Status: corev1.ConditionUnknown,
 					}))
@@ -215,34 +215,34 @@ var _ = Describe("status", func() {
 
 			Describe("Get Ready status", func() {
 				BeforeEach(func() {
-					h = &containerregistryv1alpha1.Harbor{}
+					h = &goharborv1alpha1.Harbor{}
 				})
 
 				It("Should return unknown", func() {
-					result := r.GetConditionStatus(ctx, h, containerregistryv1alpha1.ReadyConditionType)
+					result := r.GetConditionStatus(ctx, h, goharborv1alpha1.ReadyConditionType)
 					Expect(result).To(BeEquivalentTo(corev1.ConditionUnknown))
 				})
 			})
 		})
 
 		Context("With Ready condition to True", func() {
-			var condition containerregistryv1alpha1.HarborCondition
+			var condition goharborv1alpha1.HarborCondition
 
 			JustBeforeEach(func() {
-				condition = containerregistryv1alpha1.HarborCondition{
-					Type:   containerregistryv1alpha1.ReadyConditionType,
+				condition = goharborv1alpha1.HarborCondition{
+					Type:   goharborv1alpha1.ReadyConditionType,
 					Reason: "",
 					Status: corev1.ConditionTrue,
 				}
-				h.Status.Conditions = []containerregistryv1alpha1.HarborCondition{*condition.DeepCopy()}
+				h.Status.Conditions = []goharborv1alpha1.HarborCondition{*condition.DeepCopy()}
 			})
 
 			Describe("Update Ready condition to False", func() {
-				var conditionType containerregistryv1alpha1.HarborConditionType
+				var conditionType goharborv1alpha1.HarborConditionType
 				var conditionValue corev1.ConditionStatus
 
 				JustBeforeEach(func() {
-					conditionType = containerregistryv1alpha1.ReadyConditionType
+					conditionType = goharborv1alpha1.ReadyConditionType
 					conditionValue = corev1.ConditionFalse
 				})
 
@@ -251,18 +251,18 @@ var _ = Describe("status", func() {
 					Expect(err).ToNot(HaveOccurred())
 
 					Expect(h.Status.Conditions).To(ContainElement(gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
-						"Type":   BeEquivalentTo(containerregistryv1alpha1.ReadyConditionType),
+						"Type":   BeEquivalentTo(goharborv1alpha1.ReadyConditionType),
 						"Status": BeEquivalentTo(corev1.ConditionFalse),
 					})))
 				})
 
 				Context("With a reason", func() {
 					It("Should update the status", func() {
-						err := r.UpdateCondition(ctx, h, containerregistryv1alpha1.ReadyConditionType, corev1.ConditionFalse, "the-reason")
+						err := r.UpdateCondition(ctx, h, goharborv1alpha1.ReadyConditionType, corev1.ConditionFalse, "the-reason")
 						Expect(err).ToNot(HaveOccurred())
 
 						Expect(h.Status.Conditions).To(ContainElement(gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
-							"Type":   BeEquivalentTo(containerregistryv1alpha1.ReadyConditionType),
+							"Type":   BeEquivalentTo(goharborv1alpha1.ReadyConditionType),
 							"Status": BeEquivalentTo(corev1.ConditionFalse),
 							"Reason": BeEquivalentTo(reason),
 						})))
@@ -270,11 +270,11 @@ var _ = Describe("status", func() {
 
 					Context("With a message", func() {
 						It("Should update the status", func() {
-							err := r.UpdateCondition(ctx, h, containerregistryv1alpha1.ReadyConditionType, corev1.ConditionFalse, "the-reason", "A human readable message")
+							err := r.UpdateCondition(ctx, h, goharborv1alpha1.ReadyConditionType, corev1.ConditionFalse, "the-reason", "A human readable message")
 							Expect(err).ToNot(HaveOccurred())
 
 							Expect(h.Status.Conditions).To(ContainElement(gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
-								"Type":    BeEquivalentTo(containerregistryv1alpha1.ReadyConditionType),
+								"Type":    BeEquivalentTo(goharborv1alpha1.ReadyConditionType),
 								"Status":  BeEquivalentTo(corev1.ConditionFalse),
 								"Reason":  BeEquivalentTo(reason),
 								"Message": BeEquivalentTo(message),
@@ -292,10 +292,10 @@ var _ = Describe("status", func() {
 			})
 
 			Describe("Get Ready condition", func() {
-				var conditionType containerregistryv1alpha1.HarborConditionType
+				var conditionType goharborv1alpha1.HarborConditionType
 
 				JustBeforeEach(func() {
-					conditionType = containerregistryv1alpha1.ReadyConditionType
+					conditionType = goharborv1alpha1.ReadyConditionType
 				})
 
 				It("Should return the condition", func() {
@@ -305,10 +305,10 @@ var _ = Describe("status", func() {
 			})
 
 			Describe("Get Ready condition", func() {
-				var conditionType containerregistryv1alpha1.HarborConditionType
+				var conditionType goharborv1alpha1.HarborConditionType
 
 				JustBeforeEach(func() {
-					conditionType = containerregistryv1alpha1.ReadyConditionType
+					conditionType = goharborv1alpha1.ReadyConditionType
 				})
 
 				It("Should return the status", func() {
@@ -319,27 +319,27 @@ var _ = Describe("status", func() {
 		})
 
 		Context("With multiple conditions", func() {
-			var readyCondition containerregistryv1alpha1.HarborCondition
+			var readyCondition goharborv1alpha1.HarborCondition
 
 			JustBeforeEach(func() {
-				readyCondition = containerregistryv1alpha1.HarborCondition{
-					Type:   containerregistryv1alpha1.ReadyConditionType,
+				readyCondition = goharborv1alpha1.HarborCondition{
+					Type:   goharborv1alpha1.ReadyConditionType,
 					Reason: "",
 					Status: corev1.ConditionTrue,
 				}
-				appliedCondition := containerregistryv1alpha1.HarborCondition{
-					Type:   containerregistryv1alpha1.AppliedConditionType,
+				appliedCondition := goharborv1alpha1.HarborCondition{
+					Type:   goharborv1alpha1.AppliedConditionType,
 					Reason: "",
 					Status: corev1.ConditionTrue,
 				}
-				h.Status.Conditions = []containerregistryv1alpha1.HarborCondition{*readyCondition.DeepCopy(), appliedCondition}
+				h.Status.Conditions = []goharborv1alpha1.HarborCondition{*readyCondition.DeepCopy(), appliedCondition}
 			})
 
 			Describe("Get Ready condition", func() {
-				var conditionType containerregistryv1alpha1.HarborConditionType
+				var conditionType goharborv1alpha1.HarborConditionType
 
 				JustBeforeEach(func() {
-					conditionType = containerregistryv1alpha1.ReadyConditionType
+					conditionType = goharborv1alpha1.ReadyConditionType
 				})
 
 				It("Should return the right status", func() {

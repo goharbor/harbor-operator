@@ -10,8 +10,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
-	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
-	"github.com/ovh/harbor-operator/pkg/factories/application"
+	goharborv1alpha1 "github.com/goharbor/harbor-operator/api/v1alpha1"
+	"github.com/goharbor/harbor-operator/pkg/factories/application"
 )
 
 func (c *HarborCore) GetIngresses(ctx context.Context) []*netv1.Ingress { // nolint:funlen
@@ -37,10 +37,10 @@ func (c *HarborCore) GetIngresses(ctx context.Context) []*netv1.Ingress { // nol
 	return []*netv1.Ingress{
 		{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      c.harbor.NormalizeComponentName(containerregistryv1alpha1.CoreName),
+				Name:      c.harbor.NormalizeComponentName(goharborv1alpha1.CoreName),
 				Namespace: c.harbor.Namespace,
 				Labels: map[string]string{
-					"app":      containerregistryv1alpha1.CoreName,
+					"app":      goharborv1alpha1.CoreName,
 					"harbor":   harborName,
 					"operator": operatorName,
 				},
@@ -56,19 +56,19 @@ func (c *HarborCore) GetIngresses(ctx context.Context) []*netv1.Ingress { // nol
 									{
 										Path: "/api",
 										Backend: netv1.IngressBackend{
-											ServiceName: c.harbor.NormalizeComponentName(containerregistryv1alpha1.CoreName),
+											ServiceName: c.harbor.NormalizeComponentName(goharborv1alpha1.CoreName),
 											ServicePort: intstr.FromInt(PublicPort),
 										},
 									}, {
 										Path: "/c",
 										Backend: netv1.IngressBackend{
-											ServiceName: c.harbor.NormalizeComponentName(containerregistryv1alpha1.CoreName),
+											ServiceName: c.harbor.NormalizeComponentName(goharborv1alpha1.CoreName),
 											ServicePort: intstr.FromInt(PublicPort),
 										},
 									}, {
 										Path: "/service",
 										Backend: netv1.IngressBackend{
-											ServiceName: c.harbor.NormalizeComponentName(containerregistryv1alpha1.CoreName),
+											ServiceName: c.harbor.NormalizeComponentName(goharborv1alpha1.CoreName),
 											ServicePort: intstr.FromInt(PublicPort),
 										},
 									},

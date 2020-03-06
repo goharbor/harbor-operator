@@ -7,8 +7,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
-	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
-	"github.com/ovh/harbor-operator/pkg/factories/application"
+	goharborv1alpha1 "github.com/goharbor/harbor-operator/api/v1alpha1"
+	"github.com/goharbor/harbor-operator/pkg/factories/application"
 )
 
 const (
@@ -22,10 +22,10 @@ func (c *HarborCore) GetServices(ctx context.Context) []*corev1.Service {
 	return []*corev1.Service{
 		{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      c.harbor.NormalizeComponentName(containerregistryv1alpha1.CoreName),
+				Name:      c.harbor.NormalizeComponentName(goharborv1alpha1.CoreName),
 				Namespace: c.harbor.Namespace,
 				Labels: map[string]string{
-					"app":      containerregistryv1alpha1.CoreName,
+					"app":      goharborv1alpha1.CoreName,
 					"harbor":   harborName,
 					"operator": operatorName,
 				},
@@ -38,7 +38,7 @@ func (c *HarborCore) GetServices(ctx context.Context) []*corev1.Service {
 					},
 				},
 				Selector: map[string]string{
-					"app":      containerregistryv1alpha1.CoreName,
+					"app":      goharborv1alpha1.CoreName,
 					"harbor":   harborName,
 					"operator": operatorName,
 				},

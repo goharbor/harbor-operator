@@ -11,9 +11,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
-	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
-	"github.com/ovh/harbor-operator/pkg/factories/application"
-	"github.com/ovh/harbor-operator/pkg/factories/logger"
+	goharborv1alpha1 "github.com/goharbor/harbor-operator/api/v1alpha1"
+	"github.com/goharbor/harbor-operator/pkg/factories/application"
+	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 )
 
 const (
@@ -43,10 +43,10 @@ func (c *Clair) GetDeployments(ctx context.Context) []*appsv1.Deployment { // no
 	return []*appsv1.Deployment{
 		{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      c.harbor.NormalizeComponentName(containerregistryv1alpha1.ClairName),
+				Name:      c.harbor.NormalizeComponentName(goharborv1alpha1.ClairName),
 				Namespace: c.harbor.Namespace,
 				Labels: map[string]string{
-					"app":      containerregistryv1alpha1.ClairName,
+					"app":      goharborv1alpha1.ClairName,
 					"harbor":   harborName,
 					"operator": operatorName,
 				},
@@ -54,7 +54,7 @@ func (c *Clair) GetDeployments(ctx context.Context) []*appsv1.Deployment { // no
 			Spec: appsv1.DeploymentSpec{
 				Selector: &metav1.LabelSelector{
 					MatchLabels: map[string]string{
-						"app":      containerregistryv1alpha1.ClairName,
+						"app":      goharborv1alpha1.ClairName,
 						"harbor":   harborName,
 						"operator": operatorName,
 					},
@@ -68,7 +68,7 @@ func (c *Clair) GetDeployments(ctx context.Context) []*appsv1.Deployment { // no
 							"operator/version":       application.GetVersion(ctx),
 						},
 						Labels: map[string]string{
-							"app":      containerregistryv1alpha1.ClairName,
+							"app":      goharborv1alpha1.ClairName,
 							"harbor":   harborName,
 							"operator": operatorName,
 						},
@@ -82,7 +82,7 @@ func (c *Clair) GetDeployments(ctx context.Context) []*appsv1.Deployment { // no
 								VolumeSource: corev1.VolumeSource{
 									ConfigMap: &corev1.ConfigMapVolumeSource{
 										LocalObjectReference: corev1.LocalObjectReference{
-											Name: c.harbor.NormalizeComponentName(containerregistryv1alpha1.ClairName),
+											Name: c.harbor.NormalizeComponentName(goharborv1alpha1.ClairName),
 										},
 										Items: []corev1.KeyToPath{
 											{
@@ -158,7 +158,7 @@ func (c *Clair) GetDeployments(ctx context.Context) []*appsv1.Deployment { // no
 										Name: "POSTGRES_PASSWORD",
 										ValueFrom: &corev1.EnvVarSource{
 											SecretKeyRef: &corev1.SecretKeySelector{
-												Key:      containerregistryv1alpha1.HarborClairDatabasePasswordKey,
+												Key:      goharborv1alpha1.HarborClairDatabasePasswordKey,
 												Optional: &varFalse,
 												LocalObjectReference: corev1.LocalObjectReference{
 													Name: c.harbor.Spec.Components.Clair.DatabaseSecret,
@@ -207,7 +207,7 @@ func (c *Clair) GetDeployments(ctx context.Context) []*appsv1.Deployment { // no
 										Name: "SCANNER_STORE_REDIS_URL",
 										ValueFrom: &corev1.EnvVarSource{
 											SecretKeyRef: &corev1.SecretKeySelector{
-												Key:      containerregistryv1alpha1.HarborClairAdapterBrokerURLKey,
+												Key:      goharborv1alpha1.HarborClairAdapterBrokerURLKey,
 												Optional: &varFalse,
 												LocalObjectReference: corev1.LocalObjectReference{
 													Name: c.harbor.Spec.Components.Clair.Adapter.RedisSecret,
@@ -218,7 +218,7 @@ func (c *Clair) GetDeployments(ctx context.Context) []*appsv1.Deployment { // no
 										Name: "SCANNER_STORE_REDIS_NAMESPACE",
 										ValueFrom: &corev1.EnvVarSource{
 											SecretKeyRef: &corev1.SecretKeySelector{
-												Key:      containerregistryv1alpha1.HarborClairAdapterBrokerNamespaceKey,
+												Key:      goharborv1alpha1.HarborClairAdapterBrokerNamespaceKey,
 												Optional: &varFalse,
 												LocalObjectReference: corev1.LocalObjectReference{
 													Name: c.harbor.Spec.Components.Clair.Adapter.RedisSecret,
@@ -240,7 +240,7 @@ func (c *Clair) GetDeployments(ctx context.Context) []*appsv1.Deployment { // no
 										ConfigMapRef: &corev1.ConfigMapEnvSource{
 											Optional: &varFalse,
 											LocalObjectReference: corev1.LocalObjectReference{
-												Name: c.harbor.NormalizeComponentName(containerregistryv1alpha1.ClairName),
+												Name: c.harbor.NormalizeComponentName(goharborv1alpha1.ClairName),
 											},
 										},
 									},

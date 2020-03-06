@@ -11,9 +11,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
-	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
-	"github.com/ovh/harbor-operator/controllers/harbor/components"
-	"github.com/ovh/harbor-operator/pkg/factories/logger"
+	goharborv1alpha1 "github.com/goharbor/harbor-operator/api/v1alpha1"
+	"github.com/goharbor/harbor-operator/controllers/harbor/components"
+	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 )
 
 func (r *Reconciler) MutateAnnotations(ctx context.Context, resource metav1.Object) {
@@ -22,7 +22,7 @@ func (r *Reconciler) MutateAnnotations(ctx context.Context, resource metav1.Obje
 		annotations = map[string]string{}
 	}
 	// Warning annotation
-	annotations[containerregistryv1alpha1.WarningLabel] = fmt.Sprintf("⚠️ This Resource is managed by *%s* ⚠️", r.GetName())
+	annotations[goharborv1alpha1.WarningLabel] = fmt.Sprintf("⚠️ This Resource is managed by *%s* ⚠️", r.GetName())
 	resource.SetAnnotations(annotations)
 }
 
@@ -32,15 +32,15 @@ func (r *Reconciler) MutateLabels(ctx context.Context, resource metav1.Object) {
 		labels = map[string]string{}
 	}
 
-	labels[containerregistryv1alpha1.OperatorNameLabel] = r.GetName()
-	labels[containerregistryv1alpha1.OperatorVersionLabel] = r.GetVersion()
+	labels[goharborv1alpha1.OperatorNameLabel] = r.GetName()
+	labels[goharborv1alpha1.OperatorVersionLabel] = r.GetVersion()
 
-	labels[containerregistryv1alpha1.ComponentNameLabel] = components.ComponentName(ctx)
+	labels[goharborv1alpha1.ComponentNameLabel] = components.ComponentName(ctx)
 
 	resource.SetLabels(labels)
 }
 
-func (r *Reconciler) CreateResource(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, resource components.Resource) error {
+func (r *Reconciler) CreateResource(ctx context.Context, harbor *goharborv1alpha1.Harbor, resource components.Resource) error {
 	kind, version := resource.
 		GetObjectKind().
 		GroupVersionKind().
@@ -75,7 +75,7 @@ func (r *Reconciler) CreateResource(ctx context.Context, harbor *containerregist
 	return nil
 }
 
-func (r *Reconciler) CreateResources(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, resources []components.Resource) error {
+func (r *Reconciler) CreateResources(ctx context.Context, harbor *goharborv1alpha1.Harbor, resources []components.Resource) error {
 	var g errgroup.Group
 
 	for _, resource := range resources {
@@ -96,11 +96,11 @@ func (r *Reconciler) CreateResources(ctx context.Context, harbor *containerregis
 // +kubebuilder:rbac:groups="cert-manager.io",resources="certificates",verbs=create
 // +kubebuilder:rbac:groups="networking.k8s.io",resources="ingresses",verbs=create
 
-func (r *Reconciler) CreateComponent(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, component *components.ComponentRunner) error {
+func (r *Reconciler) CreateComponent(ctx context.Context, harbor *goharborv1alpha1.Harbor, component *components.ComponentRunner) error {
 	return component.ParallelRun(ctx, harbor, r.CreateResources, r.CreateResources, r.CreateResources, r.CreateResources, r.CreateResources, r.CreateResources, true)
 }
 
-func (r *Reconciler) Create(ctx context.Context, harbor *containerregistryv1alpha1.Harbor) error {
+func (r *Reconciler) Create(ctx context.Context, harbor *goharborv1alpha1.Harbor) error {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "apply")
 	defer span.Finish()
 

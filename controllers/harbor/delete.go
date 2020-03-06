@@ -16,8 +16,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
-	"github.com/ovh/harbor-operator/pkg/factories/logger"
+	goharborv1alpha1 "github.com/goharbor/harbor-operator/api/v1alpha1"
+	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 )
 
 var (
@@ -57,12 +57,12 @@ var (
 // +kubebuilder:rbac:groups="cert-manager.io",resources="certificates",verbs=delete
 // +kubebuilder:rbac:groups="networking.k8s.io",resources="ingresses",verbs=delete
 
-func (r *Reconciler) DeleteResourceCollection(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, componentName string, gvk schema.GroupVersionKind) error {
+func (r *Reconciler) DeleteResourceCollection(ctx context.Context, harbor *goharborv1alpha1.Harbor, componentName string, gvk schema.GroupVersionKind) error {
 	u := &unstructured.UnstructuredList{}
 	u.SetGroupVersionKind(gvk)
 
 	matchingLabel := client.MatchingLabels{
-		containerregistryv1alpha1.ComponentNameLabel: componentName,
+		goharborv1alpha1.ComponentNameLabel: componentName,
 	}
 	inNamespace := client.InNamespace(harbor.GetNamespace())
 
@@ -105,7 +105,7 @@ func (r *Reconciler) DeleteResourceCollection(ctx context.Context, harbor *conta
 	return nil
 }
 
-func (r *Reconciler) DeleteComponent(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, componentName string) error {
+func (r *Reconciler) DeleteComponent(ctx context.Context, harbor *goharborv1alpha1.Harbor, componentName string) error {
 	var g errgroup.Group
 
 	l := logger.Get(ctx).WithValues("Component", componentName)

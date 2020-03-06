@@ -10,8 +10,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
-	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
-	"github.com/ovh/harbor-operator/pkg/factories/application"
+	goharborv1alpha1 "github.com/goharbor/harbor-operator/api/v1alpha1"
+	"github.com/goharbor/harbor-operator/pkg/factories/application"
 )
 
 var (
@@ -32,10 +32,10 @@ func (j *JobService) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 	return []*appsv1.Deployment{
 		{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      j.harbor.NormalizeComponentName(containerregistryv1alpha1.JobServiceName),
+				Name:      j.harbor.NormalizeComponentName(goharborv1alpha1.JobServiceName),
 				Namespace: j.harbor.Namespace,
 				Labels: map[string]string{
-					"app":      containerregistryv1alpha1.JobServiceName,
+					"app":      goharborv1alpha1.JobServiceName,
 					"harbor":   harborName,
 					"operator": operatorName,
 				},
@@ -43,7 +43,7 @@ func (j *JobService) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 			Spec: appsv1.DeploymentSpec{
 				Selector: &metav1.LabelSelector{
 					MatchLabels: map[string]string{
-						"app":      containerregistryv1alpha1.JobServiceName,
+						"app":      goharborv1alpha1.JobServiceName,
 						"harbor":   harborName,
 						"operator": operatorName,
 					},
@@ -57,7 +57,7 @@ func (j *JobService) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 							"operator/version":       application.GetVersion(ctx),
 						},
 						Labels: map[string]string{
-							"app":      containerregistryv1alpha1.JobServiceName,
+							"app":      goharborv1alpha1.JobServiceName,
 							"harbor":   harborName,
 							"operator": operatorName,
 						},
@@ -76,7 +76,7 @@ func (j *JobService) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 								VolumeSource: corev1.VolumeSource{
 									ConfigMap: &corev1.ConfigMapVolumeSource{
 										LocalObjectReference: corev1.LocalObjectReference{
-											Name: j.harbor.NormalizeComponentName(containerregistryv1alpha1.JobServiceName),
+											Name: j.harbor.NormalizeComponentName(goharborv1alpha1.JobServiceName),
 										},
 									},
 								},
@@ -137,7 +137,7 @@ func (j *JobService) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 												Key:      "secret",
 												Optional: &varFalse,
 												LocalObjectReference: corev1.LocalObjectReference{
-													Name: j.harbor.NormalizeComponentName(containerregistryv1alpha1.CoreName),
+													Name: j.harbor.NormalizeComponentName(goharborv1alpha1.CoreName),
 												},
 											},
 										},
@@ -148,7 +148,7 @@ func (j *JobService) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 												Key:      "secret",
 												Optional: &varFalse,
 												LocalObjectReference: corev1.LocalObjectReference{
-													Name: j.harbor.NormalizeComponentName(containerregistryv1alpha1.JobServiceName),
+													Name: j.harbor.NormalizeComponentName(goharborv1alpha1.JobServiceName),
 												},
 											},
 										},
@@ -159,7 +159,7 @@ func (j *JobService) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 												Key:      "CORE_URL",
 												Optional: &varFalse,
 												LocalObjectReference: corev1.LocalObjectReference{
-													Name: j.harbor.NormalizeComponentName(containerregistryv1alpha1.CoreName),
+													Name: j.harbor.NormalizeComponentName(goharborv1alpha1.CoreName),
 												},
 											},
 										},
@@ -167,7 +167,7 @@ func (j *JobService) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 										Name: "JOB_SERVICE_POOL_REDIS_URL",
 										ValueFrom: &corev1.EnvVarSource{
 											SecretKeyRef: &corev1.SecretKeySelector{
-												Key:      containerregistryv1alpha1.HarborJobServiceBrokerURLKey,
+												Key:      goharborv1alpha1.HarborJobServiceBrokerURLKey,
 												Optional: &varFalse,
 												LocalObjectReference: corev1.LocalObjectReference{
 													Name: j.harbor.Spec.Components.JobService.RedisSecret,
@@ -178,7 +178,7 @@ func (j *JobService) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 										Name: "JOB_SERVICE_POOL_REDIS_NAMESPACE",
 										ValueFrom: &corev1.EnvVarSource{
 											SecretKeyRef: &corev1.SecretKeySelector{
-												Key:      containerregistryv1alpha1.HarborJobServiceBrokerNamespaceKey,
+												Key:      goharborv1alpha1.HarborJobServiceBrokerNamespaceKey,
 												Optional: &varFalse,
 												LocalObjectReference: corev1.LocalObjectReference{
 													Name: j.harbor.Spec.Components.JobService.RedisSecret,
@@ -192,7 +192,7 @@ func (j *JobService) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 										ConfigMapRef: &corev1.ConfigMapEnvSource{
 											Optional: &varFalse,
 											LocalObjectReference: corev1.LocalObjectReference{
-												Name: j.harbor.NormalizeComponentName(containerregistryv1alpha1.JobServiceName),
+												Name: j.harbor.NormalizeComponentName(goharborv1alpha1.JobServiceName),
 											},
 										},
 									},

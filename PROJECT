@@ -1,5 +1,5 @@
 domain: ovhcloud.com
-repo: github.com/ovh/harbor-operator
+repo: github.com/goharbor/harbor-operator
 resources:
 - group: containerregistry
   kind: Harbor

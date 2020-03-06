@@ -11,7 +11,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/client-go/rest"
 
-	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
+	goharborv1alpha1 "github.com/goharbor/harbor-operator/api/v1alpha1"
 )
 
 const (
@@ -60,7 +60,7 @@ func (h *APIHealth) GetUnhealthyComponents() []string {
 	return components
 }
 
-func (r *Reconciler) GetHealth(ctx context.Context, harbor *containerregistryv1alpha1.Harbor) (*APIHealth, error) {
+func (r *Reconciler) GetHealth(ctx context.Context, harbor *goharborv1alpha1.Harbor) (*APIHealth, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "check")
 	defer span.Finish()
 
@@ -81,7 +81,7 @@ func (r *Reconciler) GetHealth(ctx context.Context, harbor *containerregistryv1a
 		Context(ctx).
 		Resource("services").
 		Namespace(harbor.GetNamespace()).
-		Name(harbor.NormalizeComponentName(containerregistryv1alpha1.CoreName)).
+		Name(harbor.NormalizeComponentName(goharborv1alpha1.CoreName)).
 		SubResource("proxy").
 		Suffix(HarborHealthEndpoint).
 		DoRaw()

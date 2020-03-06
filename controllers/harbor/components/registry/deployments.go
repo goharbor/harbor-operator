@@ -10,8 +10,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
-	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
-	"github.com/ovh/harbor-operator/pkg/factories/application"
+	goharborv1alpha1 "github.com/goharbor/harbor-operator/api/v1alpha1"
+	"github.com/goharbor/harbor-operator/pkg/factories/application"
 )
 
 const (
@@ -39,7 +39,7 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 	if len(r.harbor.Spec.Components.Registry.CacheSecret) > 0 {
 		cacheEnv.ValueFrom = &corev1.EnvVarSource{
 			SecretKeyRef: &corev1.SecretKeySelector{
-				Key:      containerregistryv1alpha1.HarborRegistryURLKey,
+				Key:      goharborv1alpha1.HarborRegistryURLKey,
 				Optional: &varTrue,
 				LocalObjectReference: corev1.LocalObjectReference{
 					Name: r.harbor.Spec.Components.Registry.CacheSecret,
@@ -60,10 +60,10 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 	return []*appsv1.Deployment{
 		{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      r.harbor.NormalizeComponentName(containerregistryv1alpha1.RegistryName),
+				Name:      r.harbor.NormalizeComponentName(goharborv1alpha1.RegistryName),
 				Namespace: r.harbor.Namespace,
 				Labels: map[string]string{
-					"app":      containerregistryv1alpha1.RegistryName,
+					"app":      goharborv1alpha1.RegistryName,
 					"harbor":   harborName,
 					"operator": operatorName,
 				},
@@ -71,7 +71,7 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 			Spec: appsv1.DeploymentSpec{
 				Selector: &metav1.LabelSelector{
 					MatchLabels: map[string]string{
-						"app":      containerregistryv1alpha1.RegistryName,
+						"app":      goharborv1alpha1.RegistryName,
 						"harbor":   harborName,
 						"operator": operatorName,
 					},
@@ -85,7 +85,7 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 							"operator/version":       application.GetVersion(ctx),
 						},
 						Labels: map[string]string{
-							"app":      containerregistryv1alpha1.RegistryName,
+							"app":      goharborv1alpha1.RegistryName,
 							"harbor":   harborName,
 							"operator": operatorName,
 						},
@@ -104,7 +104,7 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 								VolumeSource: corev1.VolumeSource{
 									ConfigMap: &corev1.ConfigMapVolumeSource{
 										LocalObjectReference: corev1.LocalObjectReference{
-											Name: r.harbor.NormalizeComponentName(containerregistryv1alpha1.RegistryName),
+											Name: r.harbor.NormalizeComponentName(goharborv1alpha1.RegistryName),
 										},
 									},
 								},
@@ -115,7 +115,7 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 								Name: "certificate",
 								VolumeSource: corev1.VolumeSource{
 									Secret: &corev1.SecretVolumeSource{
-										SecretName: r.harbor.NormalizeComponentName(containerregistryv1alpha1.CertificateName),
+										SecretName: r.harbor.NormalizeComponentName(goharborv1alpha1.CertificateName),
 									},
 								},
 							},
@@ -154,7 +154,7 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 										Value: "/opt/configuration/storage",
 									}, {
 										Name:  "CORE_HOSTNAME",
-										Value: r.harbor.NormalizeComponentName(containerregistryv1alpha1.CoreName),
+										Value: r.harbor.NormalizeComponentName(goharborv1alpha1.CoreName),
 									}, {
 										Name:  "METRICS_ADDRESS",
 										Value: fmt.Sprintf(":%d", metricsPort),
@@ -186,7 +186,7 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 												Key:      "secret",
 												Optional: &varFalse,
 												LocalObjectReference: corev1.LocalObjectReference{
-													Name: r.harbor.NormalizeComponentName(containerregistryv1alpha1.CoreName),
+													Name: r.harbor.NormalizeComponentName(goharborv1alpha1.CoreName),
 												},
 											},
 										},
@@ -197,7 +197,7 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 												Key:      "secret",
 												Optional: &varFalse,
 												LocalObjectReference: corev1.LocalObjectReference{
-													Name: r.harbor.NormalizeComponentName(containerregistryv1alpha1.JobServiceName),
+													Name: r.harbor.NormalizeComponentName(goharborv1alpha1.JobServiceName),
 												},
 											},
 										},

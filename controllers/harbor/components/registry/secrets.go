@@ -9,8 +9,8 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
-	"github.com/ovh/harbor-operator/pkg/factories/application"
+	goharborv1alpha1 "github.com/goharbor/harbor-operator/api/v1alpha1"
+	"github.com/goharbor/harbor-operator/pkg/factories/application"
 )
 
 const (
@@ -24,10 +24,10 @@ func (r *Registry) GetSecrets(ctx context.Context) []*corev1.Secret {
 	return []*corev1.Secret{
 		{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      r.harbor.NormalizeComponentName(containerregistryv1alpha1.RegistryName),
+				Name:      r.harbor.NormalizeComponentName(goharborv1alpha1.RegistryName),
 				Namespace: r.harbor.Namespace,
 				Labels: map[string]string{
-					"app":      containerregistryv1alpha1.RegistryName,
+					"app":      goharborv1alpha1.RegistryName,
 					"harbor":   harborName,
 					"operator": operatorName,
 				},

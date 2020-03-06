@@ -12,8 +12,8 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
-	"github.com/ovh/harbor-operator/pkg/factories/application"
+	goharborv1alpha1 "github.com/goharbor/harbor-operator/api/v1alpha1"
+	"github.com/goharbor/harbor-operator/pkg/factories/application"
 )
 
 const (
@@ -47,10 +47,10 @@ func (c *Clair) GetConfigMaps(ctx context.Context) []*corev1.ConfigMap {
 	return []*corev1.ConfigMap{
 		{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      c.harbor.NormalizeComponentName(containerregistryv1alpha1.ClairName),
+				Name:      c.harbor.NormalizeComponentName(goharborv1alpha1.ClairName),
 				Namespace: c.harbor.Namespace,
 				Labels: map[string]string{
-					"app":      containerregistryv1alpha1.ClairName,
+					"app":      goharborv1alpha1.ClairName,
 					"harbor":   harborName,
 					"operator": operatorName,
 				},
@@ -61,7 +61,7 @@ func (c *Clair) GetConfigMaps(ctx context.Context) []*corev1.ConfigMap {
 			// https://github.com/goharbor/harbor-scanner-clair#configuration
 			// https://github.com/goharbor/harbor/blob/master/make/photon/prepare/templates/clair/clair_env.jinja
 			Data: map[string]string{
-				"SCANNER_CLAIR_URL":                   fmt.Sprintf("http://%s", c.harbor.NormalizeComponentName(containerregistryv1alpha1.ClairName)),
+				"SCANNER_CLAIR_URL":                   fmt.Sprintf("http://%s", c.harbor.NormalizeComponentName(goharborv1alpha1.ClairName)),
 				"SCANNER_LOG_LEVEL":                   "debug",
 				"SCANNER_STORE_REDIS_POOL_MAX_ACTIVE": "5",
 				"SCANNER_STORE_REDIS_POOL_MAX_IDLE":   "5",

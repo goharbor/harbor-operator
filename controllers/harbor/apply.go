@@ -13,11 +13,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
-	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
-	"github.com/ovh/harbor-operator/controllers/harbor/components"
+	goharborv1alpha1 "github.com/goharbor/harbor-operator/api/v1alpha1"
+	"github.com/goharbor/harbor-operator/controllers/harbor/components"
 )
 
-func (r *Reconciler) ApplyMutationFunc(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, resource components.Resource, result metav1.Object, mutate controllerutil.MutateFn) func() error {
+func (r *Reconciler) ApplyMutationFunc(ctx context.Context, harbor *goharborv1alpha1.Harbor, resource components.Resource, result metav1.Object, mutate controllerutil.MutateFn) func() error {
 	return func() error {
 		// Immutable field
 		resourceVersion := result.GetResourceVersion()
@@ -69,7 +69,7 @@ func (r *Reconciler) ApplyMutationFunc(ctx context.Context, harbor *containerreg
 	}
 }
 
-func (r *Reconciler) ApplyResource(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, resource components.Resource, objectFactory components.ResourceFactory, objectMutation components.ResourceMutationGetter) (components.Resource, error) {
+func (r *Reconciler) ApplyResource(ctx context.Context, harbor *goharborv1alpha1.Harbor, resource components.Resource, objectFactory components.ResourceFactory, objectMutation components.ResourceMutationGetter) (components.Resource, error) {
 	kind, version := resource.GetObjectKind().GroupVersionKind().ToAPIVersionAndKind()
 
 	span, ctx := opentracing.StartSpanFromContext(ctx, "deployResource", opentracing.Tags{
@@ -93,7 +93,7 @@ func (r *Reconciler) ApplyResource(ctx context.Context, harbor *containerregistr
 	return result, nil
 }
 
-func (r *Reconciler) ApplyResources(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, resources []components.Resource, objectFactory func() components.Resource, objectMutation func(components.Resource, components.Resource) controllerutil.MutateFn) error {
+func (r *Reconciler) ApplyResources(ctx context.Context, harbor *goharborv1alpha1.Harbor, resources []components.Resource, objectFactory func() components.Resource, objectMutation func(components.Resource, components.Resource) controllerutil.MutateFn) error {
 	var g errgroup.Group
 
 	for _, resource := range resources {
@@ -254,30 +254,30 @@ func mutateConfigMap(configResource, result components.Resource) controllerutil.
 // +kubebuilder:rbac:groups="networking.k8s.io",resources="ingresses",verbs=get;list;watch;update;patch;create
 // +kubebuilder:rbac:groups="apps",resources="deployments",verbs=get;list;watch;update;patch;create
 
-func (r *Reconciler) ApplyComponent(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, component *components.ComponentRunner) error {
-	service := func(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, resources []components.Resource) error {
+func (r *Reconciler) ApplyComponent(ctx context.Context, harbor *goharborv1alpha1.Harbor, component *components.ComponentRunner) error {
+	service := func(ctx context.Context, harbor *goharborv1alpha1.Harbor, resources []components.Resource) error {
 		return r.ApplyResources(ctx, harbor, resources, func() components.Resource { return &corev1.Service{} }, mutateService)
 	}
-	configMap := func(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, resources []components.Resource) error {
+	configMap := func(ctx context.Context, harbor *goharborv1alpha1.Harbor, resources []components.Resource) error {
 		return r.ApplyResources(ctx, harbor, resources, func() components.Resource { return &corev1.ConfigMap{} }, mutateConfigMap)
 	}
-	ingress := func(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, resources []components.Resource) error {
+	ingress := func(ctx context.Context, harbor *goharborv1alpha1.Harbor, resources []components.Resource) error {
 		return r.ApplyResources(ctx, harbor, resources, func() components.Resource { return &netv1.Ingress{} }, mutateIngress)
 	}
-	secret := func(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, resources []components.Resource) error {
+	secret := func(ctx context.Context, harbor *goharborv1alpha1.Harbor, resources []components.Resource) error {
 		return r.ApplyResources(ctx, harbor, resources, func() components.Resource { return &corev1.Secret{} }, mutateSecret)
 	}
-	certificate := func(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, resources []components.Resource) error {
+	certificate := func(ctx context.Context, harbor *goharborv1alpha1.Harbor, resources []components.Resource) error {
 		return r.ApplyResources(ctx, harbor, resources, func() components.Resource { return &certv1.Certificate{} }, mutateCertificate)
 	}
-	deployment := func(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, resources []components.Resource) error {
+	deployment := func(ctx context.Context, harbor *goharborv1alpha1.Harbor, resources []components.Resource) error {
 		return r.ApplyResources(ctx, harbor, resources, func() components.Resource { return &appsv1.Deployment{} }, mutateDeployment)
 	}
 
 	return component.ParallelRun(ctx, harbor, service, configMap, ingress, secret, certificate, deployment, true)
 }
 
-func (r *Reconciler) Apply(ctx context.Context, harbor *containerregistryv1alpha1.Harbor) error {
+func (r *Reconciler) Apply(ctx context.Context, harbor *goharborv1alpha1.Harbor) error {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "apply")
 	defer span.Finish()
 
@@ -290,14 +290,14 @@ func (r *Reconciler) Apply(ctx context.Context, harbor *containerregistryv1alpha
 
 	if harbor.Spec.Components.Clair == nil {
 		g.Go(func() error {
-			err := r.DeleteComponent(ctx, harbor, containerregistryv1alpha1.ClairName)
+			err := r.DeleteComponent(ctx, harbor, goharborv1alpha1.ClairName)
 			return errors.Wrap(err, "cannot delete clair")
 		})
 	}
 
 	if harbor.Spec.Components.Notary == nil {
 		g.Go(func() error {
-			err := r.DeleteComponent(ctx, harbor, containerregistryv1alpha1.NotaryName)
+			err := r.DeleteComponent(ctx, harbor, goharborv1alpha1.NotaryName)
 			return errors.Wrap(err, "cannot delete notary")
 		})
 	}

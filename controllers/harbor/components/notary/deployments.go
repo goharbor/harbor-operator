@@ -8,8 +8,8 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
-	"github.com/ovh/harbor-operator/pkg/factories/application"
+	goharborv1alpha1 "github.com/goharbor/harbor-operator/api/v1alpha1"
+	"github.com/goharbor/harbor-operator/pkg/factories/application"
 )
 
 const (
@@ -98,7 +98,7 @@ func (n *Notary) GetDeployments(ctx context.Context) []*appsv1.Deployment { // n
 								Name: "token-certificate",
 								VolumeSource: corev1.VolumeSource{
 									Secret: &corev1.SecretVolumeSource{
-										SecretName: n.harbor.NormalizeComponentName(containerregistryv1alpha1.CertificateName),
+										SecretName: n.harbor.NormalizeComponentName(goharborv1alpha1.CertificateName),
 									},
 								},
 							},
