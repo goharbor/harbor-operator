@@ -3,7 +3,7 @@ package jobservice
 import (
 	"context"
 
-	containerregistryv1alpha1 "github.com/goharbor/harbor-core-operator/api/v1alpha1"
+	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
 )
 
 type JobService struct {

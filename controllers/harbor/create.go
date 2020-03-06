@@ -11,9 +11,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
-	containerregistryv1alpha1 "github.com/goharbor/harbor-core-operator/api/v1alpha1"
-	"github.com/goharbor/harbor-core-operator/controllers/harbor/components"
-	"github.com/goharbor/harbor-core-operator/pkg/factories/logger"
+	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
+	"github.com/ovh/harbor-operator/controllers/harbor/components"
+	"github.com/ovh/harbor-operator/pkg/factories/logger"
 )
 
 func (r *Reconciler) MutateAnnotations(ctx context.Context, resource metav1.Object) {

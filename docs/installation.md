@@ -2,7 +2,7 @@
 
 ## Requirements
 
-Kubernetes API running (see [Supported platforms](https://github.com/goharbor/harbor-core-operator/blob/master/README.md#supported-platforms) for more information).
+Kubernetes API running (see [Supported platforms](https://github.com/goharbor/harbor-operator/blob/master/README.md#supported-platforms) for more information).
 
 ### Minimal
 

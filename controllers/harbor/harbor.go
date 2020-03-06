@@ -15,8 +15,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 
-	containerregistryv1alpha1 "github.com/goharbor/harbor-core-operator/api/v1alpha1"
-	"github.com/goharbor/harbor-core-operator/pkg/factories/logger"
+	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
+	"github.com/ovh/harbor-operator/pkg/factories/logger"
 )
 
 const (

@@ -12,8 +12,8 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	containerregistryv1alpha1 "github.com/goharbor/harbor-core-operator/api/v1alpha1"
-	"github.com/goharbor/harbor-core-operator/pkg/factories/application"
+	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
+	"github.com/ovh/harbor-operator/pkg/factories/application"
 )
 
 const (

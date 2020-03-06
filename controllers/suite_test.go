@@ -35,9 +35,9 @@ import (
 
 	// +kubebuilder:scaffold:imports
 
-	harborCtrl "github.com/goharbor/harbor-core-operator/controllers/harbor"
-	"github.com/goharbor/harbor-core-operator/pkg/factories/logger"
-	"github.com/goharbor/harbor-core-operator/pkg/scheme"
+	harborCtrl "github.com/ovh/harbor-operator/controllers/harbor"
+	"github.com/ovh/harbor-operator/pkg/factories/logger"
+	"github.com/ovh/harbor-operator/pkg/scheme"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to

@@ -13,8 +13,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
-	containerregistryv1alpha1 "github.com/goharbor/harbor-core-operator/api/v1alpha1"
-	"github.com/goharbor/harbor-core-operator/controllers/harbor/components"
+	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
+	"github.com/ovh/harbor-operator/controllers/harbor/components"
 )
 
 func (r *Reconciler) ApplyMutationFunc(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, resource components.Resource, result metav1.Object, mutate controllerutil.MutateFn) func() error {

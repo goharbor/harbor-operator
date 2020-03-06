@@ -3,13 +3,13 @@
 ## Get the sources
 
 ```bash
-git clone https://github.com/goharbor/harbor-core-operator.git
+git clone https://github.com/goharbor/harbor-operator.git
 cd harbor-core-operator
 ```
 
 You developped a new cool feature? Fixed an annoying bug? We would be happy to hear from you!
 
-Have a look in [CONTRIBUTING.md](https://github.com/goharbor/harbor-core-operator/blob/master/CONTRIBUTING.md)
+Have a look in [CONTRIBUTING.md](https://github.com/goharbor/harbor-operator/blob/master/CONTRIBUTING.md)
 
 ## Dependencies
 

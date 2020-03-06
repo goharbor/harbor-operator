@@ -11,7 +11,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/client-go/rest"
 
-	containerregistryv1alpha1 "github.com/goharbor/harbor-core-operator/api/v1alpha1"
+	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
 )
 
 const (

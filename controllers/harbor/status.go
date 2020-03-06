@@ -10,8 +10,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	containerregistryv1alpha1 "github.com/goharbor/harbor-core-operator/api/v1alpha1"
-	"github.com/goharbor/harbor-core-operator/pkg/factories/logger"
+	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
+	"github.com/ovh/harbor-operator/pkg/factories/logger"
 )
 
 func (r *Reconciler) GetCondition(ctx context.Context, harbor *containerregistryv1alpha1.Harbor, conditionType containerregistryv1alpha1.HarborConditionType) containerregistryv1alpha1.HarborCondition {

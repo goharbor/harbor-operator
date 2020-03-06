@@ -5,7 +5,7 @@
 [Harbor](https://github.com/goharbor/harbor/) is a very active project, composed on numerous stateful and stateless sub-projects and dependencies.
 These components may be deployed, updated, healed, backuped or scaled respecting some constraints.
 
-The Harbor Core Operator extends the usual K8s resources with Harbor-related custom ones. The Kubernetes API can then be used in a declarative way to manage Harbor and ensure its high-availability operation, thanks to the [Kubernetes control loop](https://kubernetes.io/docs/concepts/#kubernetes-control-plane).
+The Harbor Operator extends the usual K8s resources with Harbor-related custom ones. The Kubernetes API can then be used in a declarative way to manage Harbor and ensure its high-availability operation, thanks to the [Kubernetes control loop](https://kubernetes.io/docs/concepts/#kubernetes-control-plane).
 
 The Harbor operator aims to cover both Day1 and Day2 operations of an enterprise-grade Harbor deployment.
 
@@ -20,7 +20,7 @@ It is designed to be used on any Kubernetes cluster, in a cloud or on premise co
 
 ## Project status
 
-Harbor Core Operator is still very early stage and currently covers deployment, scale and destruction of Harbor in 1.10 version.
+Harbor Operator is still very early stage and currently covers deployment, scale and destruction of Harbor in 1.10 version.
 Other parts of the life-cycle will be managed in future versions of the operator.
 As any project in this repository, do not hesitate to raise issues or suggest code improvements.
 
@@ -62,7 +62,7 @@ It is possible to add and delete ChartMuseum, Notary and Clair by editing the Ha
 
 ## Installation
 
-See [install documentation](https://github.com/goharbor/harbor-core-operator/blob/master/docs/installation.md).
+See [install documentation](https://github.com/goharbor/harbor-operator/blob/master/docs/installation.md).
 
 ## Compatibility
 
@@ -82,19 +82,19 @@ Generate resources using `make generate`
 
 ## Development
 
-Follow the [Development guide](https://github.com/goharbor/harbor-core-operator/blob/master/docs/development.md) to start on the project.
+Follow the [Development guide](https://github.com/goharbor/harbor-operator/blob/master/docs/development.md) to start on the project.
 
 ## Additional documentation
 
- 1. [Learn how reconciliation works](https://github.com/goharbor/harbor-core-operator/blob/master/docs/reconciler.md)
- 2. [Custom Resource Definition](https://github.com/goharbor/harbor-core-operator/blob/master/docs/custom-resource-definition.md)
+ 1. [Learn how reconciliation works](https://github.com/ovh/harbor-operator/blob/master/docs/reconciler.md)
+ 2. [Custom Resource Definition](https://github.com/ovh/harbor-operator/blob/master/docs/custom-resource-definition.md)
 
 ## Related links
 
-- Contribute: <https://github.com/goharbor/harbor-core-operator/blob/master/CONTRIBUTING.md>
-- Report bugs: <https://github.com/goharbor/harbor-core-operator/issues>
-- Get latest version: <https://hub.docker.com/r/goharbor/harbor-core-operator>
+- Contribute: <https://github.com/goharbor/harbor-operator/blob/master/CONTRIBUTING.md>
+- Report bugs: <https://github.com/goharbor/harbor-operator/issues>
+- Get latest version: <https://hub.docker.com/r/goharbor/harbor-operator>
 
 ## License
 
-See <https://github.com/goharbor/harbor-core-operator/blob/master/LICENSE>
+See <https://github.com/ovh/harbor-operator/blob/master/LICENSE>

@@ -6,7 +6,7 @@ import (
 	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
 
-	"github.com/goharbor/harbor-core-operator/controllers/harbor"
+	"github.com/ovh/harbor-operator/controllers/harbor"
 )
 
 const (
