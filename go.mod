@@ -1,4 +1,4 @@
-module github.com/ovh/harbor-operator
+module github.com/goharbor/harbor-core-operator
 
 go 1.13
 

@@ -6,7 +6,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 
-	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
+	containerregistryv1alpha1 "github.com/goharbor/harbor-core-operator/api/v1alpha1"
 	"github.com/pkg/errors"
 )
 

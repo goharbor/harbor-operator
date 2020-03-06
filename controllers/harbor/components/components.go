@@ -14,15 +14,15 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
-	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
-	harbor_chartmuseum "github.com/ovh/harbor-operator/controllers/harbor/components/chartmuseum"
-	harbor_clair "github.com/ovh/harbor-operator/controllers/harbor/components/clair"
-	harbor_core "github.com/ovh/harbor-operator/controllers/harbor/components/harbor-core"
-	harbor_jobservice "github.com/ovh/harbor-operator/controllers/harbor/components/jobservice"
-	harbor_notary "github.com/ovh/harbor-operator/controllers/harbor/components/notary"
-	harbor_portal "github.com/ovh/harbor-operator/controllers/harbor/components/portal"
-	harbor_registry "github.com/ovh/harbor-operator/controllers/harbor/components/registry"
-	"github.com/ovh/harbor-operator/pkg/factories/logger"
+	containerregistryv1alpha1 "github.com/goharbor/harbor-core-operator/api/v1alpha1"
+	harbor_chartmuseum "github.com/goharbor/harbor-core-operator/controllers/harbor/components/chartmuseum"
+	harbor_clair "github.com/goharbor/harbor-core-operator/controllers/harbor/components/clair"
+	harbor_core "github.com/goharbor/harbor-core-operator/controllers/harbor/components/harbor-core"
+	harbor_jobservice "github.com/goharbor/harbor-core-operator/controllers/harbor/components/jobservice"
+	harbor_notary "github.com/goharbor/harbor-core-operator/controllers/harbor/components/notary"
+	harbor_portal "github.com/goharbor/harbor-core-operator/controllers/harbor/components/portal"
+	harbor_registry "github.com/goharbor/harbor-core-operator/controllers/harbor/components/registry"
+	"github.com/goharbor/harbor-core-operator/pkg/factories/logger"
 )
 
 type Resource interface {

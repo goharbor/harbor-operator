@@ -12,11 +12,11 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	containerregistryv1alpha1 "github.com/goharbor/harbor-core-operator/api/v1alpha1"
+	"github.com/goharbor/harbor-core-operator/controllers/harbor/components/clair"
+	"github.com/goharbor/harbor-core-operator/controllers/harbor/components/notary"
+	"github.com/goharbor/harbor-core-operator/pkg/factories/application"
 	"github.com/markbates/pkger"
-	containerregistryv1alpha1 "github.com/ovh/harbor-operator/api/v1alpha1"
-	"github.com/ovh/harbor-operator/controllers/harbor/components/clair"
-	"github.com/ovh/harbor-operator/controllers/harbor/components/notary"
-	"github.com/ovh/harbor-operator/pkg/factories/application"
 	"github.com/pkg/errors"
 )
 
