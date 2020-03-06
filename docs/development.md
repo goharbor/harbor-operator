@@ -1,5 +1,16 @@
 # Development
 
+## Get the sources
+
+```bash
+git clone https://github.com/goharbor/harbor-core-operator.git
+cd harbor-core-operator
+```
+
+You developped a new cool feature? Fixed an annoying bug? We would be happy to hear from you!
+
+Have a look in [CONTRIBUTING.md](https://github.com/goharbor/harbor-core-operator/blob/master/CONTRIBUTING.md)
+
 ## Dependencies
 
 ### Packages
@@ -18,7 +29,7 @@ make dev-tools
 
 ### Services
 
-- Kubernetes cluster. You can order a Kubernetes cluster on [ovh.com](https://www.ovh.com/fr/public-cloud/kubernetes/).
+- [Kubernetes cluster](https://kubernetes.io). You can order a Kubernetes cluster on [ovh.com](https://www.ovh.com/fr/public-cloud/kubernetes/). Then configure your environment to have the right [`Kubeconfig`](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/).
 - [CertManager](https://cert-manager.io/docs/installation/kubernetes/#steps) >= 0.11
 
   ```bash
@@ -40,6 +51,10 @@ make dev-tools
 make install-dependencies # This will install Helm charts in your current cluster
 make install # Install Custom Resource Definition
 ```
+
+### Configuration
+
+Generate resources using `make generate`
 
 ## Run it
 
@@ -74,9 +89,13 @@ make lint
 
 __Warning__: Some resource may not be deleted if a test fails
 
-Run tests
+ 1. Export `KUBECONFIG` variable:
 
-```bash
-export USE_EXISTING_CLUSTER=true
-make test
-```
+    ```bash
+    export KUBECONFIG=/path/to/kubeconfig
+    export USE_EXISTING_CLUSTER=true
+    ```
+
+ 2. ```bash
+    make test
+    ```
