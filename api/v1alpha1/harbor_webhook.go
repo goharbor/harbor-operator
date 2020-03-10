@@ -9,9 +9,9 @@ import (
 // log is for logging in this package.
 var harborlog = logf.Log.WithName("harbor-resource")
 
-func (r *Harbor) SetupWebhookWithManager(mgr ctrl.Manager) error {
+func (h *Harbor) SetupWebhookWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewWebhookManagedBy(mgr).
-		For(r).
+		For(h).
 		Complete()
 }
 
@@ -20,16 +20,16 @@ func (r *Harbor) SetupWebhookWithManager(mgr ctrl.Manager) error {
 var _ webhook.Defaulter = &Harbor{}
 
 // Default implements webhook.Defaulter so a webhook will be registered for the type
-func (r *Harbor) Default() {
-	harborlog.Info("default", "name", r.Name)
+func (h *Harbor) Default() {
+	harborlog.Info("default", "name", h.Name)
 
-	if r.Spec.Components.JobService != nil {
-		if r.Spec.Components.JobService.WorkerCount == 0 {
-			r.Spec.Components.JobService.WorkerCount = 3
+	if h.Spec.Components.JobService != nil {
+		if h.Spec.Components.JobService.WorkerCount == 0 {
+			h.Spec.Components.JobService.WorkerCount = 3
 		}
 	}
 
-	if r.Spec.HarborVersion == "" {
-		r.Spec.HarborVersion = "1.10.0"
+	if h.Spec.HarborVersion == "" {
+		h.Spec.HarborVersion = "1.10.0"
 	}
 }
