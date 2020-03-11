@@ -15,7 +15,7 @@ func (r *Harbor) SetupWebhookWithManager(mgr ctrl.Manager) error {
 		Complete()
 }
 
-// +kubebuilder:webhook:path=/mutate-goharbor-v1alpha1-harbor,mutating=true,failurePolicy=fail,groups=goharbor.io,resources=harbors,verbs=create;update,versions=v1alpha1,name=mharbor.kb.io
+// +kubebuilder:webhook:path=/mutate-goharbor-io-v1alpha1-harbor,mutating=true,failurePolicy=fail,groups=goharbor.io,resources=harbors,verbs=create;update,versions=v1alpha1,name=mharbor.kb.io
 
 var _ webhook.Defaulter = &Harbor{}
 
