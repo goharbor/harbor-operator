@@ -1,5 +1,7 @@
 # Harbor Operator
 
+**ATTENTIONS: THIS PROJECT IS STILL UNDER DEVELOPMENT AND NOT STABLE YET.**
+
 ## Why an Harbor Operator
 
 [Harbor](https://github.com/goharbor/harbor/) is a very active project, composed on numerous stateful and stateless sub-projects and dependencies.
