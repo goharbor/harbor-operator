@@ -141,7 +141,7 @@ install-dependencies: helm
 	$(HELM) get notes registry-cache \
 		|| $(HELM) install registry-cache stable/redis-ha
 	$(HELM) get notes nginx \
-		|| $(HELM) install nginx stable/nginx-ingress \
+		|| $(HELM) install nginx stable/nginx-ingress
 	kubectl apply -f config/samples/notary-ingress-service.yaml
 
 # Install local certificate
