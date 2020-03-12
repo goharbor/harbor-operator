@@ -1,6 +1,6 @@
 
 # Image URL to use all building/pushing image targets
-IMG ?= controller:latest
+IMG ?= goharbor/harbor-operator:dev
 
 SHELL = /bin/sh
 
