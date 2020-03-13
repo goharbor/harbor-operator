@@ -1,0 +1,17 @@
+on: [push, pull_request]
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build dev
+      run: make docker-build IMG='goharbor/harbor-operator:${{ github.sha }}'
+    - run: docker tag goharbor/harbor-operator:${{ github.sha }} goharbor/harbor-operator:dev
+      if: github.head_ref == 'refs/heads/master'
+    # TODO Push image to the registry
+    - run: |
+        export REF="${{ github.ref }}"
+        docker tag 'goharbor/harbor-operator:${{ github.sha }}' "goharbor/harbor-operator:${REF##*/}"
+      if: github.head_ref != 'refs/heads/master'
+    # TODO Push image to the registry

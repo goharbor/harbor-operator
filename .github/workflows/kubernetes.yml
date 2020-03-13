@@ -1,0 +1,39 @@
+on: push
+
+jobs:
+  crd:
+    runs-on: ubuntu-latest
+    name: ./config/crd validation
+    steps: 
+    - run: sudo apt-get install -y bzr # Required to install controller-gen in make manifests
+    - uses: actions/checkout@v2
+    - run: make manifests
+    - uses: azure/k8s-bake@v1
+      with:
+        renderEngine: 'kustomize'
+        kustomizationPath: './config/crd'
+        kubectl-version: 'latest'
+
+  operator:
+    runs-on: ubuntu-latest
+    name: ./config/default validation
+    steps: 
+    - run: sudo apt-get install -y bzr # Required to install controller-gen in make manifests
+    - uses: actions/checkout@v2
+    - run: make manifests
+    - uses: azure/k8s-bake@v1
+      with:
+        renderEngine: 'kustomize'
+        kustomizationPath: './config/default'
+        kubectl-version: 'latest'
+
+  samples:
+    runs-on: ubuntu-latest
+    name: ./config/samples validation
+    steps: 
+    - uses: actions/checkout@v2
+    - uses: azure/k8s-bake@v1
+      with:
+        renderEngine: 'kustomize'
+        kustomizationPath: './config/samples'
+        kubectl-version: 'latest'
