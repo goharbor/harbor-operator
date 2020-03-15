@@ -21,8 +21,9 @@ require (
 	github.com/uber/jaeger-lib v2.2.0+incompatible
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
 	golang.org/x/sys v0.0.0-20200219091948-cb0a6d8edb6c // indirect
-	k8s.io/api v0.0.0-20191114100352-16d7abae0d2a
-	k8s.io/apimachinery v0.0.0-20191028221656-72ed19daf4bb
-	k8s.io/client-go v0.0.0-20191114101535-6c5935290e33
+	k8s.io/api v0.17.4
+	k8s.io/apiextensions-apiserver v0.17.4 // indirect
+	k8s.io/apimachinery v0.17.4
+	k8s.io/client-go v0.17.4
 	sigs.k8s.io/controller-runtime v0.4.0
 )
