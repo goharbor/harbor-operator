@@ -74,7 +74,7 @@ See [install documentation](https://github.com/goharbor/harbor-operator/blob/mas
 
 ### Harbor version
 
-This Operator currently only support Harbor version 1.10.x
+This Operator currently only supports Harbor version 1.10.x
 
 ## Howto's
 
