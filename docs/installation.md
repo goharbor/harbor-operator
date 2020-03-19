@@ -74,3 +74,65 @@ Kubernetes API running (see [Supported platforms](https://github.com/goharbor/ha
    ```bash
    kubectl get secret "$(kubectl get harbor harbor-sample -o jsonpath='{.spec.adminPasswordSecret}')" -o jsonpath='{.data.password}' | base64 --decode
    ```
+
+## Some notes
+
+### using on KIND k8s with NodePort
+
+Reference [kind ingress](https://kind.sigs.k8s.io/docs/user/ingress/)
+
+1. create cluster with at multi worker nodes and export port on 1 node
+
+   ```bash
+   cat <<EOF | kind create cluster --config=-
+   kind: Cluster
+   apiVersion: kind.x-k8s.io/v1alpha4
+   nodes:
+   - role: control-plane
+   kubeadmConfigPatches:
+   - |
+      kind: InitConfiguration
+      nodeRegistration:
+         kubeletExtraArgs:
+         node-labels: "ingress-ready=true"
+         authorization-mode: "AlwaysAllow"
+   extraPortMappings:
+   - containerPort: 80
+      hostPort: 80
+      protocol: TCP
+   - containerPort: 443
+      hostPort: 443
+      protocol: TCP
+   - role: worker
+   - role: worker
+   - role: worker
+   EOF
+   ```
+
+2. install nginx-ingress with NodePort
+
+   ```bash
+   helm install nginx stable/nginx-ingress --set-string controller.config.proxy-body-size=0 --set controller.service.type=NodePort
+   ```
+
+3. patch nginx-ingress to use special node
+
+   ```bash
+   kubectl patch deployments nginx-nginx-ingress-controller -p '{"spec":{"template":{"spec":{"containers":[{"name":"nginx-ingress-controller","ports":[{"containerPort":80,"hostPort":80},{"containerPort":443,"hostPort":443}]}],"nodeSelector":{"ingress-ready":"true"},"tolerations":[{"key":"node-role.kubernetes.io/master","operator":"Equal","effect":"NoSchedule"}]}}}}'
+   ```
+
+### install the cert
+
+1. get the cert name
+
+   ```bash
+   kubectl get h harbor-sample -o jsonpath='{.spec.tlsSecretName}'
+   ```
+
+2. install cert for docker
+
+   ```bash
+   kubectl get secret "$(kubectl get h harbor-sample -o jsonpath='{.spec.tlsSecretName}')" -o jsonpath='{.data.ca\.crt}' \
+     | base64 --decode \
+     | sudo tee "/etc/docker/certs.d/$LBAAS_DOMAIN/ca.crt"
+   ```
