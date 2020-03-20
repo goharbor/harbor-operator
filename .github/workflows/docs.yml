@@ -1,0 +1,14 @@
+on: push
+
+jobs:
+  generate_plantuml:
+    runs-on: ubuntu-latest
+    name: plantuml
+    steps:
+    - uses: actions/checkout@v1
+    - name: Generate images
+      uses: grassedge/generate-plantuml-action@v1.1
+      with:
+        path: docs/images
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
