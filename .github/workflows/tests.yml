@@ -67,6 +67,49 @@ jobs:
         git restore -- vendor go.mod go.sum
         git diff-index --exit-code --ignore-cr-at-eol HEAD
 
+  go-tests:
+    runs-on: ubuntu-latest
+    name: K8S v${{ matrix.k8sVersion }} (CM v${{ matrix.certManager }})
+
+    strategy:
+      matrix:
+        # https://github.com/jetstack/cert-manager/branches/active
+        certManager: ["0.12", "0.13", "0.14", "0.15"]
+        # https://snapcraft.io/microk8s
+        k8sVersion: ["1.15", "1.16", "1.17"]
+
+    steps: 
+    - name: Set up Go 1.13
+      uses: actions/setup-go@v1
+      with:
+        go-version: 1.13
+    - name: Install Kubernetes v${{ matrix.k8sVersion }}
+      run: |
+        sudo snap install microk8s --channel='${{ matrix.k8sVersion }}/stable' --classic
+
+        sudo microk8s.start
+
+        # https://microk8s.io/docs/addons
+        sudo microk8s.enable dns
+
+        sudo microk8s.kubectl cluster-info
+
+        while [[ ! $(sudo microk8s.status) ]] ; do
+          echo "kubernetes not ready yet..." >&2
+          sleep 2
+        done
+    - name: Install CertManager v${{ matrix.certManager }}
+      run: sudo microk8s.kubectl apply -f "https://raw.githubusercontent.com/jetstack/cert-manager/release-${{ matrix.certManager }}/deploy/manifests/00-crds.yaml"
+    - uses: actions/checkout@v2
+    - name: go tests
+      run: |
+        export KUBECONFIG="$(realpath "$(mktemp kubeconfig.XXXXX)")"
+        export USE_EXISTING_CLUSTER="true"
+
+        sudo microk8s.config > "${KUBECONFIG}"
+
+        make test
+
   # Kubernetes
   crd-kubernetes-resources:
     runs-on: ubuntu-latest
