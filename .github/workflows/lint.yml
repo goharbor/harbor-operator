@@ -33,7 +33,4 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - name: lint
-      uses: luke142367/Docker-Lint-Action@v1.0.0
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        TARGET: Dockerfile
+      uses: brpaz/hadolint-action@master
