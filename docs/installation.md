@@ -112,13 +112,13 @@ Reference [kind ingress](https://kind.sigs.k8s.io/docs/user/ingress/)
 2. install nginx-ingress with NodePort
 
    ```bash
-   helm install nginx stable/nginx-ingress --set-string controller.config.proxy-body-size=0 --set controller.service.type=NodePort
-   ```
-
-3. patch nginx-ingress to use special node
-
-   ```bash
-   kubectl patch deployments nginx-nginx-ingress-controller -p '{"spec":{"template":{"spec":{"containers":[{"name":"nginx-ingress-controller","ports":[{"containerPort":80,"hostPort":80},{"containerPort":443,"hostPort":443}]}],"nodeSelector":{"ingress-ready":"true"},"tolerations":[{"key":"node-role.kubernetes.io/master","operator":"Equal","effect":"NoSchedule"}]}}}}'
+   helm install nginx stable/nginx-ingress \
+      --set-string 'controller.config.proxy-body-size'=0 \
+      --set-string 'controller.nodeSelector.ingress-ready'=true
+      --set 'controller.service.type'=NodePort \
+      --set 'controller.tolerations[0].key'=node-role.kubernetes.io/master \
+      --set 'controller.tolerations[0].operator'=Equal \
+      --set 'controller.tolerations[0].effect'=NoSchedule
    ```
 
 ### install the cert
