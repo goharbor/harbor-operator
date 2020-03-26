@@ -30,7 +30,7 @@ Kubernetes API running (see [Supported platforms](https://github.com/goharbor/ha
 
    ```bash
    make docker-build IMG=the.registry/goharbor/harbor-operator:dev
-   make docker-push IMG=the.registry/goharbor/harbor-operator:dev
+   make docker-push  IMG=the.registry/goharbor/harbor-operator:dev
    ```
 
 3. Deploy requirements
@@ -65,14 +65,16 @@ Kubernetes API running (see [Supported platforms](https://github.com/goharbor/ha
 2. Get the certificate authority used to generate the public certificate and install it on your computer (on the system scope, docker daemon + browser).
 
    ```bash
-   kubectl get secret public-certificate -o jsonpath='{.data.ca\.crt}' | base64 --decode
+   kubectl get secret public-certificate -o jsonpath='{.data.ca\.crt}' \
+     | base64 --decode
    ```
 
 3. Access to Portal with the publicURL `kubectl get harbor harbor-sample -o jsonpath='{.spec.publicURL}'.
    Connect with the admin user and with the following password.
 
    ```bash
-   kubectl get secret "$(kubectl get harbor harbor-sample -o jsonpath='{.spec.adminPasswordSecret}')" -o jsonpath='{.data.password}' | base64 --decode
+   kubectl get secret "$(kubectl get harbor harbor-sample -o jsonpath='{.spec.adminPasswordSecret}')" -o jsonpath='{.data.password}' \
+     | base64 --decode
    ```
 
 ## Some notes
@@ -114,7 +116,7 @@ Reference [kind ingress](https://kind.sigs.k8s.io/docs/user/ingress/)
    ```bash
    helm install nginx stable/nginx-ingress \
       --set-string 'controller.config.proxy-body-size'=0 \
-      --set-string 'controller.nodeSelector.ingress-ready'=true
+      --set-string 'controller.nodeSelector.ingress-ready'=true \
       --set 'controller.service.type'=NodePort \
       --set 'controller.tolerations[0].key'=node-role.kubernetes.io/master \
       --set 'controller.tolerations[0].operator'=Equal \
