@@ -1,0 +1,17 @@
+@startuml Internal certificate overview
+autonumber
+actor Admin
+
+Admin -> Kubernetes : updates harbor\nspec.certificateIssuerRef
+Kubernetes -> HarborOperator : triggers
+HarborOperator -> Kubernetes : updates registry-certificate
+Kubernetes -> CertManager : triggers
+CertManager -> Kubernetes : updates secret
+Kubernetes -x HarborOperator : triggers registry-certificate
+note right
+  Harbor Operator does not
+  watch for certificate event
+end note
+HarborOperator -> Kubernetes : updates registry deployment
+Kubernetes -> Kubernetes : updates registry pod
+@enduml

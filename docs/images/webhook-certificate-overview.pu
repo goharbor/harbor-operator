@@ -1,0 +1,12 @@
+@startuml Webhook certificate overview
+actor Admin
+boundary Installation
+
+Admin -> Kubernetes : creates annotated namespace
+Admin -> Kubernetes : creates webhook
+
+Kubernetes -> CertManager : triggers
+
+CertManager -> Kubernetes : creates secret
+CertManager -> Kubernetes : configures webhook
+@enduml
