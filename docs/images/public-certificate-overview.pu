@@ -1,0 +1,12 @@
+@startuml Public certificate overview
+autonumber
+
+actor Admin
+
+Admin -> Kubernetes : Updates harbor\nspec.tlsSecretName
+Kubernetes -> HarborOperator : triggers
+HarborOperator -> Kubernetes : updates ingress
+Kubernetes -> IngressController : triggers
+IngressController -> Kubernetes : gets certificate secret
+IngressController -> IngressController : reload certificate
+@enduml
