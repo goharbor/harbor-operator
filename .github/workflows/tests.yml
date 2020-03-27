@@ -9,17 +9,16 @@ on:
 jobs:
   # Dockerfile tests
   docker-build-test:
-    name: Build docker image
     runs-on: ubuntu-latest
+    name: Build docker image
 
     steps:
     - uses: actions/checkout@v2
     - run: make docker-build
 
   docker-lint:
-    name: DockerLint
     runs-on: ubuntu-latest
-
+    name: DockerLint
     steps: 
     - name: Checkout
       uses: actions/checkout@v2
@@ -28,9 +27,8 @@ jobs:
 
   # Golang tests
   go-lint:
-    name: GoLint
     runs-on: ubuntu-latest
-
+    name: GoLint
     steps:
     - uses: actions/checkout@v2
     - name: Run golangci-lint
@@ -39,9 +37,8 @@ jobs:
         golangci_lint_version: 1.22.2
 
   go-dependencies:
-    name: Dependencies are up to date
     runs-on: ubuntu-latest
-
+    name: Dependencies are up to date
     steps:
     - uses: actions/setup-go@v1
       with:
@@ -56,9 +53,8 @@ jobs:
       run: test -z "$(git diff-index --diff-filter=d --name-only HEAD -- 'vendor' | grep -v 'vendor/modules.txt')"
 
   check-generated-go-files:
-    name: Generated files are up to date
     runs-on: ubuntu-latest
-
+    name: Generated files are up to date
     steps:
     - uses: actions/setup-go@v1
       with:
@@ -72,8 +68,8 @@ jobs:
         git diff-index --exit-code --ignore-cr-at-eol HEAD
 
   go-tests:
-    name: K8S v${{ matrix.k8sVersion }} (CM v${{ matrix.certManager }})
     runs-on: ubuntu-latest
+    name: K8S v${{ matrix.k8sVersion }} (CM v${{ matrix.certManager }})
 
     strategy:
       fail-fast: false
@@ -117,9 +113,8 @@ jobs:
 
   # Kubernetes
   crd-kubernetes-resources:
-    name: 'kubernetes_resources: ./config/crd'
     runs-on: ubuntu-latest
-
+    name: 'kubernetes_resources: ./config/crd'
     steps: 
     - run: sudo apt-get install -y bzr # Required to install controller-gen in make manifests
     - uses: actions/checkout@v2
@@ -131,9 +126,8 @@ jobs:
         kubectl-version: 'latest'
 
   operator-kubernetes-resources:
-    name: 'kubernetes_resources: ./config/default'
     runs-on: ubuntu-latest
-
+    name: 'kubernetes_resources: ./config/default'
     steps: 
     - run: sudo apt-get install -y bzr # Required to install controller-gen in make manifests
     - uses: actions/checkout@v2
@@ -145,9 +139,8 @@ jobs:
         kubectl-version: 'latest'
 
   samples-kubernetes-resources:
-    name: 'kubernetes_resources: ./config/samples'
     runs-on: ubuntu-latest
-
+    name: 'kubernetes_resources: ./config/samples'
     steps: 
     - uses: actions/checkout@v2
     - uses: azure/k8s-bake@v1
@@ -158,9 +151,8 @@ jobs:
 
   # Documentation
   md-lint:
-    name: 'documentation: lint'
     runs-on: ubuntu-latest
-
+    name: 'documentation: lint'
     steps:
     - uses: actions/checkout@v2
     - name: markdownlint-cli
