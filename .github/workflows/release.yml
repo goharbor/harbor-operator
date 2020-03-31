@@ -1,11 +1,14 @@
+name: Release
+
 on:
   release:
     types:
-      - created
-      - published
+    - created
+    - published
 
 jobs:
   docker:
+    name: Build docker image
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
