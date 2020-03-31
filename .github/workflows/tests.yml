@@ -72,6 +72,7 @@ jobs:
     name: K8S v${{ matrix.k8sVersion }} (CM v${{ matrix.certManager }})
 
     strategy:
+      fail-fast: false
       matrix:
         # https://github.com/jetstack/cert-manager/branches/active
         certManager: ["0.12", "0.13", "0.14", "0.15"]
@@ -91,12 +92,12 @@ jobs:
 
         # https://microk8s.io/docs/addons
         sudo microk8s.enable dns
-
-        sudo microk8s.kubectl cluster-info
-
-        while [[ ! $(sudo microk8s.status) ]] ; do
+    - name: Wait for Kubernetes to be ready
+      timeout-minutes: 15
+      run: |
+        while [[ ! $(sudo microk8s.kubectl cluster-info) ]] ; do
           echo "kubernetes not ready yet..." >&2
-          sleep 2
+          sleep 1
         done
     - name: Install CertManager v${{ matrix.certManager }}
       run: sudo microk8s.kubectl apply -f "https://raw.githubusercontent.com/jetstack/cert-manager/release-${{ matrix.certManager }}/deploy/manifests/00-crds.yaml"
