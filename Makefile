@@ -35,6 +35,10 @@ dev-tools: \
 	markdownlint \
 	pkger
 
+release: goreleaser
+	# export GITHUB_TOKEN=...
+	$(GORELEASER) release --rm-dist
+
 #####################
 #     Packaging     #
 #####################
@@ -250,8 +254,8 @@ kustomize:
 ifeq (, $(shell which kustomize))
 	# https://github.com/kubernetes-sigs/kustomize/blob/master/docs/INSTALL.md
 	curl -s https://raw.githubusercontent.com/kubernetes-sigs/kustomize/04bfb3e94d0a4b740dcb426c23018cb041c8398d/hack/install_kustomize.sh | bash
-	mv ./kustomize $(KUSTOMIZE)
-	chmod u+x $(KUSTOMIZE)
+	mv ./kustomize $(GOBIN)
+	chmod u+x $(GOBIN)/kustomize
 KUSTOMIZE=$(GOBIN)/kustomize
 else
 KUSTOMIZE=$(shell which kustomize)
@@ -276,4 +280,15 @@ ifeq (, $(shell which helm))
 HELM=helm-not-found
 else
 HELM=$(shell which helm)
+endif
+
+# find or download goreleaser
+goreleaser:
+ifeq (, $(shell which goreleaser))
+	curl -sfL https://install.goreleaser.com/github.com/goreleaser/goreleaser.sh \
+		| sh -s v0.129.0
+	mv ./bin/goreleaser $(GOBIN)
+GORELEASER=$(GOBIN)/goreleaser
+else
+GORELEASER=$(shell which goreleaser)
 endif

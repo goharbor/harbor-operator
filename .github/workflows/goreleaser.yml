@@ -1,0 +1,39 @@
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  goreleaser:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v2
+      -
+        name: Unshallow
+        # required for the changelog to work correctly
+        run: git fetch --prune --unshallow
+      -
+        name: Set up Go
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.13
+      -
+        name: prepare changelog
+        run: |
+          tag=${{ github.ref }}
+          tag=${tag##*/}
+          cat <<EOF | tee /tmp/release.txt
+          ## Docker images
+
+          - \`docker pull goharbor/harbor-operator:$tag\`
+          EOF
+      -
+        name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v1
+        with:
+          version: v0.129.0
+          args: release --rm-dist --release-footer /tmp/release.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

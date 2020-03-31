@@ -29,3 +29,6 @@ pkged.go
 
 ## Mac file
 .DS_Store
+
+## goreleaser
+dist/
