@@ -1,0 +1,23 @@
+before:
+  hooks:
+    - make generate
+builds:
+- env:
+  - CGO_ENABLED=0
+  binary: manager
+  goos:
+  - linux
+  goarch:
+  - amd64
+changelog:
+  sort: asc
+  filters:
+    exclude:
+    - '^docs'
+    - '^test'
+    - '^feat'
+    - '^chore'
+    - '^Merge '
+    - '[Ty]ypo'
+release:
+  draft: true
