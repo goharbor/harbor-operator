@@ -153,7 +153,6 @@ type HarborComponents struct {
 	NotarySigner *NotarySignerComponent `json:"notarySigner"`
 }
 
-// nolint:gochecknoinits
-func init() {
+func init() { // nolint:gochecknoinits
 	SchemeBuilder.Register(&Harbor{}, &HarborList{})
 }

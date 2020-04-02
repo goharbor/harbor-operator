@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	JobServiceSecretKey = "JOBSERVICE_SECRET"
+	JobServiceSecretKey = "JOBSERVICE_SECRET" // nolint:gosec
 )
 
 const (
@@ -84,7 +84,6 @@ type JobServiceConfig struct {
 	RedisSecret string `json:"redisSecret"`
 }
 
-// nolint:gochecknoinits
-func init() {
+func init() { // nolint:gochecknoinits
 	SchemeBuilder.Register(&JobService{}, &JobServiceList{})
 }

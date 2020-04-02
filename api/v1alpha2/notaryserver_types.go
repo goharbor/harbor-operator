@@ -60,7 +60,6 @@ type NotaryServerSpec struct {
 	TokenSecret string `json:"tokenSecret"`
 }
 
-// nolint:gochecknoinits
-func init() {
+func init() { // nolint:gochecknoinits
 	SchemeBuilder.Register(&NotaryServer{}, &NotaryServerList{})
 }
