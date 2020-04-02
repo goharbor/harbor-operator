@@ -16,7 +16,7 @@ import (
 // +k8s:openapi-gen=true
 // +resource:path=harbor
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:shortName="h"
+// +kubebuilder:resource:categories="goharbor",shortName="h"
 // +kubebuilder:printcolumn:name="Version",type=string,JSONPath=`.spec.version`,description="The semver Harbor version",priority=5
 // +kubebuilder:printcolumn:name="Public URL",type=string,JSONPath=`.spec.publicURL`,description="The public URL to the Harbor application",priority=0
 type Harbor struct {

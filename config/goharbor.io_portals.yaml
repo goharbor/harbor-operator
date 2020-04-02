@@ -20,6 +20,8 @@ spec:
     type: string
   group: goharbor.io
   names:
+    categories:
+    - goharbor
     kind: Portal
     listKind: PortalList
     plural: portals

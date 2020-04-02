@@ -30,6 +30,8 @@ spec:
     type: string
   group: containerregistry.ovhcloud.com
   names:
+    categories:
+    - goharbor
     kind: Harbor
     listKind: HarborList
     plural: harbors
