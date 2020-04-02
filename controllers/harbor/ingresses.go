@@ -18,13 +18,11 @@ import (
 	"github.com/goharbor/harbor-operator/controllers/registry"
 )
 
-func (r *Reconciler) GetCoreIngresse(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*netv1.Ingress, error) {
+func getHostAndIngresses(harbor *goharborv1alpha2.Harbor) (string, []netv1.IngressTLS, error) {
 	u, err := url.Parse(harbor.Spec.PublicURL)
 	if err != nil {
-		panic(errors.Wrap(err, "invalid url"))
+		return "", nil, errors.Wrap(err, "invalid url")
 	}
-
-	host := strings.SplitN(u.Host, ":", 1)
 
 	var tls []netv1.IngressTLS
 	if u.Scheme == "https" {
@@ -35,33 +33,39 @@ func (r *Reconciler) GetCoreIngresse(ctx context.Context, harbor *goharborv1alph
 		}
 	}
 
-	rules := []netv1.HTTPIngressPath{
+	return strings.SplitN(u.Host, ":", 1)[0], tls, nil
+}
+
+func getCoreRules(harbor *goharborv1alpha2.Harbor) []netv1.HTTPIngressPath {
+	coreBackend := netv1.IngressBackend{
+		ServiceName: harbor.NormalizeComponentName(goharborv1alpha2.CoreName),
+		ServicePort: intstr.FromInt(core.PublicPort),
+	}
+
+	return []netv1.HTTPIngressPath{
 		{
-			Path: "/api",
-			Backend: netv1.IngressBackend{
-				ServiceName: harbor.NormalizeComponentName(goharborv1alpha2.CoreName),
-				ServicePort: intstr.FromInt(core.PublicPort),
-			},
+			Path:    "/api",
+			Backend: coreBackend,
 		}, {
-			Path: "/c",
-			Backend: netv1.IngressBackend{
-				ServiceName: harbor.NormalizeComponentName(goharborv1alpha2.CoreName),
-				ServicePort: intstr.FromInt(core.PublicPort),
-			},
+			Path:    "/c",
+			Backend: coreBackend,
 		}, {
-			Path: "/chartrepo",
-			Backend: netv1.IngressBackend{
-				ServiceName: harbor.NormalizeComponentName(goharborv1alpha2.CoreName),
-				ServicePort: intstr.FromInt(core.PublicPort),
-			},
+			Path:    "/chartrepo",
+			Backend: coreBackend,
 		}, {
-			Path: "/service",
-			Backend: netv1.IngressBackend{
-				ServiceName: harbor.NormalizeComponentName(goharborv1alpha2.CoreName),
-				ServicePort: intstr.FromInt(core.PublicPort),
-			},
+			Path:    "/service",
+			Backend: coreBackend,
 		},
 	}
+}
+
+func (r *Reconciler) GetCoreIngresse(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*netv1.Ingress, error) {
+	host, tls, err := getHostAndIngresses(harbor)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot get host and ingresses")
+	}
+
+	rules := getCoreRules(harbor)
 
 	if harbor.Spec.Components.Portal != nil {
 		rules = append(rules, netv1.HTTPIngressPath{
@@ -96,7 +100,7 @@ func (r *Reconciler) GetCoreIngresse(ctx context.Context, harbor *goharborv1alph
 			TLS: tls,
 			Rules: []netv1.IngressRule{
 				{
-					Host: host[0],
+					Host: host,
 					IngressRuleValue: netv1.IngressRuleValue{
 						HTTP: &netv1.HTTPIngressRuleValue{
 							Paths: rules,

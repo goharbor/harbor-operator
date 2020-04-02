@@ -62,20 +62,20 @@ var (
 // +kubebuilder:rbac:groups="cert-manager.io",resources="certificates",verbs=delete
 // +kubebuilder:rbac:groups="networking.k8s.io",resources="ingresses",verbs=delete
 
-func (r *Controller) DeleteResourceCollection(ctx context.Context, owner metav1.Object, componentName string, gvk schema.GroupVersionKind) error {
+func (c *Controller) DeleteResourceCollection(ctx context.Context, owner metav1.Object, componentName string, gvk schema.GroupVersionKind) error {
 	u := &unstructured.UnstructuredList{}
 	u.SetGroupVersionKind(gvk)
 
 	matchingLabel := client.MatchingLabels{
-		goharborv1alpha2.OperatorNameLabel: r.GetName(),
+		goharborv1alpha2.OperatorNameLabel: c.GetName(),
 	}
 	inNamespace := client.InNamespace(owner.GetNamespace())
 
-	// TODO Use r.Client.DeleteAllOf function
+	// TODO Use c.Client.DeleteAllOf function
 
 	limit := 5
 
-	err := r.Client.List(ctx, u, inNamespace, matchingLabel, client.Limit(limit))
+	err := c.Client.List(ctx, u, inNamespace, matchingLabel, client.Limit(limit))
 
 	if apierrors.IsNotFound(err) {
 		logger.Get(ctx).Info("Cannot list resource to delete, endpoint not found", "GVK.Group", gvk.Group, "GVK.Version", gvk.Version, "GVK.Kind", gvk.Kind)
@@ -92,8 +92,7 @@ func (r *Controller) DeleteResourceCollection(ctx context.Context, owner metav1.
 		owners := object.(metav1.Object).GetOwnerReferences()
 		for _, owner := range owners {
 			if owner.Controller != nil && *owner.Controller {
-
-				err := r.Client.Delete(ctx, object)
+				err := c.Client.Delete(ctx, object)
 				err = client.IgnoreNotFound(err)
 				if err == nil {
 					count++
@@ -118,7 +117,7 @@ func (r *Controller) DeleteResourceCollection(ctx context.Context, owner metav1.
 	return nil
 }
 
-func (r *Controller) DeleteComponent(ctx context.Context, owner metav1.Object, componentName string) error {
+func (c *Controller) DeleteComponent(ctx context.Context, owner metav1.Object, componentName string) error {
 	var g errgroup.Group
 
 	l := logger.Get(ctx).WithValues("Component", componentName)
@@ -130,7 +129,7 @@ func (r *Controller) DeleteComponent(ctx context.Context, owner metav1.Object, c
 		gvk := gvk
 
 		g.Go(func() error {
-			err := r.DeleteResourceCollection(ctx, owner, componentName, gvk)
+			err := c.DeleteResourceCollection(ctx, owner, componentName, gvk)
 			return errors.Wrapf(err, "deletecollection failed for %s", gvk.String())
 		})
 	}

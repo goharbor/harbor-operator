@@ -62,7 +62,6 @@ type NotarySignerSpec struct {
 	CertificateIssuerRef cmmeta.ObjectReference `json:"certificateIssuerRef"`
 }
 
-// nolint:gochecknoinits
-func init() {
+func init() { // nolint:gochecknoinits
 	SchemeBuilder.Register(&NotarySigner{}, &NotarySignerList{})
 }

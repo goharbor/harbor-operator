@@ -16,14 +16,12 @@ import (
 const (
 	migrationDatabaseURL = "postgresql://$(username):$(password)@$(host):$(port)/$(database)?sslmode=$(ssl)"
 	initImage            = "hairyhenderson/gomplate"
-	notaryServerPort     = 4443
 	notarySignerPort     = 7899
 )
 
 var (
-	revisionHistoryLimit     int32 = 0 // nolint:golint
-	varFalse                       = false
-	notarySignerKeyAlgorithm       = "ecdsa"
+	revisionHistoryLimit int32 = 0 // nolint:golint
+	varFalse                   = false
 )
 
 func (r *Reconciler) GetDeployment(ctx context.Context, notary *goharborv1alpha2.NotarySigner) (*appsv1.Deployment, error) { // nolint:funlen

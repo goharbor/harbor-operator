@@ -1,5 +1,7 @@
 package graph
 
+import "github.com/pkg/errors"
+
 type node struct {
 	resource Resource
 
@@ -12,19 +14,28 @@ type node struct {
 func (no *node) Wait() error {
 	defer close(no.parent)
 
-	for received := 0; received < no.parentCount; received++ {
-		select {
-		case err, ok := <-no.parent:
-			if !ok {
-				// parents succeeded
-				return nil
-			}
+	if no.parentCount == 0 {
+		return nil
+	}
 
-			if err != nil {
-				// a parent failed
-				return err
-			}
+	received := 0
+
+	for parentErr := range no.parent {
+		if parentErr != nil {
+			// a parent failed
+			return parentErr
 		}
+
+		received++
+
+		if received >= no.parentCount {
+			return nil
+		}
+	}
+
+	if received < no.parentCount {
+		// parents closed the channel
+		return errors.New("parent channel closed")
 	}
 
 	return nil

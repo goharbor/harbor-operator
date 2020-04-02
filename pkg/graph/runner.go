@@ -9,7 +9,7 @@ import (
 func (rm *resourceManager) Run(ctx context.Context, runner func(context.Context, Resource) error) error {
 	g := errgroup.Group{}
 
-	for _, no := range rm.getGraph(ctx) {
+	for _, no := range rm.getGraph() {
 		no := no
 
 		g.Go(func() error {
@@ -33,7 +33,7 @@ func (rm *resourceManager) Run(ctx context.Context, runner func(context.Context,
 	return g.Wait()
 }
 
-func (rm *resourceManager) getGraph(ctx context.Context) []*node {
+func (rm *resourceManager) getGraph() []*node {
 	rm.lock.Lock()
 	defer rm.lock.Unlock()
 
@@ -41,6 +41,7 @@ func (rm *resourceManager) getGraph(ctx context.Context) []*node {
 	result := make([]*node, len(rm.resources))
 
 	i := 0
+
 	for resource, blockers := range rm.resources {
 		blockerCount := len(blockers)
 
@@ -55,9 +56,11 @@ func (rm *resourceManager) getGraph(ctx context.Context) []*node {
 		}
 		graph[resource] = node
 		result[i] = node
+
 		i++
 
 		blockers := blockers
+
 		defer func() {
 			for _, blocker := range blockers {
 				graph[blocker].AddChild(node)

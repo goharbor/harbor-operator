@@ -77,7 +77,6 @@ type RegistrySpec struct {
 	CertificateIssuerRef cmmeta.ObjectReference `json:"certificateIssuerRef"`
 }
 
-// nolint:gochecknoinits
-func init() {
+func init() { // nolint:gochecknoinits
 	SchemeBuilder.Register(&Registry{}, &RegistryList{})
 }

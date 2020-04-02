@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
-	"sync"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/api/v1alpha2"
 	"github.com/markbates/pkger"
@@ -18,7 +17,6 @@ const (
 )
 
 var (
-	once         sync.Once
 	signerConfig []byte
 )
 
