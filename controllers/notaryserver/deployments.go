@@ -17,7 +17,6 @@ const (
 	migrationDatabaseURL = "postgresql://$(username):$(password)@$(host):$(port)/$(database)?sslmode=$(ssl)"
 	initImage            = "hairyhenderson/gomplate"
 	notaryServerPort     = 4443
-	notarySignerPort     = 7899
 )
 
 var (

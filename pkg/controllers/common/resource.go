@@ -28,10 +28,11 @@ func (c *Controller) AddInstantResourceToManage(ctx context.Context, resource re
 		checkable: statuscheck.True,
 		resource:  resource,
 	}
+
 	return res, c.graph.AddResource(res, dependencies)
 }
 
-func (c *Controller) AddUnsctructuredToManage(ctx context.Context, resource *unstructured.Unstructured, dependencies ...graph.Resource) (graph.Resource, error) {
+func (c *Controller) AddUnsctructuredToManage(ctx context.Context, resource *unstructured.Unstructured, dependencies ...graph.Resource) (graph.Resource, error) { // nolint:interfacer
 	if resource == nil {
 		return nil, nil
 	}
@@ -41,6 +42,7 @@ func (c *Controller) AddUnsctructuredToManage(ctx context.Context, resource *uns
 		checkable: statuscheck.UnstructuredCheck,
 		resource:  resource,
 	}
+
 	return res, c.graph.AddResource(res, dependencies)
 }
 
@@ -54,6 +56,7 @@ func (c *Controller) AddBasicObjectToManage(ctx context.Context, resource resour
 		checkable: statuscheck.BasicCheck,
 		resource:  resource,
 	}
+
 	return res, c.graph.AddResource(res, dependencies)
 }
 
@@ -67,6 +70,7 @@ func (c *Controller) AddDeploymentToManage(ctx context.Context, resource *appsv1
 		checkable: statuscheck.BasicCheck,
 		resource:  resource,
 	}
+
 	return res, c.graph.AddResource(res, dependencies)
 }
 
@@ -80,5 +84,6 @@ func (c *Controller) AddCertificateToManage(ctx context.Context, resource *certv
 		checkable: statuscheck.CertificateCheck,
 		resource:  resource,
 	}
+
 	return res, c.graph.AddResource(res, dependencies)
 }

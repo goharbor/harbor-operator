@@ -45,7 +45,6 @@ type ClairSpec struct {
 	DatabaseSecret string `json:"databaseSecret"`
 }
 
-// nolint:gochecknoinits
-func init() {
+func init() { // nolint:gochecknoinits
 	SchemeBuilder.Register(&Clair{}, &ClairList{})
 }

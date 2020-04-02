@@ -20,6 +20,6 @@ func TestSuite(t *testing.T) {
 	RunSpecsWithDefaultAndCustomReporters(t, "resourceManager", []Reporter{envtest.NewlineReporter{}})
 }
 
-func setupTest(ctx context.Context) (*resourceManager, context.Context) {
+func setupTest(ctx context.Context) (Manager, context.Context) {
 	return NewResourceManager(), ctx
 }

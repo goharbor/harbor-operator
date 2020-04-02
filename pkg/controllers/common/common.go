@@ -36,23 +36,23 @@ func NewController(name, version string) *Controller {
 	}
 }
 
-func (r *Controller) SetupWithManager(mgr ctrl.Manager) error {
-	r.Client = mgr.GetClient()
-	r.Scheme = mgr.GetScheme()
+func (c *Controller) SetupWithManager(mgr ctrl.Manager) error {
+	c.Client = mgr.GetClient()
+	c.Scheme = mgr.GetScheme()
 
 	return nil
 }
 
-func (r *Controller) GetVersion() string {
-	return r.Version
+func (c *Controller) GetVersion() string {
+	return c.Version
 }
 
-func (r *Controller) GetName() string {
-	return r.Name
+func (c *Controller) GetName() string {
+	return c.Name
 }
 
-func (r *Controller) GetAndFilter(ctx context.Context, key client.ObjectKey, obj runtime.Object) (bool, error) {
-	err := r.Client.Get(ctx, key, obj)
+func (c *Controller) GetAndFilter(ctx context.Context, key client.ObjectKey, obj runtime.Object) (bool, error) {
+	err := c.Client.Get(ctx, key, obj)
 	if err != nil {
 		if apierrs.IsNotFound(err) {
 			return false, nil
@@ -73,6 +73,7 @@ func (c *Controller) Reconcile(ctx context.Context, resource resources.Resource)
 	owner.Set(&ctx, resource)
 
 	err := c.Run(ctx, resource)
+
 	return c.HandleError(err)
 }
 
@@ -83,6 +84,7 @@ func (c *Controller) applyAndCheck(ctx context.Context, node graph.Resource) err
 	}
 
 	err = c.EnsureReady(ctx, node)
+
 	return errors.Wrap(err, "ready")
 }
 
