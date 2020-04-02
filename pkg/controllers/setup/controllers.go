@@ -18,7 +18,7 @@ import (
 
 type ControllerBuilder func(context.Context, string) (controllers.Controller, error)
 
-func SetupWithManager(ctx context.Context, mgr manager.Manager, version string) error {
+func WithManager(ctx context.Context, mgr manager.Manager, version string) error {
 	var g errgroup.Group
 
 	g.Go(ControllerFactory(ctx, mgr, chartmuseum.New, version))
@@ -39,6 +39,7 @@ func ControllerFactory(ctx context.Context, mgr manager.Manager, factory Control
 		}
 
 		err = controller.SetupWithManager(mgr)
+
 		return errors.Wrap(err, "setup")
 	}
 }

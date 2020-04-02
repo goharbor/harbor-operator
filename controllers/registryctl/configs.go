@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
-	"sync"
 
 	"github.com/markbates/pkger"
 	"github.com/pkg/errors"
@@ -21,7 +20,6 @@ const (
 )
 
 var (
-	once              sync.Once
 	registryConfig    []byte
 	registryCtlConfig []byte
 )

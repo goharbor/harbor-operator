@@ -18,8 +18,6 @@ import (
 
 var (
 	revisionHistoryLimit int32 = 0 // nolint:golint
-	maxIdleConns               = 0
-	maxOpenConns               = 1
 	varFalse                   = false
 	varTrue                    = true
 )
