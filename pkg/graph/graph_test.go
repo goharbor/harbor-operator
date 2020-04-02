@@ -11,7 +11,7 @@ import (
 )
 
 var _ = Describe("With a dependency manager", func() {
-	var rm *resourceManager
+	var rm Manager
 
 	BeforeEach(func() {
 		rm, _ = setupTest(context.TODO())

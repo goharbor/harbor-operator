@@ -10,10 +10,6 @@ import (
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/api/v1alpha2"
 )
 
-const (
-	notaryCertificateName = "notary-certificate"
-)
-
 func (r *Reconciler) GetNotaryCertificate(ctx context.Context, notary *goharborv1alpha2.NotarySigner) (*certv1.Certificate, error) {
 	return &certv1.Certificate{
 		ObjectMeta: metav1.ObjectMeta{

@@ -76,7 +76,7 @@ func main() {
 		os.Exit(exitCodeFailure)
 	}
 
-	if err := (setup.SetupWithManager(ctx, mgr, OperatorVersion)); err != nil {
+	if err := (setup.WithManager(ctx, mgr, OperatorVersion)); err != nil {
 		setupLog.Error(err, "unable to setup controllers")
 		os.Exit(exitCodeFailure)
 	}

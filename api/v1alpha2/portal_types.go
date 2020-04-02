@@ -41,7 +41,6 @@ type PortalSpec struct {
 	ComponentSpec `json:",inline"`
 }
 
-// nolint:gochecknoinits
-func init() {
+func init() { // nolint:gochecknoinits
 	SchemeBuilder.Register(&Portal{}, &PortalList{})
 }

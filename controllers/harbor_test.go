@@ -33,6 +33,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	"sigs.k8s.io/kustomize/kstatus/status"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/api/v1alpha2"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
@@ -98,13 +99,20 @@ var _ = Context("Inside of a new namespace", func() {
 				Expect(k8sClient.Create(ctx, harbor)).To(Succeed())
 				Eventually(getHarbor).Should(Succeed(), "harbor resource should exist")
 
+				getObservedGeneration := func(harbor *goharborv1alpha2.Harbor) int64 {
+					return harbor.Status.ObservedGeneration
+				}
+				Eventually(getResourceFunc(ctx, key, harbor, getObservedGeneration), applyTimeoutInterval).
+					Should(BeEquivalentTo(getHarbor().(metav1.Object).GetGeneration()), "harbor resource should be applied")
+
 				getConditions := func(harbor *goharborv1alpha2.Harbor) []goharborv1alpha2.Condition {
 					return harbor.Status.Conditions
 				}
-				Eventually(getResourceFunc(ctx, key, harbor, getConditions), applyTimeoutInterval).Should(ContainElement(gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
-					"Type":   BeEquivalentTo(goharborv1alpha2.AppliedConditionType),
-					"Status": BeEquivalentTo(corev1.ConditionTrue),
-				})), "harbor resource should be applied")
+				Eventually(getResourceFunc(ctx, key, harbor, getConditions), applyTimeoutInterval).
+					Should(ContainElement(gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
+						"Type":   BeEquivalentTo(status.ConditionInProgress),
+						"Status": BeEquivalentTo(corev1.ConditionFalse),
+					})), "harbor resource should be applied")
 			})
 		})
 	})
