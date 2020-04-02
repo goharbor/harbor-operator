@@ -15,7 +15,7 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 )
 
-func (r *Controller) GetCondition(ctx context.Context, componentStatus *goharborv1alpha2.ComponentStatus, conditionType status.ConditionType) goharborv1alpha2.Condition {
+func (c *Controller) GetCondition(ctx context.Context, componentStatus *goharborv1alpha2.ComponentStatus, conditionType status.ConditionType) goharborv1alpha2.Condition {
 	for _, condition := range componentStatus.Conditions {
 		if condition.Type == conditionType {
 			return condition
@@ -28,18 +28,18 @@ func (r *Controller) GetCondition(ctx context.Context, componentStatus *goharbor
 	}
 }
 
-func (r *Controller) GetConditionStatus(ctx context.Context, componentStatus *goharborv1alpha2.ComponentStatus, conditionType status.ConditionType) corev1.ConditionStatus {
-	return r.GetCondition(ctx, componentStatus, conditionType).Status
+func (c *Controller) GetConditionStatus(ctx context.Context, componentStatus *goharborv1alpha2.ComponentStatus, conditionType status.ConditionType) corev1.ConditionStatus {
+	return c.GetCondition(ctx, componentStatus, conditionType).Status
 }
 
-func (r *Controller) UpdateCondition(ctx context.Context, componentStatus *goharborv1alpha2.ComponentStatus, conditionType status.ConditionType, conditionStatus corev1.ConditionStatus, reasons ...string) error {
+func (c *Controller) UpdateCondition(ctx context.Context, componentStatus *goharborv1alpha2.ComponentStatus, conditionType status.ConditionType, conditionStatus corev1.ConditionStatus, reasons ...string) error {
 	var reason, message string
 
 	switch len(reasons) {
-	case 0: // nolint:mnd
-	case 1: // nolint:mnd
+	case 0: // nolint:gomnd
+	case 1: // nolint:gomnd
 		reason = reasons[0]
-	case 2: // nolint:mnd
+	case 2: // nolint:gomnd
 		reason = reasons[0]
 		message = reasons[1]
 	default:
@@ -72,8 +72,8 @@ func (r *Controller) UpdateCondition(ctx context.Context, componentStatus *gohar
 
 // UpdateStatus applies current in-memory statuses to the remote resource
 // https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/#status-subresource
-func (r *Controller) UpdateStatus(ctx context.Context, result *ctrl.Result, object runtime.Object) error {
-	err := r.Client.Status().Update(ctx, object)
+func (c *Controller) UpdateStatus(ctx context.Context, result *ctrl.Result, object runtime.Object) error {
+	err := c.Client.Status().Update(ctx, object)
 	if err != nil {
 		result.Requeue = true
 

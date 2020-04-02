@@ -18,15 +18,13 @@ const (
 	initImage   = "hairyhenderson/gomplate"
 	apiPort     = 5000 // https://github.com/docker/distribution/blob/749f6afb4572201e3c37325d0ffedb6f32be8950/contrib/compose/docker-compose.yml#L15
 	metricsPort = 5001 // https://github.com/docker/distribution/blob/b12bd4004afc203f1cbd2072317c8fda30b89710/cmd/registry/config-dev.yml#L34
-	ctlAPIPort  = 8080 // https://github.com/goharbor/harbor/blob/2fb1cc89d9ef9313842cc68b4b7c36be73681505/src/common/const.go#L134
 )
 
 var (
-	revisionHistoryLimit  int32 = 0 // nolint:golint
-	registryConfigPath          = "/etc/registry/"
-	registryCtlConfigPath       = "/etc/registryctl/"
-	varFalse                    = false
-	varTrue                     = true
+	revisionHistoryLimit int32 = 0 // nolint:golint
+	registryConfigPath         = "/etc/registry/"
+	varFalse                   = false
+	varTrue                    = true
 )
 
 func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alpha2.Registry) (*appsv1.Deployment, error) { // nolint:funlen

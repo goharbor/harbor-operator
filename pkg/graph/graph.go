@@ -10,11 +10,9 @@ type resourceManager struct {
 	resources map[Resource][]Resource
 
 	lock sync.Mutex
-
-	graph []*node
 }
 
-func NewResourceManager() *resourceManager {
+func NewResourceManager() Manager {
 	return &resourceManager{
 		resources: map[Resource][]Resource{},
 	}

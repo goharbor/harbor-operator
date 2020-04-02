@@ -25,11 +25,11 @@ var _ = Describe("status", func() {
 		extraParameter = "extra-parameter"
 	)
 
-	var r *Controller
+	var c *Controller
 	var ctx context.Context
 
 	BeforeEach(func() {
-		r, ctx = setupTest(context.TODO())
+		c, ctx = setupTest(context.TODO())
 	})
 
 	Describe("An Harbor resource", func() {
@@ -54,7 +54,7 @@ var _ = Describe("status", func() {
 				})
 
 				It("Should be added", func() {
-					err := r.UpdateCondition(ctx, &h.Status, conditionType, conditionValue)
+					err := c.UpdateCondition(ctx, &h.Status, conditionType, conditionValue)
 					Expect(err).ToNot(HaveOccurred(), "failed to update condition")
 
 					Expect(h.Status.Conditions).To(ContainElement(gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
@@ -65,7 +65,7 @@ var _ = Describe("status", func() {
 
 				Context("With a reason", func() {
 					It("Should be added", func() {
-						err := r.UpdateCondition(ctx, &h.Status, conditionType, conditionValue, reason)
+						err := c.UpdateCondition(ctx, &h.Status, conditionType, conditionValue, reason)
 						Expect(err).ToNot(HaveOccurred(), "failed to update condition")
 
 						Expect(h.Status.Conditions).To(ContainElement(gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
@@ -77,7 +77,7 @@ var _ = Describe("status", func() {
 
 					Context("With a message", func() {
 						It("Should be added", func() {
-							err := r.UpdateCondition(ctx, &h.Status, conditionType, conditionValue, reason, message)
+							err := c.UpdateCondition(ctx, &h.Status, conditionType, conditionValue, reason, message)
 							Expect(err).ToNot(HaveOccurred(), "failed to update condition")
 
 							Expect(h.Status.Conditions).To(ContainElement(gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
@@ -90,7 +90,7 @@ var _ = Describe("status", func() {
 
 						Context("With an extra parameter", func() {
 							It("Should return an error", func() {
-								err := r.UpdateCondition(ctx, &h.Status, conditionType, conditionValue, reason, message, extraParameter)
+								err := c.UpdateCondition(ctx, &h.Status, conditionType, conditionValue, reason, message, extraParameter)
 								Expect(err).To(HaveOccurred())
 							})
 						})
@@ -106,7 +106,7 @@ var _ = Describe("status", func() {
 				})
 
 				It("Should return unknown status", func() {
-					result := r.GetCondition(ctx, &h.Status, conditionType)
+					result := c.GetCondition(ctx, &h.Status, conditionType)
 					Expect(result).To(BeEquivalentTo(status.Condition{
 						Type:   conditionType,
 						Status: corev1.ConditionUnknown,
@@ -120,7 +120,7 @@ var _ = Describe("status", func() {
 				})
 
 				It("Should return unknown", func() {
-					result := r.GetConditionStatus(ctx, &h.Status, status.ConditionInProgress)
+					result := c.GetConditionStatus(ctx, &h.Status, status.ConditionInProgress)
 					Expect(result).To(BeEquivalentTo(corev1.ConditionUnknown))
 				})
 			})
@@ -148,7 +148,7 @@ var _ = Describe("status", func() {
 				})
 
 				It("Should be added", func() {
-					err := r.UpdateCondition(ctx, &h.Status, conditionType, conditionValue)
+					err := c.UpdateCondition(ctx, &h.Status, conditionType, conditionValue)
 					Expect(err).ToNot(HaveOccurred())
 
 					Expect(h.Status.Conditions).To(ConsistOf(condition, gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
@@ -159,7 +159,7 @@ var _ = Describe("status", func() {
 
 				Context("With a reason", func() {
 					It("Should be added", func() {
-						err := r.UpdateCondition(ctx, &h.Status, conditionType, conditionValue, reason)
+						err := c.UpdateCondition(ctx, &h.Status, conditionType, conditionValue, reason)
 						Expect(err).ToNot(HaveOccurred())
 
 						Expect(h.Status.Conditions).To(ConsistOf(condition, gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
@@ -171,7 +171,7 @@ var _ = Describe("status", func() {
 
 					Context("With a message", func() {
 						It("Should be added", func() {
-							err := r.UpdateCondition(ctx, &h.Status, conditionType, conditionValue, reason, message)
+							err := c.UpdateCondition(ctx, &h.Status, conditionType, conditionValue, reason, message)
 							Expect(err).ToNot(HaveOccurred())
 
 							Expect(h.Status.Conditions).To(ConsistOf(condition, gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
@@ -190,7 +190,7 @@ var _ = Describe("status", func() {
 							})
 
 							It("Should return an error", func() {
-								err := r.UpdateCondition(ctx, &h.Status, conditionType, conditionValue, reason, message, extraParameter)
+								err := c.UpdateCondition(ctx, &h.Status, conditionType, conditionValue, reason, message, extraParameter)
 								Expect(err).To(HaveOccurred())
 							})
 						})
@@ -206,7 +206,7 @@ var _ = Describe("status", func() {
 				})
 
 				It("Should return unknown", func() {
-					result := r.GetCondition(ctx, &h.Status, conditionType)
+					result := c.GetCondition(ctx, &h.Status, conditionType)
 					Expect(result).To(BeEquivalentTo(status.Condition{
 						Type:   conditionType,
 						Status: corev1.ConditionUnknown,
@@ -220,7 +220,7 @@ var _ = Describe("status", func() {
 				})
 
 				It("Should return unknown", func() {
-					result := r.GetConditionStatus(ctx, &h.Status, status.ConditionInProgress)
+					result := c.GetConditionStatus(ctx, &h.Status, status.ConditionInProgress)
 					Expect(result).To(BeEquivalentTo(corev1.ConditionUnknown))
 				})
 			})
@@ -248,7 +248,7 @@ var _ = Describe("status", func() {
 				})
 
 				It("Should update the value", func() {
-					err := r.UpdateCondition(ctx, &h.Status, conditionType, conditionValue)
+					err := c.UpdateCondition(ctx, &h.Status, conditionType, conditionValue)
 					Expect(err).ToNot(HaveOccurred())
 
 					Expect(h.Status.Conditions).To(ContainElement(gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
@@ -259,7 +259,7 @@ var _ = Describe("status", func() {
 
 				Context("With a reason", func() {
 					It("Should update the status", func() {
-						err := r.UpdateCondition(ctx, &h.Status, status.ConditionInProgress, corev1.ConditionFalse, "the-reason")
+						err := c.UpdateCondition(ctx, &h.Status, status.ConditionInProgress, corev1.ConditionFalse, "the-reason")
 						Expect(err).ToNot(HaveOccurred())
 
 						Expect(h.Status.Conditions).To(ContainElement(gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
@@ -271,7 +271,7 @@ var _ = Describe("status", func() {
 
 					Context("With a message", func() {
 						It("Should update the status", func() {
-							err := r.UpdateCondition(ctx, &h.Status, status.ConditionInProgress, corev1.ConditionFalse, "the-reason", "A human readable message")
+							err := c.UpdateCondition(ctx, &h.Status, status.ConditionInProgress, corev1.ConditionFalse, "the-reason", "A human readable message")
 							Expect(err).ToNot(HaveOccurred())
 
 							Expect(h.Status.Conditions).To(ContainElement(gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
@@ -284,7 +284,7 @@ var _ = Describe("status", func() {
 
 						Context("With an extra parameter", func() {
 							It("Should return an error", func() {
-								err := r.UpdateCondition(ctx, &h.Status, conditionType, conditionValue, reason, message, extraParameter)
+								err := c.UpdateCondition(ctx, &h.Status, conditionType, conditionValue, reason, message, extraParameter)
 								Expect(err).To(HaveOccurred())
 							})
 						})
@@ -300,7 +300,7 @@ var _ = Describe("status", func() {
 				})
 
 				It("Should return the condition", func() {
-					result := r.GetCondition(ctx, &h.Status, conditionType)
+					result := c.GetCondition(ctx, &h.Status, conditionType)
 					Expect(result).To(BeEquivalentTo(condition))
 				})
 			})
@@ -313,7 +313,7 @@ var _ = Describe("status", func() {
 				})
 
 				It("Should return the status", func() {
-					result := r.GetConditionStatus(ctx, &h.Status, conditionType)
+					result := c.GetConditionStatus(ctx, &h.Status, conditionType)
 					Expect(result).To(BeEquivalentTo(condition.Status))
 				})
 			})
@@ -344,7 +344,7 @@ var _ = Describe("status", func() {
 				})
 
 				It("Should return the right status", func() {
-					result := r.GetCondition(ctx, &h.Status, conditionType)
+					result := c.GetCondition(ctx, &h.Status, conditionType)
 					Expect(result).To(BeEquivalentTo(readyCondition))
 				})
 			})

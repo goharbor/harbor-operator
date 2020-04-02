@@ -15,7 +15,7 @@ import (
 )
 
 var _ = Describe("Walk a dependency manager", func() {
-	var rm *resourceManager
+	var rm Manager
 	var ctx context.Context
 
 	BeforeEach(func() {

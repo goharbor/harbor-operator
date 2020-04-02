@@ -21,7 +21,7 @@ const (
 	CoreDatabasePortKey     = "POSTGRESQL_PORT"
 	CoreDatabaseNameKey     = "POSTGRESQL_DATABASE"
 	CoreDatabaseUserKey     = "POSTGRESQL_USERNAME"
-	CoreDatabasePasswordKey = "POSTGRESQL_PASSWORD"
+	CoreDatabasePasswordKey = "POSTGRESQL_PASSWORD" // nolint:gosec
 )
 
 // +genclient
@@ -64,6 +64,12 @@ type CoreSpec struct {
 	// +kubebuilder:validation:Optional
 	ReadOnly bool `json:"readOnly"`
 
+	// +kubebuilder:validation:Optional
+	SyncRegistry bool `json:"syncRegistry"`
+
+	// +kubebuilder:validation:Optional
+	SyncQuota bool `json:"syncQuota"`
+
 	// +kubebuilder:validation:Required
 	ConfigExpiration time.Duration `json:"configExpiration"`
 
@@ -104,12 +110,6 @@ type CoreSpec struct {
 	// +kubebuilder:validation:Enum="INFO,DEBUG,WARNING,ERROR,FATAL"
 	LogLevel string `json:"logLevel,omitempty"`
 
-	// +kubebuilder:validation:Optional
-	SyncRegistry bool `json:"syncRegistry"`
-
-	// +kubebuilder:validation:Optional
-	SyncQuota bool `json:"syncQuota"`
-
 	// +kubebuilder:validation:Required
 	PublicURL string `json:"publicURL"`
 }
@@ -119,7 +119,6 @@ type CoreConfig struct {
 	DatabaseSecret string `json:"databaseSecret"`
 }
 
-// nolint:gochecknoinits
-func init() {
+func init() { // nolint:gochecknoinits
 	SchemeBuilder.Register(&Core{}, &CoreList{})
 }
