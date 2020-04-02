@@ -14,6 +14,7 @@ import (
 // +k8s:openapi-gen=true
 // +resource:path=notaryserver
 // +kubebuilder:subresource:status
+// +kubebuilder:resource:categories="goharbor"
 // +kubebuilder:printcolumn:name="Version",type=string,JSONPath=`.spec.version`,description="The semver Harbor version",priority=5
 // +kubebuilder:printcolumn:name="Replicas",type=string,JSONPath=`.spec.replicas`,description="The number of replicas",priority=0
 type NotaryServer struct {
