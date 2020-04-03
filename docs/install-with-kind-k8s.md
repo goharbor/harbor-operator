@@ -69,7 +69,6 @@
   ```bash
   helm repo add jetstack https://charts.jetstack.io
   helm repo add bitnami https://charts.bitnami.com/bitnami
-  helm repo add dandydev https://dandydeveloper.github.io/charts
 
   helm repo update
 

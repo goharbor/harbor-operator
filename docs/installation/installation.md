@@ -34,7 +34,8 @@ Kubernetes API running (see [Supported platforms](https://github.com/goharbor/ha
    ```
 
 3. Deploy requirements.
-   The following command deploys [databases](./database-installation.md) and redis needed to run a harbor.
+   The following command deploys [databases](./database-installation.md)
+   and [redis](./redis-installation.md) needed to run a harbor.
 
    ```bash
    make install-dependencies
