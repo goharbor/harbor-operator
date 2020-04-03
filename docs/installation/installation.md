@@ -33,7 +33,8 @@ Kubernetes API running (see [Supported platforms](https://github.com/goharbor/ha
    make docker-push  IMG=the.registry/goharbor/harbor-operator:dev
    ```
 
-3. Deploy requirements
+3. Deploy requirements.
+   The following command deploys [databases](./database-installation.md) and redis needed to run a harbor.
 
    ```bash
    make install-dependencies

@@ -130,14 +130,15 @@ sample: gomplate
 		| kubectl apply -f -
 
 install-dependencies: helm
+	$(HELM) repo add bitnami https://charts.bitnami.com/bitnami
 	$(HELM) get notes core-database \
-		|| $(HELM) install core-database stable/postgresql
+		|| $(HELM) install core-database bitnami/postgresql
 	$(HELM) get notes clair-database \
-		|| $(HELM) install clair-database stable/postgresql
+		|| $(HELM) install clair-database bitnami/postgresql
 	$(HELM) get notes notary-server-database \
-		|| $(HELM) install notary-server-database stable/postgresql
+		|| $(HELM) install notary-server-database bitnami/postgresql
 	$(HELM) get notes notary-signer-database \
-		|| $(HELM) install notary-signer-database stable/postgresql
+		|| $(HELM) install notary-signer-database bitnami/postgresql
 	$(HELM) get notes jobservice-broker \
 		|| $(HELM) install jobservice-broker stable/redis-ha
 	$(HELM) get notes clair-adapter-broker \
