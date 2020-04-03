@@ -51,7 +51,7 @@ Following components are optional:
 
 ### Delete the stack
 
-When deleting the Harbor resource, all linked components are deleted. With two arbor resources, the right components are deleted and components of the other Harbor are not changed.
+When deleting the Harbor resource, all linked components are deleted. With two Harbor resources, the right components are deleted and components of the other Harbor are not changed.
 
 ### Adding/Removing a component
 
