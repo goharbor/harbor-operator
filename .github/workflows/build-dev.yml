@@ -1,0 +1,21 @@
+on:
+  push:
+    branches:
+    - master
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Docker Build & Push to Docker Hub
+      uses: opspresso/action-docker@master
+      with:
+        args: --docker
+      env:
+        USERNAME: ${{ secrets.DOCKER_USER }}
+        PASSWORD: ${{ secrets.DOCKER_TOKEN }}
+        DOCKERFILE: Dockerfile
+        IMAGE_NAME: goharbor/harbor-operator
+        TAG_NAME: dev
+        LATEST: 'false'

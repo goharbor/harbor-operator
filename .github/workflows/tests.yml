@@ -1,0 +1,163 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  # Dockerfile tests
+  docker-build-test:
+    runs-on: ubuntu-latest
+    name: Build docker image
+
+    steps:
+    - uses: actions/checkout@v2
+    - run: make docker-build
+
+  docker-lint:
+    runs-on: ubuntu-latest
+    name: DockerLint
+    steps: 
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: lint
+      uses: brpaz/hadolint-action@master
+
+  # Golang tests
+  go-lint:
+    runs-on: ubuntu-latest
+    name: GoLint
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run golangci-lint
+      uses: actions-contrib/golangci-lint@v1
+      with:
+        golangci_lint_version: 1.22.2
+
+  go-dependencies:
+    runs-on: ubuntu-latest
+    name: Dependencies are up to date
+    steps:
+    - uses: actions/setup-go@v1
+      with:
+        go-version: 1.13
+    - name: Checkout
+      uses: actions/checkout@v2
+    - run: go mod tidy
+    - run: go mod vendor
+    - run: go mod graph
+    - run: git status
+    - name: Check diff
+      run: test -z "$(git diff-index --diff-filter=d --name-only HEAD -- 'vendor' | grep -v 'vendor/modules.txt')"
+
+  check-generated-go-files:
+    runs-on: ubuntu-latest
+    name: Generated files are up to date
+    steps:
+    - uses: actions/setup-go@v1
+      with:
+        go-version: 1.13
+    - name: Checkout
+      uses: actions/checkout@v2
+    - run: make generate
+    - name: Check diff
+      run: |
+        git restore -- vendor go.mod go.sum
+        git diff-index --exit-code --ignore-cr-at-eol HEAD
+
+  go-tests:
+    runs-on: ubuntu-latest
+    name: K8S v${{ matrix.k8sVersion }} (CM v${{ matrix.certManager }})
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # https://github.com/jetstack/cert-manager/branches/active
+        certManager: ["0.12", "0.13", "0.14", "0.15"]
+        # https://snapcraft.io/microk8s
+        k8sVersion: ["1.15", "1.16", "1.17"]
+
+    steps: 
+    - name: Set up Go 1.13
+      uses: actions/setup-go@v1
+      with:
+        go-version: 1.13
+    - name: Install Kubernetes v${{ matrix.k8sVersion }}
+      run: |
+        sudo snap install microk8s --channel='${{ matrix.k8sVersion }}/stable' --classic
+
+        sudo microk8s.start
+
+        # https://microk8s.io/docs/addons
+        sudo microk8s.enable dns
+    - name: Wait for Kubernetes to be ready
+      timeout-minutes: 15
+      run: |
+        while [[ ! $(sudo microk8s.kubectl cluster-info) ]] ; do
+          echo "kubernetes not ready yet..." >&2
+          sleep 1
+        done
+    - name: Install CertManager v${{ matrix.certManager }}
+      run: sudo microk8s.kubectl apply -f "https://raw.githubusercontent.com/jetstack/cert-manager/release-${{ matrix.certManager }}/deploy/manifests/00-crds.yaml"
+    - uses: actions/checkout@v2
+    - name: go tests
+      run: |
+        export KUBECONFIG="$(realpath "$(mktemp kubeconfig.XXXXX)")"
+        export USE_EXISTING_CLUSTER="true"
+
+        sudo microk8s.config > "${KUBECONFIG}"
+
+        make test
+
+  # Kubernetes
+  crd-kubernetes-resources:
+    runs-on: ubuntu-latest
+    name: 'kubernetes_resources: ./config/crd'
+    steps: 
+    - run: sudo apt-get install -y bzr # Required to install controller-gen in make manifests
+    - uses: actions/checkout@v2
+    - run: make manifests
+    - uses: azure/k8s-bake@v1
+      with:
+        renderEngine: 'kustomize'
+        kustomizationPath: './config/crd'
+        kubectl-version: 'latest'
+
+  operator-kubernetes-resources:
+    runs-on: ubuntu-latest
+    name: 'kubernetes_resources: ./config/default'
+    steps: 
+    - run: sudo apt-get install -y bzr # Required to install controller-gen in make manifests
+    - uses: actions/checkout@v2
+    - run: make manifests
+    - uses: azure/k8s-bake@v1
+      with:
+        renderEngine: 'kustomize'
+        kustomizationPath: './config/default'
+        kubectl-version: 'latest'
+
+  samples-kubernetes-resources:
+    runs-on: ubuntu-latest
+    name: 'kubernetes_resources: ./config/samples'
+    steps: 
+    - uses: actions/checkout@v2
+    - uses: azure/k8s-bake@v1
+      with:
+        renderEngine: 'kustomize'
+        kustomizationPath: './config/samples'
+        kubectl-version: 'latest'
+
+  # Documentation
+  md-lint:
+    runs-on: ubuntu-latest
+    name: 'documentation: lint'
+    steps:
+    - uses: actions/checkout@v2
+    - name: markdownlint-cli
+      uses: nosborn/github-action-markdown-cli@v1.1.1
+      with:
+        files: .
+        config_file: ".markdownlint.json"
+        ignore_files: "vendor"
