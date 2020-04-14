@@ -91,7 +91,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 							VolumeSource: corev1.VolumeSource{
 								ConfigMap: &corev1.ConfigMapVolumeSource{
 									LocalObjectReference: corev1.LocalObjectReference{
-										Name: registry.Name,
+										Name: fmt.Sprintf("%s-registry", registry.GetName()),
 									},
 								},
 							},
@@ -102,7 +102,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 							Name: "certificate",
 							VolumeSource: corev1.VolumeSource{
 								Secret: &corev1.SecretVolumeSource{
-									SecretName: registry.Name,
+									SecretName: fmt.Sprintf("%s-registry", registry.GetName()),
 								},
 							},
 						},

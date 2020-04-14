@@ -10,7 +10,6 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/api/v1alpha2"
-	"github.com/goharbor/harbor-operator/pkg/factories/application"
 	"github.com/pkg/errors"
 )
 
@@ -44,9 +43,6 @@ func (r *Reconciler) GetDeployment(ctx context.Context, portal *goharborv1alpha2
 			Replicas: portal.Spec.Replicas,
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Annotations: map[string]string{
-						"operator/version": application.GetVersion(ctx),
-					},
 					Labels: map[string]string{
 						"portal-name":      portal.GetName(),
 						"portal-namespace": portal.GetNamespace(),

@@ -1,14 +1,20 @@
 package graph
 
-import "github.com/pkg/errors"
+import (
+	"sync"
+
+	"github.com/pkg/errors"
+)
 
 type node struct {
 	resource Resource
 
 	parent      chan error
+	parentLock  *sync.Mutex
 	parentCount int
 
-	children []chan<- error
+	children     []chan<- error
+	childrenLock []*sync.Mutex
 }
 
 func (no *node) Wait() error {
@@ -41,16 +47,32 @@ func (no *node) Wait() error {
 	return nil
 }
 
-func (no *node) Terminates(err error) {
+func (no *node) Terminates(err error) (result error) {
 	for _, c := range no.children {
 		c := c
 
 		go func() {
+			no.parentLock.Lock()
+			defer no.parentLock.Unlock()
+
+			defer func() {
+				// recover from panic caused by writing to a closed channel
+				if r := recover(); r != nil {
+					result = errors.Errorf("%s", r)
+				}
+			}()
+
 			c <- err
 		}()
 	}
+
+	return result
 }
 
 func (no *node) AddChild(child *node) {
+	no.parentLock.Lock()
+	defer no.parentLock.Unlock()
+
 	no.children = append(no.children, child.parent)
+	no.childrenLock = append(no.childrenLock, child.parentLock)
 }

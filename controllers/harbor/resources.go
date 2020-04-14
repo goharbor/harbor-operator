@@ -20,7 +20,7 @@ func (r *Reconciler) AddResources(ctx context.Context, harbor *goharborv1alpha2.
 
 	_, err = r.Controller.AddBasicObjectToManage(ctx, coreIngress)
 	if err != nil {
-		return errors.Wrapf(err, "cannot add core ingress %+v", coreIngress)
+		return errors.Wrapf(err, "cannot add core ingress %s", coreIngress.GetName())
 	}
 
 	notaryIngress, err := r.GetNotaryServerIngresse(ctx, harbor)
@@ -30,7 +30,7 @@ func (r *Reconciler) AddResources(ctx context.Context, harbor *goharborv1alpha2.
 
 	_, err = r.Controller.AddBasicObjectToManage(ctx, notaryIngress)
 	if err != nil {
-		return errors.Wrapf(err, "cannot add notary ingress %+v", notaryIngress)
+		return errors.Wrapf(err, "cannot add notary ingress %s", notaryIngress.GetName())
 	}
 
 	return nil

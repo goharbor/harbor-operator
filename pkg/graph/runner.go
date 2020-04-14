@@ -2,12 +2,16 @@ package graph
 
 import (
 	"context"
+	"sync"
 
 	"golang.org/x/sync/errgroup"
+
+	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 )
 
 func (rm *resourceManager) Run(ctx context.Context, runner func(context.Context, Resource) error) error {
 	g := errgroup.Group{}
+	l := logger.Get(ctx)
 
 	for _, no := range rm.getGraph() {
 		no := no
@@ -16,7 +20,10 @@ func (rm *resourceManager) Run(ctx context.Context, runner func(context.Context,
 			var err error
 
 			defer func() {
-				no.Terminates(err)
+				err := no.Terminates(err)
+				if err != nil {
+					l.Error(err, "failed to terminate node when running graph")
+				}
 			}()
 
 			err = no.Wait()
@@ -45,14 +52,15 @@ func (rm *resourceManager) getGraph() []*node {
 	for resource, blockers := range rm.resources {
 		blockerCount := len(blockers)
 
-		c := make(chan error, blockerCount)
-
 		node := &node{
 			resource: resource,
 
-			parent:      c,
+			parent:      make(chan error, blockerCount),
+			parentLock:  &sync.Mutex{},
 			parentCount: blockerCount,
-			children:    []chan<- error{},
+
+			children:     []chan<- error{},
+			childrenLock: []*sync.Mutex{},
 		}
 		graph[resource] = node
 		result[i] = node
