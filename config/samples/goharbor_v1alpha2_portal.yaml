@@ -1,10 +1,7 @@
 apiVersion: goharbor.io/v1alpha2
 kind: Portal
 metadata:
-  name: portal-sample
+  name: sample
 spec:
   version: "1.10.0"
   replicas: 1
-  priority: 0
-  nodeSelector: {}
-  imagePullSecrets: []
