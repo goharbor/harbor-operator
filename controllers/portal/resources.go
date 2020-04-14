@@ -20,7 +20,7 @@ func (r *Reconciler) AddResources(ctx context.Context, portal *goharborv1alpha2.
 
 	_, err = r.Controller.AddBasicObjectToManage(ctx, service)
 	if err != nil {
-		return errors.Wrapf(err, "cannot add service %+v", service)
+		return errors.Wrapf(err, "cannot add service %s", service.GetName())
 	}
 
 	deployment, err := r.GetDeployment(ctx, portal)
@@ -30,7 +30,7 @@ func (r *Reconciler) AddResources(ctx context.Context, portal *goharborv1alpha2.
 
 	_, err = r.Controller.AddDeploymentToManage(ctx, deployment)
 	if err != nil {
-		return errors.Wrapf(err, "cannot add deployment %+v", deployment)
+		return errors.Wrapf(err, "cannot add deployment %s", deployment.GetName())
 	}
 
 	return nil

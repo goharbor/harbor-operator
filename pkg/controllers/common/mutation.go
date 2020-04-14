@@ -19,9 +19,8 @@ const (
 )
 
 const (
-	OperatorNameLabel    = "containerregistry.ovhcloud.com/controller"
-	OperatorVersionLabel = "containerregistry.ovhcloud.com/version"
-	OwnerLabel           = "containerregistry.ovhcloud.com/owner"
+	OperatorNameLabel    = "goharbor.io/operator-controller"
+	OperatorVersionLabel = "goharbor.io/operator-version"
 )
 
 func (c *Controller) GlobalMutateFn(ctx context.Context) resources.Mutable {
@@ -37,7 +36,6 @@ func (c *Controller) GlobalMutateFn(ctx context.Context) resources.Mutable {
 			logger.Get(ctx).Info("Cannot add owner mutation: owner not found")
 		} else {
 			mutation.AppendMutation(cmutation.GetOwnerMutation(c.Scheme, owner))
-			mutation.AppendMutation(cmutation.GetLabelsMutation(OwnerLabel, owner.GetName()))
 		}
 
 		mutation := mutation(ctx, resource, result)

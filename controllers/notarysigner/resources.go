@@ -20,7 +20,7 @@ func (r *Reconciler) AddResources(ctx context.Context, notary *goharborv1alpha2.
 
 	_, err = r.Controller.AddBasicObjectToManage(ctx, service)
 	if err != nil {
-		return errors.Wrapf(err, "cannot add service %+v", service)
+		return errors.Wrapf(err, "cannot add service %s", service.GetName())
 	}
 
 	configMap, err := r.GetConfigMap(ctx, notary)
@@ -30,7 +30,7 @@ func (r *Reconciler) AddResources(ctx context.Context, notary *goharborv1alpha2.
 
 	configMapResource, err := r.Controller.AddInstantResourceToManage(ctx, configMap)
 	if err != nil {
-		return errors.Wrapf(err, "cannot add configMap %+v", configMap)
+		return errors.Wrapf(err, "cannot add configMap %s", configMap.GetName())
 	}
 
 	certificate, err := r.GetNotaryCertificate(ctx, notary)
@@ -40,7 +40,7 @@ func (r *Reconciler) AddResources(ctx context.Context, notary *goharborv1alpha2.
 
 	certificateResource, err := r.Controller.AddCertificateToManage(ctx, certificate)
 	if err != nil {
-		return errors.Wrapf(err, "cannot add configMap %+v", configMap)
+		return errors.Wrapf(err, "cannot add configMap %s", configMap.GetName())
 	}
 
 	deployment, err := r.GetDeployment(ctx, notary)
@@ -50,7 +50,7 @@ func (r *Reconciler) AddResources(ctx context.Context, notary *goharborv1alpha2.
 
 	_, err = r.Controller.AddDeploymentToManage(ctx, deployment, configMapResource, certificateResource)
 	if err != nil {
-		return errors.Wrapf(err, "cannot add deployment %+v", deployment)
+		return errors.Wrapf(err, "cannot add deployment %s", deployment.GetName())
 	}
 
 	return nil
