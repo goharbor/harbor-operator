@@ -8,13 +8,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
+	serrors "github.com/goharbor/harbor-operator/pkg/controllers/common/errors"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 )
 
 func (c *Controller) Apply(ctx context.Context, node graph.Resource) error {
 	res, ok := node.(*Resource)
 	if !ok {
-		return errors.Errorf("unsupported resource type %+v", node)
+		return serrors.UnrecoverrableError(errors.Errorf("%+v", node), serrors.OperatorReason, "unable to apply resource")
 	}
 
 	span, ctx := opentracing.StartSpanFromContext(ctx, "applyResource", opentracing.Tags{
@@ -24,7 +25,7 @@ func (c *Controller) Apply(ctx context.Context, node graph.Resource) error {
 
 	objectKey, err := client.ObjectKeyFromObject(res.resource)
 	if err != nil {
-		return errors.Wrap(err, "cannot get object key")
+		return serrors.UnrecoverrableError(err, serrors.OperatorReason, "unable to get resource key")
 	}
 
 	span.
@@ -35,6 +36,7 @@ func (c *Controller) Apply(ctx context.Context, node graph.Resource) error {
 
 	op, err := controllerutil.CreateOrUpdate(ctx, c.Client, result, res.mutable(ctx, res.resource, result))
 	if err != nil {
+		// TODO Check if the error is a temporary error or a unrecoverrable one
 		return errors.Wrapf(err, "cannot create/update %+v", res.resource)
 	}
 

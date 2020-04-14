@@ -10,7 +10,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/api/v1alpha2"
-	"github.com/goharbor/harbor-operator/pkg/factories/application"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 )
 
@@ -19,8 +18,6 @@ import (
 
 func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.TODO()
-	application.SetName(&ctx, r.GetName())
-	application.SetVersion(&ctx, r.GetVersion())
 
 	span, ctx := opentracing.StartSpanFromContext(ctx, "reconcile", opentracing.Tags{
 		"Registry.Namespace": req.Namespace,
@@ -33,9 +30,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		log.String("Registry.Name", req.Name),
 	)
 
-	reqLogger := r.Log.WithValues("Request", req.NamespacedName, "Registry.Namespace", req.Namespace, "Registry.Name", req.Name)
-
-	logger.Set(&ctx, reqLogger)
+	logger.Set(&ctx, r.Log)
+	ctx = r.PopulateContext(ctx, req)
+	l := logger.Get(ctx)
 
 	// Fetch the Registry instance
 	registry := &goharborv1alpha2.Registry{}
@@ -49,7 +46,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	if !ok {
 		// Request object not found, could have been deleted after reconcile request.
 		// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
-		reqLogger.Info("Registry does not exists")
+		l.Info("Registry does not exists")
 		return reconcile.Result{}, nil
 	}
 

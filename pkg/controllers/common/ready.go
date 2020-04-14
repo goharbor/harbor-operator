@@ -2,11 +2,11 @@ package common
 
 import (
 	"context"
+	"fmt"
+	"time"
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	serrors "github.com/goharbor/harbor-operator/pkg/controllers/common/errors"
@@ -26,7 +26,7 @@ func (c *Controller) EnsureReady(ctx context.Context, node graph.Resource) error
 
 	objectKey, err := client.ObjectKeyFromObject(res.resource)
 	if err != nil {
-		return errors.Wrap(err, "cannot get object key")
+		return serrors.UnrecoverrableError(err, serrors.OperatorReason, "cannot get object key")
 	}
 
 	span.
@@ -37,26 +37,18 @@ func (c *Controller) EnsureReady(ctx context.Context, node graph.Resource) error
 
 	err = c.Client.Get(ctx, objectKey, result)
 	if err != nil {
-		return errors.Wrap(err, "cannot get resource")
+		// TODO Check if the error is a temporary error or a unrecoverrable one
+		return errors.Wrapf(err, "cannot get resource %+v", res.resource)
 	}
 
-	data, err := runtime.DefaultUnstructuredConverter.ToUnstructured(result)
+	ok, err = res.checkable(ctx, result)
 	if err != nil {
-		return errors.Wrap(err, "cannot convert to unstructured")
-	}
-
-	u := &unstructured.Unstructured{}
-	u.SetUnstructuredContent(data)
-
-	ok, err = res.checkable(ctx, u)
-	if err != nil {
-		return errors.Wrap(err, "cannot get resource")
+		return errors.Wrap(err, "cannot check resource status")
 	}
 
 	if !ok {
-		return serrors.RetryLaterError{
-			Cause: errors.Errorf("resource %+v not ready", res.resource),
-		}
+		err := errors.New("not ready")
+		return serrors.RetryLaterError(err, "dependencyStatus", fmt.Sprintf("%s %s", result.GetObjectKind().GroupVersionKind().GroupKind(), objectKey), 0*time.Second)
 	}
 
 	return nil

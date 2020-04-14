@@ -4,9 +4,11 @@ import (
 	"context"
 
 	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
+	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
+	sgraph "github.com/goharbor/harbor-operator/pkg/controllers/common/internal/graph"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 	"github.com/goharbor/harbor-operator/pkg/resources"
 	"github.com/goharbor/harbor-operator/pkg/resources/statuscheck"
@@ -29,7 +31,12 @@ func (c *Controller) AddInstantResourceToManage(ctx context.Context, resource re
 		resource:  resource,
 	}
 
-	return res, c.graph.AddResource(res, dependencies)
+	g := sgraph.Get(ctx)
+	if g == nil {
+		return nil, errors.Errorf("no graph in current context")
+	}
+
+	return res, g.AddResource(res, dependencies)
 }
 
 func (c *Controller) AddUnsctructuredToManage(ctx context.Context, resource *unstructured.Unstructured, dependencies ...graph.Resource) (graph.Resource, error) { // nolint:interfacer
@@ -43,7 +50,12 @@ func (c *Controller) AddUnsctructuredToManage(ctx context.Context, resource *uns
 		resource:  resource,
 	}
 
-	return res, c.graph.AddResource(res, dependencies)
+	g := sgraph.Get(ctx)
+	if g == nil {
+		return nil, errors.Errorf("no graph in current context")
+	}
+
+	return res, g.AddResource(res, dependencies)
 }
 
 func (c *Controller) AddBasicObjectToManage(ctx context.Context, resource resources.Resource, dependencies ...graph.Resource) (graph.Resource, error) {
@@ -57,7 +69,12 @@ func (c *Controller) AddBasicObjectToManage(ctx context.Context, resource resour
 		resource:  resource,
 	}
 
-	return res, c.graph.AddResource(res, dependencies)
+	g := sgraph.Get(ctx)
+	if g == nil {
+		return nil, errors.Errorf("no graph in current context")
+	}
+
+	return res, g.AddResource(res, dependencies)
 }
 
 func (c *Controller) AddDeploymentToManage(ctx context.Context, resource *appsv1.Deployment, dependencies ...graph.Resource) (graph.Resource, error) {
@@ -71,7 +88,12 @@ func (c *Controller) AddDeploymentToManage(ctx context.Context, resource *appsv1
 		resource:  resource,
 	}
 
-	return res, c.graph.AddResource(res, dependencies)
+	g := sgraph.Get(ctx)
+	if g == nil {
+		return nil, errors.Errorf("no graph in current context")
+	}
+
+	return res, g.AddResource(res, dependencies)
 }
 
 func (c *Controller) AddCertificateToManage(ctx context.Context, resource *certv1.Certificate, dependencies ...graph.Resource) (graph.Resource, error) {
@@ -85,5 +107,10 @@ func (c *Controller) AddCertificateToManage(ctx context.Context, resource *certv
 		resource:  resource,
 	}
 
-	return res, c.graph.AddResource(res, dependencies)
+	g := sgraph.Get(ctx)
+	if g == nil {
+		return nil, errors.Errorf("no graph in current context")
+	}
+
+	return res, g.AddResource(res, dependencies)
 }
