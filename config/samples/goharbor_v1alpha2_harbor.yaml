@@ -1,7 +1,7 @@
 apiVersion: goharbor.io/v1alpha2
 kind: Harbor
 metadata:
-  name: harbor-sample
+  name: sample
 spec:
   publicURL: 'https://{{ env.Getenv "LBAAS_DOMAIN" }}'
   tlsSecretName: public-certificate
