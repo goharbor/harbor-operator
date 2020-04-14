@@ -20,7 +20,7 @@ func (r *Reconciler) AddResources(ctx context.Context, registryctl *goharborv1al
 
 	_, err = r.Controller.AddInstantResourceToManage(ctx, cm)
 	if err != nil {
-		return errors.Wrapf(err, "cannot add configMap %+v", cm)
+		return errors.Wrapf(err, "cannot add configMap %s", cm.GetName())
 	}
 
 	return errors.New("not yet implemented")

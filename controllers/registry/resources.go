@@ -20,7 +20,7 @@ func (r *Reconciler) AddResources(ctx context.Context, registry *goharborv1alpha
 
 	_, err = r.Controller.AddBasicObjectToManage(ctx, service)
 	if err != nil {
-		return errors.Wrapf(err, "cannot add service %+v", service)
+		return errors.Wrapf(err, "cannot add service %s", service.GetName())
 	}
 
 	configMap, err := r.GetConfigMap(ctx, registry)
@@ -30,17 +30,17 @@ func (r *Reconciler) AddResources(ctx context.Context, registry *goharborv1alpha
 
 	configMapResource, err := r.Controller.AddInstantResourceToManage(ctx, configMap)
 	if err != nil {
-		return errors.Wrapf(err, "cannot add configMap %+v", configMap)
+		return errors.Wrapf(err, "cannot add configMap %s", configMap.GetName())
 	}
 
-	secret, err := r.GetConfigMap(ctx, registry)
+	secret, err := r.GetSecret(ctx, registry)
 	if err != nil {
 		return errors.Wrap(err, "cannot get secret")
 	}
 
 	secretResource, err := r.Controller.AddInstantResourceToManage(ctx, secret)
 	if err != nil {
-		return errors.Wrapf(err, "cannot add secret %+v", secret)
+		return errors.Wrapf(err, "cannot add secret %s", secret.GetName())
 	}
 
 	certificate, err := r.GetCertificate(ctx, registry)
@@ -50,7 +50,7 @@ func (r *Reconciler) AddResources(ctx context.Context, registry *goharborv1alpha
 
 	certificateResource, err := r.Controller.AddCertificateToManage(ctx, certificate)
 	if err != nil {
-		return errors.Wrapf(err, "cannot add certificate %+v", certificate)
+		return errors.Wrapf(err, "cannot add certificate %s", certificate.GetName())
 	}
 
 	deployment, err := r.GetDeployment(ctx, registry)
@@ -60,7 +60,7 @@ func (r *Reconciler) AddResources(ctx context.Context, registry *goharborv1alpha
 
 	_, err = r.Controller.AddDeploymentToManage(ctx, deployment, configMapResource, secretResource, certificateResource)
 	if err != nil {
-		return errors.Wrapf(err, "cannot add deployment %+v", deployment)
+		return errors.Wrapf(err, "cannot add deployment %s", deployment.GetName())
 	}
 
 	return nil

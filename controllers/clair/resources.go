@@ -20,7 +20,7 @@ func (r *Reconciler) AddResources(ctx context.Context, clair *goharborv1alpha2.C
 
 	_, err = r.Controller.AddBasicObjectToManage(ctx, service)
 	if err != nil {
-		return errors.Wrapf(err, "cannot add service %+v", service)
+		return errors.Wrapf(err, "cannot add service %s", service.GetName())
 	}
 
 	configMap, err := r.GetConfigMap(ctx, clair)
@@ -30,7 +30,7 @@ func (r *Reconciler) AddResources(ctx context.Context, clair *goharborv1alpha2.C
 
 	configMapResource, err := r.Controller.AddInstantResourceToManage(ctx, configMap)
 	if err != nil {
-		return errors.Wrapf(err, "cannot add configMap %+v", configMap)
+		return errors.Wrapf(err, "cannot add configMap %s", configMap.GetName())
 	}
 
 	deployment, err := r.GetDeployment(ctx, clair)
@@ -40,7 +40,7 @@ func (r *Reconciler) AddResources(ctx context.Context, clair *goharborv1alpha2.C
 
 	_, err = r.Controller.AddDeploymentToManage(ctx, deployment, configMapResource)
 	if err != nil {
-		return errors.Wrapf(err, "cannot add deployment %+v", deployment)
+		return errors.Wrapf(err, "cannot add deployment %s", deployment.GetName())
 	}
 
 	return nil

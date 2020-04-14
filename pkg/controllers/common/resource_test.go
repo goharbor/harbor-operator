@@ -2,13 +2,12 @@ package common
 
 import (
 	"context"
+	// +kubebuilder:scaffold:imports
 
 	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-
-	// +kubebuilder:scaffold:imports
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/api/v1alpha2"
 	"github.com/goharbor/harbor-operator/pkg/graph"

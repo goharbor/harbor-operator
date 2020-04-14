@@ -21,7 +21,7 @@ func (r *Reconciler) AddResources(ctx context.Context, core *goharborv1alpha2.Co
 
 	_, err = r.Controller.AddBasicObjectToManage(ctx, service)
 	if err != nil {
-		return errors.Wrapf(err, "cannot add service %+v", service)
+		return errors.Wrapf(err, "cannot add service %s", service.GetName())
 	}
 
 	configMap, err := r.GetConfigMap(ctx, core)
@@ -31,7 +31,7 @@ func (r *Reconciler) AddResources(ctx context.Context, core *goharborv1alpha2.Co
 
 	configMapResource, err := r.Controller.AddInstantResourceToManage(ctx, configMap)
 	if err != nil {
-		return errors.Wrapf(err, "cannot add configMap %+v", configMap)
+		return errors.Wrapf(err, "cannot add configMap %s", configMap.GetName())
 	}
 
 	secret, err := r.GetSecret(ctx, core)
@@ -41,7 +41,7 @@ func (r *Reconciler) AddResources(ctx context.Context, core *goharborv1alpha2.Co
 
 	secretResource, err := r.Controller.AddInstantResourceToManage(ctx, secret)
 	if err != nil {
-		return errors.Wrapf(err, "cannot add secret %+v", secret)
+		return errors.Wrapf(err, "cannot add secret %s", secret.GetName())
 	}
 
 	deployment, err := r.GetDeployment(ctx, core)
@@ -51,7 +51,7 @@ func (r *Reconciler) AddResources(ctx context.Context, core *goharborv1alpha2.Co
 
 	_, err = r.Controller.AddDeploymentToManage(ctx, deployment, configMapResource, secretResource)
 	if err != nil {
-		return errors.Wrapf(err, "cannot add deployment %+v", deployment)
+		return errors.Wrapf(err, "cannot add deployment %s", deployment.GetName())
 	}
 
 	return nil
