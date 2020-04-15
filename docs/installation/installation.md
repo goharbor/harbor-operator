@@ -79,6 +79,12 @@ Kubernetes API running (see [Supported platforms](https://github.com/goharbor/ha
      | base64 --decode
    ```
 
+Few customizations are available:
+
+- [Custom Registry storage](./registry-storage-configuration.md)
+- [Database configuration](./database-installation.md)
+- [Redis configuration](./redis-installation.md)
+
 ## Some notes
 
 ### using on KIND k8s with NodePort
