@@ -33,7 +33,9 @@ Kubernetes API running (see [Supported platforms](https://github.com/goharbor/ha
    make docker-push  IMG=the.registry/goharbor/harbor-operator:dev
    ```
 
-3. Deploy requirements
+3. Deploy requirements.
+   The following command deploys [databases](./database-installation.md)
+   and [redis](./redis-installation.md) needed to run a harbor.
 
    ```bash
    make install-dependencies
@@ -76,6 +78,12 @@ Kubernetes API running (see [Supported platforms](https://github.com/goharbor/ha
    kubectl get secret "$(kubectl get harbor harbor-sample -o jsonpath='{.spec.adminPasswordSecret}')" -o jsonpath='{.data.password}' \
      | base64 --decode
    ```
+
+Few customizations are available:
+
+- [Custom Registry storage](./registry-storage-configuration.md)
+- [Database configuration](./database-installation.md)
+- [Redis configuration](./redis-installation.md)
 
 ## Some notes
 

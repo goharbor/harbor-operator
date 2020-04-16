@@ -130,22 +130,27 @@ sample: gomplate
 		| kubectl apply -f -
 
 install-dependencies: helm
+	$(HELM) repo add bitnami https://charts.bitnami.com/bitnami
 	$(HELM) get notes core-database \
-		|| $(HELM) install core-database stable/postgresql
+		|| $(HELM) install core-database bitnami/postgresql
 	$(HELM) get notes clair-database \
-		|| $(HELM) install clair-database stable/postgresql
+		|| $(HELM) install clair-database bitnami/postgresql
 	$(HELM) get notes notary-server-database \
-		|| $(HELM) install notary-server-database stable/postgresql
+		|| $(HELM) install notary-server-database bitnami/postgresql
 	$(HELM) get notes notary-signer-database \
-		|| $(HELM) install notary-signer-database stable/postgresql
+		|| $(HELM) install notary-signer-database bitnami/postgresql
 	$(HELM) get notes jobservice-broker \
-		|| $(HELM) install jobservice-broker stable/redis-ha
+		|| $(HELM) install jobservice-broker bitnami/redis \
+			--set usePassword=false
 	$(HELM) get notes clair-adapter-broker \
-		|| $(HELM) install clair-adapter-broker stable/redis-ha
+		|| $(HELM) install clair-adapter-broker bitnami/redis \
+			--set usePassword=false
 	$(HELM) get notes registry-cache \
-		|| $(HELM) install registry-cache stable/redis-ha
+		|| $(HELM) install registry-cache bitnami/redis \
+			--set usePassword=false
 	$(HELM) get notes nginx \
-		|| $(HELM) install nginx stable/nginx-ingress --set-string controller.config.proxy-body-size=0
+		|| $(HELM) install nginx stable/nginx-ingress \
+			--set-string controller.config.proxy-body-size=0
 	kubectl apply -f config/samples/notary-ingress-service.yaml
 
 # Install local certificate

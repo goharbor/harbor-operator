@@ -69,7 +69,6 @@
   ```bash
   helm repo add jetstack https://charts.jetstack.io
   helm repo add bitnami https://charts.bitnami.com/bitnami
-  helm repo add dandydev https://dandydeveloper.github.io/charts
 
   helm repo update
 
@@ -114,20 +113,20 @@
 - install harbor
 
   ```bash
-  IP=`hostname -I|awk '{print $1}'`
-  export LBAAS_DOMAIN=harbor.$IP.xip.io \
-  NOTARY_DOMAIN=harbor.$IP.xip.io \
-  CORE_DATABASE_SECRET=$(kubectl get secret core-database-postgresql -o jsonpath='{.data.postgresql-password}' | base64 --decode) \
-  CLAIR_DATABASE_SECRET=$(kubectl get secret clair-database-postgresql -o jsonpath='{.data.postgresql-password}' | base64 --decode) \
-  NOTARY_SERVER_DATABASE_SECRET=$(kubectl get secret notary-server-database-postgresql -o jsonpath='{.data.postgresql-password}' | base64 --decode) \
-  NOTARY_SIGNER_DATABASE_SECRET=$(kubectl get secret notary-signer-database-postgresql -o jsonpath='{.data.postgresql-password}' | base64 --decode) ; \
+  IP="$(hostname -I|awk '{print $1}')"
+  export LBAAS_DOMAIN="harbor.$IP.xip.io" \
+    NOTARY_DOMAIN="harbor.$IP.xip.io" \
+    CORE_DATABASE_SECRET="$(kubectl get secret core-database-postgresql -o jsonpath='{.data.postgresql-password}' | base64 --decode)" \
+    CLAIR_DATABASE_SECRET="$(kubectl get secret clair-database-postgresql -o jsonpath='{.data.postgresql-password}' | base64 --decode)" \
+    NOTARY_SERVER_DATABASE_SECRET="$(kubectl get secret notary-server-database-postgresql -o jsonpath='{.data.postgresql-password}' | base64 --decode)" \
+    NOTARY_SIGNER_DATABASE_SECRET="$(kubectl get secret notary-signer-database-postgresql -o jsonpath='{.data.postgresql-password}' | base64 --decode)" ; \
   kubectl kustomize config/samples | gomplate | kubectl apply -f -
   ```
 
 - export self-sign cert
 
   ```bash
-  sudo mkdir -p /etc/docker/certs.d/$LBAAS_DOMAIN
+  sudo mkdir -p "/etc/docker/certs.d/$LBAAS_DOMAIN"
 
   kubectl get secret "$(kubectl get h harbor-sample -o jsonpath='{.spec.tlsSecretName}')" -o jsonpath='{.data.ca\.crt}' \
      | base64 --decode \
@@ -137,11 +136,11 @@
 - push image
 
   ```bash
-  docker login $LBAAS_DOMAIN -u admin -p $(whoami)
+  docker login "$LBAAS_DOMAIN" -u admin -p $(whoami)
 
-  docker tag busybox $LBAAS_DOMAIN/library/testbusybox
+  docker tag busybox "$LBAAS_DOMAIN/library/testbusybox"
 
-  docker push $LBAAS_DOMAIN/library/testbusybox
+  docker push "$LBAAS_DOMAIN/library/testbusybox"
   ```
 
 - clean
