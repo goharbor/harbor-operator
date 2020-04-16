@@ -76,8 +76,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # https://github.com/jetstack/cert-manager/branches/active
-        certManager: ["0.12", "0.13", "0.14", "0.15"]
+        # https://github.com/jetstack/cert-manager/tags
+        certManager: ["0.12.0", "0.13.1", "0.14.2", "0.15.0-alpha.0"]
         # https://snapcraft.io/microk8s
         k8sVersion: ["1.15", "1.16", "1.17"]
 
@@ -102,7 +102,12 @@ jobs:
           sleep 1
         done
     - name: Install CertManager v${{ matrix.certManager }}
-      run: sudo microk8s.kubectl apply -f "https://raw.githubusercontent.com/jetstack/cert-manager/release-${{ matrix.certManager }}/deploy/manifests/00-crds.yaml"
+      run: |
+        # Try the recet way to install crd or fallback to the old one
+        version='${{ matrix.certManager }}'
+        shortVersion=""${version%.*}""
+        sudo microk8s.kubectl apply -f "https://github.com/jetstack/cert-manager/releases/download/v${version}/cert-manager.crds.yaml" ||
+        sudo microk8s.kubectl apply -f "https://raw.githubusercontent.com/jetstack/cert-manager/release-${shortVersion}/deploy/manifests/00-crds.yaml"
     - uses: actions/checkout@v2
     - name: go tests
       run: |
