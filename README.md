@@ -88,8 +88,8 @@ Now, this project is maintained and developed by the [Harbor operator workgroup]
 
 ## Community
 
-* Slack channel `#harbor-operator-dev` at [CNCF Workspace](https://slack.cncf.io)
-* Send mail to Harbor dev mail group:  harbor-dev@lists.cncf.io
+- Slack channel `#harbor-operator-dev` at [CNCF Workspace](https://slack.cncf.io)
+- Send mail to Harbor dev mail group:  harbor-dev@lists.cncf.io
 
 ## Additional documentation
 
