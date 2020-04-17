@@ -17,6 +17,7 @@ Please specify the versions of following systems.
 - harbor operator version: [x.y.z]
 - harbor version: [x.y.z]
 - kubernetes version: [x.y.z]
+- Any additional relevant versions such as CertManager
 
 **Additional context:**
 
@@ -25,3 +26,4 @@ Please specify the versions of following systems.
   - Context info of Redis
   - Context info of storage
 - **Log files:** Collect logs and attach them here if have.
+- **Kubernetes:** How Kubernetes access was provided (what cloud provider, service-account configuration, ...).
