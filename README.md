@@ -84,7 +84,12 @@ Generate resources using `make generate`
 
 ## Development
 
-Follow the [Development guide](https://github.com/goharbor/harbor-operator/blob/master/docs/development.md) to start on the project.
+Now, this project is maintained and developed by the [Harbor operator workgroup](https://github.com/goharbor/community/blob/master/workgroups/wg-operator/README.md). If you're willing to join the group and do contributions to operator project, welcome to [contact us](#community). Follow the [Development guide](https://github.com/goharbor/harbor-operator/blob/master/docs/development.md) to start on the project.
+
+## Community
+
+* Slack channel `#harbor-operator-dev` at [CNCF Workspace](https://slack.cncf.io)
+* Send mail to Harbor dev mail group:  harbor-dev@lists.cncf.io
 
 ## Additional documentation
 
