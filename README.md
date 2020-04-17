@@ -64,7 +64,7 @@ It is possible to add and delete ChartMuseum, Notary and Clair by editing the Ha
 
 ## Installation
 
-See [install documentation](https://github.com/goharbor/harbor-operator/blob/master/docs/installation.md).
+See [install documentation](https://github.com/goharbor/harbor-operator/blob/master/docs/installation/installation.md).
 
 ## Compatibility
 
