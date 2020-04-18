@@ -9,6 +9,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    # opspresso/action-docker use body of ./target/TAG_NAME as docker tag
+    # https://github.com/opspresso/action-docker#common-env
+    - run: mkdir ./target
+    - run: echo -n '${{ github.ref }}' | sed 's|refs/tags/||' > ./target/TAG_NAME
     - name: Docker Build & Push to Docker Hub
       uses: opspresso/action-docker@master
       with:
@@ -16,7 +20,4 @@ jobs:
       env:
         USERNAME: '${{ secrets.DOCKER_USER }}'
         PASSWORD: '${{ secrets.DOCKER_TOKEN }}'
-        DOCKERFILE: Dockerfile
-        IMAGE_NAME: goharbor/harbor-operator
-        TAG_NAME: '${{ github.ref }}'
         LATEST: 'false'
