@@ -5,6 +5,9 @@
       localAgentHostPort: "localhost:6831"
       user: ""
       password: ""
+    sampler: # https://www.jaegertracing.io/docs/1.17/sampling/
+      type: ratelimiting
+      param: 2.0
 
 - key: operator
   priority: 10
