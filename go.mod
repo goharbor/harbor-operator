@@ -17,8 +17,9 @@ require (
 	github.com/pkg/errors v0.8.1
 	github.com/prometheus/client_golang v1.0.0
 	github.com/sethvargo/go-password v0.1.3
-	github.com/uber/jaeger-client-go v2.20.1+incompatible
+	github.com/uber/jaeger-client-go v2.22.1+incompatible
 	github.com/uber/jaeger-lib v2.2.0+incompatible
+	go.uber.org/atomic v1.6.0 // indirect
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
 	golang.org/x/sys v0.0.0-20200219091948-cb0a6d8edb6c // indirect
 	k8s.io/api v0.17.4
