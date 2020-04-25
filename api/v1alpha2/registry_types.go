@@ -61,6 +61,9 @@ type RegistrySpec struct {
 
 	JobServiceSecret string `json:"jobService,omitempty"`
 
+	// +optional
+	DisableRedirect bool `json:"disableRedirect,omitempty"`
+
 	// +kubebuilder:validation:Required
 	ConfigName string `json:"configName"`
 
