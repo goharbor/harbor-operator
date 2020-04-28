@@ -19,7 +19,7 @@ func (js *JobService) SetupWebhookWithManager(mgr ctrl.Manager) error {
 
 var _ webhook.Defaulter = &Harbor{}
 
-// Default implements webhook.Defaulter so a webhook will be registered for the type
+// Default implements webhook.Defaulter, so a webhook will be registered for the type.
 func (js *JobService) Default() {
 	jobservicelog.Info("default", "name", js.Name)
 

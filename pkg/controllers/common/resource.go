@@ -36,7 +36,7 @@ func (c *Controller) AddInstantResourceToManage(ctx context.Context, resource re
 		return nil, errors.Errorf("no graph in current context")
 	}
 
-	return res, g.AddResource(res, dependencies)
+	return res, g.AddResource(ctx, res, dependencies)
 }
 
 func (c *Controller) AddUnsctructuredToManage(ctx context.Context, resource *unstructured.Unstructured, dependencies ...graph.Resource) (graph.Resource, error) { // nolint:interfacer
@@ -55,7 +55,7 @@ func (c *Controller) AddUnsctructuredToManage(ctx context.Context, resource *uns
 		return nil, errors.Errorf("no graph in current context")
 	}
 
-	return res, g.AddResource(res, dependencies)
+	return res, g.AddResource(ctx, res, dependencies)
 }
 
 func (c *Controller) AddBasicObjectToManage(ctx context.Context, resource resources.Resource, dependencies ...graph.Resource) (graph.Resource, error) {
@@ -74,7 +74,7 @@ func (c *Controller) AddBasicObjectToManage(ctx context.Context, resource resour
 		return nil, errors.Errorf("no graph in current context")
 	}
 
-	return res, g.AddResource(res, dependencies)
+	return res, g.AddResource(ctx, res, dependencies)
 }
 
 func (c *Controller) AddDeploymentToManage(ctx context.Context, resource *appsv1.Deployment, dependencies ...graph.Resource) (graph.Resource, error) {
@@ -93,7 +93,7 @@ func (c *Controller) AddDeploymentToManage(ctx context.Context, resource *appsv1
 		return nil, errors.Errorf("no graph in current context")
 	}
 
-	return res, g.AddResource(res, dependencies)
+	return res, g.AddResource(ctx, res, dependencies)
 }
 
 func (c *Controller) AddCertificateToManage(ctx context.Context, resource *certv1.Certificate, dependencies ...graph.Resource) (graph.Resource, error) {
@@ -112,5 +112,5 @@ func (c *Controller) AddCertificateToManage(ctx context.Context, resource *certv
 		return nil, errors.Errorf("no graph in current context")
 	}
 
-	return res, g.AddResource(res, dependencies)
+	return res, g.AddResource(ctx, res, dependencies)
 }

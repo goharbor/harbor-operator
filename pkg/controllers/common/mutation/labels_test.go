@@ -1,4 +1,4 @@
-package mutation
+package mutation_test
 
 import (
 	"context"
@@ -11,6 +11,7 @@ import (
 
 	// +kubebuilder:scaffold:imports
 
+	. "github.com/goharbor/harbor-operator/pkg/controllers/common/mutation"
 	"github.com/goharbor/harbor-operator/pkg/resources"
 )
 
