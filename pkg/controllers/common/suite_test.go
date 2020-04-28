@@ -1,4 +1,4 @@
-package common
+package common_test
 
 import (
 	"context"
@@ -8,7 +8,10 @@ import (
 	. "github.com/onsi/gomega"
 
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
+
 	// +kubebuilder:scaffold:imports
+
+	. "github.com/goharbor/harbor-operator/pkg/controllers/common"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to

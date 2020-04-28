@@ -7,16 +7,27 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
+	"github.com/opentracing/opentracing-go"
 )
 
 func (rm *resourceManager) Run(ctx context.Context, runner func(context.Context, Resource) error) error {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "walkGraph", opentracing.Tags{
+		"Nodes.count": len(rm.resources),
+	})
+	defer span.Finish()
+
 	g := errgroup.Group{}
 	l := logger.Get(ctx)
 
-	for _, no := range rm.getGraph() {
+	for _, no := range rm.getGraph(ctx) {
 		no := no
 
 		g.Go(func() error {
+			span, ctx := opentracing.StartSpanFromContext(ctx, "executeNode", opentracing.Tags{
+				"Node": no,
+			})
+			defer span.Finish()
+
 			var err error
 
 			defer func() {
@@ -26,7 +37,7 @@ func (rm *resourceManager) Run(ctx context.Context, runner func(context.Context,
 				}
 			}()
 
-			err = no.Wait()
+			err = no.Wait(ctx)
 			if err != nil {
 				return err
 			}
@@ -40,7 +51,10 @@ func (rm *resourceManager) Run(ctx context.Context, runner func(context.Context,
 	return g.Wait()
 }
 
-func (rm *resourceManager) getGraph() []*node {
+func (rm *resourceManager) getGraph(ctx context.Context) []*node {
+	span, _ := opentracing.StartSpanFromContext(ctx, "getGraph", opentracing.Tags{})
+	defer span.Finish()
+
 	rm.lock.Lock()
 	defer rm.lock.Unlock()
 

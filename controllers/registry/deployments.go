@@ -82,7 +82,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 					AutomountServiceAccountToken: &varFalse,
 					Volumes: []corev1.Volume{
 						{
-							Name: "config",
+							Name: "processed-config",
 							VolumeSource: corev1.VolumeSource{
 								EmptyDir: &corev1.EmptyDirVolumeSource{},
 							},
@@ -96,13 +96,29 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 								},
 							},
 						}, {
+							Name: "config-global",
+							VolumeSource: corev1.VolumeSource{
+								ConfigMap: &corev1.ConfigMapVolumeSource{
+									LocalObjectReference: corev1.LocalObjectReference{
+										Name: registry.Spec.ConfigName,
+									},
+								},
+							},
+						}, {
 							Name:         "config-storage",
 							VolumeSource: storageVolumeSource,
+						}, {
+							Name: "config-cache",
+							VolumeSource: corev1.VolumeSource{
+								Secret: &corev1.SecretVolumeSource{
+									SecretName: registry.Spec.CacheSecret,
+								},
+							},
 						}, {
 							Name: "certificate",
 							VolumeSource: corev1.VolumeSource{
 								Secret: &corev1.SecretVolumeSource{
-									SecretName: fmt.Sprintf("%s-registry", registry.GetName()),
+									SecretName: fmt.Sprintf("%s-registry-certificate", registry.GetName()),
 								},
 							},
 						},
@@ -122,36 +138,27 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 									SubPath:   registryConfigName,
 								}, {
 									Name:      "config-storage",
-									MountPath: "/opt/configuration/storage",
+									MountPath: "/opt/configurations/storage",
 									ReadOnly:  true,
 								}, {
-									Name:      "config",
+									Name:      "config-cache",
+									MountPath: "/opt/configurations/cache",
+									ReadOnly:  true,
+								}, {
+									Name:      "config-global",
+									MountPath: "/opt/configurations/global",
+									ReadOnly:  true,
+								}, {
+									Name:      "processed-config",
 									MountPath: "/processed",
 									ReadOnly:  false,
 								},
 							},
 							Env: []corev1.EnvVar{
 								{
-									Name:  "STORAGE_CONFIG",
-									Value: "/opt/configuration/storage",
-								}, {
-									Name: "CORE_HOSTNAME",
-									ValueFrom: &corev1.EnvVarSource{
-										ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
-											LocalObjectReference: corev1.LocalObjectReference{
-												Name: registry.Spec.ConfigName,
-											},
-											Key: goharborv1alpha2.CoreURLKey,
-										},
-									},
-								}, {
-									Name:  "METRICS_ADDRESS",
-									Value: fmt.Sprintf(":%d", metricsPort),
-								}, {
-									Name:  "API_ADDRESS",
-									Value: fmt.Sprintf(":%d", apiPort),
+									Name:  "CONFIG_PATH",
+									Value: "/opt/configurations",
 								},
-								cacheEnv,
 							},
 						},
 					},
@@ -168,27 +175,11 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 							},
 							Env: []corev1.EnvVar{
 								{
-									Name: "REGISTRY_HTTP_HOST",
-									ValueFrom: &corev1.EnvVarSource{
-										ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
-											LocalObjectReference: corev1.LocalObjectReference{
-												Name: registry.Spec.ConfigName,
-											},
-											Key:      goharborv1alpha2.RegistryCorePublicURLKey,
-											Optional: &varFalse,
-										},
-									},
+									Name:  "REGISTRY_HTTP_DEBUG_ADDR",
+									Value: fmt.Sprintf(":%d", metricsPort),
 								}, {
-									Name: "REGISTRY_AUTH_TOKEN_REALM",
-									ValueFrom: &corev1.EnvVarSource{
-										ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
-											LocalObjectReference: corev1.LocalObjectReference{
-												Name: registry.Spec.ConfigName,
-											},
-											Key:      goharborv1alpha2.RegistryAuthURLKey,
-											Optional: &varFalse,
-										},
-									},
+									Name:  "REGISTRY_HTTP_ADDR",
+									Value: fmt.Sprintf(":%d", PublicPort),
 								},
 							},
 							ImagePullPolicy: corev1.PullAlways,
@@ -213,7 +204,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 							VolumeMounts: []corev1.VolumeMount{
 								{
 									MountPath: path.Join(registryConfigPath, registryConfigName),
-									Name:      "config",
+									Name:      "processed-config",
 									SubPath:   registryConfigName,
 								}, {
 									MountPath: "/etc/registry/root.crt",

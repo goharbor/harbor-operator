@@ -11,22 +11,22 @@ type Filter struct {
 	ClassName string
 }
 
-// Create returns true if the Create event should be processed
+// Create returns true if the Create event should be processed.
 func (cf *Filter) Create(e event.CreateEvent) bool {
 	return cf.HarborClassAnnotationMatch(e.Meta)
 }
 
-// Delete returns true if the Delete event should be processed
+// Delete returns true if the Delete event should be processed.
 func (cf *Filter) Delete(e event.DeleteEvent) bool {
 	return cf.HarborClassAnnotationMatch(e.Meta)
 }
 
-// Update returns true if the Update event should be processed
+// Update returns true if the Update event should be processed.
 func (cf *Filter) Update(e event.UpdateEvent) bool {
 	return cf.HarborClassAnnotationMatch(e.MetaOld) || cf.HarborClassAnnotationMatch(e.MetaNew)
 }
 
-// Generic returns true if the Generic event should be processed
+// Generic returns true if the Generic event should be processed.
 func (cf *Filter) Generic(e event.GenericEvent) bool {
 	return cf.HarborClassAnnotationMatch(e.Meta)
 }

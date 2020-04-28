@@ -3,6 +3,7 @@ package common
 import (
 	"context"
 
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -23,6 +24,12 @@ func (c *Controller) HandleError(ctx context.Context, resource runtime.Object, r
 	if resultError == nil {
 		return ctrl.Result{}, nil
 	}
+
+	span, ctx := opentracing.StartSpanFromContext(ctx, "handleError", opentracing.Tags{
+		"Resource": resource,
+		"error":    resultError,
+	})
+	defer span.Finish()
 
 	objectKey, err := client.ObjectKeyFromObject(resource)
 	if err != nil {

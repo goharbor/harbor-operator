@@ -3,6 +3,7 @@ package registry
 import (
 	"context"
 
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/api/v1alpha2"
@@ -13,6 +14,9 @@ func (r *Reconciler) InitResources() error {
 }
 
 func (r *Reconciler) AddResources(ctx context.Context, registry *goharborv1alpha2.Registry) error {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "addResources", opentracing.Tags{})
+	defer span.Finish()
+
 	service, err := r.GetService(ctx, registry)
 	if err != nil {
 		return errors.Wrap(err, "cannot get service")
