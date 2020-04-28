@@ -1,4 +1,4 @@
-package common
+package common_test
 
 import (
 	"testing"

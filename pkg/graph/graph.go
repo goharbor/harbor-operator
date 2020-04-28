@@ -1,8 +1,10 @@
 package graph
 
 import (
+	"context"
 	"sync"
 
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 )
 
@@ -18,10 +20,15 @@ func NewResourceManager() Manager {
 	}
 }
 
-func (rm *resourceManager) AddResource(resource Resource, blockers []Resource) error {
+func (rm *resourceManager) AddResource(ctx context.Context, resource Resource, blockers []Resource) error {
 	if resource == nil {
 		return nil
 	}
+
+	span, ctx := opentracing.StartSpanFromContext(ctx, "addResource", opentracing.Tags{
+		"Resource": resource,
+	})
+	defer span.Finish()
 
 	rm.lock.Lock()
 	defer rm.lock.Unlock()

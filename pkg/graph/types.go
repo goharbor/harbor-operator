@@ -6,5 +6,5 @@ type Resource interface{}
 
 type Manager interface {
 	Run(context.Context, func(context.Context, Resource) error) error
-	AddResource(Resource, []Resource) error
+	AddResource(context.Context, Resource, []Resource) error
 }

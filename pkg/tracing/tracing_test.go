@@ -1,4 +1,4 @@
-package tracing
+package tracing_test
 
 import (
 	"context"
@@ -12,6 +12,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
+	. "github.com/goharbor/harbor-operator/pkg/tracing"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to

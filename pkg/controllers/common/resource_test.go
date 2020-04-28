@@ -1,4 +1,4 @@
-package common
+package common_test
 
 import (
 	"context"
@@ -10,8 +10,8 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/api/v1alpha2"
+	. "github.com/goharbor/harbor-operator/pkg/controllers/common"
 	"github.com/goharbor/harbor-operator/pkg/graph"
-	"github.com/goharbor/harbor-operator/pkg/resources/statuscheck"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to
@@ -48,11 +48,10 @@ var _ = FContext("Adding", func() {
 
 			Describe("An unknown resource", func() {
 				BeforeEach(func() {
-					dependency = &Resource{
-						mutable:   c.GlobalMutateFn(ctx),
-						checkable: statuscheck.BasicCheck,
-						resource:  &corev1.Pod{},
-					}
+					d, err := NewController("test2", "version").AddBasicObjectToManage(ctx, &corev1.Pod{})
+					Expect(err).ToNot(HaveOccurred())
+
+					dependency = d
 				})
 
 				It("Should return an error", func() {
@@ -125,11 +124,10 @@ var _ = FContext("Adding", func() {
 
 			Describe("An unknown resource", func() {
 				BeforeEach(func() {
-					dependency = &Resource{
-						mutable:   c.GlobalMutateFn(ctx),
-						checkable: statuscheck.BasicCheck,
-						resource:  &corev1.Pod{},
-					}
+					d, err := NewController("test2", "version").AddBasicObjectToManage(ctx, &corev1.Pod{})
+					Expect(err).ToNot(HaveOccurred())
+
+					dependency = d
 				})
 
 				It("Should return an error", func() {
@@ -202,11 +200,10 @@ var _ = FContext("Adding", func() {
 
 			Describe("An unknown resource", func() {
 				BeforeEach(func() {
-					dependency = &Resource{
-						mutable:   c.GlobalMutateFn(ctx),
-						checkable: statuscheck.BasicCheck,
-						resource:  &corev1.Pod{},
-					}
+					d, err := NewController("test2", "version").AddBasicObjectToManage(ctx, &corev1.Pod{})
+					Expect(err).ToNot(HaveOccurred())
+
+					dependency = d
 				})
 
 				It("Should return an error", func() {
