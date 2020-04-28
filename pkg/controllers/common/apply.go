@@ -19,7 +19,7 @@ func (c *Controller) Apply(ctx context.Context, node graph.Resource) error {
 	}
 
 	span, ctx := opentracing.StartSpanFromContext(ctx, "applyResource", opentracing.Tags{
-		"Resource.Kind": res.resource.GetObjectKind().GroupVersionKind().GroupKind(),
+		"Resource.Kind": res.resource.GetObjectKind(),
 	})
 	defer span.Finish()
 
@@ -37,7 +37,11 @@ func (c *Controller) Apply(ctx context.Context, node graph.Resource) error {
 	op, err := controllerutil.CreateOrUpdate(ctx, c.Client, result, res.mutable(ctx, res.resource, result))
 	if err != nil {
 		// TODO Check if the error is a temporary error or a unrecoverrable one
-		return errors.Wrapf(err, "cannot create/update %+v", res.resource)
+		err := errors.Wrapf(err, "cannot create/update %s (%s/%s)", res.resource.GetObjectKind(), res.resource.GetNamespace(), res.resource.GetNamespace())
+
+		span.SetTag("error", err)
+
+		return err
 	}
 
 	span.SetTag("Operation.Result", op)

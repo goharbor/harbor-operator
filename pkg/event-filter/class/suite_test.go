@@ -1,4 +1,4 @@
-package class
+package class_test
 
 import (
 	"context"
@@ -13,6 +13,8 @@ import (
 	// +kubebuilder:scaffold:imports
 
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
+
+	. "github.com/goharbor/harbor-operator/pkg/event-filter/class"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to

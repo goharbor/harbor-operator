@@ -19,7 +19,7 @@ func (r *Harbor) SetupWebhookWithManager(mgr ctrl.Manager) error {
 
 var _ webhook.Defaulter = &Harbor{}
 
-// Default implements webhook.Defaulter so a webhook will be registered for the type
+// Default implements webhook.Defaulter, so a webhook will be registered for the type.
 func (r *Harbor) Default() {
 	harborlog.Info("default", "name", r.Name)
 

@@ -55,11 +55,8 @@ type RegistrySpec struct {
 	// +kubebuilder:validation:Optional
 	StorageSecret string `json:"storageSecret,omitempty"`
 
+	// +kubebuilder:validation:Optional
 	CacheSecret string `json:"cacheSecret,omitempty"`
-
-	CoreSecret string `json:"coreSecret,omitempty"`
-
-	JobServiceSecret string `json:"jobService,omitempty"`
 
 	// +optional
 	DisableRedirect bool `json:"disableRedirect,omitempty"`

@@ -1,4 +1,4 @@
-package graph
+package graph_test
 
 import (
 	. "github.com/onsi/ginkgo"
@@ -6,6 +6,8 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	// +kubebuilder:scaffold:imports
+
+	. "github.com/goharbor/harbor-operator/pkg/graph"
 )
 
 var _ = Describe("A resource type", func() {

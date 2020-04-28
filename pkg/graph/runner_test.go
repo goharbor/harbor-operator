@@ -1,4 +1,4 @@
-package graph
+package graph_test
 
 import (
 	"context"
@@ -11,7 +11,10 @@ import (
 
 	"github.com/onsi/gomega/types"
 	corev1 "k8s.io/api/core/v1"
+
 	// +kubebuilder:scaffold:imports
+
+	. "github.com/goharbor/harbor-operator/pkg/graph"
 )
 
 var _ = Describe("Walk a dependency manager", func() {
@@ -37,7 +40,7 @@ var _ = Describe("Walk a dependency manager", func() {
 
 	Context("With a single resource", func() {
 		BeforeEach(func() {
-			err := rm.AddResource(&corev1.Secret{}, nil)
+			err := rm.AddResource(ctx, &corev1.Secret{}, nil)
 			Expect(err).ToNot(HaveOccurred())
 		})
 
@@ -59,16 +62,16 @@ var _ = Describe("Walk a dependency manager", func() {
 
 	Context("With 4 isolated resources", func() {
 		BeforeEach(func() {
-			err := rm.AddResource(&corev1.Namespace{}, nil)
+			err := rm.AddResource(ctx, &corev1.Namespace{}, nil)
 			Expect(err).ToNot(HaveOccurred())
 
-			err = rm.AddResource(&corev1.Secret{}, nil)
+			err = rm.AddResource(ctx, &corev1.Secret{}, nil)
 			Expect(err).ToNot(HaveOccurred())
 
-			err = rm.AddResource(&corev1.ConfigMap{}, nil)
+			err = rm.AddResource(ctx, &corev1.ConfigMap{}, nil)
 			Expect(err).ToNot(HaveOccurred())
 
-			err = rm.AddResource(&corev1.Node{}, nil)
+			err = rm.AddResource(ctx, &corev1.Node{}, nil)
 			Expect(err).ToNot(HaveOccurred())
 		})
 
@@ -95,23 +98,23 @@ var _ = Describe("Walk a dependency manager", func() {
 			expectations = []types.GomegaMatcher{}
 
 			ns := &corev1.Namespace{}
-			err := rm.AddResource(ns, nil)
+			err := rm.AddResource(ctx, ns, nil)
 			Expect(err).ToNot(HaveOccurred())
 
 			expectations = append(expectations, Equal(ns))
 
 			secret := &corev1.Secret{}
-			err = rm.AddResource(secret, []Resource{ns})
+			err = rm.AddResource(ctx, secret, []Resource{ns})
 			Expect(err).ToNot(HaveOccurred())
 
 			cm := &corev1.ConfigMap{}
-			err = rm.AddResource(cm, []Resource{ns})
+			err = rm.AddResource(ctx, cm, []Resource{ns})
 			Expect(err).ToNot(HaveOccurred())
 
 			expectations = append(expectations, BeElementOf(secret, cm), BeElementOf(secret, cm))
 
 			no := &corev1.Node{}
-			err = rm.AddResource(no, []Resource{secret, cm})
+			err = rm.AddResource(ctx, no, []Resource{secret, cm})
 			Expect(err).ToNot(HaveOccurred())
 
 			expectations = append(expectations, Equal(no))

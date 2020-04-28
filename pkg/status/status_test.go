@@ -1,4 +1,4 @@
-package common
+package common_test
 
 import (
 	"context"
@@ -9,6 +9,8 @@ import (
 	"github.com/onsi/gomega/types"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/kustomize/kstatus/status"
+
+	. "github.com/goharbor/harbor-operator/pkg/status"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to
