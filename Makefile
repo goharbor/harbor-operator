@@ -19,7 +19,7 @@ manager: generate fmt vet
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 run: generate fmt vet manifests $(TMPDIR)k8s-webhook-server/serving-certs
-	CONFIGURATION_FROM='env:' \
+	CONFIGURATION_FROM='file:./config-dev.yml' \
 	go run *.go
 
 # Run linters against all files
@@ -127,17 +127,10 @@ deploy: manifests
 	$(KUSTOMIZE) build config/default \
 		| kubectl apply --validate=false -f -
 
-sample: gomplate
-	export \
-		LBAAS_DOMAIN=$$(kubectl get svc nginx-nginx-ingress-controller -o jsonpath='{.status.loadBalancer.ingress[0].hostname}') \
-		NOTARY_DOMAIN=$$(kubectl get svc nginx-nginx-ingress-controller-notary -o jsonpath='{.status.loadBalancer.ingress[0].hostname}') \
-		CORE_DATABASE_SECRET=$$(kubectl get secret core-database-postgresql -o jsonpath='{.data.postgresql-password}' | base64 --decode) \
-		CLAIR_DATABASE_SECRET=$$(kubectl get secret clair-database-postgresql -o jsonpath='{.data.postgresql-password}' | base64 --decode) \
-		NOTARY_SERVER_DATABASE_SECRET=$$(kubectl get secret notary-server-database-postgresql -o jsonpath='{.data.postgresql-password}' | base64 --decode) \
-		NOTARY_SIGNER_DATABASE_SECRET=$$(kubectl get secret notary-signer-database-postgresql -o jsonpath='{.data.postgresql-password}' | base64 --decode) ; \
+sample:
 	kubectl kustomize config/samples \
-		| gomplate \
 		| kubectl apply -f -
+	kubectl get goharbor
 
 install-dependencies: helm
 	$(HELM) repo add bitnami https://charts.bitnami.com/bitnami

@@ -1,7 +1,7 @@
 apiVersion: goharbor.io/v1alpha2
 kind: Portal
 metadata:
-  name: sample
+  name: harbor
 spec:
   version: "1.10.0"
   replicas: 1
