@@ -1,7 +1,7 @@
 apiVersion: goharbor.io/v1alpha2
 kind: Registry
 metadata:
-  name: sample
+  name: harbor
 spec:
   version: "1.10.0"
   replicas: 1
@@ -10,4 +10,6 @@ spec:
     kind: Issuer
     group: cert-manager.io
   publicURL: https://registry.com
-  configName: configuration
+  configName: sample-registry-configuration
+  cacheSecret: sample-registry-cache
+  storageSecret: sample-registry-storage
