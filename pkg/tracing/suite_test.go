@@ -1,4 +1,4 @@
-package tracing
+package tracing_test
 
 import (
 	"testing"

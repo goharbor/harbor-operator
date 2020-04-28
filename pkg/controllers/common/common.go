@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
@@ -54,6 +55,9 @@ func (c *Controller) GetName() string {
 }
 
 func (c *Controller) GetAndFilter(ctx context.Context, key client.ObjectKey, obj runtime.Object) (bool, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "getAndFilter", opentracing.Tags{})
+	defer span.Finish()
+
 	err := c.Client.Get(ctx, key, obj)
 	if err != nil {
 		if apierrs.IsNotFound(err) {
@@ -67,6 +71,11 @@ func (c *Controller) GetAndFilter(ctx context.Context, key client.ObjectKey, obj
 }
 
 func (c *Controller) Reconcile(ctx context.Context, resource resources.Resource) (ctrl.Result, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "commonReconcile", opentracing.Tags{
+		"Resource": resource,
+	})
+	defer span.Finish()
+
 	if !resource.GetDeletionTimestamp().IsZero() {
 		logger.Get(ctx).Info("Object is being deleted")
 		return ctrl.Result{}, nil
@@ -80,6 +89,9 @@ func (c *Controller) Reconcile(ctx context.Context, resource resources.Resource)
 }
 
 func (c *Controller) applyAndCheck(ctx context.Context, node graph.Resource) error {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "applyAndCheck", opentracing.Tags{})
+	defer span.Finish()
+
 	err := c.Apply(ctx, node)
 	if err != nil {
 		return errors.Wrap(err, "apply")
@@ -97,6 +109,8 @@ func (c *Controller) preUpdateData(ctx context.Context, u *unstructured.Unstruct
 	}
 
 	data := u.UnstructuredContent()
+	defer u.SetUnstructuredContent(data)
+
 	generation := u.GetGeneration()
 
 	observedGeneration, found, err := unstructured.NestedInt64(data, "status", "observedGeneration")
@@ -109,17 +123,8 @@ func (c *Controller) preUpdateData(ctx context.Context, u *unstructured.Unstruct
 		return false, serrors.UnrecoverrableError(err, serrors.OperatorReason, "unable to get conditions")
 	}
 
-	if found && generation == observedGeneration {
-		s, err := sstatus.GetConditionStatus(ctx, conditions, status.ConditionInProgress)
-		if err != nil {
-			return false, serrors.UnrecoverrableError(err, serrors.OperatorReason, fmt.Sprintf("unable to check %s condition", status.ConditionInProgress))
-		}
-
-		if s == corev1.ConditionFalse {
-			// TODO Check what triggered the event
-			return true, nil
-		}
-	} else {
+	// New generation
+	if !found || generation == observedGeneration {
 		err := unstructured.SetNestedField(data, generation, "status", "observedGeneration")
 		if err != nil {
 			return false, serrors.UnrecoverrableError(err, serrors.OperatorReason, "unable to set observed generation")
@@ -134,14 +139,27 @@ func (c *Controller) preUpdateData(ctx context.Context, u *unstructured.Unstruct
 		if err != nil {
 			return false, serrors.UnrecoverrableError(err, serrors.OperatorReason, "unable to update condition")
 		}
+
+		return false, nil
 	}
 
-	u.SetUnstructuredContent(data)
+	s, err := sstatus.GetConditionStatus(ctx, conditions, status.ConditionInProgress)
+	if err != nil {
+		return false, serrors.UnrecoverrableError(err, serrors.OperatorReason, fmt.Sprintf("unable to check %s condition", status.ConditionInProgress))
+	}
+
+	if s == corev1.ConditionFalse {
+		// TODO Check what triggered the event
+		return true, nil
+	}
 
 	return false, nil
 }
 
 func (c *Controller) Run(ctx context.Context, owner runtime.Object) error {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "commonRun", opentracing.Tags{})
+	defer span.Finish()
+
 	data, err := runtime.DefaultUnstructuredConverter.ToUnstructured(owner)
 	if err != nil {
 		return serrors.UnrecoverrableError(err, serrors.OperatorReason, "unable to convert resource to unstuctured")

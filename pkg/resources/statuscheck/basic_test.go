@@ -1,4 +1,4 @@
-package statuscheck
+package statuscheck_test
 
 import (
 	"context"
@@ -11,6 +11,7 @@ import (
 
 	// +kubebuilder:scaffold:imports
 
+	. "github.com/goharbor/harbor-operator/pkg/resources/statuscheck"
 	"github.com/goharbor/harbor-operator/pkg/scheme"
 )
 

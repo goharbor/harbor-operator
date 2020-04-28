@@ -1,8 +1,10 @@
 package graph
 
 import (
+	"context"
 	"sync"
 
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 )
 
@@ -17,12 +19,15 @@ type node struct {
 	childrenLock []*sync.Mutex
 }
 
-func (no *node) Wait() error {
+func (no *node) Wait(ctx context.Context) error {
 	defer close(no.parent)
 
 	if no.parentCount == 0 {
 		return nil
 	}
+
+	span, _ := opentracing.StartSpanFromContext(ctx, "waitNode", opentracing.Tags{})
+	defer span.Finish()
 
 	received := 0
 
