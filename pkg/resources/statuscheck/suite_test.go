@@ -1,4 +1,4 @@
-package statuscheck
+package statuscheck_test
 
 import (
 	"testing"

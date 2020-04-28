@@ -1,4 +1,4 @@
-package mutation
+package mutation_test
 
 import (
 	"testing"

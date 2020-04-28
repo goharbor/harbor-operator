@@ -1,4 +1,4 @@
-package graph
+package graph_test
 
 import (
 	"context"
@@ -9,6 +9,7 @@ import (
 
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	// +kubebuilder:scaffold:imports
+	. "github.com/goharbor/harbor-operator/pkg/graph"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to

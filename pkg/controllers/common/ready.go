@@ -7,9 +7,11 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	serrors "github.com/goharbor/harbor-operator/pkg/controllers/common/errors"
+	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 )
 
@@ -19,10 +21,19 @@ func (c *Controller) EnsureReady(ctx context.Context, node graph.Resource) error
 		return errors.Errorf("unsupported resource type %+v", node)
 	}
 
-	span, ctx := opentracing.StartSpanFromContext(ctx, "applyResource", opentracing.Tags{
-		"Resource.Kind": res.resource.GetObjectKind().GroupVersionKind().GroupKind(),
-	})
+	span, ctx := opentracing.StartSpanFromContext(ctx, "checkReady", opentracing.Tags{})
 	defer span.Finish()
+
+	var gvk schema.GroupVersionKind
+
+	gvks, _, err := c.Scheme.ObjectKinds(res.resource)
+	if err != nil {
+		logger.Get(ctx).Error(err, "cannot get object kind", "resource", res)
+
+		gvk = gvks[0]
+
+		span.SetTag("Resource.Kind", gvk)
+	}
 
 	objectKey, err := client.ObjectKeyFromObject(res.resource)
 	if err != nil {
@@ -38,7 +49,7 @@ func (c *Controller) EnsureReady(ctx context.Context, node graph.Resource) error
 	err = c.Client.Get(ctx, objectKey, result)
 	if err != nil {
 		// TODO Check if the error is a temporary error or a unrecoverrable one
-		return errors.Wrapf(err, "cannot get resource %+v", res.resource)
+		return errors.Wrapf(err, "cannot get %s %s/%s", gvk, res.resource.GetNamespace(), res.resource.GetName())
 	}
 
 	ok, err = res.checkable(ctx, result)
