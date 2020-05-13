@@ -93,6 +93,7 @@ func (c *HarborCore) GetConfigMaps(ctx context.Context) []*corev1.ConfigMap { //
 				"PORTAL_URL":                    fmt.Sprintf("http://%s", c.harbor.NormalizeComponentName(goharborv1alpha1.PortalName)),
 				"REGISTRY_URL":                  fmt.Sprintf("http://%s", c.harbor.NormalizeComponentName(goharborv1alpha1.RegistryName)),
 				"REGISTRYCTL_URL":               fmt.Sprintf("http://%s:8080", c.harbor.NormalizeComponentName(goharborv1alpha1.RegistryName)),
+				"TOKEN_PRIVATE_KEY_PATH":        "/etc/core/cert/private_key.pem",
 				"TOKEN_SERVICE_URL":             fmt.Sprintf("http://%s/service/token", c.harbor.NormalizeComponentName(goharborv1alpha1.CoreName)),
 
 				"DATABASE_TYPE":             "postgresql",
