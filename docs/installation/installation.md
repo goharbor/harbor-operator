@@ -41,9 +41,10 @@ Kubernetes API running (see [Supported platforms](https://github.com/goharbor/ha
    make install-dependencies
    ```
 
-4. Deploy the application
+4. Deploy the application into new namespace
 
    ```bash
+   kubectl create namespace harbor-operator-system
    make deploy
    ```
 
