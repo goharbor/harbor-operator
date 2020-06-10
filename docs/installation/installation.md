@@ -7,16 +7,16 @@ Kubernetes API running (see [Supported platforms](https://github.com/goharbor/ha
 ### Minimal
 
 1. [CertManager](https://docs.cert-manager.io) (version >= 1.11) and an [issuer](https://cert-manager.io/docs/configuration/selfsigned/).
-2. Redis for Job Service (such as [Redis HA Helm chart](https://github.com/helm/charts/tree/master/stable/redis-ha)).
-3. Core database (such as [PostgreSQL Helm chart](https://github.com/helm/charts/tree/master/stable/postgresql)).
+2. Redis for Job Service (such as [Redis HA Helm chart](https://github.com/bitnami/charts/tree/master/bitnami/redis)).
+3. Core database (such as [PostgreSQL Helm chart](https://github.com/bitnami/charts/tree/master/bitnami/postgresql)).
 4. Registry storage backend (such as any S3 compatible object storage).
 
 ### Additional
 
 1. Ingress controller (such as [nginx Helm chart](https://github.com/helm/charts/tree/master/stable/nginx-ingress)).
-2. Clair database (such as [PostgreSQL Helm chart](https://github.com/helm/charts/tree/master/stable/postgresql)).
+2. Clair database (such as [PostgreSQL Helm chart](https://github.com/bitnami/charts/tree/master/bitnami/postgresql)).
 3. ChartMuseum storage backend (such as any S3 compatible object storage).
-4. Notary databases (such as [PostgreSQL Helm chart](https://github.com/helm/charts/tree/master/stable/postgresql)).
+4. Notary databases (such as [PostgreSQL Helm chart](https://github.com/bitnami/charts/tree/master/bitnami/postgresql)).
 
 ## Deploy the operator
 
