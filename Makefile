@@ -139,14 +139,14 @@ install-dependencies: helm
 		|| $(HELM) install notary-server-database bitnami/postgresql
 	$(HELM) get notes notary-signer-database \
 		|| $(HELM) install notary-signer-database bitnami/postgresql
-	$(HELM) get notes jobservice-broker \
-		|| $(HELM) install jobservice-broker bitnami/redis \
+	$(HELM) get notes jobservice-redis \
+		|| $(HELM) install jobservice-redis bitnami/redis \
 			--set usePassword=false
-	$(HELM) get notes clair-adapter-broker \
-		|| $(HELM) install clair-adapter-broker bitnami/redis \
+	$(HELM) get notes clair-redis \
+		|| $(HELM) install clair-redis bitnami/redis \
 			--set usePassword=false
-	$(HELM) get notes registry-cache \
-		|| $(HELM) install registry-cache bitnami/redis \
+	$(HELM) get notes registry-redis \
+		|| $(HELM) install registry-redis bitnami/redis \
 			--set usePassword=false
 	$(HELM) get notes nginx \
 		|| $(HELM) install nginx stable/nginx-ingress \
