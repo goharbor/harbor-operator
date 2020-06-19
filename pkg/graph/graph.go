@@ -10,6 +10,7 @@ import (
 
 type resourceManager struct {
 	resources map[Resource][]Resource
+	functions map[Resource]RunFunc
 
 	lock sync.Mutex
 }
@@ -17,15 +18,20 @@ type resourceManager struct {
 func NewResourceManager() Manager {
 	return &resourceManager{
 		resources: map[Resource][]Resource{},
+		functions: map[Resource]RunFunc{},
 	}
 }
 
-func (rm *resourceManager) AddResource(ctx context.Context, resource Resource, blockers []Resource) error {
+func (rm *resourceManager) AddResource(ctx context.Context, resource Resource, blockers []Resource, run RunFunc) error {
 	if resource == nil {
 		return nil
 	}
 
-	span, ctx := opentracing.StartSpanFromContext(ctx, "addResource", opentracing.Tags{
+	if run == nil {
+		return errors.Errorf("unsupported RunFunc value %v", run)
+	}
+
+	span, _ := opentracing.StartSpanFromContext(ctx, "addResource", opentracing.Tags{
 		"Resource": resource,
 	})
 	defer span.Finish()
@@ -50,6 +56,7 @@ func (rm *resourceManager) AddResource(ctx context.Context, resource Resource, b
 	}
 
 	rm.resources[resource] = blockers
+	rm.functions[resource] = run
 
 	return nil
 }
