@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"sigs.k8s.io/controller-runtime/pkg/envtest"
+	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 	// +kubebuilder:scaffold:imports
 	. "github.com/goharbor/harbor-operator/pkg/graph"
 )
@@ -18,7 +18,7 @@ import (
 func TestSuite(t *testing.T) {
 	RegisterFailHandler(Fail)
 
-	RunSpecsWithDefaultAndCustomReporters(t, "resourceManager", []Reporter{envtest.NewlineReporter{}})
+	RunSpecsWithDefaultAndCustomReporters(t, "resourceManager", []Reporter{printer.NewlineReporter{}})
 }
 
 func setupTest(ctx context.Context) (Manager, context.Context) {

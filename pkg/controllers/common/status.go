@@ -5,14 +5,45 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/api/v1alpha2"
+	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	serrors "github.com/goharbor/harbor-operator/pkg/controllers/common/errors"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
+	"github.com/goharbor/harbor-operator/pkg/resources"
 )
+
+func (c *Controller) prepareStatus(ctx context.Context, owner resources.Resource) error {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "prepareStatus", opentracing.Tags{})
+	defer span.Finish()
+
+	data, err := runtime.DefaultUnstructuredConverter.ToUnstructured(owner)
+	if err != nil {
+		return serrors.UnrecoverrableError(err, serrors.OperatorReason, "unable to convert resource to unstuctured")
+	}
+
+	u := &unstructured.Unstructured{}
+	u.SetUnstructuredContent(data)
+
+	stop, err := c.preUpdateData(ctx, u)
+	if err != nil {
+		return errors.Wrap(err, "cannot update observedGeneration")
+	}
+
+	if stop {
+		logger.Get(ctx).Info("nothing to do")
+		return nil
+	}
+
+	err = c.Client.Status().Update(ctx, u)
+
+	return errors.Wrap(err, "cannot update status")
+}
 
 // UpdateStatus applies current in-memory statuses to the remote resource
 // https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/#status-subresource

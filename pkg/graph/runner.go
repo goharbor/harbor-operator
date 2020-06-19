@@ -10,7 +10,7 @@ import (
 	"github.com/opentracing/opentracing-go"
 )
 
-func (rm *resourceManager) Run(ctx context.Context, runner func(context.Context, Resource) error) error {
+func (rm *resourceManager) Run(ctx context.Context) error {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "walkGraph", opentracing.Tags{
 		"Nodes.count": len(rm.resources),
 	})
@@ -22,13 +22,11 @@ func (rm *resourceManager) Run(ctx context.Context, runner func(context.Context,
 	for _, no := range rm.getGraph(ctx) {
 		no := no
 
-		g.Go(func() error {
+		g.Go(func() (err error) {
 			span, ctx := opentracing.StartSpanFromContext(ctx, "executeNode", opentracing.Tags{
 				"Node": no,
 			})
 			defer span.Finish()
-
-			var err error
 
 			defer func() {
 				err := no.Terminates(err)
@@ -42,7 +40,7 @@ func (rm *resourceManager) Run(ctx context.Context, runner func(context.Context,
 				return err
 			}
 
-			err = runner(ctx, no.resource)
+			err = no.fn(ctx, no.resource)
 
 			return err
 		})
@@ -68,6 +66,7 @@ func (rm *resourceManager) getGraph(ctx context.Context) []*node {
 
 		node := &node{
 			resource: resource,
+			fn:       rm.functions[resource],
 
 			parent:      make(chan error, blockerCount),
 			parentLock:  &sync.Mutex{},

@@ -8,7 +8,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/api/v1alpha2"
+	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 )
 
 func New(ctx context.Context) (*runtime.Scheme, error) {

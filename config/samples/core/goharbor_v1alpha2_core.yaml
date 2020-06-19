@@ -1,0 +1,33 @@
+apiVersion: goharbor.io/v1alpha2
+kind: Core
+metadata:
+  name: harbor
+spec:
+  adminInitialPasswordRef: admin-core-secret
+  secretRef: core-secret
+  csrfKeyRef: csrf-key
+  externalEndpoint: https://harbor.public
+  redis:
+    dsn: redis://admin@harbor-redis-master:6379/0
+    passwordRef: harbor-redis
+  database:
+    host: core-database-postgresql
+    passwordRef: core-database-postgresql
+    encryptionKeyRef: core-database-encryption
+  components:
+    jobService:
+      url: http://harbor-jobservice
+      secretRef: jobservice-secret
+    tokenService:
+      url: http://localhost/service/token
+    registry:
+      url: http://harbor-registry:80
+      controllerURL: http://harbor-registryctl
+      credentials:
+        username: harbor_registry_user
+        passwordRef: registry-password
+      redis:
+        dsn: redis://admin@harbor-redis-master:6379/2
+        passwordRef: harbor-redis
+    portal:
+      url: http://harbor-portal

@@ -22,6 +22,11 @@ spec:
         - --enable-leader-election
         image: goharbor/harbor-operator:dev
         name: manager
+        env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+                fieldPath: metadata.namespace
         resources:
           limits:
             cpu: 1000m
