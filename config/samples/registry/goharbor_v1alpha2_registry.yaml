@@ -3,13 +3,16 @@ kind: Registry
 metadata:
   name: harbor
 spec:
-  version: "1.10.0"
-  replicas: 1
-  certificateIssuerRef:
-    name: harbor-sample
-    kind: Issuer
-    group: cert-manager.io
-  publicURL: https://registry.com
-  configName: sample-registry-configuration
-  cacheSecret: sample-registry-cache
-  storageSecret: sample-registry-storage
+  storage:
+    driverName: inmemory
+    cache:
+      blobdescriptor: redis
+  authentication:
+    htPasswd: 
+      realm: "harbor-registry"
+      secretRef: registry-htpasswd
+  redis:
+    dsn: redis://admin@harbor-redis-master:6379/2
+    passwordRef: harbor-redis
+  http:
+    secretRef: registry-secret

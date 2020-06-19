@@ -11,7 +11,7 @@ import (
 
 	// +kubebuilder:scaffold:imports
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/api/v1alpha2"
+	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-operator/pkg/controllers/setup"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	"github.com/goharbor/harbor-operator/pkg/manager"
@@ -79,6 +79,11 @@ func main() {
 	if err := (setup.WithManager(ctx, mgr, OperatorVersion)); err != nil {
 		setupLog.Error(err, "unable to setup controllers")
 		os.Exit(exitCodeFailure)
+	}
+
+	if err = (&goharborv1alpha2.NotaryServer{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "NotaryServer")
+		os.Exit(1)
 	}
 
 	// +kubebuilder:scaffold:builder

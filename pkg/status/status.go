@@ -53,8 +53,8 @@ func UpdateCondition(ctx context.Context, conditions []interface{}, conditionTyp
 	var reason, message string
 
 	switch len(reasons) {
-	case 0: // nolint:gomnd
-	case 1: // nolint:gomnd
+	case 0:
+	case 1:
 		reason = reasons[0]
 	case 2: // nolint:gomnd
 		reason = reasons[0]

@@ -12,8 +12,10 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/controllers/core"
 	"github.com/goharbor/harbor-operator/pkg/controllers/harbor"
 	"github.com/goharbor/harbor-operator/pkg/controllers/jobservice"
+	notaryserver "github.com/goharbor/harbor-operator/pkg/controllers/notary-server"
 	"github.com/goharbor/harbor-operator/pkg/controllers/portal"
 	"github.com/goharbor/harbor-operator/pkg/controllers/registry"
+	"github.com/goharbor/harbor-operator/pkg/controllers/registryctl"
 )
 
 type ControllerBuilder func(context.Context, string) (controllers.Controller, error)
@@ -26,6 +28,8 @@ func WithManager(ctx context.Context, mgr manager.Manager, version string) error
 	g.Go(ControllerFactory(ctx, mgr, harbor.New, version))
 	g.Go(ControllerFactory(ctx, mgr, jobservice.New, version))
 	g.Go(ControllerFactory(ctx, mgr, registry.New, version))
+	g.Go(ControllerFactory(ctx, mgr, notaryserver.New, version))
+	g.Go(ControllerFactory(ctx, mgr, registryctl.New, version))
 	g.Go(ControllerFactory(ctx, mgr, portal.New, version))
 
 	return g.Wait()

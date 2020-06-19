@@ -4,7 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/go-logr/logr"
 	"github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go/log"
+	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
@@ -12,6 +15,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/kustomize/kstatus/status"
 
 	serrors "github.com/goharbor/harbor-operator/pkg/controllers/common/errors"
@@ -29,13 +33,19 @@ type Controller struct {
 	Name    string
 	Version string
 
-	Scheme *runtime.Scheme
+	ConfigStore *configstore.Store
+	rm          ResourceManager
+	Log         logr.Logger
+	Scheme      *runtime.Scheme
 }
 
-func NewController(name, version string) *Controller {
+func NewController(name, version string, rm ResourceManager, config *configstore.Store) *Controller {
 	return &Controller{
-		Name:    name,
-		Version: version,
+		Name:        name,
+		Version:     version,
+		rm:          rm,
+		Log:         ctrl.Log.WithName("controller").WithName(name),
+		ConfigStore: config,
 	}
 }
 
@@ -70,22 +80,51 @@ func (c *Controller) GetAndFilter(ctx context.Context, key client.ObjectKey, obj
 	return true, nil
 }
 
-func (c *Controller) Reconcile(ctx context.Context, resource resources.Resource) (ctrl.Result, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "commonReconcile", opentracing.Tags{
-		"Resource": resource,
+func (c *Controller) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+	ctx := context.TODO()
+
+	span, ctx := opentracing.StartSpanFromContext(ctx, "reconcile", opentracing.Tags{
+		"Resource.Namespace": req.Namespace,
+		"Resource.Name":      req.Name,
+		"Controller.Name":    c.GetName(),
 	})
 	defer span.Finish()
 
-	if !resource.GetDeletionTimestamp().IsZero() {
+	span.LogFields(
+		log.String("Resource.Namespace", req.Namespace),
+		log.String("Resource.Name", req.Name),
+	)
+
+	logger.Set(&ctx, c.Log)
+	ctx = c.PopulateContext(ctx, req)
+	l := logger.Get(ctx)
+
+	// Fetch the Registry instance
+	object := c.rm.NewEmpty(ctx)
+
+	ok, err := c.GetAndFilter(ctx, req.NamespacedName, object)
+	if err != nil {
+		// Error reading the object
+		return reconcile.Result{}, err
+	}
+
+	if !ok {
+		// Request object not found, could have been deleted after reconcile request.
+		// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
+		l.Info("Object does not exists")
+		return reconcile.Result{}, nil
+	}
+
+	if !object.GetDeletionTimestamp().IsZero() {
 		logger.Get(ctx).Info("Object is being deleted")
 		return ctrl.Result{}, nil
 	}
 
-	owner.Set(&ctx, resource)
+	owner.Set(&ctx, object)
 
-	err := c.Run(ctx, resource)
+	err = c.Run(ctx, object)
 
-	return c.HandleError(ctx, resource, err)
+	return c.HandleError(ctx, object, err)
 }
 
 func (c *Controller) applyAndCheck(ctx context.Context, node graph.Resource) error {
@@ -109,7 +148,6 @@ func (c *Controller) preUpdateData(ctx context.Context, u *unstructured.Unstruct
 	}
 
 	data := u.UnstructuredContent()
-	defer u.SetUnstructuredContent(data)
 
 	generation := u.GetGeneration()
 
@@ -123,8 +161,19 @@ func (c *Controller) preUpdateData(ctx context.Context, u *unstructured.Unstruct
 		return false, serrors.UnrecoverrableError(err, serrors.OperatorReason, "unable to get conditions")
 	}
 
+	ok, err := c.preUpdateGenerationData(ctx, found, observedGeneration, generation, conditions, data)
+	if err != nil {
+		return false, err
+	}
+
+	u.SetUnstructuredContent(data)
+
+	return ok, nil
+}
+
+func (c *Controller) preUpdateGenerationData(ctx context.Context, found bool, observedGeneration, generation int64, conditions []interface{}, data map[string]interface{}) (bool, error) {
 	// New generation
-	if !found || generation == observedGeneration {
+	if !found || generation != observedGeneration {
 		err := unstructured.SetNestedField(data, generation, "status", "observedGeneration")
 		if err != nil {
 			return false, serrors.UnrecoverrableError(err, serrors.OperatorReason, "unable to set observed generation")
@@ -148,40 +197,24 @@ func (c *Controller) preUpdateData(ctx context.Context, u *unstructured.Unstruct
 		return false, serrors.UnrecoverrableError(err, serrors.OperatorReason, fmt.Sprintf("unable to check %s condition", status.ConditionInProgress))
 	}
 
-	if s == corev1.ConditionFalse {
-		// TODO Check what triggered the event
-		return true, nil
-	}
+	// TODO Check what triggered the event
 
-	return false, nil
+	return s == corev1.ConditionFalse, nil
 }
 
-func (c *Controller) Run(ctx context.Context, owner runtime.Object) error {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "commonRun", opentracing.Tags{})
+func (c *Controller) Run(ctx context.Context, owner resources.Resource) error {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "run", opentracing.Tags{})
 	defer span.Finish()
 
-	data, err := runtime.DefaultUnstructuredConverter.ToUnstructured(owner)
+	err := c.rm.AddResources(ctx, owner)
 	if err != nil {
-		return serrors.UnrecoverrableError(err, serrors.OperatorReason, "unable to convert resource to unstuctured")
+		return errors.Wrap(err, "cannot add resources")
 	}
 
-	u := &unstructured.Unstructured{}
-	u.SetUnstructuredContent(data)
-
-	stop, err := c.preUpdateData(ctx, u)
+	err = c.prepareStatus(ctx, owner)
 	if err != nil {
-		return errors.Wrap(err, "cannot update observedGeneration")
+		return errors.Wrap(err, "cannot prepare owner status")
 	}
 
-	if stop {
-		logger.Get(ctx).Info("nothing to do")
-		return nil
-	}
-
-	err = c.Client.Status().Update(ctx, u)
-	if err != nil {
-		return errors.Wrap(err, "cannot update status")
-	}
-
-	return sgraph.Get(ctx).Run(ctx, c.applyAndCheck)
+	return sgraph.Get(ctx).Run(ctx)
 }
