@@ -1,0 +1,52 @@
+{{/*
+  https://github.com/goharbor/harbor/blob/master/make/photon/prepare/templates/jobservice/config.yml.jinja
+  https://github.com/goharbor/harbor/blob/master/src/jobservice/config/config.go#L63
+*/}}
+protocol: {{ empty .Spec.HTTPS.CertificateRef | ternary "http" "https" }}
+port: 8080
+
+{{- if .Spec.HTTPS.CertificateRef }}
+https_config:
+  cert: /etc/jobservice/certificates/tls.crt
+  key: /etc/jobservice/certificates/tls.key
+{{- end }}
+
+worker_pool:
+  backend: "redis"
+
+  redis_pool:
+    redis_url: {{ "redis-password" | secretData .Spec.WorkerPool.Redis.PasswordRef | .Spec.WorkerPool.Redis.GetDSN }}
+    namespace: {{ default ( printf "jobservice::%s::%s" .ObjectMeta.Namespace .ObjectMeta.Name ) .Spec.WorkerPool.Redis.Namespace }}
+    idle_timeout_second: {{ .Spec.WorkerPool.Redis.IdleTimeout.Seconds | int64 }}
+
+job_loggers:
+{{- range $_, $logger := .Spec.JobLoggers }}
+- name: {{ $logger.Name }}
+  level: {{ default "info" $logger.Level }}
+  {{- if $logger.SettingsRef }}
+  settings: {{ secretData $logger.SettingsRef | toJson }}
+  {{- end }}
+  {{- if $logger.Sweeper }}
+  sweeper:
+    duration: {{ $logger.Sweeper.Duration }}
+    {{- if $logger.Sweeper.SettingsRef }}
+    settings: {{ secretData $logger.Sweeper.SettingsRef | toJson }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+
+loggers:
+{{- range $_, $logger := .Spec.Loggers }}
+- name: {{ $logger.Name }}
+  level: {{ default "info" $logger.Level }}
+  {{- if $logger.SettingsRef }}
+  settings: {{ secretData $logger.SettingsRef | toJson }}
+  {{- end }}
+  {{- if $logger.Sweeper }}
+  sweeper:
+    duration: {{ $logger.Sweeper.Duration }}
+    {{- if $logger.Sweeper.SettingsRef }}
+    settings: {{ secretData $logger.Sweeper.SettingsRef | toJson }}
+    {{- end }}
+  {{- end }}
+{{- end }}

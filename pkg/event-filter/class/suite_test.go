@@ -7,14 +7,13 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"sigs.k8s.io/controller-runtime/pkg/envtest"
+	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	// +kubebuilder:scaffold:imports
 
-	"github.com/goharbor/harbor-operator/pkg/factories/logger"
-
 	. "github.com/goharbor/harbor-operator/pkg/event-filter/class"
+	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to
@@ -23,7 +22,7 @@ import (
 func TestSuite(t *testing.T) {
 	RegisterFailHandler(Fail)
 
-	RunSpecsWithDefaultAndCustomReporters(t, "EventFilter", []Reporter{envtest.NewlineReporter{}})
+	RunSpecsWithDefaultAndCustomReporters(t, "EventFilter", []Reporter{printer.NewlineReporter{}})
 }
 
 func setupTest(ctx context.Context) (*Filter, context.Context) {

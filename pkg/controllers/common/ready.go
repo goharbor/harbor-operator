@@ -15,6 +15,8 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/graph"
 )
 
+var errNotReady = errors.New("not ready")
+
 func (c *Controller) EnsureReady(ctx context.Context, node graph.Resource) error {
 	res, ok := node.(*Resource)
 	if !ok {
@@ -58,8 +60,7 @@ func (c *Controller) EnsureReady(ctx context.Context, node graph.Resource) error
 	}
 
 	if !ok {
-		err := errors.New("not ready")
-		return serrors.RetryLaterError(err, "dependencyStatus", fmt.Sprintf("%s %s", result.GetObjectKind().GroupVersionKind().GroupKind(), objectKey), 0*time.Second)
+		return serrors.RetryLaterError(errNotReady, "dependencyStatus", fmt.Sprintf("%s %v", result.GetObjectKind().GroupVersionKind().GroupKind(), objectKey), 0*time.Second)
 	}
 
 	return nil

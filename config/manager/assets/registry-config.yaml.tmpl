@@ -1,0 +1,199 @@
+{{/* https://docs.docker.com/registry/configuration/ */}}
+version: 0.1
+log:
+  accesslog:
+    disabled: {{ .Spec.Log.AccessLog.Disabled }}
+  level: {{ .Spec.Log.Level }}
+  formatter: {{ .Spec.Log.Formatter }}
+  fields: {{ .Spec.Log.Fields | toJson }}
+{{- if .Spec.Log.Hooks }}
+  hooks:
+  {{- range $index, $element := .Spec.Log.Hooks }}
+  - type: {{ $element.Type }}
+    disabled: {{ $element.Disabled }}
+    levels: {{ $element.Levels | toJson }}
+    options: {{ secretData $element.OptionsRef | toJson }}
+  {{- end }}
+{{- end }}
+http:
+  # secret: setted through environment variable
+  debug:
+    addr: {{ .Spec.HTTP.Debug.Address }}
+    prometheus:
+      enabled: {{ .Spec.HTTP.Debug.Prometheus.Enabled }}
+      path: {{ .Spec.HTTP.Debug.Prometheus.Path }}
+{{- if .Spec.HTTP.Headers }}
+  headers: {{ .Spec.HTTP.Headers | toJson }}
+{{- end }}
+  net: {{ .Spec.HTTP.Net }}
+  addr: :5000
+  prefix: {{ .Spec.HTTP.Prefix }}
+  headers: {{ .Spec.HTTP.Headers | toJson }}
+  http2:
+    disabled: {{ .Spec.HTTP.HTTP2.Disabled }}
+  host: {{ .Spec.HTTP.Host }}
+  relativeurls: {{ .Spec.HTTP.RelativeURLs }}
+  draintimeout: {{ .Spec.HTTP.DrainTimeout }}
+{{- if .Spec.Reporting }}
+reporting:
+  {{- range $name, $reference := .Spec.Reporting }}
+  {{ $name }}: {{ secretData $reference | toJson }}
+  {{- end }}
+{{- end }}
+storage:
+  delete:
+    enabled: {{ .Spec.Storage.Delete.Enabled }}
+  cache:
+    blobdescriptor: {{ default "inmemory" .Spec.Storage.Cache.Blobdescriptor }}
+  maintenance:
+    uploadPurging:
+      enabled: {{ .Spec.Storage.Maintenance.UploadPurging.Enabled }}
+      age: {{ .Spec.Storage.Maintenance.UploadPurging.Age }}
+      interval: {{ .Spec.Storage.Maintenance.UploadPurging.Interval }}
+      dryRun: {{ .Spec.Storage.Maintenance.UploadPurging.DryRun }}
+    readOnly:
+      enabled: {{ .Spec.Storage.Maintenance.ReadOnly.Enabled }}
+  redirect: 
+    disable: {{ .Spec.Storage.Redirect.Disable }}
+{{- if .Spec.Storage.RegistryStorageDriverSpec.SecretRef }}
+  {{ .Spec.Storage.RegistryStorageDriverSpec.Name }}: {{ secretData .Spec.Storage.RegistryStorageDriverSpec.SecretRef | toJson }}
+{{- else }}
+  {{ .Spec.Storage.RegistryStorageDriverSpec.Name }}: {}
+{{- end }}
+{{- if ( or .Spec.Middlewares.Registry ( or .Spec.Middlewares.Repository .Spec.Middlewares.Storage ) ) }}
+middleware:
+  {{- if .Spec.Middlewares.Registry }}
+  registry:
+    {{- range $index, $middleware := .Spec.Middlewares.Registry }}
+  - name: $Middlewares.Name
+      {{- if $middleware.OptionsRef }}
+    options: {{ secretData $middleware.OptionsRef | toJson }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+  {{- if .Spec.Middlewares.Repository }}
+  registry:
+    {{- range $index, $middleware := .Spec.Middlewares.Repository }}
+  - name: $Middlewares.Name
+      {{- if $middleware.OptionsRef }}
+    options: {{ secretData $middleware.OptionsRef | toJson }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+  {{- if .Spec.Middlewares.Storage }}
+  registry:
+    {{- range $index, $middleware := .Spec.Middlewares.Storage }}
+  - name: {{ $middleware.Name }}
+      {{- if $middleware.OptionsRef }}
+    options: {{ secretData $middleware.OptionsRef | toJson }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+{{- if .Spec.Redis.PasswordRef }}
+redis:
+  {{- with ( "redis-password" | secretData .Spec.Redis.PasswordRef | .Spec.Redis.GetDSN ) }}
+  addr: {{ .Hostname }}
+  # password: setted through environment variable
+  db: {{ .EscapedPath | trimAll "/" }}
+  {{- end }}
+  dialtimeout: {{ .Spec.Redis.DialTimeout }}
+  readtimeout: {{ .Spec.Redis.ReadTimeout }}
+  writetimeout: {{ .Spec.Redis.WriteTimeout }}
+  pool:
+    maxidle: {{ .Spec.Redis.Pool.MaxIdle }}
+    maxactive: {{ .Spec.Redis.Pool.MaxActive }}
+    idletimeout: {{ .Spec.Redis.Pool.IdleTimeout }}
+{{- end }}
+proxy:
+  remoteurl: {{ .Spec.Proxy.RemoteURL }}
+  # username: setted through environment variable
+  # password: setted through environment variable
+compatibility:
+  schema1:
+    # signingkeyfile: setted through environment variable
+    enabled: {{ .Spec.Compatibility.Schema1.Enabled }}
+validation:
+  disabled: {{ .Spec.Validation.Disabled }}
+{{- if or .Spec.Validation.Manifests.URLs.Allow .Spec.Validation.Manifests.URLs.Deny }}
+  manifests:
+    urls:
+  {{- if .Spec.Validation.Manifests.URLs.Allow }}
+      allow: {{ .Spec.Validation.Manifests.URLs.Allow | toJson }}
+  {{- end }}
+  {{- if .Spec.Validation.Manifests.URLs.Deny }}
+      deny: {{ .Spec.Validation.Manifests.URLs.Deny | toJson }}
+  {{- end }}
+{{- end }}
+{{- if ( or .Spec.Authentication.Silly.Realm ( or .Spec.Authentication.Token.Realm .Spec.Authentication.HTPasswd.Realm ) ) }}
+auth:
+  {{- if .Spec.Authentication.Silly.Realm }}
+  silly:
+    realm: {{ .Spec.Authentication.Silly.Realm }}
+    service: {{ .Spec.Authentication.Silly.Service }}
+  {{- end }}
+  {{- if .Spec.Authentication.Token.Realm }}
+  token:
+    realm: {{ .Spec.Authentication.Token.Realm }}
+    service: {{ .Spec.Authentication.Token.Service }}
+    issuer: registry-token-issuer
+    rootcertbundle: /root/certs/bundle
+    autoredirect: {{ .Spec.Authentication.Token.AutoRedirect }}
+  {{- end }}
+  {{- if .Spec.Authentication.HTPasswd.Realm }}
+  htpasswd:
+    realm: {{ .Spec.Authentication.HTPasswd.Realm }}
+    # path: setted through environment variable
+  {{- end }}
+{{- end }}
+notifications:
+{{- if .Spec.Notifications.Endpoints }}
+  endpoints:
+  {{- range $_, $endpoint := .Spec.Notifications.Endpoints }}
+  - name: {{ $endpoint.Name }}
+    disabled: {{ $endpoint.Disabled }}
+    url: {{ $endpoint.URL }}
+    headers: {{ $endpoint.Headers | toJson }}
+    timeout: {{ $endpoint.Timeout }}
+    threshold: {{ $endpoint.Threshold }}
+    backoff: {{ $endpoint.Backoff }}
+    ignoredmediatypes: {{ $endpoint.IgnoredMediaTypes | toJson }}
+    ignore:
+      mediatypes: {{ $endpoint.Ignore.MediaTypes | toJson }}
+      actions: {{ $endpoint.Ignore.Actions | toJson }}
+  {{- end }}
+{{- end }}
+  events:
+    includereferences: {{ .Spec.Notifications.Events.IncludeReferences }}
+health:
+  storagedriver:
+    enabled: {{ .Spec.Health.StorageDriver.Enabled }}
+    interval: {{ .Spec.Health.StorageDriver.Interval }}
+    threshold: {{ .Spec.Health.StorageDriver.Threshold }}
+{{- if .Spec.Health.File }}
+  file:
+  {{- range $_, $health := .Spec.Health.File }}
+  - file: {{ $health.File }}
+    interval: {{ $health.Interval }}
+  {{- end }}
+{{- end }}
+{{- if .Spec.Health.HTTP }}
+  http:
+  {{- range $_, $health := .Spec.Health.HTTP }}
+  - uri: {{ $health.URI }}
+    headers: {{ $health.Headers | toJson }}
+    statuscode: {{ $health.StatusCode }}
+    timeout: {{ $health.Timeout }}
+    interval: {{ $health.Interval }}
+    threshold: {{ $health.Threshold }}
+  {{- end }}
+{{- end }}
+{{- if .Spec.Health.TCP }}
+  tcp:
+  {{- range $_, $health := .Spec.Health.TCP }}
+  - addr: {{ $health.Address }}
+    timeout: {{ $health.Timeout }}
+    interval: {{ $health.Interval }}
+    threshold: {{ $health.Threshold }}
+  {{- end }}
+{{- end }}

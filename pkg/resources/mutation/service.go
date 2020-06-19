@@ -10,14 +10,12 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/resources"
 )
 
-type MutateService func(context.Context, *corev1.Service, *corev1.Service) controllerutil.MutateFn
-
-func NewService(service *corev1.Service, mutate MutateService) resources.Mutable {
+func NewService(mutate resources.Mutable) resources.Mutable {
 	return func(ctx context.Context, serviceResource, serviceResult runtime.Object) controllerutil.MutateFn {
 		result := serviceResult.(*corev1.Service)
-		previous := serviceResource.(*corev1.Service)
+		desired := serviceResource.(*corev1.Service)
 
-		mutate := mutate(ctx, previous, result)
+		mutate := mutate(ctx, desired, result)
 
 		return func() error {
 			// Immutable field
@@ -43,7 +41,7 @@ func NewService(service *corev1.Service, mutate MutateService) resources.Mutable
 				}()
 			}
 
-			previous.DeepCopyInto(result)
+			desired.Spec.DeepCopyInto(&result.Spec)
 
 			return mutate()
 		}

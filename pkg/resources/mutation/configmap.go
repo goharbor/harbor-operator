@@ -10,17 +10,17 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/resources"
 )
 
-type MutateConfigMap func(context.Context, *corev1.ConfigMap, *corev1.ConfigMap) controllerutil.MutateFn
-
-func NewConfigMap(configMap *corev1.ConfigMap, mutate MutateConfigMap) resources.Mutable {
+func NewConfigMap(mutate resources.Mutable) resources.Mutable {
 	return func(ctx context.Context, configResource, configResult runtime.Object) controllerutil.MutateFn {
 		result := configResult.(*corev1.ConfigMap)
-		previous := configResource.(*corev1.ConfigMap)
+		desired := configResource.(*corev1.ConfigMap)
 
-		mutate := mutate(ctx, previous, result)
+		mutate := mutate(ctx, desired, result)
 
 		return func() error {
-			previous.DeepCopyInto(result)
+			result.BinaryData = desired.BinaryData
+			result.Data = desired.Data
+			result.Immutable = desired.Immutable
 
 			return mutate()
 		}
