@@ -7,10 +7,13 @@ images:
   newTag: latest
 
 configMapGenerator:
-- literals:
+- name: operator-config
+  literals:
   - HARBOR_CONTROLLER_MAX_RECONCILE=1
   - HARBOR_CONTROLLER_WATCH_CHILDREN=true
-  name: operator-config
+- name: registry-template
+  files:
+  - assets/registry-config.yaml.tmpl
 
 patchesStrategicMerge:
 - patches-configuration.yaml

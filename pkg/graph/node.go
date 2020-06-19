@@ -10,6 +10,7 @@ import (
 
 type node struct {
 	resource Resource
+	fn       RunFunc
 
 	parent      chan error
 	parentLock  *sync.Mutex
@@ -18,6 +19,8 @@ type node struct {
 	children     []chan<- error
 	childrenLock []*sync.Mutex
 }
+
+var errParentChannelClosed = errors.New("parent channel closed")
 
 func (no *node) Wait(ctx context.Context) error {
 	defer close(no.parent)
@@ -46,7 +49,7 @@ func (no *node) Wait(ctx context.Context) error {
 
 	if received < no.parentCount {
 		// parents closed the channel
-		return errors.New("parent channel closed")
+		return errParentChannelClosed
 	}
 
 	return nil
@@ -63,7 +66,7 @@ func (no *node) Terminates(err error) (result error) {
 			defer func() {
 				// recover from panic caused by writing to a closed channel
 				if r := recover(); r != nil {
-					result = errors.Errorf("%s", r)
+					result = errors.Errorf("%v", r)
 				}
 			}()
 

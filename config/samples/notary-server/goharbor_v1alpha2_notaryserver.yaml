@@ -1,0 +1,11 @@
+apiVersion: goharbor.io/v1alpha2
+kind: NotaryServer
+metadata:
+  name: harbor
+spec:
+  storage:
+    type: postgres
+    dsn: postgresql://postgres@notary-server-database-postgresql:5432/notary-server?parseTime=true
+    passwordRef: notary-server-database-postgresql
+  trustService:
+    type: local

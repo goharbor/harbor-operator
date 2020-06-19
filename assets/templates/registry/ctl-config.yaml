@@ -1,3 +1,0 @@
-protocol: "http"
-port: {{ env.Getenv "REGISTRYCTL_PORT" }}
-log_level: info

@@ -10,17 +10,15 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/resources"
 )
 
-type MutateDeployment func(context.Context, *appsv1.Deployment, *appsv1.Deployment) controllerutil.MutateFn
-
-func NewDeployment(deployment *appsv1.Deployment, mutate MutateDeployment) resources.Mutable {
+func NewDeployment(mutate resources.Mutable) resources.Mutable {
 	return func(ctx context.Context, deploymentResource, deploymentResult runtime.Object) controllerutil.MutateFn {
 		result := deploymentResult.(*appsv1.Deployment)
-		previous := deploymentResource.(*appsv1.Deployment)
+		desired := deploymentResource.(*appsv1.Deployment)
 
-		mutate := mutate(ctx, previous, result)
+		mutate := mutate(ctx, desired, result)
 
 		return func() error {
-			previous.DeepCopyInto(result)
+			desired.Spec.DeepCopyInto(&result.Spec)
 
 			return mutate()
 		}
