@@ -14,5 +14,6 @@
   value: |
     {
       "leaderElection": true,
+      "leaderElectionID": "harbor-operator-election-leader",
       "leaderElectionNamespace": "default"
     }

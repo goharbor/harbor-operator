@@ -20,14 +20,23 @@ var _ = Describe("With a dependency manager", func() {
 		rm, ctx = setupTest(context.TODO())
 	})
 
+	Describe("Add resource with nil function", func() {
+		It("Should fail", func() {
+			secret := &corev1.Secret{}
+
+			err := rm.AddResource(ctx, secret, nil, nil)
+			Expect(err).To(HaveOccurred())
+		})
+	})
+
 	Describe("Add 2 times the same resources", func() {
 		It("Should fail", func() {
 			secret := &corev1.Secret{}
 
-			err := rm.AddResource(ctx, secret, nil)
+			err := rm.AddResource(ctx, secret, nil, func(ctx context.Context, resource Resource) error { return nil })
 			Expect(err).ToNot(HaveOccurred())
 
-			err = rm.AddResource(ctx, secret, nil)
+			err = rm.AddResource(ctx, secret, nil, func(ctx context.Context, resource Resource) error { return nil })
 			Expect(err).To(HaveOccurred())
 		})
 	})
@@ -37,7 +46,7 @@ var _ = Describe("With a dependency manager", func() {
 			cm := &corev1.ConfigMap{}
 			secret := &corev1.Secret{}
 
-			err := rm.AddResource(ctx, secret, []Resource{cm})
+			err := rm.AddResource(ctx, secret, []Resource{cm}, func(ctx context.Context, resource Resource) error { return nil })
 			Expect(err).To(HaveOccurred())
 		})
 	})

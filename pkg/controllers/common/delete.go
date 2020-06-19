@@ -17,7 +17,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/api/v1alpha2"
+	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 )
 
@@ -53,6 +53,8 @@ var (
 			Kind:    "Deployment",
 		},
 	}
+
+	errRemainingObjectToDelete = errors.New("some resource to delete may remain")
 )
 
 // +kubebuilder:rbac:groups="",resources="configmaps",verbs=delete
@@ -111,7 +113,7 @@ func (c *Controller) DeleteResourceCollection(ctx context.Context, owner metav1.
 	}
 
 	if limit == countToDelete {
-		return errors.New("some resource to delete may remain")
+		return errRemainingObjectToDelete
 	}
 
 	return nil

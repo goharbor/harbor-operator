@@ -12,15 +12,15 @@ bases:
 # generatorOptions:
 #   disableNameSuffixHash: true
 
-# secretGenerator:
-# - name: jobservice-redis
-#   literals:
-#   - url=redis://jobservice-broker-redis-ha-announce-0:6379/0
-#   - namespace=
-# - name: clair-adapter-redis
-#   literals:
-#   - url=redis://clair-adapter-broker-redis-ha-announce-0:6379/0
-#   - namespace=harbor.scanner.clair:store
+secretGenerator:
+- name: jobservice-redis
+  literals:
+  - url=redis://jobservice-broker-redis-ha-announce-0:6379/0
+  - namespace=
+- name: clair-adapter-redis
+  literals:
+  - url=redis://clair-adapter-broker-redis-ha-announce-0:6379/0
+  - namespace=harbor.scanner.clair:store
 
 # resources:
 # - certificate.yaml

@@ -1,6 +1,0 @@
-{{- range file.Walk ( env.Getenv "CONFIG_PATH" ) }}
-  {{- if not ( file.IsDir . ) }}
-    {{- "\n" -}}{{ filepath.Base . }}:
-    {{- "\n" -}}{{ file.Read . | data.YAML | data.ToYAML | strings.Indent 1 "  " }}
-  {{- end }}
-{{- end }}

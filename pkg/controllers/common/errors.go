@@ -13,6 +13,7 @@ import (
 	"sigs.k8s.io/kustomize/kstatus/status"
 
 	serrors "github.com/goharbor/harbor-operator/pkg/controllers/common/errors"
+	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	sstatus "github.com/goharbor/harbor-operator/pkg/status"
 )
 
@@ -56,7 +57,13 @@ func (c *Controller) HandleError(ctx context.Context, resource runtime.Object, r
 		return result, errors.Wrap(resultError, errors.Wrap(err, "cannot update status").Error())
 	}
 
-	return result, resultError
+	if resultError != nil {
+		return result, resultError
+	}
+
+	logger.Get(ctx).Info("error handled")
+
+	return result, nil
 }
 
 func postUpdateData(ctx context.Context, u *unstructured.Unstructured, resultError error) (ctrl.Result, error) {
