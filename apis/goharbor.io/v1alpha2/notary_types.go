@@ -1,83 +1,122 @@
 package v1alpha2
 
 import (
-	"errors"
+	"context"
 
+	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
-	runtime "k8s.io/apimachinery/pkg/runtime"
 )
 
 type NotaryLoggingSpec struct {
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Enum={"debug","info","warning","error","fatal","panic"}
-	// +kubebuilder:default=info
+	// +kubebuilder:default="info"
 	Level string `json:"level"`
 }
 
 type NotaryMigrationSpec struct {
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=true
-	Enabled bool `json:"enabled"`
-
-	// +kubebuilder:validation:Optional
-	// Reference of the source of the migration.
-	SourceRef *corev1.SecretKeySelector `json:"sourceRef"`
+	Disabled bool `json:"disabled"`
 
 	// +kubebuilder:validation:Optional
 	// Source of the migration.
-	// Cannot be used if SourceRef is not empty.
-	Source string `json:"source"`
-
-	// +kubebuilder:validation:Optional
-	// +nullable
-	Volume corev1.VolumeSource `json:"volume"`
-
-	// +kubebuilder:validation:Optional
-	// +nullable
-	Mount corev1.VolumeMount `json:"volumeMount"`
-}
-
-func (r *NotaryMigrationSpec) ValidateCreate() error {
-	return r.Validate()
-}
-
-func (r *NotaryMigrationSpec) ValidateUpdate(old runtime.Object) error {
-	return r.Validate()
+	Source OpacifiedDSN `json:"source"`
 }
 
 func (r *NotaryMigrationSpec) Validate() error {
-	if !r.Enabled {
+	if r.Disabled {
 		return nil
 	}
 
-	err := r.ValidateSource()
+	return nil
+}
+
+const migrationImage = "migrate/migrate"
+
+var varFalse = false
+
+func (r *NotaryMigrationSpec) GetMigrationContainer(ctx context.Context, storage *NotaryStorageSpec) (corev1.Container, error) {
+	migrationEnvs := []corev1.EnvVar{}
+	secretDatabaseVariable, secretSourceVariable := "", ""
+
+	if storage.PasswordRef != "" {
+		migrationEnvs = append(migrationEnvs, corev1.EnvVar{
+			Name: "secretDatabase",
+			ValueFrom: &corev1.EnvVarSource{
+				SecretKeyRef: &corev1.SecretKeySelector{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: storage.PasswordRef,
+					},
+					Key: PostgresqlPasswordKey,
+				},
+			},
+		})
+
+		secretDatabaseVariable = "$(secretDatabase)"
+	}
+
+	if r.Source.PasswordRef != "" {
+		migrationEnvs = append(migrationEnvs, corev1.EnvVar{
+			Name: "secretSource",
+			ValueFrom: &corev1.EnvVarSource{
+				SecretKeyRef: &corev1.SecretKeySelector{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: r.Source.PasswordRef,
+					},
+					Key:      SharedSecretKey,
+					Optional: &varFalse,
+				},
+			},
+		})
+
+		secretSourceVariable = "$(secretSource)"
+	}
+
+	migrationDatabaseURL, err := storage.GetDSNStringWithRawPassword(secretDatabaseVariable)
 	if err != nil {
-		return err
+		return corev1.Container{}, errors.Wrap(err, "cannot get storage DSN")
 	}
 
-	return r.ValidateVolume()
+	migrationSourceURL, err := r.Source.GetDSNStringWithRawPassword(secretSourceVariable)
+	if err != nil {
+		return corev1.Container{}, errors.Wrap(err, "cannot get migration source DSN")
+	}
+
+	return corev1.Container{
+		Name:  "init-db",
+		Image: migrationImage,
+		Args: []string{
+			"-source", migrationSourceURL,
+			"-database", migrationDatabaseURL,
+			"up",
+		},
+		Env: migrationEnvs,
+	}, nil
 }
 
-var errTwoSource = errors.New("only one source and sourceRef can be specified")
-
-func (r *NotaryMigrationSpec) ValidateSource() error {
-	if r.Source != "" && r.SourceRef != nil {
-		return errTwoSource
-	}
-
-	return nil
+type NotaryHTTPSSpec struct {
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:MinLength=1
+	CertificateRef string `json:"certificateRef"`
 }
 
-var errVolume = errors.New("both or neither of volume and volumeMount should be specified")
+type NotaryStorageSpec struct {
+	OpacifiedDSN `json:",inline"`
 
-func (r *NotaryMigrationSpec) ValidateVolume() error {
-	if r.Volume.Size() == 0 && r.Mount.Size() == 0 {
-		return nil
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Enum={"mysql","postgres","memory"}
+	Type string `json:"type"`
+}
+
+var (
+	errNotImplemented = errors.New("not yet implemented")
+)
+
+func (n *NotaryStorageSpec) GetPasswordFieldKey() (string, error) {
+	switch n.Type {
+	case "postgres":
+		return PostgresqlPasswordKey, nil
+	default:
+		return "", errNotImplemented
 	}
-
-	if r.Volume.Size() == 0 || r.Mount.Size() == 0 {
-		return errVolume
-	}
-
-	return nil
 }

@@ -6,13 +6,9 @@ import (
 	"github.com/pkg/errors"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
-	serrors "github.com/goharbor/harbor-operator/pkg/controllers/common/errors"
+	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	"github.com/goharbor/harbor-operator/pkg/resources"
 )
-
-func (r *Reconciler) InitResources() error {
-	return errors.Wrap(r.InitConfigMaps(), "configMaps")
-}
 
 func (r *Reconciler) NewEmpty(_ context.Context) resources.Resource {
 	return &goharborv1alpha2.ChartMuseum{}

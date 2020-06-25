@@ -82,39 +82,6 @@ func (r *Reconciler) GetHookDataFunc(ctx context.Context, registry *goharborv1al
 	}, len(registry.Spec.Log.Hooks))
 }
 
-func (r *Reconciler) GetStorageDataFunc(ctx context.Context, registry *goharborv1alpha2.Registry) (interface{}, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "getStorageDataFunc", opentracing.Tags{})
-	defer span.Finish()
-
-	if registry.Spec.Storage.SecretRef == "" {
-		return func() map[string]string {
-			return map[string]string{}
-		}, nil
-	}
-
-	key := types.NamespacedName{
-		Namespace: registry.GetNamespace(),
-		Name:      registry.Spec.Storage.SecretRef,
-	}
-
-	var secret corev1.Secret
-
-	err := r.Client.Get(ctx, key, &secret)
-	if err != nil {
-		return nil, errors.Wrap(err, "cannot get secret")
-	}
-
-	result := make(map[string]string, len(secret.Data))
-
-	for key, value := range secret.Data {
-		result[key] = string(value)
-	}
-
-	return func() map[string]string {
-		return result
-	}, nil
-}
-
 func (r *Reconciler) GetReportingDataFunc(ctx context.Context, registry *goharborv1alpha2.Registry) (interface{}, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "registryMiddleware", opentracing.Tags{})
 	defer span.Finish()
@@ -189,12 +156,6 @@ func (r *Reconciler) GetConfigFuncs(ctx context.Context, registry *goharborv1alp
 		var err error
 		hookDataFunc, err = r.GetHookDataFunc(gctx, registry)
 		return errors.Wrap(err, "hook")
-	})
-
-	g.Go(func() error {
-		var err error
-		storageDataFunc, err = r.GetStorageDataFunc(gctx, registry)
-		return errors.Wrap(err, "storage")
 	})
 
 	g.Go(func() error {

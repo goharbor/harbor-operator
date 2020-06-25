@@ -165,8 +165,18 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 		})
 	}
 
+	if core.Spec.Components.ChartRepository.URL != "" {
+		envs = append(envs, corev1.EnvVar{
+			Name:  "CHART_REPOSITORY_URL",
+			Value: core.Spec.Components.ChartRepository.URL,
+		})
+	}
+
 	if core.Spec.Components.NotaryServer.URL != "" {
 		envs = append(envs, corev1.EnvVar{
+			Name:  "WITH_NOTARY",
+			Value: "true",
+		}, corev1.EnvVar{
 			Name:  "NOTARY_URL",
 			Value: core.Spec.Components.NotaryServer.URL,
 		})
@@ -216,21 +226,16 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 		Spec: appsv1.DeploymentSpec{
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
-					"core.goharbor.io/name":      name,
-					"core.goharbor.io/namespace": namespace,
+					r.Label("name"):      name,
+					r.Label("namespace"): namespace,
 				},
 			},
 			Replicas: core.Spec.Replicas,
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
-						"core.goharbor.io/name":      name,
-						"core.goharbor.io/namespace": namespace,
-					},
-					Annotations: map[string]string{
-						"core.goharbor.io/uid":        fmt.Sprintf("%v", core.GetUID()),
-						"core.goharbor.io/generation": fmt.Sprintf("%v", core.GetGeneration()),
-						// TODO get configMap data
+						r.Label("name"):      name,
+						r.Label("namespace"): namespace,
 					},
 				},
 				Spec: corev1.PodSpec{

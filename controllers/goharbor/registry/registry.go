@@ -13,8 +13,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
-	"github.com/goharbor/harbor-operator/pkg/controllers/common"
-	"github.com/goharbor/harbor-operator/pkg/controllers/config"
+	"github.com/goharbor/harbor-operator/pkg/config"
+	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
 	"github.com/goharbor/harbor-operator/pkg/event-filter/class"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 )
@@ -33,14 +33,14 @@ const (
 
 // Reconciler reconciles a Registry object.
 type Reconciler struct {
-	*common.Controller
+	*commonCtrl.Controller
 }
 
 // +kubebuilder:rbac:groups=containerregistry.ovhcloud.com,resources=registries,verbs=get;list;watch
 // +kubebuilder:rbac:groups=containerregistry.ovhcloud.com,resources=registries/status,verbs=get;update;patch
 
-func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
-	err := r.Controller.SetupWithManager(mgr)
+func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) error {
+	err := r.Controller.SetupWithManager(ctx, mgr)
 	if err != nil {
 		return errors.Wrap(err, "cannot setup common controller")
 	}
@@ -74,7 +74,7 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 // +kubebuilder:rbac:groups=containerregistry.ovhcloud.com,resources=registries,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=containerregistry.ovhcloud.com,resources=registries/status,verbs=get;update;patch
 
-func New(ctx context.Context, name, version string, configStore *configstore.Store) (*Reconciler, error) {
+func New(ctx context.Context, name, version string, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
 	configStore.Env(name)
 
 	configTemplatePath, err := configStore.GetItemValue(ConfigTemplatePathKey)
@@ -96,7 +96,7 @@ func New(ctx context.Context, name, version string, configStore *configstore.Sto
 
 	r := &Reconciler{}
 
-	r.Controller = common.NewController(name, version, r, configStore)
+	r.Controller = commonCtrl.NewController(ctx, name, r, configStore)
 
 	return r, nil
 }

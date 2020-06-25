@@ -1,0 +1,24 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+commonLabels:
+  sample: "true"
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+secretGenerator:
+- name: github-token
+  literals:
+  - secret=$(GITHUB_TOKEN)
+  type: "goharbor.io/single-secret"
+- name: notary-signer-aliases
+  literals:
+  - default=the-default-password
+  - oldalias1=anOldPassword
+  type: "goharbor.io/notary-signer-aliases"
+
+resources:
+- notarysigner-certificate.yaml
+- notarysigner-certificate-issuer.yaml
+- goharbor_v1alpha2_notarysigner.yaml
+

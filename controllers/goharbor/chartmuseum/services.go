@@ -2,7 +2,6 @@ package chartmuseum
 
 import (
 	"context"
-	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -16,10 +15,13 @@ const (
 )
 
 func (r *Reconciler) GetService(ctx context.Context, chartMuseum *goharborv1alpha2.ChartMuseum) (*corev1.Service, error) {
+	name := r.NormalizeName(ctx, chartMuseum.GetName())
+	namespace := chartMuseum.GetNamespace()
+
 	return &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-chartmuseum", chartMuseum.GetName()),
-			Namespace: chartMuseum.GetNamespace(),
+			Name:      name,
+			Namespace: namespace,
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{
@@ -29,8 +31,8 @@ func (r *Reconciler) GetService(ctx context.Context, chartMuseum *goharborv1alph
 				},
 			},
 			Selector: map[string]string{
-				"chartmuseum-name":      chartMuseum.GetName(),
-				"chartmuseum-namespace": chartMuseum.GetNamespace(),
+				r.Label("name"):      name,
+				r.Label("namespace"): namespace,
 			},
 		},
 	}, nil
