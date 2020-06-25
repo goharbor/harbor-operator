@@ -1,0 +1,57 @@
+allow.overwrite: {{ .Spec.Chart.AllowOvewrite }}
+
+auth:
+  anonymous.get: {{ .Spec.Auth.AnonymousGet }}
+  {{- if .Spec.Auth.Bearer.CertificateRef }}
+  cert-path: /etc/chartmuseum/auth-certificates/tls.crt
+  {{- end }}
+  {{- if .Spec.Auth.Bearer.Realm }}
+  realm: {{ .Spec.Auth.Bearer.Realm }}
+  service: {{ .Spec.Auth.Bearer.Service }}
+  {{- end }}
+
+{{- if .Spec.Auth.Bearer.CertificateRef }}
+bearer.auth: 1
+{{- end }}
+
+{{- if .Spec.Cache.Redis.DSN }}
+cache: redis
+cache.redis:
+  {{- with (.Spec.Cache.Redis.DSN.GetDSN "") }}
+  addr: {{ quote .Host }}
+  # password: Will be set with environment variable
+  db: {{ .EscapedPath | trimAll "/" }}
+  {{- end }}
+{{- end }}
+
+context.path: ''
+
+debug: {{ .Spec.Log.Debug }}
+
+{{- if .Spec.Chart.Repo.DepthDynamic }}
+depth.dynamic: {{ .Spec.Chart.Repo.DepthDynamic }}
+{{- else }}
+depth: {{ .Spec.Chart.Repo.Depth }}
+{{- end }}
+
+disable:
+  api: {{ .Spec.Disable.API }}
+  delete: {{ .Spec.Disable.Delete }}
+  force.overwrite: {{ .Spec.Disable.ForceOverwrite }}
+  metrics: {{ .Spec.Disable.Metrics }}
+  statefiles: {{ .Spec.Disable.StateFiles }}
+
+index.limit: {{ .Spec.Chart.Index.ParallelLimit }}
+
+log:
+  health: {{ .Spec.Log.Health }}
+  json: {{ .Spec.Log.JSON }}
+
+max:
+  storage.objects: {{ .Spec.Chart.Storage.MaxStorageObjects }}
+  upload.size: {{ .Spec.Server.MaxUploadSize }}
+
+chart.post.form.field.name: {{ .Spec.Chart.PostFormFieldName.Chart }}
+prov.post.form.field.name: {{ .Spec.Chart.PostFormFieldName.Provenance }}
+
+storage: {{ .Spec.Chart.Storage.Name }}

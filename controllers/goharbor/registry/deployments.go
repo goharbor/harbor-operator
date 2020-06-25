@@ -2,7 +2,6 @@ package registry
 
 import (
 	"context"
-	"fmt"
 	"path"
 
 	"github.com/pkg/errors"
@@ -23,6 +22,8 @@ const (
 	CompatibilitySchema1VolumeName   = "compatibility-schema1-certificate"
 	AuthenticationHTPasswdPath       = ConfigPath + "/auth"
 	AuthenticationHTPasswdVolumeName = "authentication-htpasswd"
+	StorageName                      = "storage"
+	StoragePath                      = "/var/lib/registry"
 )
 
 var (
@@ -170,7 +171,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 		})
 	}
 
-	return &appsv1.Deployment{
+	deploy := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
@@ -178,23 +179,16 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 		Spec: appsv1.DeploymentSpec{
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
-					"registry.goharbor.io/name":      name,
-					"registry.goharbor.io/namespace": namespace,
+					r.Label("name"):      name,
+					r.Label("namespace"): namespace,
 				},
 			},
 			Replicas: registry.Spec.Replicas,
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
-						"registry.goharbor.io/name":      name,
-						"registry.goharbor.io/namespace": namespace,
-					},
-					Annotations: map[string]string{
-						"registry.goharbor.io/uid":        fmt.Sprintf("%v", registry.GetUID()),
-						"registry.goharbor.io/generation": fmt.Sprintf("%v", registry.GetGeneration()),
-						// TODO get configMap data
-						"config.registry.goharbor.io/uid":        fmt.Sprintf("%v", registry.GetUID()),
-						"config.registry.goharbor.io/generation": fmt.Sprintf("%v", registry.GetGeneration()),
+						r.Label("name"):      name,
+						r.Label("namespace"): namespace,
 					},
 				},
 				Spec: corev1.PodSpec{
@@ -240,5 +234,87 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 				},
 			},
 		},
-	}, nil
+	}
+
+	err = r.ApplyStorageConfiguration(ctx, registry, deploy)
+
+	return deploy, errors.Wrap(err, "cannot apply storage configuration")
+}
+
+const registryContainerIndex = 0
+
+func (r *Reconciler) GetFilesystemStorageEnvs(ctx context.Context, registry *goharborv1alpha2.Registry, deploy *appsv1.Deployment) error {
+	regContainer := deploy.Spec.Template.Spec.Containers[registryContainerIndex]
+
+	deploy.Spec.Template.Spec.Volumes = append(deploy.Spec.Template.Spec.Volumes, corev1.Volume{
+		Name:         StorageName,
+		VolumeSource: registry.Spec.Storage.Driver.FileSystem.VolumeSource,
+	})
+
+	regContainer.VolumeMounts = append(regContainer.VolumeMounts, corev1.VolumeMount{
+		Name:      StorageName,
+		MountPath: StoragePath,
+		ReadOnly:  false,
+	})
+
+	return nil
+}
+
+func (r *Reconciler) GetS3StorageEnvs(ctx context.Context, registry *goharborv1alpha2.Registry, deploy *appsv1.Deployment) error {
+	regContainer := deploy.Spec.Template.Spec.Containers[registryContainerIndex]
+
+	regContainer.Env = append(regContainer.Env, corev1.EnvVar{
+		Name: "REGISTRY_STORAGE_S3_SECRETKEY",
+		ValueFrom: &corev1.EnvVarSource{
+			SecretKeyRef: &corev1.SecretKeySelector{
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: registry.Spec.Storage.Driver.S3.SecretKeyRef,
+				},
+			},
+		},
+	})
+
+	return nil
+}
+
+func (r *Reconciler) GetSwiftStorageEnvs(ctx context.Context, registry *goharborv1alpha2.Registry, deploy *appsv1.Deployment) error {
+	regContainer := deploy.Spec.Template.Spec.Containers[registryContainerIndex]
+
+	regContainer.Env = append(regContainer.Env, corev1.EnvVar{
+		Name: "REGISTRY_STORAGE_SWIFT_PASSWORD",
+		ValueFrom: &corev1.EnvVarSource{
+			SecretKeyRef: &corev1.SecretKeySelector{
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: registry.Spec.Storage.Driver.Swift.PasswordRef,
+				},
+			},
+		},
+	}, corev1.EnvVar{
+		Name: "REGISTRY_STORAGE_SWIFT_SECRETKEY",
+		ValueFrom: &corev1.EnvVarSource{
+			SecretKeyRef: &corev1.SecretKeySelector{
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: registry.Spec.Storage.Driver.Swift.SecretKeyRef,
+				},
+			},
+		},
+	})
+
+	return nil
+}
+
+func (r *Reconciler) ApplyStorageConfiguration(ctx context.Context, registry *goharborv1alpha2.Registry, deploy *appsv1.Deployment) error {
+	if registry.Spec.Storage.Driver.FileSystem != nil {
+		return r.GetFilesystemStorageEnvs(ctx, registry, deploy)
+	}
+
+	if registry.Spec.Storage.Driver.S3 != nil {
+		return r.GetS3StorageEnvs(ctx, registry, deploy)
+	}
+
+	if registry.Spec.Storage.Driver.Swift != nil {
+		return r.GetSwiftStorageEnvs(ctx, registry, deploy)
+	}
+
+	return nil
 }
