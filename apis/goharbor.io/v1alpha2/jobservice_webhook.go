@@ -1,6 +1,8 @@
 package v1alpha2
 
 import (
+	"context"
+
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
@@ -9,7 +11,7 @@ import (
 // log is for logging in this package.
 var jobservicelog = logf.Log.WithName("jobservice-resource")
 
-func (js *JobService) SetupWebhookWithManager(mgr ctrl.Manager) error {
+func (js *JobService) SetupWebhookWithManager(ctx context.Context, mgr ctrl.Manager) error {
 	return ctrl.NewWebhookManagedBy(mgr).
 		For(js).
 		Complete()

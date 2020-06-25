@@ -1,0 +1,34 @@
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: harbor-signer
+spec:
+  # Secret names are always required.
+  secretName: harbor-signer-certificate
+  duration: 2160h # 90d
+  renewBefore: 360h # 15d
+  organization:
+  - goharbor
+  isCA: false
+  keySize: 2048
+  keyAlgorithm: rsa
+  keyEncoding: pkcs1
+  usages:
+    - server auth
+    - client auth
+  # At least one of a DNS Name, URI, or IP address is required.
+  dnsNames:
+  - notary.harbor.public
+  uriSANs:
+  - spiffe://cluster.local/ns/sandbox/sa/example
+  ipAddresses:
+  - 192.168.0.5
+  # Issuer references are always required.
+  issuerRef:
+    name: harbor-signer
+    # We can reference ClusterIssuers by changing the kind here.
+    # The default value is Issuer (i.e. a locally namespaced Issuer)
+    kind: Issuer
+    # This is optional since cert-manager will default to this value however
+    # if you are using an external issuer, change this to that issuer group.
+    group: cert-manager.io

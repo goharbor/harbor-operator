@@ -14,8 +14,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
-	"github.com/goharbor/harbor-operator/pkg/controllers/common"
-	"github.com/goharbor/harbor-operator/pkg/controllers/config"
+	"github.com/goharbor/harbor-operator/pkg/config"
+	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
 	"github.com/goharbor/harbor-operator/pkg/event-filter/class"
 )
 
@@ -27,11 +27,11 @@ const (
 
 // Reconciler reconciles a Portal object.
 type Reconciler struct {
-	*common.Controller
+	*commonCtrl.Controller
 }
 
-func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
-	err := r.Controller.SetupWithManager(mgr)
+func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) error {
+	err := r.Controller.SetupWithManager(ctx, mgr)
 	if err != nil {
 		return errors.Wrap(err, "cannot setup common controller")
 	}
@@ -63,12 +63,12 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func New(ctx context.Context, name, version string, configStore *configstore.Store) (*Reconciler, error) {
+func New(ctx context.Context, name, version string, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
 	configStore.Env(name)
 
 	r := &Reconciler{}
 
-	r.Controller = common.NewController(name, version, r, configStore)
+	r.Controller = commonCtrl.NewController(ctx, name, r, configStore)
 
 	return r, nil
 }

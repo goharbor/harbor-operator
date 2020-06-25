@@ -2,7 +2,6 @@ package portal
 
 import (
 	"context"
-	"fmt"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -32,26 +31,22 @@ func (r *Reconciler) GetDeployment(ctx context.Context, portal *goharborv1alpha2
 
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-portal", portal.GetName()),
-			Namespace: portal.GetNamespace(),
+			Name:      name,
+			Namespace: namespace,
 		},
 		Spec: appsv1.DeploymentSpec{
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
-					"portal.goharbor.io/name":      name,
-					"portal.goharbor.io/namespace": namespace,
+					r.Label("name"):      name,
+					r.Label("namespace"): namespace,
 				},
 			},
 			Replicas: portal.Spec.Replicas,
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
-						"portal.goharbor.io/name":      name,
-						"portal.goharbor.io/namespace": namespace,
-					},
-					Annotations: map[string]string{
-						"registry.goharbor.io/uid":        fmt.Sprintf("%v", portal.GetUID()),
-						"registry.goharbor.io/generation": fmt.Sprintf("%v", portal.GetGeneration()),
+						r.Label("name"):      name,
+						r.Label("namespace"): namespace,
 					},
 				},
 				Spec: corev1.PodSpec{

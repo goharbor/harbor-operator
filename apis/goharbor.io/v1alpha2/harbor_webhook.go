@@ -1,6 +1,8 @@
 package v1alpha2
 
 import (
+	"context"
+
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
@@ -9,7 +11,7 @@ import (
 // log is for logging in this package.
 var harborlog = logf.Log.WithName("harbor-resource")
 
-func (h *Harbor) SetupWebhookWithManager(mgr ctrl.Manager) error {
+func (h *Harbor) SetupWebhookWithManager(ctx context.Context, mgr ctrl.Manager) error {
 	return ctrl.NewWebhookManagedBy(mgr).
 		For(h).
 		Complete()

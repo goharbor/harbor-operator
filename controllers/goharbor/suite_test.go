@@ -37,7 +37,8 @@ import (
 	// +kubebuilder:scaffold:imports
 
 	harborCtrl "github.com/goharbor/harbor-operator/controllers/goharbor/harbor"
-	"github.com/goharbor/harbor-operator/pkg/controllers/common"
+	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
+	"github.com/goharbor/harbor-operator/pkg/factories/application"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	"github.com/goharbor/harbor-operator/pkg/scheme"
 )
@@ -66,6 +67,9 @@ var _ = BeforeSuite(func(done Done) {
 	logf.SetLogger(log)
 	ctx := logger.Context(log)
 
+	application.SetName(&ctx, "test-app")
+	application.SetVersion(&ctx, "test")
+
 	By("bootstrapping test environment")
 	testEnv = &envtest.Environment{
 		CRDDirectoryPaths: []string{filepath.Join("..", "config", "crd", "bases")},
@@ -92,9 +96,9 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(err).NotTo(HaveOccurred(), "failed to create manager")
 
 	controller := &harborCtrl.Reconciler{
-		Controller: common.NewController("test-operator", "test", nil, nil),
+		Controller: commonCtrl.NewController(ctx, "test", nil, nil),
 	}
-	err = controller.SetupWithManager(mgr)
+	err = controller.SetupWithManager(ctx, mgr)
 	Expect(err).NotTo(HaveOccurred(), "failed to setup controller")
 
 	go func() {

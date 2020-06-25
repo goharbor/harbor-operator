@@ -1,0 +1,54 @@
+{{/* https://github.com/theupdateframework/notary/blob/master/docs/reference/server-config.md */}}
+{
+  "server": {
+    {{- if .Spec.HTTPS.CertificateRef }}
+      "tls_cert_file": "/etc/notary-server/certificates/tls.crt",
+      "tls_key_file": "/etc/notary-server/certificates/tls.key",
+    {{- end }}
+    "http_addr": ":4443"
+  },
+  "trust_service": {
+    {{- if .Spec.TrustService.Host }}
+    "hostname": "{{ .Spec.TrustService.Host }}",
+    {{- end }}
+    {{- if .Spec.TrustService.Port }}
+    "port": "{{ .Spec.TrustService.Port }}",
+    {{- end }}
+    {{- if .Spec.TrustService.CertificateRef }}
+    "tls_ca_file": "/etc/notary-server/trust-certificates/ca.crt",
+    "tls_client_cert": "/etc/notary-server/trust-certificates/tls.crt",
+    "tls_client_key": "/etc/notary-server/trust-certificates/tls.key",
+    {{- end }}
+    {{- if .Spec.TrustService.KeyAlgorithm }}
+    "key_algorithm": "{{ .Spec.TrustService.KeyAlgorithm }}",
+    {{- end }}
+    "type": "{{ .Spec.TrustService.Type }}"
+  },
+  {{- if .Spec.Logging.Level }}
+  "logging": {
+    "level": "{{ .Spec.Logging.Level }}"
+  },
+  {{- end }}
+  "storage": {
+    "backend": "{{ .Spec.Storage.Type }}",
+    "db_url": "{{ .Spec.Storage.GetPasswordFieldKey | secretData .Spec.Storage.PasswordRef | .Spec.Storage.GetDSN | toString }}"
+  },
+  {{- if .Spec.Auth.Token.Realm }}
+  "auth": {
+    "type": "token",
+    "options": {
+      "realm": "{{ .Spec.Auth.Token.Realm }}",
+      "service": "{{ .Spec.Auth.Token.Service }}",
+      "issuer": "{{ .Spec.Auth.Token.Issuer }}",
+      "rootcertbundle": "/etc/notary-server/auth-certificates/ca.crt",
+      "autoredirect": "{{ .Spec.Auth.Token.AutoRedirect }}"
+    }
+  },
+  {{- end }}
+  "caching": {
+    "max_age": {
+      "current_metadata": 300,
+      "consistent_metadata": 31536000
+    }
+  }
+}

@@ -16,7 +16,7 @@ const (
 )
 
 const (
-	// SecretTypeSharedSecret contains data needed for authenticate users against password.
+	// SecretTypeSharedSecret contains a single secret to share
 	//
 	// Required field:
 	// - Secret.Data["secret"] - secret to shared
@@ -27,7 +27,7 @@ const (
 )
 
 const (
-	// SecretTypeSharedSecret contains data needed for authenticate users against password.
+	// SecretTypeRedis contains a password to connect to redis
 	//
 	// Required field:
 	// - Secret.Data["redis-password"] - password to connect to redis, may be empty
@@ -38,7 +38,7 @@ const (
 )
 
 const (
-	// SecretTypeSharedSecret contains data needed for authenticate users against password.
+	// SecretTypeSharedSecret contains password for a postgresql user
 	//
 	// Required field:
 	// - Secret.Data["redis-password"] - password to connect to redis, may be empty
@@ -49,7 +49,7 @@ const (
 )
 
 const (
-	// SecretTypeSharedSecret contains data needed for authenticate users against password.
+	// SecretTypeCSRF contains data needed for CSRF security
 	//
 	// Required field:
 	// - Secret.Data["key"] - CSRF key
@@ -57,4 +57,18 @@ const (
 
 	// CSRFSecretKey is the key for SecretTypeCSRF
 	CSRFSecretKey = "key"
+)
+
+const (
+	// SecretTypeNotarySignerAliases contains aliases for encryption keys.
+	// Only "default" key is required
+	// Keys must match [a-zA-Z]([a-zA-Z0-9_]*[a-zA-Z0-9])?
+	// Passwords may be any string
+	//
+	// Required field:
+	// - Secret.Data["default"] - The default password
+	SecretTypeNotarySignerAliases corev1.SecretType = "goharbor.io/notary-signer-aliases"
+
+	// SharedSecretKey is the default password to use
+	DefaultAliasSecretKey = "default"
 )

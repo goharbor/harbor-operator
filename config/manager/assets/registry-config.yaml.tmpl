@@ -55,11 +55,75 @@ storage:
       enabled: {{ .Spec.Storage.Maintenance.ReadOnly.Enabled }}
   redirect: 
     disable: {{ .Spec.Storage.Redirect.Disable }}
-{{- if .Spec.Storage.RegistryStorageDriverSpec.SecretRef }}
-  {{ .Spec.Storage.RegistryStorageDriverSpec.Name }}: {{ secretData .Spec.Storage.RegistryStorageDriverSpec.SecretRef | toJson }}
-{{- else }}
-  {{ .Spec.Storage.RegistryStorageDriverSpec.Name }}: {}
+
+{{- if .Spec.Storage.Driver.InMemory }}
+  inmemory: {}
 {{- end }}
+
+{{- if .Spec.Storage.Driver.FileSystem }}
+  filesystem:
+    rootdirectory: /var/lib/registry
+    maxthreads: {{ .Spec.Storage.Driver.FileSystem.MaxThreads }}
+{{- end }}
+
+{{- if .Spec.Storage.Driver.S3 }}
+  s3:
+    region: {{ .Spec.Storage.Driver.S3.Region }}
+    bucket: {{ .Spec.Storage.Driver.S3.Bucket }}
+    encrypt: {{ .Spec.Storage.Driver.S3.Encrypt }}
+    keyid: {{ .Spec.Storage.Driver.S3.KeyID }}
+    secure: {{ .Spec.Storage.Driver.S3.Secure }}
+    v4auth: {{ .Spec.Storage.Driver.S3.V4Auth }}
+    chunksize: {{ .Spec.Storage.Driver.S3.ChunkSize }}
+    skipverify: {{ .Spec.Storage.Driver.S3.SkipVerify }}
+    storageclass: {{ .Spec.Storage.Driver.S3.StorageClass }}
+    rootdirectory: {{ .Spec.Storage.Driver.S3.RootDirectory }}
+  {{- if .Spec.Storage.Driver.S3.AccessKey }}
+    accesskey: {{ .Spec.Storage.Driver.S3.AccessKey }}
+    # secretkey: setted through environment variable
+  {{- end }}
+  {{- if .Spec.Storage.Driver.S3.RegionEndpoint }}
+    regionendpoint: {{ .Spec.Storage.Driver.S3.RegionEndpoint }}
+  {{- end }}
+{{- end }}
+
+{{- if .Spec.Storage.Driver.Swift }}
+  swift:
+    username: {{ .Spec.Storage.Driver.Swift.Username }}
+    # password: setted through environment variable
+    authurl: {{ .Spec.Storage.Driver.Swift.AuthURL }}
+    container: {{ .Spec.Storage.Driver.Swift.Container }}
+    prefix: {{ .Spec.Storage.Driver.Swift.Prefix }}
+    insecureskipverify: {{ .Spec.Storage.Driver.Swift.InsecureSkipVerify }}
+    endpointtype: {{ .Spec.Storage.Driver.Swift.EndpointType }}
+    chunksize: {{ .Spec.Storage.Driver.Swift.ChunkSize }}
+  {{- if .Spec.Storage.Driver.Swift.AccessKey }}
+    accesskey: {{ .Spec.Storage.Driver.Swift.AccessKey }}
+    # secretkey: setted through environment variable
+  {{- end }}
+  {{- if .Spec.Storage.Driver.Swift.AuthVersion }}
+    authversion: {{ .Spec.Storage.Driver.Swift.AuthVersion }}
+  {{- end }}
+  {{- if .Spec.Storage.Driver.Swift.Tenant }}
+    tenantid: {{ .Spec.Storage.Driver.Swift.Tenant }}
+  {{- end }}
+  {{- if .Spec.Storage.Driver.Swift.TenantID }}
+    tenantid: {{ .Spec.Storage.Driver.Swift.TenantID }}
+  {{- end }}
+  {{- if .Spec.Storage.Driver.Swift.Domain }}
+    domain: {{ .Spec.Storage.Driver.Swift.Domain }}
+  {{- end }}
+  {{- if .Spec.Storage.Driver.Swift.DomainID }}
+    domainid: {{ .Spec.Storage.Driver.Swift.DomainID }}
+  {{- end }}
+  {{- if .Spec.Storage.Driver.Swift.TrustID }}
+    trustid: {{ .Spec.Storage.Driver.Swift.TrustID }}
+  {{- end }}
+  {{- if .Spec.Storage.Driver.Swift.Region }}
+    region: {{ .Spec.Storage.Driver.Swift.Region }}
+  {{- end }}
+{{- end }}
+
 {{- if ( or .Spec.Middlewares.Registry ( or .Spec.Middlewares.Repository .Spec.Middlewares.Storage ) ) }}
 middleware:
   {{- if .Spec.Middlewares.Registry }}

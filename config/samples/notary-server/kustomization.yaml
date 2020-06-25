@@ -6,6 +6,12 @@ commonLabels:
 generatorOptions:
   disableNameSuffixHash: true
 
+secretGenerator:
+- name: github-token
+  literals:
+  - secret=$(GITHUB_TOKEN)
+  type: "goharbor.io/single-secret"
+
 resources:
 - goharbor_v1alpha2_notaryserver.yaml
 
