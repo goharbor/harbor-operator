@@ -14,29 +14,28 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
-	"github.com/goharbor/harbor-operator/pkg/controllers/common"
-	"github.com/goharbor/harbor-operator/pkg/controllers/config"
+	"github.com/goharbor/harbor-operator/pkg/config"
+	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
 	"github.com/goharbor/harbor-operator/pkg/event-filter/class"
+	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 )
 
 const (
-	DefaultRequeueWait = 2 * time.Second
-	ConfigImageKey     = "docker-image"
-	DefaultImage       = "goharbor/harbor-notary-signer:v2.0.0"
+	DefaultRequeueWait        = 2 * time.Second
+	ConfigTemplatePathKey     = "template-path"
+	DefaultConfigTemplatePath = "/etc/harbor-operator/notary-signer-config.json.tmpl"
+	ConfigTemplateKey         = "template-content"
+	ConfigImageKey            = "docker-image"
+	DefaultImage              = "goharbor/notary-signer-photon:v2.0.0"
 )
 
 // Reconciler reconciles a NotarySigner object.
 type Reconciler struct {
-	*common.Controller
+	*commonCtrl.Controller
 }
 
-func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
-	err := r.InitResources()
-	if err != nil {
-		return errors.Wrap(err, "cannot initialize resources")
-	}
-
-	err = r.Controller.SetupWithManager(mgr)
+func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) error {
+	err := r.Controller.SetupWithManager(ctx, mgr)
 	if err != nil {
 		return errors.Wrap(err, "cannot setup common controller")
 	}
@@ -55,7 +54,7 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 		WithEventFilter(&class.Filter{
 			ClassName: className,
 		}).
-		For(&goharborv1alpha2.NotarySigner{}).
+		For(&goharborv1alpha2.NotaryServer{}).
 		Owns(&appsv1.Deployment{}).
 		Owns(&certv1.Certificate{}).
 		Owns(&corev1.ConfigMap{}).
@@ -68,15 +67,29 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-// +kubebuilder:rbac:groups=containerregistry.ovhcloud.com,resources=notarysigners,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=containerregistry.ovhcloud.com,resources=notarysigners/status,verbs=get;update;patch
-
-func New(ctx context.Context, name, version string, configStore *configstore.Store) (*Reconciler, error) {
+func New(ctx context.Context, name, version string, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
 	configStore.Env(name)
+
+	configTemplatePath, err := configStore.GetItemValue(ConfigTemplatePathKey)
+	if err != nil {
+		if _, ok := err.(configstore.ErrItemNotFound); !ok {
+			return nil, errors.Wrap(err, "cannot get config template path")
+		}
+
+		configTemplatePath = DefaultConfigTemplatePath
+	}
+
+	l := logger.Get(ctx).WithName("controller").WithName(name)
+
+	configStore.FileCustomRefresh(configTemplatePath, func(data []byte) ([]configstore.Item, error) {
+		l.Info("config reloaded", "path", configTemplatePath)
+		// TODO reconcile all registries
+		return []configstore.Item{configstore.NewItem(ConfigTemplateKey, string(data), config.DefaultPriority)}, nil
+	})
 
 	r := &Reconciler{}
 
-	r.Controller = common.NewController(name, version, r, configStore)
+	r.Controller = commonCtrl.NewController(ctx, name, r, configStore)
 
 	return r, nil
 }

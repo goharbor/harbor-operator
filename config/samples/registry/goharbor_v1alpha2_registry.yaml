@@ -4,7 +4,8 @@ metadata:
   name: harbor
 spec:
   storage:
-    driverName: inmemory
+    driver:
+      inmemory: {}
     cache:
       blobdescriptor: redis
   authentication:

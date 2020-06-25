@@ -1,0 +1,17 @@
+apiVersion: goharbor.io/v1alpha2
+kind: NotarySigner
+metadata:
+  name: harbor
+spec:
+  migration:
+    source:
+      dsn: github://holyhope@theupdateframework/notary/migrations/server/postgresql#v0.6.1
+      passwordRef: github-token
+  https:
+    certificateRef: harbor-signer-certificate
+  publicURL: https://notary.harbor.public
+  storage:
+    type: postgres
+    dsn: postgresql://postgres@notary-signer-database-postgresql:5432/postgres?sslmode=disable
+    passwordRef: notary-signer-database-postgresql
+    aliasesRef: notary-signer-aliases

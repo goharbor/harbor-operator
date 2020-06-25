@@ -2,21 +2,23 @@ package notarysigner
 
 import (
 	"context"
-	"fmt"
-	"strconv"
+	"path"
 
+	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
-	"github.com/pkg/errors"
 )
 
 const (
-	migrationDatabaseURL = "postgresql://$(username):$(password)@$(host):$(port)/$(database)?sslmode=$(ssl)"
-	initImage            = "hairyhenderson/gomplate"
-	notarySignerPort     = 7899
+	port                 = 7899
+	VolumeName           = "config"
+	ConfigPath           = "/etc/notary-signer"
+	HTTPSVolumeName      = "certificates"
+	HTTPSCertificatePath = ConfigPath + "/certificates"
 )
 
 var (
@@ -29,135 +31,116 @@ func (r *Reconciler) GetDeployment(ctx context.Context, notary *goharborv1alpha2
 		return nil, errors.Wrap(err, "cannot get image")
 	}
 
-	dbMigratorImage, err := r.GetDBMigratorImage(ctx)
-	if err != nil {
-		return nil, errors.Wrap(err, "cannot get dbMigrator image")
+	name := r.NormalizeName(ctx, notary.GetName())
+	namespace := notary.GetNamespace()
+
+	volumes := []corev1.Volume{{
+		Name: VolumeName,
+		VolumeSource: corev1.VolumeSource{
+			ConfigMap: &corev1.ConfigMapVolumeSource{
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: name,
+				},
+			},
+		},
+	}}
+
+	volumeMounts := []corev1.VolumeMount{{
+		Name:      VolumeName,
+		MountPath: ConfigPath,
+	}}
+
+	if notary.Spec.HTTPS.CertificateRef != "" {
+		volumes = append(volumes, corev1.Volume{
+			Name: HTTPSVolumeName,
+			VolumeSource: corev1.VolumeSource{
+				Secret: &corev1.SecretVolumeSource{
+					SecretName: notary.Spec.HTTPS.CertificateRef,
+				},
+			},
+		})
+
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{
+			Name:      HTTPSVolumeName,
+			MountPath: HTTPSCertificatePath,
+		})
+	}
+
+	initContainers := []corev1.Container{}
+
+	if !notary.Spec.Migration.Disabled {
+		migrationContainer, err := notary.Spec.Migration.GetMigrationContainer(ctx, &notary.Spec.Storage.NotaryStorageSpec)
+		if err != nil {
+			return nil, errors.Wrap(err, "migrationContainer")
+		}
+
+		initContainers = append(initContainers, migrationContainer)
 	}
 
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-notarysigner", notary.GetName()),
-			Namespace: notary.GetNamespace(),
+			Name:      name,
+			Namespace: namespace,
 		},
 		Spec: appsv1.DeploymentSpec{
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
-					"notarysigner-name":      notary.GetName(),
-					"notarysigner-namespace": notary.GetNamespace(),
+					r.Label("name"):      name,
+					r.Label("namespace"): namespace,
 				},
 			},
 			Replicas: notary.Spec.Replicas,
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
-						"notarysigner-name":      notary.GetName(),
-						"notarysigner-namespace": notary.GetNamespace(),
+						r.Label("name"):      name,
+						r.Label("namespace"): namespace,
 					},
 				},
 				Spec: corev1.PodSpec{
 					NodeSelector:                 notary.Spec.NodeSelector,
 					AutomountServiceAccountToken: &varFalse,
-					Volumes: []corev1.Volume{
-						{
-							Name: "config-template",
-							VolumeSource: corev1.VolumeSource{
-								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{
-										Name: notary.Name,
-									},
-								},
-							},
-						}, {
-							Name:         "config",
-							VolumeSource: corev1.VolumeSource{},
-						}, {
-							Name: "notary-certificate",
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName: notary.Spec.CertificateSecret,
-								},
-							},
-						},
-					},
-					InitContainers: []corev1.Container{
-						{
-							Name:  "init-db",
-							Image: dbMigratorImage,
-							Args:  []string{"-c", "signer", "-d", migrationDatabaseURL},
-							EnvFrom: []corev1.EnvFromSource{
-								{
-									SecretRef: &corev1.SecretEnvSource{
-										Optional: &varFalse,
-										LocalObjectReference: corev1.LocalObjectReference{
-											Name: notary.Spec.DatabaseSecret,
-										},
-									},
-								},
-							},
-						}, {
-							Name:       "configuration",
-							Image:      initImage,
-							WorkingDir: "/workdir",
-							Args:       []string{"--input-dir", "/workdir", "--output-dir", "/processed"},
-							VolumeMounts: []corev1.VolumeMount{
-								{
-									Name:      "config-template",
-									MountPath: "/workdir",
-									ReadOnly:  true,
-								}, {
-									Name:      "config",
-									MountPath: "/processed",
-									ReadOnly:  false,
-								},
-							},
-							EnvFrom: []corev1.EnvFromSource{
-								{
-									SecretRef: &corev1.SecretEnvSource{
-										Optional: &varFalse,
-										LocalObjectReference: corev1.LocalObjectReference{
-											Name: notary.Spec.DatabaseSecret,
-										},
-									},
-								},
-							},
-							Env: []corev1.EnvVar{
-								{
-									Name:  "notary_signer_port",
-									Value: strconv.Itoa(notarySignerPort),
-								},
-							},
-						},
-					},
+					Volumes:                      volumes,
+					InitContainers:               initContainers,
 					Containers: []corev1.Container{
 						{
 							Name:            "notary-signer",
 							Image:           image,
-							Args:            []string{"notary-signer", "-config", "/etc/notary/signer-config.json"},
+							Args:            []string{"notary-signer", "-config", path.Join(ConfigPath, ConfigName)},
 							ImagePullPolicy: corev1.PullAlways,
-							VolumeMounts: []corev1.VolumeMount{
+							VolumeMounts:    volumeMounts,
+							Ports: []corev1.ContainerPort{
 								{
-									Name:      "notary-certificate",
-									MountPath: "/etc/ssl/notary/tls.crt",
-									SubPath:   "tls.crt",
-								}, {
-									Name:      "notary-certificate",
-									MountPath: "/etc/ssl/notary/tls.key",
-									SubPath:   "tls.key",
-								}, {
-									Name:      "config",
-									MountPath: "/etc/notary/signer-config.json",
-									SubPath:   signerConfigKey,
+									ContainerPort: port,
 								},
 							},
-							Env: []corev1.EnvVar{
+							ReadinessProbe: &corev1.Probe{
+								Handler: corev1.Handler{
+									TCPSocket: &corev1.TCPSocketAction{
+										Port: intstr.FromInt(port),
+									},
+								},
+							},
+							LivenessProbe: &corev1.Probe{
+								Handler: corev1.Handler{
+									TCPSocket: &corev1.TCPSocketAction{
+										Port: intstr.FromInt(port),
+									},
+								},
+							},
+							EnvFrom: []corev1.EnvFromSource{
 								{
-									Name:  "NOTARY_SIGNER_DEFAULTALIAS",
-									Value: "defaultalias",
+									Prefix: "NOTARY_SIGNER_",
+									SecretRef: &corev1.SecretEnvSource{
+										LocalObjectReference: corev1.LocalObjectReference{
+											Name: notary.Spec.Storage.AliasesRef,
+										},
+										Optional: &varFalse,
+									},
 								},
 							},
 						},
 					},
-					Priority: notary.Spec.Priority,
 				},
 			},
 		},
