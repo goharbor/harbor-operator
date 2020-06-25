@@ -2,8 +2,6 @@ package jobservice
 
 import (
 	"context"
-	"crypto/sha256"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"text/template"
@@ -64,16 +62,12 @@ func (r *Reconciler) GetConfigMap(ctx context.Context, jobservice *goharborv1alp
 	}
 
 	name := r.NormalizeName(ctx, jobservice.GetName())
+	namespace := jobservice.GetNamespace()
 
 	return &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
-			Namespace: jobservice.GetNamespace(),
-			Annotations: map[string]string{
-				"template.jobservice.goharbor.io/checksum": fmt.Sprintf("%x", sha256.Sum256([]byte(templateConfig))),
-				"jobservice.goharbor.io/uid":               fmt.Sprintf("%v", jobservice.GetUID()),
-				"jobservice.goharbor.io/generation":        fmt.Sprintf("%v", jobservice.GetGeneration()),
-			},
+			Namespace: namespace,
 		},
 
 		BinaryData: map[string][]byte{

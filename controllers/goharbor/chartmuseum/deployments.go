@@ -2,7 +2,6 @@ package chartmuseum
 
 import (
 	"context"
-	"fmt"
 	"path"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -16,13 +15,13 @@ import (
 
 var (
 	varFalse = false
-	varTrue  = true
 )
 
 const (
-	initImage  = "hairyhenderson/gomplate"
-	configPath = "/etc/chartmuseum/"
+	ConfigPath = "/etc/chartmuseum"
+	HealthPath = "/health"
 	port       = 8080 // https://github.com/helm/chartmuseum/blob/969515a51413e1f1840fb99509401aa3c63deccd/pkg/config/vars.go#L135
+	VolumeName = "config"
 )
 
 func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1alpha2.ChartMuseum) (*appsv1.Deployment, error) { // nolint:funlen
@@ -31,144 +30,115 @@ func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1a
 		return nil, errors.Wrap(err, "cannot get image")
 	}
 
-	volumes := []corev1.Volume{{
-		Name: "chartmuseum",
-		VolumeSource: corev1.VolumeSource{
-			EmptyDir: &corev1.EmptyDirVolumeSource{
-				Medium: corev1.StorageMediumMemory,
+	name := r.NormalizeName(ctx, chartMuseum.GetName())
+	namespace := chartMuseum.GetNamespace()
+
+	envs := []corev1.EnvVar{}
+
+	volumes := []corev1.Volume{
+		{
+			Name: VolumeName,
+			VolumeSource: corev1.VolumeSource{
+				ConfigMap: &corev1.ConfigMapVolumeSource{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: name,
+					},
+					Optional: &varFalse,
+				},
 			},
 		},
-	}}
-	volumeMounts := []corev1.VolumeMount{{
-		MountPath: "/mnt/chartmuseum",
-		Name:      "chartmuseum",
-	}}
-	envs := []corev1.EnvVar{{
-		Name:  "STORAGE",
-		Value: "local",
-	}, {
-		Name:  "STORAGE_LOCAL_ROOTDIR",
-		Value: "/mnt/chartmuseum",
-	}}
-	envFroms := []corev1.EnvFromSource{}
+	}
 
-	if chartMuseum.Spec.StorageSecret != "" {
-		volumes = []corev1.Volume{}
-		volumeMounts = []corev1.VolumeMount{}
+	volumesMount := []corev1.VolumeMount{
+		{
+			Name:      VolumeName,
+			MountPath: ConfigPath,
+		},
+	}
 
-		envs = []corev1.EnvVar{{
-			Name: "STORAGE",
+	if chartMuseum.Spec.Auth.BasicAuthRef != "" {
+		envs = append(envs, corev1.EnvVar{
+			Name: "BASIC_AUTH_USER",
 			ValueFrom: &corev1.EnvVarSource{
 				SecretKeyRef: &corev1.SecretKeySelector{
 					LocalObjectReference: corev1.LocalObjectReference{
-						Name: chartMuseum.Spec.StorageSecret,
+						Name: chartMuseum.Spec.Auth.BasicAuthRef,
 					},
-					Key: goharborv1alpha2.ChartMuseumStorageKindKey,
+					Key: corev1.BasicAuthUsernameKey,
 				},
 			},
-		}}
+		}, corev1.EnvVar{
+			Name: "BASIC_AUTH_PASS",
+			ValueFrom: &corev1.EnvVarSource{
+				SecretKeyRef: &corev1.SecretKeySelector{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: chartMuseum.Spec.Auth.BasicAuthRef,
+					},
+					Key: corev1.BasicAuthPasswordKey,
+				},
+			},
+		})
+	}
 
-		envFroms = []corev1.EnvFromSource{{
+	envFroms := []corev1.EnvFromSource{}
+
+	if chartMuseum.Spec.Chart.Storage.SecretRef != "" {
+		envs = append(envs, corev1.EnvVar{
+			Name:  "STORAGE",
+			Value: chartMuseum.Spec.Chart.Storage.Name,
+		})
+
+		envFroms = append(envFroms, corev1.EnvFromSource{
 			SecretRef: &corev1.SecretEnvSource{
 				Optional: &varFalse,
 				LocalObjectReference: corev1.LocalObjectReference{
-					Name: chartMuseum.Spec.StorageSecret,
+					Name: chartMuseum.Spec.Chart.Storage.SecretRef,
 				},
 			},
 			Prefix: "STORAGE_",
-		}, {
-			// Some storage driver requires environment variable, add it from secret data
-			// See https://chartmuseum.com/docs/#using-with-openstack-object-storage
-			SecretRef: &corev1.SecretEnvSource{
-				Optional: &varFalse,
-				LocalObjectReference: corev1.LocalObjectReference{
-					Name: chartMuseum.Spec.StorageSecret,
-				},
-			},
-		}}
+		})
 	}
 
-	initEnv := []corev1.EnvVar{}
-
-	if chartMuseum.Spec.CacheSecret != "" {
-		initEnv = []corev1.EnvVar{
-			{
-				Name: "CACHE_URL",
-				ValueFrom: &corev1.EnvVarSource{
-					SecretKeyRef: &corev1.SecretKeySelector{
-						LocalObjectReference: corev1.LocalObjectReference{
-							Name: chartMuseum.Spec.CacheSecret,
-						},
-						Key:      goharborv1alpha2.ChartMuseumCacheURLKey,
-						Optional: &varTrue,
+	if chartMuseum.Spec.Cache.Redis.PasswordRef != "" {
+		envs = append(envs, corev1.EnvVar{
+			Name: "CACHE_REDIS_DB",
+			ValueFrom: &corev1.EnvVarSource{
+				SecretKeyRef: &corev1.SecretKeySelector{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: chartMuseum.Spec.Cache.Redis.PasswordRef,
 					},
+					Key:      goharborv1alpha2.RedisPasswordKey,
+					Optional: &varFalse,
 				},
 			},
-		}
+		})
 	}
 
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-chartmuseum", chartMuseum.GetName()),
-			Namespace: chartMuseum.GetNamespace(),
+			Name:      name,
+			Namespace: namespace,
 		},
 		Spec: appsv1.DeploymentSpec{
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
-					"chartmuseum-name":      chartMuseum.GetName(),
-					"chartmuseum-namespace": chartMuseum.GetNamespace(),
+					r.Label("name"):      name,
+					r.Label("namespace"): namespace,
 				},
 			},
 			Replicas: chartMuseum.Spec.Replicas,
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
-						"chartmuseum-name":      chartMuseum.GetName(),
-						"chartmuseum-namespace": chartMuseum.GetNamespace(),
+						r.Label("name"):      name,
+						r.Label("namespace"): namespace,
 					},
 				},
 				Spec: corev1.PodSpec{
 					NodeSelector:                 chartMuseum.Spec.NodeSelector,
 					AutomountServiceAccountToken: &varFalse,
-					Volumes: append([]corev1.Volume{
-						{
-							Name: "config",
-							VolumeSource: corev1.VolumeSource{
-								EmptyDir: &corev1.EmptyDirVolumeSource{},
-							},
-						}, {
-							Name: "config-template",
-							VolumeSource: corev1.VolumeSource{
-								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{
-										Name: chartMuseum.Name,
-									},
-								},
-							},
-						},
-					}, volumes...),
-					InitContainers: []corev1.Container{
-						{
-							Name:            "configuration",
-							Image:           initImage,
-							WorkingDir:      "/workdir",
-							Args:            []string{"--input-dir", "/workdir", "--output-dir", "/processed"},
-							SecurityContext: &corev1.SecurityContext{},
-							VolumeMounts: []corev1.VolumeMount{
-								{
-									Name:      "config-template",
-									MountPath: path.Join("/workdir", configName),
-									ReadOnly:  true,
-									SubPath:   configName,
-								}, {
-									Name:      "config",
-									MountPath: "/processed",
-									ReadOnly:  false,
-								},
-							},
-							Env: initEnv,
-						},
-					},
+					Volumes:                      volumes,
+
 					Containers: []corev1.Container{
 						{
 							Name:  "chartmuseum",
@@ -179,42 +149,17 @@ func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1a
 								},
 							},
 							Command: []string{"/home/chart/chartm"},
-							Args:    []string{"-c", path.Join(configPath, configName)},
-
-							VolumeMounts: append(volumeMounts, corev1.VolumeMount{
-								MountPath: path.Join(configPath, configName),
-								Name:      "config",
-								SubPath:   configName,
-							}),
-
-							Env: append([]corev1.EnvVar{
-								{
-									Name: "BASIC_AUTH_PASS",
-									ValueFrom: &corev1.EnvVarSource{
-										SecretKeyRef: &corev1.SecretKeySelector{
-											Key:      goharborv1alpha2.ChartMuseumBasicAuthKey,
-											Optional: &varFalse,
-											LocalObjectReference: corev1.LocalObjectReference{
-												Name: chartMuseum.Spec.SecretName,
-											},
-										},
-									},
-								}, {
-									Name:  "PORT",
-									Value: fmt.Sprintf("%d", port),
-								}, {
-									Name:  "CHART_URL",
-									Value: chartMuseum.Spec.PublicURL,
-								},
-							}, envs...),
+							Args:    []string{"-c", path.Join(ConfigPath, ConfigName)},
 
 							EnvFrom: envFroms,
+							Env:     envs,
 
-							ImagePullPolicy: corev1.PullAlways,
+							VolumeMounts: volumesMount,
+
 							LivenessProbe: &corev1.Probe{
 								Handler: corev1.Handler{
 									HTTPGet: &corev1.HTTPGetAction{
-										Path: "/health",
+										Path: HealthPath,
 										Port: intstr.FromInt(port),
 									},
 								},
@@ -222,14 +167,13 @@ func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1a
 							ReadinessProbe: &corev1.Probe{
 								Handler: corev1.Handler{
 									HTTPGet: &corev1.HTTPGetAction{
-										Path: "/health",
+										Path: HealthPath,
 										Port: intstr.FromInt(port),
 									},
 								},
 							},
 						},
 					},
-					Priority: chartMuseum.Spec.Priority,
 				},
 			},
 		},

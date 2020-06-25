@@ -24,13 +24,17 @@ manager: generate fmt vet
 .PHONY: run
 run: generate fmt vet $(TMPDIR)k8s-webhook-server/serving-certs
 	# See https://github.com/settings/tokens for GITHUB_TOKEN. No permissions required.
-	CONFIGURATION_FROM='file:./config-dev.yml' \
-	REGISTRY_TEMPLATE_PATH=./config/manager/assets/registry-config.yaml.tmpl \
-	REGISTRYCTL_TEMPLATE_PATH=./config/manager/assets/registryctl-config.yaml.tmpl \
-	JOBSERVICE_TEMPLATE_PATH=./config/manager/assets/jobservice-config.yaml.tmpl \
-	CORE_TEMPLATE_PATH=./config/manager/assets/core-config.conf.tmpl \
-	NOTARY_SERVER_TEMPLATE_PATH=./config/manager/assets/notaryserver-config.json.tmpl \
-	NOTARY_SERVER_MIGRATION_SOURCE="github://holyhope:$${GITHUB_TOKEN}@theupdateframework/notary/migrations/server/postgresql#v0.6.1" \
+	set -u ; \
+		CONFIGURATION_FROM='file:./config-dev.yml' \
+		REGISTRY_TEMPLATE_PATH=./config/manager/assets/registry-config.yaml.tmpl \
+		REGISTRYCTL_TEMPLATE_PATH=./config/manager/assets/registryctl-config.yaml.tmpl \
+		JOBSERVICE_TEMPLATE_PATH=./config/manager/assets/jobservice-config.yaml.tmpl \
+		CORE_TEMPLATE_PATH=./config/manager/assets/core-config.conf.tmpl \
+		CHARTMUSEUM_TEMPLATE_PATH=./config/manager/assets/chartmuseum-config.yaml.tmpl \
+		NOTARY_SERVER_TEMPLATE_PATH=./config/manager/assets/notary-server-config.json.tmpl \
+		NOTARY_SERVER_MIGRATION_SOURCE="github://holyhope:$${GITHUB_TOKEN}@theupdateframework/notary/migrations/server/postgresql#v0.6.1" \
+		NOTARY_SIGNER_TEMPLATE_PATH=./config/manager/assets/notary-signer-config.json.tmpl \
+		NOTARY_SIGNER_MIGRATION_SOURCE="github://holyhope:$${GITHUB_TOKEN}@theupdateframework/notary/migrations/signer/postgresql#v0.6.1" \
 	go run *.go
 
 # Run linters against all files
