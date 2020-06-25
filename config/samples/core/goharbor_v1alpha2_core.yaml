@@ -15,6 +15,8 @@ spec:
     passwordRef: core-database-postgresql
     encryptionKeyRef: core-database-encryption
   components:
+    chartRepository:
+      url: http://harbor-chartmuseum
     jobService:
       url: http://harbor-jobservice
       secretRef: jobservice-secret
@@ -29,5 +31,7 @@ spec:
       redis:
         dsn: redis://admin@harbor-redis-master:6379/2
         passwordRef: harbor-redis
+    notaryServer:
+      url: http://harbor-notary-server
     portal:
       url: http://harbor-portal

@@ -3,6 +3,8 @@ package v1alpha2
 import (
 	"time"
 
+	"github.com/pkg/errors"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -472,7 +474,8 @@ type RegistryCompatibilitySchemaSpec struct {
 }
 
 type RegistryStorageSpec struct {
-	RegistryStorageDriverSpec `json:",inline"`
+	// +kubebuilder:validation:Required
+	Driver RegistryStorageDriverSpec `json:"driver"`
 
 	// +kubebuilder:validation:Optional
 	Cache RegistryStorageCacheSpec `json:"cache"`
@@ -488,12 +491,218 @@ type RegistryStorageSpec struct {
 }
 
 type RegistryStorageDriverSpec struct {
-	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:MinLength=1
-	Name string `json:"driverName"`
+	// +kubebuilder:validation:Optional
+	// InMemory storage driver is for purely tests purposes.
+	// This driver is an implementation of the storagedriver.StorageDriver interface which
+	// uses local memory for object storage.
+	// If you would like to run a registry from volatile memory, use the filesystem driver on a ramdisk.
+	// IMPORTANT: This storage driver does not persist data across runs. This is why it is only suitable for testing. Never use this driver in production.
+	// See: https://docs.docker.com/registry/storage-drivers/inmemory/
+	InMemory *RegistryStorageDriverInmemorySpec `json:"inmemory,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	SecretRef string `json:"secretRef"`
+	// FileSystem is an implementation of the storagedriver.StorageDriver interface which uses the local filesystem.
+	// The local filesystem can be a remote volume.
+	// See: https://docs.docker.com/registry/storage-drivers/filesystem/
+	FileSystem *RegistryStorageDriverFilesystemSpec `json:"filesystem,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// An implementation of the storagedriver.StorageDriver interface which uses Amazon S3 or S3 compatible services for object storage.
+	// See: https://docs.docker.com/registry/storage-drivers/s3/
+	S3 *RegistryStorageDriverS3Spec `json:"s3,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// An implementation of the storagedriver.StorageDriver interface that uses OpenStack Swift for object storage.
+	// See: https://docs.docker.com/registry/storage-drivers/swift/
+	Swift *RegistryStorageDriverSwiftSpec `json:"swift,omitempty"`
+}
+
+var (
+	errNoStorageConfiguration = errors.New("no storage configuration")
+	err2StorageConfiguration  = errors.New("only 1 storage can be configured")
+)
+
+func (r *RegistryStorageDriverSpec) Validate() error {
+	found := 0
+
+	if r.InMemory != nil {
+		found++
+	}
+
+	if r.FileSystem != nil {
+		found++
+	}
+
+	if r.S3 != nil {
+		found++
+	}
+
+	if r.Swift != nil {
+		found++
+	}
+
+	switch found {
+	case 0:
+		return errNoStorageConfiguration
+	case 1:
+		return nil
+	default:
+		return err2StorageConfiguration
+	}
+}
+
+type RegistryStorageDriverInmemorySpec struct{}
+
+type RegistryStorageDriverFilesystemSpec struct {
+	// +kubebuilder:validation:Required
+	VolumeSource corev1.VolumeSource `json:"volumeSource"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Minimum=25
+	// +kubebuilder:default=100
+	MaxThreads int `json:"maxthreads"`
+}
+
+type RegistryStorageDriverS3Spec struct {
+	// +kubebuilder:validation:Optional
+	// The AWS Access Key.
+	// If you use IAM roles, omit to fetch temporary credentials from IAM.
+	AccessKey string `json:"accesskey,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Reference to the secret containing the AWS Secret Key.
+	// If you use IAM roles, omit to fetch temporary credentials from IAM.
+	SecretKeyRef string `json:"secretkeyRef,omitempty"`
+
+	// +kubebuilder:validation:Required
+	// The AWS region in which your bucket exists.
+	// For the moment, the Go AWS library in use does not use the newer DNS based bucket routing.
+	// For a list of regions, see http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html
+	Region string `json:"region"`
+
+	// +kubebuilder:validation:Optional
+	// Endpoint for S3 compatible storage services (Minio, etc).
+	RegionEndpoint string `json:"regionendpoint,omitempty"`
+
+	// +kubebuilder:validation:Required
+	// The bucket name in which you want to store the registry’s data.
+	Bucket string `json:"bucket"`
+
+	// +kubebuilder:validation:Optional
+	// This is a prefix that is applied to all S3 keys to allow you to segment data in your bucket if necessary.
+	RootDirectory string `json:"rootdirectory,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default="STANDARD"
+	// The S3 storage class applied to each registry file.
+	StorageClass string `json:"storageclass,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// KMS key ID to use for encryption (encrypt must be true, or this parameter is ignored).
+	KeyID string `json:"keyid,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=false
+	// Specifies whether the registry stores the image in encrypted format or not. A boolean value.
+	Encrypt bool `json:"encrypt"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=true
+	Secure bool `json:"secure"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=false
+	// Skips TLS verification when the value is set to true.
+	SkipVerify bool `json:"skipverify"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=true
+	// Indicates whether the registry uses Version 4 of AWS’s authentication.
+	V4Auth bool `json:"v4auth"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Minimum=5242880
+	// The S3 API requires multipart upload chunks to be at least 5MB.
+	ChunkSize int64 `json:"chunksize,omitempty"`
+}
+
+type RegistryStorageDriverSwiftSpec struct {
+	// +kubebuilder:validation:Required
+	// URL for obtaining an auth token.
+	// https://storage.myprovider.com/v2.0 or https://storage.myprovider.com/v3/auth
+	AuthURL string `json:"authurl"`
+
+	// +kubebuilder:validation:Required
+	// The Openstack user name.
+	Username string `json:"username,omitempty"`
+
+	// +kubebuilder:validation:Required
+	// Secret name containing the Openstack password.
+	PasswordRef string `json:"passwordRef,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// The Openstack region in which your container exists.
+	Region string `json:"region,omitempty"`
+
+	// +kubebuilder:validation:Required
+	// The name of your Swift container where you wish to store the registry’s data.
+	// The driver creates the named container during its initialization.
+	Container string `json:"container"`
+
+	// +kubebuilder:validation:Optional
+	// Your Openstack tenant name.
+	// You can either use tenant or tenantid.
+	Tenant string `json:"tenant,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Your Openstack tenant ID.
+	// You can either use tenant or tenantid.
+	TenantID string `json:"tenantID,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Your Openstack domain name for Identity v3 API. You can either use domain or domainid.
+	Domain string `json:"domain,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Your Openstack domain ID for Identity v3 API. You can either use domain or domainid.
+	DomainID string `json:"domainID,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Your Openstack trust ID for Identity v3 API.
+	TrustID string `json:"trustid,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=false
+	// Skips TLS verification if the value is set to true.
+	InsecureSkipVerify bool `json:"insecureskipverify,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Minimum=5242880
+	// Size of the data segments for the Swift Dynamic Large Objects.
+	// This value should be a number.
+	ChunkSize int64 `json:"chunksize,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// This is a prefix that is applied to all Swift keys to allow you to segment data in your container if necessary. Defaults to the container’s root.
+	Prefix string `json:"prefix,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// The secret key used to generate temporary URLs.
+	SecretKeyRef string `json:"secretkeyRef,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// The access key to generate temporary URLs. It is used by HP Cloud Object Storage in addition to the secretkey parameter.
+	AccessKey string `json:"accesskey,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Specify the OpenStack Auth’s version, for example 3. By default the driver autodetects the auth’s version from the AuthURL.
+	AuthVersion string `json:"authversion,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default="public"
+	// +kubebuilder:validation:Enum={"public","internal","admin"}
+	// The endpoint type used when connecting to swift.
+	EndpointType string `json:"endpointtype"`
 }
 
 type RegistryStorageRedirectSpec struct {

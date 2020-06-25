@@ -11,11 +11,11 @@ import (
 
 	// +kubebuilder:scaffold:imports
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
-	"github.com/goharbor/harbor-operator/pkg/controllers/setup"
+	"github.com/goharbor/harbor-operator/pkg/factories/application"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	"github.com/goharbor/harbor-operator/pkg/manager"
 	"github.com/goharbor/harbor-operator/pkg/scheme"
+	"github.com/goharbor/harbor-operator/pkg/setup"
 	"github.com/goharbor/harbor-operator/pkg/tracing"
 )
 
@@ -46,10 +46,11 @@ func main() {
 	configstore.InitFromEnvironment()
 
 	setupLog := ctrl.Log.WithName("setup")
-
 	ctx := logger.Context(setupLog)
-
 	logger := getLogger()
+
+	application.SetName(&ctx, OperatorName)
+	application.SetVersion(&ctx, OperatorVersion)
 	ctrl.SetLogger(logger)
 
 	scheme, err := scheme.New(ctx)
@@ -71,19 +72,9 @@ func main() {
 	}
 	defer traCon.Close()
 
-	if err := (&goharborv1alpha2.Harbor{}).SetupWebhookWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create webhook", "webhook", "Harbor")
-		os.Exit(exitCodeFailure)
-	}
-
 	if err := (setup.WithManager(ctx, mgr, OperatorVersion)); err != nil {
 		setupLog.Error(err, "unable to setup controllers")
 		os.Exit(exitCodeFailure)
-	}
-
-	if err = (&goharborv1alpha2.NotaryServer{}).SetupWebhookWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create webhook", "webhook", "NotaryServer")
-		os.Exit(1)
 	}
 
 	// +kubebuilder:scaffold:builder

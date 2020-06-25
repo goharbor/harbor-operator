@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
-	serrors "github.com/goharbor/harbor-operator/pkg/controllers/common/errors"
+	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	"github.com/goharbor/harbor-operator/pkg/resources"
 )
 
@@ -40,22 +40,12 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrapf(err, "cannot add configMap %s", configMap.GetName())
 	}
 
-	secret, err := r.GetSecret(ctx, notaryserver)
-	if err != nil {
-		return errors.Wrap(err, "cannot get secret")
-	}
-
-	secretResource, err := r.Controller.AddSecretToManage(ctx, secret)
-	if err != nil {
-		return errors.Wrapf(err, "cannot add secret %s", secret.GetName())
-	}
-
 	deployment, err := r.GetDeployment(ctx, notaryserver)
 	if err != nil {
 		return errors.Wrap(err, "cannot get deployment")
 	}
 
-	_, err = r.Controller.AddDeploymentToManage(ctx, deployment, secretResource, configMapResource)
+	_, err = r.Controller.AddDeploymentToManage(ctx, deployment, configMapResource)
 	if err != nil {
 		return errors.Wrapf(err, "cannot add deployment %s", deployment.GetName())
 	}

@@ -31,8 +31,8 @@ func (r *Reconciler) GetService(ctx context.Context, portal *goharborv1alpha2.Po
 				},
 			},
 			Selector: map[string]string{
-				"portal.goharbor.io/name":      name,
-				"portal.goharbor.io/namespace": namespace,
+				r.Label("name"):      name,
+				r.Label("namespace"): namespace,
 			},
 		},
 	}, nil

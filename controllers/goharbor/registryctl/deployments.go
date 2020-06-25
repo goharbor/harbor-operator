@@ -2,7 +2,6 @@ package registryctl
 
 import (
 	"context"
-	"fmt"
 	"path"
 
 	"github.com/pkg/errors"
@@ -153,23 +152,16 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registryCtl *goharborv1a
 		Spec: appsv1.DeploymentSpec{
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
-					"registryctl.goharbor.io/name":      name,
-					"registryctl.goharbor.io/namespace": namespace,
+					r.Label("name"):      name,
+					r.Label("namespace"): namespace,
 				},
 			},
 			Replicas: registryCtl.Spec.Replicas,
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
-						"registryctl.goharbor.io/name":      name,
-						"registryctl.goharbor.io/namespace": namespace,
-					},
-					Annotations: map[string]string{
-						"registryCtl.goharbor.io/uid":        fmt.Sprintf("%v", registryCtl.GetUID()),
-						"registryCtl.goharbor.io/generation": fmt.Sprintf("%v", registryCtl.GetGeneration()),
-						// TODO get configMap data
-						"config.registryCtl.goharbor.io/uid":        fmt.Sprintf("%v", registryCtl.GetUID()),
-						"config.registryCtl.goharbor.io/generation": fmt.Sprintf("%v", registryCtl.GetGeneration()),
+						r.Label("name"):      name,
+						r.Label("namespace"): namespace,
 					},
 				},
 				Spec: corev1.PodSpec{

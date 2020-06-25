@@ -1,8 +1,6 @@
 package v1alpha2
 
 import (
-	"errors"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -41,27 +39,22 @@ type NotaryServerSpec struct {
 	ComponentSpec `json:",inline"`
 
 	// +kubebuilder:validation:Optional
-	HTTPS NotaryServerHTTPSSpec `json:"https,omitempty"`
+	HTTPS NotaryHTTPSSpec `json:"https,omitempty"`
 
 	// +kubebuilder:validation:Required
 	TrustService NotaryServerTrustServiceSpec `json:"trustService"`
 
-	// +kubebuilder:validation:Required
-	Storage NotaryServerStorageSpec `json:"storage"`
-
 	// +kubebuilder:validation:Optional
 	Logging NotaryLoggingSpec `json:"logging"`
+
+	// +kubebuilder:validation:Required
+	Storage NotaryStorageSpec `json:"storage"`
 
 	// +kubebuilder:validation:Optional
 	Auth NotaryServerAuthSpec `json:"auth"`
 
-	// +kubebuilder:validation:Optional
-	Migration NotaryMigrationSpec `json:"migration"`
-}
-
-type NotaryServerHTTPSSpec struct {
 	// +kubebuilder:validation:Required
-	CertificateRef string `json:"certificateRef"`
+	Migration NotaryMigrationSpec `json:"migration"`
 }
 
 type NotaryServerTrustServiceSpec struct {
@@ -105,27 +98,6 @@ type NotaryServerAuthTokenSpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
 	AutoRedirect bool `json:"autoredirect"`
-}
-
-type NotaryServerStorageSpec struct {
-	OpacifiedDSN `json:",inline"`
-
-	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Enum={"mysql","postgres","memory"}
-	Type string `json:"type"`
-}
-
-var (
-	errNotImplemented = errors.New("not yet implemented")
-)
-
-func (n *NotaryServerStorageSpec) GetPasswordFieldKey() (string, error) {
-	switch n.Type {
-	case "postgres":
-		return PostgresqlPasswordKey, nil
-	default:
-		return "", errNotImplemented
-	}
 }
 
 func init() { // nolint:gochecknoinits

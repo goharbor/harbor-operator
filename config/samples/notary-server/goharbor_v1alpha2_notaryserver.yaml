@@ -3,9 +3,13 @@ kind: NotaryServer
 metadata:
   name: harbor
 spec:
+  migration:
+    source:
+      dsn: github://holyhope@theupdateframework/notary/migrations/server/postgresql#v0.6.1
+      passwordRef: github-token
   storage:
     type: postgres
-    dsn: postgresql://postgres@notary-server-database-postgresql:5432/notary-server?parseTime=true
+    dsn: postgresql://postgres@notary-server-database-postgresql:5432/postgres?sslmode=disable
     passwordRef: notary-server-database-postgresql
   trustService:
     type: local
