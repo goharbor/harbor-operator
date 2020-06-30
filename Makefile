@@ -52,7 +52,8 @@ dev-tools: \
 	helm \
 	kubebuilder \
 	kustomize \
-	markdownlint
+	markdownlint \
+	stringer
 
 .PHONY: release
 release: goreleaser
@@ -64,7 +65,7 @@ release: goreleaser
 #####################
 
 .PHONY: generate
-generate: controller-gen
+generate: controller-gen stringer
 	go generate ./...
 	$(MAKE) vendor
 
@@ -116,32 +117,32 @@ md-lint: markdownlint
 
 # Install CRDs into a cluster
 .PHONY: install
-install: generate
+install: generate kustomize
 	$(KUSTOMIZE) build config/crd \
 		| kubectl apply --validate=false -f -
 
 # Uninstall CRDs from a cluster
 .PHONY: uninstall
-uninstall: generate
+uninstall: generate kustomize
 	$(KUSTOMIZE) build config/crd \
 		| kubectl delete -f -
 
 # Deploy controller in the configured Kubernetes cluster in ~/.kube/config
 .PHONY: deploy
-deploy: generate
+deploy: generate kustomize
 	cd config/manager && $(KUSTOMIZE) edit set image controller="$(IMG)"
 	$(KUSTOMIZE) build config/default \
 		| kubectl apply --validate=false -f -
 
 .PHONY: sample
-sample:
-	kubectl kustomize config/samples \
+sample: kustomize
+	$(KUSTOMIZE) config/samples \
 		| kubectl apply -f -
 	kubectl get goharbor
 
 .PHONY: sample
-sample-%:
-	kubectl kustomize 'config/samples/$*' \
+sample-%: kustomize
+	$(KUSTOMIZE) 'config/samples/$*' \
 		| kubectl apply -f -
 	kubectl get goharbor
 
@@ -264,7 +265,7 @@ endif
 kustomize:
 ifeq (, $(shell which kustomize))
 	# https://github.com/kubernetes-sigs/kustomize/blob/master/docs/INSTALL.md
-        curl -s https://raw.githubusercontent.com/kubernetes-sigs/kustomize/7eca29daeee6b583f5394a45d8edfd41c15dbe6d/hack/install_kustomize.sh | bash
+	curl -s https://raw.githubusercontent.com/kubernetes-sigs/kustomize/7eca29daeee6b583f5394a45d8edfd41c15dbe6d/hack/install_kustomize.sh | bash
 	mv ./kustomize $(GOBIN)
 	chmod u+x $(GOBIN)/kustomize
 KUSTOMIZE=$(GOBIN)/kustomize
@@ -306,3 +307,16 @@ GORELEASER=$(GOBIN)/goreleaser
 else
 GORELEASER=$(shell which goreleaser)
 endif
+
+# find or download stringer
+# download stringer if necessary
+.PHONY: stringer
+stringer:
+ifeq (, $(shell which stringer))
+	# https://pkg.go.dev/golang.org/x/tools/cmd/stringer
+	go get golang.org/x/tools/cmd/stringer@v0.0.0-20200626171337-aa94e735be7f
+STRINGER=$(GOBIN)/stringer
+else
+STRINGER=$(shell which stringer)
+endif
+:
