@@ -42,11 +42,26 @@ func New(ctx context.Context, scheme *runtime.Scheme) (manager.Manager, error) {
 		}
 
 		mgrConfig = config.(*manager.Options)
+
+		if mgrConfig.Port == 0 {
+			mgrConfig.Port = WebHookPort
+		}
+
+		if mgrConfig.MetricsBindAddress == "" {
+			mgrConfig.MetricsBindAddress = fmt.Sprintf(":%d", MetricsPort)
+		}
 	}
 
 	mgrConfig.Scheme = scheme
 
-	log.Info("Manager initialized", "Metrics.Address", mgrConfig.MetricsBindAddress, "LeaderElection.Enabled", mgrConfig.LeaderElection, "LeaderElection.Namespace", mgrConfig.LeaderElectionNamespace, "LeaderElection.ID", mgrConfig.LeaderElectionID)
+	log.Info(
+		"Manager initialized",
+		"Webhook.Port", mgrConfig.Port,
+		"Metrics.Address", mgrConfig.MetricsBindAddress,
+		"LeaderElection.Enabled", mgrConfig.LeaderElection,
+		"LeaderElection.Namespace", mgrConfig.LeaderElectionNamespace,
+		"LeaderElection.ID", mgrConfig.LeaderElectionID,
+	)
 
 	config, err := ctrl.GetConfig()
 	if err != nil {
