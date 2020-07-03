@@ -15,20 +15,7 @@ type NotaryLoggingSpec struct {
 }
 
 type NotaryMigrationSpec struct {
-	// +kubebuilder:validation:Optional
-	Disabled bool `json:"disabled"`
-
-	// +kubebuilder:validation:Optional
-	// Source of the migration.
-	Source OpacifiedDSN `json:"source"`
-}
-
-func (r *NotaryMigrationSpec) Validate() error {
-	if r.Disabled {
-		return nil
-	}
-
-	return nil
+	OpacifiedDSN `json:",inline"`
 }
 
 const migrationImage = "migrate/migrate"
@@ -55,13 +42,13 @@ func (r *NotaryMigrationSpec) GetMigrationContainer(ctx context.Context, storage
 		secretDatabaseVariable = "$(secretDatabase)"
 	}
 
-	if r.Source.PasswordRef != "" {
+	if r.PasswordRef != "" {
 		migrationEnvs = append(migrationEnvs, corev1.EnvVar{
 			Name: "secretSource",
 			ValueFrom: &corev1.EnvVarSource{
 				SecretKeyRef: &corev1.SecretKeySelector{
 					LocalObjectReference: corev1.LocalObjectReference{
-						Name: r.Source.PasswordRef,
+						Name: r.PasswordRef,
 					},
 					Key:      SharedSecretKey,
 					Optional: &varFalse,
@@ -77,7 +64,7 @@ func (r *NotaryMigrationSpec) GetMigrationContainer(ctx context.Context, storage
 		return corev1.Container{}, errors.Wrap(err, "cannot get storage DSN")
 	}
 
-	migrationSourceURL, err := r.Source.GetDSNStringWithRawPassword(secretSourceVariable)
+	migrationSourceURL, err := r.GetDSNStringWithRawPassword(secretSourceVariable)
 	if err != nil {
 		return corev1.Container{}, errors.Wrap(err, "cannot get migration source DSN")
 	}

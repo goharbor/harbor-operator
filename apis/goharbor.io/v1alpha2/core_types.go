@@ -1,8 +1,6 @@
 package v1alpha2
 
 import (
-	"time"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -43,16 +41,16 @@ type CoreSpec struct {
 	CoreConfig `json:",inline"`
 
 	// +kubebuilder:validation:Optional
-	HTTP CoreHTTPSpec `json:"http"`
+	HTTP CoreHTTPSpec `json:"http,omitempty"`
 
 	// +kubebuilder:validation:Required
 	Components CoreComponentsSpec `json:"components"`
 
 	// +kubebuilder:validation:Optional
-	Proxy CoreProxySpec `json:"proxy,omitempty"`
+	Proxy *CoreProxySpec `json:"proxy,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	Log CoreLogSpec `json:"log"`
+	Log CoreLogSpec `json:"log,omitempty"`
 
 	// +kubebuilder:validation:Required
 	Database CoreDatabaseSpec `json:"database"`
@@ -65,33 +63,34 @@ type CoreSpec struct {
 	ExternalEndpoint string `json:"externalEndpoint"`
 
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=5000000000
-	ConfigExpiration time.Duration `json:"configExpiration"`
+	// +kubebuilder:default="5s"
+	ConfigExpiration PositiveDuration `json:"configExpiration,omitempty"`
 
 	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:MinLength=1
 	CSRFKeyRef string `json:"csrfKeyRef"`
 }
 
 type CoreRedisSpec struct {
 	OpacifiedDSN `json:",inline"`
 
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default="30s"
 	// IdleTimeoutSecond closes connections after remaining idle for this duration. If the value
 	// is zero, then idle connections are not closed. Applications should set
 	// the timeout to a value less than the server's timeout.
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=30000000000
-	IdleTimeout time.Duration `json:"idleTimeout"`
+	IdleTimeout PositiveDuration `json:"idleTimeout,omitempty"`
 }
 
 type CoreHTTPSpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
-	GZip bool `json:"enableGzip"`
+	GZip *bool `json:"enableGzip,omitempty"`
 }
 
 type CoreComponentsSpec struct {
 	// +kubebuilder:validation:Optional
-	TLS CoreComponentsTLSSpec `json:"tls,omitempty"`
+	TLS *CoreComponentsTLSSpec `json:"tls,omitempty"`
 
 	// +kubebuilder:validation:Required
 	JobService CoreComponentsJobServiceSpec `json:"jobService"`
@@ -106,16 +105,16 @@ type CoreComponentsSpec struct {
 	TokenService CoreComponentsTokenServiceSpec `json:"tokenService"`
 
 	// +kubebuilder:validation:Optional
-	Trivy CoreComponentsTrivySpec `json:"trivy,omitempty"`
+	Trivy *CoreComponentsTrivySpec `json:"trivy,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	Clair CoreComponentsClairSpec `json:"clairAdapter,omitempty"`
+	Clair *CoreComponentsClairSpec `json:"clairAdapter,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	ChartRepository CoreComponentsChartRepositorySpec `json:"chartRepository,omitempty"`
+	ChartRepository *CoreComponentsChartRepositorySpec `json:"chartRepository,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	NotaryServer CoreComponentsNotaryServerSpec `json:"notaryServer,omitempty"`
+	NotaryServer *CoreComponentsNotaryServerSpec `json:"notaryServer,omitempty"`
 }
 
 type CoreComponentPortalSpec struct {
@@ -133,11 +132,13 @@ type CoreDatabaseSpec struct {
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=0
-	MaxIdleConnections int `json:"maxIdleConnections"`
+	// +kubebuilder:default=50
+	MaxIdleConnections int32 `json:"maxIdleConnections,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=0
-	MaxOpenConnections int `json:"maxOpenConnections"`
+	// +kubebuilder:default=100
+	MaxOpenConnections int32 `json:"maxOpenConnections,omitempty"`
 
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:MinLength=1
@@ -146,31 +147,33 @@ type CoreDatabaseSpec struct {
 
 type CorePostgresqlSpec struct {
 	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:MinLength=1
 	Host string `json:"host"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=0
 	// +kubebuilder:validation:ExclusiveMinimum=true
 	// +kubebuilder:default=5432
-	Port int `json:"port"`
+	Port int32 `json:"port,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:MinLength=1
 	// +kubebuilder:default="postgres"
-	Username string `json:"username"`
+	Username string `json:"username,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:MinLength=1
 	// +kubebuilder:default="postgres"
-	Name string `json:"name"`
+	Name string `json:"name,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	PasswordRef string `json:"passwordRef"`
+	// +kubebuilder:validation:MinLength=1
+	PasswordRef string `json:"passwordRef,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Enum={"disable","allow","prefer","require","verify-ca","verify-full"}
 	// +kubebuilder:default="prefer"
-	SSLMode string `json:"sslMode"`
+	SSLMode string `json:"sslMode,omitempty"`
 }
 
 type CoreComponentsJobServiceSpec struct {
@@ -192,17 +195,18 @@ type CoreComponentsRegistrySpec struct {
 	ControllerURL string `json:"controllerURL"`
 
 	// +kubebuilder:validation:Optional
-	Redis OpacifiedDSN `json:"redis"`
+	Redis OpacifiedDSN `json:"redis,omitempty"`
 
 	// +kubebuilder:validation:Required
 	Credentials CoreComponentsRegistryCredentialsSpec `json:"credentials"`
 
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=true
+	// +kubebuilder:default=false
 	Sync bool `json:"sync"`
 
 	// +kubebuilder:validation:Optional
-	StorageProviderName string `json:"storageProviderName"`
+	// +kubebuilder:validation:MinLength=1
+	StorageProviderName string `json:"storageProviderName,omitempty"`
 }
 
 type CoreComponentsRegistryCredentialsSpec struct {
@@ -231,16 +235,17 @@ type CoreComponentsChartRepositorySpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Enum={"redis"}
 	// +kubebuilder:default="redis"
-	CacheDriver string `json:"cacheDriver"`
+	CacheDriver string `json:"cacheDriver,omitempty"`
 }
 
 type CoreComponentsTLSSpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
-	Verify bool `json:"verify"`
+	Verify *bool `json:"verify,omitempty"`
 
-	// +kubebuilder:validation:Optional
-	CertificateRef string `json:"certificateRef,omitempty"`
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:MinLength=1
+	CertificateRef string `json:"certificateRef"`
 }
 
 type CoreComponentsTrivySpec struct {
@@ -279,7 +284,7 @@ type CoreConfig struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Enum={"db_auth"}
 	// +kubebuilder:default="db_auth"
-	AuthenticationMode string `json:"authMode"`
+	AuthenticationMode string `json:"authMode,omitempty"`
 
 	// +kubebuilder:validation:Required
 	SecretRef string `json:"secretRef"`
@@ -294,17 +299,15 @@ type CoreProxySpec struct {
 	URL string `json:"url"`
 
 	// +kubebuilder:validation:Optional
-	NoProxy []string `json:"noProxy"`
+	NoProxy []string `json:"noProxy,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	Components []string `json:"components"`
+	Components []string `json:"components,omitempty"`
 }
 
 type CoreLogSpec struct {
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Enum={"debug","info","warn","error"}
-	// +kubebuilder:default="info"
-	Level string `json:"level"`
+	Level CoreLogLevel `json:"level,omitempty"`
 }
 
 func init() { // nolint:gochecknoinits
