@@ -24,8 +24,4 @@ var _ webhook.Defaulter = &Harbor{}
 // Default implements webhook.Defaulter, so a webhook will be registered for the type.
 func (h *Harbor) Default() {
 	harborlog.Info("default", "name", h.Name)
-
-	if h.Spec.HarborVersion == "" {
-		h.Spec.HarborVersion = "1.10.0"
-	}
 }
