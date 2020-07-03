@@ -1,9 +1,6 @@
 package v1alpha2
 
 import (
-	"time"
-
-	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -50,6 +47,16 @@ type RegistryList struct {
 type RegistrySpec struct {
 	ComponentSpec    `json:",inline"`
 	RegistryConfig01 `json:",inline"`
+}
+
+func (r *RegistrySpec) Default() {
+	if r.Storage.Cache.Blobdescriptor == "" {
+		if r.Redis.DSN == "" {
+			r.Storage.Cache.Blobdescriptor = "inmemory"
+		} else {
+			r.Storage.Cache.Blobdescriptor = "redis"
+		}
+	}
 }
 
 type RegistryConfig01 struct {
@@ -102,13 +109,16 @@ type RegistryRedisSpec struct {
 	OpacifiedDSN `json:",inline"`
 
 	// +kubebuilder:validation:Optional
-	DialTimeout time.Duration `json:"dialTimeout,omitempty"`
+	// +kubebuilder:default=""
+	DialTimeout PositiveDuration `json:"dialTimeout,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	ReadTimeout time.Duration `json:"readTimeout,omitempty"`
+	// +kubebuilder:default=""
+	ReadTimeout PositiveDuration `json:"readTimeout,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	WriteTimeout time.Duration `json:"writeTimeout,omitempty"`
+	// +kubebuilder:default=""
+	WriteTimeout PositiveDuration `json:"writeTimeout,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	Pool RegistryRedisPoolSpec `json:"pool,omitempty"`
@@ -116,16 +126,18 @@ type RegistryRedisSpec struct {
 
 type RegistryRedisPoolSpec struct {
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Minimum=0
 	// +kubebuilder:default=3
-	MaxIdle int `json:"maxIdle,omitempty"`
+	MaxIdle int32 `json:"maxIdle,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Minimum=0
 	// +kubebuilder:default=5
-	MaxActive int `json:"maxActive,omitempty"`
+	MaxActive int32 `json:"maxActive,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=30000000000
-	IdleTimeout time.Duration `json:"idleTimeout,omitempty"`
+	// +kubebuilder:default="30s"
+	IdleTimeout PositiveDuration `json:"idleTimeout,omitempty"`
 }
 
 type RegistryLogSpec struct {
@@ -133,9 +145,7 @@ type RegistryLogSpec struct {
 	AccessLog RegistryAccessLogSpec `json:"accessLog,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Enum={"debug","info","warn","error"}
-	// +kubebuilder:default="info"
-	Level string `json:"level,omitempty"`
+	Level RegistryLogLevel `json:"level,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Enum={"text","json","logstash"}
@@ -193,32 +203,69 @@ type RegistryMiddlewareSpec struct {
 
 type RegistryHTTPSpec struct {
 	// +kubebuilder:validation:Optional
+	// The secret name containing a random piece of data
+	// used to sign state that may be stored with the client
+	// to protect against tampering. For production environments
+	// you should generate a random piece of data using
+	// a cryptographically secure random generator.
+	// If you omit the secret, the registry will automatically generate a secret when it starts.
+	// If you are building a cluster of registries behind a load balancer,
+	// you MUST ensure the secret is the same for all registries.
 	SecretRef string `json:"secretRef,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// A fully-qualified URL for an externally-reachable address for the registry.
+	// If present, it is used when creating generated URLs.
+	// Otherwise, these URLs are derived from client requests.
 	Host string `json:"host,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Enum={"unix","tcp"}
+	// +kubebuilder:default="tcp"
+	// The network used to create a listening socket.
 	Net string `json:"net,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Pattern="(/(.+/)?)?"
+	// If the server does not run at the root path, set this to the value of the prefix.
+	// The root path is the section before v2.
+	// It requires both preceding and trailing slashes, such as in the example /path/.
 	Prefix string `json:"prefix,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	DrainTimeout time.Duration `json:"drainTimeout,omitempty"`
+	// +kubebuilder:default=""
+	// Amount of time to wait for HTTP connections to drain
+	// before shutting down after registry receives SIGTERM signal
+	DrainTimeout PositiveDuration `json:"drainTimeout,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:default={"X-Content-Type-Options":{"nosniff"}}
+	// Use this option to specify headers that the HTTP server should include in responses.
+	// This can be used for security headers such as Strict-Transport-Security.
+	// The headers option should contain an option for each header to include, where the parameter
+	// name is the header’s name, and the parameter value a list of the header’s payload values.
+	// Including X-Content-Type-Options: [nosniff] is recommended, sothat browsers
+	// will not interpret content as HTML if they are directed to load a page from the registry.
+	// This header is included in the example configuration file.
 	Headers map[string][]string `json:"headers,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
-	RelativeURLs bool `json:"relativeURLs"`
+	// If true, the registry returns relative URLs in Location headers.
+	// The client is responsible for resolving the correct URL.
+	// This option is not compatible with Docker 1.7 and earlier.
+	RelativeURLs *bool `json:"relativeURLs,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// Use the http2 structure to control http2 settings for the registry.
 	HTTP2 RegistryHTTPHTTP2Spec `json:"http2,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	Debug RegistryHTTPDebugSpec `json:"debug,omitempty"`
+	// Use debug option to configure a debug server that can be helpful in diagnosing problems.
+	// The debug endpoint can be used for monitoring registry metrics and health,
+	// as well as profiling. Sensitive information may be available via the debug endpoint.
+	// Please be certain that access to the debug endpoint is locked down in a production environment.
+	Debug *RegistryHTTPDebugSpec `json:"debug,omitempty"`
 }
 
 type RegistryHTTPHTTP2Spec struct {
@@ -229,7 +276,10 @@ type RegistryHTTPHTTP2Spec struct {
 
 type RegistryHTTPDebugSpec struct {
 	// +kubebuilder:validation:Required
-	Address string `json:"address"`
+	// +kubebuilder:validation:Minimum=0
+	// +kubebuilder:validation:ExclusiveMinimum=true
+	// +kubebuilder:default=5001
+	Port int32 `json:"port,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	Prometheus RegistryHTTPDebugPrometheusSpec `json:"prometheus,omitempty"`
@@ -265,12 +315,12 @@ type RegistryHealthStorageDriverSpec struct {
 	Enabled bool `json:"enabled"`
 
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=5000000000
-	Interval time.Duration `json:"interval,omitempty"`
+	// +kubebuilder:default=3
+	Threshold int32 `json:"threshold,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=3
-	Threshold int `json:"threshold,omitempty"`
+	// +kubebuilder:default="5s"
+	Interval PositiveDuration `json:"interval,omitempty"`
 }
 
 type RegistryHealthFileSpec struct {
@@ -279,8 +329,8 @@ type RegistryHealthFileSpec struct {
 	File string `json:"path"`
 
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=5000000000
-	Interval time.Duration `json:"interval,omitempty"`
+	// +kubebuilder:default="5s"
+	Interval PositiveDuration `json:"interval,omitempty"`
 }
 
 type RegistryHealthHTTPSpec struct {
@@ -292,20 +342,22 @@ type RegistryHealthHTTPSpec struct {
 	Headers map[string][]string `json:"headers,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=200
-	StatusCode int `json:"statuscode,omitempty"`
+	// +kubebuilder:default="5s"
+	Timeout PositiveDuration `json:"timeout,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=5000000000
-	Timeout time.Duration `json:"timeout,omitempty"`
+	// +kubebuilder:default="5s"
+	Interval PositiveDuration `json:"interval,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=5000000000
-	Interval time.Duration `json:"interval,omitempty"`
-
-	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Minimum=0
 	// +kubebuilder:default=3
-	Threshold int `json:"threshold,omitempty"`
+	Threshold int32 `json:"threshold,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Minimum=0
+	// +kubebuilder:default=200
+	StatusCode int32 `json:"statuscode,omitempty"`
 }
 
 type RegistryHealthTCPSpec struct {
@@ -314,22 +366,24 @@ type RegistryHealthTCPSpec struct {
 	Address string `json:"address"`
 
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=5000000000
-	Timeout time.Duration `json:"timeout,omitempty"`
+	// +kubebuilder:default="5s"
+	Timeout PositiveDuration `json:"timeout,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=5000000000
-	Interval time.Duration `json:"interval,omitempty"`
+	// +kubebuilder:default="5s"
+	Interval PositiveDuration `json:"interval,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Minimum=0
 	// +kubebuilder:default=3
-	Threshold int `json:"threshold,omitempty"`
+	Threshold int32 `json:"threshold,omitempty"`
 }
 
 type RegistryNotificationsSpec struct {
 	// +kubebuilder:validation:Optional
 	// +listType:map
 	// +listMapKey:name
+	// The endpoints structure contains a list of named services (URLs) that can accept event notifications.
 	Endpoints []RegistryNotificationEndpointSpec `json:"endpoints,omitempty"`
 
 	// +kubebuilder:validation:Optional
@@ -339,36 +393,41 @@ type RegistryNotificationsSpec struct {
 type RegistryNotificationEventsSpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
-	IncludeReferences bool `json:"includeReferences"`
+	IncludeReferences *bool `json:"includeReferences,omitempty"`
 }
 
 type RegistryNotificationEndpointSpec struct {
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:minLength=1
+	// A human-readable name for the service.
 	Name string `json:"name"`
-
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=false
-	Disabled bool `json:"disabled"`
 
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Pattern="https?://.+"
+	// The URL to which events should be published.
 	URL string `json:"url"`
 
-	// +kubebuilder:validation:Required
-	Headers map[string][]string `json:"headers"`
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=false
+	// If true, notifications are disabled for the service.
+	Disabled bool `json:"disabled"`
 
-	// +kubebuilder:validation:Required
-	// +kubebuilder:default=5000000000
-	Timeout time.Duration `json:"timeout"`
-
-	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Minimum=0
 	// +kubebuilder:default=3
-	Threshold int `json:"threshold"`
+	Threshold int32 `json:"threshold,omitempty"`
 
-	// +kubebuilder:validation:Required
-	// +kubebuilder:default=10000000000
-	Backoff time.Duration `json:"backoff"`
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default="5s"
+	// A value for the HTTP timeout. A positive integer and an optional suffix indicating the unit of time, which may be ns, us, ms, s, m, or h. If you omit the unit of time, ns is used.
+	Timeout PositiveDuration `json:"timeout,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default="10s"
+	Backoff PositiveDuration `json:"backoff,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	Headers map[string][]string `json:"headers,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	IgnoredMediaTypes []string `json:"ignoredMediaTypes,omitempty"`
@@ -425,7 +484,7 @@ type RegistryAuthenticationTokenSpec struct {
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default:true
-	AutoRedirect bool `json:"autoredirect"`
+	AutoRedirect *bool `json:"autoredirect,omitempty"`
 }
 
 type RegistryAuthenticationHTPasswdSpec struct {
@@ -478,7 +537,7 @@ type RegistryStorageSpec struct {
 	Driver RegistryStorageDriverSpec `json:"driver"`
 
 	// +kubebuilder:validation:Optional
-	Cache RegistryStorageCacheSpec `json:"cache"`
+	Cache RegistryStorageCacheSpec `json:"cache,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	Maintenance RegistryStorageMaintenanceSpec `json:"maintenance,omitempty"`
@@ -517,11 +576,6 @@ type RegistryStorageDriverSpec struct {
 	Swift *RegistryStorageDriverSwiftSpec `json:"swift,omitempty"`
 }
 
-var (
-	errNoStorageConfiguration = errors.New("no storage configuration")
-	err2StorageConfiguration  = errors.New("only 1 storage can be configured")
-)
-
 func (r *RegistryStorageDriverSpec) Validate() error {
 	found := 0
 
@@ -543,11 +597,11 @@ func (r *RegistryStorageDriverSpec) Validate() error {
 
 	switch found {
 	case 0:
-		return errNoStorageConfiguration
+		return ErrNoStorageConfiguration
 	case 1:
 		return nil
 	default:
-		return err2StorageConfiguration
+		return Err2StorageConfiguration
 	}
 }
 
@@ -560,7 +614,7 @@ type RegistryStorageDriverFilesystemSpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=25
 	// +kubebuilder:default=100
-	MaxThreads int `json:"maxthreads"`
+	MaxThreads int32 `json:"maxthreads,omitempty"`
 }
 
 type RegistryStorageDriverS3Spec struct {
@@ -607,18 +661,18 @@ type RegistryStorageDriverS3Spec struct {
 	Encrypt bool `json:"encrypt"`
 
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=true
-	Secure bool `json:"secure"`
-
-	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=false
 	// Skips TLS verification when the value is set to true.
 	SkipVerify bool `json:"skipverify"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
+	Secure *bool `json:"secure,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=true
 	// Indicates whether the registry uses Version 4 of AWS’s authentication.
-	V4Auth bool `json:"v4auth"`
+	V4Auth *bool `json:"v4auth,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=5242880
@@ -630,13 +684,14 @@ type RegistryStorageDriverSwiftSpec struct {
 	// +kubebuilder:validation:Required
 	// URL for obtaining an auth token.
 	// https://storage.myprovider.com/v2.0 or https://storage.myprovider.com/v3/auth
-	AuthURL string `json:"authurl"`
+	AuthenticationURL string `json:"authurl"`
 
 	// +kubebuilder:validation:Required
 	// The Openstack user name.
 	Username string `json:"username,omitempty"`
 
 	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:MinLegnth=1
 	// Secret name containing the Openstack password.
 	PasswordRef string `json:"passwordRef,omitempty"`
 
@@ -695,14 +750,14 @@ type RegistryStorageDriverSwiftSpec struct {
 	AccessKey string `json:"accesskey,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// Specify the OpenStack Auth’s version, for example 3. By default the driver autodetects the auth’s version from the AuthURL.
+	// Specify the OpenStack Auth’s version, for example 3. By default the driver autodetects the auth’s version from the authurl.
 	AuthVersion string `json:"authversion,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default="public"
 	// +kubebuilder:validation:Enum={"public","internal","admin"}
 	// The endpoint type used when connecting to swift.
-	EndpointType string `json:"endpointtype"`
+	EndpointType string `json:"endpointtype,omitempty"`
 }
 
 type RegistryStorageRedirectSpec struct {
@@ -714,7 +769,7 @@ type RegistryStorageRedirectSpec struct {
 type RegistryStorageCacheSpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Enum={"inmemory","redis"}
-	Blobdescriptor string `json:"blobdescriptor"`
+	Blobdescriptor string `json:"blobdescriptor,omitempty"`
 }
 
 type RegistryStorageMaintenanceSpec struct {
@@ -741,18 +796,18 @@ type RegistryStorageMaintenanceUploadPurgingSpec struct {
 	DryRun bool `json:"dryRun"`
 
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=3600000000000
-	Age time.Duration `json:"age,omitempty"`
+	// +kubebuilder:default="168h"
+	Age PositiveDuration `json:"age,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=900000000000
-	Interval time.Duration `json:"interval,omitempty"`
+	// +kubebuilder:default="24h"
+	Interval PositiveDuration `json:"interval,omitempty"`
 }
 
 type RegistryStorageDeleteSpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
-	Enabled bool `json:"enabled"`
+	Enabled *bool `json:"enabled,omitempty"`
 }
 
 func init() { // nolint:gochecknoinits
