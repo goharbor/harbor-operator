@@ -48,13 +48,13 @@ type NotarySignerSpec struct {
 	HTTPS NotaryHTTPSSpec `json:"https,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	Logging NotaryLoggingSpec `json:"logging"`
+	Logging NotaryLoggingSpec `json:"logging,omitempty"`
 
 	// +kubebuilder:validation:Required
 	Storage NotarySignerStorageSpec `json:"storage"`
 
-	// +kubebuilder:validation:Required
-	Migration NotaryMigrationSpec `json:"migration"`
+	// +kubebuilder:validation:Optional
+	Migration *NotaryMigrationSpec `json:"migration"`
 }
 
 type NotarySignerStorageSpec struct {

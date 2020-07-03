@@ -47,8 +47,7 @@ type RegistryControllerList struct {
 
 // RegistryControllerSpec defines the desired state of RegistryController.
 type RegistryControllerSpec struct {
-	ComponentSpec               `json:",inline"`
-	RegistryControllerComponent `json:",inline"`
+	ComponentSpec `json:",inline"`
 
 	// +kubebuilder:validation:Required
 	RegistryRef string `json:"registryRef"`
@@ -62,7 +61,7 @@ type RegistryControllerSpec struct {
 
 type RegistryControllerLogSpec struct {
 	// +kubebuilder:validation:Optional
-	Level string `json:"level,omitempty"`
+	Level RegistryCtlLogLevel `json:"level,omitempty"`
 }
 
 type RegistryControllerHTTPSSpec struct {

@@ -1,8 +1,7 @@
 package v1alpha2
 
 import (
-	"time"
-
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -38,32 +37,30 @@ type JobServiceList struct {
 
 // JobServiceSpec defines the desired state of JobService.
 type JobServiceSpec struct {
-	ComponentSpec       `json:",inline"`
-	JobServiceComponent `json:",inline"`
+	ComponentSpec `json:",inline"`
 
 	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:MinLength=1
 	SecretRef string `json:"secretRef"`
 
-	// Config to use https protocol
 	// +kubebuilder:validation:Optional
+	// Config to use https protocol
 	HTTPS JobServiceHTTPSSpec `json:"https,omitempty"`
 
 	// +kubebuilder:validation:Required
 	Core JobServiceCoreSpec `json:"core"`
 
-	// Configurations of worker pool
 	// +kubebuilder:validation:Required
+	// Configurations of worker pool
 	WorkerPool JobServicePoolSpec `json:"workerPool,omitempty"`
 
+	// +kubebuilder:validation:Required
 	// Job logger configurations
-	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:MinItems=1
-	JobLoggers []JobServiceLoggerConfigSpec `json:"jobLoggers"`
+	JobLoggers JobServiceLoggerConfigSpec `json:"jobLoggers,omitempty"`
 
-	// Logger configurations
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:MinItems=1
-	Loggers []JobServiceLoggerConfigSpec `json:"loggers"`
+	// Logger configurations
+	Loggers JobServiceLoggerConfigSpec `json:"loggers,omitempty"`
 
 	// +kubebuilder:validation:Required
 	Registry CoreComponentsRegistryCredentialsSpec `json:"registry"`
@@ -90,12 +87,12 @@ type JobServicePoolRedisSpec struct {
 	// +kubebuilder:validation:Optional
 	Namespace string `json:"namespace,omitempty"`
 
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default="30s"
 	// IdleTimeoutSecond closes connections after remaining idle for this duration. If the value
 	// is zero, then idle connections are not closed. Applications should set
 	// the timeout to a value less than the server's timeout.
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=30000000000
-	IdleTimeout time.Duration `json:"idleTimeout"`
+	IdleTimeout PositiveDuration `json:"idleTimeout,omitempty"`
 }
 
 // PoolConfig keeps worker worker configurations.
@@ -103,38 +100,78 @@ type JobServicePoolSpec struct {
 	// Worker concurrency
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=1
-	// +kubebuilder:default=1
-	WorkerCount uint `json:"workers"`
+	// +kubebuilder:default=10
+	WorkerCount int32 `json:"workers,omitempty"`
+
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:MinLength=1
 	// +kubebuilder:validation:Enum={"redis"}
 	// +kubebuilder:default="redis"
-	Backend string `json:"backend"`
+	Backend string `json:"backend,omitempty"`
+
 	// +kubebuilder:validation:Optional
 	Redis JobServicePoolRedisSpec `json:"redisPool,omitempty"`
 }
 
 // JobServiceLoggerConfigSweeperSpec keeps settings of log sweeper.
 type JobServiceLoggerConfigSweeperSpec struct {
+
 	// +kubebuilder:validation:Optional
-	Duration int `json:"duration"`
-	// +kubebuilder:validation:Optional
-	SettingsRef string `json:"settingsRef"`
+	SettingsRef string `json:"settingsRef,omitempty"`
 }
 
 // LoggerConfig keeps logger basic configurations.
+// One of files, database or stdout must be defined.
 type JobServiceLoggerConfigSpec struct {
-	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Enum={"DB","FILE","STD_OUTPUT"}
-	Name string `json:"name"` // https://github.com/goharbor/harbor/blob/master/src/jobservice/logger/known_loggers.go#L9-L16
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Enum={"DEBUG","INFO","WARNING","ERROR","FATAL"}
-	// +kubebuilder:default=INFO
-	Level string `json:"level"`
+	// +nullable
+	Files []JobServiceLoggerConfigFileSpec `json:"files,omitempty"`
+
 	// +kubebuilder:validation:Optional
-	SettingsRef string `json:"settingsRef"`
+	Database *JobServiceLoggerConfigDatabaseSpec `json:"database,omitempty"`
+
 	// +kubebuilder:validation:Optional
-	Sweeper *JobServiceLoggerConfigSweeperSpec `json:"sweeper"`
+	// +nullable
+	STDOUT *JobServiceLoggerConfigSTDOUTSpec `json:"stdout,omitempty"`
 }
+
+type JobServiceLoggerConfigDatabaseSpec struct {
+	// +kubebuilder:validation:Required
+	Level JobServiceLogLevel `json:"level"`
+
+	// +kubebuilder:validation:Optional
+	Sweeper PositiveDuration `json:"sweeper,omitempty"`
+}
+
+type JobServiceLoggerConfigSTDOUTSpec struct {
+	// +kubebuilder:validation:Required
+	Level JobServiceLogLevel `json:"level"`
+}
+
+type JobServiceLoggerConfigFileSpec struct {
+	// +kubebuilder:validation:Optional
+	Volume *corev1.VolumeSource `json:"volume,omitempty"`
+
+	// +kubebuilder:validation:Required
+	// +kubebuilder:default="INFO"
+	Level JobServiceLogLevel `json:"level"`
+
+	// +kubebuilder:validation:Optional
+	Sweeper PositiveDuration `json:"sweeper,omitempty"`
+}
+
+// +kubebuilder:validation:Type=string
+// +kubebuilder:validation:Enum={"DB","FILE","STD_OUTPUT"}
+// JobServiceLoggerName is the type of logger to configure.
+type JobServiceLoggerName string
+
+const (
+	JobServiceLoggerDatabase JobServiceLoggerName = "DB"
+	JobServiceLoggerFile     JobServiceLoggerName = "FILE"
+	JobServiceLoggerSTDOUT   JobServiceLoggerName = "STD_OUTPUT"
+)
+
+// +kubebuilder:validation:Type=string
 
 func init() { // nolint:gochecknoinits
 	SchemeBuilder.Register(&JobService{}, &JobServiceList{})
