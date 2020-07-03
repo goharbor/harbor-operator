@@ -1,8 +1,7 @@
 package v1alpha2
 
 import (
-	"time"
-
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -38,25 +37,24 @@ type ChartMuseumList struct {
 
 // ChartMuseumSpec defines the desired state of ChartMuseum.
 type ChartMuseumSpec struct {
-	ComponentSpec        `json:",inline"`
-	ChartMuseumComponent `json:",inline"`
+	ComponentSpec `json:",inline"`
 
 	// +kubebuilder:validation:Optional
-	Log ChartMuseumLogSpec `json:"log"`
+	Log ChartMuseumLogSpec `json:"log,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	Auth ChartMuseumAuthSpec `json:"auth"`
+	Auth ChartMuseumAuthSpec `json:"auth,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	Server ChartMuseumServerSpec `json:"server"`
+	Server ChartMuseumServerSpec `json:"server,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// Disable some features
-	Disable ChartMuseumDisableSpec `json:"disable"`
+	Disable ChartMuseumDisableSpec `json:"disable,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// Cache stores
-	Cache ChartMuseumCacheSpec `json:"cache"`
+	Cache ChartMuseumCacheSpec `json:"cache,omitempty"`
 
 	// +kubebuilder:validation:Required
 	Chart ChartMuseumChartSpec `json:"chart"`
@@ -67,17 +65,18 @@ type ChartMuseumServerSpec struct {
 	HTTPS ChartMuseumHTTPSSpec `json:"https,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// Socket timeout in nanoseconds
-	ReadTimeout time.Duration `json:"readTimeout,omitempty"`
+	// Socket timeout
+	ReadTimeout PositiveDuration `json:"readTimeout,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// Socket timeout in nanoseconds
-	WriteTimeout time.Duration `json:"writeTimeout,omitempty"`
+	// Socket timeout
+	WriteTimeout PositiveDuration `json:"writeTimeout,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Minimum=0
 	// +kubebuilder:default=20971520
 	// Max size of post body (in bytes)
-	MaxUploadSize int64 `json:"maxUploadSize"`
+	MaxUploadSize int64 `json:"maxUploadSize,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// Value to set in the Access-Control-Allow-Origin HTTP header
@@ -90,14 +89,14 @@ type ChartMuseumChartSpec struct {
 	PostFormFieldName ChartMuseumPostFormFieldNameSpec `json:"postFormFieldName,omitempty"`
 
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Pattern="^https?://.*$"
+	// +kubebuilder:validation:Pattern="https?://.*"
 	// The absolute url for .tgzs in index.yaml
 	URL string `json:"url"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
 	// Allow chart versions to be re-uploaded without ?force querystring
-	AllowOvewrite bool `json:"allowOverwrite"`
+	AllowOvewrite *bool `json:"allowOverwrite,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=false
@@ -108,10 +107,10 @@ type ChartMuseumChartSpec struct {
 	Storage ChartMuseumChartStorageSpec `json:"storage"`
 
 	// +kubebuilder:validation:Optional
-	Index ChartMuseumChartIndexSpec `json:"index"`
+	Index ChartMuseumChartIndexSpec `json:"index,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	Repo ChartMuseumChartRepoSpec `json:"repo"`
+	Repo ChartMuseumChartRepoSpec `json:"repo,omitempty"`
 }
 
 type ChartMuseumChartRepoSpec struct {
@@ -121,47 +120,139 @@ type ChartMuseumChartRepoSpec struct {
 	DepthDynamic bool `json:"depthDynamic"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Minimum=0
 	// +kubebuilder:default=1
 	// Levels of nested repos for multitenancy
-	Depth int `json:"depth"`
+	Depth *int32 `json:"depth,omitempty"`
 }
 
 type ChartMuseumChartStorageSpec struct {
 	ChartMuseumChartStorageDriverSpec `json:",inline"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Minimum=0
 	// Maximum number of objects allowed in storage (per tenant)
 	MaxStorageObjects int64 `json:"maxStorageObject,omitempty"`
 }
 
 type ChartMuseumChartStorageDriverSpec struct {
-	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:MinLength=1
-	// Storage backend name
-	Name string `json:"driverName"`
+	// +kubebuilder:validation:Optional
+	Amazon *ChartMuseumChartStorageDriverAmazonSpec `json:"amazon,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	SecretRef string `json:"secretRef,omitempty"`
+	OpenStack *ChartMuseumChartStorageDriverOpenStackSpec `json:"openstack,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	FileSystem *ChartMuseumChartStorageDriverFilesystemSpec `json:"filesystem,omitempty"`
+}
+
+type ChartMuseumChartStorageDriverAmazonSpec struct {
+	// +kubebuilder:validation:Required
+	// S3 bucket to store charts for amazon storage
+	Bucket string `json:"bucket"`
+
+	// +kubebuilder:validation:Optional
+	// Alternative s3 endpoint
+	Endpoint string `json:"endpoint,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Prefix to store charts for the bucket
+	Prefix string `json:"prefix,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Region of the bucket
+	Region string `json:"region,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// ServerSideEncryption is the algorithm for server side encryption
+	ServerSideEncryption string `json:"serverSideEncryption,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	AccessKeyID string `json:"accessKeyID,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:MinLength=1
+	AccessSecretRef string `json:"accessSecretRef,omitempty"`
+}
+
+type ChartMuseumChartStorageDriverOpenStackSpec struct {
+	// +kubebuilder:validation:Required
+	// Container to store charts for openstack storage backend
+	Container string `json:"container"`
+
+	// +kubebuilder:validation:Optional
+	// Prefix to store charts for the container
+	Prefix string `json:"prefix,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Region of the container
+	Region string `json:"region,omitempty"`
+
+	// +kubebuilder:validation:Required
+	// URL for obtaining an auth token.
+	// https://storage.myprovider.com/v2.0 or https://storage.myprovider.com/v3/auth
+	AuthenticationURL string `json:"authenticationURL"`
+
+	// +kubebuilder:validation:Optional
+	// Your Openstack tenant name.
+	// You can either use tenant or tenantid.
+	Tenant string `json:"tenant,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Your Openstack tenant ID.
+	// You can either use tenant or tenantid.
+	TenantID string `json:"tenantID,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Your Openstack domain name for Identity v3 API. You can either use domain or domainid.
+	Domain string `json:"domain,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Your Openstack domain ID for Identity v3 API. You can either use domain or domainid.
+	DomainID string `json:"domainID,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// The Openstack user name. You can either use username or userid.
+	Username string `json:"username,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// The Openstack user id. You can either use username or userid.
+	UserID string `json:"userid,omitempty"`
+
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:MinLegnth=1
+	// Secret name containing the Openstack password.
+	PasswordRef string `json:"passwordRef,omitempty"`
+}
+
+type ChartMuseumChartStorageDriverFilesystemSpec struct {
+	// +kubebuilder:validation:Required
+	VolumeSource corev1.VolumeSource `json:"volumeSource"`
+
+	// +kubebuilder:validation:Optionel
+	Prefix string `json:"prefix,omitempty"`
 }
 
 type ChartMuseumChartIndexSpec struct {
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Minimum=0
 	// Parallel scan limit for the repo indexer
 	ParallelLimit int32 `json:"parallelLimit,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=0
-	// Timestamp drift tolerated between cached and generated index before invalidation (in nanoseconds)
-	StorageTimestampTolerance time.Duration `json:"storageTimestampTolerance,omitempty"`
+	// Timestamp drift tolerated between cached and generated index before invalidation
+	StorageTimestampTolerance PositiveDuration `json:"storageTimestampTolerance,omitempty"`
 }
 
 type ChartMuseumPostFormFieldNameSpec struct {
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:MinLength=1
 	// +kubebuilder:default="chart"
 	// Form field which will be queried for the chart file content
 	Chart string `json:"chart,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:MinLength=1
 	// +kubebuilder:default="prov"
 	// Form field which will be queried for the provenance file content
 	Provenance string `json:"provenance,omitempty"`
@@ -185,8 +276,8 @@ type ChartMuseumLogSpec struct {
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
-	// log latency as an integer (nanoseconds) instead of a string
-	LatencyInteger bool `json:"latencyInteger"`
+	// log latency as an integer instead of a string
+	LatencyInteger *bool `json:"latencyInteger,omitempty"`
 }
 
 type ChartMuseumAuthSpec struct {

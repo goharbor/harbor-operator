@@ -1,11 +1,10 @@
-package v1alpha2 // nolint:dupl
+package v1alpha2
 
 import (
 	"context"
 
 	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
-	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
@@ -33,7 +32,7 @@ func (r *NotarySigner) SetupWebhookWithManager(ctx context.Context, mgr ctrl.Man
 		Complete()
 }
 
-// +kubebuilder:webhook:path=/mutate-goharbor-io-goharbor-io-v1alpha2-notarysigner,mutating=true,failurePolicy=ignore,groups=goharbor.io.goharbor.io,resources=notarysigners,verbs=create;update,versions=v1alpha2,name=mnotarysigner.kb.io
+// +kubebuilder:webhook:path=/mutate-goharbor-io-v1alpha2-notarysigner,mutating=true,failurePolicy=ignore,groups=goharbor.io.goharbor.io,resources=notarysigners,verbs=create;update,versions=v1alpha2,name=mnotarysigner.kb.io
 
 var _ webhook.Defaulter = &NotarySigner{}
 
@@ -41,36 +40,11 @@ var _ webhook.Defaulter = &NotarySigner{}
 func (r *NotarySigner) Default() {
 	notarysignerlog.Info("default", "name", r.Name)
 
-	if !r.Spec.Migration.Disabled {
-		if r.Spec.Migration.Source.DSN == "" {
-			r.Spec.Migration.Source = OpacifiedDSN{
+	if r.Spec.Migration != nil {
+		if r.Spec.Migration.DSN == "" {
+			r.Spec.Migration.OpacifiedDSN = OpacifiedDSN{
 				DSN: defaultNotarySignerMigrationSource,
 			}
 		}
 	}
-}
-
-// +kubebuilder:webhook:verbs=create;update,path=/validate-goharbor-io-goharbor-io-v1alpha2-notarysigner,mutating=false,failurePolicy=fail,groups=goharbor.io.goharbor.io,resources=notarysigners,versions=v1alpha2,name=vnotarysigner.kb.io
-
-var _ webhook.Validator = &NotarySigner{}
-
-// ValidateCreate implements webhook.Validator so a webhook will be registered for the type.
-func (r *NotarySigner) ValidateCreate() error {
-	notarysignerlog.Info("validate create", "name", r.Name)
-
-	return r.Spec.Migration.Validate()
-}
-
-// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type.
-func (r *NotarySigner) ValidateUpdate(old runtime.Object) error {
-	notarysignerlog.Info("validate update", "name", r.Name)
-
-	return r.Spec.Migration.Validate()
-}
-
-// ValidateDelete implements webhook.Validator so a webhook will be registered for the type.
-func (r *NotarySigner) ValidateDelete() error {
-	notarysignerlog.Info("validate delete", "name", r.Name)
-
-	return nil
 }

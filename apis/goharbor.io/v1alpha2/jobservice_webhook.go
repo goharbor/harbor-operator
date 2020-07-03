@@ -17,7 +17,7 @@ func (js *JobService) SetupWebhookWithManager(ctx context.Context, mgr ctrl.Mana
 		Complete()
 }
 
-// +kubebuilder:webhook:path=/mutate-containerregistry-ovhcloud-com-v1alpha2-jobservice,mutating=true,failurePolicy=fail,groups=containerregistry.ovhcloud.com,resources=jobservices,verbs=create;update,versions=v1alpha2,name=mjobservice.kb.io
+// +kubebuilder:webhook:path=/mutate-goharbor-io-v1alpha2-jobservice,mutating=true,failurePolicy=fail,groups=goharbor-io,resources=jobservices,verbs=create;update,versions=v1alpha2,name=mjobservice.kb.io
 
 var _ webhook.Defaulter = &Harbor{}
 

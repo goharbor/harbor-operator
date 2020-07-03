@@ -45,16 +45,16 @@ type NotaryServerSpec struct {
 	TrustService NotaryServerTrustServiceSpec `json:"trustService"`
 
 	// +kubebuilder:validation:Optional
-	Logging NotaryLoggingSpec `json:"logging"`
+	Logging NotaryLoggingSpec `json:"logging,omitempty"`
 
 	// +kubebuilder:validation:Required
-	Storage NotaryStorageSpec `json:"storage"`
+	Storage NotaryStorageSpec `json:"storage,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	Auth NotaryServerAuthSpec `json:"auth"`
+	Auth NotaryServerAuthSpec `json:"auth,omitempty"`
 
-	// +kubebuilder:validation:Required
-	Migration NotaryMigrationSpec `json:"migration"`
+	// +kubebuilder:validation:Optional
+	Migration *NotaryMigrationSpec `json:"migration,omitempty"`
 }
 
 type NotaryServerTrustServiceSpec struct {
@@ -63,18 +63,20 @@ type NotaryServerTrustServiceSpec struct {
 	Type string `json:"type"`
 
 	// +kubebuilder:validation:Optional
-	Host string `json:"host"`
+	Host string `json:"host,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	Port int64 `json:"port"`
+	// +kubebuilder:validation:Minimum=0
+	// +kubebuilder:validation:ExclusiveMinimum=true
+	Port int64 `json:"port,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Enum={"ecdsa","rsa","ed25519"}
 	// +kubebuilder:default=ecdsa
-	KeyAlgorithm string `json:"keyAlgorithm"`
+	KeyAlgorithm string `json:"keyAlgorithm,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	CertificateRef string `json:"certificateRef"`
+	CertificateRef string `json:"certificateRef,omitempty"`
 }
 
 type NotaryServerAuthSpec struct {
@@ -97,7 +99,7 @@ type NotaryServerAuthTokenSpec struct {
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
-	AutoRedirect bool `json:"autoredirect"`
+	AutoRedirect *bool `json:"autoredirect,omitempty"`
 }
 
 func init() { // nolint:gochecknoinits
