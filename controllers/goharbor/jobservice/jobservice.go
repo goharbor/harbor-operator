@@ -73,9 +73,7 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 // +kubebuilder:rbac:groups=containerregistry.ovhcloud.com,resources=jobservices,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=containerregistry.ovhcloud.com,resources=jobservices/status,verbs=get;update;patch
 
-func New(ctx context.Context, name, version string, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
-	configStore.Env(name)
-
+func New(ctx context.Context, name string, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
 	configTemplatePath, err := configStore.GetItemValue(ConfigTemplatePathKey)
 	if err != nil {
 		if _, ok := err.(configstore.ErrItemNotFound); !ok {

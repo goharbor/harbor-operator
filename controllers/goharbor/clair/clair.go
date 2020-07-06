@@ -69,9 +69,7 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 // +kubebuilder:rbac:groups=containerregistry.ovhcloud.com,resources=clairs,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=containerregistry.ovhcloud.com,resources=clairs/status,verbs=get;update;patch
 
-func New(ctx context.Context, name, version string, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
-	configStore.Env(name)
-
+func New(ctx context.Context, name string, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
 	r := &Reconciler{}
 
 	r.Controller = commonCtrl.NewController(ctx, name, r, configStore)

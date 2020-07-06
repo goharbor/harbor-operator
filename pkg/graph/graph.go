@@ -36,6 +36,21 @@ func (rm *resourceManager) AddResource(ctx context.Context, resource Resource, b
 	})
 	defer span.Finish()
 
+	nonNilBlockers := []Resource{}
+
+	for _, blocker := range blockers {
+		if blocker == nil {
+			continue
+		}
+
+		nonNilBlockers = append(nonNilBlockers, blocker)
+
+		_, ok := rm.resources[blocker]
+		if !ok {
+			return errors.Errorf("unknown blocker %+v", blocker)
+		}
+	}
+
 	rm.lock.Lock()
 	defer rm.lock.Unlock()
 
@@ -44,18 +59,7 @@ func (rm *resourceManager) AddResource(ctx context.Context, resource Resource, b
 		return errors.Errorf("resource %+v already added", resource)
 	}
 
-	for _, blocker := range blockers {
-		if blocker == nil {
-			continue
-		}
-
-		_, ok := rm.resources[blocker]
-		if !ok {
-			return errors.Errorf("unknown blocker %+v", blocker)
-		}
-	}
-
-	rm.resources[resource] = blockers
+	rm.resources[resource] = nonNilBlockers
 	rm.functions[resource] = run
 
 	return nil
