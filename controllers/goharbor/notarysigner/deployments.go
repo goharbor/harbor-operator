@@ -68,7 +68,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, notary *goharborv1alpha2
 
 	initContainers := []corev1.Container{}
 
-	if !notary.Spec.Migration.Disabled {
+	if notary.Spec.Migration != nil {
 		migrationContainer, err := notary.Spec.Migration.GetMigrationContainer(ctx, &notary.Spec.Storage.NotaryStorageSpec)
 		if err != nil {
 			return nil, errors.Wrap(err, "migrationContainer")

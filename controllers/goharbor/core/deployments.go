@@ -22,18 +22,22 @@ var (
 const (
 	port = 8080 // https://github.com/goharbor/harbor/blob/2fb1cc89d9ef9313842cc68b4b7c36be73681505/src/common/const.go#L127
 
-	healthCheckPeriod              = 90 * time.Second
-	ConfigPath                     = "/etc/core"
-	VolumeName                     = "configuration"
-	InternalCertificatesVolumeName = "internal-certificates"
-	InternalCertificatesPath       = ConfigPath + "/internal-certificates"
-	PublicCertificateVolumeName    = "ca-download"
-	PublicCertificatePath          = ConfigPath + "/ca"
-	CertificatesVolumeName         = "certificates"
-	CertificatesPath               = ConfigPath + "/certificates"
-	EncryptionKeyVolumeName        = "encryption"
-	EncryptionKeyPath              = "key"
-	HealthPath                     = "/api/v2.0/ping"
+	healthCheckPeriod                 = 90 * time.Second
+	ConfigPath                        = "/etc/core"
+	VolumeName                        = "configuration"
+	InternalCertificatesVolumeName    = "internal-certificates"
+	InternalCertificatesPath          = ConfigPath + "/internal-certificates"
+	PublicCertificateVolumeName       = "ca-download"
+	PublicCertificatePath             = ConfigPath + "/ca"
+	CertificatesVolumeName            = "certificates"
+	CertificatesPath                  = ConfigPath + "/certificates"
+	EncryptionKeyVolumeName           = "encryption"
+	EncryptionKeyPath                 = "key"
+	HealthPath                        = "/api/v2.0/ping"
+	TokenStorageVolumeName            = "psc"
+	TokenStoragePath                  = ConfigPath + "/token"
+	ServiceTokenCertificateVolumeName = "token-service-private-key"
+	ServiceTokenCertificatePath       = ConfigPath + "private_key.pem"
 )
 
 func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.Core) (*appsv1.Deployment, error) { // nolint:funlen
@@ -71,9 +75,17 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 				},
 			},
 		}, {
-			Name: "psc",
+			Name: TokenStorageVolumeName,
 			VolumeSource: corev1.VolumeSource{
 				EmptyDir: &corev1.EmptyDirVolumeSource{},
+			},
+		}, {
+			Name: ServiceTokenCertificateVolumeName,
+			VolumeSource: corev1.VolumeSource{
+				Secret: &corev1.SecretVolumeSource{
+					Optional:   &varFalse,
+					SecretName: core.Spec.ServiceToken.CertificateRef,
+				},
 			},
 		},
 	}
@@ -90,9 +102,14 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 			MountPath: path.Join(ConfigPath, EncryptionKeyPath),
 			SubPath:   EncryptionKeyPath,
 		}, {
-			Name:      "psc",
+			Name:      TokenStorageVolumeName,
 			ReadOnly:  false,
-			MountPath: path.Join(ConfigPath, "token"),
+			MountPath: TokenStoragePath,
+		}, {
+			Name:      ServiceTokenCertificateVolumeName,
+			ReadOnly:  true,
+			MountPath: ServiceTokenCertificatePath,
+			SubPath:   corev1.TLSPrivateKeyKey,
 		},
 	}
 
@@ -129,7 +146,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 		})
 	}
 
-	if core.Spec.Components.Clair.Database.PasswordRef != "" {
+	if core.Spec.Components.Clair != nil {
 		envs = append(envs, corev1.EnvVar{
 			Name:  "CLAIR_DB_HOST",
 			Value: core.Spec.Components.Clair.Database.Host,
@@ -165,24 +182,28 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 		})
 	}
 
-	if core.Spec.Components.ChartRepository.URL != "" {
+	if core.Spec.Components.Trivy != nil {
 		envs = append(envs, corev1.EnvVar{
-			Name:  "CHART_REPOSITORY_URL",
-			Value: core.Spec.Components.ChartRepository.URL,
+			Name:  "TRIVY_ADAPTER_URL",
+			Value: core.Spec.Components.Trivy.AdapterURL,
 		})
 	}
 
-	if core.Spec.Components.NotaryServer.URL != "" {
+	if core.Spec.Components.NotaryServer != nil {
 		envs = append(envs, corev1.EnvVar{
-			Name:  "WITH_NOTARY",
-			Value: "true",
-		}, corev1.EnvVar{
 			Name:  "NOTARY_URL",
 			Value: core.Spec.Components.NotaryServer.URL,
 		})
 	}
 
-	if core.Spec.Components.TLS.CertificateRef != "" {
+	if core.Spec.Components.NotaryServer != nil {
+		envs = append(envs, corev1.EnvVar{
+			Name:  "NOTARY_URL",
+			Value: core.Spec.Components.NotaryServer.URL,
+		})
+	}
+
+	if core.Spec.Components.TLS != nil {
 		envs = append(envs, corev1.EnvVar{
 			Name:  "INTERNAL_TLS_TRUST_CA_PATH",
 			Value: path.Join(InternalCertificatesPath, corev1.ServiceAccountRootCAKey),
@@ -258,7 +279,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 								Value: core.Spec.ExternalEndpoint,
 							}, corev1.EnvVar{
 								Name:  "LOG_LEVEL",
-								Value: core.Spec.Log.Level,
+								Value: string(core.Spec.Log.Level),
 							}, corev1.EnvVar{
 								Name:  "AUTH_MODE",
 								Value: core.Spec.AuthenticationMode,
@@ -370,9 +391,6 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 								Name:  "INTERNAL_TLS_TRUST_CA_PATH",
 								Value: path.Join(CertificatesPath, corev1.ServiceAccountRootCAKey),
 							}, corev1.EnvVar{
-								Name:  "CHART_REPOSITORY_URL",
-								Value: core.Spec.Components.ChartRepository.URL,
-							}, corev1.EnvVar{
 								Name:  "REGISTRY_URL",
 								Value: core.Spec.Components.Registry.URL,
 							}, corev1.EnvVar{
@@ -382,14 +400,11 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 								Name:  "TOKEN_SERVICE_URL",
 								Value: core.Spec.Components.TokenService.URL,
 							}, corev1.EnvVar{
-								Name:  "TRIVY_ADAPTER_URL",
-								Value: core.Spec.Components.Trivy.AdapterURL,
-							}, corev1.EnvVar{
 								Name:  "CONFIG_PATH",
 								Value: path.Join(ConfigPath, ConfigName),
 							}, corev1.EnvVar{
 								Name:  "CFG_EXPIRATION",
-								Value: fmt.Sprintf("%.0f", core.Spec.ConfigExpiration.Seconds()),
+								Value: fmt.Sprintf("%.0f", core.Spec.ConfigExpiration.Duration.Seconds()),
 							}, corev1.EnvVar{
 								Name:  "HTTP_PROXY",
 								Value: "", // TODO
@@ -418,19 +433,19 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 								},
 							}, corev1.EnvVar{
 								Name:  "INTERNAL_TLS_ENABLED",
-								Value: fmt.Sprintf("%v", core.Spec.Components.TLS.CertificateRef != ""),
+								Value: fmt.Sprintf("%v", core.Spec.Components.TLS != nil),
 							}, corev1.EnvVar{
 								Name:  "WITH_CHARTMUSEUM",
-								Value: fmt.Sprintf("%+v", core.Spec.Components.ChartRepository.URL != ""),
+								Value: fmt.Sprintf("%+v", core.Spec.Components.ChartRepository != nil),
 							}, corev1.EnvVar{
 								Name:  "WITH_CLAIR",
-								Value: fmt.Sprintf("%+v", core.Spec.Components.Clair.URL != ""),
+								Value: fmt.Sprintf("%+v", core.Spec.Components.Clair != nil),
 							}, corev1.EnvVar{
 								Name:  "WITH_NOTARY",
-								Value: fmt.Sprintf("%+v", core.Spec.Components.NotaryServer.URL != ""),
+								Value: fmt.Sprintf("%+v", core.Spec.Components.NotaryServer != nil),
 							}, corev1.EnvVar{
 								Name:  "WITH_TRIVY",
-								Value: fmt.Sprintf("%+v", core.Spec.Components.Trivy.URL != ""),
+								Value: fmt.Sprintf("%+v", core.Spec.Components.Trivy != nil),
 							}),
 							ImagePullPolicy: corev1.PullAlways,
 							LivenessProbe: &corev1.Probe{
@@ -453,7 +468,6 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 							VolumeMounts: volumesMount,
 						},
 					},
-					Priority: core.Spec.Priority,
 				},
 			},
 		},

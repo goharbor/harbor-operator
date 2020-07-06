@@ -267,7 +267,6 @@ func (r *Reconciler) GetDeployment(ctx context.Context, clair *goharborv1alpha2.
 							},
 						},
 					},
-					Priority: clair.Spec.Priority,
 				},
 			},
 		},

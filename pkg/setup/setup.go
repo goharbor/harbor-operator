@@ -26,6 +26,7 @@ func WithManager(ctx context.Context, mgr manager.Manager, version string) error
 
 		if !ok {
 			logger.Get(ctx).Info("Controller disabled", "controller", name)
+
 			continue
 		}
 

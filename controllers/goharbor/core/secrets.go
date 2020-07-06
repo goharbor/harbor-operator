@@ -80,7 +80,7 @@ func (r *Reconciler) GetSecret(ctx context.Context, core *goharborv1alpha2.Core)
 			Namespace: namespace,
 		},
 		StringData: map[string]string{
-			RedisDSNKey:         fmt.Sprintf("%s:%s,100,%s,%s,%.0f", redisDSN.Hostname(), redisDSN.Port(), redisPassword, strings.Trim(redisDSN.EscapedPath(), "/"), core.Spec.Redis.IdleTimeout.Seconds()),
+			RedisDSNKey:         fmt.Sprintf("%s:%s,100,%s,%s,%.0f", redisDSN.Hostname(), redisDSN.Port(), redisPassword, strings.Trim(redisDSN.EscapedPath(), "/"), core.Spec.Redis.IdleTimeout.Duration.Seconds()),
 			RegistryRedisDSNKey: registryCacheDSN.String(),
 		},
 	}, nil

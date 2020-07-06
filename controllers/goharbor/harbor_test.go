@@ -18,7 +18,6 @@ package goharbor_test
 
 import (
 	"context"
-	"fmt"
 	"net/url"
 	"reflect"
 	"time"
@@ -48,30 +47,7 @@ var _ = Context("Inside of a new namespace", func() {
 	ctx := logger.Context(log)
 	ns := SetupTest(ctx)
 
-	publicURL := url.URL{
-		Scheme: "http",
-		Host:   "the.dns",
-	}
-
 	Describe("Creating Harbor resources", func() {
-		Context("with invalid version", func() {
-			It("should raise an error", func() {
-				harbor := &goharborv1alpha2.Harbor{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "harbor-invalid-semver",
-						Namespace: ns.Name,
-					},
-					Spec: goharborv1alpha2.HarborSpec{
-						HarborVersion: "invalid-semver",
-						PublicURL:     publicURL.String(),
-					},
-				}
-				harbor.Default()
-
-				Expect(k8sClient.Create(ctx, harbor)).Should(WithTransform(apierrs.IsInvalid, BeTrue()))
-			})
-		})
-
 		Context("with invalid public url", func() {
 			It("should raise an error", func() {
 				harbor := &goharborv1alpha2.Harbor{
@@ -80,8 +56,9 @@ var _ = Context("Inside of a new namespace", func() {
 						Namespace: ns.Name,
 					},
 					Spec: goharborv1alpha2.HarborSpec{
-						HarborVersion: "1.9.1",
-						PublicURL:     "123::bad::dns",
+						HarborHelm1_4_0Spec: goharborv1alpha2.HarborHelm1_4_0Spec{
+							ExternalURL: "123::bad::dns",
+						},
 					},
 				}
 				harbor.Default()
@@ -129,7 +106,12 @@ var _ = Context("Inside of a new namespace", func() {
 
 				Expect(k8sClient.Get(ctx, key, harbor)).To(Succeed())
 
-				harbor.Spec.HarborVersion = fmt.Sprintf("%s-latest", harbor.Spec.HarborVersion)
+				u, err := url.Parse(harbor.Spec.ExternalURL)
+				Expect(err).ToNot(HaveOccurred())
+
+				u.Host = "new." + u.Host
+
+				harbor.Spec.ExternalURL = u.String()
 				// Use Eventually since Operator may increase resourceVersion asynchronously
 				Eventually(getUpdateFunc(ctx, harbor), applyTimeoutInterval).Should(Succeed(), "harbor resource should be updatable")
 
@@ -204,9 +186,10 @@ func newValidHarborTest(ns string) (*goharborv1alpha2.Harbor, client.ObjectKey) 
 			Namespace: ns,
 		},
 		Spec: goharborv1alpha2.HarborSpec{
-			HarborVersion:       "1.10.0",
-			PublicURL:           publicURL.String(),
-			AdminPasswordSecret: "admin-secret",
+			HarborHelm1_4_0Spec: goharborv1alpha2.HarborHelm1_4_0Spec{
+				ExternalURL:            publicURL.String(),
+				HarborAdminPasswordRef: "admin-secret",
+			},
 		},
 	}
 	harbor.Default()
