@@ -65,12 +65,16 @@ type ChartMuseumServerSpec struct {
 	HTTPS ChartMuseumHTTPSSpec `json:"https,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type="string"
+	// +kubebuilder:validation:Pattern="([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?"
 	// Socket timeout
-	ReadTimeout PositiveDuration `json:"readTimeout,omitempty"`
+	ReadTimeout *metav1.Duration `json:"readTimeout,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type="string"
+	// +kubebuilder:validation:Pattern="([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?"
 	// Socket timeout
-	WriteTimeout PositiveDuration `json:"writeTimeout,omitempty"`
+	WriteTimeout *metav1.Duration `json:"writeTimeout,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=0
@@ -240,8 +244,10 @@ type ChartMuseumChartIndexSpec struct {
 	ParallelLimit int32 `json:"parallelLimit,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type="string"
+	// +kubebuilder:validation:Pattern="([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?"
 	// Timestamp drift tolerated between cached and generated index before invalidation
-	StorageTimestampTolerance PositiveDuration `json:"storageTimestampTolerance,omitempty"`
+	StorageTimestampTolerance *metav1.Duration `json:"storageTimestampTolerance,omitempty"`
 }
 
 type ChartMuseumPostFormFieldNameSpec struct {
@@ -345,7 +351,7 @@ type ChartMuseumDisableSpec struct {
 type ChartMuseumCacheSpec struct {
 	// +kubebuilder:validation:Optional
 	// Redis cache store
-	Redis OpacifiedDSN `json:"redis,omitempty"`
+	Redis *OpacifiedDSN `json:"redis,omitempty"`
 }
 
 func init() { // nolint:gochecknoinits
