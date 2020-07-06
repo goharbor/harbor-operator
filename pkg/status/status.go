@@ -73,8 +73,18 @@ func UpdateCondition(ctx context.Context, conditions []interface{}, conditionTyp
 
 		if condition["type"] == conditionTypeString {
 			condition["status"] = string(conditionStatus)
-			condition["reason"] = reason
-			condition["message"] = message
+
+			if reason == "" {
+				delete(condition, "reason")
+			} else {
+				condition["reason"] = reason
+			}
+
+			if message == "" {
+				delete(condition, "message")
+			} else {
+				condition["message"] = message
+			}
 
 			// conditions[i] = condition
 

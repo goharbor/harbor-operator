@@ -65,9 +65,7 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 		Complete(r)
 }
 
-func New(ctx context.Context, name, version string, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
-	configStore.Env(name)
-
+func New(ctx context.Context, name string, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
 	configTemplatePath, err := configStore.GetItemValue(ConfigTemplatePathKey)
 	if err != nil {
 		if _, ok := err.(configstore.ErrItemNotFound); !ok {
