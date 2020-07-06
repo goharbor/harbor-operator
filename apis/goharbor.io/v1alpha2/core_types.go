@@ -63,23 +63,36 @@ type CoreSpec struct {
 	ExternalEndpoint string `json:"externalEndpoint"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type="string"
+	// +kubebuilder:validation:Pattern="([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?"
 	// +kubebuilder:default="5s"
-	ConfigExpiration PositiveDuration `json:"configExpiration,omitempty"`
+	ConfigExpiration *metav1.Duration `json:"configExpiration,omitempty"`
 
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:MinLength=1
 	CSRFKeyRef string `json:"csrfKeyRef"`
+
+	// +kubebuilder:validation:Required
+	ServiceToken CoreServiceTokenSpec `json:"serviceToken"`
+}
+
+type CoreServiceTokenSpec struct {
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:MinLength=1
+	CertificateRef string `json:"certificateRef"`
 }
 
 type CoreRedisSpec struct {
 	OpacifiedDSN `json:",inline"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type="string"
+	// +kubebuilder:validation:Pattern="([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?"
 	// +kubebuilder:default="30s"
 	// IdleTimeoutSecond closes connections after remaining idle for this duration. If the value
 	// is zero, then idle connections are not closed. Applications should set
 	// the timeout to a value less than the server's timeout.
-	IdleTimeout PositiveDuration `json:"idleTimeout,omitempty"`
+	IdleTimeout *metav1.Duration `json:"idleTimeout,omitempty"`
 }
 
 type CoreHTTPSpec struct {
@@ -146,34 +159,16 @@ type CoreDatabaseSpec struct {
 }
 
 type CorePostgresqlSpec struct {
-	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:MinLength=1
-	Host string `json:"host"`
-
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Minimum=0
-	// +kubebuilder:validation:ExclusiveMinimum=true
-	// +kubebuilder:default=5432
-	Port int32 `json:"port,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:MinLength=1
-	// +kubebuilder:default="postgres"
-	Username string `json:"username,omitempty"`
+	ExternalDatabaseSpec `json:",inline"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:MinLength=1
 	// +kubebuilder:default="postgres"
 	Name string `json:"name,omitempty"`
+}
 
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:MinLength=1
-	PasswordRef string `json:"passwordRef,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Enum={"disable","allow","prefer","require","verify-ca","verify-full"}
-	// +kubebuilder:default="prefer"
-	SSLMode string `json:"sslMode,omitempty"`
+func (r CorePostgresqlSpec) GetOpacifiedDSN() OpacifiedDSN {
+	return r.ExternalDatabaseSpec.GetOpacifiedDSN(r.Name)
 }
 
 type CoreComponentsJobServiceSpec struct {
