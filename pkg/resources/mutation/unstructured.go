@@ -18,7 +18,12 @@ func NewUnstructured(mutate resources.Mutable) resources.Mutable {
 		mutate := mutate(ctx, desired, result)
 
 		return func() error {
+			gvk := result.GetObjectKind().GroupVersionKind()
+			resourceVersion := result.GetResourceVersion()
+
 			result.SetUnstructuredContent(desired.UnstructuredContent())
+			result.SetGroupVersionKind(gvk)
+			result.SetResourceVersion(resourceVersion)
 
 			return mutate()
 		}

@@ -2,7 +2,6 @@ package jobservice
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/sethvargo/go-password/password"
 	corev1 "k8s.io/api/core/v1"
@@ -22,10 +21,13 @@ const (
 )
 
 func (r *Reconciler) GetSecrets(ctx context.Context, jobservice *goharborv1alpha2.JobService) (*corev1.Secret, error) {
+	name := r.NormalizeName(ctx, jobservice.GetName())
+	namespace := jobservice.GetNamespace()
+
 	return &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-jobservice", jobservice.GetName()),
-			Namespace: jobservice.GetNamespace(),
+			Name:      name,
+			Namespace: namespace,
 		},
 		Type: corev1.SecretTypeOpaque,
 		StringData: map[string]string{

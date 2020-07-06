@@ -28,22 +28,32 @@ var _ = FContext("Adding", func() {
 	var c *Controller
 
 	resourceAdd := map[resources.Resource]func(*Controller, context.Context, resources.Resource, ...graph.Resource) (graph.Resource, error){
-		&corev1.ConfigMap{}:   (*Controller).AddConfigMapToManage,
-		&corev1.Secret{}:      (*Controller).AddSecretToManage,
-		&netv1.Ingress{}:      (*Controller).AddIngressToManage,
-		&certv1.Certificate{}: (*Controller).AddCertificateToManage,
-		&appsv1.Deployment{}:  (*Controller).AddDeploymentToManage,
+		&corev1.ConfigMap{}: func(c *Controller, ctx context.Context, res resources.Resource, dep ...graph.Resource) (graph.Resource, error) {
+			return c.AddConfigMapToManage(ctx, res.(*corev1.ConfigMap), dep...)
+		},
+		&corev1.Secret{}: func(c *Controller, ctx context.Context, res resources.Resource, dep ...graph.Resource) (graph.Resource, error) {
+			return c.AddSecretToManage(ctx, res.(*corev1.Secret), dep...)
+		},
+		&netv1.Ingress{}: func(c *Controller, ctx context.Context, res resources.Resource, dep ...graph.Resource) (graph.Resource, error) {
+			return c.AddIngressToManage(ctx, res.(*netv1.Ingress), dep...)
+		},
+		&certv1.Certificate{}: func(c *Controller, ctx context.Context, res resources.Resource, dep ...graph.Resource) (graph.Resource, error) {
+			return c.AddCertificateToManage(ctx, res.(*certv1.Certificate), dep...)
+		},
+		&appsv1.Deployment{}: func(c *Controller, ctx context.Context, res resources.Resource, dep ...graph.Resource) (graph.Resource, error) {
+			return c.AddDeploymentToManage(ctx, res.(*appsv1.Deployment), dep...)
+		},
 	}
 
 	BeforeEach(func() {
-		c, ctx = setupTest(context.TODO())
-
-		ctx = c.PopulateContext(ctx, controllerruntime.Request{
+		ctx = c.NewContext(controllerruntime.Request{
 			NamespacedName: types.NamespacedName{
 				Name:      "resource-name",
 				Namespace: "namespace",
 			},
 		})
+
+		c, ctx = setupTest(ctx)
 	})
 
 	for p, add := range resourceAdd {
@@ -67,7 +77,7 @@ var _ = FContext("Adding", func() {
 				Describe("An unknown resource", func() {
 					BeforeEach(func() {
 						c := NewController(ctx, "test", nil, nil)
-						d, err := c.AddConfigMapToManage(c.PopulateContext(context.TODO(), controllerruntime.Request{
+						d, err := c.AddConfigMapToManage(c.NewContext(controllerruntime.Request{
 							NamespacedName: types.NamespacedName{
 								Name:      "resource-name",
 								Namespace: "namespace",
