@@ -1,7 +1,7 @@
 apiVersion: goharbor.io/v1alpha2
 kind: Registry
 metadata:
-  name: harbor
+  name: sample
 spec:
   storage:
     driver:

@@ -136,34 +136,48 @@ deploy: generate kustomize
 
 .PHONY: sample
 sample: kustomize
-	$(KUSTOMIZE) config/samples \
+	$(KUSTOMIZE) build config/samples \
 		| kubectl apply -f -
 	kubectl get goharbor
 
 .PHONY: sample
 sample-%: kustomize
-	$(KUSTOMIZE) 'config/samples/$*' \
+	$(KUSTOMIZE) build 'config/samples/$*' \
 		| kubectl apply -f -
 	kubectl get goharbor
 
 .PHONY: install-dependencies
-install-dependencies: helm
+install-dependencies: certmanager redis postgresql ingress
+
+redis: helm
 	$(HELM) repo add bitnami https://charts.bitnami.com/bitnami
-	$(HELM) get notes core-database \
-		|| $(HELM) install core-database bitnami/postgresql
-	$(HELM) get notes clair-database \
-		|| $(HELM) install clair-database bitnami/postgresql
-	$(HELM) get notes notary-server-database \
-		|| $(HELM) install notary-server-database bitnami/postgresql
-	$(HELM) get notes notary-signer-database \
-		|| $(HELM) install notary-signer-database bitnami/postgresql
-	$(HELM) get notes harbor-redis \
-		|| $(HELM) install harbor-redis bitnami/redis \
-			--set usePassword=true
-	$(HELM) get notes nginx \
-		|| $(HELM) install nginx stable/nginx-ingress \
-			--set-string controller.config.proxy-body-size=0
-	kubectl apply -f config/samples/notary-ingress-service.yaml
+	$(HELM) upgrade --install harbor-redis bitnami/redis \
+		--set usePassword=true
+
+postgresql: helm
+	$(MAKE) sample-database
+	$(HELM) repo add bitnami https://charts.bitnami.com/bitnami
+	$(HELM) upgrade --install harbor-database bitnami/postgresql \
+		--set-string initdbScriptsConfigMap=harbor-init-db
+
+INGRESS_NAMESPACE := nginx-ingress
+
+ingress: helm
+	kubectl get namespace $(INGRESS_NAMESPACE) || kubectl create namespace $(INGRESS_NAMESPACE)
+	$(HELM) upgrade --install nginx stable/nginx-ingress \
+		--namespace $(INGRESS_NAMESPACE) \
+		--set-string controller.config.proxy-body-size=0
+
+CERTMANAGER_NAMESPACE := cert-manager
+
+certmanager: helm
+	$(HELM) repo add jetstack https://charts.jetstack.io
+	kubectl get namespace $(CERTMANAGER_NAMESPACE) || kubectl create namespace $(CERTMANAGER_NAMESPACE)
+	$(HELM) upgrade --install certmanager jetstack/cert-manager \
+		--namespace $(CERTMANAGER_NAMESPACE) \
+		--version v0.15.1 \
+		--set installCRDs=true
+
 
 # Install local certificate
 # Required for webhook server to start
