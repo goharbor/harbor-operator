@@ -12,15 +12,19 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (r *Reconciler) AddNotaryServerConfigurations(ctx context.Context, harbor *goharborv1alpha2.Harbor) (ChartMuseumAuthSecret, error) {
+func (r *Reconciler) AddNotaryServerConfigurations(ctx context.Context, harbor *goharborv1alpha2.Harbor) (graph.Resource, error) {
 	if harbor.Spec.Notary == nil {
 		return nil, nil
 	}
 
+	// TODO
+
 	return nil, nil
 }
 
-func (r *Reconciler) AddNotaryServer(ctx context.Context, harbor *goharborv1alpha2.Harbor) (graph.Resource, error) {
+type NotaryServer graph.Resource
+
+func (r *Reconciler) AddNotaryServer(ctx context.Context, harbor *goharborv1alpha2.Harbor) (NotaryServer, error) {
 	if harbor.Spec.Notary == nil {
 		return nil, nil
 	}
@@ -32,7 +36,7 @@ func (r *Reconciler) AddNotaryServer(ctx context.Context, harbor *goharborv1alph
 
 	notaryServerRes, err := r.AddBasicResource(ctx, notaryServer)
 
-	return notaryServerRes, errors.Wrap(err, "cannot add basic resource")
+	return NotaryServer(notaryServerRes), errors.Wrap(err, "cannot add basic resource")
 }
 
 const (
