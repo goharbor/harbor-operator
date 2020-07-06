@@ -2,6 +2,7 @@ package jobservice
 
 import (
 	"context"
+	"fmt"
 	"path"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -18,11 +19,13 @@ var (
 )
 
 const (
-	VolumeName     = "config"
-	LogsVolumeName = "logs"
-	configPath     = "/etc/jobservice/"
-	port           = 8080
-	HealthPath     = "/api/v1/stats"
+	VolumeName       = "config"
+	LogsVolumeName   = "logs"
+	configPath       = "/etc/jobservice/"
+	port             = 8080
+	HealthPath       = "/api/v1/stats"
+	JobLogsParentDir = "/mnt/joblogs"
+	LogsParentDir    = "/mnt/logs"
 )
 
 func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1alpha2.JobService) (*appsv1.Deployment, error) { // nolint:funlen
@@ -33,6 +36,79 @@ func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1al
 
 	name := r.NormalizeName(ctx, jobservice.GetName())
 	namespace := jobservice.GetNamespace()
+
+	volumes := []corev1.Volume{
+		{
+			Name: VolumeName,
+			VolumeSource: corev1.VolumeSource{
+				ConfigMap: &corev1.ConfigMapVolumeSource{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: name,
+					},
+				},
+			},
+		}, {
+			Name: LogsVolumeName,
+			VolumeSource: corev1.VolumeSource{
+				EmptyDir: &corev1.EmptyDirVolumeSource{},
+			},
+		},
+	}
+	volumeMounts := []corev1.VolumeMount{
+		{
+			MountPath: configPath,
+			Name:      VolumeName,
+		}, {
+			MountPath: logsDirectory,
+			Name:      LogsVolumeName,
+		},
+	}
+
+	for i, fileLogger := range jobservice.Spec.Loggers.Files {
+		source := corev1.VolumeSource{
+			EmptyDir: &corev1.EmptyDirVolumeSource{},
+		}
+
+		if fileLogger.Volume != nil {
+			source = *fileLogger.Volume
+		}
+
+		name := fmt.Sprintf("logs-%d", i)
+
+		volumes = append(volumes, corev1.Volume{
+			Name:         name,
+			VolumeSource: source,
+		})
+
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{
+			MountPath: path.Join(LogsParentDir, fmt.Sprintf("%d", i)),
+			Name:      name,
+			ReadOnly:  false,
+		})
+	}
+
+	for i, fileLogger := range jobservice.Spec.JobLoggers.Files {
+		source := corev1.VolumeSource{
+			EmptyDir: &corev1.EmptyDirVolumeSource{},
+		}
+
+		if fileLogger.Volume != nil {
+			source = *fileLogger.Volume
+		}
+
+		name := fmt.Sprintf("joblogs-%d", i)
+
+		volumes = append(volumes, corev1.Volume{
+			Name:         name,
+			VolumeSource: source,
+		})
+
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{
+			MountPath: path.Join(JobLogsParentDir, fmt.Sprintf("%d", i)),
+			Name:      name,
+			ReadOnly:  false,
+		})
+	}
 
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -57,23 +133,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1al
 				Spec: corev1.PodSpec{
 					NodeSelector:                 jobservice.Spec.NodeSelector,
 					AutomountServiceAccountToken: &varFalse,
-					Volumes: []corev1.Volume{
-						{
-							Name: VolumeName,
-							VolumeSource: corev1.VolumeSource{
-								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{
-										Name: name,
-									},
-								},
-							},
-						}, {
-							Name: LogsVolumeName,
-							VolumeSource: corev1.VolumeSource{
-								EmptyDir: &corev1.EmptyDirVolumeSource{},
-							},
-						},
-					},
+					Volumes:                      volumes,
 					Containers: []corev1.Container{
 						{
 							Name:  "jobservice",
@@ -146,18 +206,9 @@ func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1al
 									},
 								},
 							},
-							VolumeMounts: []corev1.VolumeMount{
-								{
-									MountPath: configPath,
-									Name:      VolumeName,
-								}, {
-									MountPath: logsDirectory,
-									Name:      LogsVolumeName,
-								},
-							},
+							VolumeMounts: volumeMounts,
 						},
 					},
-					Priority: jobservice.Spec.Priority,
 				},
 			},
 		},

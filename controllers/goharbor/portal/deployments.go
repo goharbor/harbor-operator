@@ -81,7 +81,6 @@ func (r *Reconciler) GetDeployment(ctx context.Context, portal *goharborv1alpha2
 							},
 						},
 					},
-					Priority: portal.Spec.Priority,
 				},
 			},
 			Paused: false,

@@ -7,8 +7,6 @@ import (
 	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
-	appsv1 "k8s.io/api/apps/v1"
-	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1beta1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -26,14 +24,6 @@ const (
 // Reconciler reconciles a Harbor object.
 type Reconciler struct {
 	*commonCtrl.Controller
-}
-
-func (r *Reconciler) GetVersion() string {
-	return r.Version
-}
-
-func (r *Reconciler) GetName() string {
-	return r.Name
 }
 
 func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) error {
@@ -57,21 +47,22 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 			ClassName: className,
 		}).
 		For(&goharborv1alpha2.Harbor{}).
-		Owns(&appsv1.Deployment{}).
+		Owns(&goharborv1alpha2.Portal{}).
+		Owns(&goharborv1alpha2.Registry{}).
+		Owns(&goharborv1alpha2.ChartMuseum{}).
+		Owns(&goharborv1alpha2.Core{}).
+		Owns(&goharborv1alpha2.RegistryController{}).
+		Owns(&goharborv1alpha2.NotaryServer{}).
+		Owns(&goharborv1alpha2.NotarySigner{}).
 		Owns(&certv1.Certificate{}).
-		Owns(&corev1.ConfigMap{}).
 		Owns(&netv1.Ingress{}).
-		Owns(&corev1.Secret{}).
-		Owns(&corev1.Service{}).
 		WithOptions(controller.Options{
 			MaxConcurrentReconciles: int(concurrentReconcile),
 		}).
 		Complete(r)
 }
 
-func New(ctx context.Context, name, version string, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
-	configStore.Env(name)
-
+func New(ctx context.Context, name string, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
 	r := &Reconciler{}
 
 	r.Controller = commonCtrl.NewController(ctx, name, r, configStore)
