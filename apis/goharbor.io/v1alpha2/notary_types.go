@@ -9,9 +9,7 @@ import (
 
 type NotaryLoggingSpec struct {
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Enum={"debug","info","warning","error","fatal","panic"}
-	// +kubebuilder:default="info"
-	Level string `json:"level"`
+	Level NotaryLogLevel `json:"level"`
 }
 
 type NotaryMigrationSpec struct {
