@@ -10,7 +10,9 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (r *Reconciler) AddPortal(ctx context.Context, harbor *goharborv1alpha2.Harbor) (graph.Resource, error) {
+type Portal graph.Resource
+
+func (r *Reconciler) AddPortal(ctx context.Context, harbor *goharborv1alpha2.Harbor) (Portal, error) {
 	portal, err := r.GetPortal(ctx, harbor)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot get portal")
