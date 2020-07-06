@@ -17,36 +17,48 @@ worker_pool:
   redis_pool:
     redis_url: {{ "redis-password" | secretData .Spec.WorkerPool.Redis.PasswordRef | .Spec.WorkerPool.Redis.GetDSN }}
     namespace: {{ default ( printf "jobservice::%s::%s" .ObjectMeta.Namespace .ObjectMeta.Name ) .Spec.WorkerPool.Redis.Namespace }}
-    idle_timeout_second: {{ .Spec.WorkerPool.Redis.IdleTimeout.Seconds | int64 }}
+    idle_timeout_second: {{ .Spec.WorkerPool.Redis.IdleTimeout.Duration.Seconds | int64 }}
 
 job_loggers:
-{{- range $_, $logger := .Spec.JobLoggers }}
-- name: {{ $logger.Name }}
-  level: {{ default "info" $logger.Level }}
-  {{- if $logger.SettingsRef }}
-  settings: {{ secretData $logger.SettingsRef | toJson }}
-  {{- end }}
-  {{- if $logger.Sweeper }}
+{{- if .Spec.JobLoggers.Database }}
+- name: DB
+  level: {{ .Spec.JobLoggers.Database.Level }}
   sweeper:
-    duration: {{ $logger.Sweeper.Duration }}
-    {{- if $logger.Sweeper.SettingsRef }}
-    settings: {{ secretData $logger.Sweeper.SettingsRef | toJson }}
-    {{- end }}
-  {{- end }}
+    duration: {{ div .Spec.JobLoggers.Database.Sweeper.Duration.Hours 24 }} # days
+{{- end }}
+{{- if .Spec.JobLoggers.STDOUT }}
+- name: STD_OUTPUT
+  level: {{ .Spec.JobLoggers.STDOUT.Level }}
+{{- end }}
+{{- range $i, $logger := .Spec.JobLoggers.Files }}
+- name: FILE
+  level: {{ $logger.Level }}
+  settings: # Customized settings of logger
+    base_dir: /mnt/joblogs/{{ $i }}
+  sweeper:
+    duration: {{ div $logger.Sweeper.Duration.Hours 24 }} # days
+    settings: # Customized settings of sweeper
+      work_dir: /mnt/joblogs/{{ $i }}
 {{- end }}
 
 loggers:
-{{- range $_, $logger := .Spec.Loggers }}
-- name: {{ $logger.Name }}
-  level: {{ default "info" $logger.Level }}
-  {{- if $logger.SettingsRef }}
-  settings: {{ secretData $logger.SettingsRef | toJson }}
-  {{- end }}
-  {{- if $logger.Sweeper }}
+{{- if .Spec.Loggers.Database }}
+- name: DB
+  level: {{ .Spec.Loggers.Database.Level }}
   sweeper:
-    duration: {{ $logger.Sweeper.Duration }}
-    {{- if $logger.Sweeper.SettingsRef }}
-    settings: {{ secretData $logger.Sweeper.SettingsRef | toJson }}
-    {{- end }}
-  {{- end }}
+    duration: {{ div .Spec.Loggers.Database.Sweeper.Duration.Hours 24 }} # days
+{{- end }}
+{{- if .Spec.Loggers.STDOUT }}
+- name: STD_OUTPUT
+  level: {{ .Spec.Loggers.STDOUT.Level }}
+{{- end }}
+{{- range $i, $logger := .Spec.Loggers.Files }}
+- name: FILE
+  level: {{ $logger.Level }}
+  settings: # Customized settings of logger
+    base_dir: /mnt/joblogs/{{ $i }}
+  sweeper:
+    duration: {{ div $logger.Sweeper.Duration.Hours 24 }} # days
+    settings: # Customized settings of sweeper
+      work_dir: /mnt/logs/{{ $i }}
 {{- end }}

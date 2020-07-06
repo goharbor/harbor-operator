@@ -14,10 +14,10 @@ auth:
 bearer.auth: 1
 {{- end }}
 
-{{- if .Spec.Cache.Redis.DSN }}
+{{- if .Spec.Cache.Redis }}
 cache: redis
 cache.redis:
-  {{- with (.Spec.Cache.Redis.DSN.GetDSN "") }}
+  {{- with (.Spec.Cache.Redis.GetDSN "") }}
   addr: {{ quote .Host }}
   # password: Will be set with environment variable
   db: {{ .EscapedPath | trimAll "/" }}
@@ -53,5 +53,3 @@ max:
 
 chart.post.form.field.name: {{ .Spec.Chart.PostFormFieldName.Chart }}
 prov.post.form.field.name: {{ .Spec.Chart.PostFormFieldName.Provenance }}
-
-storage: {{ .Spec.Chart.Storage.Name }}
