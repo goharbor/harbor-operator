@@ -309,13 +309,13 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1alpha2.Harbo
 	tokenCertificateRef := r.NormalizeName(ctx, harbor.GetName(), "core", "tokencert")
 
 	dbDSN := harbor.Spec.DatabaseDSN(goharborv1alpha2.CoreDatabase)
+
 	dbURL, err := dbDSN.GetDSN("")
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot get database DSN")
 	}
 
-	portStr := dbURL.Port()
-	port, err := strconv.Atoi(portStr)
+	port, err := strconv.ParseInt(dbURL.Port(), 10, 32)
 	if err != nil {
 		return nil, errors.Wrap(err, "unsupported port value")
 	}

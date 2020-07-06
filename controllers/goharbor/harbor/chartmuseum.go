@@ -73,7 +73,9 @@ func (r *Reconciler) GetChartMuseumAuthenticationSecret(ctx context.Context, har
 	}, nil
 }
 
-func (r *Reconciler) AddChartMuseum(ctx context.Context, harbor *goharborv1alpha2.Harbor) (graph.Resource, error) {
+type ChartMuseum graph.Resource
+
+func (r *Reconciler) AddChartMuseum(ctx context.Context, harbor *goharborv1alpha2.Harbor) (ChartMuseum, error) {
 	if harbor.Spec.ChartMuseum == nil {
 		return nil, nil
 	}
@@ -85,7 +87,7 @@ func (r *Reconciler) AddChartMuseum(ctx context.Context, harbor *goharborv1alpha
 
 	chartmuseumRes, err := r.AddBasicResource(ctx, chartmuseum)
 
-	return chartmuseumRes, errors.Wrap(err, "cannot add basic resource")
+	return ChartMuseum(chartmuseumRes), errors.Wrap(err, "cannot add basic resource")
 }
 
 func (r *Reconciler) GetChartMuseum(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*goharborv1alpha2.ChartMuseum, error) {
