@@ -1,7 +1,7 @@
 apiVersion: cert-manager.io/v1alpha2
 kind: Certificate
 metadata:
-  name: harbor-signer
+  name: sample-signer
 spec:
   # Secret names are always required.
   secretName: harbor-signer-certificate

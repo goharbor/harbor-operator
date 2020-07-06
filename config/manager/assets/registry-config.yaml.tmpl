@@ -1,4 +1,4 @@
-{{/* https://docs.docker.com/registry/configuration/ */}}
+# https://docs.docker.com/registry/configuration/
 version: 0.1
 log:
   accesslog:
@@ -17,11 +17,13 @@ log:
 {{- end }}
 http:
   # secret: setted through environment variable
+  {{- if .Spec.HTTP.Debug }}
   debug:
-    addr: {{ .Spec.HTTP.Debug.Address }}
+    addr: :{{ .Spec.HTTP.Debug.Port }}
     prometheus:
       enabled: {{ .Spec.HTTP.Debug.Prometheus.Enabled }}
       path: {{ .Spec.HTTP.Debug.Prometheus.Path }}
+  {{- end }}q
 {{- if .Spec.HTTP.Headers }}
   headers: {{ .Spec.HTTP.Headers | toJson }}
 {{- end }}
@@ -33,7 +35,9 @@ http:
     disabled: {{ .Spec.HTTP.HTTP2.Disabled }}
   host: {{ .Spec.HTTP.Host }}
   relativeurls: {{ .Spec.HTTP.RelativeURLs }}
-  draintimeout: {{ .Spec.HTTP.DrainTimeout }}
+  {{- if .Spec.HTTP.DrainTimeout }}
+  draintimeout: {{ .Spec.HTTP.DrainTimeout.Duration }}
+  {{- end }}
 {{- if .Spec.Reporting }}
 reporting:
   {{- range $name, $reference := .Spec.Reporting }}
@@ -48,8 +52,12 @@ storage:
   maintenance:
     uploadPurging:
       enabled: {{ .Spec.Storage.Maintenance.UploadPurging.Enabled }}
-      age: {{ .Spec.Storage.Maintenance.UploadPurging.Age }}
-      interval: {{ .Spec.Storage.Maintenance.UploadPurging.Interval }}
+      {{- if .Spec.Storage.Maintenance.UploadPurging.Age }}
+      age: {{ .Spec.Storage.Maintenance.UploadPurging.Age.Duration }}
+      {{- end }}
+      {{- if .Spec.Storage.Maintenance.UploadPurging.Interval }}
+      interval: {{ .Spec.Storage.Maintenance.UploadPurging.Interval.Duration }}
+      {{- end }}
       dryRun: {{ .Spec.Storage.Maintenance.UploadPurging.DryRun }}
     readOnly:
       enabled: {{ .Spec.Storage.Maintenance.ReadOnly.Enabled }}
@@ -91,7 +99,7 @@ storage:
   swift:
     username: {{ .Spec.Storage.Driver.Swift.Username }}
     # password: setted through environment variable
-    authurl: {{ .Spec.Storage.Driver.Swift.AuthURL }}
+    authurl: {{ .Spec.Storage.Driver.Swift.AuthenticationURL }}
     container: {{ .Spec.Storage.Driver.Swift.Container }}
     prefix: {{ .Spec.Storage.Driver.Swift.Prefix }}
     insecureskipverify: {{ .Spec.Storage.Driver.Swift.InsecureSkipVerify }}
@@ -161,13 +169,21 @@ redis:
   # password: setted through environment variable
   db: {{ .EscapedPath | trimAll "/" }}
   {{- end }}
-  dialtimeout: {{ .Spec.Redis.DialTimeout }}
-  readtimeout: {{ .Spec.Redis.ReadTimeout }}
-  writetimeout: {{ .Spec.Redis.WriteTimeout }}
+  {{- if .Spec.Redis.DialTimeout }}
+  dialtimeout: {{ .Spec.Redis.DialTimeout.Duration }}
+  {{- end }}
+  {{- if .Spec.Redis.ReadTimeout }}
+  readtimeout: {{ .Spec.Redis.ReadTimeout.Duration }}
+  {{- end }}
+  {{- if .Spec.Redis.WriteTimeout }}
+  writetimeout: {{ .Spec.Redis.WriteTimeout.Duration }}
+  {{- end }}
   pool:
     maxidle: {{ .Spec.Redis.Pool.MaxIdle }}
     maxactive: {{ .Spec.Redis.Pool.MaxActive }}
-    idletimeout: {{ .Spec.Redis.Pool.IdleTimeout }}
+    {{- if .Spec.Redis.Pool.IdleTimeout }}
+    idletimeout: {{ .Spec.Redis.Pool.IdleTimeout.Duration }}
+    {{- end }}
 {{- end }}
 proxy:
   remoteurl: {{ .Spec.Proxy.RemoteURL }}
@@ -218,7 +234,9 @@ notifications:
     disabled: {{ $endpoint.Disabled }}
     url: {{ $endpoint.URL }}
     headers: {{ $endpoint.Headers | toJson }}
-    timeout: {{ $endpoint.Timeout }}
+    {{- if $endpoint.Timeout }}
+    timeout: {{ $endpoint.Timeout.Duration }}
+    {{- end }}
     threshold: {{ $endpoint.Threshold }}
     backoff: {{ $endpoint.Backoff }}
     ignoredmediatypes: {{ $endpoint.IgnoredMediaTypes | toJson }}
@@ -232,13 +250,17 @@ notifications:
 health:
   storagedriver:
     enabled: {{ .Spec.Health.StorageDriver.Enabled }}
-    interval: {{ .Spec.Health.StorageDriver.Interval }}
+    {{- if .Spec.Health.StorageDriver.Interval }}
+    interval: {{ .Spec.Health.StorageDriver.Interval.Duration }}
+    {{- end }}
     threshold: {{ .Spec.Health.StorageDriver.Threshold }}
 {{- if .Spec.Health.File }}
   file:
   {{- range $_, $health := .Spec.Health.File }}
   - file: {{ $health.File }}
-    interval: {{ $health.Interval }}
+    {{- if $health.Interval }}
+    interval: {{ $health.Interval.Duration }}
+    {{- end }}
   {{- end }}
 {{- end }}
 {{- if .Spec.Health.HTTP }}
@@ -247,8 +269,12 @@ health:
   - uri: {{ $health.URI }}
     headers: {{ $health.Headers | toJson }}
     statuscode: {{ $health.StatusCode }}
-    timeout: {{ $health.Timeout }}
-    interval: {{ $health.Interval }}
+    {{- if $health.Timeout }}
+    timeout: {{ $health.Timeout.Duration }}
+    {{- end }}
+    {{- if $health.Interval }}
+    interval: {{ $health.Interval.Duration }}
+    {{- end }}
     threshold: {{ $health.Threshold }}
   {{- end }}
 {{- end }}
@@ -256,8 +282,12 @@ health:
   tcp:
   {{- range $_, $health := .Spec.Health.TCP }}
   - addr: {{ $health.Address }}
-    timeout: {{ $health.Timeout }}
-    interval: {{ $health.Interval }}
+    {{- if $health.Timeout }}
+    timeout: {{ $health.Timeout.Duration }}
+    {{- end }}
+    {{- if $health.Interval }}
+    interval: {{ $health.Interval.Duration }}
+    {{- end }}
     threshold: {{ $health.Threshold }}
   {{- end }}
 {{- end }}

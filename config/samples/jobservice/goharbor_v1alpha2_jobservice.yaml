@@ -1,7 +1,7 @@
 apiVersion: goharbor.io/v1alpha2
 kind: JobService
 metadata:
-  name: harbor
+  name: sample
 spec:
   secretRef: jobservice-secret
   core:

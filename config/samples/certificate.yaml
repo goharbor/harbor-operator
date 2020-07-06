@@ -1,14 +1,14 @@
 apiVersion: cert-manager.io/v1alpha2
 kind: Issuer
 metadata:
-  name: harbor-sample
+  name: sample-sample
 spec:
   selfSigned: {}
 ---
 apiVersion: cert-manager.io/v1alpha2
 kind: Certificate
 metadata:
-  name: harbor-sample-public
+  name: sample-sample-public
 spec:
   secretName: public-certificate
   dnsNames:
