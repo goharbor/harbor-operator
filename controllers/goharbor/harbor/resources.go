@@ -55,12 +55,12 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrap(err, "cannot add core")
 	}
 
-	_, err = r.AddJobService(ctx, harbor, core, coreSecret, jobServiceSecret)
+	registry, err := r.AddJobService(ctx, harbor, core, coreSecret, jobServiceSecret)
 	if err != nil {
 		return errors.Wrap(err, "cannot add jobservice")
 	}
 
-	_, err = r.AddPortal(ctx, harbor)
+	portal, err := r.AddPortal(ctx, harbor)
 	if err != nil {
 		return errors.Wrap(err, "cannot add portal")
 	}
@@ -70,29 +70,19 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrap(err, "cannot add chartmuseum")
 	}
 
-	_, err = r.AddNotaryServer(ctx, harbor)
+	notaryServer, err := r.AddNotaryServer(ctx, harbor)
 	if err != nil {
 		return errors.Wrap(err, "cannot add notaryserver")
 	}
 
-	coreIngress, err := r.GetCoreIngresse(ctx, harbor)
+	_, err = r.AddCoreIngress(ctx, harbor, core, portal, registry)
 	if err != nil {
-		return errors.Wrap(err, "cannot get core ingress")
+		return errors.Wrap(err, "cannot add core ingress")
 	}
 
-	_, err = r.Controller.AddIngressToManage(ctx, coreIngress)
+	_, err = r.AddNotaryIngress(ctx, harbor, notaryServer)
 	if err != nil {
-		return errors.Wrapf(err, "cannot add core ingress %s", coreIngress.GetName())
-	}
-
-	notaryIngress, err := r.GetNotaryServerIngresse(ctx, harbor)
-	if err != nil {
-		return errors.Wrap(err, "cannot get notary ingress")
-	}
-
-	_, err = r.Controller.AddIngressToManage(ctx, notaryIngress)
-	if err != nil {
-		return errors.Wrapf(err, "cannot add notary ingress %s", notaryIngress.GetName())
+		return errors.Wrap(err, "cannot add notary ingress")
 	}
 
 	return nil
