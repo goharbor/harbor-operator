@@ -109,16 +109,19 @@ type RegistryRedisSpec struct {
 	OpacifiedDSN `json:",inline"`
 
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=""
-	DialTimeout PositiveDuration `json:"dialTimeout,omitempty"`
+	// +kubebuilder:validation:Type="string"
+	// +kubebuilder:validation:Pattern="([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?"
+	DialTimeout *metav1.Duration `json:"dialTimeout,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=""
-	ReadTimeout PositiveDuration `json:"readTimeout,omitempty"`
+	// +kubebuilder:validation:Type="string"
+	// +kubebuilder:validation:Pattern="([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?"
+	ReadTimeout *metav1.Duration `json:"readTimeout,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=""
-	WriteTimeout PositiveDuration `json:"writeTimeout,omitempty"`
+	// +kubebuilder:validation:Type="string"
+	// +kubebuilder:validation:Pattern="([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?"
+	WriteTimeout *metav1.Duration `json:"writeTimeout,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	Pool RegistryRedisPoolSpec `json:"pool,omitempty"`
@@ -136,8 +139,10 @@ type RegistryRedisPoolSpec struct {
 	MaxActive int32 `json:"maxActive,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type="string"
+	// +kubebuilder:validation:Pattern="([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?"
 	// +kubebuilder:default="30s"
-	IdleTimeout PositiveDuration `json:"idleTimeout,omitempty"`
+	IdleTimeout *metav1.Duration `json:"idleTimeout,omitempty"`
 }
 
 type RegistryLogSpec struct {
@@ -233,10 +238,11 @@ type RegistryHTTPSpec struct {
 	Prefix string `json:"prefix,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=""
+	// +kubebuilder:validation:Type="string"
+	// +kubebuilder:validation:Pattern="([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?"
 	// Amount of time to wait for HTTP connections to drain
 	// before shutting down after registry receives SIGTERM signal
-	DrainTimeout PositiveDuration `json:"drainTimeout,omitempty"`
+	DrainTimeout *metav1.Duration `json:"drainTimeout,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default={"X-Content-Type-Options":{"nosniff"}}
@@ -319,8 +325,10 @@ type RegistryHealthStorageDriverSpec struct {
 	Threshold int32 `json:"threshold,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type="string"
+	// +kubebuilder:validation:Pattern="([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?"
 	// +kubebuilder:default="5s"
-	Interval PositiveDuration `json:"interval,omitempty"`
+	Interval *metav1.Duration `json:"interval,omitempty"`
 }
 
 type RegistryHealthFileSpec struct {
@@ -329,8 +337,10 @@ type RegistryHealthFileSpec struct {
 	File string `json:"path"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type="string"
+	// +kubebuilder:validation:Pattern="([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?"
 	// +kubebuilder:default="5s"
-	Interval PositiveDuration `json:"interval,omitempty"`
+	Interval *metav1.Duration `json:"interval,omitempty"`
 }
 
 type RegistryHealthHTTPSpec struct {
@@ -342,12 +352,16 @@ type RegistryHealthHTTPSpec struct {
 	Headers map[string][]string `json:"headers,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type="string"
+	// +kubebuilder:validation:Pattern="([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?"
 	// +kubebuilder:default="5s"
-	Timeout PositiveDuration `json:"timeout,omitempty"`
+	Timeout *metav1.Duration `json:"timeout,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type="string"
+	// +kubebuilder:validation:Pattern="([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?"
 	// +kubebuilder:default="5s"
-	Interval PositiveDuration `json:"interval,omitempty"`
+	Interval *metav1.Duration `json:"interval,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=0
@@ -366,12 +380,16 @@ type RegistryHealthTCPSpec struct {
 	Address string `json:"address"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type="string"
+	// +kubebuilder:validation:Pattern="([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?"
 	// +kubebuilder:default="5s"
-	Timeout PositiveDuration `json:"timeout,omitempty"`
+	Timeout *metav1.Duration `json:"timeout,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type="string"
+	// +kubebuilder:validation:Pattern="([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?"
 	// +kubebuilder:default="5s"
-	Interval PositiveDuration `json:"interval,omitempty"`
+	Interval *metav1.Duration `json:"interval,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=0
@@ -418,13 +436,17 @@ type RegistryNotificationEndpointSpec struct {
 	Threshold int32 `json:"threshold,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type="string"
+	// +kubebuilder:validation:Pattern="([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?"
 	// +kubebuilder:default="5s"
 	// A value for the HTTP timeout. A positive integer and an optional suffix indicating the unit of time, which may be ns, us, ms, s, m, or h. If you omit the unit of time, ns is used.
-	Timeout PositiveDuration `json:"timeout,omitempty"`
+	Timeout *metav1.Duration `json:"timeout,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type="string"
+	// +kubebuilder:validation:Pattern="([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?"
 	// +kubebuilder:default="10s"
-	Backoff PositiveDuration `json:"backoff,omitempty"`
+	Backoff *metav1.Duration `json:"backoff,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	Headers map[string][]string `json:"headers,omitempty"`
@@ -796,12 +818,16 @@ type RegistryStorageMaintenanceUploadPurgingSpec struct {
 	DryRun bool `json:"dryRun"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type="string"
+	// +kubebuilder:validation:Pattern="([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?"
 	// +kubebuilder:default="168h"
-	Age PositiveDuration `json:"age,omitempty"`
+	Age *metav1.Duration `json:"age,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type="string"
+	// +kubebuilder:validation:Pattern="([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?"
 	// +kubebuilder:default="24h"
-	Interval PositiveDuration `json:"interval,omitempty"`
+	Interval *metav1.Duration `json:"interval,omitempty"`
 }
 
 type RegistryStorageDeleteSpec struct {

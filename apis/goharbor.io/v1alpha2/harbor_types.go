@@ -2,7 +2,9 @@ package v1alpha2
 
 import (
 	"fmt"
+	"net/url"
 
+	cmmeta "github.com/jetstack/cert-manager/pkg/apis/meta/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -108,11 +110,22 @@ type HarborComponentsSpec struct {
 	Trivy *TrivyComponentSpec `json:"trivy,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	Notary *ComponentSpec `json:"notary,omitempty"`
+	Notary *NotaryComponentSpec `json:"notary,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// If null, redis dsn must be specified for every components that need a redis.
 	Redis ExternalRedisSpec `json:"redis,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// If null, database must be specified for every components that need a database.
+	Database ExternalDatabaseSpec `json:"database,omitempty"`
+}
+
+type NotaryComponentSpec struct {
+	ComponentSpec `json:",inline"`
+
+	// +kubebuilder:validation:Optional
+	Database *OpacifiedDSN `json:"database,omitempty"`
 }
 
 type ExternalRedisSpec struct {
@@ -127,6 +140,47 @@ type ExternalRedisSpec struct {
 
 	// +kubebuilder:validation:Optional
 	PasswordRef string `json:"passwordRef,omitempty"`
+}
+
+type ExternalDatabaseSpec struct {
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:MinLength=1
+	Host string `json:"host"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Minimum=0
+	// +kubebuilder:validation:ExclusiveMinimum=true
+	// +kubebuilder:default=5432
+	Port int32 `json:"port,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:MinLength=1
+	// +kubebuilder:default="postgres"
+	Username string `json:"username,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Enum={"disable","allow","prefer","require","verify-ca","verify-full"}
+	// +kubebuilder:default="prefer"
+	SSLMode string `json:"sslMode,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:MinLength=1
+	PasswordRef string `json:"passwordRef,omitempty"`
+}
+
+func (r ExternalDatabaseSpec) GetOpacifiedDSN(dbName string) OpacifiedDSN {
+	return OpacifiedDSN{
+		PasswordRef: r.PasswordRef,
+		DSN: (&url.URL{
+			Scheme: "postgres",
+			Host:   fmt.Sprintf("%s:%d", r.Host, r.Port),
+			User:   url.User(r.Username),
+			Path:   dbName,
+			RawQuery: (&url.Values{
+				"sslmode": []string{r.SSLMode},
+			}).Encode(),
+		}).String(),
+	}
 }
 
 func (c *HarborComponentsSpec) RedisDSN(component ComponentWithRedis) OpacifiedDSN {
@@ -163,16 +217,34 @@ func (c *HarborComponentsSpec) RedisDSN(component ComponentWithRedis) OpacifiedD
 	}
 }
 
+func (c *HarborComponentsSpec) DatabaseDSN(component ComponentWithDatabase) OpacifiedDSN {
+	switch component {
+	case CoreDatabase:
+		if c.Core.Database != nil {
+			return c.Core.Database.GetOpacifiedDSN()
+		}
+	case NotaryServerDatabase:
+		if c.Notary.Database != nil {
+			return *c.Notary.Database
+		}
+	}
+
+	return c.Database.GetOpacifiedDSN(component.DBName())
+}
+
 type CoreComponentSpec struct {
 	ComponentSpec `json:",inline"`
+
+	// +kubebuilder:validation:Required
+	TokenIssuer cmmeta.ObjectReference `json:"tokenIssuer"`
 
 	// +kubebuilder:validation:Optional
 	// One of core redis dsn or global redis component must be specified
 	Redis *OpacifiedDSN `json:"redis,omitempty"`
 
-	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Optional
 	// One of core database dsn or global database component must be specified
-	Database CorePostgresqlSpec `json:"database,omitempty"`
+	Database *CorePostgresqlSpec `json:"database,omitempty"`
 }
 
 type JobServiceComponentSpec struct {
