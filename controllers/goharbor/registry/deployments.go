@@ -230,7 +230,6 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 							Env:          envs,
 						},
 					},
-					Priority: registry.Spec.Priority,
 				},
 			},
 		},

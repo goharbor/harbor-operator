@@ -9,6 +9,6 @@ type Resulter interface {
 	Result() (ctrl.Result, error)
 }
 
-type Stature interface {
+type Status interface {
 	Status() []status.Condition
 }

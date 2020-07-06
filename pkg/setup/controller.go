@@ -10,7 +10,6 @@ import (
 
 	"github.com/goharbor/harbor-operator/pkg/config"
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
-	"github.com/goharbor/harbor-operator/pkg/factories/application"
 )
 
 const (
@@ -26,11 +25,23 @@ type Controller interface {
 
 type controller struct {
 	Name ControllerUID
-	New  func(context.Context, string, string, *configstore.Store) (commonCtrl.Reconciler, error)
+	New  func(context.Context, string, *configstore.Store) (commonCtrl.Reconciler, error)
+}
+
+func (c *controller) GetConfig(ctx context.Context) (*configstore.Store, error) {
+	configStore := config.NewConfigWithDefaults()
+	configStore.Env(c.Name.String())
+
+	return configStore, nil
 }
 
 func (c *controller) WithManager(ctx context.Context, mgr manager.Manager) error {
-	controller, err := c.New(ctx, c.Name.String(), application.GetVersion(ctx), config.NewConfigWithDefaults())
+	configStore, err := c.GetConfig(ctx)
+	if err != nil {
+		return errors.Wrap(err, "get configuration")
+	}
+
+	controller, err := c.New(ctx, c.Name.String(), configStore)
 	if err != nil {
 		return errors.Wrap(err, "create")
 	}
@@ -41,9 +52,9 @@ func (c *controller) WithManager(ctx context.Context, mgr manager.Manager) error
 }
 
 func (c *controller) IsEnabled(ctx context.Context) (bool, error) {
-	ok, err := configstore.GetItemValueBool(fmt.Sprintf("%s-%s", c.Name, ControllerDisabledSuffixConfigKey))
+	disabled, err := configstore.GetItemValueBool(fmt.Sprintf("%s-%s", c.Name, ControllerDisabledSuffixConfigKey))
 	if err == nil {
-		return ok, nil
+		return !disabled, nil
 	}
 
 	if _, ok := err.(configstore.ErrItemNotFound); ok {

@@ -24,7 +24,7 @@ const (
 
 func (c *Controller) apply(ctx context.Context, res *Resource) error {
 	retry, ctx := errgroup.WithContext(ctx)
-	l := logger.Get(ctx)
+	l := logger.Get(ctx).WithValues("resource.namespace", res.resource.GetNamespace(), "resource.name", res.resource.GetName())
 
 	end := time.Now().Add(RetryDuration)
 
@@ -33,6 +33,10 @@ func (c *Controller) apply(ctx context.Context, res *Resource) error {
 	f = func() error {
 		span, ctx := opentracing.StartSpanFromContext(ctx, "createOrUpdate", &opentracing.Tags{})
 		defer span.Finish()
+
+		gvk := c.AddGVKToSpan(ctx, span, res.resource)
+
+		l.V(1).Info("Deploying resource", "gvk", gvk)
 
 		result := res.resource.DeepCopyObject()
 
@@ -45,7 +49,7 @@ func (c *Controller) apply(ctx context.Context, res *Resource) error {
 					return errors.Wrap(err, "max retry exceeded")
 				}
 
-				l.Info(fmt.Sprintf("failed to update resource, retrying in %v...", RetryDelay), "resource", res.resource)
+				l.Info(fmt.Sprintf("Failed to update resource, retrying in %v...", RetryDelay), "resource", res.resource)
 
 				time.Sleep(RetryDelay)
 				retry.Go(f)
@@ -54,10 +58,12 @@ func (c *Controller) apply(ctx context.Context, res *Resource) error {
 			}
 
 			// TODO Check if the error is a temporary error or a unrecoverrable one
-			return errors.Wrapf(err, "cannot create/update %s (%s/%s)", res.resource.GetObjectKind(), res.resource.GetNamespace(), res.resource.GetName())
+			return errors.Wrapf(err, "cannot create/update %s (%s/%s)", gvk, res.resource.GetNamespace(), res.resource.GetName())
 		}
 
 		span.SetTag("Operation.Result", op)
+
+		l.Info("Resource deployed", "resource.apiVersion", gvk.GroupVersion(), "resource.kind", gvk.Kind)
 
 		return nil
 	}

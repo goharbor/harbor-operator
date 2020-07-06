@@ -32,7 +32,7 @@ const (
 	ChartMuseum                       // chartmuseum
 )
 
-var controllers = map[ControllerUID]func(context.Context, string, string, *configstore.Store) (commonCtrl.Reconciler, error){
+var controllers = map[ControllerUID]func(context.Context, string, *configstore.Store) (commonCtrl.Reconciler, error){
 	Core:         core.New,
 	Harbor:       harbor.New,
 	JobService:   jobservice.New,

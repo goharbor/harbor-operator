@@ -78,6 +78,11 @@ func (no *node) Terminates(err error) (result error) {
 }
 
 func (no *node) AddChild(child *node) {
+	if no == nil {
+		// Parent is nil -> not a blocker
+		return
+	}
+
 	no.parentLock.Lock()
 	defer no.parentLock.Unlock()
 
