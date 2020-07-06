@@ -1,6 +1,6 @@
 apiVersion: cert-manager.io/v1alpha2
 kind: Issuer
 metadata:
-  name: sample-signer
+  name: service-token
 spec:
   selfSigned: {}

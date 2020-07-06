@@ -1,7 +1,7 @@
 apiVersion: goharbor.io/v1alpha2
 kind: ChartMuseum
 metadata:
-  name: harbor
+  name: sample
 spec:
   chart:
     url: https://harbor.public/chartrepo
