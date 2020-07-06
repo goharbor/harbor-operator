@@ -8,11 +8,11 @@ type HarborLogLevel string
 
 const (
 	HarborDebug        HarborLogLevel = "debug"
-	HarborInfo                        = "info"
-	HarborWarning                     = "warning"
-	HarborError                       = "error"
-	HarborFatal                       = "fatal"
-	HarborDefaultLevel                = HarborInfo
+	HarborInfo         HarborLogLevel = "info"
+	HarborWarning      HarborLogLevel = "warning"
+	HarborError        HarborLogLevel = "error"
+	HarborFatal        HarborLogLevel = "fatal"
+	HarborDefaultLevel HarborLogLevel = HarborInfo
 )
 
 // +kubebuilder:validation:Type=string
@@ -23,10 +23,10 @@ type CoreLogLevel string
 
 const (
 	CoreDebug        CoreLogLevel = "debug"
-	CoreInfo                      = "info"
-	CoreWarning                   = "warn"
-	CoreError                     = "error"
-	CoreDefaultLevel              = CoreInfo
+	CoreInfo         CoreLogLevel = "info"
+	CoreWarning      CoreLogLevel = "warn"
+	CoreError        CoreLogLevel = "error"
+	CoreDefaultLevel CoreLogLevel = CoreInfo
 )
 
 func (l HarborLogLevel) Core() CoreLogLevel {
@@ -52,10 +52,10 @@ type RegistryLogLevel string
 
 const (
 	RegistryDebug        RegistryLogLevel = "debug"
-	RegistryInfo                          = "info"
-	RegistryWarning                       = "warning"
-	RegistryError                         = "error"
-	RegistryDefaultLevel                  = RegistryInfo
+	RegistryInfo         RegistryLogLevel = "info"
+	RegistryWarning      RegistryLogLevel = "warning"
+	RegistryError        RegistryLogLevel = "error"
+	RegistryDefaultLevel RegistryLogLevel = RegistryInfo
 )
 
 func (l HarborLogLevel) Registry() RegistryLogLevel {
@@ -79,11 +79,11 @@ type RegistryCtlLogLevel string
 
 const (
 	RegistryCtlDebug        RegistryCtlLogLevel = "debug"
-	RegistryCtlInfo                             = "info"
-	RegistryCtlWarning                          = "warning"
-	RegistryCtlError                            = "error"
-	RegistryCtlFatal                            = "fatal"
-	RegistryCtlDefaultLevel                     = RegistryCtlInfo
+	RegistryCtlInfo         RegistryCtlLogLevel = "info"
+	RegistryCtlWarning      RegistryCtlLogLevel = "warning"
+	RegistryCtlError        RegistryCtlLogLevel = "error"
+	RegistryCtlFatal        RegistryCtlLogLevel = "fatal"
+	RegistryCtlDefaultLevel RegistryCtlLogLevel = RegistryCtlInfo
 )
 
 func (l HarborLogLevel) RegistryCtl() RegistryCtlLogLevel {
@@ -111,11 +111,11 @@ type JobServiceLogLevel string
 
 const (
 	JobServiceDebug        JobServiceLogLevel = "DEBUG"
-	JobServiceInfo                            = "INFO"
-	JobServiceWarning                         = "WARNING"
-	JobServiceError                           = "ERROR"
-	JobServiceFatal                           = "FATAL"
-	JobServiceDefaultLevel                    = JobServiceInfo
+	JobServiceInfo         JobServiceLogLevel = "INFO"
+	JobServiceWarning      JobServiceLogLevel = "WARNING"
+	JobServiceError        JobServiceLogLevel = "ERROR"
+	JobServiceFatal        JobServiceLogLevel = "FATAL"
+	JobServiceDefaultLevel JobServiceLogLevel = JobServiceInfo
 )
 
 func (l HarborLogLevel) JobService() JobServiceLogLevel {
@@ -132,5 +132,38 @@ func (l HarborLogLevel) JobService() JobServiceLogLevel {
 		return JobServiceError
 	case HarborFatal:
 		return JobServiceFatal
+	}
+}
+
+// +kubebuilder:validation:Type=string
+// +kubebuilder:validation:Enum={"debug","info","warning","error","fatal","panic"}
+// +kubebuilder:default="info"
+// NotaryLogLevel is the log level for NotaryServer and NotarySigner.
+type NotaryLogLevel string
+
+const (
+	NotaryDebug        NotaryLogLevel = "debug"
+	NotaryInfo         NotaryLogLevel = "info"
+	NotaryWarning      NotaryLogLevel = "warning"
+	NotaryError        NotaryLogLevel = "error"
+	NotaryFatal        NotaryLogLevel = "fatal"
+	NotaryPanic        NotaryLogLevel = "panic"
+	NotaryDefaultLevel NotaryLogLevel = NotaryInfo
+)
+
+func (l HarborLogLevel) Notary() NotaryLogLevel {
+	switch l {
+	default:
+		return NotaryDefaultLevel
+	case HarborDebug:
+		return NotaryDebug
+	case HarborInfo:
+		return NotaryInfo
+	case HarborWarning:
+		return NotaryWarning
+	case HarborError:
+		return NotaryError
+	case HarborFatal:
+		return NotaryFatal
 	}
 }

@@ -88,11 +88,13 @@ type JobServicePoolRedisSpec struct {
 	Namespace string `json:"namespace,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type="string"
+	// +kubebuilder:validation:Pattern="([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?"
 	// +kubebuilder:default="30s"
 	// IdleTimeoutSecond closes connections after remaining idle for this duration. If the value
 	// is zero, then idle connections are not closed. Applications should set
 	// the timeout to a value less than the server's timeout.
-	IdleTimeout PositiveDuration `json:"idleTimeout,omitempty"`
+	IdleTimeout *metav1.Duration `json:"idleTimeout,omitempty"`
 }
 
 // PoolConfig keeps worker worker configurations.
@@ -140,7 +142,9 @@ type JobServiceLoggerConfigDatabaseSpec struct {
 	Level JobServiceLogLevel `json:"level"`
 
 	// +kubebuilder:validation:Optional
-	Sweeper PositiveDuration `json:"sweeper,omitempty"`
+	// +kubebuilder:validation:Type="string"
+	// +kubebuilder:validation:Pattern="([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?"
+	Sweeper *metav1.Duration `json:"sweeper,omitempty"`
 }
 
 type JobServiceLoggerConfigSTDOUTSpec struct {
@@ -157,7 +161,9 @@ type JobServiceLoggerConfigFileSpec struct {
 	Level JobServiceLogLevel `json:"level"`
 
 	// +kubebuilder:validation:Optional
-	Sweeper PositiveDuration `json:"sweeper,omitempty"`
+	// +kubebuilder:validation:Type="string"
+	// +kubebuilder:validation:Pattern="([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?"
+	Sweeper *metav1.Duration `json:"sweeper,omitempty"`
 }
 
 // +kubebuilder:validation:Type=string

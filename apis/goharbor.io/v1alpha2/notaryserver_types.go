@@ -68,6 +68,7 @@ type NotaryServerTrustServiceSpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=0
 	// +kubebuilder:validation:ExclusiveMinimum=true
+	// +kubebuilder:default=443
 	Port int64 `json:"port,omitempty"`
 
 	// +kubebuilder:validation:Optional
