@@ -1,6 +1,6 @@
 apiVersion: goharbor.io/v1alpha2
-kind: RegistryController
+kind: Harbor
 metadata:
   name: sample
 spec:
-  registryRef: harbor
+  chartmuseum: {}
