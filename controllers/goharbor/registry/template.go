@@ -14,7 +14,7 @@ import (
 )
 
 func (r *Reconciler) GetDataFuncFromArraySecret(ctx context.Context, getter func(int) (interface{}, types.NamespacedName, error), itemsCount int) (func(interface{}) (map[string]string, error), error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "getDataFuncFromSecret", opentracing.Tags{})
+	span, ctx := opentracing.StartSpanFromContext(ctx, "getDataFuncFromSecret")
 	defer span.Finish()
 
 	datas := make(map[interface{}]map[string]string, itemsCount)
@@ -69,7 +69,7 @@ func (r *Reconciler) GetDataFuncFromArraySecret(ctx context.Context, getter func
 }
 
 func (r *Reconciler) GetHookDataFunc(ctx context.Context, registry *goharborv1alpha2.Registry) (interface{}, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "hookDataFunc", opentracing.Tags{})
+	span, ctx := opentracing.StartSpanFromContext(ctx, "hookDataFunc")
 	defer span.Finish()
 
 	namespace := registry.GetNamespace()
@@ -83,7 +83,7 @@ func (r *Reconciler) GetHookDataFunc(ctx context.Context, registry *goharborv1al
 }
 
 func (r *Reconciler) GetReportingDataFunc(ctx context.Context, registry *goharborv1alpha2.Registry) (interface{}, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "registryMiddleware", opentracing.Tags{})
+	span, ctx := opentracing.StartSpanFromContext(ctx, "registryMiddleware")
 	defer span.Finish()
 
 	namespace := registry.GetNamespace()
@@ -106,7 +106,7 @@ func (r *Reconciler) GetReportingDataFunc(ctx context.Context, registry *goharbo
 }
 
 func (r *Reconciler) GetRegistryMiddlewareDataFunc(ctx context.Context, registry *goharborv1alpha2.Registry) (interface{}, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "registryMiddlewareDataFunc", opentracing.Tags{})
+	span, ctx := opentracing.StartSpanFromContext(ctx, "registryMiddlewareDataFunc")
 	defer span.Finish()
 
 	namespace := registry.GetNamespace()
@@ -120,7 +120,7 @@ func (r *Reconciler) GetRegistryMiddlewareDataFunc(ctx context.Context, registry
 }
 
 func (r *Reconciler) GetRepositoryMiddlewareDataFunc(ctx context.Context, registry *goharborv1alpha2.Registry) (interface{}, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "repositoryMiddlewareDataFunc", opentracing.Tags{})
+	span, ctx := opentracing.StartSpanFromContext(ctx, "repositoryMiddlewareDataFunc")
 	defer span.Finish()
 
 	namespace := registry.GetNamespace()
@@ -134,7 +134,7 @@ func (r *Reconciler) GetRepositoryMiddlewareDataFunc(ctx context.Context, regist
 }
 
 func (r *Reconciler) GetStorageMiddlewareDataFunc(ctx context.Context, registry *goharborv1alpha2.Registry) (interface{}, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "storageMiddlewareDataFunc", opentracing.Tags{})
+	span, ctx := opentracing.StartSpanFromContext(ctx, "storageMiddlewareDataFunc")
 	defer span.Finish()
 
 	namespace := registry.GetNamespace()

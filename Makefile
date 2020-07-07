@@ -134,6 +134,12 @@ deploy: generate kustomize
 	$(KUSTOMIZE) build config/default \
 		| kubectl apply --validate=false -f -
 
+# Deploy RBAC in the configured Kubernetes cluster in ~/.kube/config
+.PHONY: deploy
+deploy-rbac: generate kustomize
+	$(KUSTOMIZE) build config/rbac \
+		| kubectl apply --validate=false -f -
+
 .PHONY: sample
 sample: kustomize
 	$(KUSTOMIZE) build config/samples \
