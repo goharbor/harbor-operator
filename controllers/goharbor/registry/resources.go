@@ -24,7 +24,7 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return serrors.UnrecoverrableError(errors.Errorf("%+v", resource), serrors.OperatorReason, "unable to add resource")
 	}
 
-	span, ctx := opentracing.StartSpanFromContext(ctx, "addResources", opentracing.Tags{})
+	span, ctx := opentracing.StartSpanFromContext(ctx, "addResources")
 	defer span.Finish()
 
 	service, err := r.GetService(ctx, registry)
