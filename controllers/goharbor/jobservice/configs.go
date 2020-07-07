@@ -24,7 +24,7 @@ const (
 )
 
 func (r *Reconciler) GetConfigMap(ctx context.Context, jobservice *goharborv1alpha2.JobService) (*corev1.ConfigMap, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "GetConfigMap", opentracing.Tags{})
+	span, ctx := opentracing.StartSpanFromContext(ctx, "GetConfigMap")
 	defer span.Finish()
 
 	templateConfig, err := r.ConfigStore.GetItemValue(ConfigTemplateKey)
