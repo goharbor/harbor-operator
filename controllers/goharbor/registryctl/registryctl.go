@@ -4,16 +4,13 @@ import (
 	"context"
 	"time"
 
-	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	netv1 "k8s.io/api/networking/v1beta1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-operator/pkg/config"
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
 	"github.com/goharbor/harbor-operator/pkg/event-filter/class"
@@ -35,6 +32,11 @@ type Reconciler struct {
 	*commonCtrl.Controller
 }
 
+// +kubebuilder:rbac:groups=goharbor.io,resources=registrycontrollers,verbs=get;list;watch
+// +kubebuilder:rbac:groups=goharbor.io,resources=registrycontrollers/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups="",resources=configmaps;secrets;services,verbs=get;list;watch;create;update;patch;delete
+
 func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) error {
 	err := r.Controller.SetupWithManager(ctx, mgr)
 	if err != nil {
@@ -55,12 +57,9 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 		WithEventFilter(&class.Filter{
 			ClassName: className,
 		}).
-		For(&goharborv1alpha2.RegistryController{}).
+		For(r.NewEmpty(ctx)).
 		Owns(&appsv1.Deployment{}).
-		Owns(&certv1.Certificate{}).
 		Owns(&corev1.ConfigMap{}).
-		Owns(&netv1.Ingress{}).
-		Owns(&corev1.Secret{}).
 		Owns(&corev1.Service{}).
 		WithOptions(controller.Options{
 			MaxConcurrentReconciles: int(concurrentReconcile),

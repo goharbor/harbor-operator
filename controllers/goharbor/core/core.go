@@ -11,7 +11,6 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-operator/pkg/config"
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
 	"github.com/goharbor/harbor-operator/pkg/event-filter/class"
@@ -35,6 +34,11 @@ type Reconciler struct {
 	*commonCtrl.Controller
 }
 
+// +kubebuilder:rbac:groups=goharbor.io,resources=cores,verbs=get;list;watch
+// +kubebuilder:rbac:groups=goharbor.io,resources=cores/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups="",resources=configmaps;secrets;services,verbs=get;list;watch;create;update;patch;delete
+
 func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) error {
 	err := r.Controller.SetupWithManager(ctx, mgr)
 	if err != nil {
@@ -55,7 +59,7 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 		WithEventFilter(&class.Filter{
 			ClassName: className,
 		}).
-		For(&goharborv1alpha2.Core{}).
+		For(r.NewEmpty(ctx)).
 		Owns(&appsv1.Deployment{}).
 		Owns(&corev1.ConfigMap{}).
 		Owns(&corev1.Secret{}).
@@ -65,9 +69,6 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 		}).
 		Complete(r)
 }
-
-// +kubebuilder:rbac:groups=containerregistry.ovhcloud.com,resources=cores,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=containerregistry.ovhcloud.com,resources=cores/status,verbs=get;update;patch
 
 func New(ctx context.Context, name string, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
 	configTemplatePath, err := configStore.GetItemValue(ConfigTemplatePathKey)
