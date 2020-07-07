@@ -5,7 +5,7 @@ metadata:
   name: portal-editor-role
 rules:
 - apiGroups:
-  - containerregistry.ovhcloud.com
+  - goharbor.io
   resources:
   - portals
   verbs:
@@ -17,7 +17,7 @@ rules:
   - update
   - watch
 - apiGroups:
-  - containerregistry.ovhcloud.com
+  - goharbor.io
   resources:
   - portals/status
   verbs:
