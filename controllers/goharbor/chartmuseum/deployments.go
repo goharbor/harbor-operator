@@ -192,7 +192,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1a
 		})
 	}
 
-	if chartMuseum.Spec.Cache.Redis.PasswordRef != "" {
+	if chartMuseum.Spec.Cache.Redis != nil {
 		envs = append(envs, corev1.EnvVar{
 			Name: "CACHE_REDIS_PASSWORD",
 			ValueFrom: &corev1.EnvVarSource{
