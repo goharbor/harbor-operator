@@ -56,7 +56,7 @@ type RegistryControllerSpec struct {
 	Log RegistryControllerLogSpec `json:"log,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	HTTPS RegistryControllerHTTPSSpec `json:"https,omitempty"`
+	HTTPS *RegistryControllerHTTPSSpec `json:"https,omitempty"`
 }
 
 type RegistryControllerLogSpec struct {
@@ -65,8 +65,9 @@ type RegistryControllerLogSpec struct {
 }
 
 type RegistryControllerHTTPSSpec struct {
-	// +kubebuilder:validation:Optional
-	CertificateRef string `json:"certificateRef,omitempty"`
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:MinLength=1
+	CertificateRef string `json:"certificateRef"`
 }
 
 func init() { // nolint:gochecknoinits

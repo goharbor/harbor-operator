@@ -101,4 +101,9 @@ var _ = DescribeTable(
 	PEntry("Harbor", newHarborController(), 5*time.Minute, 10*time.Second),
 	Entry("Portal", newPortalController(), 30*time.Second, 2*time.Second),
 	Entry("Registry", newRegistryController(), time.Minute, 5*time.Second),
+	Entry("RegistryCtl", newRegistryCtlController(), 3*time.Minute, 5*time.Second),
+	Entry("ChartMuseum", newChartMuseumController(), time.Minute, 5*time.Second),
+
+//	Entry("NotaryServer", newNotaryServerController(), time.Minute, 5*time.Second),
+//	Entry("NotarySigner", newNotarySignerController(), time.Minute, 5*time.Second),
 )
