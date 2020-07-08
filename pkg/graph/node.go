@@ -29,7 +29,7 @@ func (no *node) Wait(ctx context.Context) error {
 		return nil
 	}
 
-	span, _ := opentracing.StartSpanFromContext(ctx, "waitNode", opentracing.Tags{})
+	span, _ := opentracing.StartSpanFromContext(ctx, "waitNode")
 	defer span.Finish()
 
 	received := 0

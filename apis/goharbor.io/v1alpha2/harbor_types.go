@@ -236,7 +236,7 @@ type CoreComponentSpec struct {
 	ComponentSpec `json:",inline"`
 
 	// +kubebuilder:validation:Required
-	TokenIssuer cmmeta.ObjectReference `json:"tokenIssuer"`
+	TokenIssuer cmmeta.ObjectReference `json:"tokenIssuer,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// One of core redis dsn or global redis component must be specified

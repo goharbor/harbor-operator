@@ -162,7 +162,7 @@ middleware:
     {{- end }}
   {{- end }}
 {{- end }}
-{{- if .Spec.Redis.PasswordRef }}
+{{- if .Spec.Redis }}
 redis:
   {{- with ( "redis-password" | secretData .Spec.Redis.PasswordRef | .Spec.Redis.GetDSN ) }}
   addr: {{ .Hostname }}
@@ -185,10 +185,12 @@ redis:
     idletimeout: {{ .Spec.Redis.Pool.IdleTimeout.Duration }}
     {{- end }}
 {{- end }}
+{{- if .Spec.Proxy }}
 proxy:
   remoteurl: {{ .Spec.Proxy.RemoteURL }}
   # username: setted through environment variable
   # password: setted through environment variable
+{{- end }}
 compatibility:
   schema1:
     # signingkeyfile: setted through environment variable
