@@ -65,14 +65,14 @@ func main() {
 		os.Exit(exitCodeFailure)
 	}
 
-	traCon, err := tracing.New(ctx, OperatorName, OperatorVersion)
+	traCon, err := tracing.New(ctx)
 	if err != nil {
 		setupLog.Error(err, "unable to create tracer")
 		os.Exit(exitCodeFailure)
 	}
 	defer traCon.Close()
 
-	if err := (setup.WithManager(ctx, mgr, OperatorVersion)); err != nil {
+	if err := (setup.WithManager(ctx, mgr)); err != nil {
 		setupLog.Error(err, "unable to setup controllers")
 		os.Exit(exitCodeFailure)
 	}

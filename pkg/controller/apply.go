@@ -9,12 +9,9 @@ import (
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
-	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
-	"github.com/goharbor/harbor-operator/pkg/graph"
 )
 
 const (
@@ -22,21 +19,17 @@ const (
 	RetryDelay    = time.Second
 )
 
-func (c *Controller) apply(ctx context.Context, res *Resource) error {
+func (c *Controller) apply(ctx context.Context, res *Resource) (controllerutil.OperationResult, error) {
 	retry, ctx := errgroup.WithContext(ctx)
-	l := logger.Get(ctx).WithValues("resource.namespace", res.resource.GetNamespace(), "resource.name", res.resource.GetName())
-
+	l := logger.Get(ctx)
 	end := time.Now().Add(RetryDuration)
+	opResult := controllerutil.OperationResultNone
 
 	var f func() error
 
 	f = func() error {
-		span, ctx := opentracing.StartSpanFromContext(ctx, "createOrUpdate", &opentracing.Tags{})
+		span, ctx := opentracing.StartSpanFromContext(ctx, "applyAndRetry")
 		defer span.Finish()
-
-		gvk := c.AddGVKToSpan(ctx, span, res.resource)
-
-		l.V(1).Info("Deploying resource", "gvk", gvk)
 
 		result := res.resource.DeepCopyObject()
 
@@ -49,7 +42,7 @@ func (c *Controller) apply(ctx context.Context, res *Resource) error {
 					return errors.Wrap(err, "max retry exceeded")
 				}
 
-				l.Info(fmt.Sprintf("Failed to update resource, retrying in %v...", RetryDelay), "resource", res.resource)
+				l.V(1).Info(fmt.Sprintf("Failed to update resource, retrying in %v...", RetryDelay))
 
 				time.Sleep(RetryDelay)
 				retry.Go(f)
@@ -58,46 +51,39 @@ func (c *Controller) apply(ctx context.Context, res *Resource) error {
 			}
 
 			// TODO Check if the error is a temporary error or a unrecoverrable one
-			return errors.Wrapf(err, "cannot create/update %s (%s/%s)", gvk, res.resource.GetNamespace(), res.resource.GetName())
+			return errors.Wrapf(err, "cannot create/update")
 		}
 
-		span.SetTag("Operation.Result", op)
+		span.SetTag("operation.result", op)
 
-		l.Info("Resource deployed", "resource.apiVersion", gvk.GroupVersion(), "resource.kind", gvk.Kind)
+		opResult = op
 
 		return nil
 	}
 
 	retry.Go(f)
 
-	return retry.Wait()
+	err := retry.Wait()
+
+	return opResult, err
 }
 
-func (c *Controller) Apply(ctx context.Context, node graph.Resource) error {
-	res, ok := node.(*Resource)
-	if !ok {
-		return serrors.UnrecoverrableError(errors.Errorf("%+v", node), serrors.OperatorReason, "unable to apply resource")
-	}
-
-	span, ctx := opentracing.StartSpanFromContext(ctx, "applyResource", opentracing.Tags{})
+func (c *Controller) Apply(ctx context.Context, res *Resource) error {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "apply")
 	defer span.Finish()
 
-	if kinds, unversioned, err := c.Scheme.ObjectKinds(res.resource); err == nil {
-		span.
-			SetTag("Resource.Kind", kinds[0].Kind).
-			SetTag("Resource.Versioned", !unversioned)
-	} else {
-		logger.Get(ctx).Error(err, "Cannot find kinds", "resource", res.resource)
-	}
+	l := logger.Get(ctx)
 
-	objectKey, err := client.ObjectKeyFromObject(res.resource)
+	l.V(1).Info("Deploying resource")
+
+	op, err := c.apply(ctx, res)
 	if err != nil {
-		return serrors.UnrecoverrableError(err, serrors.OperatorReason, "unable to get resource key")
+		l.Error(err, "Cannot deploy resource")
+
+		return err
 	}
 
-	span.
-		SetTag("Resource.Name", objectKey.Name).
-		SetTag("Resource.Namespace", objectKey.Namespace)
+	l.Info("Resource deployed", "operation.result", op)
 
-	return c.apply(ctx, res)
+	return nil
 }

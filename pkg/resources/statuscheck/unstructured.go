@@ -13,19 +13,22 @@ import (
 func UnstructuredCheck(ctx context.Context, object runtime.Object) (bool, error) {
 	uResource := object.(*unstructured.Unstructured)
 
+	err := status.Augment(uResource)
+	if err != nil {
+		return false, errors.Wrap(err, "cannot augment unstructured resource")
+	}
+
 	s, err := status.Compute(uResource)
 	if err != nil {
 		return false, errors.Wrap(err, "cannot compute status")
 	}
 
 	for _, cond := range s.Conditions {
-		if cond.Type == status.ConditionInProgress && cond.Status == corev1.ConditionTrue {
-			return false, nil
+		if cond.Status != corev1.ConditionTrue {
+			continue
 		}
-	}
 
-	for _, cond := range s.Conditions {
-		if cond.Type == status.ConditionFailed && cond.Status == corev1.ConditionTrue {
+		if cond.Type == status.ConditionInProgress || cond.Type == status.ConditionFailed {
 			return false, nil
 		}
 	}

@@ -3,37 +3,29 @@ package controller
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
+	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 )
 
 var errNotReady = errors.New("not ready")
 
-func (c *Controller) EnsureReady(ctx context.Context, node graph.Resource) error {
-	res, ok := node.(*Resource)
-	if !ok {
-		return errors.Errorf("unsupported resource type %+v", node)
-	}
-
-	span, ctx := opentracing.StartSpanFromContext(ctx, "checkReady", opentracing.Tags{})
+func (c *Controller) ensureResourceReady(ctx context.Context, res *Resource) error {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "checkReady")
 	defer span.Finish()
-
-	gvk := c.AddGVKToSpan(ctx, span, res.resource)
 
 	objectKey, err := client.ObjectKeyFromObject(res.resource)
 	if err != nil {
 		return serrors.UnrecoverrableError(err, serrors.OperatorReason, "cannot get object key")
 	}
 
-	span.
-		SetTag("Resource.Name", objectKey.Name).
-		SetTag("Resource.Namespace", objectKey.Namespace)
+	gvk := c.AddGVKToSpan(ctx, span, res.resource)
+	l := logger.Get(ctx)
 
 	result := res.resource.DeepCopyObject()
 
@@ -43,14 +35,29 @@ func (c *Controller) EnsureReady(ctx context.Context, node graph.Resource) error
 		return errors.Wrapf(err, "cannot get %s %s/%s", gvk, res.resource.GetNamespace(), res.resource.GetName())
 	}
 
-	ok, err = res.checkable(ctx, result)
+	l.V(1).Info("Checking resource readiness")
+
+	ok, err := res.checkable(ctx, result)
 	if err != nil {
 		return errors.Wrap(err, "cannot check resource status")
 	}
 
 	if !ok {
-		return serrors.RetryLaterError(errNotReady, "dependencyStatus", fmt.Sprintf("%s %v", result.GetObjectKind().GroupVersionKind().GroupKind(), objectKey), 0*time.Second)
+		l.Info("Resource is not ready")
+
+		return serrors.RetryLaterError(errNotReady, "dependencyStatus", fmt.Sprintf("%s %v", result.GetObjectKind().GroupVersionKind().GroupKind(), objectKey))
 	}
 
+	l.Info("Resource is ready")
+
 	return nil
+}
+
+func (c *Controller) EnsureReady(ctx context.Context, node graph.Resource) error {
+	res, ok := node.(*Resource)
+	if !ok {
+		return serrors.UnrecoverrableError(errors.Errorf("%+v", node), serrors.OperatorReason, "unable to apply resource")
+	}
+
+	return c.ensureResourceReady(ctx, res)
 }

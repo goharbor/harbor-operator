@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	WarningAnnotation = "containerregistry.ovhcloud.com/warning"
+	WarningAnnotation = "goharbor.io/warning"
 	WarningValueTmpl  = "⚠️ This Resource is managed by *%s* ⚠️"
 )
 

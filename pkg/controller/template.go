@@ -24,7 +24,7 @@ func (c *Controller) Funcs(ctx context.Context, owner resources.Resource) templa
 }
 
 func (c *Controller) GetTemplatedConfig(ctx context.Context, templateKey string, owner resources.Resource) ([]byte, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "GetTemplatedConfig", opentracing.Tags{})
+	span, ctx := opentracing.StartSpanFromContext(ctx, "GetTemplatedConfig")
 	defer span.Finish()
 
 	templateConfig, err := c.ConfigStore.GetItemValue(templateKey)

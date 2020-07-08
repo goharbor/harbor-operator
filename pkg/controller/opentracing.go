@@ -14,7 +14,9 @@ func (c *Controller) AddGVKToSpan(ctx context.Context, span opentracing.Span, re
 	if err != nil {
 		logger.Get(ctx).Error(err, "cannot get object kind", "resource", resource)
 
-		span.SetTag("Resource.Kind", gvk)
+		span.
+			SetTag("resource.kind", gvk.Kind).
+			SetTag("resource.version", gvk.GroupVersion)
 	} else {
 		gvk = gvks[0]
 	}
