@@ -11,7 +11,7 @@ import (
 )
 
 func GetK8SNamespacedDataFunc(ctx context.Context, c client.Client, namespace string, object runtime.Object, getData func(context.Context, runtime.Object) (map[string]interface{}, error), ignoreNotFound bool) interface{} {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "getK8SNamespacedDataFunc", opentracing.Tags{})
+	span, ctx := opentracing.StartSpanFromContext(ctx, "getK8SNamespacedDataFunc")
 	defer span.Finish()
 
 	return func(reference string, keys ...string) (interface{}, error) {

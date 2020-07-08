@@ -16,6 +16,7 @@ import (
 	// +kubebuilder:scaffold:imports
 
 	. "github.com/goharbor/harbor-operator/pkg/controller"
+	"github.com/goharbor/harbor-operator/pkg/factories/application"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 	"github.com/goharbor/harbor-operator/pkg/resources"
 )
@@ -23,7 +24,7 @@ import (
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to
 // http://onsi.github.io/ginkgo/ to learn more about Ginkgo.
 
-var _ = FContext("Adding", func() {
+var _ = Context("Adding", func() {
 	var ctx context.Context
 	var c *Controller
 
@@ -43,9 +44,18 @@ var _ = FContext("Adding", func() {
 		&appsv1.Deployment{}: func(c *Controller, ctx context.Context, res resources.Resource, dep ...graph.Resource) (graph.Resource, error) {
 			return c.AddDeploymentToManage(ctx, res.(*appsv1.Deployment), dep...)
 		},
+		&unstructured.Unstructured{}: func(c *Controller, ctx context.Context, res resources.Resource, dep ...graph.Resource) (graph.Resource, error) {
+			return c.AddUnsctructuredToManage(ctx, res.(*unstructured.Unstructured), dep...)
+		},
 	}
 
 	BeforeEach(func() {
+		setupCtx := context.TODO()
+
+		application.SetName(&setupCtx, "test-app")
+		application.SetVersion(&setupCtx, "test")
+
+		c = NewController(setupCtx, "test", nil, nil)
 		ctx = c.NewContext(controllerruntime.Request{
 			NamespacedName: types.NamespacedName{
 				Name:      "resource-name",
@@ -53,7 +63,8 @@ var _ = FContext("Adding", func() {
 			},
 		})
 
-		c, ctx = setupTest(ctx)
+		application.SetName(&ctx, "test-app")
+		application.SetVersion(&ctx, "test")
 	})
 
 	for p, add := range resourceAdd {

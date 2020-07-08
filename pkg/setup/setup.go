@@ -10,7 +10,7 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 )
 
-func WithManager(ctx context.Context, mgr manager.Manager, version string) error {
+func WithManager(ctx context.Context, mgr manager.Manager) error {
 	var g errgroup.Group
 
 	for name, builder := range controllers {

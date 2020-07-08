@@ -50,7 +50,7 @@ func (rm *resourceManager) Run(ctx context.Context) error {
 }
 
 func (rm *resourceManager) getGraph(ctx context.Context) []*node {
-	span, _ := opentracing.StartSpanFromContext(ctx, "getGraph", opentracing.Tags{})
+	span, _ := opentracing.StartSpanFromContext(ctx, "getGraph")
 	defer span.Finish()
 
 	rm.lock.Lock()

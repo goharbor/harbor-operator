@@ -15,6 +15,7 @@ import (
 	jaeger_metrics "github.com/uber/jaeger-lib/metrics"
 	jaeger_prom "github.com/uber/jaeger-lib/metrics/prometheus"
 
+	"github.com/goharbor/harbor-operator/pkg/factories/application"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 )
 
@@ -48,7 +49,7 @@ func Init(ctx context.Context, jaegerConfig *jaeger_cnf.Configuration) (io.Close
 	return con, err
 }
 
-func New(ctx context.Context, name, version string) (io.Closer, error) {
+func New(ctx context.Context) (io.Closer, error) {
 	jaegerConfig := &jaeger_cnf.Configuration{}
 
 	item, err := configstore.Filter().
@@ -71,11 +72,11 @@ func New(ctx context.Context, name, version string) (io.Closer, error) {
 
 	jaegerConfig.Tags = append(jaegerConfig.Tags, opentracing.Tag{
 		Key:   "version",
-		Value: version,
+		Value: application.GetVersion(ctx),
 	})
 
 	if jaegerConfig.ServiceName == "" {
-		jaegerConfig.ServiceName = name
+		jaegerConfig.ServiceName = application.GetName(ctx)
 	}
 
 	traCon, err := Init(ctx, jaegerConfig)

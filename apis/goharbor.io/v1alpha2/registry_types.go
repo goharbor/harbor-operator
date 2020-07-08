@@ -91,10 +91,10 @@ type RegistryConfig01 struct {
 	Reporting map[string]string `json:"reporting,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	Redis RegistryRedisSpec `json:"redis,omitempty"`
+	Redis *RegistryRedisSpec `json:"redis,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	Proxy RegistryProxySpec `json:"proxy,omitempty"`
+	Proxy *RegistryProxySpec `json:"proxy,omitempty"`
 }
 
 type RegistryProxySpec struct {

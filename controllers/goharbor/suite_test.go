@@ -14,12 +14,10 @@ limitations under the License.
 package goharbor_test
 
 import (
-	"context"
 	"fmt"
 	"math/rand"
 	"path/filepath"
 	"testing"
-	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -36,11 +34,10 @@ import (
 
 	// +kubebuilder:scaffold:imports
 
-	harborCtrl "github.com/goharbor/harbor-operator/controllers/goharbor/harbor"
-	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
 	"github.com/goharbor/harbor-operator/pkg/factories/application"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	"github.com/goharbor/harbor-operator/pkg/scheme"
+	"github.com/goharbor/harbor-operator/pkg/setup"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to
@@ -51,6 +48,8 @@ var (
 	k8sClient client.Client
 	testEnv   *envtest.Environment
 	stopCh    chan struct{}
+	version   string
+	log       = zap.LoggerTo(GinkgoWriter, true)
 )
 
 func TestAPIs(t *testing.T) {
@@ -62,13 +61,16 @@ func TestAPIs(t *testing.T) {
 }
 
 var _ = BeforeSuite(func(done Done) {
-	rand.Seed(time.Now().UnixNano())
+	rand.Seed(GinkgoRandomSeed())
+
+	version = newName("version")
+
 	log := zap.LoggerTo(GinkgoWriter, true)
 	logf.SetLogger(log)
 	ctx := logger.Context(log)
 
 	application.SetName(&ctx, "test-app")
-	application.SetVersion(&ctx, "test")
+	application.SetVersion(&ctx, version)
 
 	By("bootstrapping test environment")
 	testEnv = &envtest.Environment{
@@ -95,11 +97,7 @@ var _ = BeforeSuite(func(done Done) {
 	})
 	Expect(err).NotTo(HaveOccurred(), "failed to create manager")
 
-	controller := &harborCtrl.Reconciler{
-		Controller: commonCtrl.NewController(ctx, "test", nil, nil),
-	}
-	err = controller.SetupWithManager(ctx, mgr)
-	Expect(err).NotTo(HaveOccurred(), "failed to setup controller")
+	Expect(setup.WithManager(ctx, mgr)).To(Succeed())
 
 	go func() {
 		defer GinkgoRecover()
@@ -125,7 +123,8 @@ var _ = AfterSuite(func() {
 // * starting the Harbor Reconciler
 // * stopping the Harbor Reconciler after the test ends
 // Call this function at the start of each of your tests.
-func SetupTest(ctx context.Context) *core.Namespace {
+func SetupTest() *core.Namespace {
+	ctx := logger.Context(log)
 	ns := &core.Namespace{}
 
 	BeforeEach(func() {

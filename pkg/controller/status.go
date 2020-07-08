@@ -18,7 +18,7 @@ import (
 )
 
 func (c *Controller) prepareStatus(ctx context.Context, owner resources.Resource) error {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "prepareStatus", opentracing.Tags{})
+	span, ctx := opentracing.StartSpanFromContext(ctx, "prepareStatus")
 	defer span.Finish()
 
 	data, err := runtime.DefaultUnstructuredConverter.ToUnstructured(owner)
