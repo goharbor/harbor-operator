@@ -22,7 +22,7 @@ import (
 )
 
 const (
-	ComponentNameLabel = "containerregistry.ovhcloud.com/component"
+	ComponentNameLabel = "goharbor.io/component"
 )
 
 var (

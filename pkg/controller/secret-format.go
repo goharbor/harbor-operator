@@ -21,7 +21,7 @@ func (c *Controller) EnsureSecretType(ctx context.Context, node graph.Resource) 
 		return errors.Errorf("unsupported resource type %+v", node)
 	}
 
-	span, ctx := opentracing.StartSpanFromContext(ctx, "checkSecretType", opentracing.Tags{})
+	span, ctx := opentracing.StartSpanFromContext(ctx, "checkSecretType")
 	defer span.Finish()
 
 	gvk := c.AddGVKToSpan(ctx, span, res.resource)
