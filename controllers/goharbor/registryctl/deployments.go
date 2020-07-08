@@ -127,7 +127,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registryCtl *goharborv1a
 		}
 	}
 
-	if registryCtl.Spec.HTTPS.CertificateRef != "" {
+	if registryCtl.Spec.HTTPS != nil {
 		volumes = append(volumes, corev1.Volume{
 			Name: certificatesVolumeName,
 			VolumeSource: corev1.VolumeSource{
