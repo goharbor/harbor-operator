@@ -78,7 +78,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 		})
 	}
 
-	if registry.Spec.Redis.PasswordRef != "" {
+	if registry.Spec.Redis != nil {
 		envs = append(envs, corev1.EnvVar{
 			Name: "REGISTRY_REDIS_PASSWORD",
 			ValueFrom: &corev1.EnvVarSource{
@@ -93,7 +93,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 		})
 	}
 
-	if registry.Spec.Proxy.BasicAuthRef != "" {
+	if registry.Spec.Proxy != nil {
 		envs = append(envs, corev1.EnvVar{
 			Name: "REGISTRY_PROXY_PASSWORD",
 			ValueFrom: &corev1.EnvVarSource{
@@ -119,7 +119,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 		})
 	}
 
-	if registry.Spec.Compatibility.Schema1.CertificateRef != "" {
+	if registry.Spec.Compatibility.Schema1.Enabled {
 		envs = append(envs, corev1.EnvVar{
 			Name:  "REGISTRY_COMPATIBILITY_SCHEMA1_SIGNINGKEYFILE",
 			Value: path.Join(CompatibilitySchema1Path, corev1.TLSPrivateKeyKey),

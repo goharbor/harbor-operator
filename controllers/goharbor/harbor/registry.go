@@ -3,7 +3,6 @@ package harbor
 import (
 	"context"
 	"fmt"
-	"net/url"
 
 	"github.com/ovh/configstore"
 	"github.com/sethvargo/go-password/password"
@@ -172,16 +171,7 @@ func (r *Reconciler) GetRegistry(ctx context.Context, harbor *goharborv1alpha2.H
 	authenticationSecretName := r.NormalizeName(ctx, harbor.GetName(), "registry", "basicauth")
 	httpSecretName := r.NormalizeName(ctx, harbor.GetName(), "registry", "http")
 
-	redisDSN := *harbor.Spec.Registry.Redis
-
-	if redisDSN.DSN == "" {
-		redisDSN.DSN = (&url.URL{
-			Host:   r.NormalizeName(ctx, harbor.GetName(), "redis"),
-			Scheme: "redis",
-			Path:   "2",
-		}).String()
-		redisDSN.PasswordRef = r.NormalizeName(ctx, harbor.GetName(), "redis")
-	}
+	redisDSN := harbor.Spec.RedisDSN(goharborv1alpha2.RegistryRedis)
 
 	return &goharborv1alpha2.Registry{
 		ObjectMeta: metav1.ObjectMeta{
@@ -220,7 +210,7 @@ func (r *Reconciler) GetRegistry(ctx context.Context, harbor *goharborv1alpha2.H
 					},
 					Redirect: harbor.Spec.Persistence.ImageChartStorage.Redirect,
 				},
-				Redis: goharborv1alpha2.RegistryRedisSpec{
+				Redis: &goharborv1alpha2.RegistryRedisSpec{
 					OpacifiedDSN: redisDSN,
 				},
 			},

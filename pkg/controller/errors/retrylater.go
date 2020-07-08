@@ -1,8 +1,6 @@
 package errors
 
 import (
-	"time"
-
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -16,15 +14,13 @@ const (
 type retryLaterError struct {
 	cause error
 
-	delay   time.Duration
 	reason  string
 	message string
 }
 
-func RetryLaterError(err error, reason, message string, delay time.Duration) error {
+func RetryLaterError(err error, reason, message string) error {
 	return &retryLaterError{
 		cause:   err,
-		delay:   delay,
 		reason:  reason,
 		message: message,
 	}
@@ -33,8 +29,7 @@ func RetryLaterError(err error, reason, message string, delay time.Duration) err
 func (err *retryLaterError) Result() (ctrl.Result, error) {
 	if err != nil {
 		return ctrl.Result{
-			Requeue:      true,
-			RequeueAfter: err.delay,
+			Requeue: true,
 		}, nil
 	}
 

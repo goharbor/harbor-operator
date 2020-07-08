@@ -17,7 +17,7 @@ func (c *Controller) Create(ctx context.Context, node graph.Resource) error {
 		return errors.Errorf("unsupported resource type %+v", node)
 	}
 
-	span, ctx := opentracing.StartSpanFromContext(ctx, "applyResource", opentracing.Tags{})
+	span, ctx := opentracing.StartSpanFromContext(ctx, "applyResource")
 	defer span.Finish()
 
 	gvk := c.AddGVKToSpan(ctx, span, res.resource)

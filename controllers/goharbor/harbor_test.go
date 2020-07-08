@@ -19,161 +19,93 @@ package goharbor_test
 import (
 	"context"
 	"net/url"
-	"reflect"
-	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	gstruct "github.com/onsi/gomega/gstruct"
+	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
+	cmmeta "github.com/jetstack/cert-manager/pkg/apis/meta/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
-	"sigs.k8s.io/kustomize/kstatus/status"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 )
 
-const (
-	applyTimeoutInterval = 5 * time.Second
-)
+var _ = Context("Harbor reconciler", func() {
+	var ctx context.Context
 
-var _ = Context("Inside of a new namespace", func() {
-	log := zap.LoggerTo(GinkgoWriter, true)
-	ctx := logger.Context(log)
-	ns := SetupTest(ctx)
-
-	Describe("Creating Harbor resources", func() {
-		Context("with invalid public url", func() {
-			It("should raise an error", func() {
-				harbor := &goharborv1alpha2.Harbor{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "harbor-invalid-url",
-						Namespace: ns.Name,
-					},
-					Spec: goharborv1alpha2.HarborSpec{
-						HarborHelm1_4_0Spec: goharborv1alpha2.HarborHelm1_4_0Spec{
-							ExternalURL: "123::bad::dns",
-						},
-					},
-				}
-				harbor.Default()
-
-				Expect(k8sClient.Create(ctx, harbor)).Should(WithTransform(apierrs.IsInvalid, BeTrue()))
-			})
-		})
-
-		PContext("with valid spec", func() {
-			It("should be handled", func() {
-				harbor, key := newValidHarborTest(ns.Name)
-
-				getHarbor := getResourceFunc(ctx, key, harbor, nil)
-
-				Expect(k8sClient.Create(ctx, harbor)).To(Succeed())
-				Eventually(getHarbor).Should(Succeed(), "harbor resource should exist")
-
-				getObservedGeneration := func(harbor *goharborv1alpha2.Harbor) int64 {
-					return harbor.Status.ObservedGeneration
-				}
-				Eventually(getResourceFunc(ctx, key, harbor, getObservedGeneration), applyTimeoutInterval).
-					Should(BeEquivalentTo(getHarbor().(metav1.Object).GetGeneration()), "harbor resource should be applied")
-
-				getConditions := func(harbor *goharborv1alpha2.Harbor) []goharborv1alpha2.Condition {
-					return harbor.Status.Conditions
-				}
-				Eventually(getResourceFunc(ctx, key, harbor, getConditions), applyTimeoutInterval).
-					Should(ContainElement(gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
-						"Type":   BeEquivalentTo(status.ConditionInProgress),
-						"Status": BeEquivalentTo(corev1.ConditionFalse),
-					})), "harbor resource should be applied")
-			})
-		})
+	BeforeEach(func() {
+		ctx = logger.Context(log)
 	})
 
-	Describe("Handling resource events", func() {
-		Context("Updating Harbor resource spec", func() {
-			It("should update ObservedGeneration", func() {
-				harbor, key := newValidHarborTest(ns.Name)
+	Describe("Creating resources with invalid public url", func() {
+		It("Should raise an error", func() {
+			harbor := &goharborv1alpha2.Harbor{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "harbor-invalid-url",
+					Namespace: ns.Name,
+				},
+				Spec: goharborv1alpha2.HarborSpec{
+					HarborHelm1_4_0Spec: goharborv1alpha2.HarborHelm1_4_0Spec{
+						ExternalURL: "123::bad::dns",
+					},
+				},
+			}
+			harbor.Default()
 
-				getHarbor := getResourceFunc(ctx, key, harbor, nil)
-
-				Expect(k8sClient.Create(ctx, harbor)).To(Succeed())
-				Eventually(getHarbor).Should(Succeed(), "harbor resource should exist")
-
-				Expect(k8sClient.Get(ctx, key, harbor)).To(Succeed())
-
-				u, err := url.Parse(harbor.Spec.ExternalURL)
-				Expect(err).ToNot(HaveOccurred())
-
-				u.Host = "new." + u.Host
-
-				harbor.Spec.ExternalURL = u.String()
-				// Use Eventually since Operator may increase resourceVersion asynchronously
-				Eventually(getUpdateFunc(ctx, harbor), applyTimeoutInterval).Should(Succeed(), "harbor resource should be updatable")
-
-				Expect(k8sClient.Get(ctx, key, harbor)).To(Succeed())
-
-				getObservedGeneration := func(harbor *goharborv1alpha2.Harbor) int64 {
-					return harbor.Status.ObservedGeneration
-				}
-				Eventually(getResourceFunc(ctx, key, harbor, getObservedGeneration), applyTimeoutInterval).Should(BeNumerically(">=", harbor.GetGeneration()), "ObservedGeneration should math Generation")
-			})
-
-			It("should not update Generation", func() {
-				const defaultGenerationNumber int64 = 1
-
-				harbor, key := newValidHarborTest(ns.Name)
-
-				Expect(k8sClient.Create(ctx, harbor)).To(Succeed())
-				Consistently(getResourceFunc(ctx, key, harbor, metav1.Object.GetGeneration), applyTimeoutInterval).Should(Equal(defaultGenerationNumber), "harbor Generation should not be updated")
-			})
-		})
-	})
-
-	Describe("Deleting Harbor resource", func() {
-		Context("with new resource", func() {
-			It("should no more exists", func() {
-				harbor, key := newValidHarborTest(ns.Name)
-
-				getHarbor := getResourceFunc(ctx, key, harbor, nil)
-
-				Expect(k8sClient.Create(ctx, harbor)).To(Succeed())
-				Eventually(getHarbor).Should(Succeed(), "harbor resource should exist")
-
-				Expect(k8sClient.Delete(ctx, harbor)).To(Succeed())
-				Eventually(getHarbor).ShouldNot(Succeed(), "harbor resource should not exist")
-			})
+			Expect(k8sClient.Create(ctx, harbor)).
+				Should(WithTransform(apierrs.IsInvalid, BeTrue()))
 		})
 	})
 })
 
-func getUpdateFunc(ctx context.Context, harbor *goharborv1alpha2.Harbor) func() error {
-	return func() error {
-		return k8sClient.Update(ctx, harbor)
+func newHarborController() controllerTest {
+	return controllerTest{
+		Setup:         setupValidHarbor,
+		Update:        updateHarbor,
+		GetStatusFunc: getHarborStatusFunc,
 	}
 }
 
-func getResourceFunc(ctx context.Context, key client.ObjectKey, obj runtime.Object, f interface{}) func() interface{} {
-	fValue := reflect.ValueOf(f)
+func setupHarborResourceDependencies(ctx context.Context, ns string) (string, string) {
+	adminSecretName := newName("admin-secret")
 
-	return func() interface{} {
-		err := k8sClient.Get(ctx, key, obj)
+	err := k8sClient.Create(ctx, &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      adminSecretName,
+			Namespace: ns,
+		},
+		StringData: map[string]string{
+			goharborv1alpha2.SharedSecretKey: "th3Adm!nPa$$w0rd",
+		},
+		Type: goharborv1alpha2.SecretTypeSingle,
+	})
+	Expect(err).ToNot(HaveOccurred())
 
-		if f == nil {
-			return err
-		}
+	tokenIssuerName := newName("token-issuer")
 
-		Expect(err).ToNot(HaveOccurred())
+	err = k8sClient.Create(ctx, &certv1.Issuer{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      tokenIssuerName,
+			Namespace: ns,
+		},
+		Spec: certv1.IssuerSpec{
+			IssuerConfig: certv1.IssuerConfig{
+				SelfSigned: &certv1.SelfSignedIssuer{},
+			},
+		},
+	})
+	Expect(err).ToNot(HaveOccurred())
 
-		return fValue.Call([]reflect.Value{reflect.ValueOf(obj)})[0].Interface()
-	}
+	return adminSecretName, tokenIssuerName
 }
 
-func newValidHarborTest(ns string) (*goharborv1alpha2.Harbor, client.ObjectKey) {
+func setupValidHarbor(ctx context.Context, ns string) (Resource, client.ObjectKey) {
+	adminSecretName, tokenIssuerName := setupHarborResourceDependencies(ctx, ns)
+
 	name := newName("harbor")
 	publicURL := url.URL{
 		Scheme: "http",
@@ -188,14 +120,64 @@ func newValidHarborTest(ns string) (*goharborv1alpha2.Harbor, client.ObjectKey) 
 		Spec: goharborv1alpha2.HarborSpec{
 			HarborHelm1_4_0Spec: goharborv1alpha2.HarborHelm1_4_0Spec{
 				ExternalURL:            publicURL.String(),
-				HarborAdminPasswordRef: "admin-secret",
+				HarborAdminPasswordRef: adminSecretName,
+				EncryptionKeyRef:       "encryption-key",
+				Persistence: goharborv1alpha2.HarborPersistenceSpec{
+					ImageChartStorage: goharborv1alpha2.HarborPersistenceImageChartStorageSpec{
+						FileSystem: &goharborv1alpha2.HarborPersistenceImageChartStorageFileSystemSpec{
+							RootDirectory: "/harbor",
+						},
+					},
+					PersistentVolumeClaim: goharborv1alpha2.HarborPersistencePersistentVolumeClaimComponentsSpec{
+						Registry: goharborv1alpha2.HarborPersistencePersistentVolumeClaim5GSpec{
+							HarborPersistencePersistentVolumeClaimComponentSpec: goharborv1alpha2.HarborPersistencePersistentVolumeClaimComponentSpec{
+								ExistingClaim: "test-registry",
+							},
+						},
+					},
+				},
+				HarborComponentsSpec: goharborv1alpha2.HarborComponentsSpec{
+					Database: goharborv1alpha2.ExternalDatabaseSpec{
+						Host: "the-database",
+					},
+					Core: goharborv1alpha2.CoreComponentSpec{
+						TokenIssuer: cmmeta.ObjectReference{
+							Name: tokenIssuerName,
+						},
+					},
+				},
 			},
 		},
 	}
 	harbor.Default()
 
+	Expect(k8sClient.Create(ctx, harbor)).To(Succeed())
+
 	return harbor, client.ObjectKey{
 		Name:      name,
 		Namespace: ns,
+	}
+}
+
+func updateHarbor(ctx context.Context, object Resource) {
+	harbor, ok := object.(*goharborv1alpha2.Harbor)
+	Expect(ok).To(BeTrue())
+
+	u, err := url.Parse(harbor.Spec.ExternalURL)
+	Expect(err).ToNot(HaveOccurred())
+
+	u.Host = "new." + u.Host
+	harbor.Spec.ExternalURL = u.String()
+}
+
+func getHarborStatusFunc(ctx context.Context, key client.ObjectKey) func() goharborv1alpha2.ComponentStatus {
+	return func() goharborv1alpha2.ComponentStatus {
+		var harbor goharborv1alpha2.Harbor
+
+		err := k8sClient.Get(ctx, key, &harbor)
+
+		Expect(err).ToNot(HaveOccurred())
+
+		return harbor.Status
 	}
 }
