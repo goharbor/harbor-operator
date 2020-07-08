@@ -18,6 +18,7 @@ import (
 	"github.com/goharbor/harbor-operator/controllers/goharbor/portal"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/registry"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/registryctl"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/trivy"
 	"github.com/goharbor/harbor-operator/pkg/config"
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
 )
@@ -36,6 +37,7 @@ var controllersBuilder = map[controllers.Controller]func(context.Context, string
 	controllers.RegistryController: registryctl.New,
 	controllers.Portal:             portal.New,
 	controllers.ChartMuseum:        chartmuseum.New,
+	controllers.Trivy:              trivy.New,
 }
 
 type ControllerFactory func(context.Context, string, string, *configstore.Store) (commonCtrl.Reconciler, error)
