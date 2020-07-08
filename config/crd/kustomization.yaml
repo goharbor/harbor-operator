@@ -12,6 +12,7 @@ resources:
 - bases/goharbor.io_portals.yaml
 - bases/goharbor.io_registries.yaml
 - bases/goharbor.io_registrycontrollers.yaml
+- bases/goharbor.io_trivies.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:

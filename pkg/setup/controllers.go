@@ -14,6 +14,7 @@ import (
 	"github.com/goharbor/harbor-operator/controllers/goharbor/portal"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/registry"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/registryctl"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/trivy"
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
 )
 
@@ -30,6 +31,7 @@ const (
 	RegistryCtl                       // registryctl
 	Portal                            // portal
 	ChartMuseum                       // chartmuseum
+	Trivy                             // trivy
 )
 
 var controllers = map[ControllerUID]func(context.Context, string, *configstore.Store) (commonCtrl.Reconciler, error){
@@ -42,4 +44,5 @@ var controllers = map[ControllerUID]func(context.Context, string, *configstore.S
 	RegistryCtl:  registryctl.New,
 	Portal:       portal.New,
 	ChartMuseum:  chartmuseum.New,
+	Trivy:        trivy.New,
 }

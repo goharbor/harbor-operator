@@ -1,0 +1,10 @@
+apiVersion: goharbor.io/v1alpha2
+kind: Trivy
+metadata:
+  name: sample
+spec:
+  cache:
+    redis:
+      dsn: "redis://harbor-redis-master:6379/5"
+      passwordRef: harbor-redis
+  server: {}
