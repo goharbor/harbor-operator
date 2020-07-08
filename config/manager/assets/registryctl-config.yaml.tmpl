@@ -1,9 +1,9 @@
 {{/* https://github.com/goharbor/harbor/blob/master/src/registryctl/config/config.go#L28 */}}
-protocol: {{ empty .Spec.HTTPS.CertificateRef | ternary "http" "https" }}
+protocol: {{ empty .Spec.HTTPS | ternary "http" "https" }}
 port: 8080
 log_level: {{ default "info" .Spec.Log.Level }}
 
-{{- if .Spec.HTTPS.CertificateRef }}
+{{- if .Spec.HTTPS }}
 https_config:
   cert: /etc/registryctl/certificates/tls.crt
   key: /etc/registryctl/certificates/tls.key
