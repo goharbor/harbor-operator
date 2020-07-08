@@ -2,6 +2,32 @@
 # Image URL to use all building/pushing image targets
 IMG ?= goharbor/harbor-operator:dev
 
+CONFIGURATION_FROM ?= file:$(CURDIR)/config-dev.yml
+export CONFIGURATION_FROM
+
+REGISTRY_TEMPLATE_PATH ?= $(CURDIR)/config/manager/assets/registry-config.yaml.tmpl
+REGISTRYCTL_TEMPLATE_PATH ?= $(CURDIR)/config/manager/assets/registryctl-config.yaml.tmpl
+JOBSERVICE_TEMPLATE_PATH ?= $(CURDIR)/config/manager/assets/jobservice-config.yaml.tmpl
+CORE_TEMPLATE_PATH ?= $(CURDIR)/config/manager/assets/core-config.conf.tmpl
+CHARTMUSEUM_TEMPLATE_PATH ?= $(CURDIR)/config/manager/assets/chartmuseum-config.yaml.tmpl
+NOTARY_SERVER_TEMPLATE_PATH ?= $(CURDIR)/config/manager/assets/notary-server-config.json.tmpl
+NOTARY_SIGNER_TEMPLATE_PATH ?= $(CURDIR)/config/manager/assets/notary-signer-config.json.tmpl
+
+export REGISTRY_TEMPLATE_PATH
+export REGISTRYCTL_TEMPLATE_PATH
+export JOBSERVICE_TEMPLATE_PATH
+export CORE_TEMPLATE_PATH
+export CHARTMUSEUM_TEMPLATE_PATH
+export NOTARY_SERVER_TEMPLATE_PATH
+export NOTARY_SIGNER_TEMPLATE_PATH
+
+# See https://github.com/settings/tokens for GITHUB_TOKEN. No permissions required.
+NOTARY_SERVER_MIGRATION_SOURCE ?= github://holyhope:$${GITHUB_TOKEN}@theupdateframework/notary/migrations/server/postgresql\#v0.6.1
+NOTARY_SIGNER_MIGRATION_SOURCE ?= github://holyhope:$${GITHUB_TOKEN}@theupdateframework/notary/migrations/signer/postgresql\#v0.6.1
+
+export NOTARY_SERVER_MIGRATION_SOURCE
+export NOTARY_SIGNER_MIGRATION_SOURCE
+
 SHELL = /bin/sh
 
 .PHONY: all
@@ -23,18 +49,6 @@ manager: generate fmt vet
 # Run against the configured Kubernetes cluster in ~/.kube/config
 .PHONY: run
 run: generate fmt vet $(TMPDIR)k8s-webhook-server/serving-certs
-	# See https://github.com/settings/tokens for GITHUB_TOKEN. No permissions required.
-	set -u ; \
-		CONFIGURATION_FROM='file:./config-dev.yml' \
-		REGISTRY_TEMPLATE_PATH=./config/manager/assets/registry-config.yaml.tmpl \
-		REGISTRYCTL_TEMPLATE_PATH=./config/manager/assets/registryctl-config.yaml.tmpl \
-		JOBSERVICE_TEMPLATE_PATH=./config/manager/assets/jobservice-config.yaml.tmpl \
-		CORE_TEMPLATE_PATH=./config/manager/assets/core-config.conf.tmpl \
-		CHARTMUSEUM_TEMPLATE_PATH=./config/manager/assets/chartmuseum-config.yaml.tmpl \
-		NOTARY_SERVER_TEMPLATE_PATH=./config/manager/assets/notary-server-config.json.tmpl \
-		NOTARY_SERVER_MIGRATION_SOURCE="github://holyhope:$${GITHUB_TOKEN}@theupdateframework/notary/migrations/server/postgresql#v0.6.1" \
-		NOTARY_SIGNER_TEMPLATE_PATH=./config/manager/assets/notary-signer-config.json.tmpl \
-		NOTARY_SIGNER_MIGRATION_SOURCE="github://holyhope:$${GITHUB_TOKEN}@theupdateframework/notary/migrations/signer/postgresql#v0.6.1" \
 	go run *.go
 
 # Run linters against all files
@@ -135,7 +149,7 @@ deploy: generate kustomize
 		| kubectl apply --validate=false -f -
 
 # Deploy RBAC in the configured Kubernetes cluster in ~/.kube/config
-.PHONY: deploy
+.PHONY: deploy-rbac
 deploy-rbac: generate kustomize
 	$(KUSTOMIZE) build config/rbac \
 		| kubectl apply --validate=false -f -
@@ -214,9 +228,6 @@ GOBIN=$(shell go env GOPATH)/bin
 else
 GOBIN=$(shell go env GOBIN)
 endif
-
-t:
-	echo $(GOBIN)
 
 # Get the npm install path
 NPMBIN=$$(npm --global bin)

@@ -98,7 +98,7 @@ func (r *Reconciler) GetSecrets(ctx context.Context, registry *goharborv1alpha2.
 }
 
 func (r *Reconciler) GetProxySecrets(ctx context.Context, registry *goharborv1alpha2.Registry) ([]graph.Resource, error) {
-	if registry.Spec.Proxy.BasicAuthRef != "" {
+	if registry.Spec.Proxy != nil {
 		secret, err := r.Controller.AddExternalTypedSecret(ctx, &corev1.Secret{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      registry.Spec.Proxy.BasicAuthRef,
