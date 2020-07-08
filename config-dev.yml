@@ -17,3 +17,21 @@
       "leaderElectionID": "harbor-operator-election-leader",
       "leaderElectionNamespace": "default"
     }
+- key: portal-controller-disabled
+  value: true
+- key: registry-controller-disabled
+  value: true
+- key: registryctl-controller-disabled
+  value: true
+- key: jobservice-controller-disabled
+  value: true
+- key: chartmuseum-controller-disabled
+  value: true
+- key: notary-server-controller-disabled
+  value: true
+- key: notary-signer-controller-disabled
+  value: true
+- key: core-controller-disabled
+  value: true
+- key: harbor-controller-disabled
+  value: true
