@@ -1,7 +1,7 @@
 {{/* https://github.com/theupdateframework/notary/blob/master/docs/reference/server-config.md */}}
 {
   "server": {
-    {{- if .Spec.HTTPS.CertificateRef }}
+    {{- if .Spec.HTTPS }}
       "tls_cert_file": "/etc/notary-server/certificates/tls.crt",
       "tls_key_file": "/etc/notary-server/certificates/tls.key",
     {{- end }}

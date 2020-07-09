@@ -8,8 +8,8 @@ import (
 )
 
 type NotaryLoggingSpec struct {
-	// +kubebuilder:validation:Required
-	Level NotaryLogLevel `json:"level"`
+	// +kubebuilder:validation:Optional
+	Level NotaryLogLevel `json:"level,omitempty"`
 }
 
 type NotaryMigrationSpec struct {
