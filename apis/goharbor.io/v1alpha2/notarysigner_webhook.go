@@ -32,7 +32,7 @@ func (r *NotarySigner) SetupWebhookWithManager(ctx context.Context, mgr ctrl.Man
 		Complete()
 }
 
-// +kubebuilder:webhook:path=/mutate-goharbor-io-v1alpha2-notarysigner,mutating=true,failurePolicy=ignore,groups=goharbor.io.goharbor.io,resources=notarysigners,verbs=create;update,versions=v1alpha2,name=mnotarysigner.kb.io
+// +kubebuilder:webhook:path=/mutate-goharbor-io-v1alpha2-notarysigner,mutating=true,failurePolicy=ignore,groups=goharbor.io,resources=notarysigners,verbs=create;update,versions=v1alpha2,name=mnotarysigner.kb.io
 
 var _ webhook.Defaulter = &NotarySigner{}
 

@@ -151,8 +151,11 @@ func generateCertificate() map[string][]byte {
 
 func setupNotarySignerResourceDependencies(ctx context.Context, ns string) (string, string, string, string) {
 	pgPasswordName := newName("pg-password")
+	aliasesName := newName("aliases")
+	signingCertName := newName("signing-certificate")
+	httpsCertName := newName("https-certificate")
 
-	err := k8sClient.Create(ctx, &corev1.Secret{
+	Expect(k8sClient.Create(ctx, &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      pgPasswordName,
 			Namespace: ns,
@@ -161,12 +164,9 @@ func setupNotarySignerResourceDependencies(ctx context.Context, ns string) (stri
 			goharborv1alpha2.PostgresqlPasswordKey: "th3Adm!nPa$$w0rd",
 		},
 		Type: goharborv1alpha2.SecretTypePostgresql,
-	})
-	Expect(err).ToNot(HaveOccurred())
+	})).ToNot(HaveOccurred())
 
-	aliasesName := newName("aliases")
-
-	err = k8sClient.Create(ctx, &corev1.Secret{
+	Expect(k8sClient.Create(ctx, &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      aliasesName,
 			Namespace: ns,
@@ -175,35 +175,29 @@ func setupNotarySignerResourceDependencies(ctx context.Context, ns string) (stri
 			goharborv1alpha2.DefaultAliasSecretKey: "abcde_012345_ABCDE",
 		},
 		Type: goharborv1alpha2.SecretTypeNotarySignerAliases,
-	})
-	Expect(err).ToNot(HaveOccurred())
+	})).ToNot(HaveOccurred())
 
-	signingCertName := newName("signing-certificate")
-
-	err = k8sClient.Create(ctx, &corev1.Secret{
+	Expect(k8sClient.Create(ctx, &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      signingCertName,
 			Namespace: ns,
 		},
 		Data: generateCertificate(),
 		Type: corev1.SecretTypeTLS,
-	})
-	Expect(err).ToNot(HaveOccurred())
+	})).ToNot(HaveOccurred())
 
-	httpsCertName := newName("https-certificate")
-
-	err = k8sClient.Create(ctx, &corev1.Secret{
+	Expect(k8sClient.Create(ctx, &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      httpsCertName,
 			Namespace: ns,
 		},
 		Data: generateCertificate(),
 		Type: corev1.SecretTypeTLS,
-	})
-	Expect(err).ToNot(HaveOccurred())
+	})).ToNot(HaveOccurred())
 
 	return pgPasswordName, signingCertName, httpsCertName, aliasesName
 }
+
 func setupValidNotarySigner(ctx context.Context, ns string) (Resource, client.ObjectKey) {
 	pgPasswordName, signingCertName, httpsCertName, aliasesName := setupNotarySignerResourceDependencies(ctx, ns)
 

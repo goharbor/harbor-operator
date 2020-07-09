@@ -81,7 +81,7 @@ func (r *NotaryMigrationSpec) GetMigrationContainer(ctx context.Context, storage
 
 type NotaryHTTPSSpec struct {
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:MinLength=1
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	CertificateRef string `json:"certificateRef"`
 }
 

@@ -69,7 +69,7 @@ type CoreSpec struct {
 	ConfigExpiration *metav1.Duration `json:"configExpiration,omitempty"`
 
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:MinLength=1
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	CSRFKeyRef string `json:"csrfKeyRef"`
 
 	// +kubebuilder:validation:Required
@@ -78,7 +78,7 @@ type CoreSpec struct {
 
 type CoreServiceTokenSpec struct {
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:MinLength=1
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	CertificateRef string `json:"certificateRef"`
 }
 
@@ -154,7 +154,7 @@ type CoreDatabaseSpec struct {
 	MaxOpenConnections int32 `json:"maxOpenConnections,omitempty"`
 
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:MinLength=1
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	EncryptionKeyRef string `json:"encryptionKeyRef"`
 }
 
@@ -177,6 +177,7 @@ type CoreComponentsJobServiceSpec struct {
 	URL string `json:"url"`
 
 	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	SecretRef string `json:"secretRef"`
 }
 
@@ -209,6 +210,7 @@ type CoreComponentsRegistryCredentialsSpec struct {
 	Username string `json:"username"`
 
 	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	PasswordRef string `json:"passwordRef"`
 }
 
@@ -239,7 +241,7 @@ type CoreComponentsTLSSpec struct {
 	Verify *bool `json:"verify,omitempty"`
 
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:MinLength=1
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	CertificateRef string `json:"certificateRef"`
 }
 
@@ -274,6 +276,7 @@ type CoreComponentsNotaryServerSpec struct {
 
 type CoreConfig struct {
 	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	AdminInitialPasswordRef string `json:"adminInitialPasswordRef"`
 
 	// +kubebuilder:validation:Optional
@@ -282,9 +285,11 @@ type CoreConfig struct {
 	AuthenticationMode string `json:"authMode,omitempty"`
 
 	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	SecretRef string `json:"secretRef"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	PublicCertificateRef string `json:"publicCertificateRef,omitempty"`
 }
 
