@@ -47,6 +47,11 @@ func (r *Reconciler) GetDeployment(ctx context.Context, clair *goharborv1alpha2.
 		logger.Get(ctx).Error(err, "invalid vulnerability sources")
 	}
 
+	redisDSN, err := clair.Spec.Adapter.Redis.GetDSN("")
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot get redis DSN")
+	}
+
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      fmt.Sprintf("%s-clair", clair.GetName()),
@@ -204,21 +209,13 @@ func (r *Reconciler) GetDeployment(ctx context.Context, clair *goharborv1alpha2.
 											Key:      goharborv1alpha2.HarborClairAdapterBrokerURLKey,
 											Optional: &varFalse,
 											LocalObjectReference: corev1.LocalObjectReference{
-												Name: clair.Spec.Adapter.RedisSecret,
+												Name: redisDSN.String(),
 											},
 										},
 									},
 								}, {
-									Name: "SCANNER_STORE_REDIS_NAMESPACE",
-									ValueFrom: &corev1.EnvVarSource{
-										SecretKeyRef: &corev1.SecretKeySelector{
-											Key:      goharborv1alpha2.HarborClairAdapterBrokerNamespaceKey,
-											Optional: &varFalse,
-											LocalObjectReference: corev1.LocalObjectReference{
-												Name: clair.Spec.Adapter.RedisSecret,
-											},
-										},
-									},
+									Name:  "SCANNER_STORE_REDIS_NAMESPACE",
+									Value: "clair",
 								},
 							},
 							EnvFrom: []corev1.EnvFromSource{

@@ -128,7 +128,7 @@ func (r *Reconciler) GetHTTPSecrets(ctx context.Context, registry *goharborv1alp
 }
 
 func (r *Reconciler) GetAuthenticationSecrets(ctx context.Context, registry *goharborv1alpha2.Registry) ([]graph.Resource, error) {
-	if registry.Spec.Authentication.Token.CertificateRef != "" {
+	if registry.Spec.Authentication.Token != nil {
 		secret, err := r.Controller.AddExternalTypedSecret(ctx, &corev1.Secret{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      registry.Spec.Authentication.Token.CertificateRef,
@@ -139,7 +139,7 @@ func (r *Reconciler) GetAuthenticationSecrets(ctx context.Context, registry *goh
 		return []graph.Resource{secret}, errors.Wrapf(err, "cannot add external typed secret %s", registry.Spec.Authentication.Token.CertificateRef)
 	}
 
-	if registry.Spec.Authentication.HTPasswd.SecretRef != "" {
+	if registry.Spec.Authentication.HTPasswd != nil {
 		secret, err := r.Controller.AddExternalTypedSecret(ctx, &corev1.Secret{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      registry.Spec.Authentication.HTPasswd.SecretRef,

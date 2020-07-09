@@ -207,14 +207,14 @@ validation:
       deny: {{ .Spec.Validation.Manifests.URLs.Deny | toJson }}
   {{- end }}
 {{- end }}
-{{- if ( or .Spec.Authentication.Silly.Realm ( or .Spec.Authentication.Token.Realm .Spec.Authentication.HTPasswd.Realm ) ) }}
+{{- if ( or .Spec.Authentication.Silly ( or .Spec.Authentication.Token .Spec.Authentication.HTPasswd ) ) }}
 auth:
-  {{- if .Spec.Authentication.Silly.Realm }}
+  {{- if .Spec.Authentication.Silly }}
   silly:
     realm: {{ .Spec.Authentication.Silly.Realm }}
     service: {{ .Spec.Authentication.Silly.Service }}
   {{- end }}
-  {{- if .Spec.Authentication.Token.Realm }}
+  {{- if .Spec.Authentication.Token }}
   token:
     realm: {{ .Spec.Authentication.Token.Realm }}
     service: {{ .Spec.Authentication.Token.Service }}
@@ -222,7 +222,7 @@ auth:
     rootcertbundle: /root/certs/bundle
     autoredirect: {{ .Spec.Authentication.Token.AutoRedirect }}
   {{- end }}
-  {{- if .Spec.Authentication.HTPasswd.Realm }}
+  {{- if .Spec.Authentication.HTPasswd }}
   htpasswd:
     realm: {{ .Spec.Authentication.HTPasswd.Realm }}
     # path: setted through environment variable

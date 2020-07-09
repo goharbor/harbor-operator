@@ -113,7 +113,179 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 		},
 	}
 
-	envs := []corev1.EnvVar{}
+	envs := []corev1.EnvVar{{
+		Name:  "EXT_ENDPOINT",
+		Value: core.Spec.ExternalEndpoint,
+	}, {
+		Name:  "LOG_LEVEL",
+		Value: string(core.Spec.Log.Level),
+	}, {
+		Name:  "AUTH_MODE",
+		Value: core.Spec.AuthenticationMode,
+	}, {
+		Name:  "DATABASE_TYPE",
+		Value: goharborv1alpha2.CoreDatabaseType,
+	}, {
+		Name:  "POSTGRESQL_HOST",
+		Value: core.Spec.Database.Host,
+	}, {
+		Name:  "POSTGRESQL_PORT",
+		Value: fmt.Sprintf("%d", core.Spec.Database.Port),
+	}, {
+		Name:  "POSTGRESQL_USERNAME",
+		Value: core.Spec.Database.Username,
+	}, {
+		Name:  "POSTGRESQL_DATABASE",
+		Value: core.Spec.Database.Name,
+	}, {
+		Name: "POSTGRESQL_PASSWORD",
+		ValueFrom: &corev1.EnvVarSource{
+			SecretKeyRef: &corev1.SecretKeySelector{
+				Key: goharborv1alpha2.PostgresqlPasswordKey,
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: core.Spec.Database.PasswordRef,
+				},
+			},
+		},
+	}, {
+		Name:  "CORE_URL",
+		Value: fmt.Sprintf("http://%s", core.GetName()),
+	}, {
+		Name:  "CORE_LOCAL_URL",
+		Value: fmt.Sprintf("http://%s", core.GetName()),
+	}, {
+		Name: "CORE_SECRET",
+		ValueFrom: &corev1.EnvVarSource{
+			SecretKeyRef: &corev1.SecretKeySelector{
+				Key:      goharborv1alpha2.SharedSecretKey,
+				Optional: &varFalse,
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: core.Spec.CoreConfig.SecretRef,
+				},
+			},
+		},
+	}, {
+		Name: "_REDIS_URL",
+		ValueFrom: &corev1.EnvVarSource{
+			SecretKeyRef: &corev1.SecretKeySelector{
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: name,
+				},
+				Key:      RedisDSNKey,
+				Optional: &varFalse,
+			},
+		},
+	}, {
+		Name:  "PORTAL_URL",
+		Value: core.Spec.Components.Portal.URL,
+	}, {
+		Name:  "REGISTRY_CONTROLLER_URL",
+		Value: core.Spec.Components.Registry.ControllerURL,
+	}, {
+		Name:  "REGISTRY_CREDENTIAL_USERNAME",
+		Value: core.Spec.Components.Registry.Credentials.Username,
+	}, {
+		Name: "REGISTRY_CREDENTIAL_PASSWORD",
+		ValueFrom: &corev1.EnvVarSource{
+			SecretKeyRef: &corev1.SecretKeySelector{
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: core.Spec.Components.Registry.Credentials.PasswordRef,
+				},
+				Key:      goharborv1alpha2.SharedSecretKey,
+				Optional: &varFalse,
+			},
+		},
+	}, {
+		Name:  "JOBSERVICE_URL",
+		Value: core.Spec.Components.JobService.URL,
+	}, {
+		Name: "JOBSERVICE_SECRET",
+		ValueFrom: &corev1.EnvVarSource{
+			SecretKeyRef: &corev1.SecretKeySelector{
+				Key:      goharborv1alpha2.SharedSecretKey,
+				Optional: &varFalse,
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: core.Spec.Components.JobService.SecretRef,
+				},
+			},
+		},
+	}, {
+		Name: "CSRF_KEY",
+		ValueFrom: &corev1.EnvVarSource{
+			SecretKeyRef: &corev1.SecretKeySelector{
+				Key:      goharborv1alpha2.CSRFSecretKey,
+				Optional: &varFalse,
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: core.Spec.CSRFKeyRef,
+				},
+			},
+		},
+	}, {
+		Name:  "INTERNAL_TLS_KEY_PATH",
+		Value: path.Join(CertificatesPath, corev1.TLSPrivateKeyKey),
+	}, {
+		Name:  "INTERNAL_TLS_CERT_PATH",
+		Value: path.Join(CertificatesPath, corev1.TLSCertKey),
+	}, {
+		Name:  "INTERNAL_TLS_TRUST_CA_PATH",
+		Value: path.Join(CertificatesPath, corev1.ServiceAccountRootCAKey),
+	}, {
+		Name:  "REGISTRY_URL",
+		Value: core.Spec.Components.Registry.URL,
+	}, {
+		Name:  "REGISTRYCTL_URL",
+		Value: core.Spec.Components.Registry.ControllerURL,
+	}, {
+		Name:  "TOKEN_SERVICE_URL",
+		Value: core.Spec.Components.TokenService.URL,
+	}, {
+		Name:  "CONFIG_PATH",
+		Value: path.Join(ConfigPath, ConfigName),
+	}, {
+		Name:  "CFG_EXPIRATION",
+		Value: fmt.Sprintf("%.0f", core.Spec.ConfigExpiration.Duration.Seconds()),
+	}, {
+		Name:  "HTTP_PROXY",
+		Value: "", // TODO
+	}, {
+		Name:  "HTTPS_PROXY",
+		Value: "", // TODO
+	}, {
+		Name:  "RELOAD_KEY",
+		Value: "true",
+	}, {
+		Name:  "SYNC_QUOTA",
+		Value: "true", // TODO
+	}, {
+		Name:  "SYNC_REGISTRY",
+		Value: fmt.Sprintf("%+v", core.Spec.Components.Registry.Sync),
+	}, {
+		Name: "HARBOR_ADMIN_PASSWORD",
+		ValueFrom: &corev1.EnvVarSource{
+			SecretKeyRef: &corev1.SecretKeySelector{
+				Key:      goharborv1alpha2.SharedSecretKey,
+				Optional: &varFalse,
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: core.Spec.AdminInitialPasswordRef,
+				},
+			},
+		},
+	}, {
+		Name:  "INTERNAL_TLS_ENABLED",
+		Value: fmt.Sprintf("%v", core.Spec.Components.TLS != nil),
+	}, {
+		Name:  "WITH_CHARTMUSEUM",
+		Value: fmt.Sprintf("%+v", core.Spec.Components.ChartRepository != nil),
+	}, {
+		Name:  "WITH_CLAIR",
+		Value: fmt.Sprintf("%+v", core.Spec.Components.Clair != nil),
+	}, {
+		Name:  "WITH_NOTARY",
+		Value: fmt.Sprintf("%+v", core.Spec.Components.NotaryServer != nil),
+	}, {
+		Name:  "WITH_TRIVY",
+		Value: fmt.Sprintf("%+v", core.Spec.Components.Trivy != nil),
+	}}
 
 	if len(core.Spec.Components.Registry.Redis.DSN) > 0 {
 		envs = append(envs, corev1.EnvVar{
@@ -274,179 +446,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 							},
 
 							// https://github.com/goharbor/harbor/blob/master/make/photon/prepare/templates/core/env.jinja
-							Env: append(envs, corev1.EnvVar{
-								Name:  "EXT_ENDPOINT",
-								Value: core.Spec.ExternalEndpoint,
-							}, corev1.EnvVar{
-								Name:  "LOG_LEVEL",
-								Value: string(core.Spec.Log.Level),
-							}, corev1.EnvVar{
-								Name:  "AUTH_MODE",
-								Value: core.Spec.AuthenticationMode,
-							}, corev1.EnvVar{
-								Name:  "DATABASE_TYPE",
-								Value: goharborv1alpha2.CoreDatabaseType,
-							}, corev1.EnvVar{
-								Name:  "POSTGRESQL_HOST",
-								Value: core.Spec.Database.Host,
-							}, corev1.EnvVar{
-								Name:  "POSTGRESQL_PORT",
-								Value: fmt.Sprintf("%d", core.Spec.Database.Port),
-							}, corev1.EnvVar{
-								Name:  "POSTGRESQL_USERNAME",
-								Value: core.Spec.Database.Username,
-							}, corev1.EnvVar{
-								Name:  "POSTGRESQL_DATABASE",
-								Value: core.Spec.Database.Name,
-							}, corev1.EnvVar{
-								Name: "POSTGRESQL_PASSWORD",
-								ValueFrom: &corev1.EnvVarSource{
-									SecretKeyRef: &corev1.SecretKeySelector{
-										Key: goharborv1alpha2.PostgresqlPasswordKey,
-										LocalObjectReference: corev1.LocalObjectReference{
-											Name: core.Spec.Database.PasswordRef,
-										},
-									},
-								},
-							}, corev1.EnvVar{
-								Name:  "CORE_URL",
-								Value: fmt.Sprintf("http://%s", core.GetName()),
-							}, corev1.EnvVar{
-								Name:  "CORE_LOCAL_URL",
-								Value: fmt.Sprintf("http://%s", core.GetName()),
-							}, corev1.EnvVar{
-								Name: "CORE_SECRET",
-								ValueFrom: &corev1.EnvVarSource{
-									SecretKeyRef: &corev1.SecretKeySelector{
-										Key:      goharborv1alpha2.SharedSecretKey,
-										Optional: &varFalse,
-										LocalObjectReference: corev1.LocalObjectReference{
-											Name: core.Spec.CoreConfig.SecretRef,
-										},
-									},
-								},
-							}, corev1.EnvVar{
-								Name: "_REDIS_URL",
-								ValueFrom: &corev1.EnvVarSource{
-									SecretKeyRef: &corev1.SecretKeySelector{
-										LocalObjectReference: corev1.LocalObjectReference{
-											Name: name,
-										},
-										Key:      RedisDSNKey,
-										Optional: &varFalse,
-									},
-								},
-							}, corev1.EnvVar{
-								Name:  "PORTAL_URL",
-								Value: core.Spec.Components.Portal.URL,
-							}, corev1.EnvVar{
-								Name:  "REGISTRY_CONTROLLER_URL",
-								Value: core.Spec.Components.Registry.ControllerURL,
-							}, corev1.EnvVar{
-								Name:  "REGISTRY_CREDENTIAL_USERNAME",
-								Value: core.Spec.Components.Registry.Credentials.Username,
-							}, corev1.EnvVar{
-								Name: "REGISTRY_CREDENTIAL_PASSWORD",
-								ValueFrom: &corev1.EnvVarSource{
-									SecretKeyRef: &corev1.SecretKeySelector{
-										LocalObjectReference: corev1.LocalObjectReference{
-											Name: core.Spec.Components.Registry.Credentials.PasswordRef,
-										},
-										Key:      goharborv1alpha2.SharedSecretKey,
-										Optional: &varFalse,
-									},
-								},
-							}, corev1.EnvVar{
-								Name:  "JOBSERVICE_URL",
-								Value: core.Spec.Components.JobService.URL,
-							}, corev1.EnvVar{
-								Name: "JOBSERVICE_SECRET",
-								ValueFrom: &corev1.EnvVarSource{
-									SecretKeyRef: &corev1.SecretKeySelector{
-										Key:      goharborv1alpha2.SharedSecretKey,
-										Optional: &varFalse,
-										LocalObjectReference: corev1.LocalObjectReference{
-											Name: core.Spec.Components.JobService.SecretRef,
-										},
-									},
-								},
-							}, corev1.EnvVar{
-								Name: "CSRF_KEY",
-								ValueFrom: &corev1.EnvVarSource{
-									SecretKeyRef: &corev1.SecretKeySelector{
-										Key:      goharborv1alpha2.CSRFSecretKey,
-										Optional: &varFalse,
-										LocalObjectReference: corev1.LocalObjectReference{
-											Name: core.Spec.CSRFKeyRef,
-										},
-									},
-								},
-							}, corev1.EnvVar{
-								Name:  "INTERNAL_TLS_KEY_PATH",
-								Value: path.Join(CertificatesPath, corev1.TLSPrivateKeyKey),
-							}, corev1.EnvVar{
-								Name:  "INTERNAL_TLS_CERT_PATH",
-								Value: path.Join(CertificatesPath, corev1.TLSCertKey),
-							}, corev1.EnvVar{
-								Name:  "INTERNAL_TLS_TRUST_CA_PATH",
-								Value: path.Join(CertificatesPath, corev1.ServiceAccountRootCAKey),
-							}, corev1.EnvVar{
-								Name:  "REGISTRY_URL",
-								Value: core.Spec.Components.Registry.URL,
-							}, corev1.EnvVar{
-								Name:  "REGISTRYCTL_URL",
-								Value: core.Spec.Components.Registry.ControllerURL,
-							}, corev1.EnvVar{
-								Name:  "TOKEN_SERVICE_URL",
-								Value: core.Spec.Components.TokenService.URL,
-							}, corev1.EnvVar{
-								Name:  "CONFIG_PATH",
-								Value: path.Join(ConfigPath, ConfigName),
-							}, corev1.EnvVar{
-								Name:  "CFG_EXPIRATION",
-								Value: fmt.Sprintf("%.0f", core.Spec.ConfigExpiration.Duration.Seconds()),
-							}, corev1.EnvVar{
-								Name:  "HTTP_PROXY",
-								Value: "", // TODO
-							}, corev1.EnvVar{
-								Name:  "HTTPS_PROXY",
-								Value: "", // TODO
-							}, corev1.EnvVar{
-								Name:  "RELOAD_KEY",
-								Value: "true",
-							}, corev1.EnvVar{
-								Name:  "SYNC_QUOTA",
-								Value: "true", // TODO
-							}, corev1.EnvVar{
-								Name:  "SYNC_REGISTRY",
-								Value: fmt.Sprintf("%+v", core.Spec.Components.Registry.Sync),
-							}, corev1.EnvVar{
-								Name: "HARBOR_ADMIN_PASSWORD",
-								ValueFrom: &corev1.EnvVarSource{
-									SecretKeyRef: &corev1.SecretKeySelector{
-										Key:      goharborv1alpha2.SharedSecretKey,
-										Optional: &varFalse,
-										LocalObjectReference: corev1.LocalObjectReference{
-											Name: core.Spec.AdminInitialPasswordRef,
-										},
-									},
-								},
-							}, corev1.EnvVar{
-								Name:  "INTERNAL_TLS_ENABLED",
-								Value: fmt.Sprintf("%v", core.Spec.Components.TLS != nil),
-							}, corev1.EnvVar{
-								Name:  "WITH_CHARTMUSEUM",
-								Value: fmt.Sprintf("%+v", core.Spec.Components.ChartRepository != nil),
-							}, corev1.EnvVar{
-								Name:  "WITH_CLAIR",
-								Value: fmt.Sprintf("%+v", core.Spec.Components.Clair != nil),
-							}, corev1.EnvVar{
-								Name:  "WITH_NOTARY",
-								Value: fmt.Sprintf("%+v", core.Spec.Components.NotaryServer != nil),
-							}, corev1.EnvVar{
-								Name:  "WITH_TRIVY",
-								Value: fmt.Sprintf("%+v", core.Spec.Components.Trivy != nil),
-							}),
+							Env:             envs,
 							ImagePullPolicy: corev1.PullAlways,
 							LivenessProbe: &corev1.Probe{
 								Handler: corev1.Handler{
