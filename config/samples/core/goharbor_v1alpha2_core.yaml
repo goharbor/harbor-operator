@@ -11,9 +11,10 @@ spec:
     dsn: redis://admin@harbor-redis-master:6379/0
     passwordRef: harbor-redis
   database:
-    host: core-database-postgresql
-    passwordRef: core-database-postgresql
+    host: harbor-database-postgresql
+    passwordRef: harbor-database-postgresql
     encryptionKeyRef: core-database-encryption
+    name: core
   components:
     chartRepository:
       url: http://harbor-chartmuseum
@@ -22,6 +23,7 @@ spec:
       secretRef: jobservice-secret
     tokenService:
       url: http://localhost/service/token
+      certificateRef: core-token-certificate
     registry:
       url: http://harbor-registry:80
       controllerURL: http://harbor-registryctl
