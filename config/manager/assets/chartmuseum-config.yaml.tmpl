@@ -2,6 +2,7 @@ allow.overwrite: {{ .Spec.Chart.AllowOvewrite }}
 
 auth:
   anonymous.get: {{ .Spec.Auth.AnonymousGet }}
+{{- if .Spec.Auth.Bearer }}
   {{- if .Spec.Auth.Bearer.CertificateRef }}
   cert-path: /etc/chartmuseum/auth-certificates/tls.crt
   {{- end }}
@@ -9,8 +10,9 @@ auth:
   realm: {{ .Spec.Auth.Bearer.Realm }}
   service: {{ .Spec.Auth.Bearer.Service }}
   {{- end }}
+{{- end }}
 
-{{- if .Spec.Auth.Bearer.CertificateRef }}
+{{- if .Spec.Auth.Bearer }}
 bearer.auth: 1
 {{- end }}
 
