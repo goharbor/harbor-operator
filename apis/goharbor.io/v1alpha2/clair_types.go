@@ -37,11 +37,23 @@ type ClairList struct {
 
 // ClairSpec defines the desired state of Clair.
 type ClairSpec struct {
-	ComponentSpec  `json:",inline"`
-	ClairComponent `json:",inline"`
+	ComponentSpec `json:",inline"`
+
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:MinItems=1
+	// +listType:set
+	VulnerabilitySources []string `json:"vulnerabilitySources"`
+
+	// +kubebuilder:validation:Required
+	Adapter ClairAdapterComponent `json:"adapter"`
 
 	// +kubebuilder:validation:Required
 	DatabaseSecret string `json:"databaseSecret"`
+}
+
+type ClairAdapterComponent struct {
+	// +kubebuilder:validation:Required
+	Redis OpacifiedDSN `json:"redis"`
 }
 
 func init() { // nolint:gochecknoinits
