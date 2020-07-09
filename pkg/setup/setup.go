@@ -14,6 +14,7 @@ func WithManager(ctx context.Context, mgr manager.Manager) error {
 	var g errgroup.Group
 
 	for name, builder := range controllers {
+		name := name
 		c := &controller{
 			Name: name,
 			New:  builder,
@@ -21,7 +22,7 @@ func WithManager(ctx context.Context, mgr manager.Manager) error {
 
 		ok, err := c.IsEnabled(ctx)
 		if err != nil {
-			return errors.Wrapf(err, "controller %s", name)
+			return errors.Wrapf(err, "cannot check if controller %s is enabled", name)
 		}
 
 		if !ok {
@@ -31,11 +32,12 @@ func WithManager(ctx context.Context, mgr manager.Manager) error {
 		}
 
 		g.Go(func() error {
-			return errors.Wrapf(c.WithManager(ctx, mgr), "%s", c.Name)
+			return errors.Wrapf(c.WithManager(ctx, mgr), "controller %s", name)
 		})
 	}
 
 	for name, object := range webhooks {
+		name := name
 		wh := &webHook{
 			Name:    name,
 			webhook: object,
@@ -43,7 +45,7 @@ func WithManager(ctx context.Context, mgr manager.Manager) error {
 
 		ok, err := wh.IsEnabled(ctx)
 		if err != nil {
-			return errors.Wrapf(err, "controller %s", name)
+			return errors.Wrapf(err, "cannot check if webhook %s is enabled", name)
 		}
 
 		if !ok {
@@ -52,7 +54,7 @@ func WithManager(ctx context.Context, mgr manager.Manager) error {
 		}
 
 		g.Go(func() error {
-			return errors.Wrapf(wh.WithManager(ctx, mgr), "%s", wh.Name)
+			return errors.Wrapf(wh.WithManager(ctx, mgr), "webhook %s", name)
 		})
 	}
 
