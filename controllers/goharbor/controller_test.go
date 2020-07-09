@@ -115,7 +115,6 @@ var _ = DescribeTable(
 		Eventually(func() error { return k8sClient.Get(ctx, key, resource) }, timeouts...).
 			ShouldNot(Succeed(), "Resource should no more exist")
 	},
-	PEntry("Harbor", newHarborController(), 5*time.Minute, 10*time.Second),
 	Entry("Portal", newPortalController(), 30*time.Second, 2*time.Second),
 	Entry("Registry", newRegistryController(), time.Minute, 5*time.Second),
 	Entry("RegistryCtl", newRegistryCtlController(), 3*time.Minute, 5*time.Second),
@@ -123,4 +122,7 @@ var _ = DescribeTable(
 	// Following tests require databases
 	PEntry("NotaryServer", newNotaryServerController(), time.Minute, 5*time.Second),
 	PEntry("NotarySigner", newNotarySignerController(), time.Minute, 5*time.Second),
+	PEntry("Core", newCoreController(), time.Minute, 5*time.Second),
+	PEntry("JobService", newJobServiceController(), time.Minute, 5*time.Second), // This requires Core resource
+	PEntry("Harbor", newHarborController(), 5*time.Minute, 10*time.Second),      // This requires Core and JobService resources
 )
