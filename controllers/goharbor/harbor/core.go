@@ -354,7 +354,8 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1alpha2.Harbo
 					URL: portalURL,
 				},
 				TokenService: goharborv1alpha2.CoreComponentsTokenServiceSpec{
-					URL: tokenServiceURL,
+					URL:            tokenServiceURL,
+					CertificateRef: tokenCertificateRef,
 				},
 			},
 			CoreConfig: goharborv1alpha2.CoreConfig{
@@ -371,9 +372,6 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1alpha2.Harbo
 				OpacifiedDSN: harbor.Spec.RedisDSN(goharborv1alpha2.CoreRedis),
 			},
 			Proxy: harbor.Spec.Proxy,
-			ServiceToken: goharborv1alpha2.CoreServiceTokenSpec{
-				CertificateRef: tokenCertificateRef,
-			},
 		},
 	}, nil
 }
