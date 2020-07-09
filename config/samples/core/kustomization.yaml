@@ -30,6 +30,11 @@ secretGenerator:
   literals:
   - secret=unsecure-jobservice-secret
   type: "goharbor.io/single-secret"
+- name: core-token-certificate
+  files:
+    - tls.crt
+    - tls.key
+  type: "kubernetes.io/tls"
 
 bases:
 - ../registry

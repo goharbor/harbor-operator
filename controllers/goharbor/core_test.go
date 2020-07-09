@@ -173,12 +173,10 @@ func setupValidCore(ctx context.Context, ns string) (Resource, client.ObjectKey)
 				SecretRef:               coreSecret,
 			},
 			ExternalEndpoint: "https://the.public.url",
-			ServiceToken: goharborv1alpha2.CoreServiceTokenSpec{
-				CertificateRef: tokenCertificate,
-			},
 			Components: goharborv1alpha2.CoreComponentsSpec{
 				TokenService: goharborv1alpha2.CoreComponentsTokenServiceSpec{
-					URL: "https://the.public.url/service/token",
+					URL:            "https://the.public.url/service/token",
+					CertificateRef: tokenCertificate,
 				},
 				Registry: goharborv1alpha2.CoreComponentsRegistrySpec{
 					ControllerURL: "http://the.registryctl.url",
