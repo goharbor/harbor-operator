@@ -3,7 +3,9 @@ package v1alpha2
 import (
 	"context"
 
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -58,13 +60,17 @@ func (js *JobService) Validate() error {
 
 	err := js.Spec.JobLoggers.Validate()
 	if err != nil {
-		allErrs = append(allErrs, field.Invalid(field.NewPath("spec", "jobLoggers"), js.Spec.JobLoggers, err.Error()))
+		allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("jobLoggers"), js.Spec.JobLoggers, err.Error()))
 	}
 
 	err = js.Spec.Loggers.Validate()
 	if err != nil {
-		allErrs = append(allErrs, field.Invalid(field.NewPath("spec", "loggers"), js.Spec.Loggers, err.Error()))
+		allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("loggers"), js.Spec.Loggers, err.Error()))
 	}
 
-	return allErrs.ToAggregate()
+	if len(allErrs) == 0 {
+		return nil
+	}
+
+	return apierrors.NewInvalid(schema.GroupKind{Group: GroupVersion.Group, Kind: "JobService"}, js.Name, allErrs)
 }
