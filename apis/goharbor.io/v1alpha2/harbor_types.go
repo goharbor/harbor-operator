@@ -729,48 +729,6 @@ type HarborExposeIngressHostsSpec struct {
 	Notary string `json:"notary"`
 }
 
-type NotarySignerComponent struct {
-	// CommonName is a common name to be used on the Certificate.
-	// The CommonName should have a length of 64 characters or fewer to avoid
-	// generating invalid CSRs.
-	// +kubebuilder:validation:MaxLength=64
-	// +kubebuilder:validation:Optional
-	CommonName string `json:"commonName,omitempty"`
-
-	// Organization is the organization to be used on the Certificate
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:MinItems=1
-	// This cannot be set to true: https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/#validation
-	// +listType:atomic
-	Organization []string `json:"organization,omitempty"`
-
-	// KeySize is the key bit size of the corresponding private key for this certificate.
-	// +optional
-	// +kubebuilder:validation:Maximum=8192
-	// +kubebuilder:validation:Minimum=2048
-	KeySize int32 `json:"keySize,omitempty"`
-}
-
-type ClairAdapterComponent struct {
-	// +kubebuilder:validation:Required
-	RedisSecret string `json:"redisSecret"`
-}
-
-type ClairComponent struct {
-	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:MinItems=1
-	// +listType:set
-	VulnerabilitySources []string `json:"vulnerabilitySources"`
-
-	// +kubebuilder:validation:Required
-	Adapter ClairAdapterComponent `json:"adapter"`
-}
-type HarborComponents struct {
-	Clair *ClairComponent `json:"clair"`
-
-	NotarySigner *NotarySignerComponent `json:"notarySigner"`
-}
-
 func init() { // nolint:gochecknoinits
 	SchemeBuilder.Register(&Harbor{}, &HarborList{})
 }

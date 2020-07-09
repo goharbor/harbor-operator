@@ -36,8 +36,11 @@ type NotarySignerList struct {
 
 // NotarySignerSpec defines the desired state of NotarySigner.
 type NotarySignerSpec struct {
-	ComponentSpec         `json:",inline"`
-	NotarySignerComponent `json:",inline"`
+	ComponentSpec `json:",inline"`
+
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:MinLength=1
+	CertificateRef string `json:"certificateRef"`
 
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Pattern="^https?://.*$"
@@ -54,7 +57,7 @@ type NotarySignerSpec struct {
 	Storage NotarySignerStorageSpec `json:"storage"`
 
 	// +kubebuilder:validation:Optional
-	Migration *NotaryMigrationSpec `json:"migration"`
+	Migration *NotaryMigrationSpec `json:"migration,omitempty"`
 }
 
 type NotarySignerStorageSpec struct {

@@ -71,7 +71,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, notary *goharborv1alpha2
 		})
 	}
 
-	if notary.Spec.HTTPS.CertificateRef != "" {
+	if notary.Spec.HTTPS != nil {
 		volumes = append(volumes, corev1.Volume{
 			Name: HTTPSVolumeName,
 			VolumeSource: corev1.VolumeSource{
