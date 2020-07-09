@@ -188,7 +188,7 @@ func (r *Reconciler) GetRegistry(ctx context.Context, harbor *goharborv1alpha2.H
 					Level: harbor.Spec.LogLevel.Registry(),
 				},
 				Authentication: goharborv1alpha2.RegistryAuthenticationSpec{
-					HTPasswd: goharborv1alpha2.RegistryAuthenticationHTPasswdSpec{
+					HTPasswd: &goharborv1alpha2.RegistryAuthenticationHTPasswdSpec{
 						Realm:     RegistryAuthRealm,
 						SecretRef: authenticationSecretName,
 					},

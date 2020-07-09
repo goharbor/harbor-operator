@@ -1,6 +1,8 @@
 package v1alpha2
 
 import (
+	"errors"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -40,7 +42,7 @@ type JobServiceSpec struct {
 	ComponentSpec `json:",inline"`
 
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:MinLength=1
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	SecretRef string `json:"secretRef"`
 
 	// +kubebuilder:validation:Optional
@@ -68,7 +70,7 @@ type JobServiceSpec struct {
 
 type JobServiceCoreSpec struct {
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:MinLength=1
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	SecretRef string `json:"secretRef"`
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Pattern=".+://.+"
@@ -77,6 +79,7 @@ type JobServiceCoreSpec struct {
 
 type JobServiceHTTPSSpec struct {
 	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	CertificateRef string `json:"certificateRef,omitempty"`
 }
 
@@ -117,8 +120,8 @@ type JobServicePoolSpec struct {
 
 // JobServiceLoggerConfigSweeperSpec keeps settings of log sweeper.
 type JobServiceLoggerConfigSweeperSpec struct {
-
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	SettingsRef string `json:"settingsRef,omitempty"`
 }
 
@@ -133,8 +136,19 @@ type JobServiceLoggerConfigSpec struct {
 	Database *JobServiceLoggerConfigDatabaseSpec `json:"database,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// +nullable
 	STDOUT *JobServiceLoggerConfigSTDOUTSpec `json:"stdout,omitempty"`
+}
+
+var (
+	errOneLoggerMustBeSpecified = errors.New("one of files, database or stdout must be specified")
+)
+
+func (r *JobServiceLoggerConfigSpec) Validate() error {
+	if len(r.Files) == 0 && r.Database == nil && r.STDOUT == nil {
+		return errOneLoggerMustBeSpecified
+	}
+
+	return nil
 }
 
 type JobServiceLoggerConfigDatabaseSpec struct {
@@ -148,8 +162,8 @@ type JobServiceLoggerConfigDatabaseSpec struct {
 }
 
 type JobServiceLoggerConfigSTDOUTSpec struct {
-	// +kubebuilder:validation:Required
-	Level JobServiceLogLevel `json:"level"`
+	// +kubebuilder:validation:Optional
+	Level JobServiceLogLevel `json:"level,omitempty"`
 }
 
 type JobServiceLoggerConfigFileSpec struct {

@@ -142,7 +142,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 		})
 	}
 
-	if registry.Spec.Authentication.HTPasswd.SecretRef != "" {
+	if registry.Spec.Authentication.HTPasswd != nil {
 		envs = append(envs, corev1.EnvVar{
 			Name:  "REGISTRY_AUTH_HTPASSWD_PATH",
 			Value: path.Join(AuthenticationHTPasswdPath, goharborv1alpha2.HTPasswdFileName),
