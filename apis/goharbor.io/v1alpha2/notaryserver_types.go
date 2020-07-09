@@ -39,7 +39,7 @@ type NotaryServerSpec struct {
 	ComponentSpec `json:",inline"`
 
 	// +kubebuilder:validation:Optional
-	HTTPS NotaryHTTPSSpec `json:"https,omitempty"`
+	HTTPS *NotaryHTTPSSpec `json:"https,omitempty"`
 
 	// +kubebuilder:validation:Required
 	TrustService NotaryServerTrustServiceSpec `json:"trustService"`
