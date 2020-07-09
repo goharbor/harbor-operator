@@ -39,7 +39,7 @@ type NotarySignerSpec struct {
 	ComponentSpec `json:",inline"`
 
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:MinLength=1
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	CertificateRef string `json:"certificateRef"`
 
 	// +kubebuilder:validation:Required
@@ -64,7 +64,7 @@ type NotarySignerStorageSpec struct {
 	NotaryStorageSpec `json:",inline"`
 
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:MinLength=1
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	AliasesRef string `json:"aliasesRef"`
 }
 

@@ -50,6 +50,7 @@ type RegistryControllerSpec struct {
 	ComponentSpec `json:",inline"`
 
 	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	RegistryRef string `json:"registryRef"`
 
 	// +kubebuilder:validation:Optional
@@ -66,7 +67,7 @@ type RegistryControllerLogSpec struct {
 
 type RegistryControllerHTTPSSpec struct {
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:MinLength=1
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	CertificateRef string `json:"certificateRef"`
 }
 

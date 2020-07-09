@@ -29,6 +29,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	"sigs.k8s.io/kustomize/kstatus/status"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
@@ -48,6 +49,8 @@ type controllerTest struct {
 type Resource interface {
 	runtime.Object
 	metav1.Object
+
+	DeepCopyObject() runtime.Object
 }
 
 var ns = SetupTest()
@@ -64,6 +67,10 @@ var _ = DescribeTable(
 
 		resource, key := resourceController.Setup(ctx, ns.Name)
 
+		if resource, ok := resource.(webhook.Validator); ok {
+			Expect(resource.ValidateCreate()).To(Succeed())
+		}
+
 		Eventually(func() error { return k8sClient.Get(ctx, key, resource) }, timeouts...).
 			Should(Succeed(), "resource should exists")
 
@@ -72,7 +79,13 @@ var _ = DescribeTable(
 
 		By("Updating resource spec")
 
+		old := resource.DeepCopyObject()
+
 		resourceController.Update(ctx, resource)
+
+		if resource, ok := resource.(webhook.Validator); ok {
+			Expect(resource.ValidateUpdate(old)).To(Succeed())
+		}
 
 		Expect(k8sClient.Get(ctx, key, resource)).To(Succeed(), "resource should still be accessible")
 
@@ -93,6 +106,10 @@ var _ = DescribeTable(
 
 		By("Deleting resource")
 
+		if resource, ok := resource.(webhook.Validator); ok {
+			Expect(resource.ValidateDelete()).To(Succeed())
+		}
+
 		Expect(k8sClient.Delete(ctx, resource)).To(Succeed())
 
 		Eventually(func() error { return k8sClient.Get(ctx, key, resource) }, timeouts...).
@@ -103,7 +120,7 @@ var _ = DescribeTable(
 	Entry("Registry", newRegistryController(), time.Minute, 5*time.Second),
 	Entry("RegistryCtl", newRegistryCtlController(), 3*time.Minute, 5*time.Second),
 	Entry("ChartMuseum", newChartMuseumController(), time.Minute, 5*time.Second),
-	// Folowing tests required a database
+	// Following tests require databases
 	PEntry("NotaryServer", newNotaryServerController(), time.Minute, 5*time.Second),
 	PEntry("NotarySigner", newNotarySignerController(), time.Minute, 5*time.Second),
 )

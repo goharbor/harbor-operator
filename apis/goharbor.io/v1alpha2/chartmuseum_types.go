@@ -62,7 +62,7 @@ type ChartMuseumSpec struct {
 
 type ChartMuseumServerSpec struct {
 	// +kubebuilder:validation:Optional
-	HTTPS ChartMuseumHTTPSSpec `json:"https,omitempty"`
+	HTTPS *ChartMuseumHTTPSSpec `json:"https,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="string"
@@ -175,7 +175,7 @@ type ChartMuseumChartStorageDriverAmazonSpec struct {
 	AccessKeyID string `json:"accessKeyID,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:MinLength=1
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	AccessSecretRef string `json:"accessSecretRef,omitempty"`
 }
 
@@ -224,7 +224,7 @@ type ChartMuseumChartStorageDriverOpenStackSpec struct {
 	UserID string `json:"userid,omitempty"`
 
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:MinLegnth=1
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	// Secret name containing the Openstack password.
 	PasswordRef string `json:"passwordRef,omitempty"`
 }
@@ -293,16 +293,18 @@ type ChartMuseumAuthSpec struct {
 	AnonymousGet bool `json:"anonymousGet"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	// Reference to secret containing basic http authentication
 	BasicAuthRef string `json:"basicAuthRef,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// Bearer authentication specs
-	Bearer ChartMuseumAuthBearerSpec `json:"bearer,omitempty"`
+	Bearer *ChartMuseumAuthBearerSpec `json:"bearer,omitempty"`
 }
 
 type ChartMuseumAuthBearerSpec struct {
 	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	// Reference to secret containing authorization server certificate
 	CertificateRef string `json:"certificateRef"`
 
@@ -317,6 +319,7 @@ type ChartMuseumAuthBearerSpec struct {
 
 type ChartMuseumHTTPSSpec struct {
 	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	// Reference to secret containing tls certificate
 	CertificateRef string `json:"certificateRef"`
 }

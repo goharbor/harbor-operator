@@ -18,7 +18,7 @@ func (r *Registry) SetupWebhookWithManager(ctx context.Context, mgr ctrl.Manager
 		Complete()
 }
 
-// +kubebuilder:webhook:verbs=create;update,path=/validate-goharbor-io-goharbor-io-v1alpha2-registry,mutating=false,failurePolicy=fail,groups=goharbor.io.goharbor.io,resources=notaryservers,versions=v1alpha2,name=vnotaryserver.kb.io
+// +kubebuilder:webhook:verbs=create;update,path=/validate-goharbor-io-v1alpha2-registry,mutating=false,failurePolicy=fail,groups=goharbor.io,resources=registries,versions=v1alpha2,name=vregistry.kb.io
 
 var _ webhook.Validator = &Registry{}
 
