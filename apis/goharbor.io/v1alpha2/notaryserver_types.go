@@ -77,6 +77,7 @@ type NotaryServerTrustServiceSpec struct {
 	KeyAlgorithm string `json:"keyAlgorithm,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	CertificateRef string `json:"certificateRef,omitempty"`
 }
 
@@ -96,6 +97,7 @@ type NotaryServerAuthTokenSpec struct {
 	Issuer string `json:"issuer"`
 
 	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	CertificateRef string `json:"certificateRef"`
 
 	// +kubebuilder:validation:Optional

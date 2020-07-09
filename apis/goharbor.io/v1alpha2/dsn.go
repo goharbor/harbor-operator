@@ -12,6 +12,7 @@ type OpacifiedDSN struct {
 	DSN string `json:"dsn"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	// If password is absent from dsn field, please specify it here
 	PasswordRef string `json:"passwordRef,omitempty"`
 }

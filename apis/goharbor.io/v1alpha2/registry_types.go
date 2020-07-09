@@ -102,6 +102,7 @@ type RegistryProxySpec struct {
 	RemoteURL string `json:"remoteURL"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	BasicAuthRef string `json:"basicAuthRef,omitempty"`
 }
 
@@ -178,6 +179,7 @@ type RegistryLogHookSpec struct {
 	Levels []string `json:"levels"`
 
 	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	OptionsRef string `json:"optionsRef"`
 }
 
@@ -203,11 +205,13 @@ type RegistryMiddlewareSpec struct {
 	Name string `json:"name"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	OptionsRef string `json:"optionsRef,omitempty"`
 }
 
 type RegistryHTTPSpec struct {
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	// The secret name containing a random piece of data
 	// used to sign state that may be stored with the client
 	// to protect against tampering. For production environments
@@ -468,13 +472,13 @@ type RegistryNotificationEndpointIgnoreSpec struct {
 
 type RegistryAuthenticationSpec struct {
 	// +kubebuilder:validation:Optional
-	Silly RegistryAuthenticationSillySpec `json:"silly,omitempty"`
+	Silly *RegistryAuthenticationSillySpec `json:"silly,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	Token RegistryAuthenticationTokenSpec `json:"token,omitempty"`
+	Token *RegistryAuthenticationTokenSpec `json:"token,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	HTPasswd RegistryAuthenticationHTPasswdSpec `json:"htPasswd,omitempty"`
+	HTPasswd *RegistryAuthenticationHTPasswdSpec `json:"htPasswd,omitempty"`
 }
 
 type RegistryAuthenticationSillySpec struct {
@@ -501,7 +505,7 @@ type RegistryAuthenticationTokenSpec struct {
 	Issuer string `json:"issuer"`
 
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:minLength=1
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	CertificateRef string `json:"certificateRef"`
 
 	// +kubebuilder:validation:Optional
@@ -515,7 +519,7 @@ type RegistryAuthenticationHTPasswdSpec struct {
 	Realm string `json:"realm"`
 
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:minLength=1
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	SecretRef string `json:"secretRef"`
 }
 
@@ -551,6 +555,7 @@ type RegistryCompatibilitySchemaSpec struct {
 	Enabled bool `json:"enabled"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	CertificateRef string `json:"certificateRef,omitempty"`
 }
 
@@ -646,6 +651,7 @@ type RegistryStorageDriverS3Spec struct {
 	AccessKey string `json:"accesskey,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	// Reference to the secret containing the AWS Secret Key.
 	// If you use IAM roles, omit to fetch temporary credentials from IAM.
 	SecretKeyRef string `json:"secretkeyRef,omitempty"`
@@ -713,7 +719,7 @@ type RegistryStorageDriverSwiftSpec struct {
 	Username string `json:"username,omitempty"`
 
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:MinLegnth=1
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	// Secret name containing the Openstack password.
 	PasswordRef string `json:"passwordRef,omitempty"`
 
@@ -764,6 +770,7 @@ type RegistryStorageDriverSwiftSpec struct {
 	Prefix string `json:"prefix,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	// The secret key used to generate temporary URLs.
 	SecretKeyRef string `json:"secretkeyRef,omitempty"`
 

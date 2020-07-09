@@ -66,9 +66,11 @@ type HarborHelm1_4_0Spec struct {
 	LogLevel HarborLogLevel `json:"logLevel,omitempty"`
 
 	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	HarborAdminPasswordRef string `json:"harborAdminPasswordRef"`
 
 	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	// The secret key used for encryption.
 	EncryptionKeyRef string `json:"encryptionKeyRef"`
 
@@ -139,6 +141,7 @@ type ExternalRedisSpec struct {
 	Port int32 `json:"port,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	PasswordRef string `json:"passwordRef,omitempty"`
 }
 
@@ -164,7 +167,7 @@ type ExternalDatabaseSpec struct {
 	SSLMode string `json:"sslMode,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:MinLength=1
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	PasswordRef string `json:"passwordRef,omitempty"`
 }
 
@@ -539,24 +542,31 @@ type HarborPersistencePersistentVolumeClaimComponentSpec struct {
 
 type HarborInternalTLSSpec struct {
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	CoreCertificateRef string `json:"coreCertificateRef,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	JobServiceCertificateRef string `json:"jobServiceCertificateRef,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	RegistryCertificateRef string `json:"registryCertificateRef,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	PortalCertificateRef string `json:"portalCertificateRef,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	ChartMuseumCertificateRef string `json:"chartmuseumCertificateRef,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	ClairCertificateRef string `json:"clairCertificateRef,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	TrivyCertificateRef string `json:"trivyCertificateRef,omitempty"`
 }
 
@@ -577,10 +587,12 @@ type HarborExposeSpec struct {
 // Enables TLS for public traffic.
 type HarborExposeTLSSpec struct {
 	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	// CertificateRef is a reference to the secret containing public certificates.
 	CertificateRef string `json:"certificateRef"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	// NotaryCertificateRef is a reference to the secret containing public Notary certificates.
 	// Otherwise it will be the same values than certificateRef.
 	NotaryCertificateRef string `json:"notaryCertificateRef,omitempty"`
