@@ -71,15 +71,6 @@ type CoreSpec struct {
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	CSRFKeyRef string `json:"csrfKeyRef"`
-
-	// +kubebuilder:validation:Required
-	ServiceToken CoreServiceTokenSpec `json:"serviceToken"`
-}
-
-type CoreServiceTokenSpec struct {
-	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
-	CertificateRef string `json:"certificateRef"`
 }
 
 type CoreRedisSpec struct {
@@ -218,6 +209,10 @@ type CoreComponentsTokenServiceSpec struct {
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Pattern="https?://.+"
 	URL string `json:"url"`
+
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
+	CertificateRef string `json:"certificateRef"`
 }
 
 type CoreComponentsChartRepositorySpec struct {

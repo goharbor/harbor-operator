@@ -84,7 +84,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 			VolumeSource: corev1.VolumeSource{
 				Secret: &corev1.SecretVolumeSource{
 					Optional:   &varFalse,
-					SecretName: core.Spec.ServiceToken.CertificateRef,
+					SecretName: core.Spec.Components.TokenService.CertificateRef,
 				},
 			},
 		},
