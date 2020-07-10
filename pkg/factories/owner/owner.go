@@ -4,26 +4,32 @@ import (
 	"context"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 var (
 	ownerContext = "owner"
 )
 
-func Get(ctx context.Context) metav1.Object {
+type Owner interface {
+	runtime.Object
+	metav1.Object
+}
+
+func Get(ctx context.Context) Owner {
 	owner := ctx.Value(&ownerContext)
 	if owner == nil {
 		return nil
 	}
 
-	return owner.(metav1.Object)
+	return owner.(Owner)
 }
 
-func Set(ctx *context.Context, object metav1.Object) {
+func Set(ctx *context.Context, object Owner) {
 	*ctx = context.WithValue(*ctx, &ownerContext, object)
 }
 
-func Context(object metav1.Object) context.Context {
+func Context(object Owner) context.Context {
 	ctx := context.TODO()
 	Set(&ctx, object)
 
