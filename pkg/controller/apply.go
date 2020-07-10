@@ -9,9 +9,11 @@ import (
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
+	"github.com/goharbor/harbor-operator/pkg/resources/checksum"
 )
 
 const (
@@ -55,6 +57,8 @@ func (c *Controller) apply(ctx context.Context, res *Resource) (controllerutil.O
 		}
 
 		span.SetTag("operation.result", op)
+
+		checksum.CopyMarkers(result.(metav1.Object), res.resource)
 
 		opResult = op
 
