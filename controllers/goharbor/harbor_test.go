@@ -106,6 +106,8 @@ func setupHarborResourceDependencies(ctx context.Context, ns string) (string, st
 func setupValidHarbor(ctx context.Context, ns string) (Resource, client.ObjectKey) {
 	adminSecretName, tokenIssuerName := setupHarborResourceDependencies(ctx, ns)
 
+	corePG := setupPostgresql(ctx, ns)
+
 	name := newName("harbor")
 	publicURL := url.URL{
 		Scheme: "http",
@@ -137,13 +139,11 @@ func setupValidHarbor(ctx context.Context, ns string) (Resource, client.ObjectKe
 					},
 				},
 				HarborComponentsSpec: goharborv1alpha2.HarborComponentsSpec{
-					Database: goharborv1alpha2.ExternalDatabaseSpec{
-						Host: "the-database",
-					},
 					Core: goharborv1alpha2.CoreComponentSpec{
 						TokenIssuer: cmmeta.ObjectReference{
 							Name: tokenIssuerName,
 						},
+						Database: &corePG,
 					},
 				},
 			},

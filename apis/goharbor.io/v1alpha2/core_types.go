@@ -132,7 +132,7 @@ const (
 )
 
 type CoreDatabaseSpec struct {
-	CorePostgresqlSpec `json:",inline"`
+	OpacifiedDSN `json:",inline"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=0
@@ -147,19 +147,6 @@ type CoreDatabaseSpec struct {
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	EncryptionKeyRef string `json:"encryptionKeyRef"`
-}
-
-type CorePostgresqlSpec struct {
-	ExternalDatabaseSpec `json:",inline"`
-
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:MinLength=1
-	// +kubebuilder:default="postgres"
-	Name string `json:"name,omitempty"`
-}
-
-func (r CorePostgresqlSpec) GetOpacifiedDSN() OpacifiedDSN {
-	return r.ExternalDatabaseSpec.GetOpacifiedDSN(r.Name)
 }
 
 type CoreComponentsJobServiceSpec struct {
@@ -182,7 +169,7 @@ type CoreComponentsRegistrySpec struct {
 	ControllerURL string `json:"controllerURL"`
 
 	// +kubebuilder:validation:Optional
-	Redis OpacifiedDSN `json:"redis,omitempty"`
+	Redis *OpacifiedDSN `json:"redis,omitempty"`
 
 	// +kubebuilder:validation:Required
 	Credentials CoreComponentsRegistryCredentialsSpec `json:"credentials"`
@@ -260,7 +247,7 @@ type CoreComponentsClairSpec struct {
 	AdapterURL string `json:"adapterURL"`
 
 	// +kubebuilder:validation:Required
-	Database CorePostgresqlSpec `json:"database"`
+	Database OpacifiedDSN `json:"database"`
 }
 
 type CoreComponentsNotaryServerSpec struct {

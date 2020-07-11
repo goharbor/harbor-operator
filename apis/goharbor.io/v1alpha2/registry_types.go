@@ -70,6 +70,7 @@ type RegistryConfig01 struct {
 	Health RegistryHealthSpec `json:"health,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:default={}
 	Notifications RegistryNotificationsSpec `json:"notifications,omitempty"`
 
 	// +kubebuilder:validation:Optional
@@ -409,6 +410,7 @@ type RegistryNotificationsSpec struct {
 	Endpoints []RegistryNotificationEndpointSpec `json:"endpoints,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:default={}
 	Events RegistryNotificationEventsSpec `json:"events,omitempty"`
 }
 
