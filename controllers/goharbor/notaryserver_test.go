@@ -21,7 +21,6 @@ import (
 
 	. "github.com/onsi/gomega"
 
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -36,25 +35,8 @@ func newNotaryServerController() controllerTest {
 	}
 }
 
-func setupNotaryServerResourceDependencies(ctx context.Context, ns string) string {
-	pgPasswordName := newName("pg-password")
-
-	err := k8sClient.Create(ctx, &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      pgPasswordName,
-			Namespace: ns,
-		},
-		StringData: map[string]string{
-			goharborv1alpha2.PostgresqlPasswordKey: "th3Adm!nPa$$w0rd",
-		},
-		Type: goharborv1alpha2.SecretTypePostgresql,
-	})
-	Expect(err).ToNot(HaveOccurred())
-
-	return pgPasswordName
-}
 func setupValidNotaryServer(ctx context.Context, ns string) (Resource, client.ObjectKey) {
-	pgPasswordName := setupNotaryServerResourceDependencies(ctx, ns)
+	dsn := setupPostgresql(ctx, ns)
 
 	name := newName("notary-server")
 	notaryServer := &goharborv1alpha2.NotaryServer{
@@ -64,11 +46,8 @@ func setupValidNotaryServer(ctx context.Context, ns string) (Resource, client.Ob
 		},
 		Spec: goharborv1alpha2.NotaryServerSpec{
 			Storage: goharborv1alpha2.NotaryStorageSpec{
-				OpacifiedDSN: goharborv1alpha2.OpacifiedDSN{
-					DSN:         "postgres://postgres:password@the.database/notaryserver",
-					PasswordRef: pgPasswordName,
-				},
-				Type: "postgres",
+				OpacifiedDSN: dsn,
+				Type:         "postgres",
 			},
 			TrustService: goharborv1alpha2.NotaryServerTrustServiceSpec{
 				Type: "local",

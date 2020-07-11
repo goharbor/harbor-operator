@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/url"
-	"strings"
 
 	"github.com/pkg/errors"
 	netv1 "k8s.io/api/networking/v1beta1"
@@ -39,7 +38,8 @@ func getHostAndIngresses(harbor *goharborv1alpha2.Harbor) (string, []netv1.Ingre
 	}
 
 	var tls []netv1.IngressTLS
-	if u.Scheme == "https" {
+
+	if harbor.Spec.Expose.TLS != nil {
 		tls = []netv1.IngressTLS{
 			{
 				SecretName: harbor.Spec.Expose.TLS.CertificateRef,
@@ -47,7 +47,7 @@ func getHostAndIngresses(harbor *goharborv1alpha2.Harbor) (string, []netv1.Ingre
 		}
 	}
 
-	return strings.SplitN(u.Host, ":", 1)[0], tls, nil
+	return u.Hostname(), tls, nil
 }
 
 func (r *Reconciler) GetCoreIngresse(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*netv1.Ingress, error) {
@@ -140,7 +140,8 @@ func (r *Reconciler) GetNotaryServerIngresse(ctx context.Context, harbor *goharb
 	}
 
 	var tls []netv1.IngressTLS
-	if u.Scheme == "https" {
+
+	if harbor.Spec.Expose.TLS != nil {
 		tls = []netv1.IngressTLS{{
 			SecretName: harbor.Spec.Expose.TLS.CertificateRef,
 		}}
