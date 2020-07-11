@@ -30,6 +30,8 @@ func (r *Reconciler) GetRegistryCtl(ctx context.Context, harbor *goharborv1alpha
 	name := r.NormalizeName(ctx, harbor.GetName())
 	namespace := harbor.GetNamespace()
 
+	registryName := r.NormalizeName(ctx, harbor.GetName())
+
 	return &goharborv1alpha2.RegistryController{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
@@ -37,7 +39,7 @@ func (r *Reconciler) GetRegistryCtl(ctx context.Context, harbor *goharborv1alpha
 		},
 		Spec: goharborv1alpha2.RegistryControllerSpec{
 			ComponentSpec: harbor.Spec.Registry.ComponentSpec,
-			RegistryRef:   name,
+			RegistryRef:   registryName,
 			Log: goharborv1alpha2.RegistryControllerLogSpec{
 				Level: harbor.Spec.LogLevel.RegistryCtl(),
 			},

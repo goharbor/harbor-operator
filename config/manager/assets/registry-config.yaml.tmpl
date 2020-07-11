@@ -23,10 +23,7 @@ http:
     prometheus:
       enabled: {{ .Spec.HTTP.Debug.Prometheus.Enabled }}
       path: {{ .Spec.HTTP.Debug.Prometheus.Path }}
-  {{- end }}q
-{{- if .Spec.HTTP.Headers }}
-  headers: {{ .Spec.HTTP.Headers | toJson }}
-{{- end }}
+  {{- end }}
   net: {{ .Spec.HTTP.Net }}
   addr: :5000
   prefix: {{ .Spec.HTTP.Prefix }}
@@ -248,7 +245,7 @@ notifications:
   {{- end }}
 {{- end }}
   events:
-    includereferences: {{ .Spec.Notifications.Events.IncludeReferences }}
+    includereferences: {{ empty .Spec.Notifications.Events.IncludeReferences | ternary true .Spec.Notifications.Events.IncludeReferences }}
 health:
   storagedriver:
     enabled: {{ .Spec.Health.StorageDriver.Enabled }}
