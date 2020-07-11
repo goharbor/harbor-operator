@@ -10,8 +10,8 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/resources"
 )
 
-func NewIngress(mutate resources.Mutable) resources.Mutable {
-	return func(ctx context.Context, ingressResource, ingressResult runtime.Object) controllerutil.MutateFn {
+func NewIngress(mutate resources.Mutable) (result resources.Mutable) {
+	result = func(ctx context.Context, ingressResource, ingressResult runtime.Object) controllerutil.MutateFn {
 		result := ingressResult.(*netv1.Ingress)
 		desired := ingressResource.(*netv1.Ingress)
 
@@ -23,4 +23,8 @@ func NewIngress(mutate resources.Mutable) resources.Mutable {
 			return mutate()
 		}
 	}
+
+	result.AppendMutation(MetadataMutateFn)
+
+	return result
 }
