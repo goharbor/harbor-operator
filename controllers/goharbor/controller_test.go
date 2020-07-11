@@ -117,7 +117,7 @@ var _ = DescribeTable(
 	},
 	Entry("Portal", newPortalController(), 30*time.Second, 2*time.Second),
 	Entry("Registry", newRegistryController(), time.Minute, 5*time.Second),
-	PEntry("RegistryCtl", newRegistryCtlController(), 5*time.Minute, 5*time.Second),
+	Entry("RegistryCtl", newRegistryCtlController(), 2*time.Minute, 5*time.Second),
 	Entry("ChartMuseum", newChartMuseumController(), time.Minute, 5*time.Second),
 	Entry("NotaryServer", newNotaryServerController(), time.Minute, 5*time.Second),
 	Entry("NotarySigner", newNotarySignerController(), time.Minute, 5*time.Second),
