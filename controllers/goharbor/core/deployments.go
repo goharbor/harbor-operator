@@ -49,6 +49,11 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 	name := r.NormalizeName(ctx, core.GetName())
 	namespace := core.GetNamespace()
 
+	database, dbName, err := goharborv1alpha2.FromOpacifiedDSN(core.Spec.Database.OpacifiedDSN)
+	if err != nil {
+		return nil, errors.Wrap(err, "database")
+	}
+
 	volumes := []corev1.Volume{
 		{
 			Name: VolumeName,
@@ -127,23 +132,23 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 		Value: goharborv1alpha2.CoreDatabaseType,
 	}, {
 		Name:  "POSTGRESQL_HOST",
-		Value: core.Spec.Database.Host,
+		Value: database.Host,
 	}, {
 		Name:  "POSTGRESQL_PORT",
-		Value: fmt.Sprintf("%d", core.Spec.Database.Port),
+		Value: fmt.Sprintf("%d", database.Port),
 	}, {
 		Name:  "POSTGRESQL_USERNAME",
-		Value: core.Spec.Database.Username,
+		Value: database.Username,
 	}, {
 		Name:  "POSTGRESQL_DATABASE",
-		Value: core.Spec.Database.Name,
+		Value: dbName,
 	}, {
 		Name: "POSTGRESQL_PASSWORD",
 		ValueFrom: &corev1.EnvVarSource{
 			SecretKeyRef: &corev1.SecretKeySelector{
 				Key: goharborv1alpha2.PostgresqlPasswordKey,
 				LocalObjectReference: corev1.LocalObjectReference{
-					Name: core.Spec.Database.PasswordRef,
+					Name: database.PasswordRef,
 				},
 			},
 		},
@@ -319,21 +324,26 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 	}
 
 	if core.Spec.Components.Clair != nil {
+		database, dbName, err := goharborv1alpha2.FromOpacifiedDSN(core.Spec.Database.OpacifiedDSN)
+		if err != nil {
+			return nil, errors.Wrap(err, "database")
+		}
+
 		envs = append(envs, corev1.EnvVar{
 			Name:  "CLAIR_DB_HOST",
-			Value: core.Spec.Components.Clair.Database.Host,
+			Value: database.Host,
 		}, corev1.EnvVar{
 			Name:  "CLAIR_DB_PORT",
-			Value: fmt.Sprintf("%d", core.Spec.Components.Clair.Database.Port),
+			Value: fmt.Sprintf("%d", database.Port),
 		}, corev1.EnvVar{
 			Name:  "CLAIR_DB_USERNAME",
-			Value: core.Spec.Components.Clair.Database.Username,
+			Value: database.Username,
 		}, corev1.EnvVar{
 			Name:  "CLAIR_DB",
-			Value: core.Spec.Components.Clair.Database.Name,
+			Value: dbName,
 		}, corev1.EnvVar{
 			Name:  "CLAIR_DB_SSLMODE",
-			Value: core.Spec.Components.Clair.Database.SSLMode,
+			Value: database.SSLMode,
 		}, corev1.EnvVar{
 			Name: "CLAIR_DB_PASSWORD",
 			ValueFrom: &corev1.EnvVarSource{
@@ -341,7 +351,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 					Key:      goharborv1alpha2.PostgresqlPasswordKey,
 					Optional: &varFalse,
 					LocalObjectReference: corev1.LocalObjectReference{
-						Name: core.Spec.Components.Clair.Database.PasswordRef,
+						Name: database.PasswordRef,
 					},
 				},
 			},

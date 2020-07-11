@@ -33,7 +33,7 @@ type Resource struct {
 	resource  resources.Resource
 }
 
-func (c *Controller) ProcessFunc(ctx context.Context, resource metav1.Object, dependencies ...graph.Resource) func(context.Context, graph.Resource) error {
+func (c *Controller) ProcessFunc(ctx context.Context, resource metav1.Object, dependencies ...graph.Resource) func(context.Context, graph.Resource) error { // nolint:funlen
 	depManager := checksum.New(c.Scheme)
 
 	depManager.Add(ctx, owner.Get(ctx), false)
@@ -45,75 +45,76 @@ func (c *Controller) ProcessFunc(ctx context.Context, resource metav1.Object, de
 	}
 
 	return func(ctx context.Context, r graph.Resource) error {
+		res, ok := r.(*Resource)
+		if !ok {
+			return nil
+		}
+
 		span, ctx := opentracing.StartSpanFromContext(ctx, "process")
 		defer span.Finish()
 
-		if res, ok := r.(*Resource); ok {
-			namespace, name := res.resource.GetNamespace(), res.resource.GetName()
+		namespace, name := res.resource.GetNamespace(), res.resource.GetName()
 
-			gvk := c.AddGVKToSpan(ctx, span, res.resource)
-			l := logger.Get(ctx).WithValues(
-				"resource.apiVersion", gvk.GroupVersion(),
-				"resource.kind", gvk.Kind,
-				"resource.name", name,
-				"resource.namespace", namespace,
-			)
+		gvk := c.AddGVKToSpan(ctx, span, res.resource)
+		l := logger.Get(ctx).WithValues(
+			"resource.apiVersion", gvk.GroupVersion(),
+			"resource.kind", gvk.Kind,
+			"resource.name", name,
+			"resource.namespace", namespace,
+		)
 
-			logger.Set(&ctx, l)
-			span.
-				SetTag("resource.name", name).
-				SetTag("resource.namespace", namespace)
+		logger.Set(&ctx, l)
+		span.
+			SetTag("resource.name", name).
+			SetTag("resource.namespace", namespace)
 
-			objectKey, err := client.ObjectKeyFromObject(res.resource)
-			if err != nil {
-				return serrors.UnrecoverrableError(err, serrors.OperatorReason, "cannot get object key")
-			}
-
-			result := res.resource.DeepCopyObject()
-
-			err = c.Client.Get(ctx, objectKey, result)
-			if err != nil {
-				if !apierrors.IsNotFound(err) {
-					return errors.Wrap(err, "cannot get resource")
-				}
-			} else {
-				checksum.CopyMarkers(result.(metav1.Object), res.resource)
-			}
-
-			if !depManager.ChangedFor(ctx, res.resource) {
-				changed := false
-
-				for key, _ := range res.resource.GetAnnotations() {
-					if checksum.IsStaticAnnotation(key) {
-						changed = true
-						break
-					}
-				}
-
-				if !changed {
-					l.V(0).Info("dependencies unchanged")
-
-					return nil
-				}
-			}
-
-			res.mutable.AppendMutation(func(ctx context.Context, resource, result runtime.Object) controllerutil.MutateFn {
-				return func() error {
-					if res, ok := result.(metav1.Object); ok {
-						depManager.AddAnnotations(res)
-						depManager.AddAnnotations(r.(*Resource).resource)
-					}
-
-					return nil
-				}
-			})
-
-			err = c.applyAndCheck(ctx, r)
-
-			return errors.Wrapf(err, "apply %s (%s/%s)", gvk, namespace, name)
+		objectKey, err := client.ObjectKeyFromObject(res.resource)
+		if err != nil {
+			return serrors.UnrecoverrableError(err, serrors.OperatorReason, "cannot get object key")
 		}
 
-		return nil
+		result := res.resource.DeepCopyObject()
+
+		err = c.Client.Get(ctx, objectKey, result)
+		if err != nil {
+			if !apierrors.IsNotFound(err) {
+				return errors.Wrap(err, "cannot get resource")
+			}
+		} else {
+			checksum.CopyMarkers(result.(metav1.Object), res.resource)
+		}
+
+		if !depManager.ChangedFor(ctx, res.resource) {
+			changed := false
+
+			for key := range res.resource.GetAnnotations() {
+				if checksum.IsStaticAnnotation(key) {
+					changed = true
+					break
+				}
+			}
+
+			if !changed {
+				l.V(0).Info("dependencies unchanged")
+
+				return nil
+			}
+		}
+
+		res.mutable.AppendMutation(func(ctx context.Context, resource, result runtime.Object) controllerutil.MutateFn {
+			return func() error {
+				if res, ok := result.(metav1.Object); ok {
+					depManager.AddAnnotations(res)
+					depManager.AddAnnotations(r.(*Resource).resource)
+				}
+
+				return nil
+			}
+		})
+
+		err = c.applyAndCheck(ctx, r)
+
+		return errors.Wrapf(err, "apply %s (%s/%s)", gvk, namespace, name)
 	}
 }
 
