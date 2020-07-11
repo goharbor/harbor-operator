@@ -7,13 +7,10 @@ import (
 	"github.com/opentracing/opentracing-go"
 	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
-	corev1 "k8s.io/api/core/v1"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/kustomize/kstatus/status"
 
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	sgraph "github.com/goharbor/harbor-operator/pkg/controller/internal/graph"
@@ -132,66 +129,14 @@ func (c *Controller) applyAndCheck(ctx context.Context, node graph.Resource) err
 		return serrors.UnrecoverrableError(errors.Errorf("%+v", node), serrors.OperatorReason, "unable to apply resource")
 	}
 
-	namespace, name := res.resource.GetNamespace(), res.resource.GetName()
-
-	gvk := c.AddGVKToSpan(ctx, span, res.resource)
-	l := logger.Get(ctx).WithValues(
-		"resource.apiVersion", gvk.GroupVersion(),
-		"resource.kind", gvk.Kind,
-		"resource.name", name,
-		"resource.namespace", namespace,
-	)
-
-	logger.Set(&ctx, l)
-	span.
-		SetTag("resource.name", name).
-		SetTag("resource.namespace", namespace)
-
-	err := c.EnsureNotRunning(ctx, res)
+	err := c.Apply(ctx, res)
 	if err != nil {
-		return errors.Wrapf(err, "cannot ensure %s (%s/%s) is not running", gvk, namespace, name)
-	}
-
-	err = c.Apply(ctx, res)
-	if err != nil {
-		return errors.Wrapf(err, "apply %s (%s/%s)", gvk, namespace, name)
+		return errors.Wrap(err, "apply")
 	}
 
 	err = c.ensureResourceReady(ctx, res)
 
-	return errors.Wrapf(err, "check %s (%s/%s)", gvk, namespace, name)
-}
-
-var (
-	errObjectIsRunning = errors.New("still processing")
-)
-
-func (c *Controller) EnsureNotRunning(ctx context.Context, res *Resource) error {
-	data, err := runtime.DefaultUnstructuredConverter.ToUnstructured(res.resource)
-	if err != nil {
-		return errors.Wrap(err, "cannot transform to unstructured")
-	}
-
-	resource := &unstructured.Unstructured{}
-	resource.SetUnstructuredContent(data)
-
-	err = status.Augment(resource)
-	if err != nil {
-		return errors.Wrap(err, "cannot augment unstructured resource")
-	}
-
-	s, err := status.Compute(resource)
-	if err != nil {
-		return errors.Wrap(err, "cannot compute status")
-	}
-
-	for _, cond := range s.Conditions {
-		if cond.Type == status.ConditionInProgress && cond.Status == corev1.ConditionTrue {
-			return serrors.RetryLaterError(errObjectIsRunning, cond.Reason, cond.Message)
-		}
-	}
-
-	return nil
+	return errors.Wrap(err, "check")
 }
 
 func (c *Controller) Run(ctx context.Context, owner resources.Resource) error {

@@ -10,8 +10,8 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/resources"
 )
 
-func NewUnstructured(mutate resources.Mutable) resources.Mutable {
-	return func(ctx context.Context, unstructuredResource, unstructuredResult runtime.Object) controllerutil.MutateFn {
+func NewUnstructured(mutate resources.Mutable) (result resources.Mutable) {
+	result = func(ctx context.Context, unstructuredResource, unstructuredResult runtime.Object) controllerutil.MutateFn {
 		desired := unstructuredResource.(*unstructured.Unstructured)
 		result := unstructuredResult.(*unstructured.Unstructured)
 
@@ -28,4 +28,8 @@ func NewUnstructured(mutate resources.Mutable) resources.Mutable {
 			return mutate()
 		}
 	}
+
+	result.AppendMutation(MetadataMutateFn)
+
+	return result
 }

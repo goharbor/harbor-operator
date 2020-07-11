@@ -10,8 +10,8 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/resources"
 )
 
-func NewService(mutate resources.Mutable) resources.Mutable {
-	return func(ctx context.Context, serviceResource, serviceResult runtime.Object) controllerutil.MutateFn {
+func NewService(mutate resources.Mutable) (result resources.Mutable) {
+	result = func(ctx context.Context, serviceResource, serviceResult runtime.Object) controllerutil.MutateFn {
 		result := serviceResult.(*corev1.Service)
 		desired := serviceResource.(*corev1.Service)
 
@@ -46,4 +46,8 @@ func NewService(mutate resources.Mutable) resources.Mutable {
 			return mutate()
 		}
 	}
+
+	result.AppendMutation(MetadataMutateFn)
+
+	return result
 }

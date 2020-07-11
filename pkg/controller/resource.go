@@ -4,6 +4,7 @@ import (
 	"context"
 
 	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -44,7 +45,25 @@ func (c *Controller) ProcessFunc(ctx context.Context, resource metav1.Object, de
 	}
 
 	return func(ctx context.Context, r graph.Resource) error {
+		span, ctx := opentracing.StartSpanFromContext(ctx, "process")
+		defer span.Finish()
+
 		if res, ok := r.(*Resource); ok {
+			namespace, name := res.resource.GetNamespace(), res.resource.GetName()
+
+			gvk := c.AddGVKToSpan(ctx, span, res.resource)
+			l := logger.Get(ctx).WithValues(
+				"resource.apiVersion", gvk.GroupVersion(),
+				"resource.kind", gvk.Kind,
+				"resource.name", name,
+				"resource.namespace", namespace,
+			)
+
+			logger.Set(&ctx, l)
+			span.
+				SetTag("resource.name", name).
+				SetTag("resource.namespace", namespace)
+
 			objectKey, err := client.ObjectKeyFromObject(res.resource)
 			if err != nil {
 				return serrors.UnrecoverrableError(err, serrors.OperatorReason, "cannot get object key")
@@ -59,9 +78,20 @@ func (c *Controller) ProcessFunc(ctx context.Context, resource metav1.Object, de
 				}
 			} else {
 				checksum.CopyMarkers(result.(metav1.Object), res.resource)
+			}
 
-				if !depManager.ChangedFor(ctx, res.resource) {
-					logger.Get(ctx).Info("dependencies unchanged")
+			if !depManager.ChangedFor(ctx, res.resource) {
+				changed := false
+
+				for key, _ := range res.resource.GetAnnotations() {
+					if checksum.IsStaticAnnotation(key) {
+						changed = true
+						break
+					}
+				}
+
+				if !changed {
+					l.V(0).Info("dependencies unchanged")
 
 					return nil
 				}
@@ -78,7 +108,9 @@ func (c *Controller) ProcessFunc(ctx context.Context, resource metav1.Object, de
 				}
 			})
 
-			return c.applyAndCheck(ctx, r)
+			err = c.applyAndCheck(ctx, r)
+
+			return errors.Wrapf(err, "apply %s (%s/%s)", gvk, namespace, name)
 		}
 
 		return nil

@@ -23,16 +23,11 @@ func (c *Controller) Funcs(ctx context.Context, owner resources.Resource) templa
 	}
 }
 
-func (c *Controller) GetTemplatedConfig(ctx context.Context, templateKey string, owner resources.Resource) ([]byte, error) {
+func (c *Controller) GetTemplatedConfig(ctx context.Context, templateConfig string, owner resources.Resource) ([]byte, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "GetTemplatedConfig")
 	defer span.Finish()
 
-	templateConfig, err := c.ConfigStore.GetItemValue(templateKey)
-	if err != nil {
-		return nil, errors.Wrap(err, "cannot get template")
-	}
-
-	template, err := template.New(templateKey).
+	template, err := template.New("template").
 		Funcs(sprig.TxtFuncMap()).
 		Funcs(c.Funcs(ctx, owner)).
 		Parse(templateConfig)
