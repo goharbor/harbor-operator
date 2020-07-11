@@ -18,11 +18,15 @@ package goharbor_test
 
 import (
 	"context"
+	"time"
 
 	. "github.com/onsi/gomega"
+	. "github.com/onsi/gomega/gstruct"
 
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/kustomize/kstatus/status"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 )
@@ -35,36 +39,22 @@ func newRegistryCtlController() controllerTest {
 	}
 }
 
-func setupRegistryCtlResourceDependencies(ctx context.Context, ns string) string {
-	registryName := newName("registry")
-
-	var replicas int32 = 1
-
-	err := k8sClient.Create(ctx, &goharborv1alpha2.Registry{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      registryName,
-			Namespace: ns,
-		},
-		Spec: goharborv1alpha2.RegistrySpec{
-			ComponentSpec: goharborv1alpha2.ComponentSpec{
-				Replicas: &replicas,
-			},
-			RegistryConfig01: goharborv1alpha2.RegistryConfig01{
-				Storage: goharborv1alpha2.RegistryStorageSpec{
-					Driver: goharborv1alpha2.RegistryStorageDriverSpec{
-						InMemory: &goharborv1alpha2.RegistryStorageDriverInmemorySpec{},
-					},
-				},
-			},
-		},
-	})
-	Expect(err).ToNot(HaveOccurred())
-
-	return registryName
-}
-
 func setupValidRegistryCtl(ctx context.Context, ns string) (Resource, client.ObjectKey) {
-	registryName := setupRegistryCtlResourceDependencies(ctx, ns)
+	registryObject, key := setupValidRegistry(ctx, ns)
+
+	// TODO remove this once the controller owning registryCtl watch Registries' events.
+	Eventually(getRegistryStatusFunc(ctx, key), time.Minute, 2*time.Second).
+		Should(MatchFields(IgnoreExtras, Fields{
+			"Conditions": ContainElements(MatchFields(IgnoreExtras, Fields{
+				"Type":   BeEquivalentTo(status.ConditionInProgress),
+				"Status": BeEquivalentTo(corev1.ConditionFalse),
+			}), MatchFields(IgnoreExtras, Fields{
+				"Type":   BeEquivalentTo(status.ConditionFailed),
+				"Status": BeEquivalentTo(corev1.ConditionFalse),
+			})),
+		}), "registry should be ready")
+
+	registry := registryObject.(*goharborv1alpha2.Registry)
 
 	name := newName("registryctl")
 	registryctl := &goharborv1alpha2.RegistryController{
@@ -73,7 +63,7 @@ func setupValidRegistryCtl(ctx context.Context, ns string) (Resource, client.Obj
 			Namespace: ns,
 		},
 		Spec: goharborv1alpha2.RegistryControllerSpec{
-			RegistryRef: registryName,
+			RegistryRef: registry.GetName(),
 		},
 	}
 
