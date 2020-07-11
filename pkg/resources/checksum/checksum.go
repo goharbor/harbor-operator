@@ -45,6 +45,10 @@ func (d *Dependencies) GetID(resource Dependency) string {
 	return fmt.Sprintf("%s.%s.checksum.goharbor.io/%s", resource.GetNamespace(), strings.ToLower(gvks[0].Kind), resource.GetName())
 }
 
+func GetStaticID(name string) string {
+	return fmt.Sprintf("static.checksum.goharbor.io/%s", name)
+}
+
 func (d *Dependencies) ComputeChecksum(resource metav1.Object, withStatus bool) string {
 	if withStatus {
 		return resource.GetResourceVersion()
@@ -101,16 +105,43 @@ func CopyMarkers(from, to metav1.Object) {
 	to.SetGeneration(from.GetGeneration())
 	to.SetResourceVersion(from.GetResourceVersion())
 
-	annotations := to.GetAnnotations()
-	if annotations == nil {
-		annotations = map[string]string{}
+	toAnnotations := to.GetAnnotations()
+	if toAnnotations == nil {
+		toAnnotations = map[string]string{}
 	}
 
-	for key, value := range from.GetAnnotations() {
-		if strings.Contains(key, ".checksum.goharbor.io/") {
-			annotations[key] = value
+	fromAnnotations := from.GetAnnotations()
+	if fromAnnotations == nil {
+		fromAnnotations = map[string]string{}
+	}
+
+	for key, _ := range toAnnotations {
+		if !strings.Contains(key, ".checksum.goharbor.io/") {
+			continue
 		}
+
+		if IsStaticAnnotation(key) {
+			continue
+		}
+
+		delete(toAnnotations, key)
 	}
 
-	to.SetAnnotations(annotations)
+	for key, value := range fromAnnotations {
+		if !strings.Contains(key, ".checksum.goharbor.io/") {
+			continue
+		}
+
+		if IsStaticAnnotation(key) {
+			continue
+		}
+
+		toAnnotations[key] = value
+	}
+
+	to.SetAnnotations(toAnnotations)
+}
+
+func IsStaticAnnotation(key string) bool {
+	return strings.HasPrefix(key, "static.checksum.goharbor.io/")
 }

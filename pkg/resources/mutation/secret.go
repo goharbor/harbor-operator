@@ -10,8 +10,8 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/resources"
 )
 
-func NewSecret(mutate resources.Mutable) resources.Mutable {
-	return func(ctx context.Context, secretResource, secretResult runtime.Object) controllerutil.MutateFn {
+func NewSecret(mutate resources.Mutable) (result resources.Mutable) {
+	result = func(ctx context.Context, secretResource, secretResult runtime.Object) controllerutil.MutateFn {
 		result := secretResult.(*corev1.Secret)
 		desired := secretResource.(*corev1.Secret)
 
@@ -49,4 +49,8 @@ func NewSecret(mutate resources.Mutable) resources.Mutable {
 			return mutate()
 		}
 	}
+
+	result.AppendMutation(MetadataMutateFn)
+
+	return result
 }

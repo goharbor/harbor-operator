@@ -10,8 +10,8 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/resources"
 )
 
-func NewConfigMap(mutate resources.Mutable) resources.Mutable {
-	return func(ctx context.Context, configResource, configResult runtime.Object) controllerutil.MutateFn {
+func NewConfigMap(mutate resources.Mutable) (result resources.Mutable) {
+	result = func(ctx context.Context, configResource, configResult runtime.Object) controllerutil.MutateFn {
 		result := configResult.(*corev1.ConfigMap)
 		desired := configResource.(*corev1.ConfigMap)
 
@@ -25,4 +25,8 @@ func NewConfigMap(mutate resources.Mutable) resources.Mutable {
 			return mutate()
 		}
 	}
+
+	result.AppendMutation(MetadataMutateFn)
+
+	return result
 }
