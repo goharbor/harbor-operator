@@ -17,20 +17,25 @@ limitations under the License.
 package goharbor_test
 
 import (
+	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"math/big"
 	"time"
 
+	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func generateCertificate() map[string][]byte {
@@ -133,5 +138,92 @@ func generateCertificate() map[string][]byte {
 		corev1.TLSPrivateKeyKey:        privBytes,
 		corev1.TLSCertKey:              publicBytes,
 		corev1.ServiceAccountRootCAKey: caPublicBytes,
+	}
+}
+
+// setupPostgresql deploy a servicea deployment and a secret to run a postgresql instance
+// Based on https://hub.docker.com/_/postgres
+func setupPostgresql(ctx context.Context, ns string) goharborv1alpha2.OpacifiedDSN {
+	pgName := newName("pg")
+	pgPasswordName := newName("pg-password")
+
+	Expect(k8sClient.Create(ctx, &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      pgName,
+			Namespace: ns,
+		},
+		Spec: corev1.ServiceSpec{
+			Ports: []corev1.ServicePort{{
+				Name: "http",
+				Port: 5432,
+			}},
+		},
+	})).To(Succeed())
+
+	Expect(k8sClient.Create(ctx, &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      pgPasswordName,
+			Namespace: ns,
+		},
+		StringData: map[string]string{
+			goharborv1alpha2.PostgresqlPasswordKey: "th3Adm!nPa$$w0rd",
+		},
+		Type: goharborv1alpha2.SecretTypePostgresql,
+	})).To(Succeed())
+
+	Expect(k8sClient.Create(ctx, &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      pgName,
+			Namespace: ns,
+		},
+		Spec: appsv1.DeploymentSpec{
+			Selector: &metav1.LabelSelector{
+				MatchLabels: map[string]string{
+					"pod-selector": pgName,
+				},
+			},
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: map[string]string{
+						"pod-selector": pgName,
+					},
+				},
+				Spec: corev1.PodSpec{
+					Volumes: []corev1.Volume{{
+						Name: "data",
+						VolumeSource: corev1.VolumeSource{
+							EmptyDir: &corev1.EmptyDirVolumeSource{},
+						},
+					}},
+					Containers: []corev1.Container{{
+						Name:  "database",
+						Image: "postgres",
+						Env: []corev1.EnvVar{{
+							Name: "POSTGRES_PASSWORD",
+							ValueFrom: &corev1.EnvVarSource{
+								SecretKeyRef: &corev1.SecretKeySelector{
+									LocalObjectReference: corev1.LocalObjectReference{
+										Name: pgPasswordName,
+									},
+									Key: goharborv1alpha2.PostgresqlPasswordKey,
+								},
+							},
+						}},
+						Ports: []corev1.ContainerPort{{
+							ContainerPort: 5432,
+						}},
+						VolumeMounts: []corev1.VolumeMount{{
+							MountPath: "/var/lib/postgresql/data",
+							Name:      "data",
+						}},
+					}},
+				},
+			},
+		},
+	})).To(Succeed())
+
+	return goharborv1alpha2.OpacifiedDSN{
+		DSN:         fmt.Sprintf("postgres://postgres@%s:5432/postgresql", pgName),
+		PasswordRef: pgPasswordName,
 	}
 }
