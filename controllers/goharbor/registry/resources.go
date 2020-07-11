@@ -98,7 +98,11 @@ func (r *Reconciler) GetSecrets(ctx context.Context, registry *goharborv1alpha2.
 }
 
 func (r *Reconciler) GetProxySecrets(ctx context.Context, registry *goharborv1alpha2.Registry) ([]graph.Resource, error) {
-	if registry.Spec.Proxy != nil {
+	if registry.Spec.Proxy == nil {
+		return nil, nil
+	}
+
+	if registry.Spec.Proxy.BasicAuthRef != "" {
 		secret, err := r.Controller.AddExternalTypedSecret(ctx, &corev1.Secret{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      registry.Spec.Proxy.BasicAuthRef,
@@ -169,7 +173,8 @@ func (r *Reconciler) GetS3StorageSecrets(ctx context.Context, registry *goharbor
 	if registry.Spec.Storage.Driver.S3.SecretKeyRef != "" {
 		secret, err := r.Controller.AddExternalTypedSecret(ctx, &corev1.Secret{
 			ObjectMeta: metav1.ObjectMeta{
-				Name: registry.Spec.Storage.Driver.S3.SecretKeyRef,
+				Name:      registry.Spec.Storage.Driver.S3.SecretKeyRef,
+				Namespace: registry.GetNamespace(),
 			},
 		}, goharborv1alpha2.SecretTypeSingle)
 
@@ -182,7 +187,8 @@ func (r *Reconciler) GetS3StorageSecrets(ctx context.Context, registry *goharbor
 func (r *Reconciler) GetSwiftStorageSecrets(ctx context.Context, registry *goharborv1alpha2.Registry) ([]graph.Resource, error) {
 	secret, err := r.Controller.AddExternalTypedSecret(ctx, &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: registry.Spec.Storage.Driver.Swift.PasswordRef,
+			Name:      registry.Spec.Storage.Driver.Swift.PasswordRef,
+			Namespace: registry.GetNamespace(),
 		},
 	}, goharborv1alpha2.SecretTypeSingle)
 	if err != nil {
@@ -194,7 +200,8 @@ func (r *Reconciler) GetSwiftStorageSecrets(ctx context.Context, registry *gohar
 	if registry.Spec.Storage.Driver.Swift.SecretKeyRef != "" {
 		secret, err := r.Controller.AddExternalTypedSecret(ctx, &corev1.Secret{
 			ObjectMeta: metav1.ObjectMeta{
-				Name: registry.Spec.Storage.Driver.Swift.SecretKeyRef,
+				Name:      registry.Spec.Storage.Driver.Swift.SecretKeyRef,
+				Namespace: registry.GetNamespace(),
 			},
 		}, goharborv1alpha2.SecretTypeSingle)
 

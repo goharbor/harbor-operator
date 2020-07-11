@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/pkg/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
@@ -23,6 +24,16 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 	service, err := r.GetService(ctx, registryctl)
 	if err != nil {
 		return errors.Wrap(err, "cannot get service")
+	}
+
+	registry, err := r.Controller.AddExternalResource(ctx, &goharborv1alpha2.Registry{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      registryctl.Spec.RegistryRef,
+			Namespace: registryctl.GetNamespace(),
+		},
+	})
+	if err != nil {
+		return errors.Wrapf(err, "cannot add registry %s", registryctl.Spec.RegistryRef)
 	}
 
 	_, err = r.Controller.AddServiceToManage(ctx, service)
@@ -45,7 +56,7 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrap(err, "cannot get deployment")
 	}
 
-	_, err = r.Controller.AddDeploymentToManage(ctx, deployment, configMapResource)
+	_, err = r.Controller.AddDeploymentToManage(ctx, deployment, registry, configMapResource)
 	if err != nil {
 		return errors.Wrapf(err, "cannot add deployment %s", deployment.GetName())
 	}
