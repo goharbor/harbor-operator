@@ -45,7 +45,12 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrap(err, "cannot add core configuration")
 	}
 
-	_, err = r.AddRegistry(ctx, harbor, registryAuthSecret, registryHTTPSecret)
+	registry, err := r.AddRegistry(ctx, harbor, registryAuthSecret, registryHTTPSecret)
+	if err != nil {
+		return errors.Wrap(err, "cannot add registry")
+	}
+
+	_, err = r.AddRegistryController(ctx, harbor, registry)
 	if err != nil {
 		return errors.Wrap(err, "cannot add registry")
 	}
@@ -55,7 +60,7 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrap(err, "cannot add core")
 	}
 
-	registry, err := r.AddJobService(ctx, harbor, core, coreSecret, jobServiceSecret)
+	_, err = r.AddJobService(ctx, harbor, core, coreSecret, jobServiceSecret)
 	if err != nil {
 		return errors.Wrap(err, "cannot add jobservice")
 	}
