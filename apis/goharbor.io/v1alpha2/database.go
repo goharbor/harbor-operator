@@ -8,7 +8,6 @@ const (
 	NotaryServerDatabase                              // notaryserver
 	NotarySignerDatabase                              // notarysigner
 	ClairDatabase                                     // clair
-	TrivyDatabase                                     // trivy
 )
 
 func (r ComponentWithDatabase) DBName() string {

@@ -12,12 +12,11 @@ func _() {
 	_ = x[NotaryServerDatabase-1]
 	_ = x[NotarySignerDatabase-2]
 	_ = x[ClairDatabase-3]
-	_ = x[TrivyDatabase-4]
 }
 
-const _ComponentWithDatabase_name = "corenotaryservernotarysignerclairtrivy"
+const _ComponentWithDatabase_name = "corenotaryservernotarysignerclair"
 
-var _ComponentWithDatabase_index = [...]uint8{0, 4, 16, 28, 33, 38}
+var _ComponentWithDatabase_index = [...]uint8{0, 4, 16, 28, 33}
 
 func (i ComponentWithDatabase) String() string {
 	if i < 0 || i >= ComponentWithDatabase(len(_ComponentWithDatabase_index)-1) {
