@@ -36,22 +36,10 @@ func newNotarySignerController() controllerTest {
 	}
 }
 
-func setupNotarySignerResourceDependencies(ctx context.Context, ns string) (string, string, string, string) {
-	pgPasswordName := newName("pg-password")
+func setupNotarySignerResourceDependencies(ctx context.Context, ns string) (string, string, string) {
 	aliasesName := newName("aliases")
 	signingCertName := newName("signing-certificate")
 	httpsCertName := newName("https-certificate")
-
-	Expect(k8sClient.Create(ctx, &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      pgPasswordName,
-			Namespace: ns,
-		},
-		StringData: map[string]string{
-			goharborv1alpha2.PostgresqlPasswordKey: "th3Adm!nPa$$w0rd",
-		},
-		Type: goharborv1alpha2.SecretTypePostgresql,
-	})).ToNot(HaveOccurred())
 
 	Expect(k8sClient.Create(ctx, &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
@@ -82,11 +70,12 @@ func setupNotarySignerResourceDependencies(ctx context.Context, ns string) (stri
 		Type: corev1.SecretTypeTLS,
 	})).ToNot(HaveOccurred())
 
-	return pgPasswordName, signingCertName, httpsCertName, aliasesName
+	return signingCertName, httpsCertName, aliasesName
 }
 
 func setupValidNotarySigner(ctx context.Context, ns string) (Resource, client.ObjectKey) {
-	pgPasswordName, signingCertName, httpsCertName, aliasesName := setupNotarySignerResourceDependencies(ctx, ns)
+	postgresqlDSN := setupPostgresql(ctx, ns)
+	signingCertName, httpsCertName, aliasesName := setupNotarySignerResourceDependencies(ctx, ns)
 
 	name := newName("notary-signer")
 	notarySigner := &goharborv1alpha2.NotarySigner{
@@ -97,11 +86,8 @@ func setupValidNotarySigner(ctx context.Context, ns string) (Resource, client.Ob
 		Spec: goharborv1alpha2.NotarySignerSpec{
 			Storage: goharborv1alpha2.NotarySignerStorageSpec{
 				NotaryStorageSpec: goharborv1alpha2.NotaryStorageSpec{
-					OpacifiedDSN: goharborv1alpha2.OpacifiedDSN{
-						DSN:         "postgres://postgres:password@the.database/notarysigner",
-						PasswordRef: pgPasswordName,
-					},
-					Type: "postgres",
+					OpacifiedDSN: postgresqlDSN,
+					Type:         "postgres",
 				},
 				AliasesRef: aliasesName,
 			},

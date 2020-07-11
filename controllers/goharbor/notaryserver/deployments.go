@@ -87,7 +87,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, notary *goharborv1alpha2
 		})
 	}
 
-	if notary.Spec.Auth.Token.CertificateRef != "" {
+	if notary.Spec.Auth != nil {
 		volumes = append(volumes, corev1.Volume{
 			Name: AuthVolumeName,
 			VolumeSource: corev1.VolumeSource{

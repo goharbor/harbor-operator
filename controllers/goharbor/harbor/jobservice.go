@@ -83,8 +83,12 @@ func (r *Reconciler) GetJobService(ctx context.Context, harbor *goharborv1alpha2
 	coreSecretRef := r.NormalizeName(ctx, harbor.GetName(), "core", "secret")
 	registryAuthRef := r.NormalizeName(ctx, harbor.GetName(), "registry", "basicauth")
 	secretRef := r.NormalizeName(ctx, harbor.GetName(), "jobservice", "secret")
-
 	logLevel := harbor.Spec.LogLevel.JobService()
+
+	redisDSN, err := harbor.Spec.RedisDSN(goharborv1alpha2.JobServiceRedis)
+	if err != nil {
+		return nil, errors.Wrap(err, "redis")
+	}
 
 	return &goharborv1alpha2.JobService{
 		ObjectMeta: metav1.ObjectMeta{
@@ -113,7 +117,7 @@ func (r *Reconciler) GetJobService(ctx context.Context, harbor *goharborv1alpha2
 			WorkerPool: goharborv1alpha2.JobServicePoolSpec{
 				WorkerCount: harbor.Spec.JobService.WorkerCount,
 				Redis: goharborv1alpha2.JobServicePoolRedisSpec{
-					OpacifiedDSN: harbor.Spec.RedisDSN(goharborv1alpha2.JobServiceRedis),
+					OpacifiedDSN: *redisDSN,
 				},
 			},
 			Registry: goharborv1alpha2.CoreComponentsRegistryCredentialsSpec{

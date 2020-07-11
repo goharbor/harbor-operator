@@ -3,8 +3,11 @@ package v1alpha2
 import (
 	"fmt"
 	"net/url"
+	"strconv"
+	"strings"
 
 	cmmeta "github.com/jetstack/cert-manager/pkg/apis/meta/v1"
+	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -116,11 +119,59 @@ type HarborComponentsSpec struct {
 
 	// +kubebuilder:validation:Optional
 	// If null, redis dsn must be specified for every components that need a redis.
-	Redis ExternalRedisSpec `json:"redis,omitempty"`
+	Redis *ExternalRedisSpec `json:"redis,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// If null, database must be specified for every components that need a database.
-	Database ExternalDatabaseSpec `json:"database,omitempty"`
+	Database *ExternalDatabaseSpec `json:"database,omitempty"`
+}
+
+type MissingDatabaseSpecError struct {
+	Component string
+}
+
+func (m *MissingDatabaseSpecError) Error() string {
+	return fmt.Sprintf("%s has no database specs", m.Component)
+}
+
+func (r *HarborComponentsSpec) ValidateDatabases() error {
+	if r.Database != nil {
+		return nil
+	}
+
+	if r.Core.Database == nil {
+		return &MissingDatabaseSpecError{CoreDatabase.String()}
+	}
+
+	if r.Notary != nil && r.Notary.Database == nil {
+		return &MissingDatabaseSpecError{NotaryServerDatabase.String()}
+	}
+
+	return nil
+}
+
+type MissingRedisSpecError struct {
+	Component string
+}
+
+func (m *MissingRedisSpecError) Error() string {
+	return fmt.Sprintf("%s has no redis specs", m.Component)
+}
+
+func (r *HarborComponentsSpec) ValidateRedis() error {
+	if r.Redis != nil {
+		return nil
+	}
+
+	if r.Core.Redis == nil {
+		return &MissingDatabaseSpecError{CoreRedis.String()}
+	}
+
+	if r.JobService.Redis == nil {
+		return &MissingDatabaseSpecError{JobServiceRedis.String()}
+	}
+
+	return nil
 }
 
 type NotaryComponentSpec struct {
@@ -186,53 +237,89 @@ func (r ExternalDatabaseSpec) GetOpacifiedDSN(dbName string) OpacifiedDSN {
 	}
 }
 
-func (c *HarborComponentsSpec) RedisDSN(component ComponentWithRedis) OpacifiedDSN {
-	switch component {
-	case CoreRedis:
-		if c.Core.Redis != nil {
-			return *c.Core.Redis
-		}
-	case JobServiceRedis:
-		if c.JobService.Redis != nil {
-			return *c.JobService.Redis
-		}
-	case RegistryRedis:
-		if c.Registry.Redis != nil {
-			return *c.Registry.Redis
-		}
-	case ChartMuseumRedis:
-		if c.ChartMuseum.Redis != nil {
-			return *c.ChartMuseum.Redis
-		}
-	case ClairRedis:
-		if c.Clair.Redis != nil {
-			return *c.Clair.Redis
-		}
-	case TrivyRedis:
-		if c.Trivy.Redis != nil {
-			return *c.Trivy.Redis
+func FromOpacifiedDSN(dsn OpacifiedDSN) (*ExternalDatabaseSpec, string, error) {
+	dbURL, err := dsn.GetDSN("")
+	if err != nil {
+		return nil, "", err
+	}
+
+	portStr := dbURL.Port()
+
+	var port int64 = 5432
+
+	if portStr != "" {
+		port, err = strconv.ParseInt(portStr, 10, 32)
+		if err != nil {
+			return nil, "", errors.Wrap(err, "unsupported port")
 		}
 	}
 
-	return OpacifiedDSN{
-		DSN:         fmt.Sprintf("redis://%s:%d/%d", c.Redis.Address, c.Redis.Port, component.Index()),
-		PasswordRef: c.Redis.PasswordRef,
-	}
+	return &ExternalDatabaseSpec{
+		PasswordRef: dsn.PasswordRef,
+		Host:        dbURL.Hostname(),
+		SSLMode:     dbURL.Query().Get("sslmode"),
+		Port:        int32(port),
+		Username:    dbURL.User.Username(),
+	}, strings.Trim(dbURL.Path, "/"), nil
 }
 
-func (c *HarborComponentsSpec) DatabaseDSN(component ComponentWithDatabase) OpacifiedDSN {
+func (r *HarborComponentsSpec) RedisDSN(component ComponentWithRedis) (*OpacifiedDSN, error) {
 	switch component {
-	case CoreDatabase:
-		if c.Core.Database != nil {
-			return c.Core.Database.GetOpacifiedDSN()
+	case CoreRedis:
+		if r.Core.Redis != nil {
+			return r.Core.Redis, nil
 		}
-	case NotaryServerDatabase:
-		if c.Notary.Database != nil {
-			return *c.Notary.Database
+	case JobServiceRedis:
+		if r.JobService.Redis != nil {
+			return r.JobService.Redis, nil
+		}
+	case RegistryRedis:
+		if r.Registry.Redis != nil {
+			return r.Registry.Redis, nil
+		}
+	case ChartMuseumRedis:
+		if r.ChartMuseum.Redis != nil {
+			return r.ChartMuseum.Redis, nil
+		}
+	case ClairRedis:
+		if r.Clair.Redis != nil {
+			return r.Clair.Redis, nil
+		}
+	case TrivyRedis:
+		if r.Trivy.Redis != nil {
+			return r.Trivy.Redis, nil
 		}
 	}
 
-	return c.Database.GetOpacifiedDSN(component.DBName())
+	if r.Redis == nil {
+		return nil, &MissingRedisSpecError{component.String()}
+	}
+
+	return &OpacifiedDSN{
+		DSN:         fmt.Sprintf("redis://%s:%d/%d", r.Redis.Address, r.Redis.Port, component.Index()),
+		PasswordRef: r.Redis.PasswordRef,
+	}, nil
+}
+
+func (r *HarborComponentsSpec) DatabaseDSN(component ComponentWithDatabase) (*OpacifiedDSN, error) {
+	switch component {
+	case CoreDatabase:
+		if r.Core.Database != nil {
+			return r.Core.Database, nil
+		}
+	case NotaryServerDatabase:
+		if r.Notary.Database != nil {
+			return r.Notary.Database, nil
+		}
+	}
+
+	if r.Database == nil {
+		return nil, &MissingDatabaseSpecError{component.String()}
+	}
+
+	dsn := r.Database.GetOpacifiedDSN(component.DBName())
+
+	return &dsn, nil
 }
 
 type CoreComponentSpec struct {
@@ -247,7 +334,7 @@ type CoreComponentSpec struct {
 
 	// +kubebuilder:validation:Optional
 	// One of core database dsn or global database component must be specified
-	Database *CorePostgresqlSpec `json:"database,omitempty"`
+	Database *OpacifiedDSN `json:"database,omitempty"`
 }
 
 type JobServiceComponentSpec struct {
@@ -572,7 +659,7 @@ type HarborInternalTLSSpec struct {
 
 type HarborExposeSpec struct {
 	// +kubebuilder:validation:Optional
-	TLS HarborExposeTLSSpec `json:"tls,omitempty"`
+	TLS *HarborExposeTLSSpec `json:"tls,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	Ingress *HarborExposeIngressSpec `json:"ingress,omitempty"`

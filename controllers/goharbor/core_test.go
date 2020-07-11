@@ -36,8 +36,7 @@ func newCoreController() controllerTest {
 	}
 }
 
-func setupCoreResourceDependencies(ctx context.Context, ns string) (string, string, string, string, string, string, string, string, string) {
-	database := newName("database")
+func setupCoreResourceDependencies(ctx context.Context, ns string) (string, string, string, string, string, string, string, string) {
 	encryption := newName("encryption")
 	csrf := newName("csrf")
 	registryCtl := newName("registryctl")
@@ -46,17 +45,6 @@ func setupCoreResourceDependencies(ctx context.Context, ns string) (string, stri
 	jobservice := newName("jobservice-secret")
 	tokenCert := newName("token-certificate")
 	redis := newName("redis")
-
-	Expect(k8sClient.Create(ctx, &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      database,
-			Namespace: ns,
-		},
-		StringData: map[string]string{
-			goharborv1alpha2.PostgresqlPasswordKey: "pg-password",
-		},
-		Type: goharborv1alpha2.SecretTypePostgresql,
-	})).To(Succeed())
 
 	Expect(k8sClient.Create(ctx, &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
@@ -144,11 +132,13 @@ func setupCoreResourceDependencies(ctx context.Context, ns string) (string, stri
 		Type: goharborv1alpha2.SecretTypeRedis,
 	})).To(Succeed())
 
-	return database, encryption, csrf, registryCtl, admin, core, jobservice, tokenCert, redis
+	return encryption, csrf, registryCtl, admin, core, jobservice, tokenCert, redis
 }
 
 func setupValidCore(ctx context.Context, ns string) (Resource, client.ObjectKey) {
-	databasePasswordName, encryptionKeyName, csrfKey, registryCtlPassword, adminPassword, coreSecret, jobserviceSecret, tokenCertificate, redisPassword := setupCoreResourceDependencies(ctx, ns)
+	encryptionKeyName, csrfKey, registryCtlPassword, adminPassword, coreSecret, jobserviceSecret, tokenCertificate, redisPassword := setupCoreResourceDependencies(ctx, ns)
+
+	databaseDSN := setupPostgresql(ctx, ns)
 
 	name := newName("core")
 	core := &goharborv1alpha2.Core{
@@ -158,13 +148,7 @@ func setupValidCore(ctx context.Context, ns string) (Resource, client.ObjectKey)
 		},
 		Spec: goharborv1alpha2.CoreSpec{
 			Database: goharborv1alpha2.CoreDatabaseSpec{
-				CorePostgresqlSpec: goharborv1alpha2.CorePostgresqlSpec{
-					ExternalDatabaseSpec: goharborv1alpha2.ExternalDatabaseSpec{
-						Host:        "the.database.url",
-						PasswordRef: databasePasswordName,
-					},
-					Name: "core",
-				},
+				OpacifiedDSN:     databaseDSN,
 				EncryptionKeyRef: encryptionKeyName,
 			},
 			CSRFKeyRef: csrfKey,
@@ -181,7 +165,7 @@ func setupValidCore(ctx context.Context, ns string) (Resource, client.ObjectKey)
 				Registry: goharborv1alpha2.CoreComponentsRegistrySpec{
 					ControllerURL: "http://the.registryctl.url",
 					URL:           "http://the.registry.url",
-					Redis: goharborv1alpha2.OpacifiedDSN{
+					Redis: &goharborv1alpha2.OpacifiedDSN{
 						DSN:         "redis://registry-redis/2",
 						PasswordRef: redisPassword,
 					},

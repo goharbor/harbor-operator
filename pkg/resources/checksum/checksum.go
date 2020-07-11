@@ -69,17 +69,15 @@ func (d *Dependencies) ChangedFor(ctx context.Context, resource Dependency) bool
 	for object, withStatus := range d.objects {
 		previous, ok := annotations[d.GetID(object)]
 		if !ok {
-			gvks, _, err := d.scheme.ObjectKinds(resource)
-			if err != nil {
-				return true
-			}
-			logger.Get(ctx).V(1).Info("dependencies changed (no annotation)", "resource", resource, "dependency", object, "annotations", annotations, "gvk", gvks[0])
+			logger.Get(ctx).V(1).Info("dependencies changed (no annotation)", "dependency", object)
+
 			return true
 		}
 
 		current := d.ComputeChecksum(object, withStatus)
 		if previous != current {
-			logger.Get(ctx).V(1).Info(fmt.Sprintf("dependencies changed (expected %s, got %s)", previous, current), "resource", resource, "dependency", object)
+			logger.Get(ctx).V(1).Info(fmt.Sprintf("dependencies changed (expected %s, got %s)", previous, current), "dependency", object)
+
 			return true
 		}
 	}
@@ -115,7 +113,7 @@ func CopyMarkers(from, to metav1.Object) {
 		fromAnnotations = map[string]string{}
 	}
 
-	for key, _ := range toAnnotations {
+	for key := range toAnnotations {
 		if !strings.Contains(key, ".checksum.goharbor.io/") {
 			continue
 		}

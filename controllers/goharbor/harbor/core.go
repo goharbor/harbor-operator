@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/url"
-	"strconv"
-	"strings"
 	"time"
 
 	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
@@ -308,27 +306,19 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1alpha2.Harbo
 	tokenServiceURL := fmt.Sprintf("http://%s", fmt.Sprintf("%s/service/token", r.NormalizeName(ctx, harbor.GetName(), "core")))
 	tokenCertificateRef := r.NormalizeName(ctx, harbor.GetName(), "core", "tokencert")
 
-	dbDSN := harbor.Spec.DatabaseDSN(goharborv1alpha2.CoreDatabase)
-
-	dbURL, err := dbDSN.GetDSN("")
+	dbDSN, err := harbor.Spec.DatabaseDSN(goharborv1alpha2.CoreDatabase)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot get database DSN")
+		return nil, errors.Wrap(err, "database")
 	}
 
-	port, err := strconv.ParseInt(dbURL.Port(), 10, 32)
+	registryRedisDSN, err := harbor.Spec.RedisDSN(goharborv1alpha2.RegistryRedis)
 	if err != nil {
-		return nil, errors.Wrap(err, "unsupported port value")
+		return nil, errors.Wrap(err, "redis")
 	}
 
-	postgresqlSpec := goharborv1alpha2.CorePostgresqlSpec{
-		ExternalDatabaseSpec: goharborv1alpha2.ExternalDatabaseSpec{
-			Host:        dbURL.Hostname(),
-			PasswordRef: dbDSN.PasswordRef,
-			Port:        int32(port),
-			SSLMode:     dbURL.Query().Get("sslmode"),
-			Username:    dbURL.User.Username(),
-		},
-		Name: strings.TrimLeft(dbURL.Path, "/"),
+	coreRedisDSN, err := harbor.Spec.RedisDSN(goharborv1alpha2.CoreRedis)
+	if err != nil {
+		return nil, errors.Wrap(err, "redis")
 	}
 
 	return &goharborv1alpha2.Core{
@@ -343,7 +333,7 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1alpha2.Harbo
 					URL:                 registryURL,
 					ControllerURL:       registryCtlURL,
 					Credentials:         credentials,
-					Redis:               harbor.Spec.RedisDSN(goharborv1alpha2.RegistryRedis),
+					Redis:               registryRedisDSN,
 					StorageProviderName: harbor.Spec.Persistence.ImageChartStorage.Name(),
 				},
 				JobService: goharborv1alpha2.CoreComponentsJobServiceSpec{
@@ -364,12 +354,12 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1alpha2.Harbo
 			},
 			CSRFKeyRef: csrfRef,
 			Database: goharborv1alpha2.CoreDatabaseSpec{
-				EncryptionKeyRef:   encryptionKeyRef,
-				CorePostgresqlSpec: postgresqlSpec,
+				OpacifiedDSN:     *dbDSN,
+				EncryptionKeyRef: encryptionKeyRef,
 			},
 			ExternalEndpoint: harbor.Spec.ExternalURL,
 			Redis: goharborv1alpha2.CoreRedisSpec{
-				OpacifiedDSN: harbor.Spec.RedisDSN(goharborv1alpha2.CoreRedis),
+				OpacifiedDSN: *coreRedisDSN,
 			},
 			Proxy: harbor.Spec.Proxy,
 		},

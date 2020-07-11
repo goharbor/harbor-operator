@@ -18,6 +18,7 @@ package goharbor_test
 
 import (
 	"context"
+	"fmt"
 
 	. "github.com/onsi/gomega"
 
@@ -35,33 +36,10 @@ func newJobServiceController() controllerTest {
 		GetStatusFunc: getJobServiceStatusFunc,
 	}
 }
-func setupJobServiceResourceDependencies(ctx context.Context, ns string) (string, string, string, string) {
-	secret := newName("jobservice")
-	coreSecret := newName("core")
+
+func setupJobServiceResourceDependencies(ctx context.Context, ns string) (string, string) {
 	redisSecret := newName("redis")
 	registrySecret := newName("registry")
-
-	Expect(k8sClient.Create(ctx, &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      secret,
-			Namespace: ns,
-		},
-		StringData: map[string]string{
-			goharborv1alpha2.SharedSecretKey: "jobservice-secret",
-		},
-		Type: goharborv1alpha2.SecretTypeSingle,
-	})).To(Succeed())
-
-	Expect(k8sClient.Create(ctx, &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      coreSecret,
-			Namespace: ns,
-		},
-		StringData: map[string]string{
-			goharborv1alpha2.SharedSecretKey: "core-secret",
-		},
-		Type: goharborv1alpha2.SecretTypeSingle,
-	})).To(Succeed())
 
 	Expect(k8sClient.Create(ctx, &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
@@ -85,10 +63,14 @@ func setupJobServiceResourceDependencies(ctx context.Context, ns string) (string
 		Type: goharborv1alpha2.SecretTypeSingle,
 	})).To(Succeed())
 
-	return secret, coreSecret, redisSecret, registrySecret
+	return redisSecret, registrySecret
 }
 func setupValidJobService(ctx context.Context, ns string) (Resource, client.ObjectKey) {
-	secret, coreSecret, redisSecret, registrySecret := setupJobServiceResourceDependencies(ctx, ns)
+	redisSecret, registrySecret := setupJobServiceResourceDependencies(ctx, ns)
+
+	coreResource, _ := setupValidCore(ctx, ns)
+
+	core := coreResource.(*goharborv1alpha2.Core)
 
 	name := newName("jobservice")
 	jobService := &goharborv1alpha2.JobService{
@@ -98,8 +80,8 @@ func setupValidJobService(ctx context.Context, ns string) (Resource, client.Obje
 		},
 		Spec: goharborv1alpha2.JobServiceSpec{
 			Core: goharborv1alpha2.JobServiceCoreSpec{
-				URL:       "http://the.core.url",
-				SecretRef: coreSecret,
+				URL:       fmt.Sprintf("http://%s", core.GetName()),
+				SecretRef: core.Spec.SecretRef,
 			},
 			WorkerPool: goharborv1alpha2.JobServicePoolSpec{
 				Redis: goharborv1alpha2.JobServicePoolRedisSpec{
@@ -109,7 +91,7 @@ func setupValidJobService(ctx context.Context, ns string) (Resource, client.Obje
 					},
 				},
 			},
-			SecretRef: secret,
+			SecretRef: core.Spec.Components.JobService.SecretRef,
 			Registry: goharborv1alpha2.CoreComponentsRegistryCredentialsSpec{
 				PasswordRef: registrySecret,
 			},

@@ -59,6 +59,11 @@ func (r *Reconciler) GetNotaryServer(ctx context.Context, harbor *goharborv1alph
 
 	serviceTokenURL.Path += "/service/token"
 
+	dbDSN, err := harbor.Spec.DatabaseDSN(goharborv1alpha2.NotaryServerDatabase)
+	if err != nil {
+		return nil, errors.Wrap(err, "database")
+	}
+
 	return &goharborv1alpha2.NotaryServer{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
@@ -66,7 +71,7 @@ func (r *Reconciler) GetNotaryServer(ctx context.Context, harbor *goharborv1alph
 		},
 		Spec: goharborv1alpha2.NotaryServerSpec{
 			ComponentSpec: harbor.Spec.Notary.ComponentSpec,
-			Auth: goharborv1alpha2.NotaryServerAuthSpec{
+			Auth: &goharborv1alpha2.NotaryServerAuthSpec{
 				Token: goharborv1alpha2.NotaryServerAuthTokenSpec{
 					CertificateRef: tokenServiceCertificateRef,
 					Issuer:         TokenServiceIssuer,
@@ -78,7 +83,7 @@ func (r *Reconciler) GetNotaryServer(ctx context.Context, harbor *goharborv1alph
 				Level: harbor.Spec.LogLevel.Notary(),
 			},
 			Storage: goharborv1alpha2.NotaryStorageSpec{
-				OpacifiedDSN: harbor.Spec.DatabaseDSN(goharborv1alpha2.NotaryServerDatabase),
+				OpacifiedDSN: *dbDSN,
 				Type:         "postgres",
 			},
 			TrustService: goharborv1alpha2.NotaryServerTrustServiceSpec{
