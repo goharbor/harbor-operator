@@ -6,11 +6,13 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	"github.com/goharbor/harbor-operator/pkg/graph"
+	"github.com/goharbor/harbor-operator/pkg/resources/checksum"
 )
 
 var errNotReady = errors.New("not ready")
@@ -34,6 +36,8 @@ func (c *Controller) ensureResourceReady(ctx context.Context, res *Resource) err
 		// TODO Check if the error is a temporary error or a unrecoverrable one
 		return errors.Wrapf(err, "cannot get %s %s/%s", gvk, res.resource.GetNamespace(), res.resource.GetName())
 	}
+
+	checksum.CopyMarkers(result.(metav1.Object), res.resource)
 
 	l.V(1).Info("Checking resource readiness")
 

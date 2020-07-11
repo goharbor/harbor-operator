@@ -10,8 +10,8 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/resources"
 )
 
-func NewDeployment(mutate resources.Mutable) resources.Mutable {
-	return func(ctx context.Context, deploymentResource, deploymentResult runtime.Object) controllerutil.MutateFn {
+func NewDeployment(mutate resources.Mutable) (result resources.Mutable) {
+	result = func(ctx context.Context, deploymentResource, deploymentResult runtime.Object) controllerutil.MutateFn {
 		result := deploymentResult.(*appsv1.Deployment)
 		desired := deploymentResource.(*appsv1.Deployment)
 
@@ -23,4 +23,8 @@ func NewDeployment(mutate resources.Mutable) resources.Mutable {
 			return mutate()
 		}
 	}
+
+	result.AppendMutation(MetadataMutateFn)
+
+	return result
 }

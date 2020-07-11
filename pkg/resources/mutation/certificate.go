@@ -10,8 +10,8 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/resources"
 )
 
-func NewCertificate(mutate resources.Mutable) resources.Mutable {
-	return func(ctx context.Context, certificateResource, certificateResult runtime.Object) controllerutil.MutateFn {
+func NewCertificate(mutate resources.Mutable) (result resources.Mutable) {
+	result = func(ctx context.Context, certificateResource, certificateResult runtime.Object) controllerutil.MutateFn {
 		result := certificateResult.(*certv1.Certificate)
 		desired := certificateResource.(*certv1.Certificate)
 
@@ -23,4 +23,8 @@ func NewCertificate(mutate resources.Mutable) resources.Mutable {
 			return mutate()
 		}
 	}
+
+	result.AppendMutation(MetadataMutateFn)
+
+	return result
 }

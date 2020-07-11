@@ -2,16 +2,14 @@ package jobservice
 
 import (
 	"context"
-	"io"
-	"io/ioutil"
-	"text/template"
+	"crypto/sha256"
+	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/Masterminds/sprig"
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
-	"github.com/opentracing/opentracing-go"
+	"github.com/goharbor/harbor-operator/pkg/resources/checksum"
 	"github.com/pkg/errors"
 )
 
@@ -24,41 +22,14 @@ const (
 )
 
 func (r *Reconciler) GetConfigMap(ctx context.Context, jobservice *goharborv1alpha2.JobService) (*corev1.ConfigMap, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "GetConfigMap")
-	defer span.Finish()
-
 	templateConfig, err := r.ConfigStore.GetItemValue(ConfigTemplateKey)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot get template")
 	}
 
-	template, err := template.New(ConfigName).
-		Funcs(sprig.TxtFuncMap()).
-		Funcs(r.Funcs(ctx, jobservice)).
-		Parse(templateConfig)
+	content, err := r.GetTemplatedConfig(ctx, templateConfig, jobservice)
 	if err != nil {
-		return nil, errors.Wrap(err, "invalid template")
-	}
-
-	reader, writer := io.Pipe()
-	defer reader.Close()
-
-	var errTemplate error
-
-	go func() {
-		defer writer.Close()
-
-		errTemplate = template.Execute(writer, jobservice)
-	}()
-
-	configContent, err := ioutil.ReadAll(reader)
-
-	if errTemplate != nil {
-		return nil, errors.Wrap(errTemplate, "cannot process config template")
-	}
-
-	if err != nil {
-		return nil, errors.Wrap(err, "cannot read processed config")
+		return nil, err
 	}
 
 	name := r.NormalizeName(ctx, jobservice.GetName())
@@ -68,10 +39,13 @@ func (r *Reconciler) GetConfigMap(ctx context.Context, jobservice *goharborv1alp
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
+			Annotations: map[string]string{
+				checksum.GetStaticID("template"): fmt.Sprintf("%x", sha256.Sum256([]byte(templateConfig))),
+			},
 		},
 
 		BinaryData: map[string][]byte{
-			ConfigName: configContent,
+			ConfigName: content,
 		},
 	}, nil
 }
