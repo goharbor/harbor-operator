@@ -1,5 +1,5 @@
 # Build the manager binary
-FROM golang:1.13.4 as builder
+FROM golang:1.14.5 as builder
 
 WORKDIR /workspace
 # Copy the Go Modules manifests
@@ -13,31 +13,15 @@ ENV CGO_ENABLED=0 \
     GO111MODULE=on
 
 # Copy the go source
-COPY main.go main.go
-COPY api api
-COPY pkg pkg
-COPY controllers controllers
-COPY assets assets
+COPY . .
 
-COPY hack hack
-
-COPY Makefile Makefile
-
-RUN make generate
-
-COPY vendor vendor
-# Build
-RUN go build -a \
-    -ldflags "-X ${GO_APP_PKG}.OperatorVersion=${RELEASE_VERSION}" \
-    -o manager \
-    pkged.go \
-    main.go
+RUN make manager
 
 # Use distroless as minimal base image to package the manager binary
 # Refer to https://github.com/GoogleContainerTools/distroless for more details
 FROM gcr.io/distroless/static:nonroot
 WORKDIR /
-COPY --from=builder /workspace/manager .
+COPY --from=builder /workspace/bin/manager .
 USER nonroot:nonroot
 
 ENTRYPOINT ["/manager"]
