@@ -20,33 +20,30 @@ jobs:
 
   docker-lint:
     runs-on: ubuntu-latest
-    name: DockerLint
+    name: 'dockerfile: lint'
     steps: 
-    - name: Checkout
-      uses: actions/checkout@v2
-    - name: lint
-      uses: brpaz/hadolint-action@master
+    - uses: actions/checkout@v2
+    - run: make docker-lint
 
   # Golang tests
   go-lint:
     runs-on: ubuntu-latest
-    name: GoLint
+    name: 'golang: lint'
     steps:
-    - uses: actions/checkout@v2
-    - name: Run golangci-lint
-      uses: actions-contrib/golangci-lint@v1
+    - uses: actions/setup-go@v2
       with:
-        golangci_lint_version: 1.22.2
+        go-version: 1.14
+    - uses: actions/checkout@v2
+    - run: make go-lint
 
   go-dependencies:
     runs-on: ubuntu-latest
     name: Dependencies are up to date
     steps:
-    - uses: actions/setup-go@v1
+    - uses: actions/setup-go@v2
       with:
-        go-version: 1.13
-    - name: Checkout
-      uses: actions/checkout@v2
+        go-version: 1.14
+    - uses: actions/checkout@v2
     - run: go mod tidy
     - run: go mod vendor
     - run: go mod graph
@@ -58,11 +55,10 @@ jobs:
     runs-on: ubuntu-latest
     name: Generated files are up to date
     steps:
-    - uses: actions/setup-go@v1
+    - uses: actions/setup-go@v2
       with:
-        go-version: 1.13
-    - name: Checkout
-      uses: actions/checkout@v2
+        go-version: 1.14
+    - uses: actions/checkout@v2
     - run: make generate
     - name: Check diff
       run: |
@@ -82,10 +78,9 @@ jobs:
         k8sVersion: ["1.15", "1.16", "1.17"]
 
     steps: 
-    - name: Set up Go 1.13
-      uses: actions/setup-go@v1
+    - uses: actions/setup-go@v2
       with:
-        go-version: 1.13
+        go-version: 1.14
     - name: Install Kubernetes v${{ matrix.k8sVersion }}
       run: |
         sudo snap install microk8s --channel='${{ matrix.k8sVersion }}/stable' --classic
@@ -122,8 +117,10 @@ jobs:
   crd-kubernetes-resources:
     runs-on: ubuntu-latest
     name: 'kubernetes_resources: ./config/crd'
-    steps: 
-    - run: sudo apt-get install -y bzr # Required to install controller-gen in make manifests
+    steps:
+    - uses: actions/setup-go@v2
+      with:
+        go-version: 1.14
     - uses: actions/checkout@v2
     - run: make manifests
     - uses: azure/k8s-bake@v1
@@ -136,7 +133,9 @@ jobs:
     runs-on: ubuntu-latest
     name: 'kubernetes_resources: ./config/default'
     steps: 
-    - run: sudo apt-get install -y bzr # Required to install controller-gen in make manifests
+    - uses: actions/setup-go@v2
+      with:
+        go-version: 1.14
     - uses: actions/checkout@v2
     - run: make manifests
     - uses: azure/k8s-bake@v1
@@ -162,9 +161,4 @@ jobs:
     name: 'documentation: lint'
     steps:
     - uses: actions/checkout@v2
-    - name: markdownlint-cli
-      uses: nosborn/github-action-markdown-cli@v1.1.1
-      with:
-        files: .
-        config_file: ".markdownlint.json"
-        ignore_files: "vendor"
+    - run: make md-lint
