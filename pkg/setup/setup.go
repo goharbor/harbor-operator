@@ -11,6 +11,20 @@ import (
 )
 
 func WithManager(ctx context.Context, mgr manager.Manager) error {
+	g, ctx := errgroup.WithContext(ctx)
+
+	g.Go(func() error {
+		return ControllersWithManager(ctx, mgr)
+	})
+
+	g.Go(func() error {
+		return WabhooksWithManager(ctx, mgr)
+	})
+
+	return g.Wait()
+}
+
+func ControllersWithManager(ctx context.Context, mgr manager.Manager) error {
 	var g errgroup.Group
 
 	for name, builder := range controllers {
@@ -35,6 +49,12 @@ func WithManager(ctx context.Context, mgr manager.Manager) error {
 			return errors.Wrapf(c.WithManager(ctx, mgr), "controller %s", name)
 		})
 	}
+
+	return g.Wait()
+}
+
+func WabhooksWithManager(ctx context.Context, mgr manager.Manager) error {
+	var g errgroup.Group
 
 	for name, object := range webhooks {
 		name := name
