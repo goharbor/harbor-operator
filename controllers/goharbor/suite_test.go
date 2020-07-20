@@ -74,7 +74,7 @@ var _ = BeforeSuite(func(done Done) {
 
 	By("bootstrapping test environment")
 	testEnv = &envtest.Environment{
-		CRDDirectoryPaths: []string{filepath.Join("..", "config", "crd", "bases")},
+		CRDDirectoryPaths: []string{filepath.Join("..", "..", "config", "crd", "bases")},
 	}
 
 	var err error
@@ -97,7 +97,7 @@ var _ = BeforeSuite(func(done Done) {
 	})
 	Expect(err).NotTo(HaveOccurred(), "failed to create manager")
 
-	Expect(setup.WithManager(ctx, mgr)).To(Succeed())
+	Expect(setup.ControllersWithManager(ctx, mgr)).To(Succeed())
 
 	go func() {
 		defer GinkgoRecover()
