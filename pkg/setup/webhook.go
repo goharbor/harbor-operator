@@ -8,6 +8,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
 
+const (
+	WebhookDisabledSuffixConfigKey = "webhook-disabled"
+)
+
 type WebHook interface {
 	SetupWebhookWithManager(context.Context, manager.Manager) error
 }
@@ -26,7 +30,7 @@ func (wh *webHook) WithManager(ctx context.Context, mgr manager.Manager) error {
 }
 
 func (wh *webHook) IsEnabled(ctx context.Context) (bool, error) {
-	ok, err := configstore.GetItemValueBool(fmt.Sprintf("%s-%s", wh.Name, ControllerDisabledSuffixConfigKey))
+	ok, err := configstore.GetItemValueBool(fmt.Sprintf("%s-%s", wh.Name, WebhookDisabledSuffixConfigKey))
 	if err == nil {
 		return ok, nil
 	}
