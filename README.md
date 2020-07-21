@@ -70,7 +70,7 @@ See [install documentation](https://github.com/goharbor/harbor-operator/blob/mas
 
 ### Supported platforms
 
-- [Kubernetes](https://kubernetes.io/docs/concepts/overview/kubernetes-api/) >= 1.15
+- [Kubernetes](https://kubernetes.io/docs/concepts/overview/kubernetes-api/) >= 1.16
 
 ### Harbor version
 
