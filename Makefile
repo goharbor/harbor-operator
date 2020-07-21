@@ -37,6 +37,14 @@ test: generate
 	go test ./... \
 		-coverprofile cover.out
 
+.PHONY: dependencies-test
+dependencies-test:
+	go mod tidy
+	go mod vendor
+	go mod graph
+	git status
+	test -z "$$(git diff-index --diff-filter=d --name-only HEAD -- 'vendor')"
+
 RELEASE_VERSION ?= dev
 
 # Build manager binary
@@ -45,7 +53,7 @@ manager: generate fmt vet
 	go build \
 		-mod vendor \
 		-o bin/manager \
-    	-ldflags "-X $$(go list -m).OperatorVersion=$(RELEASE_VERSION)" \
+		-ldflags "-X $$(go list -m).OperatorVersion=$(RELEASE_VERSION)" \
 		*.go
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
