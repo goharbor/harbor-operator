@@ -18,6 +18,11 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/graph"
 )
 
+const (
+	DefaultIngressAnnotationsEnabled   = true
+	IngressAnnotationsEnabledCOnfigKey = "ingress-annotations-enabled"
+)
+
 type CoreIngress graph.Resource
 
 func (r *Reconciler) AddCoreIngress(ctx context.Context, harbor *goharborv1alpha2.Harbor, core Core, portal Portal, registry Registry) (CoreIngress, error) {
@@ -95,12 +100,9 @@ func (r *Reconciler) GetCoreIngresse(ctx context.Context, harbor *goharborv1alph
 
 	return &netv1.Ingress{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-harbor-core", harbor.GetName()),
-			Namespace: harbor.GetNamespace(),
-			Annotations: map[string]string{
-				// resolve 413(Too Large Entity) error when push large image. It only works for NGINX ingress.
-				"nginx.ingress.kubernetes.io/proxy-body-size": "0",
-			},
+			Name:        fmt.Sprintf("%s-harbor-core", harbor.GetName()),
+			Namespace:   harbor.GetNamespace(),
+			Annotations: r.GetIngressAnnotations(),
 		},
 		Spec: netv1.IngressSpec{
 			TLS: tls,
@@ -153,12 +155,9 @@ func (r *Reconciler) GetNotaryServerIngresse(ctx context.Context, harbor *goharb
 
 	return &netv1.Ingress{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-harbor-notary", harbor.GetName()),
-			Namespace: harbor.GetNamespace(),
-			Annotations: map[string]string{
-				// resolve 413(Too Large Entity) error when push large image. It only works for NGINX ingress.
-				"nginx.ingress.kubernetes.io/proxy-body-size": "0",
-			},
+			Name:        fmt.Sprintf("%s-harbor-notary", harbor.GetName()),
+			Namespace:   harbor.GetNamespace(),
+			Annotations: r.GetIngressAnnotations(),
 		},
 		Spec: netv1.IngressSpec{
 			TLS: tls,
@@ -178,4 +177,11 @@ func (r *Reconciler) GetNotaryServerIngresse(ctx context.Context, harbor *goharb
 			}},
 		},
 	}, nil
+}
+
+func (r *Reconciler) GetIngressAnnotations() map[string]string {
+	return map[string]string{
+		// resolve 413(Too Large Entity) error when push large image. It only works for NGINX ingress.
+		"nginx.ingress.kubernetes.io/proxy-body-size": "0",
+	}
 }
