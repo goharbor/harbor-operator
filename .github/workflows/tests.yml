@@ -75,7 +75,10 @@ jobs:
         # https://github.com/jetstack/cert-manager/tags
         certManager: ["0.12.0", "0.13.1", "0.14.2", "0.15.0-alpha.0"]
         # https://snapcraft.io/microk8s
-        k8sVersion: ["1.15", "1.16", "1.17"]
+        k8sVersion:
+        - "1.16"
+        - "1.17"
+        # - "1.18" # TODO check why Registry and RegistryCtl controllers tests fail
 
     steps: 
     - uses: actions/setup-go@v2
