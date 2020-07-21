@@ -10,7 +10,6 @@ require (
 	github.com/go-kit/kit v0.10.0
 	github.com/go-logr/logr v0.1.0
 	github.com/gobuffalo/here v0.6.2 // indirect
-	github.com/googleapis/gnostic v0.4.2 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/huandu/xstrings v1.3.2 // indirect
 	github.com/imdario/mergo v0.3.9 // indirect
@@ -46,3 +45,5 @@ require (
 	sigs.k8s.io/controller-runtime v0.6.1-0.20200528151803-676c350bd1f3
 	sigs.k8s.io/kustomize/kstatus v0.0.2
 )
+
+replace github.com/googleapis/gnostic => github.com/googleapis/gnostic v0.5.0
