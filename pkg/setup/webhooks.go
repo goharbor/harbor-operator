@@ -20,6 +20,7 @@ var webhooksBuilder = map[controllers.Controller]WebHook{
 	controllers.Registry:     &goharborv1alpha2.Registry{},
 	controllers.NotaryServer: &goharborv1alpha2.NotaryServer{},
 	controllers.NotarySigner: &goharborv1alpha2.NotarySigner{},
+	controllers.Trivy:        &goharborv1alpha2.Trivy{},
 }
 
 type WebHook interface {
