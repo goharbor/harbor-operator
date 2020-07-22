@@ -80,8 +80,13 @@ func (r *Reconciler) GetConfigMap(ctx context.Context, trivy *goharborv1alpha2.T
 // Explode array of vulnerabilities type into a string separated by commas
 func GetVulnerabilities(vulnType []goharborv1alpha2.TrivyServerVulnerabilityType) string {
 	vulnerabilities := ""
-	for _, v := range vulnType {
-		vulnerabilities = fmt.Sprintf("%s,%s", vulnerabilities, v)
+
+	for index, v := range vulnType {
+		if index == 0 {
+			vulnerabilities = string(v)
+		} else {
+			vulnerabilities = fmt.Sprintf("%s,%s", vulnerabilities, v)
+		}
 	}
 
 	return vulnerabilities
@@ -90,8 +95,13 @@ func GetVulnerabilities(vulnType []goharborv1alpha2.TrivyServerVulnerabilityType
 // Explode array of severities type into a string separated by commas
 func GetSeverities(sevType []goharborv1alpha2.TrivyServerSeverityType) string {
 	severities := ""
-	for _, s := range sevType {
-		severities = fmt.Sprintf("%s,%s", severities, s)
+
+	for index, s := range sevType {
+		if index == 0 {
+			severities = string(s)
+		} else {
+			severities = fmt.Sprintf("%s,%s", severities, s)
+		}
 	}
 
 	return severities
