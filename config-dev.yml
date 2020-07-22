@@ -19,6 +19,8 @@
     }
 - key: portal-controller-disabled
   value: true
+- key: trivy-controller-disabled
+  value: true
 - key: registry-controller-disabled
   value: true
 - key: registryctl-controller-disabled

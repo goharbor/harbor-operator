@@ -8,4 +8,6 @@ var (
 
 	ErrNoMigrationConfiguration = errors.New("no migration source configuration")
 	Err2MigrationConfiguration  = errors.New("only 1 migration source can be configured")
+
+	ErrWrongURLFormat = errors.New("wrong url format")
 )
