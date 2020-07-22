@@ -167,3 +167,36 @@ func (l HarborLogLevel) Notary() NotaryLogLevel {
 		return NotaryFatal
 	}
 }
+
+// +kubebuilder:validation:Type=string
+// +kubebuilder:validation:Enum={"debug","info","warning","error","fatal","panic"}
+// +kubebuilder:default="info"
+// TrivyLogLevel is the log level for Trivy.
+type TrivyLogLevel string
+
+const (
+	TrivyDebug        TrivyLogLevel = "debug"
+	TrivyInfo         TrivyLogLevel = "info"
+	TrivyWarning      TrivyLogLevel = "warning"
+	TrivyError        TrivyLogLevel = "error"
+	TrivyFatal        TrivyLogLevel = "fatal"
+	TrivyPanic        TrivyLogLevel = "panic"
+	TrivyDefaultLevel TrivyLogLevel = TrivyInfo
+)
+
+func (l HarborLogLevel) Trivy() TrivyLogLevel {
+	switch l {
+	default:
+		return TrivyDefaultLevel
+	case HarborDebug:
+		return TrivyDebug
+	case HarborInfo:
+		return TrivyInfo
+	case HarborWarning:
+		return TrivyWarning
+	case HarborError:
+		return TrivyError
+	case HarborFatal:
+		return TrivyFatal
+	}
+}

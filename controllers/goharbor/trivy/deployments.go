@@ -18,7 +18,9 @@ var (
 )
 
 const (
-	HealthPath        = "/health"
+	ContainerName     = "trivy"
+	LivenessProbe     = "/probe/healthy"
+	ReadinessProbe    = "/probe/ready"
 	port              = 8080 // https://github.com/helm/chartmuseum/blob/969515a51413e1f1840fb99509401aa3c63deccd/pkg/config/vars.go#L135
 	CacheVolumeName   = "cache"
 	CacheVolumePath   = "/home/scanner/.cache/trivy"
@@ -26,14 +28,30 @@ const (
 	ReportsVolumePath = "/home/scanner/.cache/reports"
 )
 
-func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.Trivy) (*appsv1.Deployment, error) { // nolint:funlen
-	image, err := r.GetImage(ctx)
+func (r *Reconciler) AddDeployment(ctx context.Context, trivy *goharborv1alpha2.Trivy) error {
+	// Forge the deploy resource
+	deploy, err := r.GetDeployment(ctx, trivy)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot get image")
+		return errors.Wrap(err, "cannot get deployment")
 	}
 
+	// Add deploy to reconciler controller
+	_, err = r.Controller.AddDeploymentToManage(ctx, deploy)
+	if err != nil {
+		return errors.Wrapf(err, "cannot manage deploy %s", deploy.GetName())
+	}
+
+	return nil
+}
+
+func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.Trivy) (*appsv1.Deployment, error) { // nolint:funlen
 	name := r.NormalizeName(ctx, trivy.GetName())
 	namespace := trivy.GetNamespace()
+
+	image, err := r.GetImage(ctx)
+	if err != nil {
+		return nil, errors.Wrapf(err, "cannot get image for deploy: %s", name)
+	}
 
 	volumes := []corev1.Volume{
 		{
@@ -105,7 +123,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.
 
 					Containers: []corev1.Container{
 						{
-							Name:  "trivy",
+							Name:  ContainerName,
 							Image: image,
 							Ports: []corev1.ContainerPort{
 								{
@@ -113,14 +131,13 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.
 								},
 							},
 
-							EnvFrom: envFroms,
-
+							EnvFrom:      envFroms,
 							VolumeMounts: volumesMount,
 
 							LivenessProbe: &corev1.Probe{
 								Handler: corev1.Handler{
 									HTTPGet: &corev1.HTTPGetAction{
-										Path: HealthPath,
+										Path: LivenessProbe,
 										Port: intstr.FromInt(port),
 									},
 								},
@@ -128,7 +145,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.
 							ReadinessProbe: &corev1.Probe{
 								Handler: corev1.Handler{
 									HTTPGet: &corev1.HTTPGetAction{
-										Path: HealthPath,
+										Path: ReadinessProbe,
 										Port: intstr.FromInt(port),
 									},
 								},

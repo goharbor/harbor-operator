@@ -17,11 +17,12 @@ func _() {
 	_ = x[RegistryCtl-6]
 	_ = x[Portal-7]
 	_ = x[ChartMuseum-8]
+	_ = x[Trivy-9]
 }
 
-const _ControllerUID_name = "harborcorejobserviceregistrynotary-servernotary-signerregistryctlportalchartmuseum"
+const _ControllerUID_name = "harborcorejobserviceregistrynotary-servernotary-signerregistryctlportalchartmuseumtrivy"
 
-var _ControllerUID_index = [...]uint8{0, 6, 10, 20, 28, 41, 54, 65, 71, 82}
+var _ControllerUID_index = [...]uint8{0, 6, 10, 20, 28, 41, 54, 65, 71, 82, 87}
 
 func (i ControllerUID) String() string {
 	if i < 0 || i >= ControllerUID(len(_ControllerUID_index)-1) {

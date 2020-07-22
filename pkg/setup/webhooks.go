@@ -10,4 +10,5 @@ var webhooks = map[ControllerUID]WebHook{
 	NotaryServer: &goharborv1alpha2.NotaryServer{},
 	NotarySigner: &goharborv1alpha2.NotarySigner{},
 	Registry:     &goharborv1alpha2.Registry{},
+	Trivy:        &goharborv1alpha2.Trivy{},
 }
