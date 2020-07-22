@@ -90,7 +90,6 @@ var _ = DescribeTable(
 		}
 
 		Expect(k8sClient.Get(ctx, key, resource)).To(Succeed(), "resource should still be accessible")
-
 		Eventually(resourceController.GetStatusFunc(ctx, key), timeouts...).
 			Should(MatchFields(IgnoreExtras, Fields{
 				"ObservedGeneration": BeEquivalentTo(resource.GetGeneration()),
@@ -121,6 +120,7 @@ var _ = DescribeTable(
 	Entry("Registry", newRegistryController(), time.Minute, 5*time.Second),
 	Entry("RegistryCtl", newRegistryCtlController(), 2*time.Minute, 5*time.Second),
 	Entry("ChartMuseum", newChartMuseumController(), time.Minute, 5*time.Second),
+	Entry("Trivy", newTrivyController(), time.Minute, 5*time.Second),
 	Entry("NotaryServer", newNotaryServerController(), time.Minute, 5*time.Second),
 	Entry("NotarySigner", newNotarySignerController(), time.Minute, 5*time.Second),
 	Entry("Core", newCoreController(), time.Minute, 5*time.Second),

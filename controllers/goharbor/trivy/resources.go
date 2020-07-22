@@ -2,7 +2,6 @@ package trivy
 
 import (
 	"context"
-
 	"github.com/pkg/errors"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
@@ -15,49 +14,34 @@ func (r *Reconciler) NewEmpty(_ context.Context) resources.Resource {
 }
 
 func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resource) error {
+	// Fetch the trivy resources definition
 	trivy, ok := resource.(*goharborv1alpha2.Trivy)
 	if !ok {
 		return serrors.UnrecoverrableError(errors.Errorf("%+v", resource), serrors.OperatorReason, "unable to add resource")
 	}
 
-	service, err := r.GetService(ctx, trivy)
+	// Add Trivy service resources with a public port for Trivy deployment
+	err := r.AddService(ctx, trivy)
 	if err != nil {
-		return errors.Wrap(err, "cannot get service")
+		return errors.Wrap(err, "cannot add service")
 	}
 
-	_, err = r.Controller.AddServiceToManage(ctx, service)
+	// Add Trivy config map resources with all Trivy custom definition
+	err = r.AddConfigMap(ctx, trivy)
 	if err != nil {
-		return errors.Wrapf(err, "cannot add service %s", service.GetName())
+		return errors.Wrap(err, "cannot add config map")
 	}
 
-	configMap, err := r.GetConfigMap(ctx, trivy)
+	// Add Trivy secret resources with creds for Redis
+	err = r.AddSecret(ctx, trivy)
 	if err != nil {
-		return errors.Wrap(err, "cannot get configMap")
+		return errors.Wrap(err, "cannot add secret")
 	}
 
-	configMapResource, err := r.Controller.AddConfigMapToManage(ctx, configMap)
+	// Add Trivy deployment and volumes resources
+	err = r.AddDeployment(ctx, trivy)
 	if err != nil {
-		return errors.Wrapf(err, "cannot add configMap %s", configMap.GetName())
-	}
-
-	secret, err := r.GetSecret(ctx, trivy)
-	if err != nil {
-		return errors.Wrap(err, "cannot get configMap")
-	}
-
-	secretResource, err := r.Controller.AddSecretToManage(ctx, secret)
-	if err != nil {
-		return errors.Wrapf(err, "cannot add configMap %s", configMap.GetName())
-	}
-
-	deployment, err := r.GetDeployment(ctx, trivy)
-	if err != nil {
-		return errors.Wrap(err, "cannot get deployment")
-	}
-
-	_, err = r.Controller.AddDeploymentToManage(ctx, deployment, configMapResource, secretResource)
-	if err != nil {
-		return errors.Wrapf(err, "cannot add deployment %s", deployment.GetName())
+		return errors.Wrap(err, "cannot add deployment")
 	}
 
 	return nil
