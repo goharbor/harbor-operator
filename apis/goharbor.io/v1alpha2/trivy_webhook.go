@@ -2,6 +2,7 @@ package v1alpha2
 
 import (
 	"context"
+
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -26,21 +27,21 @@ var _ webhook.Validator = &Trivy{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type.
 func (r *Trivy) ValidateCreate() error {
-	registrylog.Info("validate create", "name", r.Name)
+	trivyLog.Info("validate create", "name", r.Name)
 
 	return r.Validate()
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type.
 func (r *Trivy) ValidateUpdate(old runtime.Object) error {
-	registrylog.Info("validate update", "name", r.Name)
+	trivyLog.Info("validate update", "name", r.Name)
 
 	return r.Validate()
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type.
 func (r *Trivy) ValidateDelete() error {
-	registrylog.Info("validate delete", "name", r.Name)
+	trivyLog.Info("validate delete", "name", r.Name)
 
 	return nil
 }

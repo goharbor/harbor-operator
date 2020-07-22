@@ -18,9 +18,9 @@ import (
 // +resource:path=trivy
 // +kubebuilder:subresource:status
 // +kubebuilder:resource:categories="goharbor"
-// +kubebuilder:printcolumn:name="Version",type=string,JSONPath=`.spec.version`,description="The semver Harbor version",priority=5
+// +kubebuilder:printcolumn:name="Version",type=string,JSONPath=`.spec.version`,description="The semver version",priority=5
 // +kubebuilder:printcolumn:name="Replicas",type=string,JSONPath=`.spec.replicas`,description="The number of replicas",priority=0
-// Trivy is the Schema for the registries API.
+// Trivy is the Schema for the Trivy API.
 type Trivy struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -96,11 +96,6 @@ type TrivyServerSpec struct {
 	ReportsDir string `json:"reportsDir,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=false
-	// The flag to enable or disable Trivy debug mode
-	DebugMode bool `json:"debugMode,omitempty"`
-
-	// +kubebuilder:validation:Optional
 	// Comma-separated list of vulnerability types.
 	// Possible values are os and library.
 	VulnType []TrivyServerVulnerabilityType `json:"vulnType,omitempty"`
@@ -117,17 +112,22 @@ type TrivyServerSpec struct {
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=false
-	// The flag to enable or disable Trivy DB downloads from GitHub
-	SkipUpdate bool `json:"skipUpdate,omitempty"`
+	// The flag to enable or disable Trivy debug mode
+	DebugMode bool `json:"debugMode,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// The GitHub access token to download Trivy DB (see GitHub rate limiting)
-	GithubToken string `json:"githubToken,omitempty"`
+	// +kubebuilder:default=false
+	// The flag to enable or disable Trivy DB downloads from GitHub
+	SkipUpdate bool `json:"skipUpdate,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=false
 	// The flag to skip verifying registry certificate
 	Insecure bool `json:"insecure,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// The GitHub access token to download Trivy DB (see GitHub rate limiting)
+	GithubToken string `json:"githubToken,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Pattern="http?://.+"
@@ -146,20 +146,25 @@ type TrivyServerSpec struct {
 
 // +kubebuilder:validation:Enum={"os","library"}
 // +kubebuilder:default={"os","library"}
+// TrivyServerVulnerabilityType represents a CVE vulnerability type for trivy.
 type TrivyServerVulnerabilityType string
 
 // +kubebuilder:validation:Enum={"UNKNOWN","LOW","MEDIUM","HIGH","CRITICAL"}
 // +kubebuilder:default={"UNKNOWN","LOW","MEDIUM","HIGH","CRITICAL"}
+// TrivyServerSeverityType represents a CVE severity type for trivy.
 type TrivyServerSeverityType string
 
+var trivyURLValidationRegexp = regexp.MustCompile(`https?://.+`)
+
 func (r *TrivyServerSpec) Validate() map[string]error {
-	errors := make(map[string]error, 0)
+	errors := map[string]error{}
 
 	if len(r.NoProxy) > 0 {
 		for _, url := range r.NoProxy {
-			matched, err := regexp.MatchString("https?://.+", url)
-			if err != nil || !matched {
+			matched := trivyURLValidationRegexp.MatchString(url)
+			if !matched {
 				errors["NoProxy"] = ErrWrongURLFormat
+				break
 			}
 		}
 	}

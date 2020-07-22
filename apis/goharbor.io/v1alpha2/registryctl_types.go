@@ -26,9 +26,9 @@ const (
 // +resource:path=registrycontroller
 // +kubebuilder:subresource:status
 // +kubebuilder:resource:categories="goharbor"
-// +kubebuilder:printcolumn:name="Version",type=string,JSONPath=`.spec.version`,description="The semver Harbor version",priority=5
+// +kubebuilder:printcolumn:name="Version",type=string,JSONPath=`.spec.version`,description="The semver version",priority=5
 // +kubebuilder:printcolumn:name="Replicas",type=string,JSONPath=`.spec.replicas`,description="The number of replicas",priority=0
-// RegistryController is the Schema for the registries API.
+// RegistryController is the Schema for the RegistryController API.
 type RegistryController struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
