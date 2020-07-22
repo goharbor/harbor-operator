@@ -44,6 +44,10 @@ func (r *Registry) GetIngresses(ctx context.Context) []*netv1.Ingress { // nolin
 					"harbor":   harborName,
 					"operator": operatorName,
 				},
+				Annotations: map[string]string{
+					// resolve 413(Too Large Entity) error when push large image. It only works for NGINX ingress.
+					"nginx.ingress.kubernetes.io/proxy-body-size": "0",
+				},
 			},
 			Spec: netv1.IngressSpec{
 				TLS: tls,
