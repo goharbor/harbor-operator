@@ -29,7 +29,7 @@ func (r *Reconciler) AddConfigMap(ctx context.Context, trivy *goharborv1alpha2.T
 	return nil
 }
 
-// Get the config map linked to the trivy deployment
+// Get the config map linked to the trivy deployment.
 func (r *Reconciler) GetConfigMap(ctx context.Context, trivy *goharborv1alpha2.Trivy) (*corev1.ConfigMap, error) {
 	name := r.NormalizeName(ctx, trivy.GetName())
 	namespace := trivy.GetNamespace()
@@ -77,7 +77,7 @@ func (r *Reconciler) GetConfigMap(ctx context.Context, trivy *goharborv1alpha2.T
 	}, nil
 }
 
-// Explode array of vulnerabilities type into a string separated by commas
+// Explode array of vulnerabilities type into a string separated by commas.
 func GetVulnerabilities(vulnType []goharborv1alpha2.TrivyServerVulnerabilityType) string {
 	vulnerabilities := ""
 
@@ -92,7 +92,7 @@ func GetVulnerabilities(vulnType []goharborv1alpha2.TrivyServerVulnerabilityType
 	return vulnerabilities
 }
 
-// Explode array of severities type into a string separated by commas
+// Explode array of severities type into a string separated by commas.
 func GetSeverities(sevType []goharborv1alpha2.TrivyServerSeverityType) string {
 	severities := ""
 
