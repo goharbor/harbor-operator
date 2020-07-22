@@ -1,6 +1,8 @@
 package v1alpha2
 
 import (
+	"regexp"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -31,7 +33,8 @@ type Trivy struct {
 type TrivyList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []Trivy `json:"items"`
+
+	Items []Trivy `json:"items"`
 }
 
 // TrivySpec defines the desired state of Trivy.
@@ -96,18 +99,14 @@ type TrivyServerSpec struct {
 	DebugMode bool `json:"debugMode,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// TODO +kubebuilder:validation:Enum={"os","library"}
-	// +kubebuilder:default={"os","library"}
 	// Comma-separated list of vulnerability types.
 	// Possible values are os and library.
-	VulnType []string `json:"vulnType,omitempty"`
+	VulnType []TrivyServerVulnerabilityType `json:"vulnType,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// TODO +kubebuilder:validation:Enum={"UNKNOWN","LOW","MEDIUM","HIGH","CRITICAL"}
-	// +kubebuilder:default={"UNKNOWN","LOW","MEDIUM","HIGH","CRITICAL"}
 	// Comma-separated list of vulnerabilities
 	// severities to be displayed
-	Severity []string `json:"severity,omitempty"`
+	Severity []TrivyServerSeverityType `json:"severity,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=false
@@ -143,13 +142,33 @@ type TrivyServerSpec struct {
 	NoProxy []string `json:"noProxy,omitempty"`
 }
 
+// +kubebuilder:validation:Enum={"os","library"}
+// +kubebuilder:default={"os","library"}
+type TrivyServerVulnerabilityType string
+
+// +kubebuilder:validation:Enum={"UNKNOWN","LOW","MEDIUM","HIGH","CRITICAL"}
+// +kubebuilder:default={"UNKNOWN","LOW","MEDIUM","HIGH","CRITICAL"}
+type TrivyServerSeverityType string
+
+func (r *TrivyServerSpec) Validate() map[string]error {
+	errors := make(map[string]error, 0)
+
+	if len(r.NoProxy) > 0 {
+		for _, url := range r.NoProxy {
+			matched, err := regexp.MatchString("https?://.+", url)
+			if err != nil || !matched {
+				errors["NoProxy"] = ErrWrongUrlFormat
+				break
+			}
+		}
+	}
+
+	return errors
+}
+
 type TrivyLogSpec struct {
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default="info"
-	// +kubebuilder:validation:Enum={"trace","debug","info","warn","warning","error","fatal","panic"}
-	// The standard logger logs entries
-	// with that level or anything above it.
-	LogLevel string `json:"logLevel"`
+	Level TrivyLogLevel `json:"level,omitempty"`
 }
 
 type TrivyHTTPSSpec struct {
@@ -170,7 +189,7 @@ type TrivyHTTPSSpec struct {
 type TrivyCacheSpec struct {
 	// +kubebuilder:validation:Required
 	// Redis cache store
-	Redis *OpacifiedDSN `json:"redis,omitempty"`
+	Redis OpacifiedDSN `json:"redis,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default="harbor.scanner.trivy:store"

@@ -4,15 +4,15 @@ import (
 	"context"
 	"time"
 
-	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
+
+	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-operator/pkg/config"
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
 	"github.com/goharbor/harbor-operator/pkg/event-filter/class"
@@ -49,7 +49,7 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 		WithEventFilter(&class.Filter{
 			ClassName: className,
 		}).
-		For(&goharborv1alpha2.Trivy{}).
+		For(r.NewEmpty(ctx)).
 		Owns(&appsv1.Deployment{}).
 		Owns(&certv1.Certificate{}).
 		Owns(&corev1.ConfigMap{}).
@@ -62,7 +62,6 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 }
 
 func New(ctx context.Context, name string, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
-
 	r := &Reconciler{}
 
 	r.Controller = commonCtrl.NewController(ctx, name, r, configStore)

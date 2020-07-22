@@ -18,6 +18,7 @@ var webhooksBuilder = map[controllers.Controller]WebHook{
 	controllers.Harbor:     &goharborv1alpha2.Harbor{},
 	controllers.JobService: &goharborv1alpha2.JobService{},
 	controllers.Registry:   &goharborv1alpha2.Registry{},
+	controllers.Trivy:      &goharborv1alpha2.Trivy{},
 }
 
 type WebHook interface {

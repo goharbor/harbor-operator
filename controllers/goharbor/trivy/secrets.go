@@ -11,10 +11,27 @@ import (
 	"github.com/pkg/errors"
 )
 
+func (r *Reconciler) AddSecret(ctx context.Context, trivy *goharborv1alpha2.Trivy) error {
+	// Forge the secret resource
+	secret, err := r.GetSecret(ctx, trivy)
+	if err != nil {
+		return errors.Wrap(err, "cannot get secret")
+	}
+
+	// Add secret to reconciler controller
+	_, err = r.Controller.AddSecretToManage(ctx, secret)
+	if err != nil {
+		return errors.Wrapf(err, "cannot manage secret %s", secret.GetName())
+	}
+
+	return nil
+}
+
 func (r *Reconciler) GetSecret(ctx context.Context, trivy *goharborv1alpha2.Trivy) (*corev1.Secret, error) {
+	var redisPassword string
+
 	name := r.NormalizeName(ctx, trivy.GetName())
 	namespace := trivy.GetNamespace()
-	var redisPassword string
 
 	if trivy.Spec.Cache.Redis.PasswordRef != "" {
 		var passwordSecret corev1.Secret
@@ -46,7 +63,8 @@ func (r *Reconciler) GetSecret(ctx context.Context, trivy *goharborv1alpha2.Triv
 			Namespace: namespace,
 		},
 		StringData: map[string]string{
-			"SCANNER_REDIS_URL": redisDSN.String(),
+			"SCANNER_REDIS_URL":           redisDSN.String(),
+			"SCANNER_JOB_QUEUE_REDIS_URL": redisDSN.String(),
 		},
 	}, nil
 }
