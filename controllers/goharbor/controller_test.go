@@ -116,13 +116,14 @@ var _ = DescribeTable(
 	},
 	Entry("Portal", newPortalController(), 30*time.Second, 2*time.Second),
 	Entry("Registry", newRegistryController(), time.Minute, 5*time.Second),
-	Entry("RegistryCtl", newRegistryCtlController(), 3*time.Minute, 5*time.Second),
+	Entry("RegistryCtl", newRegistryCtlController(), 2*time.Minute, 5*time.Second),
 	Entry("ChartMuseum", newChartMuseumController(), time.Minute, 5*time.Second),
 	Entry("Trivy", newTrivyController(), time.Minute, 5*time.Second),
 	// Following tests require databases
-	PEntry("NotaryServer", newNotaryServerController(), time.Minute, 5*time.Second),
-	PEntry("NotarySigner", newNotarySignerController(), time.Minute, 5*time.Second),
-	PEntry("Core", newCoreController(), time.Minute, 5*time.Second),
-	PEntry("JobService", newJobServiceController(), time.Minute, 5*time.Second), // This requires Core resource
-	PEntry("Harbor", newHarborController(), 5*time.Minute, 10*time.Second),      // This requires Core and JobService resources
+	Entry("NotaryServer", newNotaryServerController(), time.Minute, 5*time.Second),
+	Entry("NotarySigner", newNotarySignerController(), time.Minute, 5*time.Second),
+	Entry("Core", newCoreController(), time.Minute, 5*time.Second),
+	Entry("JobService", newJobServiceController(), time.Minute, 5*time.Second),
+	// Following tests require redis
+	PEntry("Harbor", newHarborController(), 5*time.Minute, 10*time.Second),
 )

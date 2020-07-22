@@ -4,16 +4,25 @@ import (
 	"context"
 
 	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1beta1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
+	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	sgraph "github.com/goharbor/harbor-operator/pkg/controller/internal/graph"
+	"github.com/goharbor/harbor-operator/pkg/factories/logger"
+	"github.com/goharbor/harbor-operator/pkg/factories/owner"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 	"github.com/goharbor/harbor-operator/pkg/resources"
+	"github.com/goharbor/harbor-operator/pkg/resources/checksum"
 	"github.com/goharbor/harbor-operator/pkg/resources/mutation"
 	"github.com/goharbor/harbor-operator/pkg/resources/statuscheck"
 )
@@ -22,6 +31,91 @@ type Resource struct {
 	mutable   resources.Mutable
 	checkable resources.Checkable
 	resource  resources.Resource
+}
+
+func (c *Controller) ProcessFunc(ctx context.Context, resource metav1.Object, dependencies ...graph.Resource) func(context.Context, graph.Resource) error { // nolint:funlen
+	depManager := checksum.New(c.Scheme)
+
+	depManager.Add(ctx, owner.Get(ctx), false)
+
+	for _, dep := range dependencies {
+		if dep, ok := dep.(*Resource); ok {
+			depManager.Add(ctx, dep.resource, true)
+		}
+	}
+
+	return func(ctx context.Context, r graph.Resource) error {
+		res, ok := r.(*Resource)
+		if !ok {
+			return nil
+		}
+
+		span, ctx := opentracing.StartSpanFromContext(ctx, "process")
+		defer span.Finish()
+
+		namespace, name := res.resource.GetNamespace(), res.resource.GetName()
+
+		gvk := c.AddGVKToSpan(ctx, span, res.resource)
+		l := logger.Get(ctx).WithValues(
+			"resource.apiVersion", gvk.GroupVersion(),
+			"resource.kind", gvk.Kind,
+			"resource.name", name,
+			"resource.namespace", namespace,
+		)
+
+		logger.Set(&ctx, l)
+		span.
+			SetTag("resource.name", name).
+			SetTag("resource.namespace", namespace)
+
+		objectKey, err := client.ObjectKeyFromObject(res.resource)
+		if err != nil {
+			return serrors.UnrecoverrableError(err, serrors.OperatorReason, "cannot get object key")
+		}
+
+		result := res.resource.DeepCopyObject()
+
+		err = c.Client.Get(ctx, objectKey, result)
+		if err != nil {
+			if !apierrors.IsNotFound(err) {
+				return errors.Wrap(err, "cannot get resource")
+			}
+		} else {
+			checksum.CopyMarkers(result.(metav1.Object), res.resource)
+		}
+
+		if !depManager.ChangedFor(ctx, res.resource) {
+			changed := false
+
+			for key := range res.resource.GetAnnotations() {
+				if checksum.IsStaticAnnotation(key) {
+					changed = true
+					break
+				}
+			}
+
+			if !changed {
+				l.V(0).Info("dependencies unchanged")
+
+				return nil
+			}
+		}
+
+		res.mutable.AppendMutation(func(ctx context.Context, resource, result runtime.Object) controllerutil.MutateFn {
+			return func() error {
+				if res, ok := result.(metav1.Object); ok {
+					depManager.AddAnnotations(res)
+					depManager.AddAnnotations(r.(*Resource).resource)
+				}
+
+				return nil
+			}
+		})
+
+		err = c.applyAndCheck(ctx, r)
+
+		return errors.Wrapf(err, "apply %s (%s/%s)", gvk, namespace, name)
+	}
 }
 
 func (c *Controller) AddUnsctructuredToManage(ctx context.Context, resource *unstructured.Unstructured, dependencies ...graph.Resource) (graph.Resource, error) { // nolint:interfacer
@@ -40,7 +134,7 @@ func (c *Controller) AddUnsctructuredToManage(ctx context.Context, resource *uns
 		return nil, errors.Errorf("no graph in current context")
 	}
 
-	return res, g.AddResource(ctx, res, dependencies, c.applyAndCheck)
+	return res, g.AddResource(ctx, res, dependencies, c.ProcessFunc(ctx, resource, dependencies...))
 }
 
 func (c *Controller) AddServiceToManage(ctx context.Context, resource *corev1.Service, dependencies ...graph.Resource) (graph.Resource, error) {
@@ -59,7 +153,7 @@ func (c *Controller) AddServiceToManage(ctx context.Context, resource *corev1.Se
 		return nil, errors.Errorf("no graph in current context")
 	}
 
-	return res, g.AddResource(ctx, res, dependencies, c.applyAndCheck)
+	return res, g.AddResource(ctx, res, dependencies, c.ProcessFunc(ctx, resource, dependencies...))
 }
 
 func (c *Controller) AddBasicResource(ctx context.Context, resource resources.Resource, dependencies ...graph.Resource) (graph.Resource, error) {
@@ -136,7 +230,7 @@ func (c *Controller) AddCertificateToManage(ctx context.Context, resource *certv
 		return nil, errors.Errorf("no graph in current context")
 	}
 
-	return res, g.AddResource(ctx, res, dependencies, c.applyAndCheck)
+	return res, g.AddResource(ctx, res, dependencies, c.ProcessFunc(ctx, resource, dependencies...))
 }
 
 func (c *Controller) AddIngressToManage(ctx context.Context, resource *netv1.Ingress, dependencies ...graph.Resource) (graph.Resource, error) {
@@ -155,7 +249,7 @@ func (c *Controller) AddIngressToManage(ctx context.Context, resource *netv1.Ing
 		return nil, errors.Errorf("no graph in current context")
 	}
 
-	return res, g.AddResource(ctx, res, dependencies, c.applyAndCheck)
+	return res, g.AddResource(ctx, res, dependencies, c.ProcessFunc(ctx, resource, dependencies...))
 }
 
 func (c *Controller) AddSecretToManage(ctx context.Context, resource *corev1.Secret, dependencies ...graph.Resource) (graph.Resource, error) {
@@ -174,7 +268,7 @@ func (c *Controller) AddSecretToManage(ctx context.Context, resource *corev1.Sec
 		return nil, errors.Errorf("no graph in current context")
 	}
 
-	return res, g.AddResource(ctx, res, dependencies, c.applyAndCheck)
+	return res, g.AddResource(ctx, res, dependencies, c.ProcessFunc(ctx, resource, dependencies...))
 }
 
 func (c *Controller) AddConfigMapToManage(ctx context.Context, resource *corev1.ConfigMap, dependencies ...graph.Resource) (graph.Resource, error) {
@@ -193,7 +287,7 @@ func (c *Controller) AddConfigMapToManage(ctx context.Context, resource *corev1.
 		return nil, errors.Errorf("no graph in current context")
 	}
 
-	return res, g.AddResource(ctx, res, dependencies, c.applyAndCheck)
+	return res, g.AddResource(ctx, res, dependencies, c.ProcessFunc(ctx, resource, dependencies...))
 }
 
 func (c *Controller) AddDeploymentToManage(ctx context.Context, resource *appsv1.Deployment, dependencies ...graph.Resource) (graph.Resource, error) {
@@ -212,5 +306,5 @@ func (c *Controller) AddDeploymentToManage(ctx context.Context, resource *appsv1
 		return nil, errors.Errorf("no graph in current context")
 	}
 
-	return res, g.AddResource(ctx, res, dependencies, c.applyAndCheck)
+	return res, g.AddResource(ctx, res, dependencies, c.ProcessFunc(ctx, resource, dependencies...))
 }

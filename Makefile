@@ -28,9 +28,7 @@ NOTARY_SIGNER_MIGRATION_SOURCE ?= github://holyhope:$${GITHUB_TOKEN}@theupdatefr
 export NOTARY_SERVER_MIGRATION_SOURCE
 export NOTARY_SIGNER_MIGRATION_SOURCE
 
-SHELL = /bin/sh
-
-.PHONY: all
+.PHONY: all clean
 all: manager
 
 # Run tests
@@ -39,12 +37,24 @@ test: generate
 	go test ./... \
 		-coverprofile cover.out
 
+.PHONY: dependencies-test
+dependencies-test:
+	go mod tidy
+	go mod vendor
+	go mod graph
+	git status
+	test -z "$$(git diff-index --diff-filter=d --name-only HEAD -- 'vendor')"
+
+RELEASE_VERSION ?= dev
+
 # Build manager binary
 .PHONY: manager
 manager: generate fmt vet
 	go build \
+		-mod vendor \
 		-o bin/manager \
-		main.go
+		-ldflags "-X $$(go list -m).OperatorVersion=$(RELEASE_VERSION)" \
+		*.go
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 .PHONY: run
@@ -54,7 +64,9 @@ run: generate fmt vet $(TMPDIR)k8s-webhook-server/serving-certs
 # Run linters against all files
 .PHONY: lint
 lint: \
+	docker-lint \
 	go-lint \
+	make-lint \
 	md-lint
 
 # Install all dev dependencies
@@ -62,7 +74,6 @@ lint: \
 dev-tools: \
 	controller-gen \
 	golangci-lint \
-	gomplate \
 	helm \
 	kubebuilder \
 	kustomize \
@@ -77,6 +88,12 @@ release: goreleaser
 #####################
 #     Packaging     #
 #####################
+
+manifests: controller-gen
+	$(CONTROLLER_GEN) crd:crdVersions="v1" output:artifacts:config="config/crd/bases" paths="./..."
+	$(CONTROLLER_GEN) webhook output:artifacts:config="config/webhook" paths="./..."
+	$(CONTROLLER_GEN) object paths="./..."
+	$(CONTROLLER_GEN) rbac:roleName="manager-role" output:artifacts:config="config/rbac" paths="./..."
 
 .PHONY: generate
 generate: controller-gen stringer
@@ -123,7 +140,14 @@ md-lint: markdownlint
 	$(MARKDOWNLINT) \
 		-c "$(CURDIR)/.markdownlint.json" \
 		--ignore "$(CURDIR)/vendor" \
+		--ignore "$(CURDIR)/node_modules" \
 		"$(CURDIR)"
+
+docker-lint: hadolint
+	$(HADOLINT) Dockerfile
+
+make-lint: checkmake
+	$(CHECKMAKE) Makefile
 
 #####################
 #    Dev helpers    #
@@ -169,11 +193,13 @@ sample-%: kustomize
 .PHONY: install-dependencies
 install-dependencies: certmanager redis postgresql ingress
 
+.PHONY: redis
 redis: helm
 	$(HELM) repo add bitnami https://charts.bitnami.com/bitnami
 	$(HELM) upgrade --install harbor-redis bitnami/redis \
 		--set usePassword=true
 
+.PHONY: postgresql
 postgresql: helm
 	$(MAKE) sample-database
 	$(HELM) repo add bitnami https://charts.bitnami.com/bitnami
@@ -182,6 +208,7 @@ postgresql: helm
 
 INGRESS_NAMESPACE := nginx-ingress
 
+.PHONY: ingress
 ingress: helm
 	kubectl get namespace $(INGRESS_NAMESPACE) || kubectl create namespace $(INGRESS_NAMESPACE)
 	$(HELM) upgrade --install nginx stable/nginx-ingress \
@@ -190,14 +217,17 @@ ingress: helm
 
 CERTMANAGER_NAMESPACE := cert-manager
 
-certmanager: helm
-	$(HELM) repo add jetstack https://charts.jetstack.io
+.PHONY: certmanager
+certmanager: helm jetstack
 	kubectl get namespace $(CERTMANAGER_NAMESPACE) || kubectl create namespace $(CERTMANAGER_NAMESPACE)
 	$(HELM) upgrade --install certmanager jetstack/cert-manager \
 		--namespace $(CERTMANAGER_NAMESPACE) \
 		--version v0.15.1 \
 		--set installCRDs=true
 
+.PHONY: jetstack
+jetstack:
+	$(HELM) repo add jetstack https://charts.jetstack.io
 
 # Install local certificate
 # Required for webhook server to start
@@ -229,24 +259,34 @@ else
 GOBIN=$(shell go env GOBIN)
 endif
 
-# Get the npm install path
-NPMBIN=$$(npm --global bin)
+$(GOBIN):
+	mkdir -p "$(GOBIN)"
 
-SHELL := /bin/bash
+# Get the npm install path
+NPMOPTS=#--global
+
+NPMBIN=$(shell npm $(NPMOPTS) bin)
+
+$(NPMBIN):
+	mkdir -p "$(NPMBIN)"
+
+.PHONY: go-binary
+go-binary: $(GOBIN)
+	@{ \
+		set -uex ; \
+		export CONTROLLER_GEN_TMP_DIR="$$(mktemp -d)" ; \
+		cd "$$CONTROLLER_GEN_TMP_DIR" ; \
+		go mod init tmp ; \
+		go get "$${GO_DEPENDENCY}" ; \
+		rm -rf "$${CONTROLLER_GEN_TMP_DIR}" ; \
+	}
 
 # find or download controller-gen
 # download controller-gen if necessary
 .PHONY: controller-gen
 controller-gen:
 ifeq (, $(shell which controller-gen))
-	@{ \
-	set -e ;\
-	CONTROLLER_GEN_TMP_DIR=$$(mktemp -d) ;\
-	cd $$CONTROLLER_GEN_TMP_DIR ;\
-	go mod init tmp ;\
-	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.4 ;\
-	rm -rf $$CONTROLLER_GEN_TMP_DIR ;\
-	}
+	GO_DEPENDENCY='sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.4' $(MAKE) go-binary
 CONTROLLER_GEN=$(GOBIN)/controller-gen
 else
 CONTROLLER_GEN=$(shell which controller-gen)
@@ -257,8 +297,9 @@ endif
 .PHONY: markdownlint
 markdownlint:
 ifeq (, $(shell which markdownlint))
+	$(MAKE) $(NPMBIN)
 	# https://github.com/igorshubovych/markdownlint-cli#installation
-	npm install --global markdownlint-cli@0.16.0 --no-save
+	npm install $(NPMOPTS) markdownlint-cli@0.16.0 --no-save
 MARKDOWNLINT=$(NPMBIN)/markdownlint
 else
 MARKDOWNLINT=$(shell which markdownlint)
@@ -270,7 +311,7 @@ endif
 golangci-lint:
 ifeq (, $(shell which golangci-lint))
 	# https://github.com/golangci/golangci-lint#install
-	go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.22.2
+	GO_DEPENDENCY='github.com/golangci/golangci-lint/cmd/golangci-lint@v1.27.0' $(MAKE) go-binary
 GOLANGCI_LINT=$(GOBIN)/golangci-lint
 else
 GOLANGCI_LINT=$(shell which golangci-lint)
@@ -281,6 +322,7 @@ endif
 .PHONY: kubebuilder
 kubebuilder:
 ifeq (, $(shell which kubebuilder))
+	$(MAKE) $(GOBIN)
 	# https://kubebuilder.io/quick-start.html#installation
 	curl -sSL "https://go.kubebuilder.io/dl/2.0.1/$(shell go env GOOS)/$(shell go env GOARCH)" \
 		| tar -xz -C /tmp/
@@ -295,6 +337,7 @@ endif
 .PHONY: kustomize
 kustomize:
 ifeq (, $(shell which kustomize))
+	$(MAKE) $(GOBIN)
 	# https://github.com/kubernetes-sigs/kustomize/blob/master/docs/INSTALL.md
 	curl -s https://raw.githubusercontent.com/kubernetes-sigs/kustomize/7eca29daeee6b583f5394a45d8edfd41c15dbe6d/hack/install_kustomize.sh | bash
 	mv ./kustomize $(GOBIN)
@@ -302,18 +345,6 @@ ifeq (, $(shell which kustomize))
 KUSTOMIZE=$(GOBIN)/kustomize
 else
 KUSTOMIZE=$(shell which kustomize)
-endif
-
-# find or download gomplate
-# download gomplate if necessary
-.PHONY: gomplate
-gomplate:
-ifeq (, $(shell which gomplate))
-	# https://docs.gomplate.ca/installing/#install-with-npm
-	npm install --global gomplate@3.6.0 --no-save
-GOMPLATE=$(NPMBIN)/gomplate
-else
-GOMPLATE=$(shell which gomplate)
 endif
 
 # find helm or raise an error
@@ -331,6 +362,7 @@ endif
 .PHONY: goreleaser
 goreleaser:
 ifeq (, $(shell which goreleaser))
+	$(MAKE) $(GOBIN)
 	curl -sfL https://install.goreleaser.com/github.com/goreleaser/goreleaser.sh \
 		| sh -s v0.129.0
 	mv ./bin/goreleaser $(GOBIN)
@@ -345,9 +377,36 @@ endif
 stringer:
 ifeq (, $(shell which stringer))
 	# https://pkg.go.dev/golang.org/x/tools/cmd/stringer
-	go get golang.org/x/tools/cmd/stringer@v0.0.0-20200626171337-aa94e735be7f
+	GO_DEPENDENCY='golang.org/x/tools/cmd/stringer@v0.0.0-20200626171337-aa94e735be7f' $(MAKE) go-binary
 STRINGER=$(GOBIN)/stringer
 else
 STRINGER=$(shell which stringer)
 endif
-:
+
+# find or download hadolint
+# download hadolint if necessary
+.PHONY: hadolint
+hadolint:
+ifeq (, $(shell which hadolint))
+	$(MAKE) $(GOBIN)
+	# https://github.com/hadolint/hadolint/releases/
+	curl -sL https://github.com/hadolint/hadolint/releases/download/v1.18.0/hadolint-$(shell uname -s)-x86_64 \
+		> $(GOBIN)/hadolint
+	chmod u+x $(GOBIN)/hadolint
+HADOLINT=$(GOBIN)/hadolint
+else
+HADOLINT=$(shell which hadolint)
+endif
+
+
+# find or download checkmake
+# download checkmake if necessary
+.PHONY: checkmake
+checkmake:
+ifeq (, $(shell which checkmake))
+	# https://github.com/mrtazz/checkmake#installation
+	GO_DEPENDENCY='github.com/mrtazz/checkmake/cmd/checkmake@0.1.0' $(MAKE) go-binary
+CHECKMAKE=$(GOBIN)/checkmake
+else
+CHECKMAKE=$(shell which checkmake)
+endif

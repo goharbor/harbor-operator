@@ -33,7 +33,7 @@
     "backend": "{{ .Spec.Storage.Type }}",
     "db_url": "{{ .Spec.Storage.GetPasswordFieldKey | secretData .Spec.Storage.PasswordRef | .Spec.Storage.GetDSN | toString }}"
   },
-  {{- if .Spec.Auth.Token.Realm }}
+  {{- if .Spec.Auth }}
   "auth": {
     "type": "token",
     "options": {
