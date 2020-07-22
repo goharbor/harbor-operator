@@ -57,6 +57,7 @@ Following components are optional:
 - ChartMuseum
 - Notary
 - Clair
+- Trivy
 
 ### Delete the stack
 
@@ -64,7 +65,7 @@ When deleting the Harbor resource, all linked components are deleted. With two H
 
 ### Adding/Removing a component
 
-It is possible to add and delete ChartMuseum, Notary and Clair by editing the Harbor resource.
+It is possible to add and delete ChartMuseum, Notary, Clair and Trivy by editing the Harbor resource.
 
 ### Future features
 
