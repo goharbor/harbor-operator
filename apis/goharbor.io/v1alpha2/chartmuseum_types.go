@@ -80,7 +80,7 @@ type ChartMuseumServerSpec struct {
 	// +kubebuilder:validation:Minimum=0
 	// +kubebuilder:default=20971520
 	// Max size of post body (in bytes)
-	MaxUploadSize int64 `json:"maxUploadSize,omitempty"`
+	MaxUploadSize *int64 `json:"maxUploadSize,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// Value to set in the Access-Control-Allow-Origin HTTP header
@@ -136,7 +136,7 @@ type ChartMuseumChartStorageSpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=0
 	// Maximum number of objects allowed in storage (per tenant)
-	MaxStorageObjects int64 `json:"maxStorageObject,omitempty"`
+	MaxStorageObjects *int64 `json:"maxStorageObject,omitempty"`
 }
 
 type ChartMuseumChartStorageDriverSpec struct {
@@ -241,7 +241,7 @@ type ChartMuseumChartIndexSpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=0
 	// Parallel scan limit for the repo indexer
-	ParallelLimit int32 `json:"parallelLimit,omitempty"`
+	ParallelLimit *int32 `json:"parallelLimit,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="string"

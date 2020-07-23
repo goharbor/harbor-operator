@@ -137,12 +137,12 @@ type CoreDatabaseSpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=0
 	// +kubebuilder:default=50
-	MaxIdleConnections int32 `json:"maxIdleConnections,omitempty"`
+	MaxIdleConnections *int32 `json:"maxIdleConnections,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=0
 	// +kubebuilder:default=100
-	MaxOpenConnections int32 `json:"maxOpenConnections,omitempty"`
+	MaxOpenConnections *int32 `json:"maxOpenConnections,omitempty"`
 
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"

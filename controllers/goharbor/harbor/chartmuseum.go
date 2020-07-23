@@ -108,6 +108,8 @@ func (r *Reconciler) GetChartMuseum(ctx context.Context, harbor *goharborv1alpha
 	}
 
 	publicURL.Path += "/chartrepo"
+	maxStorageObjects := int64(0)
+	parallelLimit := int32(0)
 
 	return &goharborv1alpha2.ChartMuseum{
 		ObjectMeta: metav1.ObjectMeta{
@@ -127,10 +129,10 @@ func (r *Reconciler) GetChartMuseum(ctx context.Context, harbor *goharborv1alpha
 				AllowOvewrite: &varTrue,
 				Storage: goharborv1alpha2.ChartMuseumChartStorageSpec{
 					ChartMuseumChartStorageDriverSpec: harbor.Spec.Persistence.ImageChartStorage.ChartMuseum(),
-					MaxStorageObjects:                 0,
+					MaxStorageObjects:                 &maxStorageObjects,
 				},
 				Index: goharborv1alpha2.ChartMuseumChartIndexSpec{
-					ParallelLimit: 0,
+					ParallelLimit: &parallelLimit,
 				},
 				URL: publicURL.String(),
 			},
