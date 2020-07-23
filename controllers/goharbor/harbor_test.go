@@ -114,6 +114,9 @@ func setupValidHarbor(ctx context.Context, ns string) (Resource, client.ObjectKe
 		Host:   "the.dns",
 	}
 
+	db, _, err := goharborv1alpha2.FromOpacifiedDSN(corePG)
+	Expect(err).ToNot(HaveOccurred())
+
 	harbor := &goharborv1alpha2.Harbor{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
@@ -143,8 +146,8 @@ func setupValidHarbor(ctx context.Context, ns string) (Resource, client.ObjectKe
 						TokenIssuer: cmmeta.ObjectReference{
 							Name: tokenIssuerName,
 						},
-						Database: &corePG,
 					},
+					Database: *db,
 				},
 			},
 		},
