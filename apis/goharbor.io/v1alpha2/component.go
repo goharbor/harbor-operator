@@ -62,7 +62,7 @@ type ComponentStatus struct {
 	// Current number of pods.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=0
-	Replicas int32 `json:"replicas"`
+	Replicas *int32 `json:"replicas"`
 
 	// Conditions list of extracted conditions from Resource
 	// +listType:map
