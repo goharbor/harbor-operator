@@ -306,10 +306,7 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1alpha2.Harbo
 	tokenServiceURL := fmt.Sprintf("http://%s", fmt.Sprintf("%s/service/token", r.NormalizeName(ctx, harbor.GetName(), "core")))
 	tokenCertificateRef := r.NormalizeName(ctx, harbor.GetName(), "core", "tokencert")
 
-	dbDSN, err := harbor.Spec.DatabaseDSN(goharborv1alpha2.CoreDatabase)
-	if err != nil {
-		return nil, errors.Wrap(err, "database")
-	}
+	dbDSN := harbor.Spec.Database.GetOpacifiedDSN(goharborv1alpha2.CoreDatabase)
 
 	registryRedisDSN, err := harbor.Spec.RedisDSN(goharborv1alpha2.RegistryRedis)
 	if err != nil {
@@ -354,7 +351,7 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1alpha2.Harbo
 			},
 			CSRFKeyRef: csrfRef,
 			Database: goharborv1alpha2.CoreDatabaseSpec{
-				OpacifiedDSN:     *dbDSN,
+				OpacifiedDSN:     dbDSN,
 				EncryptionKeyRef: encryptionKeyRef,
 			},
 			ExternalEndpoint: harbor.Spec.ExternalURL,
