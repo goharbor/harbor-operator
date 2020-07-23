@@ -111,7 +111,9 @@ func (r *Reconciler) GetDeployment(ctx context.Context, notary *goharborv1alpha2
 			return nil, errors.Wrap(err, "migrationContainer")
 		}
 
-		initContainers = append(initContainers, migrationContainer)
+		if migrationContainer != nil {
+			initContainers = append(initContainers, *migrationContainer)
+		}
 	}
 
 	return &appsv1.Deployment{
