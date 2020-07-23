@@ -7,10 +7,12 @@ import (
 	"strings"
 
 	cmmeta "github.com/jetstack/cert-manager/pkg/apis/meta/v1"
+	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
 // +genclient
@@ -125,13 +127,43 @@ type HarborComponentsSpec struct {
 	Database ExternalDatabaseSpec `json:"database"`
 }
 
+func (r *ExternalDatabaseSpec) Validate() field.ErrorList {
+	var allErrs field.ErrorList
 
+	databaseNameMaxLength, err := r.GetMaxDatabaseNameLength()
+	if err != nil {
+		return append(allErrs, field.InternalError(field.NewPath("spec").Child("database").Child("prefix"), err))
 	}
 
+	if databaseNameMaxLength > 0 {
+		remainingCharCount := databaseNameMaxLength - databaseComponentMaxName
+		if len(r.Prefix) >= remainingCharCount {
+			allErrs = append(allErrs, field.TooLong(field.NewPath("spec").Child("database").Child("prefix"), r.Prefix, remainingCharCount))
+		}
 	}
 
+	return allErrs
+}
+
+const (
+	// Value of NAMEDATALEN
+	// See https://www.postgresql.org/docs/current/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS
+	DefaultMaxDatabaseNameLength = 64
+
+	HarborDatabaseNameMaxLengthConfigKey = "harbor-database-name-max-length"
+)
+
+func (r *ExternalDatabaseSpec) GetMaxDatabaseNameLength() (int, error) {
+	value, err := configstore.GetItemValueInt(HarborDatabaseNameMaxLengthConfigKey)
+	if err != nil {
+		if _, ok := err.(configstore.ErrItemNotFound); ok {
+			return DefaultMaxDatabaseNameLength, nil
+		}
+
+		return 0, err
 	}
 
+	return int(value), nil
 }
 
 type MissingRedisSpecError struct {
@@ -201,6 +233,10 @@ type ExternalDatabaseSpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	PasswordRef string `json:"passwordRef,omitempty"`
+
+	// Prefix of the database name
+	// +kubebuilder:validation:Optional
+	Prefix string `json:"prefix,omitempty"`
 }
 
 func (r ExternalDatabaseSpec) GetOpacifiedDSN(component ComponentWithDatabase) OpacifiedDSN {
@@ -210,7 +246,7 @@ func (r ExternalDatabaseSpec) GetOpacifiedDSN(component ComponentWithDatabase) O
 			Scheme: "postgres",
 			Host:   fmt.Sprintf("%s:%d", r.Host, r.Port),
 			User:   url.User(r.Username),
-			Path:   component.DBName(),
+			Path:   fmt.Sprintf("%s%s", r.Prefix, component.DBName()),
 			RawQuery: (&url.Values{
 				"sslmode": []string{r.SSLMode},
 			}).Encode(),
