@@ -63,6 +63,8 @@ func (h *Harbor) Validate() error {
 		allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("persistence").Child("imageChartStorage"), h.Spec.Persistence.ImageChartStorage, err.Error()))
 	}
 
+	errs := h.Spec.HarborComponentsSpec.Database.Validate()
+	allErrs = append(allErrs, errs...)
 
 	err = h.Spec.HarborComponentsSpec.ValidateRedis()
 	if err != nil {
