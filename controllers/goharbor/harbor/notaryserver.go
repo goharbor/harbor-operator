@@ -59,10 +59,7 @@ func (r *Reconciler) GetNotaryServer(ctx context.Context, harbor *goharborv1alph
 
 	serviceTokenURL.Path += "/service/token"
 
-	dbDSN, err := harbor.Spec.DatabaseDSN(goharborv1alpha2.NotaryServerDatabase)
-	if err != nil {
-		return nil, errors.Wrap(err, "database")
-	}
+	dbDSN := harbor.Spec.Database.GetOpacifiedDSN(goharborv1alpha2.NotaryServerDatabase)
 
 	return &goharborv1alpha2.NotaryServer{
 		ObjectMeta: metav1.ObjectMeta{
@@ -83,7 +80,7 @@ func (r *Reconciler) GetNotaryServer(ctx context.Context, harbor *goharborv1alph
 				Level: harbor.Spec.LogLevel.Notary(),
 			},
 			Storage: goharborv1alpha2.NotaryStorageSpec{
-				OpacifiedDSN: *dbDSN,
+				OpacifiedDSN: dbDSN,
 				Type:         "postgres",
 			},
 			TrustService: goharborv1alpha2.NotaryServerTrustServiceSpec{
