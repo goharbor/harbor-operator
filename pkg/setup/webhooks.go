@@ -5,9 +5,7 @@ import (
 )
 
 var webhooks = map[ControllerUID]WebHook{
-	Harbor:       &goharborv1alpha2.Harbor{},
-	JobService:   &goharborv1alpha2.JobService{},
-	NotaryServer: &goharborv1alpha2.NotaryServer{},
-	NotarySigner: &goharborv1alpha2.NotarySigner{},
-	Registry:     &goharborv1alpha2.Registry{},
+	Harbor:     &goharborv1alpha2.Harbor{},
+	JobService: &goharborv1alpha2.JobService{},
+	Registry:   &goharborv1alpha2.Registry{},
 }

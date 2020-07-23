@@ -3,8 +3,14 @@ package v1alpha2
 import (
 	"context"
 
+	"github.com/goharbor/harbor-operator/pkg/factories/logger"
+	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
+)
+
+const (
+	NotaryMigrationSourceConfigKey = "notary-migration-source"
 )
 
 type NotaryLoggingSpec struct {
@@ -20,9 +26,9 @@ const migrationImage = "migrate/migrate"
 
 var varFalse = false
 
-func (r *NotaryMigrationSpec) GetMigrationContainer(ctx context.Context, storage *NotaryStorageSpec) (corev1.Container, error) {
+func (r *NotaryMigrationSpec) GetMigrationContainer(ctx context.Context, storage *NotaryStorageSpec) (*corev1.Container, error) {
 	migrationEnvs := []corev1.EnvVar{}
-	secretDatabaseVariable, secretSourceVariable := "", ""
+	secretDatabaseVariable := ""
 
 	if storage.PasswordRef != "" {
 		migrationEnvs = append(migrationEnvs, corev1.EnvVar{
@@ -40,7 +46,23 @@ func (r *NotaryMigrationSpec) GetMigrationContainer(ctx context.Context, storage
 		secretDatabaseVariable = "$(secretDatabase)"
 	}
 
-	if r.PasswordRef != "" {
+	migrationDatabaseURL, err := storage.GetDSNStringWithRawPassword(secretDatabaseVariable)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot get storage DSN")
+	}
+
+	migrationSourceURL, err := r.GetMigrationSourceURL(ctx)
+	if err != nil {
+		if _, ok := err.(configstore.ErrItemNotFound); ok {
+			logger.Get(ctx).Info("no migration source url found, do not deploy migration container")
+
+			return nil, nil
+		}
+
+		return nil, errors.Wrap(err, "cannot get migration source DSN")
+	}
+
+	if r != nil && r.PasswordRef != "" {
 		migrationEnvs = append(migrationEnvs, corev1.EnvVar{
 			Name: "secretSource",
 			ValueFrom: &corev1.EnvVarSource{
@@ -53,21 +75,9 @@ func (r *NotaryMigrationSpec) GetMigrationContainer(ctx context.Context, storage
 				},
 			},
 		})
-
-		secretSourceVariable = "$(secretSource)"
 	}
 
-	migrationDatabaseURL, err := storage.GetDSNStringWithRawPassword(secretDatabaseVariable)
-	if err != nil {
-		return corev1.Container{}, errors.Wrap(err, "cannot get storage DSN")
-	}
-
-	migrationSourceURL, err := r.GetDSNStringWithRawPassword(secretSourceVariable)
-	if err != nil {
-		return corev1.Container{}, errors.Wrap(err, "cannot get migration source DSN")
-	}
-
-	return corev1.Container{
+	return &corev1.Container{
 		Name:  "init-db",
 		Image: migrationImage,
 		Args: []string{
@@ -77,6 +87,20 @@ func (r *NotaryMigrationSpec) GetMigrationContainer(ctx context.Context, storage
 		},
 		Env: migrationEnvs,
 	}, nil
+}
+
+func (r *NotaryMigrationSpec) GetMigrationSourceURL(ctx context.Context) (string, error) {
+	if r == nil {
+		return configstore.GetItemValue(NotaryMigrationSourceConfigKey)
+	}
+
+	secretSourceVariable := ""
+
+	if r.PasswordRef != "" {
+		secretSourceVariable = "$(secretSource)"
+	}
+
+	return r.GetDSNStringWithRawPassword(secretSourceVariable)
 }
 
 type NotaryHTTPSSpec struct {
