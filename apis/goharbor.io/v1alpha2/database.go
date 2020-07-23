@@ -1,5 +1,7 @@
 package v1alpha2
 
+const databaseComponentMaxName = 12
+
 //go:generate stringer -type=ComponentWithDatabase -linecomment
 type ComponentWithDatabase int
 
