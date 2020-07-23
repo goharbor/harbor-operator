@@ -133,12 +133,12 @@ type RegistryRedisPoolSpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=0
 	// +kubebuilder:default=3
-	MaxIdle int32 `json:"maxIdle,omitempty"`
+	MaxIdle *int32 `json:"maxIdle,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=0
 	// +kubebuilder:default=5
-	MaxActive int32 `json:"maxActive,omitempty"`
+	MaxActive *int32 `json:"maxActive,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="string"
@@ -327,7 +327,7 @@ type RegistryHealthStorageDriverSpec struct {
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=3
-	Threshold int32 `json:"threshold,omitempty"`
+	Threshold *int32 `json:"threshold,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="string"
@@ -371,12 +371,12 @@ type RegistryHealthHTTPSpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=0
 	// +kubebuilder:default=3
-	Threshold int32 `json:"threshold,omitempty"`
+	Threshold *int32 `json:"threshold,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=0
 	// +kubebuilder:default=200
-	StatusCode int32 `json:"statuscode,omitempty"`
+	StatusCode *int32 `json:"statuscode,omitempty"`
 }
 
 type RegistryHealthTCPSpec struct {
@@ -399,7 +399,7 @@ type RegistryHealthTCPSpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=0
 	// +kubebuilder:default=3
-	Threshold int32 `json:"threshold,omitempty"`
+	Threshold *int32 `json:"threshold,omitempty"`
 }
 
 type RegistryNotificationsSpec struct {
@@ -439,7 +439,7 @@ type RegistryNotificationEndpointSpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=0
 	// +kubebuilder:default=3
-	Threshold int32 `json:"threshold,omitempty"`
+	Threshold *int32 `json:"threshold,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="string"
