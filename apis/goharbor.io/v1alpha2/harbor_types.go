@@ -728,14 +728,14 @@ type HarborExposeNodePortPortsSpec struct {
 type HarborExposeNodePortPortsHTTPSpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=0
-	// +kubebuilder:validation:ExclusiveMaximum=true
+	// +kubebuilder:validation:ExclusiveMinimum=true
 	// +kubebuilder:default=80
 	// The service port Harbor listens on when serving with HTTP
 	Port int32 `json:"port,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=0
-	// +kubebuilder:validation:ExclusiveMaximum=true
+	// +kubebuilder:validation:ExclusiveMinimum=true
 	// +kubebuilder:default=30002
 	// The node port Harbor listens on when serving with HTTP
 	NodePort int32 `json:"nodePort,omitempty"`
@@ -744,14 +744,14 @@ type HarborExposeNodePortPortsHTTPSpec struct {
 type HarborExposeNodePortPortsHTTPSSpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=0
-	// +kubebuilder:validation:ExclusiveMaximum=true
+	// +kubebuilder:validation:ExclusiveMinimum=true
 	// +kubebuilder:default=443
 	// The service port Harbor listens on when serving with HTTPS
 	Port int32 `json:"port,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=0
-	// +kubebuilder:validation:ExclusiveMaximum=true
+	// +kubebuilder:validation:ExclusiveMinimum=true
 	// +kubebuilder:default=30003
 	// The node port Harbor listens on when serving with HTTPS
 	NodePort int32 `json:"nodePort,omitempty"`
@@ -760,14 +760,14 @@ type HarborExposeNodePortPortsHTTPSSpec struct {
 type HarborExposeNodePortPortsNotarySpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=0
-	// +kubebuilder:validation:ExclusiveMaximum=true
+	// +kubebuilder:validation:ExclusiveMinimum=true
 	// +kubebuilder:default=4443
 	// The service port Notary listens on
 	Port int32 `json:"port,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=0
-	// +kubebuilder:validation:ExclusiveMaximum=true
+	// +kubebuilder:validation:ExclusiveMinimum=true
 	// +kubebuilder:default=30004
 	// The node port Notary listens on
 	NodePort int32 `json:"nodePort,omitempty"`
@@ -786,21 +786,21 @@ type HarborExposeClusterIPSpec struct {
 type HarborExposePortsSpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=0
-	// +kubebuilder:validation:ExclusiveMaximum=true
+	// +kubebuilder:validation:ExclusiveMinimum=true
 	// +kubebuilder:default=80
 	// The service port Harbor listens on when serving with HTTP.
 	HTTPPort int32 `json:"httpPort,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=0
-	// +kubebuilder:validation:ExclusiveMaximum=true
+	// +kubebuilder:validation:ExclusiveMinimum=true
 	// +kubebuilder:default=443
 	// The service port Harbor listens on when serving with HTTPS.
 	HTTPSPort int32 `json:"httpsPort,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=0
-	// +kubebuilder:validation:ExclusiveMaximum=true
+	// +kubebuilder:validation:ExclusiveMinimum=true
 	// +kubebuilder:default=4443
 	// The service port Notary listens on.
 	// Only needed when notary is enabled.
