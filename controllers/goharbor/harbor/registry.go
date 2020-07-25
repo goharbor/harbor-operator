@@ -171,10 +171,7 @@ func (r *Reconciler) GetRegistry(ctx context.Context, harbor *goharborv1alpha2.H
 	authenticationSecretName := r.NormalizeName(ctx, harbor.GetName(), "registry", "basicauth")
 	httpSecretName := r.NormalizeName(ctx, harbor.GetName(), "registry", "http")
 
-	redisDSN, err := harbor.Spec.RedisDSN(goharborv1alpha2.RegistryRedis)
-	if err != nil {
-		return nil, errors.Wrap(err, "redis")
-	}
+	redisDSN := harbor.Spec.RedisDSN(goharborv1alpha2.RegistryRedis)
 
 	return &goharborv1alpha2.Registry{
 		ObjectMeta: metav1.ObjectMeta{
@@ -214,7 +211,7 @@ func (r *Reconciler) GetRegistry(ctx context.Context, harbor *goharborv1alpha2.H
 					Redirect: harbor.Spec.Persistence.ImageChartStorage.Redirect,
 				},
 				Redis: &goharborv1alpha2.RegistryRedisSpec{
-					OpacifiedDSN: *redisDSN,
+					OpacifiedDSN: redisDSN,
 				},
 			},
 		},

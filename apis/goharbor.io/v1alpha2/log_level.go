@@ -7,12 +7,11 @@ package v1alpha2
 type HarborLogLevel string
 
 const (
-	HarborDebug        HarborLogLevel = "debug"
-	HarborInfo         HarborLogLevel = "info"
-	HarborWarning      HarborLogLevel = "warning"
-	HarborError        HarborLogLevel = "error"
-	HarborFatal        HarborLogLevel = "fatal"
-	HarborDefaultLevel HarborLogLevel = HarborInfo
+	HarborDebug   HarborLogLevel = "debug"
+	HarborInfo    HarborLogLevel = "info"
+	HarborWarning HarborLogLevel = "warning"
+	HarborError   HarborLogLevel = "error"
+	HarborFatal   HarborLogLevel = "fatal"
 )
 
 // +kubebuilder:validation:Type=string
@@ -22,17 +21,16 @@ const (
 type CoreLogLevel string
 
 const (
-	CoreDebug        CoreLogLevel = "debug"
-	CoreInfo         CoreLogLevel = "info"
-	CoreWarning      CoreLogLevel = "warn"
-	CoreError        CoreLogLevel = "error"
-	CoreDefaultLevel CoreLogLevel = CoreInfo
+	CoreDebug   CoreLogLevel = "debug"
+	CoreInfo    CoreLogLevel = "info"
+	CoreWarning CoreLogLevel = "warn"
+	CoreError   CoreLogLevel = "error"
 )
 
 func (l HarborLogLevel) Core() CoreLogLevel {
 	switch l {
 	default:
-		return CoreDefaultLevel
+		return CoreInfo
 	case HarborDebug:
 		return CoreDebug
 	case HarborInfo:
@@ -51,17 +49,16 @@ func (l HarborLogLevel) Core() CoreLogLevel {
 type RegistryLogLevel string
 
 const (
-	RegistryDebug        RegistryLogLevel = "debug"
-	RegistryInfo         RegistryLogLevel = "info"
-	RegistryWarning      RegistryLogLevel = "warning"
-	RegistryError        RegistryLogLevel = "error"
-	RegistryDefaultLevel RegistryLogLevel = RegistryInfo
+	RegistryDebug   RegistryLogLevel = "debug"
+	RegistryInfo    RegistryLogLevel = "info"
+	RegistryWarning RegistryLogLevel = "warning"
+	RegistryError   RegistryLogLevel = "error"
 )
 
 func (l HarborLogLevel) Registry() RegistryLogLevel {
 	switch l {
 	default:
-		return RegistryDefaultLevel
+		return RegistryInfo
 	case HarborDebug:
 		return RegistryDebug
 	case HarborInfo:
@@ -78,18 +75,17 @@ func (l HarborLogLevel) Registry() RegistryLogLevel {
 type RegistryCtlLogLevel string
 
 const (
-	RegistryCtlDebug        RegistryCtlLogLevel = "debug"
-	RegistryCtlInfo         RegistryCtlLogLevel = "info"
-	RegistryCtlWarning      RegistryCtlLogLevel = "warning"
-	RegistryCtlError        RegistryCtlLogLevel = "error"
-	RegistryCtlFatal        RegistryCtlLogLevel = "fatal"
-	RegistryCtlDefaultLevel RegistryCtlLogLevel = RegistryCtlInfo
+	RegistryCtlDebug   RegistryCtlLogLevel = "debug"
+	RegistryCtlInfo    RegistryCtlLogLevel = "info"
+	RegistryCtlWarning RegistryCtlLogLevel = "warning"
+	RegistryCtlError   RegistryCtlLogLevel = "error"
+	RegistryCtlFatal   RegistryCtlLogLevel = "fatal"
 )
 
 func (l HarborLogLevel) RegistryCtl() RegistryCtlLogLevel {
 	switch l {
 	default:
-		return RegistryCtlDefaultLevel
+		return RegistryCtlInfo
 	case HarborDebug:
 		return RegistryCtlDebug
 	case HarborInfo:
