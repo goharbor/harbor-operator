@@ -72,6 +72,7 @@ type JobServiceCoreSpec struct {
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	SecretRef string `json:"secretRef"`
+
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Pattern=".+://.+"
 	URL string `json:"url"`
@@ -139,9 +140,7 @@ type JobServiceLoggerConfigSpec struct {
 	STDOUT *JobServiceLoggerConfigSTDOUTSpec `json:"stdout,omitempty"`
 }
 
-var (
-	errOneLoggerMustBeSpecified = errors.New("one of files, database or stdout must be specified")
-)
+var errOneLoggerMustBeSpecified = errors.New("one of files, database or stdout must be specified")
 
 func (r *JobServiceLoggerConfigSpec) Validate() error {
 	if len(r.Files) == 0 && r.Database == nil && r.STDOUT == nil {

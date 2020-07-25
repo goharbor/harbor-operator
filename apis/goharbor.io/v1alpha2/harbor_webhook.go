@@ -66,11 +66,6 @@ func (h *Harbor) Validate() error {
 	errs := h.Spec.HarborComponentsSpec.Database.Validate()
 	allErrs = append(allErrs, errs...)
 
-	err = h.Spec.HarborComponentsSpec.ValidateRedis()
-	if err != nil {
-		allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("redis"), h.Spec.Redis, err.Error()))
-	}
-
 	if len(allErrs) == 0 {
 		return nil
 	}
