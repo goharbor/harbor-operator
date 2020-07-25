@@ -119,9 +119,8 @@ type HarborComponentsSpec struct {
 	// +kubebuilder:validation:Optional
 	Notary *NotaryComponentSpec `json:"notary,omitempty"`
 
-	// +kubebuilder:validation:Optional
-	// If null, redis dsn must be specified for every components that need a redis.
-	Redis *ExternalRedisSpec `json:"redis,omitempty"`
+	// +kubebuilder:validation:Required
+	Redis ExternalRedisSpec `json:"redis"`
 
 	// +kubebuilder:validation:Required
 	Database ExternalDatabaseSpec `json:"database"`
@@ -164,30 +163,6 @@ func (r *ExternalDatabaseSpec) GetMaxDatabaseNameLength() (int, error) {
 	}
 
 	return int(value), nil
-}
-
-type MissingRedisSpecError struct {
-	Component string
-}
-
-func (m *MissingRedisSpecError) Error() string {
-	return fmt.Sprintf("%s has no redis specs", m.Component)
-}
-
-func (r *HarborComponentsSpec) ValidateRedis() error {
-	if r.Redis != nil {
-		return nil
-	}
-
-	if r.Core.Redis == nil {
-		return &MissingRedisSpecError{CoreRedis.String()}
-	}
-
-	if r.JobService.Redis == nil {
-		return &MissingRedisSpecError{JobServiceRedis.String()}
-	}
-
-	return nil
 }
 
 type NotaryComponentSpec struct {
@@ -280,42 +255,11 @@ func FromOpacifiedDSN(dsn OpacifiedDSN) (*ExternalDatabaseSpec, string, error) {
 	}, strings.Trim(dbURL.Path, "/"), nil
 }
 
-func (r *HarborComponentsSpec) RedisDSN(component ComponentWithRedis) (*OpacifiedDSN, error) {
-	switch component {
-	case CoreRedis:
-		if r.Core.Redis != nil {
-			return r.Core.Redis, nil
-		}
-	case JobServiceRedis:
-		if r.JobService.Redis != nil {
-			return r.JobService.Redis, nil
-		}
-	case RegistryRedis:
-		if r.Registry.Redis != nil {
-			return r.Registry.Redis, nil
-		}
-	case ChartMuseumRedis:
-		if r.ChartMuseum.Redis != nil {
-			return r.ChartMuseum.Redis, nil
-		}
-	case ClairRedis:
-		if r.Clair.Redis != nil {
-			return r.Clair.Redis, nil
-		}
-	case TrivyRedis:
-		if r.Trivy.Redis != nil {
-			return r.Trivy.Redis, nil
-		}
-	}
-
-	if r.Redis == nil {
-		return nil, &MissingRedisSpecError{component.String()}
-	}
-
-	return &OpacifiedDSN{
+func (r *HarborComponentsSpec) RedisDSN(component ComponentWithRedis) OpacifiedDSN {
+	return OpacifiedDSN{
 		DSN:         fmt.Sprintf("redis://%s:%d/%d", r.Redis.Address, r.Redis.Port, component.Index()),
 		PasswordRef: r.Redis.PasswordRef,
-	}, nil
+	}
 }
 
 type CoreComponentSpec struct {
@@ -323,18 +267,10 @@ type CoreComponentSpec struct {
 
 	// +kubebuilder:validation:Required
 	TokenIssuer cmmeta.ObjectReference `json:"tokenIssuer,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	// One of core redis dsn or global redis component must be specified
-	Redis *OpacifiedDSN `json:"redis,omitempty"`
 }
 
 type JobServiceComponentSpec struct {
 	ComponentSpec `json:",inline"`
-
-	// +kubebuilder:validation:Optional
-	// One of jobservice redis dsn or global redis component must be specified
-	Redis *OpacifiedDSN `json:"redis,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=1
@@ -351,34 +287,18 @@ type RegistryComponentSpec struct {
 
 	// +kubebuilder:validation:Optional
 	StorageMiddlewares []RegistryMiddlewareSpec `json:"storageMiddlewares,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	// One of redis dsn or redis component must be specified
-	Redis *OpacifiedDSN `json:"redis,omitempty"`
 }
 
 type ChartMuseumComponentSpec struct {
 	ComponentSpec `json:",inline"`
-
-	// +kubebuilder:validation:Optional
-	// One of chartmuseum redis dsn or global redis component must be specified
-	Redis *OpacifiedDSN `json:"redis,omitempty"`
 }
 
 type ClairComponentSpec struct {
 	ComponentSpec `json:",inline"`
-
-	// +kubebuilder:validation:Optional
-	// One of clair redis dsn or global redis component must be specified
-	Redis *OpacifiedDSN `json:"redis,omitempty"`
 }
 
 type TrivyComponentSpec struct {
 	ComponentSpec `json:",inline"`
-
-	// +kubebuilder:validation:Optional
-	// One of trivy redis dsn or global redis component must be specified
-	Redis *OpacifiedDSN `json:"redis,omitempty"`
 }
 
 type HarborPersistenceSpec struct {
