@@ -7,9 +7,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
-var (
-	loggerContext = "logger"
-)
+var loggerContext = "logger"
 
 func Get(ctx context.Context) logr.Logger {
 	l := ctx.Value(&loggerContext)
