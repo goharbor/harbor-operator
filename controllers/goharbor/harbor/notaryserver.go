@@ -54,7 +54,7 @@ func (r *Reconciler) GetNotaryServer(ctx context.Context, harbor *goharborv1alph
 
 	serviceTokenURL, err := url.Parse(harbor.Spec.ExternalURL)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot parseexternalURL")
+		return nil, errors.Wrap(err, "cannot parse externalURL")
 	}
 
 	serviceTokenURL.Path += "/service/token"

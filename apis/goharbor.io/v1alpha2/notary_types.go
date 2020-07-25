@@ -117,9 +117,7 @@ type NotaryStorageSpec struct {
 	Type string `json:"type"`
 }
 
-var (
-	errNotImplemented = errors.New("not yet implemented")
-)
+var errNotImplemented = errors.New("not yet implemented")
 
 func (n *NotaryStorageSpec) GetPasswordFieldKey() (string, error) {
 	switch n.Type {

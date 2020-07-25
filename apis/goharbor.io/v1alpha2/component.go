@@ -2,10 +2,47 @@ package v1alpha2
 
 import (
 	"encoding/json"
+	"math"
 
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/kustomize/kstatus/status"
 )
+
+//go:generate stringer -type=Component -linecomment
+type Component int
+
+const (
+	CoreComponent               Component = iota // core
+	JobServiceComponent                          // jobservice
+	PortalComponent                              // portal
+	RegistryComponent                            // registry
+	RegistryControllerComponent                  // registryctl
+	ChartMuseumComponent                         // chartmuseum
+	NotaryServerComponent                        // notaryserver
+	NotarySignerComponent                        // notarysigner
+	ClairComponent                               // clair
+	TrivyComponent                               // trivy
+
+	componentCount
+)
+
+func GetLargestComponentNameSize() int {
+	max := len(Component(math.MaxInt64).String())
+
+	size := len(Component(math.MinInt64).String())
+	if size > max {
+		max = size
+	}
+
+	for i := 0; i < int(componentCount); i++ {
+		size := len(Component(i).String())
+		if size > max {
+			max = size
+		}
+	}
+
+	return max
+}
 
 type ComponentSpec struct {
 	// +kubebuilder:validation:Optional

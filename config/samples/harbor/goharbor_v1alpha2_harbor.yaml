@@ -17,10 +17,7 @@ spec:
         nginx.ingress.kubernetes.io/proxy-body-size: "0"
   encryptionKeyRef: core-database-encryption
   portal: {}
-  registry:
-    redis:
-      dsn: redis://admin@harbor-redis-master:6379/2
-      passwordRef: harbor-redis
+  registry: {}
   core:
     tokenIssuer:
       name: service-token
