@@ -7,9 +7,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-var (
-	ownerContext = "owner"
-)
+var ownerContext = "owner"
 
 type Owner interface {
 	runtime.Object

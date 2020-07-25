@@ -1,19 +1,27 @@
 package v1alpha2
 
-//go:generate stringer -type=ComponentWithRedis -linecomment
-type ComponentWithRedis int
+type ComponentWithRedis Component
 
 const (
-	// Order matters since the iota value
-	// is the default redis index to use.
-	CoreRedis        ComponentWithRedis = iota // core
-	JobServiceRedis                            // jobservice
-	RegistryRedis                              // registry
-	ChartMuseumRedis                           // chartmuseum
-	ClairRedis                                 // clair
-	TrivyRedis                                 // trivy
+	CoreRedis        = ComponentWithRedis(CoreComponent)
+	JobServiceRedis  = ComponentWithRedis(JobServiceComponent)
+	RegistryRedis    = ComponentWithRedis(RegistryComponent)
+	ChartMuseumRedis = ComponentWithRedis(ChartMuseumComponent)
+	ClairRedis       = ComponentWithRedis(ClairComponent)
+	TrivyRedis       = ComponentWithRedis(TrivyComponent)
 )
 
 func (r ComponentWithRedis) Index() int {
-	return int(r)
+	return map[ComponentWithRedis]int{
+		CoreRedis:        0,
+		JobServiceRedis:  1,
+		RegistryRedis:    2, // nolint:gomnd
+		ChartMuseumRedis: 3, // nolint:gomnd
+		ClairRedis:       4, // nolint:gomnd
+		TrivyRedis:       5, // nolint:gomnd
+	}[r]
+}
+
+func (r ComponentWithRedis) String() string {
+	return Component(r).String()
 }

@@ -308,15 +308,9 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1alpha2.Harbo
 
 	dbDSN := harbor.Spec.Database.GetOpacifiedDSN(goharborv1alpha2.CoreDatabase)
 
-	registryRedisDSN, err := harbor.Spec.RedisDSN(goharborv1alpha2.RegistryRedis)
-	if err != nil {
-		return nil, errors.Wrap(err, "redis")
-	}
+	registryRedisDSN := harbor.Spec.RedisDSN(goharborv1alpha2.RegistryRedis)
 
-	coreRedisDSN, err := harbor.Spec.RedisDSN(goharborv1alpha2.CoreRedis)
-	if err != nil {
-		return nil, errors.Wrap(err, "redis")
-	}
+	coreRedisDSN := harbor.Spec.RedisDSN(goharborv1alpha2.CoreRedis)
 
 	return &goharborv1alpha2.Core{
 		ObjectMeta: metav1.ObjectMeta{
@@ -330,7 +324,7 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1alpha2.Harbo
 					URL:                 registryURL,
 					ControllerURL:       registryCtlURL,
 					Credentials:         credentials,
-					Redis:               registryRedisDSN,
+					Redis:               &registryRedisDSN,
 					StorageProviderName: harbor.Spec.Persistence.ImageChartStorage.Name(),
 				},
 				JobService: goharborv1alpha2.CoreComponentsJobServiceSpec{
@@ -356,7 +350,7 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1alpha2.Harbo
 			},
 			ExternalEndpoint: harbor.Spec.ExternalURL,
 			Redis: goharborv1alpha2.CoreRedisSpec{
-				OpacifiedDSN: *coreRedisDSN,
+				OpacifiedDSN: coreRedisDSN,
 			},
 			Proxy: harbor.Spec.Proxy,
 		},
