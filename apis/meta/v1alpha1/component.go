@@ -53,19 +53,19 @@ type ComponentSpec struct {
 	// Replicas is the number of desired replicas.
 	// This is a pointer to distinguish between explicit zero and unspecified.
 	// More info: https://kubernetes.io/docs/concepts/workloads/controllers/replicationcontroller#what-is-a-replicationcontroller
-	Replicas *int32 `json:"replicas,omitempty" protobuf:"varint,1,opt,name=replicas"`
+	Replicas *int32 `json:"replicas,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// ServiceAccountName is the name of the ServiceAccount to use to run this component.
 	// More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
-	ServiceAccountName string `json:"serviceAccountName,omitempty" protobuf:"bytes,8,opt,name=serviceAccountName"`
+	ServiceAccountName string `json:"serviceAccountName,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Enum={"Always","Never","IfNotPresent"}
 	// +kubebuilder:default="IfNotPresent"
 	// Image pull policy.
 	// More info: https://kubernetes.io/docs/concepts/containers/images#updating-images
-	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy,omitempty" protobuf:"bytes,14,opt,name=imagePullPolicy,casttype=PullPolicy"`
+	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +listType:map
@@ -76,17 +76,17 @@ type ComponentSpec struct {
 	// NodeSelector is a selector which must be true for the component to fit on a node.
 	// Selector which must match a node's labels for the pod to be scheduled on that node.
 	// More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
-	NodeSelector map[string]string `json:"nodeSelector,omitempty" protobuf:"bytes,7,rep,name=nodeSelector"`
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// If specified, the pod's tolerations.
-	Tolerations []corev1.Toleration `json:"tolerations,omitempty" protobuf:"bytes,22,opt,name=tolerations"`
+	Tolerations []corev1.Toleration `json:"tolerations,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// Compute Resources required by this component.
 	// Cannot be updated.
 	// More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
-	Resources corev1.ResourceRequirements `json:"resources,omitempty" protobuf:"bytes,8,opt,name=resources"`
+	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 }
 
 // +kubebuilder:validation:Type=object
