@@ -51,6 +51,9 @@ GO4CONTROLLERGEN_SOURCES    := $(sort $(shell grep -l '// +' -- $(GONOGENERATED_
 
 ########
 
+TMPDIR ?= /tmp/
+export TMPDIR
+
 .PHONY: all clean
 all: manager
 
