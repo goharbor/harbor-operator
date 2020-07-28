@@ -14,7 +14,6 @@ import (
 
 var (
 	varFalse = false
-	varTrue  = true
 )
 
 const (
