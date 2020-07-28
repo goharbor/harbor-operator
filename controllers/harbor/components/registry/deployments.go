@@ -276,6 +276,17 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 									}, {
 										Name:  "REGISTRY_LOG_FIELDS_HARBOR",
 										Value: harborName,
+									}, {
+										Name: "REGISTRY_HTTP_SECRET",
+										ValueFrom: &corev1.EnvVarSource{
+											SecretKeyRef: &corev1.SecretKeySelector{
+												Key:      "REGISTRY_HTTP_SECRET",
+												Optional: &varFalse,
+												LocalObjectReference: corev1.LocalObjectReference{
+													Name: r.harbor.NormalizeComponentName(goharborv1alpha1.RegistryName),
+												},
+											},
+										},
 									},
 								},
 								ImagePullPolicy: corev1.PullAlways,
