@@ -153,9 +153,7 @@ func (c *Controller) SetControllerStatus(ctx context.Context, data map[string]in
 	return nil
 }
 
-var (
-	errNoGeneration = errors.New("no $.metadata.generation found")
-)
+var errNoGeneration = errors.New("no $.metadata.generation found")
 
 func (c *Controller) preUpdateObservedGeneration(ctx context.Context, data map[string]interface{}) (bool, error) {
 	generation, found, err := unstructured.NestedInt64(data, "metadata", "generation")

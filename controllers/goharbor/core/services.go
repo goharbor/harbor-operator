@@ -10,10 +10,6 @@ import (
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 )
 
-const (
-	PublicPort = 80
-)
-
 func (r *Reconciler) GetService(ctx context.Context, core *goharborv1alpha2.Core) (*corev1.Service, error) {
 	name := r.NormalizeName(ctx, core.GetName())
 	namespace := core.GetNamespace()
@@ -24,15 +20,18 @@ func (r *Reconciler) GetService(ctx context.Context, core *goharborv1alpha2.Core
 			Namespace: namespace,
 		},
 		Spec: corev1.ServiceSpec{
-			Ports: []corev1.ServicePort{
-				{
-					Port:       PublicPort,
-					TargetPort: intstr.FromInt(port),
-				},
-			},
+			Ports: []corev1.ServicePort{{
+				Name:       goharborv1alpha2.CoreHTTPPortName,
+				Port:       goharborv1alpha2.HTTPPort,
+				TargetPort: intstr.FromString(goharborv1alpha2.CoreHTTPPortName),
+			}, {
+				Name:       goharborv1alpha2.CoreHTTPSPortName,
+				Port:       goharborv1alpha2.HTTPSPort,
+				TargetPort: intstr.FromString(goharborv1alpha2.CoreHTTPSPortName),
+			}},
 			Selector: map[string]string{
-				"core.goharbor.io/name":      name,
-				"core.goharbor.io/namespace": namespace,
+				r.Label("name"):      name,
+				r.Label("namespace"): namespace,
 			},
 		},
 	}, nil

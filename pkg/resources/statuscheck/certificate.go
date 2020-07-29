@@ -26,3 +26,15 @@ func CertificateCheck(ctx context.Context, object runtime.Object) (bool, error) 
 
 	return false, nil
 }
+
+func IssuerCheck(ctx context.Context, object runtime.Object) (bool, error) {
+	issuer := object.(*certv1.Issuer)
+
+	for _, condition := range issuer.Status.Conditions {
+		if condition.Type == certv1.IssuerConditionReady {
+			return condition.Status == cmmeta.ConditionTrue, nil
+		}
+	}
+
+	return false, nil
+}

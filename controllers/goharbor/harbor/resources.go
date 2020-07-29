@@ -20,22 +20,27 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return serrors.UnrecoverrableError(errors.Errorf("%+v", resource), serrors.OperatorReason, "unable to add resource")
 	}
 
-	registryAuthSecret, registryHTTPSecret, err := r.AddRegistryConfigurations(ctx, harbor)
+	_, _, internalTLSIssuer, err := r.AddInternalTLSIssuer(ctx, harbor)
+	if err != nil {
+		return errors.Wrap(err, "cannot add internal TLS issuer")
+	}
+
+	registryCertificate, registryAuthSecret, registryHTTPSecret, err := r.AddRegistryConfigurations(ctx, harbor, internalTLSIssuer)
 	if err != nil {
 		return errors.Wrap(err, "cannot add registry configuration")
 	}
 
-	coreCSRF, coreTokenCertificate, coreSecret, coreAdminPassword, coreEncryptionKey, err := r.AddCoreConfigurations(ctx, harbor)
+	coreCertificate, coreCSRF, coreTokenCertificate, coreSecret, coreAdminPassword, coreEncryptionKey, err := r.AddCoreConfigurations(ctx, harbor, internalTLSIssuer)
 	if err != nil {
 		return errors.Wrap(err, "cannot add core configuration")
 	}
 
-	jobServiceSecret, err := r.AddJobServiceConfigurations(ctx, harbor)
+	jobServiceCertificate, jobServiceSecret, err := r.AddJobServiceConfigurations(ctx, harbor, internalTLSIssuer)
 	if err != nil {
 		return errors.Wrap(err, "cannot add core configuration")
 	}
 
-	chartMuseumAuthSecret, err := r.AddChartMuseumConfigurations(ctx, harbor)
+	chartMuseumCertificate, chartMuseumAuthSecret, err := r.AddChartMuseumConfigurations(ctx, harbor, internalTLSIssuer)
 	if err != nil {
 		return errors.Wrap(err, "cannot add core configuration")
 	}
@@ -45,32 +50,32 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrap(err, "cannot add core configuration")
 	}
 
-	registry, err := r.AddRegistry(ctx, harbor, registryAuthSecret, registryHTTPSecret)
+	registry, err := r.AddRegistry(ctx, harbor, registryCertificate, registryAuthSecret, registryHTTPSecret)
 	if err != nil {
 		return errors.Wrap(err, "cannot add registry")
 	}
 
-	_, err = r.AddRegistryController(ctx, harbor, registry)
+	_, _, err = r.AddRegistryController(ctx, harbor, registry, internalTLSIssuer)
 	if err != nil {
 		return errors.Wrap(err, "cannot add registry")
 	}
 
-	core, err := r.AddCore(ctx, harbor, registryAuthSecret, chartMuseumAuthSecret, coreCSRF, coreTokenCertificate, coreSecret, coreAdminPassword, coreEncryptionKey)
+	core, err := r.AddCore(ctx, harbor, coreCertificate, registryAuthSecret, chartMuseumAuthSecret, coreCSRF, coreTokenCertificate, coreSecret, coreAdminPassword, coreEncryptionKey)
 	if err != nil {
 		return errors.Wrap(err, "cannot add core")
 	}
 
-	_, err = r.AddJobService(ctx, harbor, core, coreSecret, jobServiceSecret)
+	_, err = r.AddJobService(ctx, harbor, core, jobServiceCertificate, coreSecret, jobServiceSecret)
 	if err != nil {
 		return errors.Wrap(err, "cannot add jobservice")
 	}
 
-	portal, err := r.AddPortal(ctx, harbor)
+	_, portal, err := r.AddPortal(ctx, harbor, internalTLSIssuer)
 	if err != nil {
 		return errors.Wrap(err, "cannot add portal")
 	}
 
-	_, err = r.AddChartMuseum(ctx, harbor)
+	_, err = r.AddChartMuseum(ctx, harbor, chartMuseumCertificate)
 	if err != nil {
 		return errors.Wrap(err, "cannot add chartmuseum")
 	}

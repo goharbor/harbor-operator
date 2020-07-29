@@ -2,7 +2,6 @@ package harbor
 
 import (
 	"context"
-	"fmt"
 	"net/url"
 	"time"
 
@@ -11,6 +10,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 	"github.com/pkg/errors"
 	"github.com/sethvargo/go-password/password"
@@ -96,44 +96,65 @@ func (r *Reconciler) AddCoreEncryptionKey(ctx context.Context, harbor *goharborv
 	return CoreEncryptionKey(encryptionKeyRes), nil
 }
 
-func (r *Reconciler) AddCoreConfigurations(ctx context.Context, harbor *goharborv1alpha2.Harbor) (CoreCSRF, CoreTokenCertificate, CoreSecret, CoreAdminPassword, CoreEncryptionKey, error) {
+type CoreInternalCertificate graph.Resource
+
+func (r *Reconciler) AddCoreInternalCertificate(ctx context.Context, harbor *goharborv1alpha2.Harbor, tlsIssuer InternalTLSIssuer) (CoreInternalCertificate, error) {
+	cert, err := r.GetInternalTLSCertificate(ctx, harbor, goharborv1alpha2.CoreTLS)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot get TLS certificate")
+	}
+
+	certRes, err := r.Controller.AddCertificateToManage(ctx, cert, tlsIssuer)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot add TLS certificate")
+	}
+
+	return CoreInternalCertificate(certRes), nil
+}
+
+func (r *Reconciler) AddCoreConfigurations(ctx context.Context, harbor *goharborv1alpha2.Harbor, tlsIssuer InternalTLSIssuer) (CoreInternalCertificate, CoreCSRF, CoreTokenCertificate, CoreSecret, CoreAdminPassword, CoreEncryptionKey, error) {
+	certificate, err := r.AddCoreInternalCertificate(ctx, harbor, tlsIssuer)
+	if err != nil {
+		return nil, nil, nil, nil, nil, nil, errors.Wrap(err, "certificate")
+	}
+
 	csrf, err := r.AddCoreCSRF(ctx, harbor)
 	if err != nil {
-		return nil, nil, nil, nil, nil, errors.Wrap(err, "csrf")
+		return nil, nil, nil, nil, nil, nil, errors.Wrap(err, "csrf")
 	}
 
 	secret, err := r.AddCoreSecret(ctx, harbor)
 	if err != nil {
-		return nil, nil, nil, nil, nil, errors.Wrap(err, "secret")
+		return nil, nil, nil, nil, nil, nil, errors.Wrap(err, "secret")
 	}
 
 	tokenCertificate, err := r.AddCoreTokenCertificate(ctx, harbor)
 	if err != nil {
-		return nil, nil, nil, nil, nil, errors.Wrap(err, "secret")
+		return nil, nil, nil, nil, nil, nil, errors.Wrap(err, "secret")
 	}
 
 	adminPassword, err := r.AddCoreAdminPassword(ctx, harbor)
 	if err != nil {
-		return nil, nil, nil, nil, nil, errors.Wrap(err, "admin password")
+		return nil, nil, nil, nil, nil, nil, errors.Wrap(err, "admin password")
 	}
 
 	encryptionKey, err := r.AddCoreEncryptionKey(ctx, harbor)
 	if err != nil {
-		return nil, nil, nil, nil, nil, errors.Wrap(err, "encryption key")
+		return nil, nil, nil, nil, nil, nil, errors.Wrap(err, "encryption key")
 	}
 
-	return csrf, tokenCertificate, secret, adminPassword, encryptionKey, nil
+	return certificate, csrf, tokenCertificate, secret, adminPassword, encryptionKey, nil
 }
 
 type Core graph.Resource
 
-func (r *Reconciler) AddCore(ctx context.Context, harbor *goharborv1alpha2.Harbor, registryAuth RegistryAuthSecret, chartMuseumAuth ChartMuseumAuthSecret, csrf CoreCSRF, tokenCertificate CoreTokenCertificate, secret CoreSecret, adminPassword CoreAdminPassword, encryptionKey CoreEncryptionKey) (Core, error) {
+func (r *Reconciler) AddCore(ctx context.Context, harbor *goharborv1alpha2.Harbor, coreCertificate CoreInternalCertificate, registryAuth RegistryAuthSecret, chartMuseumAuth ChartMuseumAuthSecret, csrf CoreCSRF, tokenCertificate CoreTokenCertificate, secret CoreSecret, adminPassword CoreAdminPassword, encryptionKey CoreEncryptionKey) (Core, error) {
 	core, err := r.GetCore(ctx, harbor)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot get core")
 	}
 
-	coreRes, err := r.AddBasicResource(ctx, core, registryAuth, chartMuseumAuth, csrf, tokenCertificate, secret, adminPassword, encryptionKey)
+	coreRes, err := r.AddBasicResource(ctx, core, coreCertificate, registryAuth, chartMuseumAuth, csrf, tokenCertificate, secret, adminPassword, encryptionKey)
 
 	return Core(coreRes), errors.Wrap(err, "cannot add basic resource")
 }
@@ -291,26 +312,57 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1alpha2.Harbo
 
 	credentials := goharborv1alpha2.CoreComponentsRegistryCredentialsSpec{
 		Username:    RegistryAuthenticationUsername,
-		PasswordRef: r.NormalizeName(ctx, harbor.GetName(), "registry", "basicauth"),
+		PasswordRef: r.NormalizeName(ctx, harbor.GetName(), controllers.Registry.String(), "basicauth"),
 	}
 
-	registryCtlURL := fmt.Sprintf("http://%s", r.NormalizeName(ctx, harbor.GetName(), "registryctl"))
-	registryURL := fmt.Sprintf("http://%s", r.NormalizeName(ctx, harbor.GetName(), "registry"))
-	portalURL := fmt.Sprintf("http://%s", r.NormalizeName(ctx, harbor.GetName(), "portal"))
-	adminPasswordRef := r.NormalizeName(ctx, harbor.GetName(), "core", "admin-password")
-	coreSecretRef := r.NormalizeName(ctx, harbor.GetName(), "core", "secret")
-	encryptionKeyRef := r.NormalizeName(ctx, harbor.GetName(), "core", "encryptionkey")
-	csrfRef := r.NormalizeName(ctx, harbor.GetName(), "core", "csrf")
-	jobserviceURL := fmt.Sprintf("http://%s", r.NormalizeName(ctx, harbor.GetName(), "jobservice"))
-	jobserviceSecretRef := r.NormalizeName(ctx, harbor.GetName(), "jobservice", "secret")
-	tokenServiceURL := fmt.Sprintf("http://%s", fmt.Sprintf("%s/service/token", r.NormalizeName(ctx, harbor.GetName(), "core")))
-	tokenCertificateRef := r.NormalizeName(ctx, harbor.GetName(), "core", "tokencert")
+	registryCtlURL := (&url.URL{
+		Scheme: harbor.Spec.InternalTLS.GetScheme(),
+		Host:   r.NormalizeName(ctx, harbor.GetName(), controllers.RegistryController.String()),
+	}).String()
+	registryURL := (&url.URL{
+		Scheme: harbor.Spec.InternalTLS.GetScheme(),
+		Host:   r.NormalizeName(ctx, harbor.GetName(), controllers.Registry.String()),
+	}).String()
+	portalURL := (&url.URL{
+		Scheme: harbor.Spec.InternalTLS.GetScheme(),
+		Host:   r.NormalizeName(ctx, harbor.GetName(), controllers.Portal.String()),
+	}).String()
+
+	var chartmuseum *goharborv1alpha2.CoreComponentsChartRepositorySpec
+
+	if harbor.Spec.ChartMuseum != nil {
+		chartmuseumURL := (&url.URL{
+			Scheme: harbor.Spec.InternalTLS.GetScheme(),
+			Host:   r.NormalizeName(ctx, harbor.GetName(), controllers.ChartMuseum.String()),
+		}).String()
+		chartmuseum = &goharborv1alpha2.CoreComponentsChartRepositorySpec{
+			URL: chartmuseumURL,
+		}
+	}
+
+	adminPasswordRef := r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String(), "admin-password")
+	coreSecretRef := r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String(), "secret")
+	encryptionKeyRef := r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String(), "encryptionkey")
+	csrfRef := r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String(), "csrf")
+	jobserviceURL := (&url.URL{
+		Scheme: harbor.Spec.InternalTLS.GetScheme(),
+		Host:   r.NormalizeName(ctx, harbor.GetName(), controllers.JobService.String()),
+	}).String()
+	jobserviceSecretRef := r.NormalizeName(ctx, harbor.GetName(), controllers.JobService.String(), "secret")
+	tokenServiceURL := (&url.URL{
+		Scheme: harbor.Spec.InternalTLS.GetScheme(),
+		Host:   r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String()),
+		Path:   "/service/token",
+	}).String()
+	tokenCertificateRef := r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String(), "tokencert")
 
 	dbDSN := harbor.Spec.Database.GetOpacifiedDSN(goharborv1alpha2.CoreDatabase)
 
 	registryRedisDSN := harbor.Spec.RedisDSN(goharborv1alpha2.RegistryRedis)
 
 	coreRedisDSN := harbor.Spec.RedisDSN(goharborv1alpha2.CoreRedis)
+
+	tls := harbor.Spec.InternalTLS.GetComponentTLSSpec(r.GetInternalTLSCertificateSecretName(ctx, harbor, goharborv1alpha2.CoreTLS))
 
 	return &goharborv1alpha2.Core{
 		ObjectMeta: metav1.ObjectMeta{
@@ -334,10 +386,12 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1alpha2.Harbo
 				Portal: goharborv1alpha2.CoreComponentPortalSpec{
 					URL: portalURL,
 				},
+				ChartRepository: chartmuseum,
 				TokenService: goharborv1alpha2.CoreComponentsTokenServiceSpec{
 					URL:            tokenServiceURL,
 					CertificateRef: tokenCertificateRef,
 				},
+				TLS: tls,
 			},
 			CoreConfig: goharborv1alpha2.CoreConfig{
 				AdminInitialPasswordRef: adminPasswordRef,

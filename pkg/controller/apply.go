@@ -12,6 +12,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
+	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	"github.com/goharbor/harbor-operator/pkg/resources/checksum"
 )
@@ -50,6 +51,10 @@ func (c *Controller) apply(ctx context.Context, res *Resource) (controllerutil.O
 				retry.Go(f)
 
 				return nil
+			}
+
+			if apierrs.IsForbidden(err) {
+				return serrors.RetryLaterError(err, "dependencyStatus", err.Error())
 			}
 
 			// TODO Check if the error is a temporary error or a unrecoverrable one

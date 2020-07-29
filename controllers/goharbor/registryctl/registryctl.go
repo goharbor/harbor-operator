@@ -11,6 +11,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 
+	"github.com/goharbor/harbor-operator/controllers/goharbor/registry"
 	"github.com/goharbor/harbor-operator/pkg/config"
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
 	"github.com/goharbor/harbor-operator/pkg/event-filter/class"
@@ -29,7 +30,7 @@ const (
 
 // Reconciler reconciles a RegistryController object.
 type Reconciler struct {
-	*commonCtrl.Controller
+	registry.Reconciler
 }
 
 // +kubebuilder:rbac:groups=goharbor.io,resources=registrycontrollers,verbs=get;list;watch
@@ -87,7 +88,7 @@ func New(ctx context.Context, name string, configStore *configstore.Store) (comm
 
 	r := &Reconciler{}
 
-	r.Controller = commonCtrl.NewController(ctx, name, r, configStore)
+	r.Reconciler.Controller = commonCtrl.NewController(ctx, name, r, configStore)
 
 	return r, nil
 }

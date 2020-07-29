@@ -2,7 +2,6 @@ package portal
 
 import (
 	"context"
-	"time"
 
 	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
@@ -14,12 +13,15 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/config"
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
 	"github.com/goharbor/harbor-operator/pkg/event-filter/class"
+	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 )
 
 const (
-	DefaultRequeueWait = 2 * time.Second
-	ConfigImageKey     = "docker-image"
-	DefaultImage       = "goharbor/harbor-portal:v2.0.0"
+	ConfigTemplatePathKey     = "template-path"
+	DefaultConfigTemplatePath = "/etc/harbor-operator/portal-config.conf.tmpl"
+	ConfigTemplateKey         = "template-content"
+	ConfigImageKey            = "docker-image"
+	DefaultImage              = "goharbor/harbor-portal:v2.0.0"
 )
 
 // Reconciler reconciles a Portal object.
@@ -62,6 +64,23 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 }
 
 func New(ctx context.Context, name string, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
+	configTemplatePath, err := configStore.GetItemValue(ConfigTemplatePathKey)
+	if err != nil {
+		if _, ok := err.(configstore.ErrItemNotFound); !ok {
+			return nil, errors.Wrap(err, "cannot get config template path")
+		}
+
+		configTemplatePath = DefaultConfigTemplatePath
+	}
+
+	l := logger.Get(ctx).WithName("controller").WithName(name)
+
+	configStore.FileCustomRefresh(configTemplatePath, func(data []byte) ([]configstore.Item, error) {
+		l.Info("config reloaded", "path", configTemplatePath)
+		// TODO reconcile all core
+		return []configstore.Item{configstore.NewItem(ConfigTemplateKey, string(data), config.DefaultPriority)}, nil
+	})
+
 	r := &Reconciler{}
 
 	r.Controller = commonCtrl.NewController(ctx, name, r, configStore)

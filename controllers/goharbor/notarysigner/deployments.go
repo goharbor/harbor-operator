@@ -21,9 +21,7 @@ const (
 	HTTPSCertificatePath = ConfigPath + "/certificates"
 )
 
-var (
-	varFalse = false
-)
+var varFalse = false
 
 func (r *Reconciler) GetDeployment(ctx context.Context, notary *goharborv1alpha2.NotarySigner) (*appsv1.Deployment, error) { // nolint:funlen
 	image, err := r.GetImage(ctx)
