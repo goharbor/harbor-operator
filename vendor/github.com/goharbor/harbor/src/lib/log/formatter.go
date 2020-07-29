@@ -1,4 +1,4 @@
-// Copyright 2020 Google LLC. All Rights Reserved.
+// Copyright Project Harbor Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,15 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package openapi_v2
+package log
 
-import "github.com/googleapis/gnostic/compiler"
-
-// ParseDocument reads an OpenAPI v2 description from a YAML/JSON representation.
-func ParseDocument(b []byte) (*Document, error) {
-	info, err := compiler.ReadInfoFromBytes("", b)
-	if err != nil {
-		return nil, err
-	}
-	return NewDocument(info.Content[0], compiler.NewContextWithExtensions("$root", nil, nil))
+// Formatter formats records in different ways: text, json, etc.
+type Formatter interface {
+	Format(*Record) ([]byte, error)
 }
