@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"path"
 	"time"
 
@@ -17,29 +18,29 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/config/harbor"
 )
 
-var (
-	varFalse = false
+var varFalse = false
+
+const (
+	healthCheckPeriod                     = 90 * time.Second
+	ConfigPath                            = "/etc/core"
+	VolumeName                            = "configuration"
+	InternalCertificatesVolumeName        = "internal-certificates"
+	InternalCertificateAuthorityDirectory = "/harbor_cust_cert"
+	InternalCertificatesPath              = ConfigPath + "/ssl"
+	PublicCertificateVolumeName           = "ca-download"
+	PublicCertificatePath                 = ConfigPath + "/ca"
+	EncryptionKeyVolumeName               = "encryption"
+	EncryptionKeyPath                     = "key"
+	HealthPath                            = "/api/v2.0/ping"
+	TokenStorageVolumeName                = "psc"
+	TokenStoragePath                      = ConfigPath + "/token"
+	ServiceTokenCertificateVolumeName     = "token-service-private-key"
+	ServiceTokenCertificatePath           = ConfigPath + "private_key.pem"
 )
 
 const (
-	port = 8080 // https://github.com/goharbor/harbor/blob/2fb1cc89d9ef9313842cc68b4b7c36be73681505/src/common/const.go#L127
-
-	healthCheckPeriod                 = 90 * time.Second
-	ConfigPath                        = "/etc/core"
-	VolumeName                        = "configuration"
-	InternalCertificatesVolumeName    = "internal-certificates"
-	InternalCertificatesPath          = ConfigPath + "/internal-certificates"
-	PublicCertificateVolumeName       = "ca-download"
-	PublicCertificatePath             = ConfigPath + "/ca"
-	CertificatesVolumeName            = "certificates"
-	CertificatesPath                  = ConfigPath + "/certificates"
-	EncryptionKeyVolumeName           = "encryption"
-	EncryptionKeyPath                 = "key"
-	HealthPath                        = "/api/v2.0/ping"
-	TokenStorageVolumeName            = "psc"
-	TokenStoragePath                  = ConfigPath + "/token"
-	ServiceTokenCertificateVolumeName = "token-service-private-key"
-	ServiceTokenCertificatePath       = ConfigPath + "private_key.pem"
+	httpsPort = 8443 // https://github.com/goharbor/harbor/blob/46d7434d0b0e647d4638e69693d4eddf50841ccb/src/core/main.go#L215
+	httpPort  = 8080 // https://github.com/goharbor/harbor/blob/2fb1cc89d9ef9313842cc68b4b7c36be73681505/src/common/const.go#L127
 )
 
 func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.Core) (*appsv1.Deployment, error) { // nolint:funlen
@@ -120,6 +121,16 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 		},
 	}
 
+	scheme := "http"
+	if core.Spec.Components.TLS.Enabled() {
+		scheme = "https"
+	}
+
+	coreLocalURL := (&url.URL{
+		Scheme: scheme,
+		Host:   r.NormalizeName(ctx, core.GetName()),
+	}).String()
+
 	envs, err := harbor.EnvVars(map[string]harbor.ConfigValue{
 		common.ExtEndpoint:        harbor.Value(core.Spec.ExternalEndpoint),
 		common.AUTHMode:           harbor.Value(core.Spec.AuthenticationMode),
@@ -137,7 +148,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 		}),
 		common.PostGreSQLDatabase:    harbor.Value(dbName),
 		common.CoreURL:               harbor.Value(core.Spec.ExternalEndpoint),
-		common.CoreLocalURL:          harbor.Value(fmt.Sprintf("http://%s", core.GetName())),
+		common.CoreLocalURL:          harbor.Value(coreLocalURL),
 		common.RegistryControllerURL: harbor.Value(core.Spec.Components.Registry.ControllerURL),
 		common.RegistryURL:           harbor.Value(core.Spec.Components.Registry.URL),
 		common.JobServiceURL:         harbor.Value(core.Spec.Components.JobService.URL),
@@ -350,7 +361,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 		})
 	}
 
-	if core.Spec.Components.TLS != nil {
+	if core.Spec.Components.TLS.Enabled() {
 		envs = append(envs, corev1.EnvVar{
 			Name:  "INTERNAL_TLS_TRUST_CA_PATH",
 			Value: path.Join(InternalCertificatesPath, corev1.ServiceAccountRootCAKey),
@@ -364,16 +375,13 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 
 		volumeMounts = append(volumeMounts, corev1.VolumeMount{
 			Name:      InternalCertificatesVolumeName,
-			MountPath: path.Join(InternalCertificatesPath, corev1.ServiceAccountRootCAKey),
+			MountPath: path.Join(InternalCertificateAuthorityDirectory, corev1.ServiceAccountRootCAKey),
 			SubPath:   corev1.ServiceAccountRootCAKey,
+			ReadOnly:  true,
 		}, corev1.VolumeMount{
 			Name:      InternalCertificatesVolumeName,
-			MountPath: path.Join(InternalCertificatesPath, corev1.TLSCertKey),
-			SubPath:   corev1.TLSCertKey,
-		}, corev1.VolumeMount{
-			Name:      InternalCertificatesVolumeName,
-			MountPath: path.Join(InternalCertificatesPath, corev1.TLSPrivateKeyKey),
-			SubPath:   corev1.TLSPrivateKeyKey,
+			MountPath: InternalCertificatesPath,
+			ReadOnly:  true,
 		})
 
 		volumes = append(volumes, corev1.Volume{
@@ -384,6 +392,29 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 				},
 			},
 		})
+	} else {
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{
+			Name:      InternalCertificatesVolumeName,
+			MountPath: InternalCertificateAuthorityDirectory,
+		})
+
+		volumes = append(volumes, corev1.Volume{
+			Name: InternalCertificatesVolumeName,
+			VolumeSource: corev1.VolumeSource{
+				EmptyDir: &corev1.EmptyDirVolumeSource{},
+			},
+		})
+	}
+
+	port := goharborv1alpha2.CoreHTTPPortName
+	if core.Spec.Components.TLS.Enabled() {
+		port = goharborv1alpha2.CoreHTTPSPortName
+	}
+
+	httpGET := &corev1.HTTPGetAction{
+		Path:   HealthPath,
+		Port:   intstr.FromString(port),
+		Scheme: core.Spec.Components.TLS.GetScheme(),
 	}
 
 	return &appsv1.Deployment{
@@ -414,33 +445,29 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 						{
 							Name:  "core",
 							Image: image,
-							Ports: []corev1.ContainerPort{
-								{
-									ContainerPort: port,
-								},
-							},
+							Ports: []corev1.ContainerPort{{
+								Name:          goharborv1alpha2.CoreHTTPPortName,
+								ContainerPort: httpPort,
+							}, {
+								Name:          goharborv1alpha2.CoreHTTPSPortName,
+								ContainerPort: httpsPort,
+							}},
 
 							// https://github.com/goharbor/harbor/blob/master/make/photon/prepare/templates/core/env.jinja
 							Env:             envs,
 							ImagePullPolicy: corev1.PullAlways,
 							LivenessProbe: &corev1.Probe{
 								Handler: corev1.Handler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path: HealthPath,
-										Port: intstr.FromInt(port),
-									},
+									HTTPGet: httpGET,
 								},
 								PeriodSeconds: int32(healthCheckPeriod.Seconds()),
 							},
 							ReadinessProbe: &corev1.Probe{
 								Handler: corev1.Handler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path: HealthPath,
-										Port: intstr.FromInt(port),
-									},
+									HTTPGet: httpGET,
 								},
 							},
-							VolumeMounts: volumesMount,
+							VolumeMounts: volumeMounts,
 						},
 					},
 				},

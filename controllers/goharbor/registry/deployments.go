@@ -14,16 +14,20 @@ import (
 )
 
 const (
-	apiPort                          = 5000 // https://github.com/docker/distribution/blob/749f6afb4572201e3c37325d0ffedb6f32be8950/contrib/compose/docker-compose.yml#L15
-	metricsPort                      = 5001 // https://github.com/docker/distribution/blob/b12bd4004afc203f1cbd2072317c8fda30b89710/cmd/registry/config-dev.yml#L34
-	VolumeName                       = "registry-config"
-	ConfigPath                       = "/etc/registry"
-	CompatibilitySchema1Path         = ConfigPath + "/compatibility-schema1"
-	CompatibilitySchema1VolumeName   = "compatibility-schema1-certificate"
-	AuthenticationHTPasswdPath       = ConfigPath + "/auth"
-	AuthenticationHTPasswdVolumeName = "authentication-htpasswd"
-	StorageName                      = "storage"
-	StoragePath                      = "/var/lib/registry"
+	apiPort                               = 5000 // https://github.com/docker/distribution/blob/749f6afb4572201e3c37325d0ffedb6f32be8950/contrib/compose/docker-compose.yml#L15
+	metricsPort                           = 5001 // https://github.com/docker/distribution/blob/b12bd4004afc203f1cbd2072317c8fda30b89710/cmd/registry/config-dev.yml#L34
+	VolumeName                            = "registry-config"
+	ConfigPath                            = "/etc/registry"
+	CompatibilitySchema1Path              = ConfigPath + "/compatibility-schema1"
+	CompatibilitySchema1VolumeName        = "compatibility-schema1-certificate"
+	AuthenticationHTPasswdPath            = ConfigPath + "/auth"
+	AuthenticationHTPasswdVolumeName      = "authentication-htpasswd"
+	InternalCertificatesVolumeName        = "internal-certificates"
+	InternalCertificateAuthorityDirectory = "/harbor_cust_cert"
+	InternalCertificatesPath              = ConfigPath + "/ssl"
+	StorageName                           = "storage"
+	StoragePath                           = "/var/lib/registry"
+	HealthPath                            = "/"
 )
 
 var (
@@ -56,7 +60,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 		},
 	}
 
-	volumesMount := []corev1.VolumeMount{
+	volumeMounts := []corev1.VolumeMount{
 		{
 			Name:      VolumeName,
 			MountPath: ConfigPath,
@@ -135,7 +139,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 			},
 		})
 
-		volumesMount = append(volumesMount, corev1.VolumeMount{
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{
 			MountPath: CompatibilitySchema1Path,
 			Name:      CompatibilitySchema1VolumeName,
 			ReadOnly:  true,
@@ -164,11 +168,51 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 			},
 		})
 
-		volumesMount = append(volumesMount, corev1.VolumeMount{
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{
 			MountPath: AuthenticationHTPasswdPath,
 			Name:      AuthenticationHTPasswdVolumeName,
 			ReadOnly:  true,
 		})
+	}
+
+	if registry.Spec.HTTP.TLS.Enabled() {
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{
+			Name:      InternalCertificatesVolumeName,
+			MountPath: path.Join(InternalCertificateAuthorityDirectory, corev1.ServiceAccountRootCAKey),
+			SubPath:   corev1.ServiceAccountRootCAKey,
+			ReadOnly:  true,
+		}, corev1.VolumeMount{
+			Name:      InternalCertificatesVolumeName,
+			MountPath: InternalCertificatesPath,
+			ReadOnly:  true,
+		})
+
+		volumes = append(volumes, corev1.Volume{
+			Name: InternalCertificatesVolumeName,
+			VolumeSource: corev1.VolumeSource{
+				Secret: &corev1.SecretVolumeSource{
+					SecretName: registry.Spec.HTTP.TLS.CertificateRef,
+				},
+			},
+		})
+	} else {
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{
+			Name:      InternalCertificatesVolumeName,
+			MountPath: InternalCertificateAuthorityDirectory,
+		})
+
+		volumes = append(volumes, corev1.Volume{
+			Name: InternalCertificatesVolumeName,
+			VolumeSource: corev1.VolumeSource{
+				EmptyDir: &corev1.EmptyDirVolumeSource{},
+			},
+		})
+	}
+
+	httpGET := &corev1.HTTPGetAction{
+		Path:   HealthPath,
+		Port:   intstr.FromString(goharborv1alpha2.RegistryAPIPortName),
+		Scheme: registry.Spec.HTTP.TLS.GetScheme(),
 	}
 
 	deploy := &appsv1.Deployment{
@@ -202,30 +246,24 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 							Ports: []corev1.ContainerPort{
 								{
 									ContainerPort: apiPort,
+									Name:          goharborv1alpha2.RegistryAPIPortName,
 								}, {
 									ContainerPort: metricsPort,
+									Name:          goharborv1alpha2.RegistryMetricsPortName,
 								},
 							},
 							ImagePullPolicy: corev1.PullAlways,
 							LivenessProbe: &corev1.Probe{
 								Handler: corev1.Handler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path:   "/",
-										Port:   intstr.FromInt(apiPort),
-										Scheme: corev1.URISchemeHTTP,
-									},
+									HTTPGet: httpGET,
 								},
 							},
 							ReadinessProbe: &corev1.Probe{
 								Handler: corev1.Handler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path:   "/",
-										Port:   intstr.FromInt(apiPort),
-										Scheme: corev1.URISchemeHTTP,
-									},
+									HTTPGet: httpGET,
 								},
 							},
-							VolumeMounts: volumesMount,
+							VolumeMounts: volumeMounts,
 							Args:         []string{"serve", path.Join(ConfigPath, ConfigName)},
 							Env:          envs,
 						},

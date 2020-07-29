@@ -27,7 +27,7 @@ func WithManager(ctx context.Context, mgr manager.Manager) error {
 func ControllersWithManager(ctx context.Context, mgr manager.Manager) error {
 	var g errgroup.Group
 
-	for name, builder := range controllers {
+	for name, builder := range controllersBuilder {
 		name := name
 		c := &controller{
 			Name: name,
@@ -56,7 +56,7 @@ func ControllersWithManager(ctx context.Context, mgr manager.Manager) error {
 func WabhooksWithManager(ctx context.Context, mgr manager.Manager) error {
 	var g errgroup.Group
 
-	for name, object := range webhooks {
+	for name, object := range webhooksBuilder {
 		name := name
 		wh := &webHook{
 			Name:    name,

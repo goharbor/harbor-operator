@@ -65,6 +65,7 @@ func setupJobServiceResourceDependencies(ctx context.Context, ns string) (string
 
 	return redisSecret, registrySecret
 }
+
 func setupValidJobService(ctx context.Context, ns string) (Resource, client.ObjectKey) {
 	redisSecret, registrySecret := setupJobServiceResourceDependencies(ctx, ns)
 

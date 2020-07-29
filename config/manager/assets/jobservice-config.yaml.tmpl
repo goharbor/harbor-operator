@@ -2,13 +2,16 @@
   https://github.com/goharbor/harbor/blob/master/make/photon/prepare/templates/jobservice/config.yml.jinja
   https://github.com/goharbor/harbor/blob/master/src/jobservice/config/config.go#L63
 */}}
-protocol: {{ empty .Spec.HTTPS.CertificateRef | ternary "http" "https" }}
-port: 8080
+{{- if .Spec.TLS.Enabled }}
+protocol: "https"
+port: 8443
 
-{{- if .Spec.HTTPS.CertificateRef }}
 https_config:
-  cert: /etc/jobservice/certificates/tls.crt
-  key: /etc/jobservice/certificates/tls.key
+  cert: /etc/jobservice/ssl/tls.crt
+  key: /etc/jobservice/ssl/tls.key
+{{- else }}
+protocol: "http"
+port: 8080
 {{- end }}
 
 worker_pool:

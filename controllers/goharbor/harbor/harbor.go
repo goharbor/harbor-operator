@@ -31,6 +31,7 @@ type Reconciler struct {
 // +kubebuilder:rbac:groups=goharbor.io,resources=harbors/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=goharbor.io,resources=chartmuseums;clairs;cores;jobservices;notaryservers;notarysigners;portalsregitries;registrycontrollers,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=networking.k8s.io,resources=ingresses,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=cert-manager.io,resources=issuers;certificates,verbs=get;list;watch;create;update;patch;delete
 
 func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) error {
 	err := r.Controller.SetupWithManager(ctx, mgr)
@@ -62,6 +63,7 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 		Owns(&goharborv1alpha2.NotaryServer{}).
 		Owns(&goharborv1alpha2.NotarySigner{}).
 		Owns(&corev1.Secret{}).
+		Owns(&certv1.Issuer{}).
 		Owns(&certv1.Certificate{}).
 		Owns(&netv1.Ingress{}).
 		WithOptions(controller.Options{

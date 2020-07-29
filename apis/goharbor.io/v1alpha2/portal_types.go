@@ -4,6 +4,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	PortalHTTPPortName  = "http"
+	PortalHTTPSPortName = "https"
+)
+
 // +genclient
 
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
@@ -37,6 +42,15 @@ type PortalList struct {
 // PortalSpec defines the desired state of Portal.
 type PortalSpec struct {
 	ComponentSpec `json:",inline"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Minimum=0
+	// +kubebuilder:default=1024
+	// Sets the maximum number of simultaneous connections that can be opened.
+	MaxConnections *int32 `json:"maxConnections,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	TLS *ComponentsTLSSpec `json:"tls,omitempty"`
 }
 
 func init() { // nolint:gochecknoinits

@@ -13,17 +13,38 @@ import (
 	"github.com/sethvargo/go-password/password"
 )
 
-func (r *Reconciler) AddChartMuseumConfigurations(ctx context.Context, harbor *goharborv1alpha2.Harbor) (ChartMuseumAuthSecret, error) {
+func (r *Reconciler) AddChartMuseumConfigurations(ctx context.Context, harbor *goharborv1alpha2.Harbor, tlsIssuer InternalTLSIssuer) (ChartMuseumInternalCertificate, ChartMuseumAuthSecret, error) {
 	if harbor.Spec.ChartMuseum == nil {
-		return nil, nil
+		return nil, nil, nil
+	}
+
+	certificate, err := r.AddChartMuseumInternalCertificate(ctx, harbor, tlsIssuer)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "certificate")
 	}
 
 	authSecret, err := r.AddChartMuseumAuthenticationSecret(ctx, harbor)
 	if err != nil {
-		return nil, errors.Wrap(err, "authentication secret")
+		return nil, nil, errors.Wrap(err, "authentication secret")
 	}
 
-	return authSecret, nil
+	return certificate, authSecret, nil
+}
+
+type ChartMuseumInternalCertificate graph.Resource
+
+func (r *Reconciler) AddChartMuseumInternalCertificate(ctx context.Context, harbor *goharborv1alpha2.Harbor, tlsIssuer InternalTLSIssuer) (ChartMuseumInternalCertificate, error) {
+	cert, err := r.GetInternalTLSCertificate(ctx, harbor, goharborv1alpha2.ChartMuseumTLS)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot get TLS certificate")
+	}
+
+	certRes, err := r.Controller.AddCertificateToManage(ctx, cert, tlsIssuer)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot add TLS certificate")
+	}
+
+	return ChartMuseumInternalCertificate(certRes), nil
 }
 
 type ChartMuseumAuthSecret graph.Resource
@@ -75,7 +96,7 @@ func (r *Reconciler) GetChartMuseumAuthenticationSecret(ctx context.Context, har
 
 type ChartMuseum graph.Resource
 
-func (r *Reconciler) AddChartMuseum(ctx context.Context, harbor *goharborv1alpha2.Harbor) (ChartMuseum, error) {
+func (r *Reconciler) AddChartMuseum(ctx context.Context, harbor *goharborv1alpha2.Harbor, certificate ChartMuseumInternalCertificate) (ChartMuseum, error) {
 	if harbor.Spec.ChartMuseum == nil {
 		return nil, nil
 	}
@@ -85,7 +106,7 @@ func (r *Reconciler) AddChartMuseum(ctx context.Context, harbor *goharborv1alpha
 		return nil, errors.Wrap(err, "cannot get chartmuseum")
 	}
 
-	chartmuseumRes, err := r.AddBasicResource(ctx, chartmuseum)
+	chartmuseumRes, err := r.AddBasicResource(ctx, chartmuseum, certificate)
 
 	return ChartMuseum(chartmuseumRes), errors.Wrap(err, "cannot add basic resource")
 }
@@ -108,6 +129,8 @@ func (r *Reconciler) GetChartMuseum(ctx context.Context, harbor *goharborv1alpha
 	maxStorageObjects := int64(0)
 	parallelLimit := int32(0)
 
+	tls := harbor.Spec.InternalTLS.GetComponentTLSSpec(r.GetInternalTLSCertificateSecretName(ctx, harbor, goharborv1alpha2.ChartMuseumTLS))
+
 	return &goharborv1alpha2.ChartMuseum{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
@@ -118,6 +141,9 @@ func (r *Reconciler) GetChartMuseum(ctx context.Context, harbor *goharborv1alpha
 			Auth: goharborv1alpha2.ChartMuseumAuthSpec{
 				AnonymousGet: false,
 				BasicAuthRef: basicAuthRef,
+			},
+			Server: goharborv1alpha2.ChartMuseumServerSpec{
+				TLS: tls,
 			},
 			Cache: goharborv1alpha2.ChartMuseumCacheSpec{
 				Redis: &redisDSN,

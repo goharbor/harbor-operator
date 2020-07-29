@@ -13,6 +13,7 @@ import (
 )
 
 type MetaGetter func(metav1.Object) map[string]string
+
 type MetaSetter func(metav1.Object, map[string]string)
 
 func GetMetaMutation(getter MetaGetter, setter MetaSetter, key, value string, kv ...string) resources.Mutable {
