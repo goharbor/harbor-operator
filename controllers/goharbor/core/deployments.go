@@ -6,13 +6,15 @@ import (
 	"path"
 	"time"
 
+	"github.com/goharbor/harbor/src/common"
+	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
-	"github.com/pkg/errors"
+	"github.com/goharbor/harbor-operator/pkg/config/harbor"
 )
 
 var (
@@ -95,7 +97,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 		},
 	}
 
-	volumesMount := []corev1.VolumeMount{
+	volumeMounts := []corev1.VolumeMount{
 		{
 			Name:      VolumeName,
 			MountPath: path.Join(ConfigPath, ConfigName),
@@ -118,46 +120,49 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 		},
 	}
 
-	envs := []corev1.EnvVar{{
-		Name:  "EXT_ENDPOINT",
-		Value: core.Spec.ExternalEndpoint,
-	}, {
-		Name:  "LOG_LEVEL",
-		Value: string(core.Spec.Log.Level),
-	}, {
-		Name:  "AUTH_MODE",
-		Value: core.Spec.AuthenticationMode,
-	}, {
-		Name:  "DATABASE_TYPE",
-		Value: goharborv1alpha2.CoreDatabaseType,
-	}, {
-		Name:  "POSTGRESQL_HOST",
-		Value: database.Host,
-	}, {
-		Name:  "POSTGRESQL_PORT",
-		Value: fmt.Sprintf("%d", database.Port),
-	}, {
-		Name:  "POSTGRESQL_USERNAME",
-		Value: database.Username,
-	}, {
-		Name:  "POSTGRESQL_DATABASE",
-		Value: dbName,
-	}, {
-		Name: "POSTGRESQL_PASSWORD",
-		ValueFrom: &corev1.EnvVarSource{
+	envs, err := harbor.EnvVars(map[string]harbor.ConfigValue{
+		common.ExtEndpoint:        harbor.Value(core.Spec.ExternalEndpoint),
+		common.AUTHMode:           harbor.Value(core.Spec.AuthenticationMode),
+		common.DatabaseType:       harbor.Value(goharborv1alpha2.CoreDatabaseType),
+		common.PostGreSQLHOST:     harbor.Value(database.Host),
+		common.PostGreSQLPort:     harbor.Value(fmt.Sprintf("%d", database.Port)),
+		common.PostGreSQLUsername: harbor.Value(database.Username),
+		common.PostGreSQLPassword: harbor.ValueFrom(corev1.EnvVarSource{
 			SecretKeyRef: &corev1.SecretKeySelector{
 				Key: goharborv1alpha2.PostgresqlPasswordKey,
 				LocalObjectReference: corev1.LocalObjectReference{
 					Name: database.PasswordRef,
 				},
 			},
-		},
-	}, {
-		Name:  "CORE_URL",
-		Value: fmt.Sprintf("http://%s", core.GetName()),
-	}, {
-		Name:  "CORE_LOCAL_URL",
-		Value: fmt.Sprintf("http://%s", core.GetName()),
+		}),
+		common.PostGreSQLDatabase:    harbor.Value(dbName),
+		common.CoreURL:               harbor.Value(core.Spec.ExternalEndpoint),
+		common.CoreLocalURL:          harbor.Value(fmt.Sprintf("http://%s", core.GetName())),
+		common.RegistryControllerURL: harbor.Value(core.Spec.Components.Registry.ControllerURL),
+		common.RegistryURL:           harbor.Value(core.Spec.Components.Registry.URL),
+		common.JobServiceURL:         harbor.Value(core.Spec.Components.JobService.URL),
+		common.TokenServiceURL:       harbor.Value(core.Spec.Components.TokenService.URL),
+		common.AdminInitialPassword: harbor.ValueFrom(corev1.EnvVarSource{
+			SecretKeyRef: &corev1.SecretKeySelector{
+				Key:      goharborv1alpha2.SharedSecretKey,
+				Optional: &varFalse,
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: core.Spec.AdminInitialPasswordRef,
+				},
+			},
+		}),
+		common.WithChartMuseum: harbor.Value(fmt.Sprintf("%+v", core.Spec.Components.ChartRepository != nil)),
+		common.WithClair:       harbor.Value(fmt.Sprintf("%+v", core.Spec.Components.Clair != nil)),
+		common.WithNotary:      harbor.Value(fmt.Sprintf("%+v", core.Spec.Components.NotaryServer != nil)),
+		common.WithTrivy:       harbor.Value(fmt.Sprintf("%+v", core.Spec.Components.Trivy != nil)),
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot configure environment variables")
+	}
+
+	envs = append(envs, []corev1.EnvVar{{
+		Name:  "LOG_LEVEL",
+		Value: string(core.Spec.Log.Level),
 	}, {
 		Name: "CORE_SECRET",
 		ValueFrom: &corev1.EnvVarSource{
@@ -184,9 +189,6 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 		Name:  "PORTAL_URL",
 		Value: core.Spec.Components.Portal.URL,
 	}, {
-		Name:  "REGISTRY_CONTROLLER_URL",
-		Value: core.Spec.Components.Registry.ControllerURL,
-	}, {
 		Name:  "REGISTRY_CREDENTIAL_USERNAME",
 		Value: core.Spec.Components.Registry.Credentials.Username,
 	}, {
@@ -200,9 +202,6 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 				Optional: &varFalse,
 			},
 		},
-	}, {
-		Name:  "JOBSERVICE_URL",
-		Value: core.Spec.Components.JobService.URL,
 	}, {
 		Name: "JOBSERVICE_SECRET",
 		ValueFrom: &corev1.EnvVarSource{
@@ -226,24 +225,6 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 			},
 		},
 	}, {
-		Name:  "INTERNAL_TLS_KEY_PATH",
-		Value: path.Join(CertificatesPath, corev1.TLSPrivateKeyKey),
-	}, {
-		Name:  "INTERNAL_TLS_CERT_PATH",
-		Value: path.Join(CertificatesPath, corev1.TLSCertKey),
-	}, {
-		Name:  "INTERNAL_TLS_TRUST_CA_PATH",
-		Value: path.Join(CertificatesPath, corev1.ServiceAccountRootCAKey),
-	}, {
-		Name:  "REGISTRY_URL",
-		Value: core.Spec.Components.Registry.URL,
-	}, {
-		Name:  "REGISTRYCTL_URL",
-		Value: core.Spec.Components.Registry.ControllerURL,
-	}, {
-		Name:  "TOKEN_SERVICE_URL",
-		Value: core.Spec.Components.TokenService.URL,
-	}, {
 		Name:  "CONFIG_PATH",
 		Value: path.Join(ConfigPath, ConfigName),
 	}, {
@@ -265,32 +246,9 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 		Name:  "SYNC_REGISTRY",
 		Value: fmt.Sprintf("%+v", core.Spec.Components.Registry.Sync),
 	}, {
-		Name: "HARBOR_ADMIN_PASSWORD",
-		ValueFrom: &corev1.EnvVarSource{
-			SecretKeyRef: &corev1.SecretKeySelector{
-				Key:      goharborv1alpha2.SharedSecretKey,
-				Optional: &varFalse,
-				LocalObjectReference: corev1.LocalObjectReference{
-					Name: core.Spec.AdminInitialPasswordRef,
-				},
-			},
-		},
-	}, {
 		Name:  "INTERNAL_TLS_ENABLED",
 		Value: fmt.Sprintf("%v", core.Spec.Components.TLS != nil),
-	}, {
-		Name:  "WITH_CHARTMUSEUM",
-		Value: fmt.Sprintf("%+v", core.Spec.Components.ChartRepository != nil),
-	}, {
-		Name:  "WITH_CLAIR",
-		Value: fmt.Sprintf("%+v", core.Spec.Components.Clair != nil),
-	}, {
-		Name:  "WITH_NOTARY",
-		Value: fmt.Sprintf("%+v", core.Spec.Components.NotaryServer != nil),
-	}, {
-		Name:  "WITH_TRIVY",
-		Value: fmt.Sprintf("%+v", core.Spec.Components.Trivy != nil),
-	}}
+	}}...)
 
 	if len(core.Spec.Components.Registry.Redis.DSN) > 0 {
 		envs = append(envs, corev1.EnvVar{
@@ -317,9 +275,19 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 			},
 		})
 
-		volumesMount = append(volumesMount, corev1.VolumeMount{
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{
 			Name:      PublicCertificateVolumeName,
 			MountPath: PublicCertificatePath,
+		})
+	}
+
+	if core.Spec.Components.ChartRepository != nil {
+		envs = append(envs, corev1.EnvVar{
+			Name:  "CHART_REPOSITORY_URL",
+			Value: core.Spec.Components.ChartRepository.URL,
+		}, corev1.EnvVar{
+			Name:  "CHART_CACHE_DRIVER",
+			Value: core.Spec.Components.ChartRepository.CacheDriver,
 		})
 	}
 
@@ -329,7 +297,12 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 			return nil, errors.Wrap(err, "database")
 		}
 
-		envs = append(envs, corev1.EnvVar{
+		adapterURLConfig, err := harbor.EnvVar(common.ClairAdapterURL, harbor.Value(core.Spec.Components.Clair.AdapterURL))
+		if err != nil {
+			return nil, errors.Wrap(err, "cannot configure clair")
+		}
+
+		envs = append(envs, adapterURLConfig, corev1.EnvVar{
 			Name:  "CLAIR_DB_HOST",
 			Value: database.Host,
 		}, corev1.EnvVar{
@@ -358,24 +331,16 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 		}, corev1.EnvVar{
 			Name:  "CLAIR_URL",
 			Value: core.Spec.Components.Clair.URL,
-		}, corev1.EnvVar{
-			Name:  "CLAIR_ADAPTER_URL",
-			Value: core.Spec.Components.Clair.AdapterURL,
 		})
 	}
 
 	if core.Spec.Components.Trivy != nil {
-		envs = append(envs, corev1.EnvVar{
-			Name:  "TRIVY_ADAPTER_URL",
-			Value: core.Spec.Components.Trivy.AdapterURL,
-		})
-	}
+		adapterURLConfig, err := harbor.EnvVar(common.TrivyAdapterURL, harbor.Value(core.Spec.Components.Trivy.AdapterURL))
+		if err != nil {
+			return nil, errors.Wrap(err, "cannot configure trivy")
+		}
 
-	if core.Spec.Components.NotaryServer != nil {
-		envs = append(envs, corev1.EnvVar{
-			Name:  "NOTARY_URL",
-			Value: core.Spec.Components.NotaryServer.URL,
-		})
+		envs = append(envs, adapterURLConfig)
 	}
 
 	if core.Spec.Components.NotaryServer != nil {
@@ -397,7 +362,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 			Value: path.Join(InternalCertificatesPath, corev1.TLSPrivateKeyKey),
 		})
 
-		volumesMount = append(volumesMount, corev1.VolumeMount{
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{
 			Name:      InternalCertificatesVolumeName,
 			MountPath: path.Join(InternalCertificatesPath, corev1.ServiceAccountRootCAKey),
 			SubPath:   corev1.ServiceAccountRootCAKey,
