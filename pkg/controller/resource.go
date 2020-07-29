@@ -233,6 +233,25 @@ func (c *Controller) AddCertificateToManage(ctx context.Context, resource *certv
 	return res, g.AddResource(ctx, res, dependencies, c.ProcessFunc(ctx, resource, dependencies...))
 }
 
+func (c *Controller) AddIssuerToManage(ctx context.Context, resource *certv1.Issuer, dependencies ...graph.Resource) (graph.Resource, error) {
+	if resource == nil {
+		return nil, nil
+	}
+
+	res := &Resource{
+		mutable:   mutation.NewIssuer(c.GlobalMutateFn(ctx)),
+		checkable: statuscheck.IssuerCheck,
+		resource:  resource,
+	}
+
+	g := sgraph.Get(ctx)
+	if g == nil {
+		return nil, errors.Errorf("no graph in current context")
+	}
+
+	return res, g.AddResource(ctx, res, dependencies, c.ProcessFunc(ctx, resource, dependencies...))
+}
+
 func (c *Controller) AddIngressToManage(ctx context.Context, resource *netv1.Ingress, dependencies ...graph.Resource) (graph.Resource, error) {
 	if resource == nil {
 		return nil, nil

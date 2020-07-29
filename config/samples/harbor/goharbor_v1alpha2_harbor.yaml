@@ -16,6 +16,8 @@ spec:
         nginx.ingress.kubernetes.io/ssl-redirect: "true"
         nginx.ingress.kubernetes.io/proxy-body-size: "0"
   encryptionKeyRef: core-database-encryption
+  internalTLS:
+    enabled: true
   portal: {}
   registry: {}
   core:

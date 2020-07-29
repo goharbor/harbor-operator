@@ -35,6 +35,11 @@ http:
   {{- if .Spec.HTTP.DrainTimeout }}
   draintimeout: {{ .Spec.HTTP.DrainTimeout.Duration }}
   {{- end }}
+  {{- if .Spec.HTTP.TLS.Enabled }}
+  tls:
+    certificate: /etc/registry/ssl/tls.crt
+    key: /etc/registry/ssl/tls.key
+  {{- end }}
 {{- if .Spec.Reporting }}
 reporting:
   {{- range $name, $reference := .Spec.Reporting }}

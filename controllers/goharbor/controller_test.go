@@ -53,8 +53,10 @@ type Resource interface {
 	DeepCopyObject() runtime.Object
 }
 
-var ns = SetupTest()
-var ctx context.Context
+var (
+	ns  = SetupTest()
+	ctx context.Context
+)
 
 var _ = BeforeEach(func() {
 	ctx = logger.Context(log)

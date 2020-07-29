@@ -14,18 +14,23 @@ import (
 	"github.com/pkg/errors"
 )
 
-var (
-	varFalse = false
+const (
+	ConfigVolumeName                      = "config"
+	LogsVolumeName                        = "logs"
+	ConfigPath                            = "/etc/jobservice"
+	HealthPath                            = "/api/v1/stats"
+	JobLogsParentDir                      = "/mnt/joblogs"
+	LogsParentDir                         = "/mnt/logs"
+	InternalCertificatesVolumeName        = "internal-certificates"
+	InternalCertificatesPath              = ConfigPath + "/ssl"
+	InternalCertificateAuthorityDirectory = "/harbor_cust_cert"
 )
 
+var varFalse = false
+
 const (
-	VolumeName       = "config"
-	LogsVolumeName   = "logs"
-	configPath       = "/etc/jobservice/"
-	port             = 8080
-	HealthPath       = "/api/v1/stats"
-	JobLogsParentDir = "/mnt/joblogs"
-	LogsParentDir    = "/mnt/logs"
+	httpsPort = 8443
+	httpPort  = 8080
 )
 
 func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1alpha2.JobService) (*appsv1.Deployment, error) { // nolint:funlen
@@ -37,9 +42,51 @@ func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1al
 	name := r.NormalizeName(ctx, jobservice.GetName())
 	namespace := jobservice.GetNamespace()
 
+	envs := []corev1.EnvVar{
+		{
+			Name: "CORE_SECRET",
+			ValueFrom: &corev1.EnvVarSource{
+				SecretKeyRef: &corev1.SecretKeySelector{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: jobservice.Spec.Core.SecretRef,
+					},
+					Key:      goharborv1alpha2.SharedSecretKey,
+					Optional: &varFalse,
+				},
+			},
+		}, {
+			Name:  "REGISTRY_CREDENTIAL_USERNAME",
+			Value: jobservice.Spec.Registry.Username,
+		}, {
+			Name: "REGISTRY_CREDENTIAL_PASSWORD",
+			ValueFrom: &corev1.EnvVarSource{
+				SecretKeyRef: &corev1.SecretKeySelector{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: jobservice.Spec.Registry.PasswordRef,
+					},
+					Key:      goharborv1alpha2.SharedSecretKey,
+					Optional: &varFalse,
+				},
+			},
+		}, {
+			Name: "JOBSERVICE_SECRET",
+			ValueFrom: &corev1.EnvVarSource{
+				SecretKeyRef: &corev1.SecretKeySelector{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: jobservice.Spec.SecretRef,
+					},
+					Key:      goharborv1alpha2.SharedSecretKey,
+					Optional: &varFalse,
+				},
+			},
+		}, {
+			Name:  "CORE_URL",
+			Value: jobservice.Spec.Core.URL,
+		},
+	}
 	volumes := []corev1.Volume{
 		{
-			Name: VolumeName,
+			Name: ConfigVolumeName,
 			VolumeSource: corev1.VolumeSource{
 				ConfigMap: &corev1.ConfigMapVolumeSource{
 					LocalObjectReference: corev1.LocalObjectReference{
@@ -56,12 +103,57 @@ func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1al
 	}
 	volumeMounts := []corev1.VolumeMount{
 		{
-			MountPath: configPath,
-			Name:      VolumeName,
+			MountPath: ConfigPath,
+			Name:      ConfigVolumeName,
 		}, {
 			MountPath: logsDirectory,
 			Name:      LogsVolumeName,
 		},
+	}
+
+	if jobservice.Spec.TLS.Enabled() {
+		envs = append(envs, corev1.EnvVar{
+			Name:  "INTERNAL_TLS_TRUST_CA_PATH",
+			Value: path.Join(InternalCertificateAuthorityDirectory, corev1.ServiceAccountRootCAKey),
+		}, corev1.EnvVar{
+			Name:  "INTERNAL_TLS_CERT_PATH",
+			Value: path.Join(InternalCertificatesPath, corev1.TLSCertKey),
+		}, corev1.EnvVar{
+			Name:  "INTERNAL_TLS_KEY_PATH",
+			Value: path.Join(InternalCertificatesPath, corev1.TLSPrivateKeyKey),
+		})
+
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{
+			Name:      InternalCertificatesVolumeName,
+			MountPath: path.Join(InternalCertificateAuthorityDirectory, corev1.ServiceAccountRootCAKey),
+			SubPath:   corev1.ServiceAccountRootCAKey,
+			ReadOnly:  true,
+		}, corev1.VolumeMount{
+			Name:      InternalCertificatesVolumeName,
+			MountPath: InternalCertificatesPath,
+			ReadOnly:  true,
+		})
+
+		volumes = append(volumes, corev1.Volume{
+			Name: InternalCertificatesVolumeName,
+			VolumeSource: corev1.VolumeSource{
+				Secret: &corev1.SecretVolumeSource{
+					SecretName: jobservice.Spec.TLS.CertificateRef,
+				},
+			},
+		})
+	} else {
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{
+			Name:      InternalCertificatesVolumeName,
+			MountPath: InternalCertificateAuthorityDirectory,
+		})
+
+		volumes = append(volumes, corev1.Volume{
+			Name: InternalCertificatesVolumeName,
+			VolumeSource: corev1.VolumeSource{
+				EmptyDir: &corev1.EmptyDirVolumeSource{},
+			},
+		})
 	}
 
 	for i, fileLogger := range jobservice.Spec.Loggers.Files {
@@ -110,6 +202,17 @@ func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1al
 		})
 	}
 
+	port := goharborv1alpha2.JobServiceHTTPPortName
+	if jobservice.Spec.TLS.Enabled() {
+		port = goharborv1alpha2.JobServiceHTTPSPortName
+	}
+
+	httpGET := &corev1.HTTPGetAction{
+		Path:   HealthPath,
+		Port:   intstr.FromString(port),
+		Scheme: jobservice.Spec.TLS.GetScheme(),
+	}
+
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
@@ -138,72 +241,25 @@ func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1al
 						{
 							Name:  "jobservice",
 							Image: image,
-							Ports: []corev1.ContainerPort{
-								{
-									ContainerPort: port,
-								},
-							},
+							Ports: []corev1.ContainerPort{{
+								Name:          goharborv1alpha2.JobServiceHTTPPortName,
+								ContainerPort: httpPort,
+							}, {
+								Name:          goharborv1alpha2.JobServiceHTTPSPortName,
+								ContainerPort: httpsPort,
+							}},
 
 							// https://github.com/goharbor/harbor/blob/master/make/photon/prepare/templates/jobservice/env.jinja
-							Env: []corev1.EnvVar{
-								{
-									Name: "CORE_SECRET",
-									ValueFrom: &corev1.EnvVarSource{
-										SecretKeyRef: &corev1.SecretKeySelector{
-											LocalObjectReference: corev1.LocalObjectReference{
-												Name: jobservice.Spec.Core.SecretRef,
-											},
-											Key:      goharborv1alpha2.SharedSecretKey,
-											Optional: &varFalse,
-										},
-									},
-								}, {
-									Name:  "REGISTRY_CREDENTIAL_USERNAME",
-									Value: jobservice.Spec.Registry.Username,
-								}, {
-									Name: "REGISTRY_CREDENTIAL_PASSWORD",
-									ValueFrom: &corev1.EnvVarSource{
-										SecretKeyRef: &corev1.SecretKeySelector{
-											LocalObjectReference: corev1.LocalObjectReference{
-												Name: jobservice.Spec.Registry.PasswordRef,
-											},
-											Key:      goharborv1alpha2.SharedSecretKey,
-											Optional: &varFalse,
-										},
-									},
-								}, {
-									Name: "JOBSERVICE_SECRET",
-									ValueFrom: &corev1.EnvVarSource{
-										SecretKeyRef: &corev1.SecretKeySelector{
-											LocalObjectReference: corev1.LocalObjectReference{
-												Name: jobservice.Spec.SecretRef,
-											},
-											Key:      goharborv1alpha2.SharedSecretKey,
-											Optional: &varFalse,
-										},
-									},
-								}, {
-									Name:  "CORE_URL",
-									Value: jobservice.Spec.Core.URL,
-								},
-							},
-							Command:         []string{"/harbor/harbor_jobservice"},
-							Args:            []string{"-c", path.Join(configPath, ConfigName)},
+							Env:             envs,
 							ImagePullPolicy: corev1.PullAlways,
 							LivenessProbe: &corev1.Probe{
 								Handler: corev1.Handler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path: HealthPath,
-										Port: intstr.FromInt(port),
-									},
+									HTTPGet: httpGET,
 								},
 							},
 							ReadinessProbe: &corev1.Probe{
 								Handler: corev1.Handler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path: HealthPath,
-										Port: intstr.FromInt(port),
-									},
+									HTTPGet: httpGET,
 								},
 							},
 							VolumeMounts: volumeMounts,

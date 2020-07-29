@@ -12,18 +12,39 @@ import (
 
 type RegistryController graph.Resource
 
-func (r *Reconciler) AddRegistryController(ctx context.Context, harbor *goharborv1alpha2.Harbor, registry graph.Resource) (RegistryController, error) {
+func (r *Reconciler) AddRegistryController(ctx context.Context, harbor *goharborv1alpha2.Harbor, registry Registry, tlsIssuer InternalTLSIssuer) (RegistryControllerInternalCertificate, RegistryController, error) {
+	certificate, err := r.AddRegistryControllerInternalCertificate(ctx, harbor, tlsIssuer)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "certificate")
+	}
+
 	registryCtl, err := r.GetRegistryCtl(ctx, harbor)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot get registryCtl")
+		return nil, nil, errors.Wrap(err, "cannot get registryCtl")
 	}
 
-	registryCtlRes, err := r.AddBasicResource(ctx, registryCtl, registry)
+	registryCtlRes, err := r.AddBasicResource(ctx, registryCtl, registry, certificate)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot add registryCtl")
+		return nil, nil, errors.Wrap(err, "cannot add registryCtl")
 	}
 
-	return RegistryController(registryCtlRes), nil
+	return certificate, RegistryController(registryCtlRes), nil
+}
+
+type RegistryControllerInternalCertificate graph.Resource
+
+func (r *Reconciler) AddRegistryControllerInternalCertificate(ctx context.Context, harbor *goharborv1alpha2.Harbor, tlsIssuer InternalTLSIssuer) (RegistryControllerInternalCertificate, error) {
+	cert, err := r.GetInternalTLSCertificate(ctx, harbor, goharborv1alpha2.RegistryControllerTLS)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot get TLS certificate")
+	}
+
+	certRes, err := r.Controller.AddCertificateToManage(ctx, cert, tlsIssuer)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot add TLS certificate")
+	}
+
+	return RegistryControllerInternalCertificate(certRes), nil
 }
 
 func (r *Reconciler) GetRegistryCtl(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*goharborv1alpha2.RegistryController, error) {
@@ -31,6 +52,8 @@ func (r *Reconciler) GetRegistryCtl(ctx context.Context, harbor *goharborv1alpha
 	namespace := harbor.GetNamespace()
 
 	registryName := r.NormalizeName(ctx, harbor.GetName())
+
+	tls := harbor.Spec.InternalTLS.GetComponentTLSSpec(r.GetInternalTLSCertificateSecretName(ctx, harbor, goharborv1alpha2.RegistryControllerTLS))
 
 	return &goharborv1alpha2.RegistryController{
 		ObjectMeta: metav1.ObjectMeta{
@@ -43,6 +66,7 @@ func (r *Reconciler) GetRegistryCtl(ctx context.Context, harbor *goharborv1alpha
 			Log: goharborv1alpha2.RegistryControllerLogSpec{
 				Level: harbor.Spec.LogLevel.RegistryCtl(),
 			},
+			TLS: tls,
 		},
 	}, nil
 }

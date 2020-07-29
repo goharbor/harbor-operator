@@ -61,7 +61,7 @@ type HarborHelm1_4_0Spec struct {
 	ExternalURL string `json:"externalURL"`
 
 	// +kubebuilder:validation:Optional
-	InternalTLS HarborInternalTLSSpec `json:"internalTLS,omitempty"`
+	InternalTLS HarborInternalTLSSpec `json:"internalTLS"`
 
 	// +kubebuilder:validation:Optional
 	Persistence HarborPersistenceSpec `json:"persistence,omitempty"`
@@ -295,6 +295,16 @@ type ChartMuseumComponentSpec struct {
 
 type ClairComponentSpec struct {
 	ComponentSpec `json:",inline"`
+
+	// +kubebuilder:validation:Optional
+	// One of clair redis dsn or global redis component must be specified
+	Redis *OpacifiedDSN `json:"redis,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type="string"
+	// +kubebuilder:validation:Pattern="([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?"
+	// +kubebuilder:default="12h"
+	Interval *metav1.Duration `json:"updatersInterval,omitempty"`
 }
 
 type TrivyComponentSpec struct {
@@ -541,32 +551,46 @@ type HarborPersistencePersistentVolumeClaimComponentSpec struct {
 
 type HarborInternalTLSSpec struct {
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
-	CoreCertificateRef string `json:"coreCertificateRef,omitempty"`
+	// +kubebuilder:default=false
+	Enabled bool `json:"enabled"`
+}
 
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
-	JobServiceCertificateRef string `json:"jobServiceCertificateRef,omitempty"`
+func (r *HarborInternalTLSSpec) IsEnabled() bool {
+	return r != nil && r.Enabled
+}
 
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
-	RegistryCertificateRef string `json:"registryCertificateRef,omitempty"`
+const CertificateAuthoritySecretConfigKey = "certificate-authority-secret"
 
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
-	PortalCertificateRef string `json:"portalCertificateRef,omitempty"`
+func (r *HarborInternalTLSSpec) GetScheme() string {
+	if !r.IsEnabled() {
+		return "http"
+	}
 
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
-	ChartMuseumCertificateRef string `json:"chartmuseumCertificateRef,omitempty"`
+	return "https"
+}
 
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
-	ClairCertificateRef string `json:"clairCertificateRef,omitempty"`
+type ErrUnsupportedComponent ComponentWithTLS
 
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
-	TrivyCertificateRef string `json:"trivyCertificateRef,omitempty"`
+func (err ErrUnsupportedComponent) Error() string {
+	return fmt.Sprintf("%s is not supported", string(err))
+}
+
+func (r *HarborInternalTLSSpec) GetInternalPort(component ComponentWithTLS) (int32, error) {
+	if !r.IsEnabled() {
+		return HTTPPort, nil
+	}
+
+	return HTTPSPort, nil
+}
+
+func (r *HarborInternalTLSSpec) GetComponentTLSSpec(certificateRef string) *ComponentsTLSSpec {
+	if !r.IsEnabled() {
+		return nil
+	}
+
+	return &ComponentsTLSSpec{
+		CertificateRef: certificateRef,
+	}
 }
 
 type HarborExposeSpec struct {
@@ -586,15 +610,14 @@ type HarborExposeSpec struct {
 // Enables TLS for public traffic.
 type HarborExposeTLSSpec struct {
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
-	// CertificateRef is a reference to the secret containing public certificates.
-	CertificateRef string `json:"certificateRef"`
+	Core ComponentsTLSSpec `json:"core"`
 
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
-	// NotaryCertificateRef is a reference to the secret containing public Notary certificates.
-	// Otherwise it will be the same values than certificateRef.
-	NotaryCertificateRef string `json:"notaryCertificateRef,omitempty"`
+	Notary *ComponentsTLSSpec `json:"notary,omitempty"`
+}
+
+func (r *HarborExposeTLSSpec) Enabled() bool {
+	return r != nil
 }
 
 type HarborExposeNodePortSpec struct {

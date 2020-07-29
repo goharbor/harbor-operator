@@ -27,9 +27,7 @@ const (
 	livenessProbeInitialDelay = 300 * time.Second
 )
 
-var (
-	varFalse = false
-)
+var varFalse = false
 
 func (r *Reconciler) GetDeployment(ctx context.Context, clair *goharborv1alpha2.Clair) (*appsv1.Deployment, error) { // nolint:funlen
 	image, err := r.GetImage(ctx)

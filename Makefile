@@ -6,27 +6,29 @@ CONFIGURATION_FROM ?= file:$(CURDIR)/config-dev.yml
 export CONFIGURATION_FROM
 
 REGISTRY_TEMPLATE_PATH ?= $(CURDIR)/config/manager/assets/registry-config.yaml.tmpl
+PORTAL_TEMPLATE_PATH ?= $(CURDIR)/config/manager/assets/portal-config.conf.tmpl
 REGISTRYCTL_TEMPLATE_PATH ?= $(CURDIR)/config/manager/assets/registryctl-config.yaml.tmpl
 JOBSERVICE_TEMPLATE_PATH ?= $(CURDIR)/config/manager/assets/jobservice-config.yaml.tmpl
 CORE_TEMPLATE_PATH ?= $(CURDIR)/config/manager/assets/core-config.conf.tmpl
 CHARTMUSEUM_TEMPLATE_PATH ?= $(CURDIR)/config/manager/assets/chartmuseum-config.yaml.tmpl
-NOTARY_SERVER_TEMPLATE_PATH ?= $(CURDIR)/config/manager/assets/notary-server-config.json.tmpl
-NOTARY_SIGNER_TEMPLATE_PATH ?= $(CURDIR)/config/manager/assets/notary-signer-config.json.tmpl
+NOTARYSERVER_TEMPLATE_PATH ?= $(CURDIR)/config/manager/assets/notaryserver-config.json.tmpl
+NOTARYSIGNER_TEMPLATE_PATH ?= $(CURDIR)/config/manager/assets/notarysigner-config.json.tmpl
 
 export REGISTRY_TEMPLATE_PATH
+export PORTAL_TEMPLATE_PATH
 export REGISTRYCTL_TEMPLATE_PATH
 export JOBSERVICE_TEMPLATE_PATH
 export CORE_TEMPLATE_PATH
 export CHARTMUSEUM_TEMPLATE_PATH
-export NOTARY_SERVER_TEMPLATE_PATH
-export NOTARY_SIGNER_TEMPLATE_PATH
+export NOTARYSERVER_TEMPLATE_PATH
+export NOTARYSIGNER_TEMPLATE_PATH
 
 # See https://github.com/settings/tokens for GITHUB_TOKEN. No permissions required.
-NOTARY_SERVER_MIGRATION_SOURCE ?= github://holyhope:$${GITHUB_TOKEN}@theupdateframework/notary/migrations/server/postgresql\#v0.6.1
-NOTARY_SIGNER_MIGRATION_SOURCE ?= github://holyhope:$${GITHUB_TOKEN}@theupdateframework/notary/migrations/signer/postgresql\#v0.6.1
+NOTARYSERVER_MIGRATION_SOURCE ?= github://holyhope:$${GITHUB_TOKEN}@theupdateframework/notary/migrations/server/postgresql\#v0.6.1
+NOTARYSIGNER_MIGRATION_SOURCE ?= github://holyhope:$${GITHUB_TOKEN}@theupdateframework/notary/migrations/signer/postgresql\#v0.6.1
 
-export NOTARY_SERVER_MIGRATION_SOURCE
-export NOTARY_SIGNER_MIGRATION_SOURCE
+export NOTARYSERVER_MIGRATION_SOURCE
+export NOTARYSIGNER_MIGRATION_SOURCE
 
 ########
 

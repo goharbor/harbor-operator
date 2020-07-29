@@ -1,3 +1,14 @@
+{{- if .Spec.Server.TLS.Enabled }}
+port: 8443
+
+tls:
+  ca.cert: /etc/chartmuseum/ssl/ca.crt
+  cert: /etc/chartmuseum/ssl/tls.crt
+  key: /etc/chartmuseum/ssl/tls.key
+{{- else }}
+port: 8080
+{{- end }}
+
 allow.overwrite: {{ .Spec.Chart.AllowOvewrite }}
 
 auth:
