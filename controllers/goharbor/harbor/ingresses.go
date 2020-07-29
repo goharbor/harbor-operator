@@ -2,8 +2,6 @@ package harbor
 
 import (
 	"context"
-	"fmt"
-	"net/url"
 
 	"github.com/pkg/errors"
 	netv1 "k8s.io/api/networking/v1beta1"
@@ -11,10 +9,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
-	"github.com/goharbor/harbor-operator/controllers/goharbor/core"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/notaryserver"
-	"github.com/goharbor/harbor-operator/controllers/goharbor/portal"
-	"github.com/goharbor/harbor-operator/controllers/goharbor/registry"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 )
 
@@ -36,81 +31,68 @@ func (r *Reconciler) AddCoreIngress(ctx context.Context, harbor *goharborv1alpha
 	return CoreIngress(ingressRes), errors.Wrap(err, "cannot add core ingress")
 }
 
-func getHostAndIngresses(harbor *goharborv1alpha2.Harbor) (string, []netv1.IngressTLS, error) {
-	u, err := url.Parse(harbor.Spec.ExternalURL)
-	if err != nil {
-		return "", nil, errors.Wrap(err, "invalid url")
-	}
-
-	var tls []netv1.IngressTLS
-
-	if harbor.Spec.Expose.TLS != nil {
-		tls = []netv1.IngressTLS{
-			{
-				SecretName: harbor.Spec.Expose.TLS.CertificateRef,
-			},
-		}
-	}
-
-	return u.Hostname(), tls, nil
-}
-
-func (r *Reconciler) GetCoreIngresse(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*netv1.Ingress, error) {
+func (r *Reconciler) GetCoreIngresse(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*netv1.Ingress, error) { // nolint:funlen
 	if harbor.Spec.Expose.Ingress == nil {
 		return nil, nil
 	}
 
-	host, tls, err := getHostAndIngresses(harbor)
+	var tls []netv1.IngressTLS
+
+	if harbor.Spec.Expose.TLS.Enabled() {
+		tls = []netv1.IngressTLS{{
+			SecretName: harbor.Spec.Expose.TLS.Core.CertificateRef,
+		}}
+	}
+
+	portalPort, err := harbor.Spec.InternalTLS.GetInternalPort(goharborv1alpha2.PortalTLS)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot get host and ingresses")
+		return nil, errors.Wrap(err, "cannot get core internal port")
+	}
+
+	corePort, err := harbor.Spec.InternalTLS.GetInternalPort(goharborv1alpha2.CoreTLS)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot get core internal port")
 	}
 
 	coreBackend := netv1.IngressBackend{
 		ServiceName: r.NormalizeName(ctx, harbor.GetName(), "core"),
-		ServicePort: intstr.FromInt(core.PublicPort),
+		ServicePort: intstr.FromInt(int(corePort)),
 	}
-	portalBackend := netv1.IngressBackend{
-		ServiceName: r.NormalizeName(ctx, harbor.GetName(), "portal"),
-		ServicePort: intstr.FromInt(portal.PublicPort),
-	}
-	registryBackend := netv1.IngressBackend{
-		ServiceName: r.NormalizeName(ctx, harbor.GetName(), "registry"),
-		ServicePort: intstr.FromInt(registry.PublicPort),
-	}
-
-	rules := []netv1.HTTPIngressPath{{
-		Path:    "/api",
-		Backend: coreBackend,
-	}, {
-		Path:    "/c",
-		Backend: coreBackend,
-	}, {
-		Path:    "/chartrepo",
-		Backend: coreBackend,
-	}, {
-		Path:    "/service",
-		Backend: coreBackend,
-	}, {
-		Path:    "/",
-		Backend: portalBackend,
-	}, {
-		Path:    "/v2",
-		Backend: registryBackend,
-	}}
 
 	return &netv1.Ingress{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        fmt.Sprintf("%s-harbor-core", harbor.GetName()),
+			Name:        r.NormalizeName(ctx, harbor.GetName()),
 			Namespace:   harbor.GetNamespace(),
-			Annotations: r.GetIngressAnnotations(),
+			Annotations: r.GetIngressAnnotations(ctx, harbor),
 		},
 		Spec: netv1.IngressSpec{
 			TLS: tls,
 			Rules: []netv1.IngressRule{{
-				Host: host,
+				Host: harbor.Spec.Expose.Ingress.Hosts.Core,
 				IngressRuleValue: netv1.IngressRuleValue{
 					HTTP: &netv1.HTTPIngressRuleValue{
-						Paths: rules,
+						Paths: []netv1.HTTPIngressPath{{
+							Path:    "/api",
+							Backend: coreBackend,
+						}, {
+							Path:    "/c",
+							Backend: coreBackend,
+						}, {
+							Path:    "/chartrepo",
+							Backend: coreBackend,
+						}, {
+							Path:    "/service",
+							Backend: coreBackend,
+						}, {
+							Path: "/",
+							Backend: netv1.IngressBackend{
+								ServiceName: r.NormalizeName(ctx, harbor.GetName(), "portal"),
+								ServicePort: intstr.FromInt(int(portalPort)),
+							},
+						}, {
+							Path:    "/v2",
+							Backend: coreBackend,
+						}},
 					},
 				},
 			}},
@@ -140,29 +122,24 @@ func (r *Reconciler) GetNotaryServerIngresse(ctx context.Context, harbor *goharb
 		return nil, nil
 	}
 
-	u, err := url.Parse(harbor.Spec.Expose.Ingress.Hosts.Notary)
-	if err != nil {
-		return nil, errors.Wrap(err, "invalid url")
-	}
-
 	var tls []netv1.IngressTLS
 
-	if harbor.Spec.Expose.TLS != nil {
+	if harbor.Spec.Expose.TLS.Enabled() && harbor.Spec.Expose.TLS.Notary.Enabled() {
 		tls = []netv1.IngressTLS{{
-			SecretName: harbor.Spec.Expose.TLS.CertificateRef,
+			SecretName: harbor.Spec.Expose.TLS.Notary.CertificateRef,
 		}}
 	}
 
 	return &netv1.Ingress{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        fmt.Sprintf("%s-harbor-notary", harbor.GetName()),
+			Name:        r.NormalizeName(ctx, harbor.GetName(), "notary"),
 			Namespace:   harbor.GetNamespace(),
-			Annotations: r.GetIngressAnnotations(),
+			Annotations: r.GetIngressAnnotations(ctx, harbor),
 		},
 		Spec: netv1.IngressSpec{
 			TLS: tls,
 			Rules: []netv1.IngressRule{{
-				Host: u.Hostname(),
+				Host: harbor.Spec.Expose.Ingress.Hosts.Notary,
 				IngressRuleValue: netv1.IngressRuleValue{
 					HTTP: &netv1.HTTPIngressRuleValue{
 						Paths: []netv1.HTTPIngressPath{{
@@ -179,8 +156,16 @@ func (r *Reconciler) GetNotaryServerIngresse(ctx context.Context, harbor *goharb
 	}, nil
 }
 
-func (r *Reconciler) GetIngressAnnotations() map[string]string {
+func (r *Reconciler) GetIngressAnnotations(ctx context.Context, harbor *goharborv1alpha2.Harbor) map[string]string {
+	// https://github.com/kubernetes/ingress-nginx/blob/master/internal/ingress/annotations/backendprotocol/main.go#L34
+	protocol := "HTTP"
+
+	if harbor.Spec.InternalTLS.IsEnabled() {
+		protocol = "HTTPS"
+	}
+
 	return map[string]string{
+		"nginx.ingress.kubernetes.io/backend-protocol": protocol,
 		// resolve 413(Too Large Entity) error when push large image. It only works for NGINX ingress.
 		"nginx.ingress.kubernetes.io/proxy-body-size": "0",
 	}

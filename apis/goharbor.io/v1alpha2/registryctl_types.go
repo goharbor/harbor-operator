@@ -10,6 +10,11 @@ const (
 )
 
 const (
+	RegistryControllerHTTPPortName  = "http"
+	RegistryControllerHTTPSPortName = "https"
+)
+
+const (
 	RegistryControllerCorePublicURLKey = "REGISTRY_HTTP_HOST"
 	RegistryControllerAuthURLKey       = "REGISTRY_AUTH_TOKEN_REALM" // RegistryControllerCorePublicURLKey + "/service/token"
 )
@@ -57,7 +62,7 @@ type RegistryControllerSpec struct {
 	Log RegistryControllerLogSpec `json:"log,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	HTTPS *RegistryControllerHTTPSSpec `json:"https,omitempty"`
+	TLS *ComponentsTLSSpec `json:"tls,omitempty"`
 }
 
 type RegistryControllerLogSpec struct {

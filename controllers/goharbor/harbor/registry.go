@@ -44,29 +44,34 @@ func (r *Reconciler) AddRegistryAuthenticationSecret(ctx context.Context, harbor
 	return RegistryAuthSecret(authSecretRes), nil
 }
 
-func (r *Reconciler) AddRegistryConfigurations(ctx context.Context, harbor *goharborv1alpha2.Harbor) (RegistryAuthSecret, RegistryHTTPSecret, error) {
+func (r *Reconciler) AddRegistryConfigurations(ctx context.Context, harbor *goharborv1alpha2.Harbor, tlsIssuer InternalTLSIssuer) (RegistryInternalCertificate, RegistryAuthSecret, RegistryHTTPSecret, error) {
+	certificate, err := r.AddRegistryInternalCertificate(ctx, harbor, tlsIssuer)
+	if err != nil {
+		return nil, nil, nil, errors.Wrap(err, "certificate")
+	}
+
 	authSecret, err := r.AddRegistryAuthenticationSecret(ctx, harbor)
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "authentication secret")
+		return nil, nil, nil, errors.Wrap(err, "authentication secret")
 	}
 
 	httpSecret, err := r.AddRegistryHTTPSecret(ctx, harbor)
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "http secret")
+		return nil, nil, nil, errors.Wrap(err, "http secret")
 	}
 
-	return authSecret, httpSecret, nil
+	return certificate, authSecret, httpSecret, nil
 }
 
 type Registry graph.Resource
 
-func (r *Reconciler) AddRegistry(ctx context.Context, harbor *goharborv1alpha2.Harbor, authSecret RegistryAuthSecret, httpSecret RegistryHTTPSecret) (Registry, error) {
+func (r *Reconciler) AddRegistry(ctx context.Context, harbor *goharborv1alpha2.Harbor, certificate RegistryInternalCertificate, authSecret RegistryAuthSecret, httpSecret RegistryHTTPSecret) (Registry, error) {
 	registry, err := r.GetRegistry(ctx, harbor)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot get registry")
 	}
 
-	registryRes, err := r.AddBasicResource(ctx, registry, authSecret, httpSecret)
+	registryRes, err := r.AddBasicResource(ctx, registry, certificate, authSecret, httpSecret)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot add basic resource")
 	}
@@ -88,6 +93,22 @@ func (r *Reconciler) AddRegistryHTTPSecret(ctx context.Context, harbor *goharbor
 	}
 
 	return RegistryHTTPSecret(httpSecretRes), nil
+}
+
+type RegistryInternalCertificate graph.Resource
+
+func (r *Reconciler) AddRegistryInternalCertificate(ctx context.Context, harbor *goharborv1alpha2.Harbor, tlsIssuer InternalTLSIssuer) (RegistryInternalCertificate, error) {
+	cert, err := r.GetInternalTLSCertificate(ctx, harbor, goharborv1alpha2.RegistryTLS)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot get TLS certificate")
+	}
+
+	certRes, err := r.Controller.AddCertificateToManage(ctx, cert, tlsIssuer)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot add TLS certificate")
+	}
+
+	return RegistryInternalCertificate(certRes), nil
 }
 
 const (
@@ -173,6 +194,8 @@ func (r *Reconciler) GetRegistry(ctx context.Context, harbor *goharborv1alpha2.H
 
 	redisDSN := harbor.Spec.RedisDSN(goharborv1alpha2.RegistryRedis)
 
+	tls := harbor.Spec.InternalTLS.GetComponentTLSSpec(r.GetInternalTLSCertificateSecretName(ctx, harbor, goharborv1alpha2.RegistryTLS))
+
 	return &goharborv1alpha2.Registry{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
@@ -202,6 +225,7 @@ func (r *Reconciler) GetRegistry(ctx context.Context, harbor *goharborv1alpha2.H
 				HTTP: goharborv1alpha2.RegistryHTTPSpec{
 					RelativeURLs: harbor.Spec.Registry.RelativeURLs,
 					SecretRef:    httpSecretName,
+					TLS:          tls,
 				},
 				Storage: goharborv1alpha2.RegistryStorageSpec{
 					Driver: harbor.Spec.Persistence.ImageChartStorage.Registry(),

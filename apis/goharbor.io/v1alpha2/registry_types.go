@@ -10,6 +10,11 @@ const (
 	RegistryAuthURLKey       = "REGISTRY_AUTH_TOKEN_REALM" // RegistryCorePublicURLKey + "/service/token"
 )
 
+const (
+	RegistryAPIPortName     = "api"
+	RegistryMetricsPortName = "metrics"
+)
+
 // +genclient
 
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
@@ -277,6 +282,12 @@ type RegistryHTTPSpec struct {
 	// as well as profiling. Sensitive information may be available via the debug endpoint.
 	// Please be certain that access to the debug endpoint is locked down in a production environment.
 	Debug *RegistryHTTPDebugSpec `json:"debug,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Use this to configure TLS for the server.
+	// If you already have a web server running on the same host as the registry,
+	// you may prefer to configure TLS on that web server and proxy connections to the registry server.
+	TLS *ComponentsTLSSpec `json:"tls,omitempty"`
 }
 
 type RegistryHTTPHTTP2Spec struct {

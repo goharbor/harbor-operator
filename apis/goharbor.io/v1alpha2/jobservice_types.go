@@ -7,6 +7,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	JobServiceHTTPPortName  = "http"
+	JobServiceHTTPSPortName = "https"
+)
+
 // +genclient
 
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
@@ -46,8 +51,7 @@ type JobServiceSpec struct {
 	SecretRef string `json:"secretRef"`
 
 	// +kubebuilder:validation:Optional
-	// Config to use https protocol
-	HTTPS JobServiceHTTPSSpec `json:"https,omitempty"`
+	TLS *ComponentsTLSSpec `json:"tls,omitempty"`
 
 	// +kubebuilder:validation:Required
 	Core JobServiceCoreSpec `json:"core"`
@@ -76,12 +80,6 @@ type JobServiceCoreSpec struct {
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Pattern=".+://.+"
 	URL string `json:"url"`
-}
-
-type JobServiceHTTPSSpec struct {
-	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
-	CertificateRef string `json:"certificateRef,omitempty"`
 }
 
 // RedisPoolConfig keeps redis worker info.

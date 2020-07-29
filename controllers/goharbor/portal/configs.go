@@ -1,4 +1,4 @@
-package jobservice
+package portal
 
 import (
 	"context"
@@ -14,26 +14,22 @@ import (
 )
 
 const (
-	ConfigName = "config.yml"
+	ConfigName = "nginx.conf"
 )
 
-const (
-	logsDirectory = "/var/log/jobs"
-)
-
-func (r *Reconciler) GetConfigMap(ctx context.Context, jobservice *goharborv1alpha2.JobService) (*corev1.ConfigMap, error) {
+func (r *Reconciler) GetConfigMap(ctx context.Context, portal *goharborv1alpha2.Portal) (*corev1.ConfigMap, error) {
 	templateConfig, err := r.ConfigStore.GetItemValue(ConfigTemplateKey)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot get template")
 	}
 
-	content, err := r.GetTemplatedConfig(ctx, templateConfig, jobservice)
+	content, err := r.GetTemplatedConfig(ctx, templateConfig, portal)
 	if err != nil {
 		return nil, err
 	}
 
-	name := r.NormalizeName(ctx, jobservice.GetName())
-	namespace := jobservice.GetNamespace()
+	name := r.NormalizeName(ctx, portal.GetName())
+	namespace := portal.GetNamespace()
 
 	return &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
@@ -43,7 +39,6 @@ func (r *Reconciler) GetConfigMap(ctx context.Context, jobservice *goharborv1alp
 				checksum.GetStaticID("template"): fmt.Sprintf("%x", sha256.Sum256([]byte(templateConfig))),
 			},
 		},
-
 		BinaryData: map[string][]byte{
 			ConfigName: content,
 		},

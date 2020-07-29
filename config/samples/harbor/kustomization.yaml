@@ -7,6 +7,7 @@ generatorOptions:
   disableNameSuffixHash: true
 
 resources:
+- internal_tls.yaml
 - service_token_issuer.yaml
 - goharbor_v1alpha2_harbor.yaml
 
