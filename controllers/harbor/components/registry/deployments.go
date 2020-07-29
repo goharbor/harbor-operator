@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"path"
+	"strconv"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -150,6 +151,9 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 								},
 								Env: []corev1.EnvVar{
 									{
+										Name:  "STORAGE_DISABLE_REDIRECT",
+										Value: strconv.FormatBool(r.harbor.Spec.Components.Registry.DisableRedirect),
+									}, {
 										Name:  "STORAGE_CONFIG",
 										Value: "/opt/configuration/storage",
 									}, {

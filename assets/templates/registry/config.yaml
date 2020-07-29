@@ -76,7 +76,7 @@ storage:
   delete:
     enabled: true
   redirect:
-    disable: false
+    disable: {{ env.Getenv "STORAGE_DISABLE_REDIRECT" }}
   cache:
     blobdescriptor: {{ if gt ( len $redisUrl ) 0 -}} redis {{- else -}} inmemory {{- end }}
   maintenance:

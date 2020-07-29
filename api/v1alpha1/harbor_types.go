@@ -147,6 +147,9 @@ type RegistryComponent struct {
 
 	// +optional
 	CacheSecret string `json:"cacheSecret,omitempty"`
+
+	// +optional
+	DisableRedirect bool `json:"disableRedirect,omitempty"`
 }
 
 type RegistryControllerComponent struct {
