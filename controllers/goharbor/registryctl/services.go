@@ -24,12 +24,15 @@ func (r *Reconciler) GetService(ctx context.Context, registryCtl *goharborv1alph
 			Namespace: namespace,
 		},
 		Spec: corev1.ServiceSpec{
-			Ports: []corev1.ServicePort{
-				{
-					TargetPort: intstr.FromInt(apiPort),
-					Port:       PublicPort,
-				},
-			},
+			Ports: []corev1.ServicePort{{
+				Name:       goharborv1alpha2.RegistryControllerHTTPPortName,
+				Port:       goharborv1alpha2.HTTPPort,
+				TargetPort: intstr.FromString(goharborv1alpha2.RegistryControllerHTTPPortName),
+			}, {
+				Name:       goharborv1alpha2.RegistryControllerHTTPSPortName,
+				Port:       goharborv1alpha2.HTTPSPort,
+				TargetPort: intstr.FromString(goharborv1alpha2.RegistryControllerHTTPSPortName),
+			}},
 			Selector: map[string]string{
 				r.Label("name"):      name,
 				r.Label("namespace"): namespace,

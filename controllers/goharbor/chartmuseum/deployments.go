@@ -13,17 +13,22 @@ import (
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 )
 
-var (
-	varFalse = false
+const (
+	ConfigPath                            = "/etc/chartmuseum"
+	HealthPath                            = "/health"
+	VolumeName                            = "config"
+	InternalCertificatesVolumeName        = "internal-certificates"
+	InternalCertificateAuthorityDirectory = "/harbor_cust_cert"
+	InternalCertificatesPath              = ConfigPath + "/ssl"
+	LocalStorageVolume                    = "storage"
+	DefaultLocalStoragePath               = "/mnt/chartstorage"
 )
 
+var varFalse = false
+
 const (
-	ConfigPath              = "/etc/chartmuseum"
-	HealthPath              = "/health"
-	port                    = 8080 // https://github.com/helm/chartmuseum/blob/969515a51413e1f1840fb99509401aa3c63deccd/pkg/config/vars.go#L135
-	VolumeName              = "config"
-	LocalStorageVolume      = "storage"
-	DefaultLocalStoragePath = "/mnt/chartstorage"
+	httpsPort = 8443
+	httpPort  = 8080
 )
 
 func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1alpha2.ChartMuseum) (*appsv1.Deployment, error) { // nolint:funlen
@@ -35,7 +40,10 @@ func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1a
 	name := r.NormalizeName(ctx, chartMuseum.GetName())
 	namespace := chartMuseum.GetNamespace()
 
-	envs := []corev1.EnvVar{}
+	envs := []corev1.EnvVar{{
+		Name:  "CONFIG",
+		Value: path.Join(ConfigPath, ConfigName),
+	}}
 
 	volumes := []corev1.Volume{
 		{
@@ -51,12 +59,10 @@ func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1a
 		},
 	}
 
-	volumesMount := []corev1.VolumeMount{
-		{
-			Name:      VolumeName,
-			MountPath: ConfigPath,
-		},
-	}
+	volumeMounts := []corev1.VolumeMount{{
+		Name:      VolumeName,
+		MountPath: ConfigPath,
+	}}
 
 	if chartMuseum.Spec.Auth.BasicAuthRef != "" {
 		envs = append(envs, corev1.EnvVar{
@@ -185,7 +191,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1a
 			VolumeSource: chartMuseum.Spec.Chart.Storage.FileSystem.VolumeSource,
 		})
 
-		volumesMount = append(volumesMount, corev1.VolumeMount{
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{
 			Name:      LocalStorageVolume,
 			MountPath: DefaultLocalStoragePath,
 			ReadOnly:  false,
@@ -205,6 +211,51 @@ func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1a
 				},
 			},
 		})
+	}
+
+	if chartMuseum.Spec.Server.TLS.Enabled() {
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{
+			Name:      InternalCertificatesVolumeName,
+			MountPath: path.Join(InternalCertificateAuthorityDirectory, corev1.ServiceAccountRootCAKey),
+			SubPath:   corev1.ServiceAccountRootCAKey,
+			ReadOnly:  true,
+		}, corev1.VolumeMount{
+			Name:      InternalCertificatesVolumeName,
+			MountPath: InternalCertificatesPath,
+			ReadOnly:  true,
+		})
+
+		volumes = append(volumes, corev1.Volume{
+			Name: InternalCertificatesVolumeName,
+			VolumeSource: corev1.VolumeSource{
+				Secret: &corev1.SecretVolumeSource{
+					SecretName: chartMuseum.Spec.Server.TLS.CertificateRef,
+				},
+			},
+		})
+	} else {
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{
+			Name:      InternalCertificatesVolumeName,
+			MountPath: InternalCertificateAuthorityDirectory,
+		})
+
+		volumes = append(volumes, corev1.Volume{
+			Name: InternalCertificatesVolumeName,
+			VolumeSource: corev1.VolumeSource{
+				EmptyDir: &corev1.EmptyDirVolumeSource{},
+			},
+		})
+	}
+
+	port := goharborv1alpha2.ChartMuseumHTTPPortName
+	if chartMuseum.Spec.Server.TLS.Enabled() {
+		port = goharborv1alpha2.ChartMuseumHTTPSPortName
+	}
+
+	httpGET := &corev1.HTTPGetAction{
+		Path:   HealthPath,
+		Port:   intstr.FromString(port),
+		Scheme: chartMuseum.Spec.Server.TLS.GetScheme(),
 	}
 
 	return &appsv1.Deployment{
@@ -236,33 +287,27 @@ func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1a
 						{
 							Name:  "chartmuseum",
 							Image: image,
-							Ports: []corev1.ContainerPort{
-								{
-									ContainerPort: port,
-								},
-							},
-							Command: []string{"/home/chart/chartm"},
-							Args:    []string{"-c", path.Join(ConfigPath, ConfigName)},
+							Ports: []corev1.ContainerPort{{
+								Name:          goharborv1alpha2.ChartMuseumHTTPPortName,
+								ContainerPort: httpPort,
+							}, {
+								Name:          goharborv1alpha2.ChartMuseumHTTPSPortName,
+								ContainerPort: httpsPort,
+							}},
 
 							EnvFrom: envFroms,
 							Env:     envs,
 
-							VolumeMounts: volumesMount,
+							VolumeMounts: volumeMounts,
 
 							LivenessProbe: &corev1.Probe{
 								Handler: corev1.Handler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path: HealthPath,
-										Port: intstr.FromInt(port),
-									},
+									HTTPGet: httpGET,
 								},
 							},
 							ReadinessProbe: &corev1.Probe{
 								Handler: corev1.Handler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path: HealthPath,
-										Port: intstr.FromInt(port),
-									},
+									HTTPGet: httpGET,
 								},
 							},
 						},

@@ -17,9 +17,7 @@ const (
 	configKey = "config.yaml"
 )
 
-var (
-	configContent []byte
-)
+var configContent []byte
 
 func (r *Reconciler) InitConfigMaps() error {
 	file, err := pkger.Open("/assets/templates/clair/config.yaml")

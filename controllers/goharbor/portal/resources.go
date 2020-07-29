@@ -30,12 +30,22 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrapf(err, "cannot add service %s", service.GetName())
 	}
 
+	configMap, err := r.GetConfigMap(ctx, portal)
+	if err != nil {
+		return errors.Wrap(err, "cannot get configMap")
+	}
+
+	configMapRes, err := r.Controller.AddConfigMapToManage(ctx, configMap)
+	if err != nil {
+		return errors.Wrapf(err, "cannot add configMap %s", configMap.GetName())
+	}
+
 	deployment, err := r.GetDeployment(ctx, portal)
 	if err != nil {
 		return errors.Wrap(err, "cannot get deployment")
 	}
 
-	_, err = r.Controller.AddDeploymentToManage(ctx, deployment)
+	_, err = r.Controller.AddDeploymentToManage(ctx, deployment, configMapRes)
 	if err != nil {
 		return errors.Wrapf(err, "cannot add deployment %s", deployment.GetName())
 	}

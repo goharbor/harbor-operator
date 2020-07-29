@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	ConfigName = "ctl-config.yaml"
+	ConfigName = "config.yml"
 )
 
 func (r *Reconciler) GetConfigMap(ctx context.Context, registryCtl *goharborv1alpha2.RegistryController) (*corev1.ConfigMap, error) {

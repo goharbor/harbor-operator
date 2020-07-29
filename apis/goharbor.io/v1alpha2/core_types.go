@@ -4,6 +4,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	CoreHTTPPortName  = "http"
+	CoreHTTPSPortName = "https"
+)
+
 // +genclient
 
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
@@ -94,7 +99,7 @@ type CoreHTTPSpec struct {
 
 type CoreComponentsSpec struct {
 	// +kubebuilder:validation:Optional
-	TLS *CoreComponentsTLSSpec `json:"tls,omitempty"`
+	TLS *ComponentsTLSSpec `json:"tls,omitempty"`
 
 	// +kubebuilder:validation:Required
 	JobService CoreComponentsJobServiceSpec `json:"jobService"`
@@ -215,16 +220,6 @@ type CoreComponentsChartRepositorySpec struct {
 	// +kubebuilder:validation:Enum={"redis"}
 	// +kubebuilder:default="redis"
 	CacheDriver string `json:"cacheDriver,omitempty"`
-}
-
-type CoreComponentsTLSSpec struct {
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=true
-	Verify *bool `json:"verify,omitempty"`
-
-	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
-	CertificateRef string `json:"certificateRef"`
 }
 
 type CoreComponentsTrivySpec struct {

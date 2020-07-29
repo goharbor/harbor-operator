@@ -5,6 +5,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	ChartMuseumHTTPPortName  = "http"
+	ChartMuseumHTTPSPortName = "https"
+)
+
 // +genclient
 
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
@@ -62,7 +67,7 @@ type ChartMuseumSpec struct {
 
 type ChartMuseumServerSpec struct {
 	// +kubebuilder:validation:Optional
-	HTTPS *ChartMuseumHTTPSSpec `json:"https,omitempty"`
+	TLS *ComponentsTLSSpec `json:"tls,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="string"
@@ -315,13 +320,6 @@ type ChartMuseumAuthBearerSpec struct {
 	// +kubebuilder:validation:Required
 	// Authorization server service name
 	Service string `json:"service"`
-}
-
-type ChartMuseumHTTPSSpec struct {
-	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
-	// Reference to secret containing tls certificate
-	CertificateRef string `json:"certificateRef"`
 }
 
 type ChartMuseumDisableSpec struct {
