@@ -28,37 +28,47 @@ NOTARY_SIGNER_MIGRATION_SOURCE ?= github://holyhope:$${GITHUB_TOKEN}@theupdatefr
 export NOTARY_SERVER_MIGRATION_SOURCE
 export NOTARY_SIGNER_MIGRATION_SOURCE
 
+########
+
+define gosourcetemplate
+{{- $$dir := .Dir }}
+{{- range $$_, $$file := .GoFiles }}
+	{{- if ne ( index $$file 0 | printf "%c" ) "/" }}
+		{{- printf "%s/%s " $$dir $$file }}
+	{{- end }}
+{{- end -}}
+endef
+
+GO_SOURCES                  := $(sort $(subst $(CURDIR)/,,$(shell go list -f '$(gosourcetemplate)' ./...)))
+GONOGENERATED_SOURCES       := $(sort $(shell grep -L 'DO NOT EDIT.' -- $(GO_SOURCES)))
+GOWITHTESTS_SOURCES         := $(sort $(subst $(CURDIR)/,,$(shell go list -test -f '$(gosourcetemplate)' ./...)))
+GO4CONTROLLERGEN_SOURCES    := $(sort $(shell grep -l '// +' -- $(GONOGENERATED_SOURCES)))
+
+.SUFFIXES:            # Delete the default suffixes
+.SUFFIXES: .go   # Define our suffix list
+
+########
+
 .PHONY: all clean
 all: manager
 
 # Run tests
 .PHONY: test
 test: generate
-	go test ./... \
+	go test -vet=off ./... \
 		-coverprofile cover.out
 
 .PHONY: dependencies-test
-dependencies-test:
+dependencies-test: fmt
 	go mod tidy
-	go mod vendor
-	go mod graph
+	$(MAKE) vendor
 	git status
-	test -z "$$(git diff-index --diff-filter=d --name-only HEAD -- 'vendor')"
+	test -z "$$(git diff-index --diff-filter=d --name-only HEAD)"
 
-RELEASE_VERSION ?= dev
-
-# Build manager binary
-.PHONY: manager
-manager: generate fmt vet
-	go build \
-		-mod vendor \
-		-o bin/manager \
-		-ldflags "-X $$(go list -m).OperatorVersion=$(RELEASE_VERSION)" \
-		*.go
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 .PHONY: run
-run: generate fmt vet $(TMPDIR)k8s-webhook-server/serving-certs
+run: generate vendor $(TMPDIR)k8s-webhook-server/serving-certs
 	go run *.go
 
 # Run linters against all files
@@ -80,30 +90,54 @@ dev-tools: \
 	markdownlint \
 	stringer
 
+#####################
+#     Packaging     #
+#####################
+
+RELEASE_VERSION ?= dev
+
+# Build manager binary
+.PHONY: manager
+manager: generate vendor
+	go build \
+		-mod vendor \
+		-o bin/manager \
+		-ldflags "-X $$(go list -m).OperatorVersion=$(RELEASE_VERSION)" \
+		*.go
+
 .PHONY: release
 release: goreleaser
 	# export GITHUB_TOKEN=...
 	$(GORELEASER) release --rm-dist
 
-#####################
-#     Packaging     #
-#####################
-
+.PHONY: manifests
 manifests: controller-gen
-	$(CONTROLLER_GEN) crd:crdVersions="v1" output:artifacts:config="config/crd/bases" paths="./..."
-	$(CONTROLLER_GEN) webhook output:artifacts:config="config/webhook" paths="./..."
-	$(CONTROLLER_GEN) object paths="./..."
-	$(CONTROLLER_GEN) rbac:roleName="manager-role" output:artifacts:config="config/rbac" paths="./..."
+	$(MAKE) config/rbac config/crd/bases config/webhook
+
+config/webhook: $(GO4CONTROLLERGEN_SOURCES)
+	$(CONTROLLER_GEN) webhook output:artifacts:config="$@" paths="./..."
+	touch "$@"
+
+config/rbac: $(GO4CONTROLLERGEN_SOURCES)
+	$(CONTROLLER_GEN) rbac:roleName="manager-role" output:artifacts:config="$@" paths="./..."
+	touch "$@"
+
+config/crd/bases: $(GO4CONTROLLERGEN_SOURCES)
+	$(CONTROLLER_GEN) crd:crdVersions="v1" output:artifacts:config="$@" paths="./..."
+	touch "$@"
 
 .PHONY: generate
 generate: controller-gen stringer
 	go generate ./...
-	$(MAKE) vendor
 
 vendor: go.mod go.sum
 	go mod vendor
 
-ASSETS := $(wildcard assets/*)
+go.mod: $(GONOGENERATED_SOURCES)
+	go mod tidy
+
+go.sum: go.sum $(GONOGENERATED_SOURCES)
+	go get ./...
 
 # Build the docker image
 .PHONY: docker-build
@@ -121,12 +155,12 @@ docker-push:
 
 # Run go linters
 .PHONY: go-lint
-go-lint: golangci-lint fmt vet generate
+go-lint: golangci-lint vet generate
 	$(GOLANGCI_LINT) run --verbose
 
 # Run go fmt against code
 .PHONY: fmt
-fmt:
+fmt: generate
 	go fmt ./...
 
 # Run go vet against code
@@ -233,7 +267,7 @@ jetstack:
 # Required for webhook server to start
 .PHONY: dev-certificate
 dev-certificate:
-	rm -rf "$(TMPDIR)k8s-webhook-server/serving-certs"
+	$(RM) -r "$(TMPDIR)k8s-webhook-server/serving-certs"
 	$(MAKE) "$(TMPDIR)k8s-webhook-server/serving-certs"
 
 $(TMPDIR)k8s-webhook-server/serving-certs:
