@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc. All Rights Reserved.
+// Copyright Project Harbor Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,5 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package compiler provides support functions to generated compiler code.
-package compiler
+package log
+
+import (
+	"time"
+)
+
+// Record holds information about log
+type Record struct {
+	Time time.Time // time when the log produced
+	Msg  string    // content of the log
+	Line string    // in which file and line that the log produced
+	Lvl  Level     // level of the log
+}
+
+// NewRecord creates a record according to the arguments provided and returns it
+func NewRecord(time time.Time, msg, line string, lvl Level) *Record {
+	return &Record{
+		Time: time,
+		Msg:  msg,
+		Line: line,
+		Lvl:  lvl,
+	}
+}

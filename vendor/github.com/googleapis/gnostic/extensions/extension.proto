@@ -1,4 +1,4 @@
-// Copyright 2017 Google LLC. All Rights Reserved.
+// Copyright 2017 Google Inc. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -38,9 +38,6 @@ option java_package = "org.gnostic.v1";
 // the future. 'GPB' is reserved for the protocol buffer implementation itself.
 //
 option objc_class_prefix = "OAE"; // "OpenAPI Extension"
-
-// The Go package name.
-option go_package = "extensions;openapiextension_v1";
 
 // The version number of OpenAPI compiler.
 message Version {
