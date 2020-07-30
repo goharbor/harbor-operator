@@ -35,7 +35,7 @@ const (
 	TokenStorageVolumeName                = "psc"
 	TokenStoragePath                      = ConfigPath + "/token"
 	ServiceTokenCertificateVolumeName     = "token-service-private-key"
-	ServiceTokenCertificatePath           = ConfigPath + "private_key.pem"
+	ServiceTokenCertificatePath           = ConfigPath + "/private_key.pem"
 )
 
 const (
@@ -57,69 +57,65 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 		return nil, errors.Wrap(err, "database")
 	}
 
-	volumes := []corev1.Volume{
-		{
-			Name: VolumeName,
-			VolumeSource: corev1.VolumeSource{
-				ConfigMap: &corev1.ConfigMapVolumeSource{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: name,
-					},
-					Optional: &varFalse,
+	volumes := []corev1.Volume{{
+		Name: VolumeName,
+		VolumeSource: corev1.VolumeSource{
+			ConfigMap: &corev1.ConfigMapVolumeSource{
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: name,
 				},
-			},
-		}, {
-			Name: EncryptionKeyVolumeName,
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					Items: []corev1.KeyToPath{
-						{
-							Key:  goharborv1alpha2.SharedSecretKey,
-							Path: EncryptionKeyPath,
-						},
-					},
-					Optional:   &varFalse,
-					SecretName: core.Spec.Database.EncryptionKeyRef,
-				},
-			},
-		}, {
-			Name: TokenStorageVolumeName,
-			VolumeSource: corev1.VolumeSource{
-				EmptyDir: &corev1.EmptyDirVolumeSource{},
-			},
-		}, {
-			Name: ServiceTokenCertificateVolumeName,
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					Optional:   &varFalse,
-					SecretName: core.Spec.Components.TokenService.CertificateRef,
-				},
+				Optional: &varFalse,
 			},
 		},
-	}
+	}, {
+		Name: EncryptionKeyVolumeName,
+		VolumeSource: corev1.VolumeSource{
+			Secret: &corev1.SecretVolumeSource{
+				Items: []corev1.KeyToPath{
+					{
+						Key:  goharborv1alpha2.SharedSecretKey,
+						Path: EncryptionKeyPath,
+					},
+				},
+				Optional:   &varFalse,
+				SecretName: core.Spec.Database.EncryptionKeyRef,
+			},
+		},
+	}, {
+		Name: TokenStorageVolumeName,
+		VolumeSource: corev1.VolumeSource{
+			EmptyDir: &corev1.EmptyDirVolumeSource{},
+		},
+	}, {
+		Name: ServiceTokenCertificateVolumeName,
+		VolumeSource: corev1.VolumeSource{
+			Secret: &corev1.SecretVolumeSource{
+				Optional:   &varFalse,
+				SecretName: core.Spec.Components.TokenService.CertificateRef,
+			},
+		},
+	}}
 
-	volumeMounts := []corev1.VolumeMount{
-		{
-			Name:      VolumeName,
-			MountPath: path.Join(ConfigPath, ConfigName),
-			SubPath:   ConfigName,
-			ReadOnly:  true,
-		}, {
-			Name:      EncryptionKeyVolumeName,
-			ReadOnly:  true,
-			MountPath: path.Join(ConfigPath, EncryptionKeyPath),
-			SubPath:   EncryptionKeyPath,
-		}, {
-			Name:      TokenStorageVolumeName,
-			ReadOnly:  false,
-			MountPath: TokenStoragePath,
-		}, {
-			Name:      ServiceTokenCertificateVolumeName,
-			ReadOnly:  true,
-			MountPath: ServiceTokenCertificatePath,
-			SubPath:   corev1.TLSPrivateKeyKey,
-		},
-	}
+	volumeMounts := []corev1.VolumeMount{{
+		Name:      VolumeName,
+		MountPath: path.Join(ConfigPath, ConfigName),
+		SubPath:   ConfigName,
+		ReadOnly:  true,
+	}, {
+		Name:      EncryptionKeyVolumeName,
+		ReadOnly:  true,
+		MountPath: path.Join(ConfigPath, EncryptionKeyPath),
+		SubPath:   EncryptionKeyPath,
+	}, {
+		Name:      TokenStorageVolumeName,
+		ReadOnly:  false,
+		MountPath: TokenStoragePath,
+	}, {
+		Name:      ServiceTokenCertificateVolumeName,
+		ReadOnly:  true,
+		MountPath: ServiceTokenCertificatePath,
+		SubPath:   corev1.TLSPrivateKeyKey,
+	}}
 
 	scheme := "http"
 	if core.Spec.Components.TLS.Enabled() {
