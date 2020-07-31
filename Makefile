@@ -76,8 +76,8 @@ run: generate vendor $(TMPDIR)k8s-webhook-server/serving-certs
 # Run linters against all files
 .PHONY: lint
 lint: \
-	docker-lint \
 	go-lint \
+	docker-lint \
 	make-lint \
 	md-lint
 
@@ -138,7 +138,7 @@ vendor: go.mod go.sum
 go.mod: $(GONOGENERATED_SOURCES)
 	go mod tidy
 
-go.sum: go.sum $(GONOGENERATED_SOURCES)
+go.sum: go.mod $(GONOGENERATED_SOURCES)
 	go get ./...
 
 # Build the docker image
@@ -215,10 +215,7 @@ deploy-rbac: generate kustomize
 		| kubectl apply --validate=false -f -
 
 .PHONY: sample
-sample: kustomize
-	$(KUSTOMIZE) build config/samples \
-		| kubectl apply -f -
-	kubectl get goharbor
+sample: sample-harbor
 
 .PHONY: sample
 sample-%: kustomize
