@@ -1,13 +1,9 @@
 package v1alpha2
 
 import (
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-)
-
-const (
-	ChartMuseumHTTPPortName  = "http"
-	ChartMuseumHTTPSPortName = "https"
 )
 
 // +genclient
@@ -29,7 +25,7 @@ type ChartMuseum struct {
 
 	Spec ChartMuseumSpec `json:"spec,omitempty"`
 
-	Status ComponentStatus `json:"status,omitempty"`
+	Status harbormetav1.ComponentStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -42,7 +38,7 @@ type ChartMuseumList struct {
 
 // ChartMuseumSpec defines the desired state of ChartMuseum.
 type ChartMuseumSpec struct {
-	ComponentSpec `json:",inline"`
+	harbormetav1.ComponentSpec `json:",inline"`
 
 	// +kubebuilder:validation:Optional
 	Log ChartMuseumLogSpec `json:"log,omitempty"`
@@ -67,7 +63,7 @@ type ChartMuseumSpec struct {
 
 type ChartMuseumServerSpec struct {
 	// +kubebuilder:validation:Optional
-	TLS *ComponentsTLSSpec `json:"tls,omitempty"`
+	TLS *harbormetav1.ComponentsTLSSpec `json:"tls,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="string"

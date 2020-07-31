@@ -31,6 +31,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 )
 
@@ -79,9 +80,9 @@ func setupHarborResourceDependencies(ctx context.Context, ns string) (string, st
 			Namespace: ns,
 		},
 		StringData: map[string]string{
-			goharborv1alpha2.SharedSecretKey: "th3Adm!nPa$$w0rd",
+			harbormetav1.SharedSecretKey: "th3Adm!nPa$$w0rd",
 		},
-		Type: goharborv1alpha2.SecretTypeSingle,
+		Type: harbormetav1.SecretTypeSingle,
 	})
 	Expect(err).ToNot(HaveOccurred())
 
@@ -106,16 +107,13 @@ func setupHarborResourceDependencies(ctx context.Context, ns string) (string, st
 func setupValidHarbor(ctx context.Context, ns string) (Resource, client.ObjectKey) {
 	adminSecretName, tokenIssuerName := setupHarborResourceDependencies(ctx, ns)
 
-	corePG := setupPostgresql(ctx, ns)
+	database := setupPostgresql(ctx, ns)
 
 	name := newName("harbor")
 	publicURL := url.URL{
 		Scheme: "http",
 		Host:   "the.dns",
 	}
-
-	db, _, err := goharborv1alpha2.FromOpacifiedDSN(corePG)
-	Expect(err).ToNot(HaveOccurred())
 
 	harbor := &goharborv1alpha2.Harbor{
 		ObjectMeta: metav1.ObjectMeta{
@@ -147,7 +145,11 @@ func setupValidHarbor(ctx context.Context, ns string) (Resource, client.ObjectKe
 							Name: tokenIssuerName,
 						},
 					},
-					Database: *db,
+					Database: goharborv1alpha2.HarborDatabaseSpec{
+						PostgresCredentials: database.PostgresCredentials,
+						Hosts:               database.Hosts,
+						SSLMode:             harbormetav1.PostgresSSLMode(database.Parameters[harbormetav1.PostgresSSLModeKey]),
+					},
 				},
 			},
 		},
@@ -173,8 +175,8 @@ func updateHarbor(ctx context.Context, object Resource) {
 	harbor.Spec.ExternalURL = u.String()
 }
 
-func getHarborStatusFunc(ctx context.Context, key client.ObjectKey) func() goharborv1alpha2.ComponentStatus {
-	return func() goharborv1alpha2.ComponentStatus {
+func getHarborStatusFunc(ctx context.Context, key client.ObjectKey) func() harbormetav1.ComponentStatus {
+	return func() harbormetav1.ComponentStatus {
 		var harbor goharborv1alpha2.Harbor
 
 		err := k8sClient.Get(ctx, key, &harbor)

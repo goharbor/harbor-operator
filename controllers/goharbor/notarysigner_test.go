@@ -26,6 +26,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 )
 
 func newNotarySignerController() controllerTest {
@@ -36,10 +37,9 @@ func newNotarySignerController() controllerTest {
 	}
 }
 
-func setupNotarySignerResourceDependencies(ctx context.Context, ns string) (string, string, string) {
+func setupNotarySignerResourceDependencies(ctx context.Context, ns string) (string, string) {
 	aliasesName := newName("aliases")
-	signingCertName := newName("signing-certificate")
-	httpsCertName := newName("https-certificate")
+	authCertName := newName("authentication-certificate")
 
 	Expect(k8sClient.Create(ctx, &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
@@ -47,35 +47,26 @@ func setupNotarySignerResourceDependencies(ctx context.Context, ns string) (stri
 			Namespace: ns,
 		},
 		StringData: map[string]string{
-			goharborv1alpha2.DefaultAliasSecretKey: "abcde_012345_ABCDE",
+			harbormetav1.DefaultAliasSecretKey: "abcde_012345_ABCDE",
 		},
-		Type: goharborv1alpha2.SecretTypeNotarySignerAliases,
+		Type: harbormetav1.SecretTypeNotarySignerAliases,
 	})).ToNot(HaveOccurred())
 
 	Expect(k8sClient.Create(ctx, &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      signingCertName,
+			Name:      authCertName,
 			Namespace: ns,
 		},
 		Data: generateCertificate(),
 		Type: corev1.SecretTypeTLS,
 	})).ToNot(HaveOccurred())
 
-	Expect(k8sClient.Create(ctx, &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      httpsCertName,
-			Namespace: ns,
-		},
-		Data: generateCertificate(),
-		Type: corev1.SecretTypeTLS,
-	})).ToNot(HaveOccurred())
-
-	return signingCertName, httpsCertName, aliasesName
+	return authCertName, aliasesName
 }
 
 func setupValidNotarySigner(ctx context.Context, ns string) (Resource, client.ObjectKey) {
-	postgresqlDSN := setupPostgresql(ctx, ns)
-	signingCertName, httpsCertName, aliasesName := setupNotarySignerResourceDependencies(ctx, ns)
+	database := setupPostgresql(ctx, ns)
+	authCertName, aliasesName := setupNotarySignerResourceDependencies(ctx, ns)
 
 	name := newName("notary-signer")
 	notarySigner := &goharborv1alpha2.NotarySigner{
@@ -86,15 +77,12 @@ func setupValidNotarySigner(ctx context.Context, ns string) (Resource, client.Ob
 		Spec: goharborv1alpha2.NotarySignerSpec{
 			Storage: goharborv1alpha2.NotarySignerStorageSpec{
 				NotaryStorageSpec: goharborv1alpha2.NotaryStorageSpec{
-					OpacifiedDSN: postgresqlDSN,
-					Type:         "postgres",
+					Postgres: database,
 				},
 				AliasesRef: aliasesName,
 			},
-			PublicURL:      "https://notary.url",
-			CertificateRef: signingCertName,
-			HTTPS: goharborv1alpha2.NotaryHTTPSSpec{
-				CertificateRef: httpsCertName,
+			Authentication: goharborv1alpha2.NotarySignerAuthenticationSpec{
+				CertificateRef: authCertName,
 			},
 		},
 	}
@@ -120,8 +108,8 @@ func updateNotarySigner(ctx context.Context, object Resource) {
 	notarySigner.Spec.Replicas = &replicas
 }
 
-func getNotarySignerStatusFunc(ctx context.Context, key client.ObjectKey) func() goharborv1alpha2.ComponentStatus {
-	return func() goharborv1alpha2.ComponentStatus {
+func getNotarySignerStatusFunc(ctx context.Context, key client.ObjectKey) func() harbormetav1.ComponentStatus {
+	return func() harbormetav1.ComponentStatus {
 		var notarySigner goharborv1alpha2.NotarySigner
 
 		err := k8sClient.Get(ctx, key, &notarySigner)

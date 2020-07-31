@@ -8,7 +8,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 )
@@ -54,13 +54,13 @@ func (c *Controller) EnsureSecretType(ctx context.Context, node graph.Resource) 
 		switch expectedSecretType { // nolint:exhaustive
 		default:
 			return errors.Wrapf(errSecretInvalidTyped, "got %s expected %s", secret.Type, expectedSecretType)
-		case goharborv1alpha2.SecretTypeRedis:
+		case harbormetav1.SecretTypeRedis:
 			if isOpaqueRedisSecret(secret) {
 				return nil
 			}
 
 			return errors.Wrapf(errSecretInvalidTyped, "got %s expected %s", secret.Type, expectedSecretType)
-		case goharborv1alpha2.SecretTypePostgresql:
+		case harbormetav1.SecretTypePostgresql:
 			if isOpaquePostgresqlSecret(secret) {
 				return nil
 			}
@@ -72,13 +72,13 @@ func (c *Controller) EnsureSecretType(ctx context.Context, node graph.Resource) 
 
 func isOpaqueRedisSecret(secret *corev1.Secret) bool {
 	if len(secret.Data) > 0 {
-		if _, ok := secret.Data[goharborv1alpha2.RedisPasswordKey]; ok {
+		if _, ok := secret.Data[harbormetav1.RedisPasswordKey]; ok {
 			return true
 		}
 	}
 
 	if len(secret.StringData) > 0 {
-		if _, ok := secret.StringData[goharborv1alpha2.RedisPasswordKey]; ok {
+		if _, ok := secret.StringData[harbormetav1.RedisPasswordKey]; ok {
 			return true
 		}
 	}
@@ -88,13 +88,13 @@ func isOpaqueRedisSecret(secret *corev1.Secret) bool {
 
 func isOpaquePostgresqlSecret(secret *corev1.Secret) bool {
 	if len(secret.Data) > 0 {
-		if _, ok := secret.Data[goharborv1alpha2.PostgresqlPasswordKey]; ok {
+		if _, ok := secret.Data[harbormetav1.PostgresqlPasswordKey]; ok {
 			return true
 		}
 	}
 
 	if len(secret.StringData) > 0 {
-		if _, ok := secret.StringData[goharborv1alpha2.PostgresqlPasswordKey]; ok {
+		if _, ok := secret.StringData[harbormetav1.PostgresqlPasswordKey]; ok {
 			return true
 		}
 	}

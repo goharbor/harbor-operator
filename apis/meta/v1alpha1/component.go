@@ -1,7 +1,8 @@
-package v1alpha2
+package v1alpha1
 
 import (
 	"encoding/json"
+	"errors"
 	"math"
 
 	corev1 "k8s.io/api/core/v1"
@@ -25,6 +26,8 @@ const (
 
 	componentCount
 )
+
+var ErrUnsupportedComponent = errors.New("component not supported")
 
 func GetLargestComponentNameSize() int {
 	max := len(Component(math.MaxInt64).String())

@@ -1,4 +1,4 @@
-package v1alpha2
+package v1alpha1
 
 import (
 	corev1 "k8s.io/api/core/v1"
@@ -14,7 +14,6 @@ const (
 	RegistryTLS           = ComponentWithTLS(RegistryComponent)
 	RegistryControllerTLS = ComponentWithTLS(RegistryControllerComponent)
 	NotaryServerTLS       = ComponentWithTLS(NotaryServerComponent)
-	NotarySignerTLS       = ComponentWithTLS(NotarySignerComponent)
 	ClairTLS              = ComponentWithTLS(ClairComponent)
 )
 

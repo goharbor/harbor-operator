@@ -11,6 +11,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 )
 
 const (
@@ -206,7 +207,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1a
 					LocalObjectReference: corev1.LocalObjectReference{
 						Name: chartMuseum.Spec.Cache.Redis.PasswordRef,
 					},
-					Key:      goharborv1alpha2.RedisPasswordKey,
+					Key:      harbormetav1.RedisPasswordKey,
 					Optional: &varFalse,
 				},
 			},
@@ -247,9 +248,9 @@ func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1a
 		})
 	}
 
-	port := goharborv1alpha2.ChartMuseumHTTPPortName
+	port := harbormetav1.ChartMuseumHTTPPortName
 	if chartMuseum.Spec.Server.TLS.Enabled() {
-		port = goharborv1alpha2.ChartMuseumHTTPSPortName
+		port = harbormetav1.ChartMuseumHTTPSPortName
 	}
 
 	httpGET := &corev1.HTTPGetAction{
@@ -288,10 +289,10 @@ func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1a
 							Name:  "chartmuseum",
 							Image: image,
 							Ports: []corev1.ContainerPort{{
-								Name:          goharborv1alpha2.ChartMuseumHTTPPortName,
+								Name:          harbormetav1.ChartMuseumHTTPPortName,
 								ContainerPort: httpPort,
 							}, {
-								Name:          goharborv1alpha2.ChartMuseumHTTPSPortName,
+								Name:          harbormetav1.ChartMuseumHTTPSPortName,
 								ContainerPort: httpsPort,
 							}},
 

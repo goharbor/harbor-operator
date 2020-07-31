@@ -7,6 +7,7 @@ generatorOptions:
   disableNameSuffixHash: true
 
 resources:
+- https.yaml
 - internal_tls.yaml
 - service_token_issuer.yaml
 - goharbor_v1alpha2_harbor.yaml
@@ -32,4 +33,3 @@ secretGenerator:
   literals:
   - secret=unsecure-jobservice-secret
   type: "goharbor.io/single-secret"
-
