@@ -594,8 +594,16 @@ func (r *HarborInternalTLSSpec) GetComponentTLSSpec(certificateRef string) *Comp
 }
 
 type HarborExposeSpec struct {
+	// +kubebuilder:validation:Required
+	Core HarborExposeComponentSpec `json:"core"`
+
 	// +kubebuilder:validation:Optional
-	TLS *HarborExposeTLSSpec `json:"tls,omitempty"`
+	Notary *HarborExposeComponentSpec `json:"notary,omitempty"`
+}
+
+type HarborExposeComponentSpec struct {
+	// +kubebuilder:validation:Optional
+	TLS *ComponentsTLSSpec `json:"tls,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	Ingress *HarborExposeIngressSpec `json:"ingress,omitempty"`
@@ -604,20 +612,51 @@ type HarborExposeSpec struct {
 	ClusterIP *HarborExposeClusterIPSpec `json:"clusterIP,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	LoadBalancer *HarborExposeLoadBalancerSpec `json:"loadbalancer,omitempty"`
-}
-
-// Enables TLS for public traffic.
-type HarborExposeTLSSpec struct {
-	// +kubebuilder:validation:Required
-	Core ComponentsTLSSpec `json:"core"`
+	LoadBalancer *HarborExposeLoadBalancerSpec `json:"loadBalancer,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	Notary *ComponentsTLSSpec `json:"notary,omitempty"`
+	NodePort *HarborExposeNodePortSpec `json:"nodePort,omitempty"`
 }
 
-func (r *HarborExposeTLSSpec) Enabled() bool {
-	return r != nil
+type ErrMultipleExposeSpec []string
+
+func (specs ErrMultipleExposeSpec) Error() string {
+	return fmt.Sprintf("only one field of %v must be specified", strings.Join(specs, ","))
+}
+
+var errNoExposeSpecSpec = fmt.Errorf("one of %v must be specified", []string{"ingress", "clusterIP", "loadBalancer", "nodePort"})
+
+func (r *HarborExposeComponentSpec) Validate() error {
+	if r == nil {
+		return nil
+	}
+
+	fields := []string{}
+
+	if r.Ingress != nil {
+		fields = append(fields, "ingress")
+	}
+
+	if r.ClusterIP != nil {
+		fields = append(fields, "clusterIP")
+	}
+
+	if r.LoadBalancer != nil {
+		fields = append(fields, "loadBalancer")
+	}
+
+	if r.NodePort != nil {
+		fields = append(fields, "nodePort")
+	}
+
+	switch len(fields) {
+	case 0:
+		return errNoExposeSpecSpec
+	case 1:
+		return nil
+	default:
+		return ErrMultipleExposeSpec(fields)
+	}
 }
 
 type HarborExposeNodePortSpec struct {
@@ -732,19 +771,11 @@ type HarborExposePortsSpec struct {
 	// +kubebuilder:default=443
 	// The service port Harbor listens on when serving with HTTPS.
 	HTTPSPort int32 `json:"httpsPort,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Minimum=0
-	// +kubebuilder:validation:ExclusiveMinimum=true
-	// +kubebuilder:default=4443
-	// The service port Notary listens on.
-	// Only needed when notary is enabled.
-	NotaryPort int32 `json:"notaryPort,omitempty"`
 }
 
 type HarborExposeIngressSpec struct {
 	// +kubebuilder:validation:Required
-	Hosts HarborExposeIngressHostsSpec `json:"hosts"`
+	Host string `json:"host"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default="default"
@@ -753,14 +784,6 @@ type HarborExposeIngressSpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default={"ingress.kubernetes.io/ssl-redirect":"true","ingress.kubernetes.io/proxy-body-size":"0","nginx.ingress.kubernetes.io/ssl-redirect":"true","nginx.ingress.kubernetes.io/proxy-body-size":"0"}
 	Annotations map[string]string `json:"annotations,omitempty"`
-}
-
-type HarborExposeIngressHostsSpec struct {
-	// +kubebuilder:validation:Required
-	Core string `json:"core"`
-
-	// +kubebuilder:validation:Required
-	Notary string `json:"notary"`
 }
 
 func init() { // nolint:gochecknoinits
