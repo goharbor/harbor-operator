@@ -41,7 +41,7 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrapf(err, "cannot add %s configuration", controllers.JobService)
 	}
 
-	chartMuseumCertificate, chartMuseumAuthSecret, err := r.AddChartMuseumConfigurations(ctx, harbor, internalTLSIssuer)
+	chartMuseumCertificate, err := r.AddChartMuseumConfigurations(ctx, harbor, internalTLSIssuer)
 	if err != nil {
 		return errors.Wrapf(err, "cannot add %s configuration", controllers.ChartMuseum)
 	}
@@ -66,7 +66,7 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrapf(err, "cannot add %s", controllers.RegistryController)
 	}
 
-	core, err := r.AddCore(ctx, harbor, coreCertificate, registryAuthSecret, chartMuseumAuthSecret, coreCSRF, coreTokenCertificate, coreSecret, coreAdminPassword, coreEncryptionKey)
+	core, err := r.AddCore(ctx, harbor, coreCertificate, registryAuthSecret, coreCSRF, coreTokenCertificate, coreSecret, coreAdminPassword, coreEncryptionKey)
 	if err != nil {
 		return errors.Wrapf(err, "cannot add %s", controllers.Core)
 	}
@@ -81,7 +81,7 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrapf(err, "cannot add %s", controllers.Portal)
 	}
 
-	_, err = r.AddChartMuseum(ctx, harbor, chartMuseumCertificate)
+	_, err = r.AddChartMuseum(ctx, harbor, chartMuseumCertificate, coreSecret)
 	if err != nil {
 		return errors.Wrapf(err, "cannot add %s", controllers.ChartMuseum)
 	}
