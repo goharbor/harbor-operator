@@ -26,6 +26,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 )
 
 func newChartMuseumController() controllerTest {
@@ -80,8 +81,8 @@ func updateChartMuseum(ctx context.Context, object Resource) {
 	chartmuseum.Spec.Replicas = &replicas
 }
 
-func getChartMuseumStatusFunc(ctx context.Context, key client.ObjectKey) func() goharborv1alpha2.ComponentStatus {
-	return func() goharborv1alpha2.ComponentStatus {
+func getChartMuseumStatusFunc(ctx context.Context, key client.ObjectKey) func() harbormetav1.ComponentStatus {
+	return func() harbormetav1.ComponentStatus {
 		var chartmuseum goharborv1alpha2.ChartMuseum
 
 		err := k8sClient.Get(ctx, key, &chartmuseum)

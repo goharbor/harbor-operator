@@ -15,7 +15,9 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/config/harbor"
+	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 )
 
 var varFalse = false
@@ -52,11 +54,6 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 	name := r.NormalizeName(ctx, core.GetName())
 	namespace := core.GetNamespace()
 
-	database, dbName, err := goharborv1alpha2.FromOpacifiedDSN(core.Spec.Database.OpacifiedDSN)
-	if err != nil {
-		return nil, errors.Wrap(err, "database")
-	}
-
 	volumes := []corev1.Volume{{
 		Name: VolumeName,
 		VolumeSource: corev1.VolumeSource{
@@ -71,12 +68,10 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 		Name: EncryptionKeyVolumeName,
 		VolumeSource: corev1.VolumeSource{
 			Secret: &corev1.SecretVolumeSource{
-				Items: []corev1.KeyToPath{
-					{
-						Key:  goharborv1alpha2.SharedSecretKey,
-						Path: EncryptionKeyPath,
-					},
-				},
+				Items: []corev1.KeyToPath{{
+					Key:  harbormetav1.SharedSecretKey,
+					Path: EncryptionKeyPath,
+				}},
 				Optional:   &varFalse,
 				SecretName: core.Spec.Database.EncryptionKeyRef,
 			},
@@ -127,22 +122,29 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 		Host:   r.NormalizeName(ctx, core.GetName()),
 	}).String()
 
+	// Only one host is supported
+	if len(core.Spec.Database.Hosts) == 0 {
+		return nil, serrors.UnrecoverrableError(errors.New("cannot get a database host"), serrors.InvalidSpecReason, "cannot get a database host")
+	}
+
+	firstDatabaseHost := core.Spec.Database.Hosts[0]
+
 	envs, err := harbor.EnvVars(map[string]harbor.ConfigValue{
 		common.ExtEndpoint:        harbor.Value(core.Spec.ExternalEndpoint),
 		common.AUTHMode:           harbor.Value(core.Spec.AuthenticationMode),
 		common.DatabaseType:       harbor.Value(goharborv1alpha2.CoreDatabaseType),
-		common.PostGreSQLHOST:     harbor.Value(database.Host),
-		common.PostGreSQLPort:     harbor.Value(fmt.Sprintf("%d", database.Port)),
-		common.PostGreSQLUsername: harbor.Value(database.Username),
+		common.PostGreSQLHOST:     harbor.Value(firstDatabaseHost.Host),
+		common.PostGreSQLPort:     harbor.Value(fmt.Sprintf("%d", firstDatabaseHost.Port)),
+		common.PostGreSQLUsername: harbor.Value(core.Spec.Database.Username),
 		common.PostGreSQLPassword: harbor.ValueFrom(corev1.EnvVarSource{
 			SecretKeyRef: &corev1.SecretKeySelector{
-				Key: goharborv1alpha2.PostgresqlPasswordKey,
+				Key: harbormetav1.PostgresqlPasswordKey,
 				LocalObjectReference: corev1.LocalObjectReference{
-					Name: database.PasswordRef,
+					Name: core.Spec.Database.PasswordRef,
 				},
 			},
 		}),
-		common.PostGreSQLDatabase:    harbor.Value(dbName),
+		common.PostGreSQLDatabase:    harbor.Value(core.Spec.Database.Database),
 		common.CoreURL:               harbor.Value(core.Spec.ExternalEndpoint),
 		common.CoreLocalURL:          harbor.Value(coreLocalURL),
 		common.RegistryControllerURL: harbor.Value(core.Spec.Components.Registry.ControllerURL),
@@ -151,7 +153,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 		common.TokenServiceURL:       harbor.Value(core.Spec.Components.TokenService.URL),
 		common.AdminInitialPassword: harbor.ValueFrom(corev1.EnvVarSource{
 			SecretKeyRef: &corev1.SecretKeySelector{
-				Key:      goharborv1alpha2.SharedSecretKey,
+				Key:      harbormetav1.SharedSecretKey,
 				Optional: &varFalse,
 				LocalObjectReference: corev1.LocalObjectReference{
 					Name: core.Spec.AdminInitialPasswordRef,
@@ -174,7 +176,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 		Name: "CORE_SECRET",
 		ValueFrom: &corev1.EnvVarSource{
 			SecretKeyRef: &corev1.SecretKeySelector{
-				Key:      goharborv1alpha2.SharedSecretKey,
+				Key:      harbormetav1.SharedSecretKey,
 				Optional: &varFalse,
 				LocalObjectReference: corev1.LocalObjectReference{
 					Name: core.Spec.CoreConfig.SecretRef,
@@ -205,7 +207,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 				LocalObjectReference: corev1.LocalObjectReference{
 					Name: core.Spec.Components.Registry.Credentials.PasswordRef,
 				},
-				Key:      goharborv1alpha2.SharedSecretKey,
+				Key:      harbormetav1.SharedSecretKey,
 				Optional: &varFalse,
 			},
 		},
@@ -213,7 +215,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 		Name: "JOBSERVICE_SECRET",
 		ValueFrom: &corev1.EnvVarSource{
 			SecretKeyRef: &corev1.SecretKeySelector{
-				Key:      goharborv1alpha2.SharedSecretKey,
+				Key:      harbormetav1.SharedSecretKey,
 				Optional: &varFalse,
 				LocalObjectReference: corev1.LocalObjectReference{
 					Name: core.Spec.Components.JobService.SecretRef,
@@ -224,7 +226,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 		Name: "CSRF_KEY",
 		ValueFrom: &corev1.EnvVarSource{
 			SecretKeyRef: &corev1.SecretKeySelector{
-				Key:      goharborv1alpha2.CSRFSecretKey,
+				Key:      harbormetav1.CSRFSecretKey,
 				Optional: &varFalse,
 				LocalObjectReference: corev1.LocalObjectReference{
 					Name: core.Spec.CSRFKeyRef,
@@ -257,7 +259,34 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 		Value: fmt.Sprintf("%v", core.Spec.Components.TLS != nil),
 	}}...)
 
-	if len(core.Spec.Components.Registry.Redis.DSN) > 0 {
+	if core.Spec.Database.MaxIdleConnections != nil {
+		maxConns, err := harbor.EnvVar(common.PostGreSQLMaxIdleConns, harbor.Value(fmt.Sprintf("%d", *core.Spec.Database.MaxIdleConnections)))
+		if err != nil {
+			return nil, errors.Wrap(err, "cannot configure max idle connections")
+		}
+
+		envs = append(envs, maxConns)
+	}
+
+	if core.Spec.Database.MaxOpenConnections != nil {
+		maxConns, err := harbor.EnvVar(common.PostGreSQLMaxOpenConns, harbor.Value(fmt.Sprintf("%d", *core.Spec.Database.MaxOpenConnections)))
+		if err != nil {
+			return nil, errors.Wrap(err, "cannot configure max open connections")
+		}
+
+		envs = append(envs, maxConns)
+	}
+
+	if sslMode, ok := core.Spec.Database.Parameters[harbormetav1.PostgresSSLModeKey]; ok {
+		sslModeVar, err := harbor.EnvVar(common.PostGreSQLSSLMode, harbor.Value(sslMode))
+		if err != nil {
+			return nil, errors.Wrap(err, "cannot configure ssl mode")
+		}
+
+		envs = append(envs, sslModeVar)
+	}
+
+	if core.Spec.Components.Registry.Redis != nil {
 		envs = append(envs, corev1.EnvVar{
 			Name: "_REDIS_URL_REG",
 			ValueFrom: &corev1.EnvVarSource{
@@ -299,39 +328,39 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 	}
 
 	if core.Spec.Components.Clair != nil {
-		database, dbName, err := goharborv1alpha2.FromOpacifiedDSN(core.Spec.Database.OpacifiedDSN)
-		if err != nil {
-			return nil, errors.Wrap(err, "database")
-		}
-
 		adapterURLConfig, err := harbor.EnvVar(common.ClairAdapterURL, harbor.Value(core.Spec.Components.Clair.AdapterURL))
 		if err != nil {
 			return nil, errors.Wrap(err, "cannot configure clair")
 		}
 
+		sslMode, ok := core.Spec.Components.Clair.Database.Parameters[harbormetav1.PostgresSSLModeKey]
+		if !ok {
+			sslMode = ""
+		}
+
 		envs = append(envs, adapterURLConfig, corev1.EnvVar{
 			Name:  "CLAIR_DB_HOST",
-			Value: database.Host,
+			Value: core.Spec.Components.Clair.Database.Hosts[0].Host,
 		}, corev1.EnvVar{
 			Name:  "CLAIR_DB_PORT",
-			Value: fmt.Sprintf("%d", database.Port),
+			Value: fmt.Sprintf("%d", core.Spec.Components.Clair.Database.Hosts[0].Port),
 		}, corev1.EnvVar{
 			Name:  "CLAIR_DB_USERNAME",
-			Value: database.Username,
+			Value: core.Spec.Components.Clair.Database.Username,
 		}, corev1.EnvVar{
 			Name:  "CLAIR_DB",
-			Value: dbName,
+			Value: core.Spec.Components.Clair.Database.Database,
 		}, corev1.EnvVar{
 			Name:  "CLAIR_DB_SSLMODE",
-			Value: database.SSLMode,
+			Value: sslMode,
 		}, corev1.EnvVar{
 			Name: "CLAIR_DB_PASSWORD",
 			ValueFrom: &corev1.EnvVarSource{
 				SecretKeyRef: &corev1.SecretKeySelector{
-					Key:      goharborv1alpha2.PostgresqlPasswordKey,
+					Key:      harbormetav1.PostgresqlPasswordKey,
 					Optional: &varFalse,
 					LocalObjectReference: corev1.LocalObjectReference{
-						Name: database.PasswordRef,
+						Name: core.Spec.Components.Clair.Database.PasswordRef,
 					},
 				},
 			},
@@ -402,9 +431,9 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 		})
 	}
 
-	port := goharborv1alpha2.CoreHTTPPortName
+	port := harbormetav1.CoreHTTPPortName
 	if core.Spec.Components.TLS.Enabled() {
-		port = goharborv1alpha2.CoreHTTPSPortName
+		port = harbormetav1.CoreHTTPSPortName
 	}
 
 	httpGET := &corev1.HTTPGetAction{
@@ -437,35 +466,33 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 					NodeSelector:                 core.Spec.NodeSelector,
 					AutomountServiceAccountToken: &varFalse,
 					Volumes:                      volumes,
-					Containers: []corev1.Container{
-						{
-							Name:  "core",
-							Image: image,
-							Ports: []corev1.ContainerPort{{
-								Name:          goharborv1alpha2.CoreHTTPPortName,
-								ContainerPort: httpPort,
-							}, {
-								Name:          goharborv1alpha2.CoreHTTPSPortName,
-								ContainerPort: httpsPort,
-							}},
+					Containers: []corev1.Container{{
+						Name:  "core",
+						Image: image,
+						Ports: []corev1.ContainerPort{{
+							Name:          harbormetav1.CoreHTTPPortName,
+							ContainerPort: httpPort,
+						}, {
+							Name:          harbormetav1.CoreHTTPSPortName,
+							ContainerPort: httpsPort,
+						}},
 
-							// https://github.com/goharbor/harbor/blob/master/make/photon/prepare/templates/core/env.jinja
-							Env:             envs,
-							ImagePullPolicy: corev1.PullAlways,
-							LivenessProbe: &corev1.Probe{
-								Handler: corev1.Handler{
-									HTTPGet: httpGET,
-								},
-								PeriodSeconds: int32(healthCheckPeriod.Seconds()),
+						// https://github.com/goharbor/harbor/blob/master/make/photon/prepare/templates/core/env.jinja
+						Env:             envs,
+						ImagePullPolicy: corev1.PullAlways,
+						LivenessProbe: &corev1.Probe{
+							Handler: corev1.Handler{
+								HTTPGet: httpGET,
 							},
-							ReadinessProbe: &corev1.Probe{
-								Handler: corev1.Handler{
-									HTTPGet: httpGET,
-								},
-							},
-							VolumeMounts: volumeMounts,
+							PeriodSeconds: int32(healthCheckPeriod.Seconds()),
 						},
-					},
+						ReadinessProbe: &corev1.Probe{
+							Handler: corev1.Handler{
+								HTTPGet: httpGET,
+							},
+						},
+						VolumeMounts: volumeMounts,
+					}},
 				},
 			},
 		},

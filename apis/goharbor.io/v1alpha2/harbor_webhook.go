@@ -58,23 +58,10 @@ func (h *Harbor) ValidateDelete() error {
 func (h *Harbor) Validate() error {
 	var allErrs field.ErrorList
 
-	err := h.Spec.Expose.Core.Validate()
-	if err != nil {
-		allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("expose").Child("core"), h.Spec.Expose.Core, err.Error()))
-	}
-
-	err = h.Spec.Expose.Notary.Validate()
-	if err != nil {
-		allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("expose").Child("core"), h.Spec.Expose.Core, err.Error()))
-	}
-
-	err = h.Spec.Persistence.ImageChartStorage.Validate()
+	err := h.Spec.Persistence.ImageChartStorage.Validate()
 	if err != nil {
 		allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("persistence").Child("imageChartStorage"), h.Spec.Persistence.ImageChartStorage, err.Error()))
 	}
-
-	errs := h.Spec.HarborComponentsSpec.Database.Validate()
-	allErrs = append(allErrs, errs...)
 
 	if len(allErrs) == 0 {
 		return nil

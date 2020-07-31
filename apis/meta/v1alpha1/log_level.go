@@ -1,4 +1,4 @@
-package v1alpha2
+package v1alpha1
 
 // +kubebuilder:validation:Type=string
 // +kubebuilder:validation:Enum={"debug","info","warning","error","fatal"}
@@ -71,6 +71,7 @@ func (l HarborLogLevel) Registry() RegistryLogLevel {
 }
 
 // +kubebuilder:validation:Type=string
+// +kubebuilder:validation:Enum={"debug","info","warning","error","fatal"}
 // CoreLogLevel is the log level for RegistryController.
 type RegistryCtlLogLevel string
 

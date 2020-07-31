@@ -3,16 +3,13 @@ package v1alpha2
 import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 )
 
 const (
 	RegistryCorePublicURLKey = "REGISTRY_HTTP_HOST"
 	RegistryAuthURLKey       = "REGISTRY_AUTH_TOKEN_REALM" // RegistryCorePublicURLKey + "/service/token"
-)
-
-const (
-	RegistryAPIPortName     = "api"
-	RegistryMetricsPortName = "metrics"
 )
 
 // +genclient
@@ -35,7 +32,7 @@ type Registry struct {
 
 	Spec RegistrySpec `json:"spec,omitempty"`
 
-	Status ComponentStatus `json:"status,omitempty"`
+	Status harbormetav1.ComponentStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -50,8 +47,8 @@ type RegistryList struct {
 // RegistrySpec defines the desired state of Registry.
 // See https://docs.docker.com/registry/configuration/
 type RegistrySpec struct {
-	ComponentSpec    `json:",inline"`
-	RegistryConfig01 `json:",inline"`
+	harbormetav1.ComponentSpec `json:",inline"`
+	RegistryConfig01           `json:",inline"`
 }
 
 func (r *RegistrySpec) Default() {
@@ -157,7 +154,7 @@ type RegistryLogSpec struct {
 	AccessLog RegistryAccessLogSpec `json:"accessLog,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	Level RegistryLogLevel `json:"level,omitempty"`
+	Level harbormetav1.RegistryLogLevel `json:"level,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Enum={"text","json","logstash"}
@@ -287,7 +284,7 @@ type RegistryHTTPSpec struct {
 	// Use this to configure TLS for the server.
 	// If you already have a web server running on the same host as the registry,
 	// you may prefer to configure TLS on that web server and proxy connections to the registry server.
-	TLS *ComponentsTLSSpec `json:"tls,omitempty"`
+	TLS *harbormetav1.ComponentsTLSSpec `json:"tls,omitempty"`
 }
 
 type RegistryHTTPHTTP2Spec struct {

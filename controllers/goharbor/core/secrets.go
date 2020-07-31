@@ -11,6 +11,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 )
 
 const (
@@ -35,9 +36,9 @@ func (r *Reconciler) GetSecret(ctx context.Context, core *goharborv1alpha2.Core)
 			return nil, errors.Wrap(err, "cannot get redis password")
 		}
 
-		password, ok := passwordSecret.Data[goharborv1alpha2.RedisPasswordKey]
+		password, ok := passwordSecret.Data[harbormetav1.RedisPasswordKey]
 		if !ok {
-			return nil, errors.Errorf("%s not found in secret %s", goharborv1alpha2.RedisPasswordKey, core.Spec.Redis.PasswordRef)
+			return nil, errors.Errorf("%s not found in secret %s", harbormetav1.RedisPasswordKey, core.Spec.Redis.PasswordRef)
 		}
 
 		redisPassword = string(password)
@@ -61,9 +62,9 @@ func (r *Reconciler) GetSecret(ctx context.Context, core *goharborv1alpha2.Core)
 			return nil, errors.Wrap(err, "cannot get registry redis password")
 		}
 
-		password, ok := passwordSecret.Data[goharborv1alpha2.RedisPasswordKey]
+		password, ok := passwordSecret.Data[harbormetav1.RedisPasswordKey]
 		if !ok {
-			return nil, errors.Errorf("%s not found in secret %s", goharborv1alpha2.RedisPasswordKey, core.Spec.Components.Registry.Redis.PasswordRef)
+			return nil, errors.Errorf("%s not found in secret %s", harbormetav1.RedisPasswordKey, core.Spec.Components.Registry.Redis.PasswordRef)
 		}
 
 		registryPassword = string(password)

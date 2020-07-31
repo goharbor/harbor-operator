@@ -27,6 +27,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 )
 
 func newJobServiceController() controllerTest {
@@ -47,9 +48,9 @@ func setupJobServiceResourceDependencies(ctx context.Context, ns string) (string
 			Namespace: ns,
 		},
 		StringData: map[string]string{
-			goharborv1alpha2.RedisPasswordKey: "redis-password",
+			harbormetav1.RedisPasswordKey: "redis-password",
 		},
-		Type: goharborv1alpha2.SecretTypeRedis,
+		Type: harbormetav1.SecretTypeRedis,
 	})).To(Succeed())
 
 	Expect(k8sClient.Create(ctx, &corev1.Secret{
@@ -58,9 +59,9 @@ func setupJobServiceResourceDependencies(ctx context.Context, ns string) (string
 			Namespace: ns,
 		},
 		StringData: map[string]string{
-			goharborv1alpha2.SharedSecretKey: "registry-password",
+			harbormetav1.SharedSecretKey: "registry-password",
 		},
-		Type: goharborv1alpha2.SecretTypeSingle,
+		Type: harbormetav1.SecretTypeSingle,
 	})).To(Succeed())
 
 	return redisSecret, registrySecret
@@ -126,8 +127,8 @@ func updateJobService(ctx context.Context, object Resource) {
 	jobService.Spec.Replicas = &replicas
 }
 
-func getJobServiceStatusFunc(ctx context.Context, key client.ObjectKey) func() goharborv1alpha2.ComponentStatus {
-	return func() goharborv1alpha2.ComponentStatus {
+func getJobServiceStatusFunc(ctx context.Context, key client.ObjectKey) func() harbormetav1.ComponentStatus {
+	return func() harbormetav1.ComponentStatus {
 		var jobService goharborv1alpha2.JobService
 
 		err := k8sClient.Get(ctx, key, &jobService)

@@ -1,4 +1,4 @@
-package v1alpha2
+package v1alpha1
 
 // +kubebuilder:validation:Type=object
 // ControllerStatus represents the current status of the operator.

@@ -10,12 +10,12 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/pkg/errors"
 )
 
 const (
-	port                 = 4443
-	HealthCheck          = "/_notary_server/health"
+	HealthPath           = "/_notary_server/health"
 	VolumeName           = "config"
 	ConfigPath           = "/etc/notary-server"
 	HTTPSVolumeName      = "certificates"
@@ -27,6 +27,8 @@ const (
 )
 
 var varFalse = false
+
+const apiPort = 4443
 
 func (r *Reconciler) GetDeployment(ctx context.Context, notary *goharborv1alpha2.NotaryServer) (*appsv1.Deployment, error) { // nolint:funlen
 	image, err := r.GetImage(ctx)
@@ -69,12 +71,12 @@ func (r *Reconciler) GetDeployment(ctx context.Context, notary *goharborv1alpha2
 		})
 	}
 
-	if notary.Spec.HTTPS != nil {
+	if notary.Spec.TLS.Enabled() {
 		volumes = append(volumes, corev1.Volume{
 			Name: HTTPSVolumeName,
 			VolumeSource: corev1.VolumeSource{
 				Secret: &corev1.SecretVolumeSource{
-					SecretName: notary.Spec.HTTPS.CertificateRef,
+					SecretName: notary.Spec.TLS.CertificateRef,
 				},
 			},
 		})
@@ -114,6 +116,12 @@ func (r *Reconciler) GetDeployment(ctx context.Context, notary *goharborv1alpha2
 		}
 	}
 
+	httpGET := &corev1.HTTPGetAction{
+		Path:   HealthPath,
+		Port:   intstr.FromString(harbormetav1.NotaryServerAPIPortName),
+		Scheme: notary.Spec.TLS.GetScheme(),
+	}
+
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
@@ -139,37 +147,28 @@ func (r *Reconciler) GetDeployment(ctx context.Context, notary *goharborv1alpha2
 					AutomountServiceAccountToken: &varFalse,
 					Volumes:                      volumes,
 					InitContainers:               initContainers,
-					Containers: []corev1.Container{
-						{
-							Name:            "notary-server",
-							Image:           image,
-							Args:            []string{"notary-server", "-config", path.Join(ConfigPath, ConfigName)},
-							ImagePullPolicy: corev1.PullAlways,
-							Ports: []corev1.ContainerPort{
-								{
-									ContainerPort: port,
-								},
-							},
-							VolumeMounts: volumeMounts,
+					Containers: []corev1.Container{{
+						Name:            "notary-server",
+						Image:           image,
+						Args:            []string{"notary-server", "-config", path.Join(ConfigPath, ConfigName)},
+						ImagePullPolicy: corev1.PullAlways,
+						Ports: []corev1.ContainerPort{{
+							ContainerPort: apiPort,
+							Name:          harbormetav1.NotaryServerAPIPortName,
+						}},
+						VolumeMounts: volumeMounts,
 
-							LivenessProbe: &corev1.Probe{
-								Handler: corev1.Handler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path: HealthCheck,
-										Port: intstr.FromInt(port),
-									},
-								},
-							},
-							ReadinessProbe: &corev1.Probe{
-								Handler: corev1.Handler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path: HealthCheck,
-										Port: intstr.FromInt(port),
-									},
-								},
+						LivenessProbe: &corev1.Probe{
+							Handler: corev1.Handler{
+								HTTPGet: httpGET,
 							},
 						},
-					},
+						ReadinessProbe: &corev1.Probe{
+							Handler: corev1.Handler{
+								HTTPGet: httpGET,
+							},
+						},
+					}},
 				},
 			},
 		},

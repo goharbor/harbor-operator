@@ -26,6 +26,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 )
 
 func newCoreController() controllerTest {
@@ -52,9 +53,9 @@ func setupCoreResourceDependencies(ctx context.Context, ns string) (string, stri
 			Namespace: ns,
 		},
 		StringData: map[string]string{
-			goharborv1alpha2.SharedSecretKey: "1234567890123456",
+			harbormetav1.SharedSecretKey: "1234567890123456",
 		},
-		Type: goharborv1alpha2.SecretTypeSingle,
+		Type: harbormetav1.SecretTypeSingle,
 	})).To(Succeed())
 
 	Expect(k8sClient.Create(ctx, &corev1.Secret{
@@ -63,9 +64,9 @@ func setupCoreResourceDependencies(ctx context.Context, ns string) (string, stri
 			Namespace: ns,
 		},
 		StringData: map[string]string{
-			goharborv1alpha2.CSRFSecretKey: "12345678901234567890123456789012",
+			harbormetav1.CSRFSecretKey: "12345678901234567890123456789012",
 		},
-		Type: goharborv1alpha2.SecretTypeCSRF,
+		Type: harbormetav1.SecretTypeCSRF,
 	})).To(Succeed())
 
 	Expect(k8sClient.Create(ctx, &corev1.Secret{
@@ -74,9 +75,9 @@ func setupCoreResourceDependencies(ctx context.Context, ns string) (string, stri
 			Namespace: ns,
 		},
 		StringData: map[string]string{
-			goharborv1alpha2.SharedSecretKey: "the-registryctl-password",
+			harbormetav1.SharedSecretKey: "the-registryctl-password",
 		},
-		Type: goharborv1alpha2.SecretTypeSingle,
+		Type: harbormetav1.SecretTypeSingle,
 	})).To(Succeed())
 
 	Expect(k8sClient.Create(ctx, &corev1.Secret{
@@ -85,9 +86,9 @@ func setupCoreResourceDependencies(ctx context.Context, ns string) (string, stri
 			Namespace: ns,
 		},
 		StringData: map[string]string{
-			goharborv1alpha2.SharedSecretKey: "Harbor12345",
+			harbormetav1.SharedSecretKey: "Harbor12345",
 		},
-		Type: goharborv1alpha2.SecretTypeSingle,
+		Type: harbormetav1.SecretTypeSingle,
 	})).To(Succeed())
 
 	Expect(k8sClient.Create(ctx, &corev1.Secret{
@@ -96,9 +97,9 @@ func setupCoreResourceDependencies(ctx context.Context, ns string) (string, stri
 			Namespace: ns,
 		},
 		StringData: map[string]string{
-			goharborv1alpha2.SharedSecretKey: "unsecure-core-secret",
+			harbormetav1.SharedSecretKey: "unsecure-core-secret",
 		},
-		Type: goharborv1alpha2.SecretTypeSingle,
+		Type: harbormetav1.SecretTypeSingle,
 	})).To(Succeed())
 
 	Expect(k8sClient.Create(ctx, &corev1.Secret{
@@ -107,9 +108,9 @@ func setupCoreResourceDependencies(ctx context.Context, ns string) (string, stri
 			Namespace: ns,
 		},
 		StringData: map[string]string{
-			goharborv1alpha2.SharedSecretKey: "unsecure-jobservice-secret",
+			harbormetav1.SharedSecretKey: "unsecure-jobservice-secret",
 		},
-		Type: goharborv1alpha2.SecretTypeSingle,
+		Type: harbormetav1.SecretTypeSingle,
 	})).To(Succeed())
 
 	Expect(k8sClient.Create(ctx, &corev1.Secret{
@@ -118,7 +119,7 @@ func setupCoreResourceDependencies(ctx context.Context, ns string) (string, stri
 			Namespace: ns,
 		},
 		Data: generateCertificate(),
-		Type: goharborv1alpha2.SecretTypeSingle,
+		Type: harbormetav1.SecretTypeSingle,
 	})).To(Succeed())
 
 	Expect(k8sClient.Create(ctx, &corev1.Secret{
@@ -127,9 +128,9 @@ func setupCoreResourceDependencies(ctx context.Context, ns string) (string, stri
 			Namespace: ns,
 		},
 		StringData: map[string]string{
-			goharborv1alpha2.RedisPasswordKey: "the-redis-password",
+			harbormetav1.RedisPasswordKey: "the-redis-password",
 		},
-		Type: goharborv1alpha2.SecretTypeRedis,
+		Type: harbormetav1.SecretTypeRedis,
 	})).To(Succeed())
 
 	return encryption, csrf, registryCtl, admin, core, jobservice, tokenCert, redis
@@ -138,7 +139,7 @@ func setupCoreResourceDependencies(ctx context.Context, ns string) (string, stri
 func setupValidCore(ctx context.Context, ns string) (Resource, client.ObjectKey) {
 	encryptionKeyName, csrfKey, registryCtlPassword, adminPassword, coreSecret, jobserviceSecret, tokenCertificate, redisPassword := setupCoreResourceDependencies(ctx, ns)
 
-	databaseDSN := setupPostgresql(ctx, ns)
+	database := setupPostgresql(ctx, ns)
 
 	name := newName("core")
 	core := &goharborv1alpha2.Core{
@@ -148,8 +149,8 @@ func setupValidCore(ctx context.Context, ns string) (Resource, client.ObjectKey)
 		},
 		Spec: goharborv1alpha2.CoreSpec{
 			Database: goharborv1alpha2.CoreDatabaseSpec{
-				OpacifiedDSN:     databaseDSN,
-				EncryptionKeyRef: encryptionKeyName,
+				PostgresConnectionWithParameters: database,
+				EncryptionKeyRef:                 encryptionKeyName,
 			},
 			CSRFKeyRef: csrfKey,
 			CoreConfig: goharborv1alpha2.CoreConfig{
@@ -211,8 +212,8 @@ func updateCore(ctx context.Context, object Resource) {
 	core.Spec.Replicas = &replicas
 }
 
-func getCoreStatusFunc(ctx context.Context, key client.ObjectKey) func() goharborv1alpha2.ComponentStatus {
-	return func() goharborv1alpha2.ComponentStatus {
+func getCoreStatusFunc(ctx context.Context, key client.ObjectKey) func() harbormetav1.ComponentStatus {
+	return func() harbormetav1.ComponentStatus {
 		var core goharborv1alpha2.Core
 
 		err := k8sClient.Get(ctx, key, &core)

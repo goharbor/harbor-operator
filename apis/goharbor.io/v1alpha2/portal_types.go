@@ -1,12 +1,8 @@
 package v1alpha2
 
 import (
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-)
-
-const (
-	PortalHTTPPortName  = "http"
-	PortalHTTPSPortName = "https"
 )
 
 // +genclient
@@ -28,7 +24,7 @@ type Portal struct {
 
 	Spec PortalSpec `json:"spec,omitempty"`
 
-	Status ComponentStatus `json:"status,omitempty"`
+	Status harbormetav1.ComponentStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -41,7 +37,7 @@ type PortalList struct {
 
 // PortalSpec defines the desired state of Portal.
 type PortalSpec struct {
-	ComponentSpec `json:",inline"`
+	harbormetav1.ComponentSpec `json:",inline"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=0
@@ -50,7 +46,7 @@ type PortalSpec struct {
 	MaxConnections *int32 `json:"maxConnections,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	TLS *ComponentsTLSSpec `json:"tls,omitempty"`
+	TLS *harbormetav1.ComponentsTLSSpec `json:"tls,omitempty"`
 }
 
 func init() { // nolint:gochecknoinits

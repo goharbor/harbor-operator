@@ -8,6 +8,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 )
 
 const (
@@ -24,13 +25,11 @@ func (r *Reconciler) GetService(ctx context.Context, notary *goharborv1alpha2.No
 			Namespace: namespace,
 		},
 		Spec: corev1.ServiceSpec{
-			Ports: []corev1.ServicePort{
-				{
-					Name:       notary.Name,
-					Port:       PublicPort,
-					TargetPort: intstr.FromInt(port),
-				},
-			},
+			Ports: []corev1.ServicePort{{
+				Name:       harbormetav1.NotarySignerAPIPortName,
+				Port:       goharborv1alpha2.NotarySignerAPIPort,
+				TargetPort: intstr.FromString(harbormetav1.NotarySignerAPIPortName),
+			}},
 			Selector: map[string]string{
 				r.Label("name"):      name,
 				r.Label("namespace"): namespace,
