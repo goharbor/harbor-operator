@@ -54,19 +54,28 @@ type JobServiceSpec struct {
 	Core JobServiceCoreSpec `json:"core"`
 
 	// +kubebuilder:validation:Required
+	TokenService JobServiceTokenSpec `json:"tokenService"`
+
+	// +kubebuilder:validation:Required
 	// Configurations of worker pool
-	WorkerPool JobServicePoolSpec `json:"workerPool,omitempty"`
+	WorkerPool JobServicePoolSpec `json:"workerPool"`
 
 	// +kubebuilder:validation:Required
 	// Job logger configurations
-	JobLoggers JobServiceLoggerConfigSpec `json:"jobLoggers,omitempty"`
+	JobLoggers JobServiceLoggerConfigSpec `json:"jobLoggers"`
 
 	// +kubebuilder:validation:Required
 	// Logger configurations
-	Loggers JobServiceLoggerConfigSpec `json:"loggers,omitempty"`
+	Loggers JobServiceLoggerConfigSpec `json:"loggers"`
 
 	// +kubebuilder:validation:Required
-	Registry CoreComponentsRegistryCredentialsSpec `json:"registry"`
+	Registry RegistryControllerConnectionSpec `json:"registry"`
+}
+
+type JobServiceTokenSpec struct {
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Pattern="https?://.+"
+	URL string `json:"url"`
 }
 
 type JobServiceCoreSpec struct {
@@ -75,7 +84,7 @@ type JobServiceCoreSpec struct {
 	SecretRef string `json:"secretRef"`
 
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Pattern=".+://.+"
+	// +kubebuilder:validation:Pattern="https?://.+"
 	URL string `json:"url"`
 }
 

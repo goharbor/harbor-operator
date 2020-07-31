@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"path"
 
+	"github.com/goharbor/harbor/src/common"
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -13,6 +14,7 @@ import (
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	"github.com/goharbor/harbor-operator/pkg/config/harbor"
 )
 
 const (
@@ -43,74 +45,78 @@ func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1al
 	name := r.NormalizeName(ctx, jobservice.GetName())
 	namespace := jobservice.GetNamespace()
 
-	envs := []corev1.EnvVar{
-		{
-			Name: "CORE_SECRET",
-			ValueFrom: &corev1.EnvVarSource{
-				SecretKeyRef: &corev1.SecretKeySelector{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: jobservice.Spec.Core.SecretRef,
-					},
-					Key:      harbormetav1.SharedSecretKey,
-					Optional: &varFalse,
-				},
-			},
-		}, {
-			Name:  "REGISTRY_CREDENTIAL_USERNAME",
-			Value: jobservice.Spec.Registry.Username,
-		}, {
-			Name: "REGISTRY_CREDENTIAL_PASSWORD",
-			ValueFrom: &corev1.EnvVarSource{
-				SecretKeyRef: &corev1.SecretKeySelector{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: jobservice.Spec.Registry.PasswordRef,
-					},
-					Key:      harbormetav1.SharedSecretKey,
-					Optional: &varFalse,
-				},
-			},
-		}, {
-			Name: "JOBSERVICE_SECRET",
-			ValueFrom: &corev1.EnvVarSource{
-				SecretKeyRef: &corev1.SecretKeySelector{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: jobservice.Spec.SecretRef,
-					},
-					Key:      harbormetav1.SharedSecretKey,
-					Optional: &varFalse,
-				},
-			},
-		}, {
-			Name:  "CORE_URL",
-			Value: jobservice.Spec.Core.URL,
-		},
+	envs, err := harbor.EnvVars(map[string]harbor.ConfigValue{
+		common.RegistryControllerURL: harbor.Value(jobservice.Spec.Registry.ControllerURL),
+		common.RegistryURL:           harbor.Value(jobservice.Spec.Registry.RegistryURL),
+		common.CoreURL:               harbor.Value(jobservice.Spec.Core.URL),
+		common.TokenServiceURL:       harbor.Value(jobservice.Spec.TokenService.URL),
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot configure environment variables")
 	}
-	volumes := []corev1.Volume{
-		{
-			Name: ConfigVolumeName,
-			VolumeSource: corev1.VolumeSource{
-				ConfigMap: &corev1.ConfigMapVolumeSource{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: name,
-					},
+
+	envs = append(envs, corev1.EnvVar{
+		Name: "CORE_SECRET",
+		ValueFrom: &corev1.EnvVarSource{
+			SecretKeyRef: &corev1.SecretKeySelector{
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: jobservice.Spec.Core.SecretRef,
 				},
-			},
-		}, {
-			Name: LogsVolumeName,
-			VolumeSource: corev1.VolumeSource{
-				EmptyDir: &corev1.EmptyDirVolumeSource{},
+				Key:      harbormetav1.SharedSecretKey,
+				Optional: &varFalse,
 			},
 		},
-	}
-	volumeMounts := []corev1.VolumeMount{
-		{
-			MountPath: ConfigPath,
-			Name:      ConfigVolumeName,
-		}, {
-			MountPath: logsDirectory,
-			Name:      LogsVolumeName,
+	}, corev1.EnvVar{
+		Name:  "REGISTRY_CREDENTIAL_USERNAME",
+		Value: jobservice.Spec.Registry.Credentials.Username,
+	}, corev1.EnvVar{
+		Name: "REGISTRY_CREDENTIAL_PASSWORD",
+		ValueFrom: &corev1.EnvVarSource{
+			SecretKeyRef: &corev1.SecretKeySelector{
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: jobservice.Spec.Registry.Credentials.PasswordRef,
+				},
+				Key:      harbormetav1.SharedSecretKey,
+				Optional: &varFalse,
+			},
 		},
-	}
+	}, corev1.EnvVar{
+		Name: "JOBSERVICE_SECRET",
+		ValueFrom: &corev1.EnvVarSource{
+			SecretKeyRef: &corev1.SecretKeySelector{
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: jobservice.Spec.SecretRef,
+				},
+				Key:      harbormetav1.SharedSecretKey,
+				Optional: &varFalse,
+			},
+		},
+	}, corev1.EnvVar{
+		Name:  "INTERNAL_TLS_ENABLED",
+		Value: fmt.Sprintf("%v", jobservice.Spec.TLS.Enabled()),
+	})
+	volumes := []corev1.Volume{{
+		Name: ConfigVolumeName,
+		VolumeSource: corev1.VolumeSource{
+			ConfigMap: &corev1.ConfigMapVolumeSource{
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: name,
+				},
+			},
+		},
+	}, {
+		Name: LogsVolumeName,
+		VolumeSource: corev1.VolumeSource{
+			EmptyDir: &corev1.EmptyDirVolumeSource{},
+		},
+	}}
+	volumeMounts := []corev1.VolumeMount{{
+		MountPath: ConfigPath,
+		Name:      ConfigVolumeName,
+	}, {
+		MountPath: logsDirectory,
+		Name:      LogsVolumeName,
+	}}
 
 	if jobservice.Spec.TLS.Enabled() {
 		envs = append(envs, corev1.EnvVar{

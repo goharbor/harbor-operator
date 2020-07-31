@@ -101,7 +101,7 @@ const (
 	DefaultJobServiceLogSweeper = 14 * time.Hour
 )
 
-func (r *Reconciler) GetJobService(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*goharborv1alpha2.JobService, error) {
+func (r *Reconciler) GetJobService(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*goharborv1alpha2.JobService, error) { // nolint:funlen
 	name := r.NormalizeName(ctx, harbor.GetName())
 	namespace := harbor.GetNamespace()
 
@@ -113,6 +113,21 @@ func (r *Reconciler) GetJobService(ctx context.Context, harbor *goharborv1alpha2
 	registryAuthRef := r.NormalizeName(ctx, harbor.GetName(), controllers.Registry.String(), "basicauth")
 	secretRef := r.NormalizeName(ctx, harbor.GetName(), controllers.JobService.String(), "secret")
 	logLevel := harbor.Spec.LogLevel.JobService()
+	registryURL := (&url.URL{
+		Scheme: harbor.Spec.InternalTLS.GetScheme(),
+		Host:   r.NormalizeName(ctx, harbor.GetName(), controllers.Registry.String()),
+	}).String()
+	registryControllerURL := (&url.URL{
+		Scheme: harbor.Spec.InternalTLS.GetScheme(),
+		Host:   r.NormalizeName(ctx, harbor.GetName(), controllers.RegistryController.String()),
+	}).String()
+
+	serviceTokenURL, err := url.Parse(harbor.Spec.ExternalURL)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot parse externalURL")
+	}
+
+	serviceTokenURL.Path += "/service/token"
 
 	redisDSN := harbor.Spec.RedisDSN(harbormetav1.JobServiceRedis)
 
@@ -148,9 +163,16 @@ func (r *Reconciler) GetJobService(ctx context.Context, harbor *goharborv1alpha2
 					OpacifiedDSN: redisDSN,
 				},
 			},
-			Registry: goharborv1alpha2.CoreComponentsRegistryCredentialsSpec{
-				PasswordRef: registryAuthRef,
-				Username:    RegistryAuthenticationUsername,
+			Registry: goharborv1alpha2.RegistryControllerConnectionSpec{
+				Credentials: goharborv1alpha2.CoreComponentsRegistryCredentialsSpec{
+					PasswordRef: registryAuthRef,
+					Username:    RegistryAuthenticationUsername,
+				},
+				RegistryURL:   registryURL,
+				ControllerURL: registryControllerURL,
+			},
+			TokenService: goharborv1alpha2.JobServiceTokenSpec{
+				URL: serviceTokenURL.String(),
 			},
 			SecretRef: secretRef,
 			TLS:       tls,
