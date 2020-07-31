@@ -10,7 +10,7 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/resources"
 )
 
-func NewSecret(mutate resources.Mutable) (result resources.Mutable) {
+func NewSecret(mutate resources.Mutable, override, remove bool) (result resources.Mutable) {
 	result = func(ctx context.Context, secretResource, secretResult runtime.Object) controllerutil.MutateFn {
 		result := secretResult.(*corev1.Secret)
 		desired := secretResource.(*corev1.Secret)
@@ -18,20 +18,18 @@ func NewSecret(mutate resources.Mutable) (result resources.Mutable) {
 		mutate := mutate(ctx, desired, result)
 
 		return func() error {
-			// Most of password are generated
-			// Do not override existing secrets
-			// To update secrets value, we should rename the key or
-			//  delete it before recreating it.
 			for key := range result.Data {
 				_, okString := desired.StringData[key]
 				_, okBytes := desired.Data[key]
 
-				if !okString && !okBytes {
+				if remove && !okString && !okBytes {
 					delete(result.Data, key)
 				}
 
-				delete(desired.Data, key)
-				delete(desired.StringData, key)
+				if !override {
+					delete(desired.Data, key)
+					delete(desired.StringData, key)
+				}
 			}
 
 			if result.Data == nil {
@@ -42,9 +40,13 @@ func NewSecret(mutate resources.Mutable) (result resources.Mutable) {
 				result.Data[name] = value
 			}
 
-			// StringData is write only, it overrides Data
-			// so we can compare with remote result
-			result.StringData = desired.StringData
+			if result.StringData == nil {
+				result.StringData = map[string]string{}
+			}
+
+			for name, value := range desired.StringData {
+				result.StringData[name] = value
+			}
 
 			return mutate()
 		}
