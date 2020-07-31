@@ -149,13 +149,13 @@ func (r *Reconciler) AddCoreConfigurations(ctx context.Context, harbor *goharbor
 
 type Core graph.Resource
 
-func (r *Reconciler) AddCore(ctx context.Context, harbor *goharborv1alpha2.Harbor, coreCertificate CoreInternalCertificate, registryAuth RegistryAuthSecret, chartMuseumAuth ChartMuseumAuthSecret, csrf CoreCSRF, tokenCertificate CoreTokenCertificate, secret CoreSecret, adminPassword CoreAdminPassword, encryptionKey CoreEncryptionKey) (Core, error) {
+func (r *Reconciler) AddCore(ctx context.Context, harbor *goharborv1alpha2.Harbor, coreCertificate CoreInternalCertificate, registryAuth RegistryAuthSecret, csrf CoreCSRF, tokenCertificate CoreTokenCertificate, secret CoreSecret, adminPassword CoreAdminPassword, encryptionKey CoreEncryptionKey) (Core, error) {
 	core, err := r.GetCore(ctx, harbor)
 	if err != nil {
 		return nil, errors.Wrap(err, "get")
 	}
 
-	coreRes, err := r.AddBasicResource(ctx, core, coreCertificate, registryAuth, chartMuseumAuth, csrf, tokenCertificate, secret, adminPassword, encryptionKey)
+	coreRes, err := r.AddBasicResource(ctx, core, coreCertificate, registryAuth, csrf, tokenCertificate, secret, adminPassword, encryptionKey)
 
 	return Core(coreRes), errors.Wrap(err, "add")
 }
@@ -212,6 +212,8 @@ func (r *Reconciler) GetCoreSecret(ctx context.Context, harbor *goharborv1alpha2
 		Type:      harbormetav1.SecretTypeSingle,
 		StringData: map[string]string{
 			harbormetav1.SharedSecretKey: secret,
+			corev1.BasicAuthUsernameKey:  ChartMuseumAuthenticationUsername,
+			corev1.BasicAuthPasswordKey:  secret,
 		},
 	}, nil
 }
