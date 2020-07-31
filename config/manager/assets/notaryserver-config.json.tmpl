@@ -1,7 +1,7 @@
 {{/* https://github.com/theupdateframework/notary/blob/master/docs/reference/server-config.md */}}
 {
   "server": {
-    {{- if .Spec.HTTPS }}
+    {{- if .Spec.TLS }}
       "tls_cert_file": "/etc/notary-server/certificates/tls.crt",
       "tls_key_file": "/etc/notary-server/certificates/tls.key",
     {{- end }}
@@ -30,8 +30,8 @@
   },
   {{- end }}
   "storage": {
-    "backend": "{{ .Spec.Storage.Type }}",
-    "db_url": "{{ .Spec.Storage.GetPasswordFieldKey | secretData .Spec.Storage.PasswordRef | .Spec.Storage.GetDSN | toString }}"
+    "backend": "postgres",
+    "db_url": "{{ .Spec.Storage.GetPasswordFieldKey | secretData .Spec.Storage.Postgres.PostgresConnection.PostgresCredentials.PasswordRef | .Spec.Storage.Postgres.GetDSN | toString }}"
   },
   {{- if .Spec.Auth }}
   "auth": {

@@ -11,44 +11,63 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 )
 
-type (
-	InternalTLSCertificateAuthorityIssuer graph.Resource
-	InternalTLSCertificateAuthority       graph.Resource
-	InternalTLSIssuer                     graph.Resource
-)
+func (r *Reconciler) AddInternalTLSConfiguration(ctx context.Context, harbor *goharborv1alpha2.Harbor) (InternalTLSCertificateAuthorityIssuer, InternalTLSCertificateAuthority, InternalTLSIssuer, error) {
+	caIssuer, err := r.AddInternalTLSCAIssuer(ctx, harbor)
+	if err != nil {
+		return nil, nil, nil, errors.Wrap(err, "CA issuer")
+	}
 
-func (r *Reconciler) AddInternalTLSIssuer(ctx context.Context, harbor *goharborv1alpha2.Harbor) (InternalTLSCertificateAuthorityIssuer, InternalTLSCertificateAuthority, InternalTLSIssuer, error) {
+	ca, err := r.AddInternalTLSCACertificate(ctx, harbor, caIssuer)
+	if err != nil {
+		return nil, nil, nil, errors.Wrap(err, "CA")
+	}
+
+	issuer, err := r.AddInternalTLSIssuer(ctx, harbor, ca)
+
+	return caIssuer, ca, issuer, errors.Wrap(err, "TLS issuer")
+}
+
+type InternalTLSCertificateAuthorityIssuer graph.Resource
+
+func (r *Reconciler) AddInternalTLSCAIssuer(ctx context.Context, harbor *goharborv1alpha2.Harbor) (InternalTLSCertificateAuthorityIssuer, error) {
 	caIssuer, err := r.GetInternalTLSCertificateAuthorityIssuer(ctx, harbor)
 	if err != nil {
-		return nil, nil, nil, errors.Wrap(err, "cannot get TLS CA issuer")
+		return nil, errors.Wrap(err, "get")
 	}
 
 	caIssuerRes, err := r.Controller.AddIssuerToManage(ctx, caIssuer)
-	if err != nil {
-		return nil, nil, nil, errors.Wrap(err, "cannot add TLS CA issuer")
-	}
 
+	return InternalTLSCertificateAuthorityIssuer(caIssuerRes), errors.Wrap(err, "add")
+}
+
+type InternalTLSCertificateAuthority graph.Resource
+
+func (r *Reconciler) AddInternalTLSCACertificate(ctx context.Context, harbor *goharborv1alpha2.Harbor, caIssuer InternalTLSCertificateAuthorityIssuer) (InternalTLSCertificateAuthority, error) {
 	ca, err := r.GetInternalTLSCertificateAuthority(ctx, harbor)
 	if err != nil {
-		return nil, nil, nil, errors.Wrap(err, "cannot get TLS CA")
+		return nil, errors.Wrap(err, "get")
 	}
 
-	caRes, err := r.Controller.AddCertificateToManage(ctx, ca, caIssuerRes)
-	if err != nil {
-		return nil, nil, nil, errors.Wrap(err, "cannot add TLS CA")
-	}
+	caRes, err := r.Controller.AddCertificateToManage(ctx, ca, caIssuer)
 
+	return InternalTLSCertificateAuthority(caRes), errors.Wrap(err, "add")
+}
+
+type InternalTLSIssuer graph.Resource
+
+func (r *Reconciler) AddInternalTLSIssuer(ctx context.Context, harbor *goharborv1alpha2.Harbor, ca InternalTLSCertificate) (InternalTLSIssuer, error) {
 	issuer, err := r.GetInternalTLSIssuer(ctx, harbor)
 	if err != nil {
-		return nil, nil, nil, errors.Wrap(err, "cannot get TLS issuer")
+		return nil, errors.Wrap(err, "get")
 	}
 
-	issuerRes, err := r.Controller.AddIssuerToManage(ctx, issuer, caRes)
+	issuerRes, err := r.Controller.AddIssuerToManage(ctx, issuer, ca)
 
-	return InternalTLSCertificateAuthorityIssuer(caIssuerRes), InternalTLSCertificateAuthority(caRes), InternalTLSIssuer(issuerRes), errors.Wrap(err, "cannot add TLS issuer")
+	return InternalTLSIssuer(issuerRes), errors.Wrap(err, "add")
 }
 
 const (
@@ -134,11 +153,11 @@ func (r *Reconciler) GetInternalTLSIssuer(ctx context.Context, harbor *goharborv
 
 type InternalTLSCertificate graph.Resource
 
-func (r *Reconciler) GetInternalTLSCertificateName(ctx context.Context, harbor *goharborv1alpha2.Harbor, component goharborv1alpha2.ComponentWithTLS) string {
+func (r *Reconciler) GetInternalTLSCertificateName(ctx context.Context, harbor *goharborv1alpha2.Harbor, component harbormetav1.ComponentWithTLS) string {
 	return r.NormalizeName(ctx, harbor.GetName(), "internal", component.GetName())
 }
 
-func (r *Reconciler) GetInternalTLSCertificateSecretName(ctx context.Context, harbor *goharborv1alpha2.Harbor, component goharborv1alpha2.ComponentWithTLS) string {
+func (r *Reconciler) GetInternalTLSCertificateSecretName(ctx context.Context, harbor *goharborv1alpha2.Harbor, component harbormetav1.ComponentWithTLS) string {
 	return r.NormalizeName(ctx, harbor.GetName(), "internal-tls", component.GetName())
 }
 
@@ -147,7 +166,7 @@ const (
 	InternalTLSDurationDefaultConfig = 90 * 24 * time.Hour
 )
 
-func (r *Reconciler) GetInternalTLSCertificate(ctx context.Context, harbor *goharborv1alpha2.Harbor, component goharborv1alpha2.ComponentWithTLS) (*certv1.Certificate, error) {
+func (r *Reconciler) GetInternalTLSCertificate(ctx context.Context, harbor *goharborv1alpha2.Harbor, component harbormetav1.ComponentWithTLS) (*certv1.Certificate, error) {
 	if !harbor.Spec.InternalTLS.IsEnabled() {
 		return nil, nil
 	}

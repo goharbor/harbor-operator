@@ -3,11 +3,12 @@ package harbor
 import (
 	"context"
 
+	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/graph"
-	"github.com/pkg/errors"
 )
 
 type Portal graph.Resource
@@ -25,20 +26,20 @@ func (r *Reconciler) AddPortal(ctx context.Context, harbor *goharborv1alpha2.Har
 
 	portalRes, err := r.AddBasicResource(ctx, portal, cert)
 
-	return cert, portalRes, errors.Wrap(err, "cannot add basic resource")
+	return cert, portalRes, errors.Wrap(err, "cannot add portal")
 }
 
 type PortalInternalCertificate graph.Resource
 
 func (r *Reconciler) AddPortalInternalCertificate(ctx context.Context, harbor *goharborv1alpha2.Harbor, tlsIssuer InternalTLSIssuer) (PortalInternalCertificate, error) {
-	cert, err := r.GetInternalTLSCertificate(ctx, harbor, goharborv1alpha2.PortalTLS)
+	cert, err := r.GetInternalTLSCertificate(ctx, harbor, harbormetav1.PortalTLS)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot get TLS certificate")
+		return nil, errors.Wrap(err, "get")
 	}
 
 	certRes, err := r.Controller.AddCertificateToManage(ctx, cert, tlsIssuer)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot add TLS certificate")
+		return nil, errors.Wrap(err, "add")
 	}
 
 	return PortalInternalCertificate(certRes), nil
@@ -48,7 +49,7 @@ func (r *Reconciler) GetPortal(ctx context.Context, harbor *goharborv1alpha2.Har
 	name := r.NormalizeName(ctx, harbor.GetName())
 	namespace := harbor.GetNamespace()
 
-	tls := harbor.Spec.InternalTLS.GetComponentTLSSpec(r.GetInternalTLSCertificateSecretName(ctx, harbor, goharborv1alpha2.PortalTLS))
+	tls := harbor.Spec.InternalTLS.GetComponentTLSSpec(r.GetInternalTLSCertificateSecretName(ctx, harbor, harbormetav1.PortalTLS))
 
 	return &goharborv1alpha2.Portal{
 		ObjectMeta: metav1.ObjectMeta{

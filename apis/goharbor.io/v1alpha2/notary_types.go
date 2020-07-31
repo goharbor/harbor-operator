@@ -7,6 +7,8 @@ import (
 	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
+
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 )
 
 const (
@@ -15,7 +17,7 @@ const (
 
 type NotaryLoggingSpec struct {
 	// +kubebuilder:validation:Optional
-	Level NotaryLogLevel `json:"level,omitempty"`
+	Level harbormetav1.NotaryLogLevel `json:"level,omitempty"`
 }
 
 type NotaryMigrationSpec struct {
@@ -30,15 +32,15 @@ func (r *NotaryMigrationSpec) GetMigrationContainer(ctx context.Context, storage
 	migrationEnvs := []corev1.EnvVar{}
 	secretDatabaseVariable := ""
 
-	if storage.PasswordRef != "" {
+	if storage.Postgres.PasswordRef != "" {
 		migrationEnvs = append(migrationEnvs, corev1.EnvVar{
 			Name: "secretDatabase",
 			ValueFrom: &corev1.EnvVarSource{
 				SecretKeyRef: &corev1.SecretKeySelector{
 					LocalObjectReference: corev1.LocalObjectReference{
-						Name: storage.PasswordRef,
+						Name: storage.Postgres.PasswordRef,
 					},
-					Key: PostgresqlPasswordKey,
+					Key: harbormetav1.PostgresqlPasswordKey,
 				},
 			},
 		})
@@ -46,10 +48,7 @@ func (r *NotaryMigrationSpec) GetMigrationContainer(ctx context.Context, storage
 		secretDatabaseVariable = "$(secretDatabase)"
 	}
 
-	migrationDatabaseURL, err := storage.GetDSNStringWithRawPassword(secretDatabaseVariable)
-	if err != nil {
-		return nil, errors.Wrap(err, "cannot get storage DSN")
-	}
+	migrationDatabaseURL := storage.Postgres.GetDSNStringWithRawPassword(secretDatabaseVariable)
 
 	migrationSourceURL, err := r.GetMigrationSourceURL(ctx)
 	if err != nil {
@@ -70,7 +69,7 @@ func (r *NotaryMigrationSpec) GetMigrationContainer(ctx context.Context, storage
 					LocalObjectReference: corev1.LocalObjectReference{
 						Name: r.PasswordRef,
 					},
-					Key:      SharedSecretKey,
+					Key:      harbormetav1.SharedSecretKey,
 					Optional: &varFalse,
 				},
 			},
@@ -103,27 +102,13 @@ func (r *NotaryMigrationSpec) GetMigrationSourceURL(ctx context.Context) (string
 	return r.GetDSNStringWithRawPassword(secretSourceVariable)
 }
 
-type NotaryHTTPSSpec struct {
-	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
-	CertificateRef string `json:"certificateRef"`
-}
-
 type NotaryStorageSpec struct {
-	OpacifiedDSN `json:",inline"`
-
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Enum={"mysql","postgres","memory"}
-	Type string `json:"type"`
+	Postgres harbormetav1.PostgresConnectionWithParameters `json:"postgres"`
+
+	// TODO Add support for mysql and memory
 }
 
-var errNotImplemented = errors.New("not yet implemented")
-
-func (n *NotaryStorageSpec) GetPasswordFieldKey() (string, error) {
-	switch n.Type {
-	case "postgres":
-		return PostgresqlPasswordKey, nil
-	default:
-		return "", errNotImplemented
-	}
+func (n *NotaryStorageSpec) GetPasswordFieldKey() string {
+	return harbormetav1.PostgresqlPasswordKey
 }

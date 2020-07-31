@@ -2,17 +2,13 @@ package v1alpha2
 
 import (
 	"fmt"
-	"net/url"
-	"strconv"
-	"strings"
 
 	cmmeta "github.com/jetstack/cert-manager/pkg/apis/meta/v1"
-	"github.com/ovh/configstore"
-	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/validation/field"
+
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 )
 
 // +genclient
@@ -34,7 +30,7 @@ type Harbor struct {
 
 	Spec HarborSpec `json:"spec,omitempty"`
 
-	Status ComponentStatus `json:"status,omitempty"`
+	Status harbormetav1.ComponentStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -68,7 +64,7 @@ type HarborHelm1_4_0Spec struct {
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default="info"
-	LogLevel HarborLogLevel `json:"logLevel,omitempty"`
+	LogLevel harbormetav1.HarborLogLevel `json:"logLevel,omitempty"`
 
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
@@ -96,7 +92,7 @@ type HarborHelm1_4_0Spec struct {
 
 type HarborComponentsSpec struct {
 	// +kubebuilder:validation:Required
-	Portal ComponentSpec `json:"portal,omitempty"`
+	Portal harbormetav1.ComponentSpec `json:"portal,omitempty"`
 
 	// +kubebuilder:validation:Required
 	Core CoreComponentSpec `json:"core,omitempty"`
@@ -123,50 +119,66 @@ type HarborComponentsSpec struct {
 	Redis ExternalRedisSpec `json:"redis"`
 
 	// +kubebuilder:validation:Required
-	Database ExternalDatabaseSpec `json:"database"`
+	Database HarborDatabaseSpec `json:"database"`
 }
 
-func (r *ExternalDatabaseSpec) Validate() field.ErrorList {
-	var allErrs field.ErrorList
+type HarborDatabaseSpec struct {
+	harbormetav1.PostgresCredentials `json:",inline"`
 
-	databaseNameMaxLength, err := r.GetMaxDatabaseNameLength()
-	if err != nil {
-		return append(allErrs, field.InternalError(field.NewPath("spec").Child("database").Child("prefix"), err))
-	}
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:MinItems=1
+	Hosts []harbormetav1.PostgresHostSpec `json:"hosts"`
 
-	if databaseNameMaxLength > 0 {
-		remainingCharCount := databaseNameMaxLength - GetLargestComponentNameSize()
-		if len(r.Prefix) >= remainingCharCount {
-			allErrs = append(allErrs, field.TooLong(field.NewPath("spec").Child("database").Child("prefix"), r.Prefix, remainingCharCount))
-		}
-	}
+	// +kubebuilder:validation:Optional
+	SSLMode harbormetav1.PostgresSSLMode `json:"sslMode,omitempty"`
 
-	return allErrs
+	// +kubebuilder:validation:Optional
+	Prefix string `json:"prefix,omitempty"`
 }
 
-const (
-	// Value of NAMEDATALEN
-	// See https://www.postgresql.org/docs/current/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS
-	DefaultMaxDatabaseNameLength = 64
+func (r *HarborDatabaseSpec) GetPostgresqlConnection(component harbormetav1.Component) (*harbormetav1.PostgresConnectionWithParameters, error) {
+	sslMode := r.SSLMode
 
-	HarborDatabaseNameMaxLengthConfigKey = "harbor-database-name-max-length"
-)
+	var databaseName string
 
-func (r *ExternalDatabaseSpec) GetMaxDatabaseNameLength() (int, error) {
-	value, err := configstore.GetItemValueInt(HarborDatabaseNameMaxLengthConfigKey)
-	if err != nil {
-		if _, ok := err.(configstore.ErrItemNotFound); ok {
-			return DefaultMaxDatabaseNameLength, nil
-		}
-
-		return 0, err
+	switch component { // nolint:exhaustive
+	case harbormetav1.CoreComponent:
+		databaseName = harbormetav1.CoreDatabase
+	case harbormetav1.NotarySignerComponent:
+		sslMode = r.getSSLModeForNotary()
+		databaseName = harbormetav1.NotarySignerDatabase
+	case harbormetav1.NotaryServerComponent:
+		sslMode = r.getSSLModeForNotary()
+		databaseName = harbormetav1.NotaryServerDatabase
+	case harbormetav1.ClairComponent:
+		databaseName = harbormetav1.ClairDatabase
+	default:
+		return nil, harbormetav1.ErrUnsupportedComponent
 	}
 
-	return int(value), nil
+	return &harbormetav1.PostgresConnectionWithParameters{
+		PostgresConnection: harbormetav1.PostgresConnection{
+			PostgresCredentials: r.PostgresCredentials,
+			Database:            r.Prefix + databaseName,
+			Hosts:               r.Hosts,
+		},
+		Parameters: map[string]string{
+			harbormetav1.PostgresSSLModeKey: string(sslMode),
+		},
+	}, nil
+}
+
+func (r *HarborDatabaseSpec) getSSLModeForNotary() harbormetav1.PostgresSSLMode {
+	switch r.SSLMode { //nolint:exhaustive
+	case harbormetav1.PostgresSSLModeAllow:
+		return harbormetav1.PostgresSSLModePrefer
+	default:
+		return r.SSLMode
+	}
 }
 
 type NotaryComponentSpec struct {
-	ComponentSpec `json:",inline"`
+	harbormetav1.ComponentSpec `json:",inline"`
 }
 
 type ExternalRedisSpec struct {
@@ -184,78 +196,7 @@ type ExternalRedisSpec struct {
 	PasswordRef string `json:"passwordRef,omitempty"`
 }
 
-type ExternalDatabaseSpec struct {
-	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:MinLength=1
-	Host string `json:"host"`
-
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Minimum=0
-	// +kubebuilder:validation:ExclusiveMinimum=true
-	// +kubebuilder:default=5432
-	Port int32 `json:"port,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:MinLength=1
-	// +kubebuilder:default="postgres"
-	Username string `json:"username,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Enum={"disable","allow","prefer","require","verify-ca","verify-full"}
-	// +kubebuilder:default="prefer"
-	SSLMode string `json:"sslMode,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
-	PasswordRef string `json:"passwordRef,omitempty"`
-
-	// Prefix of the database name
-	// +kubebuilder:validation:Optional
-	Prefix string `json:"prefix,omitempty"`
-}
-
-func (r ExternalDatabaseSpec) GetOpacifiedDSN(component ComponentWithDatabase) OpacifiedDSN {
-	return OpacifiedDSN{
-		PasswordRef: r.PasswordRef,
-		DSN: (&url.URL{
-			Scheme: "postgres",
-			Host:   fmt.Sprintf("%s:%d", r.Host, r.Port),
-			User:   url.User(r.Username),
-			Path:   fmt.Sprintf("%s%s", r.Prefix, component.DBName()),
-			RawQuery: (&url.Values{
-				"sslmode": []string{r.SSLMode},
-			}).Encode(),
-		}).String(),
-	}
-}
-
-func FromOpacifiedDSN(dsn OpacifiedDSN) (*ExternalDatabaseSpec, string, error) {
-	dbURL, err := dsn.GetDSN("")
-	if err != nil {
-		return nil, "", err
-	}
-
-	portStr := dbURL.Port()
-
-	var port int64 = 5432
-
-	if portStr != "" {
-		port, err = strconv.ParseInt(portStr, 10, 32)
-		if err != nil {
-			return nil, "", errors.Wrap(err, "unsupported port")
-		}
-	}
-
-	return &ExternalDatabaseSpec{
-		PasswordRef: dsn.PasswordRef,
-		Host:        dbURL.Hostname(),
-		SSLMode:     dbURL.Query().Get("sslmode"),
-		Port:        int32(port),
-		Username:    dbURL.User.Username(),
-	}, strings.Trim(dbURL.Path, "/"), nil
-}
-
-func (r *HarborComponentsSpec) RedisDSN(component ComponentWithRedis) OpacifiedDSN {
+func (r *HarborComponentsSpec) RedisDSN(component harbormetav1.ComponentWithRedis) OpacifiedDSN {
 	return OpacifiedDSN{
 		DSN:         fmt.Sprintf("redis://%s:%d/%d", r.Redis.Address, r.Redis.Port, component.Index()),
 		PasswordRef: r.Redis.PasswordRef,
@@ -263,14 +204,14 @@ func (r *HarborComponentsSpec) RedisDSN(component ComponentWithRedis) OpacifiedD
 }
 
 type CoreComponentSpec struct {
-	ComponentSpec `json:",inline"`
+	harbormetav1.ComponentSpec `json:",inline"`
 
 	// +kubebuilder:validation:Required
 	TokenIssuer cmmeta.ObjectReference `json:"tokenIssuer,omitempty"`
 }
 
 type JobServiceComponentSpec struct {
-	ComponentSpec `json:",inline"`
+	harbormetav1.ComponentSpec `json:",inline"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=1
@@ -279,7 +220,7 @@ type JobServiceComponentSpec struct {
 }
 
 type RegistryComponentSpec struct {
-	ComponentSpec `json:",inline"`
+	harbormetav1.ComponentSpec `json:",inline"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
@@ -290,11 +231,11 @@ type RegistryComponentSpec struct {
 }
 
 type ChartMuseumComponentSpec struct {
-	ComponentSpec `json:",inline"`
+	harbormetav1.ComponentSpec `json:",inline"`
 }
 
 type ClairComponentSpec struct {
-	ComponentSpec `json:",inline"`
+	harbormetav1.ComponentSpec `json:",inline"`
 
 	// +kubebuilder:validation:Optional
 	// One of clair redis dsn or global redis component must be specified
@@ -308,7 +249,7 @@ type ClairComponentSpec struct {
 }
 
 type TrivyComponentSpec struct {
-	ComponentSpec `json:",inline"`
+	harbormetav1.ComponentSpec `json:",inline"`
 }
 
 type HarborPersistenceSpec struct {
@@ -569,26 +510,26 @@ func (r *HarborInternalTLSSpec) GetScheme() string {
 	return "https"
 }
 
-type ErrUnsupportedComponent ComponentWithTLS
+type ErrUnsupportedComponent harbormetav1.ComponentWithTLS
 
 func (err ErrUnsupportedComponent) Error() string {
 	return fmt.Sprintf("%s is not supported", string(err))
 }
 
-func (r *HarborInternalTLSSpec) GetInternalPort(component ComponentWithTLS) (int32, error) {
+func (r *HarborInternalTLSSpec) GetInternalPort(component harbormetav1.ComponentWithTLS) (int32, error) {
 	if !r.IsEnabled() {
-		return HTTPPort, nil
+		return harbormetav1.HTTPPort, nil
 	}
 
-	return HTTPSPort, nil
+	return harbormetav1.HTTPSPort, nil
 }
 
-func (r *HarborInternalTLSSpec) GetComponentTLSSpec(certificateRef string) *ComponentsTLSSpec {
+func (r *HarborInternalTLSSpec) GetComponentTLSSpec(certificateRef string) *harbormetav1.ComponentsTLSSpec {
 	if !r.IsEnabled() {
 		return nil
 	}
 
-	return &ComponentsTLSSpec{
+	return &harbormetav1.ComponentsTLSSpec{
 		CertificateRef: certificateRef,
 	}
 }
@@ -603,174 +544,12 @@ type HarborExposeSpec struct {
 
 type HarborExposeComponentSpec struct {
 	// +kubebuilder:validation:Optional
-	TLS *ComponentsTLSSpec `json:"tls,omitempty"`
+	TLS *harbormetav1.ComponentsTLSSpec `json:"tls,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	Ingress *HarborExposeIngressSpec `json:"ingress,omitempty"`
 
-	// +kubebuilder:validation:Optional
-	ClusterIP *HarborExposeClusterIPSpec `json:"clusterIP,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	LoadBalancer *HarborExposeLoadBalancerSpec `json:"loadBalancer,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	NodePort *HarborExposeNodePortSpec `json:"nodePort,omitempty"`
-}
-
-type ErrMultipleExposeSpec []string
-
-func (specs ErrMultipleExposeSpec) Error() string {
-	return fmt.Sprintf("only one field of %v must be specified", strings.Join(specs, ","))
-}
-
-var errNoExposeSpecSpec = fmt.Errorf("one of %v must be specified", []string{"ingress", "clusterIP", "loadBalancer", "nodePort"})
-
-func (r *HarborExposeComponentSpec) Validate() error {
-	if r == nil {
-		return nil
-	}
-
-	fields := []string{}
-
-	if r.Ingress != nil {
-		fields = append(fields, "ingress")
-	}
-
-	if r.ClusterIP != nil {
-		fields = append(fields, "clusterIP")
-	}
-
-	if r.LoadBalancer != nil {
-		fields = append(fields, "loadBalancer")
-	}
-
-	if r.NodePort != nil {
-		fields = append(fields, "nodePort")
-	}
-
-	switch len(fields) {
-	case 0:
-		return errNoExposeSpecSpec
-	case 1:
-		return nil
-	default:
-		return ErrMultipleExposeSpec(fields)
-	}
-}
-
-type HarborExposeNodePortSpec struct {
-	// +kubebuilder:validation:Required
-	// +kubebuilder:default="harbor"
-	// The name of NodePort service
-	Name string `json:"name"`
-
-	// +kubebuilder:validation:Optional
-	Ports HarborExposeNodePortPortsSpec `json:"ports,omitempty"`
-}
-
-type HarborExposeLoadBalancerSpec struct {
-	// +kubebuilder:validation:Required
-	// +kubebuilder:default="harbor"
-	// The name of NodePort service
-	Name string `json:"name"`
-
-	// +kubebuilder:validation:Optional
-	IP string `json:"ip,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	Ports HarborExposePortsSpec `json:"ports,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	Annotations map[string]string `json:"annotations,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	SourceRanges []string `json:"sourceRanges,omitempty"`
-}
-
-type HarborExposeNodePortPortsSpec struct {
-	// +kubebuilder:validation:Optional
-	HTTP HarborExposeNodePortPortsHTTPSpec `json:"http,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	HTTPS HarborExposeNodePortPortsHTTPSSpec `json:"https,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	Notary HarborExposeNodePortPortsNotarySpec `json:"notary,omitempty"`
-}
-
-type HarborExposeNodePortPortsHTTPSpec struct {
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Minimum=0
-	// +kubebuilder:validation:ExclusiveMinimum=true
-	// +kubebuilder:default=80
-	// The service port Harbor listens on when serving with HTTP
-	Port int32 `json:"port,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Minimum=0
-	// +kubebuilder:validation:ExclusiveMinimum=true
-	// +kubebuilder:default=30002
-	// The node port Harbor listens on when serving with HTTP
-	NodePort int32 `json:"nodePort,omitempty"`
-}
-
-type HarborExposeNodePortPortsHTTPSSpec struct {
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Minimum=0
-	// +kubebuilder:validation:ExclusiveMinimum=true
-	// +kubebuilder:default=443
-	// The service port Harbor listens on when serving with HTTPS
-	Port int32 `json:"port,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Minimum=0
-	// +kubebuilder:validation:ExclusiveMinimum=true
-	// +kubebuilder:default=30003
-	// The node port Harbor listens on when serving with HTTPS
-	NodePort int32 `json:"nodePort,omitempty"`
-}
-
-type HarborExposeNodePortPortsNotarySpec struct {
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Minimum=0
-	// +kubebuilder:validation:ExclusiveMinimum=true
-	// +kubebuilder:default=4443
-	// The service port Notary listens on
-	Port int32 `json:"port,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Minimum=0
-	// +kubebuilder:validation:ExclusiveMinimum=true
-	// +kubebuilder:default=30004
-	// The node port Notary listens on
-	NodePort int32 `json:"nodePort,omitempty"`
-}
-
-type HarborExposeClusterIPSpec struct {
-	// +kubebuilder:validation:Required
-	// +kubebuilder:default="harbor"
-	// The name of ClusterIP service
-	Name string `json:"name,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	Ports HarborExposePortsSpec `json:"ports,omitempty"`
-}
-
-type HarborExposePortsSpec struct {
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Minimum=0
-	// +kubebuilder:validation:ExclusiveMinimum=true
-	// +kubebuilder:default=80
-	// The service port Harbor listens on when serving with HTTP.
-	HTTPPort int32 `json:"httpPort,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Minimum=0
-	// +kubebuilder:validation:ExclusiveMinimum=true
-	// +kubebuilder:default=443
-	// The service port Harbor listens on when serving with HTTPS.
-	HTTPSPort int32 `json:"httpsPort,omitempty"`
+	// TODO Add supports to ClusterIP, LoadBalancer and NodePort by deploying the nginx component
 }
 
 type HarborExposeIngressSpec struct {
@@ -779,10 +558,12 @@ type HarborExposeIngressSpec struct {
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default="default"
-	Controller string `json:"controller,omitempty"`
+	// +kubebuilder:validation:Type="string"
+	// +kubebuilder:validation:Enum={"gce","ncp","default"}
+	// Set to the type of ingress controller.
+	Controller harbormetav1.IngressController `json:"controller,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default={"ingress.kubernetes.io/ssl-redirect":"true","ingress.kubernetes.io/proxy-body-size":"0","nginx.ingress.kubernetes.io/ssl-redirect":"true","nginx.ingress.kubernetes.io/proxy-body-size":"0"}
 	Annotations map[string]string `json:"annotations,omitempty"`
 }
 

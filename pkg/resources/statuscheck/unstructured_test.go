@@ -14,6 +14,7 @@ import (
 	// +kubebuilder:scaffold:imports
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	. "github.com/goharbor/harbor-operator/pkg/resources/statuscheck"
 	"github.com/goharbor/harbor-operator/pkg/scheme"
 )
@@ -122,7 +123,7 @@ var _ = Describe("Check the status", func() {
 
 		Context("With empty status", func() {
 			BeforeEach(func() {
-				data.Status = goharborv1alpha2.ComponentStatus{}
+				data.Status = harbormetav1.ComponentStatus{}
 			})
 
 			It("Should be ready", func() {
@@ -148,7 +149,7 @@ var _ = Describe("Check the status", func() {
 		Context("With basic inprogress status", func() {
 			Context("To True", func() {
 				BeforeEach(func() {
-					data.Status.Conditions = []goharborv1alpha2.Condition{
+					data.Status.Conditions = []harbormetav1.Condition{
 						{
 							Type:   status.ConditionInProgress,
 							Status: corev1.ConditionTrue,
@@ -165,7 +166,7 @@ var _ = Describe("Check the status", func() {
 
 			Context("To False", func() {
 				BeforeEach(func() {
-					data.Status.Conditions = []goharborv1alpha2.Condition{
+					data.Status.Conditions = []harbormetav1.Condition{
 						{
 							Type:   status.ConditionInProgress,
 							Status: corev1.ConditionFalse,

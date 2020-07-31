@@ -7,7 +7,8 @@ import (
 )
 
 const (
-	OperatorReason = "operatorError"
+	OperatorReason    = "operatorError"
+	InvalidSpecReason = "invalidSpec"
 )
 
 type unrecoverrableError struct {

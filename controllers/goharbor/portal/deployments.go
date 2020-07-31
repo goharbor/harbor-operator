@@ -4,13 +4,14 @@ import (
 	"context"
 	"path"
 
+	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
-	"github.com/pkg/errors"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 )
 
 const (
@@ -92,9 +93,9 @@ func (r *Reconciler) GetDeployment(ctx context.Context, portal *goharborv1alpha2
 		})
 	}
 
-	port := goharborv1alpha2.JobServiceHTTPPortName
+	port := harbormetav1.JobServiceHTTPPortName
 	if portal.Spec.TLS.Enabled() {
-		port = goharborv1alpha2.JobServiceHTTPSPortName
+		port = harbormetav1.JobServiceHTTPSPortName
 	}
 
 	httpGET := &corev1.HTTPGetAction{
@@ -132,10 +133,10 @@ func (r *Reconciler) GetDeployment(ctx context.Context, portal *goharborv1alpha2
 							Name:  "portal",
 							Image: image,
 							Ports: []corev1.ContainerPort{{
-								Name:          goharborv1alpha2.JobServiceHTTPPortName,
+								Name:          harbormetav1.JobServiceHTTPPortName,
 								ContainerPort: httpPort,
 							}, {
-								Name:          goharborv1alpha2.JobServiceHTTPSPortName,
+								Name:          harbormetav1.JobServiceHTTPSPortName,
 								ContainerPort: httpsPort,
 							}},
 

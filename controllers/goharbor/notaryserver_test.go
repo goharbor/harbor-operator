@@ -25,6 +25,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 )
 
 func newNotaryServerController() controllerTest {
@@ -36,7 +37,7 @@ func newNotaryServerController() controllerTest {
 }
 
 func setupValidNotaryServer(ctx context.Context, ns string) (Resource, client.ObjectKey) {
-	dsn := setupPostgresql(ctx, ns)
+	database := setupPostgresql(ctx, ns)
 
 	name := newName("notary-server")
 	notaryServer := &goharborv1alpha2.NotaryServer{
@@ -46,8 +47,7 @@ func setupValidNotaryServer(ctx context.Context, ns string) (Resource, client.Ob
 		},
 		Spec: goharborv1alpha2.NotaryServerSpec{
 			Storage: goharborv1alpha2.NotaryStorageSpec{
-				OpacifiedDSN: dsn,
-				Type:         "postgres",
+				Postgres: database,
 			},
 			TrustService: goharborv1alpha2.NotaryServerTrustServiceSpec{
 				Type: "local",
@@ -76,8 +76,8 @@ func updateNotaryServer(ctx context.Context, object Resource) {
 	notaryServer.Spec.Replicas = &replicas
 }
 
-func getNotaryServerStatusFunc(ctx context.Context, key client.ObjectKey) func() goharborv1alpha2.ComponentStatus {
-	return func() goharborv1alpha2.ComponentStatus {
+func getNotaryServerStatusFunc(ctx context.Context, key client.ObjectKey) func() harbormetav1.ComponentStatus {
+	return func() harbormetav1.ComponentStatus {
 		var notaryServer goharborv1alpha2.NotaryServer
 
 		err := k8sClient.Get(ctx, key, &notaryServer)
