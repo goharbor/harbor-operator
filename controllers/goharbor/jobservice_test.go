@@ -94,14 +94,21 @@ func setupValidJobService(ctx context.Context, ns string) (Resource, client.Obje
 				},
 			},
 			SecretRef: core.Spec.Components.JobService.SecretRef,
-			Registry: goharborv1alpha2.CoreComponentsRegistryCredentialsSpec{
-				PasswordRef: registrySecret,
+			Registry: goharborv1alpha2.RegistryControllerConnectionSpec{
+				ControllerURL: "http://the.registryctl.url",
+				RegistryURL:   "http://the.registry.url",
+				Credentials: goharborv1alpha2.CoreComponentsRegistryCredentialsSpec{
+					PasswordRef: registrySecret,
+				},
 			},
 			JobLoggers: goharborv1alpha2.JobServiceLoggerConfigSpec{
 				STDOUT: &goharborv1alpha2.JobServiceLoggerConfigSTDOUTSpec{},
 			},
 			Loggers: goharborv1alpha2.JobServiceLoggerConfigSpec{
 				STDOUT: &goharborv1alpha2.JobServiceLoggerConfigSTDOUTSpec{},
+			},
+			TokenService: goharborv1alpha2.JobServiceTokenSpec{
+				URL: "http://the.tokenservice.url",
 			},
 		},
 	}
