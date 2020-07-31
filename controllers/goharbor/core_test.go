@@ -164,15 +164,17 @@ func setupValidCore(ctx context.Context, ns string) (Resource, client.ObjectKey)
 					CertificateRef: tokenCertificate,
 				},
 				Registry: goharborv1alpha2.CoreComponentsRegistrySpec{
-					ControllerURL: "http://the.registryctl.url",
-					URL:           "http://the.registry.url",
+					RegistryControllerConnectionSpec: goharborv1alpha2.RegistryControllerConnectionSpec{
+						ControllerURL: "http://the.registryctl.url",
+						RegistryURL:   "http://the.registry.url",
+						Credentials: goharborv1alpha2.CoreComponentsRegistryCredentialsSpec{
+							Username:    "admin",
+							PasswordRef: registryCtlPassword,
+						},
+					},
 					Redis: &goharborv1alpha2.OpacifiedDSN{
 						DSN:         "redis://registry-redis/2",
 						PasswordRef: redisPassword,
-					},
-					Credentials: goharborv1alpha2.CoreComponentsRegistryCredentialsSpec{
-						Username:    "admin",
-						PasswordRef: registryCtlPassword,
 					},
 				},
 				JobService: goharborv1alpha2.CoreComponentsJobServiceSpec{
