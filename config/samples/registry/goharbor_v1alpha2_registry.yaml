@@ -3,6 +3,7 @@ kind: Registry
 metadata:
   name: sample
 spec:
+  replicas: 1
   storage:
     driver:
       inmemory: {}
