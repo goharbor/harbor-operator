@@ -162,12 +162,10 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 				Secret: &corev1.SecretVolumeSource{
 					SecretName: registry.Spec.Authentication.HTPasswd.SecretRef,
 					Optional:   &varFalse,
-					Items: []corev1.KeyToPath{
-						{
-							Key:  harbormetav1.HTPasswdFileName,
-							Path: harbormetav1.HTPasswdFileName,
-						},
-					},
+					Items: []corev1.KeyToPath{{
+						Key:  harbormetav1.HTPasswdFileName,
+						Path: harbormetav1.HTPasswdFileName,
+					}},
 				},
 			},
 		})
