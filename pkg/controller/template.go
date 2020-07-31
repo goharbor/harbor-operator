@@ -2,11 +2,13 @@ package controller
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"text/template"
 
 	"github.com/Masterminds/sprig"
+	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	resources "github.com/goharbor/harbor-operator/pkg/resources"
 	template2 "github.com/goharbor/harbor-operator/pkg/template"
 	"github.com/opentracing/opentracing-go"
@@ -49,7 +51,7 @@ func (c *Controller) GetTemplatedConfig(ctx context.Context, templateConfig stri
 	configContent, err := ioutil.ReadAll(reader)
 
 	if errTemplate != nil {
-		return nil, errors.Wrap(errTemplate, "cannot process config template")
+		return nil, serrors.UnrecoverrableError(errTemplate, "operatorCompatibility", fmt.Sprintf("cannot process config template: %v", errTemplate))
 	}
 
 	if err != nil {
