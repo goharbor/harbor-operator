@@ -318,17 +318,19 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 	}
 
 	if core.Spec.Components.ChartRepository != nil {
-		envs = append(envs, corev1.EnvVar{
-			Name:  "CHART_REPOSITORY_URL",
-			Value: core.Spec.Components.ChartRepository.URL,
-		}, corev1.EnvVar{
+		urlConfig, err := harbor.EnvVar(common.ChartRepoURL, harbor.Value(core.Spec.Components.ChartRepository.URL))
+		if err != nil {
+			return nil, errors.Wrap(err, "cannot configure chartmuseum")
+		}
+
+		envs = append(envs, urlConfig, corev1.EnvVar{
 			Name:  "CHART_CACHE_DRIVER",
 			Value: core.Spec.Components.ChartRepository.CacheDriver,
 		})
 	}
 
 	if core.Spec.Components.Clair != nil {
-		adapterURLConfig, err := harbor.EnvVar(common.ClairAdapterURL, harbor.Value(core.Spec.Components.Clair.AdapterURL))
+		urlConfig, err := harbor.EnvVar(common.ClairAdapterURL, harbor.Value(core.Spec.Components.Clair.AdapterURL))
 		if err != nil {
 			return nil, errors.Wrap(err, "cannot configure clair")
 		}
@@ -338,7 +340,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 			sslMode = ""
 		}
 
-		envs = append(envs, adapterURLConfig, corev1.EnvVar{
+		envs = append(envs, urlConfig, corev1.EnvVar{
 			Name:  "CLAIR_DB_HOST",
 			Value: core.Spec.Components.Clair.Database.Hosts[0].Host,
 		}, corev1.EnvVar{
