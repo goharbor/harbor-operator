@@ -162,19 +162,10 @@ type CoreComponentsJobServiceSpec struct {
 }
 
 type CoreComponentsRegistrySpec struct {
-	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Pattern="https?://.+"
-	URL string `json:"url"`
-
-	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Pattern="https?://.+"
-	ControllerURL string `json:"controllerURL"`
+	RegistryControllerConnectionSpec `json:",inline"`
 
 	// +kubebuilder:validation:Optional
 	Redis *OpacifiedDSN `json:"redis,omitempty"`
-
-	// +kubebuilder:validation:Required
-	Credentials CoreComponentsRegistryCredentialsSpec `json:"credentials"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=false
@@ -183,6 +174,19 @@ type CoreComponentsRegistrySpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:MinLength=1
 	StorageProviderName string `json:"storageProviderName,omitempty"`
+}
+
+type RegistryControllerConnectionSpec struct {
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Pattern="https?://.+"
+	RegistryURL string `json:"url"`
+
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Pattern="https?://.+"
+	ControllerURL string `json:"controllerURL"`
+
+	// +kubebuilder:validation:Required
+	Credentials CoreComponentsRegistryCredentialsSpec `json:"credentials"`
 }
 
 type CoreComponentsRegistryCredentialsSpec struct {

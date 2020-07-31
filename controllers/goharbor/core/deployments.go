@@ -148,7 +148,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 		common.CoreURL:               harbor.Value(core.Spec.ExternalEndpoint),
 		common.CoreLocalURL:          harbor.Value(coreLocalURL),
 		common.RegistryControllerURL: harbor.Value(core.Spec.Components.Registry.ControllerURL),
-		common.RegistryURL:           harbor.Value(core.Spec.Components.Registry.URL),
+		common.RegistryURL:           harbor.Value(core.Spec.Components.Registry.RegistryURL),
 		common.JobServiceURL:         harbor.Value(core.Spec.Components.JobService.URL),
 		common.TokenServiceURL:       harbor.Value(core.Spec.Components.TokenService.URL),
 		common.AdminInitialPassword: harbor.ValueFrom(corev1.EnvVarSource{

@@ -385,9 +385,11 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1alpha2.Harbo
 			ComponentSpec: harbor.Spec.Registry.ComponentSpec,
 			Components: goharborv1alpha2.CoreComponentsSpec{
 				Registry: goharborv1alpha2.CoreComponentsRegistrySpec{
-					URL:                 registryURL,
-					ControllerURL:       registryCtlURL,
-					Credentials:         credentials,
+					RegistryControllerConnectionSpec: goharborv1alpha2.RegistryControllerConnectionSpec{
+						RegistryURL:   registryURL,
+						ControllerURL: registryCtlURL,
+						Credentials:   credentials,
+					},
 					Redis:               &registryRedisDSN,
 					StorageProviderName: harbor.Spec.Persistence.ImageChartStorage.Name(),
 				},
