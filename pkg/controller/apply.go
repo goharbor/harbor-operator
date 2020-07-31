@@ -37,7 +37,7 @@ func (c *Controller) apply(ctx context.Context, res *Resource) (controllerutil.O
 		result := res.resource.DeepCopyObject()
 
 		op, err := controllerutil.CreateOrUpdate(ctx, c.Client, result, res.mutable(ctx, res.resource, result))
-		if err != nil {
+		if err != nil { //nolint:nestif
 			span.SetTag("error", err)
 
 			if apierrs.IsConflict(err) {
@@ -55,6 +55,10 @@ func (c *Controller) apply(ctx context.Context, res *Resource) (controllerutil.O
 
 			if apierrs.IsForbidden(err) {
 				return serrors.RetryLaterError(err, "dependencyStatus", err.Error())
+			}
+
+			if apierrs.IsInvalid(err) {
+				return serrors.UnrecoverrableError(err, "dependencySpec", err.Error())
 			}
 
 			// TODO Check if the error is a temporary error or a unrecoverrable one
