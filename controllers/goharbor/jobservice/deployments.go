@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"path"
 
+	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
-	"github.com/pkg/errors"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 )
 
 const (
@@ -50,7 +51,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1al
 					LocalObjectReference: corev1.LocalObjectReference{
 						Name: jobservice.Spec.Core.SecretRef,
 					},
-					Key:      goharborv1alpha2.SharedSecretKey,
+					Key:      harbormetav1.SharedSecretKey,
 					Optional: &varFalse,
 				},
 			},
@@ -64,7 +65,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1al
 					LocalObjectReference: corev1.LocalObjectReference{
 						Name: jobservice.Spec.Registry.PasswordRef,
 					},
-					Key:      goharborv1alpha2.SharedSecretKey,
+					Key:      harbormetav1.SharedSecretKey,
 					Optional: &varFalse,
 				},
 			},
@@ -75,7 +76,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1al
 					LocalObjectReference: corev1.LocalObjectReference{
 						Name: jobservice.Spec.SecretRef,
 					},
-					Key:      goharborv1alpha2.SharedSecretKey,
+					Key:      harbormetav1.SharedSecretKey,
 					Optional: &varFalse,
 				},
 			},
@@ -202,9 +203,9 @@ func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1al
 		})
 	}
 
-	port := goharborv1alpha2.JobServiceHTTPPortName
+	port := harbormetav1.JobServiceHTTPPortName
 	if jobservice.Spec.TLS.Enabled() {
-		port = goharborv1alpha2.JobServiceHTTPSPortName
+		port = harbormetav1.JobServiceHTTPSPortName
 	}
 
 	httpGET := &corev1.HTTPGetAction{
@@ -242,10 +243,10 @@ func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1al
 							Name:  "jobservice",
 							Image: image,
 							Ports: []corev1.ContainerPort{{
-								Name:          goharborv1alpha2.JobServiceHTTPPortName,
+								Name:          harbormetav1.JobServiceHTTPPortName,
 								ContainerPort: httpPort,
 							}, {
-								Name:          goharborv1alpha2.JobServiceHTTPSPortName,
+								Name:          harbormetav1.JobServiceHTTPSPortName,
 								ContainerPort: httpsPort,
 							}},
 

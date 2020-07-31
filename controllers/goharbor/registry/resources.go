@@ -9,6 +9,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 	"github.com/goharbor/harbor-operator/pkg/resources"
@@ -108,7 +109,7 @@ func (r *Reconciler) GetProxySecrets(ctx context.Context, registry *goharborv1al
 				Name:      registry.Spec.Proxy.BasicAuthRef,
 				Namespace: registry.GetNamespace(),
 			},
-		}, goharborv1alpha2.SecretTypeSingle)
+		}, harbormetav1.SecretTypeSingle)
 
 		return []graph.Resource{secret}, errors.Wrapf(err, "cannot add external typed secret %s", registry.Spec.Proxy.BasicAuthRef)
 	}
@@ -123,7 +124,7 @@ func (r *Reconciler) GetHTTPSecrets(ctx context.Context, registry *goharborv1alp
 				Name:      registry.Spec.HTTP.SecretRef,
 				Namespace: registry.GetNamespace(),
 			},
-		}, goharborv1alpha2.SecretTypeSingle)
+		}, harbormetav1.SecretTypeSingle)
 
 		return []graph.Resource{secret}, errors.Wrapf(err, "cannot add external typed secret %s", registry.Spec.HTTP.SecretRef)
 	}
@@ -138,7 +139,7 @@ func (r *Reconciler) GetAuthenticationSecrets(ctx context.Context, registry *goh
 				Name:      registry.Spec.Authentication.Token.CertificateRef,
 				Namespace: registry.GetNamespace(),
 			},
-		}, goharborv1alpha2.SecretTypeSingle)
+		}, harbormetav1.SecretTypeSingle)
 
 		return []graph.Resource{secret}, errors.Wrapf(err, "cannot add external typed secret %s", registry.Spec.Authentication.Token.CertificateRef)
 	}
@@ -149,7 +150,7 @@ func (r *Reconciler) GetAuthenticationSecrets(ctx context.Context, registry *goh
 				Name:      registry.Spec.Authentication.HTPasswd.SecretRef,
 				Namespace: registry.GetNamespace(),
 			},
-		}, goharborv1alpha2.SecretTypeSingle)
+		}, harbormetav1.SecretTypeSingle)
 
 		return []graph.Resource{secret}, errors.Wrapf(err, "cannot add external typed secret %s", registry.Spec.Authentication.HTPasswd.SecretRef)
 	}
@@ -176,7 +177,7 @@ func (r *Reconciler) GetS3StorageSecrets(ctx context.Context, registry *goharbor
 				Name:      registry.Spec.Storage.Driver.S3.SecretKeyRef,
 				Namespace: registry.GetNamespace(),
 			},
-		}, goharborv1alpha2.SecretTypeSingle)
+		}, harbormetav1.SecretTypeSingle)
 
 		return []graph.Resource{secret}, errors.Wrapf(err, "cannot add external typed secret %s", registry.Spec.Storage.Driver.S3.SecretKeyRef)
 	}
@@ -190,7 +191,7 @@ func (r *Reconciler) GetSwiftStorageSecrets(ctx context.Context, registry *gohar
 			Name:      registry.Spec.Storage.Driver.Swift.PasswordRef,
 			Namespace: registry.GetNamespace(),
 		},
-	}, goharborv1alpha2.SecretTypeSingle)
+	}, harbormetav1.SecretTypeSingle)
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot add external typed secret %s", registry.Spec.Storage.Driver.Swift.PasswordRef)
 	}
@@ -203,7 +204,7 @@ func (r *Reconciler) GetSwiftStorageSecrets(ctx context.Context, registry *gohar
 				Name:      registry.Spec.Storage.Driver.Swift.SecretKeyRef,
 				Namespace: registry.GetNamespace(),
 			},
-		}, goharborv1alpha2.SecretTypeSingle)
+		}, harbormetav1.SecretTypeSingle)
 
 		return append(resources, secret), errors.Wrapf(err, "cannot add external typed secret %s", registry.Spec.Storage.Driver.Swift.SecretKeyRef)
 	}

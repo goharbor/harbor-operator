@@ -8,6 +8,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 )
 
 func (r *Reconciler) GetService(ctx context.Context, jobservice *goharborv1alpha2.JobService) (*corev1.Service, error) {
@@ -21,13 +22,13 @@ func (r *Reconciler) GetService(ctx context.Context, jobservice *goharborv1alpha
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{{
-				Name:       goharborv1alpha2.JobServiceHTTPPortName,
-				Port:       goharborv1alpha2.HTTPPort,
-				TargetPort: intstr.FromString(goharborv1alpha2.JobServiceHTTPPortName),
+				Name:       harbormetav1.JobServiceHTTPPortName,
+				Port:       harbormetav1.HTTPPort,
+				TargetPort: intstr.FromString(harbormetav1.JobServiceHTTPPortName),
 			}, {
-				Name:       goharborv1alpha2.JobServiceHTTPSPortName,
-				Port:       goharborv1alpha2.HTTPSPort,
-				TargetPort: intstr.FromString(goharborv1alpha2.JobServiceHTTPSPortName),
+				Name:       harbormetav1.JobServiceHTTPSPortName,
+				Port:       harbormetav1.HTTPSPort,
+				TargetPort: intstr.FromString(harbormetav1.JobServiceHTTPSPortName),
 			}},
 			Selector: map[string]string{
 				r.Label("name"):      name,

@@ -32,7 +32,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	"sigs.k8s.io/kustomize/kstatus/status"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 )
 
@@ -43,7 +43,7 @@ const (
 type controllerTest struct {
 	Setup         func(context.Context, string) (Resource, client.ObjectKey)
 	Update        func(context.Context, Resource)
-	GetStatusFunc func(ctx context.Context, key client.ObjectKey) func() goharborv1alpha2.ComponentStatus
+	GetStatusFunc func(ctx context.Context, key client.ObjectKey) func() harbormetav1.ComponentStatus
 }
 
 type Resource interface {

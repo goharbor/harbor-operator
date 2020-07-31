@@ -5,14 +5,16 @@ import (
 	"fmt"
 
 	"github.com/ovh/configstore"
+	"github.com/pkg/errors"
 	"github.com/sethvargo/go-password/password"
 	"golang.org/x/crypto/bcrypt"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/pkg/graph"
-	"github.com/pkg/errors"
 )
 
 const (
@@ -33,12 +35,12 @@ type RegistryAuthSecret graph.Resource
 func (r *Reconciler) AddRegistryAuthenticationSecret(ctx context.Context, harbor *goharborv1alpha2.Harbor) (RegistryAuthSecret, error) {
 	authSecret, err := r.GetRegistryAuthenticationSecret(ctx, harbor)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot get secret")
+		return nil, errors.Wrap(err, "get")
 	}
 
 	authSecretRes, err := r.AddSecretToManage(ctx, authSecret)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot add secret")
+		return nil, errors.Wrap(err, "add")
 	}
 
 	return RegistryAuthSecret(authSecretRes), nil
@@ -68,12 +70,12 @@ type Registry graph.Resource
 func (r *Reconciler) AddRegistry(ctx context.Context, harbor *goharborv1alpha2.Harbor, certificate RegistryInternalCertificate, authSecret RegistryAuthSecret, httpSecret RegistryHTTPSecret) (Registry, error) {
 	registry, err := r.GetRegistry(ctx, harbor)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot get registry")
+		return nil, errors.Wrap(err, "get")
 	}
 
 	registryRes, err := r.AddBasicResource(ctx, registry, certificate, authSecret, httpSecret)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot add basic resource")
+		return nil, errors.Wrap(err, "add")
 	}
 
 	return Registry(registryRes), nil
@@ -84,12 +86,12 @@ type RegistryHTTPSecret graph.Resource
 func (r *Reconciler) AddRegistryHTTPSecret(ctx context.Context, harbor *goharborv1alpha2.Harbor) (RegistryHTTPSecret, error) {
 	httpSecret, err := r.GetRegistryHTTPSecret(ctx, harbor)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot get secret")
+		return nil, errors.Wrap(err, "get")
 	}
 
 	httpSecretRes, err := r.AddSecretToManage(ctx, httpSecret)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot add secret")
+		return nil, errors.Wrap(err, "add")
 	}
 
 	return RegistryHTTPSecret(httpSecretRes), nil
@@ -98,14 +100,14 @@ func (r *Reconciler) AddRegistryHTTPSecret(ctx context.Context, harbor *goharbor
 type RegistryInternalCertificate graph.Resource
 
 func (r *Reconciler) AddRegistryInternalCertificate(ctx context.Context, harbor *goharborv1alpha2.Harbor, tlsIssuer InternalTLSIssuer) (RegistryInternalCertificate, error) {
-	cert, err := r.GetInternalTLSCertificate(ctx, harbor, goharborv1alpha2.RegistryTLS)
+	cert, err := r.GetInternalTLSCertificate(ctx, harbor, harbormetav1.RegistryTLS)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot get TLS certificate")
+		return nil, errors.Wrap(err, "get")
 	}
 
 	certRes, err := r.Controller.AddCertificateToManage(ctx, cert, tlsIssuer)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot add TLS certificate")
+		return nil, errors.Wrap(err, "add")
 	}
 
 	return RegistryInternalCertificate(certRes), nil
@@ -121,12 +123,12 @@ const (
 )
 
 func (r *Reconciler) GetRegistryAuthenticationSecret(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*corev1.Secret, error) {
-	name := r.NormalizeName(ctx, harbor.GetName(), "registry", "basicauth")
+	name := r.NormalizeName(ctx, harbor.GetName(), controllers.Registry.String(), "basicauth")
 	namespace := harbor.GetNamespace()
 
 	password, err := password.Generate(RegistryAuthenticationPasswordLength, RegistryAuthenticationPasswordNumDigits, RegistryAuthenticationPasswordNumSpecials, false, true)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot generate password")
+		return nil, errors.Wrap(err, "generate password")
 	}
 
 	cost, err := r.ConfigStore.GetItemValueInt(ConfigRegistryEncryptionCostKey)
@@ -149,10 +151,10 @@ func (r *Reconciler) GetRegistryAuthenticationSecret(ctx context.Context, harbor
 			Namespace: namespace,
 		},
 		Immutable: &varFalse,
-		Type:      goharborv1alpha2.SecretTypeHTPasswd,
+		Type:      harbormetav1.SecretTypeHTPasswd,
 		StringData: map[string]string{
-			goharborv1alpha2.HTPasswdFileName: fmt.Sprintf("%s:%s", RegistryAuthenticationUsername, string(hashedPassword)),
-			goharborv1alpha2.SharedSecretKey:  password,
+			harbormetav1.HTPasswdFileName: fmt.Sprintf("%s:%s", RegistryAuthenticationUsername, string(hashedPassword)),
+			harbormetav1.SharedSecretKey:  password,
 		},
 	}, nil
 }
@@ -164,12 +166,12 @@ const (
 )
 
 func (r *Reconciler) GetRegistryHTTPSecret(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*corev1.Secret, error) {
-	name := r.NormalizeName(ctx, harbor.GetName(), "registry", "http")
+	name := r.NormalizeName(ctx, harbor.GetName(), controllers.Registry.String(), "http")
 	namespace := harbor.GetNamespace()
 
 	secret, err := password.Generate(RegistrySecretPasswordLength, RegistrySecretPasswordNumDigits, RegistrySecretPasswordNumSpecials, false, true)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot generate secret")
+		return nil, errors.Wrap(err, "generate secret")
 	}
 
 	return &corev1.Secret{
@@ -178,9 +180,9 @@ func (r *Reconciler) GetRegistryHTTPSecret(ctx context.Context, harbor *goharbor
 			Namespace: namespace,
 		},
 		Immutable: &varTrue,
-		Type:      goharborv1alpha2.SecretTypeSingle,
+		Type:      harbormetav1.SecretTypeSingle,
 		StringData: map[string]string{
-			goharborv1alpha2.SharedSecretKey: secret,
+			harbormetav1.SharedSecretKey: secret,
 		},
 	}, nil
 }
@@ -189,12 +191,12 @@ func (r *Reconciler) GetRegistry(ctx context.Context, harbor *goharborv1alpha2.H
 	name := r.NormalizeName(ctx, harbor.GetName())
 	namespace := harbor.GetNamespace()
 
-	authenticationSecretName := r.NormalizeName(ctx, harbor.GetName(), "registry", "basicauth")
-	httpSecretName := r.NormalizeName(ctx, harbor.GetName(), "registry", "http")
+	authenticationSecretName := r.NormalizeName(ctx, harbor.GetName(), controllers.Registry.String(), "basicauth")
+	httpSecretName := r.NormalizeName(ctx, harbor.GetName(), controllers.Registry.String(), "http")
 
-	redisDSN := harbor.Spec.RedisDSN(goharborv1alpha2.RegistryRedis)
+	redisDSN := harbor.Spec.RedisDSN(harbormetav1.RegistryRedis)
 
-	tls := harbor.Spec.InternalTLS.GetComponentTLSSpec(r.GetInternalTLSCertificateSecretName(ctx, harbor, goharborv1alpha2.RegistryTLS))
+	tls := harbor.Spec.InternalTLS.GetComponentTLSSpec(r.GetInternalTLSCertificateSecretName(ctx, harbor, harbormetav1.RegistryTLS))
 
 	return &goharborv1alpha2.Registry{
 		ObjectMeta: metav1.ObjectMeta{

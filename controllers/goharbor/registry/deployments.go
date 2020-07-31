@@ -11,11 +11,10 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 )
 
 const (
-	apiPort                               = 5000 // https://github.com/docker/distribution/blob/749f6afb4572201e3c37325d0ffedb6f32be8950/contrib/compose/docker-compose.yml#L15
-	metricsPort                           = 5001 // https://github.com/docker/distribution/blob/b12bd4004afc203f1cbd2072317c8fda30b89710/cmd/registry/config-dev.yml#L34
 	VolumeName                            = "registry-config"
 	ConfigPath                            = "/etc/registry"
 	CompatibilitySchema1Path              = ConfigPath + "/compatibility-schema1"
@@ -33,6 +32,11 @@ const (
 var (
 	varFalse = false
 	varTrue  = true
+)
+
+const (
+	apiPort     = 5000 // https://github.com/docker/distribution/blob/749f6afb4572201e3c37325d0ffedb6f32be8950/contrib/compose/docker-compose.yml#L15
+	metricsPort = 5001 // https://github.com/docker/distribution/blob/b12bd4004afc203f1cbd2072317c8fda30b89710/cmd/registry/config-dev.yml#L34
 )
 
 func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alpha2.Registry) (*appsv1.Deployment, error) { // nolint:funlen
@@ -72,7 +76,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 			Name: "REGISTRY_HTTP_SECRET",
 			ValueFrom: &corev1.EnvVarSource{
 				SecretKeyRef: &corev1.SecretKeySelector{
-					Key: goharborv1alpha2.SharedSecretKey,
+					Key: harbormetav1.SharedSecretKey,
 					LocalObjectReference: corev1.LocalObjectReference{
 						Name: registry.Spec.HTTP.SecretRef,
 					},
@@ -87,7 +91,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 			Name: "REGISTRY_REDIS_PASSWORD",
 			ValueFrom: &corev1.EnvVarSource{
 				SecretKeyRef: &corev1.SecretKeySelector{
-					Key: goharborv1alpha2.RedisPasswordKey,
+					Key: harbormetav1.RedisPasswordKey,
 					LocalObjectReference: corev1.LocalObjectReference{
 						Name: registry.Spec.Redis.PasswordRef,
 					},
@@ -149,7 +153,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 	if registry.Spec.Authentication.HTPasswd != nil {
 		envs = append(envs, corev1.EnvVar{
 			Name:  "REGISTRY_AUTH_HTPASSWD_PATH",
-			Value: path.Join(AuthenticationHTPasswdPath, goharborv1alpha2.HTPasswdFileName),
+			Value: path.Join(AuthenticationHTPasswdPath, harbormetav1.HTPasswdFileName),
 		})
 
 		volumes = append(volumes, corev1.Volume{
@@ -160,8 +164,8 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 					Optional:   &varFalse,
 					Items: []corev1.KeyToPath{
 						{
-							Key:  goharborv1alpha2.HTPasswdFileName,
-							Path: goharborv1alpha2.HTPasswdFileName,
+							Key:  harbormetav1.HTPasswdFileName,
+							Path: harbormetav1.HTPasswdFileName,
 						},
 					},
 				},
@@ -211,7 +215,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 
 	httpGET := &corev1.HTTPGetAction{
 		Path:   HealthPath,
-		Port:   intstr.FromString(goharborv1alpha2.RegistryAPIPortName),
+		Port:   intstr.FromString(harbormetav1.RegistryAPIPortName),
 		Scheme: registry.Spec.HTTP.TLS.GetScheme(),
 	}
 
@@ -239,35 +243,31 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 					NodeSelector:                 registry.Spec.NodeSelector,
 					AutomountServiceAccountToken: &varFalse,
 					Volumes:                      volumes,
-					Containers: []corev1.Container{
-						{
-							Name:  "registry",
-							Image: image,
-							Ports: []corev1.ContainerPort{
-								{
-									ContainerPort: apiPort,
-									Name:          goharborv1alpha2.RegistryAPIPortName,
-								}, {
-									ContainerPort: metricsPort,
-									Name:          goharborv1alpha2.RegistryMetricsPortName,
-								},
+					Containers: []corev1.Container{{
+						Name:  "registry",
+						Image: image,
+						Ports: []corev1.ContainerPort{{
+							ContainerPort: apiPort,
+							Name:          harbormetav1.RegistryAPIPortName,
+						}, {
+							ContainerPort: metricsPort,
+							Name:          harbormetav1.RegistryMetricsPortName,
+						}},
+						ImagePullPolicy: corev1.PullAlways,
+						LivenessProbe: &corev1.Probe{
+							Handler: corev1.Handler{
+								HTTPGet: httpGET,
 							},
-							ImagePullPolicy: corev1.PullAlways,
-							LivenessProbe: &corev1.Probe{
-								Handler: corev1.Handler{
-									HTTPGet: httpGET,
-								},
-							},
-							ReadinessProbe: &corev1.Probe{
-								Handler: corev1.Handler{
-									HTTPGet: httpGET,
-								},
-							},
-							VolumeMounts: volumeMounts,
-							Args:         []string{"serve", path.Join(ConfigPath, ConfigName)},
-							Env:          envs,
 						},
-					},
+						ReadinessProbe: &corev1.Probe{
+							Handler: corev1.Handler{
+								HTTPGet: httpGET,
+							},
+						},
+						VolumeMounts: volumeMounts,
+						Args:         []string{"serve", path.Join(ConfigPath, ConfigName)},
+						Env:          envs,
+					}},
 				},
 			},
 		},

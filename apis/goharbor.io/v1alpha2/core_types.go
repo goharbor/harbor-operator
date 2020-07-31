@@ -2,11 +2,8 @@ package v1alpha2
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-)
 
-const (
-	CoreHTTPPortName  = "http"
-	CoreHTTPSPortName = "https"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 )
 
 // +genclient
@@ -28,7 +25,7 @@ type Core struct {
 
 	Spec CoreSpec `json:"spec,omitempty"`
 
-	Status ComponentStatus `json:"status,omitempty"`
+	Status harbormetav1.ComponentStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -41,7 +38,7 @@ type CoreList struct {
 
 // CoreSpec defines the desired state of Core.
 type CoreSpec struct {
-	ComponentSpec `json:",inline"`
+	harbormetav1.ComponentSpec `json:",inline"`
 	// https://github.com/goharbor/harbor/blob/master/src/common/config/metadata/metadatalist.go#L62
 	CoreConfig `json:",inline"`
 
@@ -99,7 +96,7 @@ type CoreHTTPSpec struct {
 
 type CoreComponentsSpec struct {
 	// +kubebuilder:validation:Optional
-	TLS *ComponentsTLSSpec `json:"tls,omitempty"`
+	TLS *harbormetav1.ComponentsTLSSpec `json:"tls,omitempty"`
 
 	// +kubebuilder:validation:Required
 	JobService CoreComponentsJobServiceSpec `json:"jobService"`
@@ -137,7 +134,7 @@ const (
 )
 
 type CoreDatabaseSpec struct {
-	OpacifiedDSN `json:",inline"`
+	harbormetav1.PostgresConnectionWithParameters `json:",inline"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=0
@@ -242,7 +239,7 @@ type CoreComponentsClairSpec struct {
 	AdapterURL string `json:"adapterURL"`
 
 	// +kubebuilder:validation:Required
-	Database OpacifiedDSN `json:"database"`
+	Database harbormetav1.PostgresConnectionWithParameters `json:"database"`
 }
 
 type CoreComponentsNotaryServerSpec struct {
@@ -284,7 +281,7 @@ type CoreProxySpec struct {
 
 type CoreLogSpec struct {
 	// +kubebuilder:validation:Optional
-	Level CoreLogLevel `json:"level,omitempty"`
+	Level harbormetav1.CoreLogLevel `json:"level,omitempty"`
 }
 
 func init() { // nolint:gochecknoinits

@@ -2,16 +2,13 @@ package v1alpha2
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 )
 
 const (
 	// ipaddress:port[,weight,password,database_index]
 	RegistryControllerCacheURLKey = "url"
-)
-
-const (
-	RegistryControllerHTTPPortName  = "http"
-	RegistryControllerHTTPSPortName = "https"
 )
 
 const (
@@ -39,7 +36,7 @@ type RegistryController struct {
 	Spec RegistryControllerSpec `json:"spec,omitempty"`
 
 	// Most recently observed status.
-	Status ComponentStatus `json:"status,omitempty"`
+	Status harbormetav1.ComponentStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -52,7 +49,7 @@ type RegistryControllerList struct {
 
 // RegistryControllerSpec defines the desired state of RegistryController.
 type RegistryControllerSpec struct {
-	ComponentSpec `json:",inline"`
+	harbormetav1.ComponentSpec `json:",inline"`
 
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
@@ -62,12 +59,12 @@ type RegistryControllerSpec struct {
 	Log RegistryControllerLogSpec `json:"log,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	TLS *ComponentsTLSSpec `json:"tls,omitempty"`
+	TLS *harbormetav1.ComponentsTLSSpec `json:"tls,omitempty"`
 }
 
 type RegistryControllerLogSpec struct {
 	// +kubebuilder:validation:Optional
-	Level RegistryCtlLogLevel `json:"level,omitempty"`
+	Level harbormetav1.RegistryCtlLogLevel `json:"level,omitempty"`
 }
 
 type RegistryControllerHTTPSSpec struct {

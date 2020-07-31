@@ -3,18 +3,17 @@ kind: Harbor
 metadata:
   name: sample
 spec:
-  harborAdminPasswordRef: admin-core-secret
-  externalURL: http://core.harbor.domain
+  harborAdminPasswordRef: sample-harbor-core-admin-password
+  externalURL: https://core.harbor.domain
   expose:
-    ingress:
-      hosts:
-        core: core.harbor.domain
-        notary: notary.harbor.domain
-      annotations:
-        ingress.kubernetes.io/ssl-redirect: "true"
-        ingress.kubernetes.io/proxy-body-size: "0"
-        nginx.ingress.kubernetes.io/ssl-redirect: "true"
-        nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    core:
+      ingress:
+        host: core.harbor.domain
+      tls:
+        certificateRef: sample-public-certificate
+    notary:
+      ingress:
+        host: notary.harbor.domain
   encryptionKeyRef: core-database-encryption
   internalTLS:
     enabled: true
@@ -28,7 +27,9 @@ spec:
     address: harbor-redis-master
     passwordRef: harbor-redis
   database:
-    host: harbor-database-postgresql
-    port: 5432
+    hosts:
+    - host: harbor-database-postgresql
+      port: 5432
     username: postgres
     passwordRef: harbor-database-postgresql
+    sslMode: disable
