@@ -3,11 +3,12 @@ package harbor
 import (
 	"context"
 
+	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/graph"
-	"github.com/pkg/errors"
 )
 
 type RegistryController graph.Resource
@@ -34,14 +35,14 @@ func (r *Reconciler) AddRegistryController(ctx context.Context, harbor *goharbor
 type RegistryControllerInternalCertificate graph.Resource
 
 func (r *Reconciler) AddRegistryControllerInternalCertificate(ctx context.Context, harbor *goharborv1alpha2.Harbor, tlsIssuer InternalTLSIssuer) (RegistryControllerInternalCertificate, error) {
-	cert, err := r.GetInternalTLSCertificate(ctx, harbor, goharborv1alpha2.RegistryControllerTLS)
+	cert, err := r.GetInternalTLSCertificate(ctx, harbor, harbormetav1.RegistryControllerTLS)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot get TLS certificate")
+		return nil, errors.Wrap(err, "get")
 	}
 
 	certRes, err := r.Controller.AddCertificateToManage(ctx, cert, tlsIssuer)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot add TLS certificate")
+		return nil, errors.Wrap(err, "add")
 	}
 
 	return RegistryControllerInternalCertificate(certRes), nil
@@ -53,7 +54,7 @@ func (r *Reconciler) GetRegistryCtl(ctx context.Context, harbor *goharborv1alpha
 
 	registryName := r.NormalizeName(ctx, harbor.GetName())
 
-	tls := harbor.Spec.InternalTLS.GetComponentTLSSpec(r.GetInternalTLSCertificateSecretName(ctx, harbor, goharborv1alpha2.RegistryControllerTLS))
+	tls := harbor.Spec.InternalTLS.GetComponentTLSSpec(r.GetInternalTLSCertificateSecretName(ctx, harbor, harbormetav1.RegistryControllerTLS))
 
 	return &goharborv1alpha2.RegistryController{
 		ObjectMeta: metav1.ObjectMeta{

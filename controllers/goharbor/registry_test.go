@@ -25,6 +25,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 )
 
 func newRegistryController() controllerTest {
@@ -45,7 +46,7 @@ func setupValidRegistry(ctx context.Context, ns string) (Resource, client.Object
 			Namespace: ns,
 		},
 		Spec: goharborv1alpha2.RegistrySpec{
-			ComponentSpec: goharborv1alpha2.ComponentSpec{
+			ComponentSpec: harbormetav1.ComponentSpec{
 				Replicas: &replicas,
 			},
 			RegistryConfig01: goharborv1alpha2.RegistryConfig01{
@@ -79,8 +80,8 @@ func updateRegistry(ctx context.Context, object Resource) {
 	registry.Spec.Replicas = &replicas
 }
 
-func getRegistryStatusFunc(ctx context.Context, key client.ObjectKey) func() goharborv1alpha2.ComponentStatus {
-	return func() goharborv1alpha2.ComponentStatus {
+func getRegistryStatusFunc(ctx context.Context, key client.ObjectKey) func() harbormetav1.ComponentStatus {
+	return func() harbormetav1.ComponentStatus {
 		var registry goharborv1alpha2.Registry
 
 		err := k8sClient.Get(ctx, key, &registry)

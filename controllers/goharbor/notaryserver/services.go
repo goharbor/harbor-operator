@@ -8,6 +8,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 )
 
 const (
@@ -19,19 +20,16 @@ func (r *Reconciler) GetService(ctx context.Context, notary *goharborv1alpha2.No
 	namespace := notary.GetNamespace()
 
 	return &corev1.Service{
-		// https://github.com/goharbor/harbor-helm/blob/master/templates/notary/notary-svc.yaml
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
 		},
 		Spec: corev1.ServiceSpec{
-			Ports: []corev1.ServicePort{
-				{
-					Name:       notary.Name,
-					Port:       PublicPort,
-					TargetPort: intstr.FromInt(port),
-				},
-			},
+			Ports: []corev1.ServicePort{{
+				Name:       harbormetav1.NotaryServerAPIPortName,
+				Port:       notary.Spec.TLS.GetInternalPort(),
+				TargetPort: intstr.FromString(harbormetav1.NotaryServerAPIPortName),
+			}},
 			Selector: map[string]string{
 				r.Label("name"):      name,
 				r.Label("namespace"): namespace,

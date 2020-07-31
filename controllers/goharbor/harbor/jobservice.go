@@ -5,16 +5,16 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/pkg/errors"
+	"github.com/sethvargo/go-password/password"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/pkg/graph"
-	"github.com/pkg/errors"
-	"github.com/sethvargo/go-password/password"
 )
-
-type JobServiceSecret graph.Resource
 
 func (r *Reconciler) AddJobServiceConfigurations(ctx context.Context, harbor *goharborv1alpha2.Harbor, tlsIssuer InternalTLSIssuer) (JobServiceInternalCertificate, JobServiceSecret, error) {
 	certificate, err := r.AddJobServiceInternalCertificate(ctx, harbor, tlsIssuer)
@@ -22,17 +22,22 @@ func (r *Reconciler) AddJobServiceConfigurations(ctx context.Context, harbor *go
 		return nil, nil, errors.Wrap(err, "certificate")
 	}
 
+	secret, err := r.AddJobServiceSecret(ctx, harbor)
+
+	return certificate, secret, errors.Wrap(err, "secret")
+}
+
+type JobServiceSecret graph.Resource
+
+func (r *Reconciler) AddJobServiceSecret(ctx context.Context, harbor *goharborv1alpha2.Harbor) (JobServiceSecret, error) {
 	secret, err := r.GetJobServiceSecret(ctx, harbor)
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "cannot get secret")
+		return nil, errors.Wrap(err, "get")
 	}
 
 	secretRes, err := r.AddSecretToManage(ctx, secret)
-	if err != nil {
-		return nil, nil, errors.Wrap(err, "cannot add secret")
-	}
 
-	return certificate, JobServiceSecret(secretRes), nil
+	return JobServiceSecret(secretRes), errors.Wrap(err, "add")
 }
 
 const (
@@ -42,12 +47,12 @@ const (
 )
 
 func (r *Reconciler) GetJobServiceSecret(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*corev1.Secret, error) {
-	name := r.NormalizeName(ctx, harbor.GetName(), "jobservice", "secret")
+	name := r.NormalizeName(ctx, harbor.GetName(), controllers.JobService.String(), "secret")
 	namespace := harbor.GetNamespace()
 
 	secret, err := password.Generate(JobServiceSecretLength, JobServiceSecretNumDigits, JobServiceSecretNumSpecials, false, true)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot generate secret")
+		return nil, errors.Wrap(err, "cannot generate")
 	}
 
 	return &corev1.Secret{
@@ -56,9 +61,9 @@ func (r *Reconciler) GetJobServiceSecret(ctx context.Context, harbor *goharborv1
 			Namespace: namespace,
 		},
 		Immutable: &varTrue,
-		Type:      goharborv1alpha2.SecretTypeSingle,
+		Type:      harbormetav1.SecretTypeSingle,
 		StringData: map[string]string{
-			goharborv1alpha2.SharedSecretKey: secret,
+			harbormetav1.SharedSecretKey: secret,
 		},
 	}, nil
 }
@@ -68,25 +73,25 @@ type JobService graph.Resource
 func (r *Reconciler) AddJobService(ctx context.Context, harbor *goharborv1alpha2.Harbor, certificate JobServiceInternalCertificate, core Core, coreSecret CoreSecret, jobServiceSecret JobServiceSecret) (JobService, error) {
 	jobservice, err := r.GetJobService(ctx, harbor)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot get jobservice")
+		return nil, errors.Wrap(err, "get")
 	}
 
 	jobserviceRes, err := r.AddBasicResource(ctx, jobservice, core, certificate, coreSecret, jobServiceSecret)
 
-	return jobserviceRes, errors.Wrap(err, "cannot add basic resource")
+	return jobserviceRes, errors.Wrap(err, "add")
 }
 
 type JobServiceInternalCertificate graph.Resource
 
 func (r *Reconciler) AddJobServiceInternalCertificate(ctx context.Context, harbor *goharborv1alpha2.Harbor, tlsIssuer InternalTLSIssuer) (JobServiceInternalCertificate, error) {
-	cert, err := r.GetInternalTLSCertificate(ctx, harbor, goharborv1alpha2.JobServiceTLS)
+	cert, err := r.GetInternalTLSCertificate(ctx, harbor, harbormetav1.JobServiceTLS)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot get TLS certificate")
+		return nil, errors.Wrap(err, "get")
 	}
 
 	certRes, err := r.Controller.AddCertificateToManage(ctx, cert, tlsIssuer)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot add TLS certificate")
+		return nil, errors.Wrap(err, "add")
 	}
 
 	return JobServiceInternalCertificate(certRes), nil
@@ -102,16 +107,16 @@ func (r *Reconciler) GetJobService(ctx context.Context, harbor *goharborv1alpha2
 
 	coreURL := (&url.URL{
 		Scheme: harbor.Spec.InternalTLS.GetScheme(),
-		Host:   r.NormalizeName(ctx, harbor.GetName(), "core"),
+		Host:   r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String()),
 	}).String()
-	coreSecretRef := r.NormalizeName(ctx, harbor.GetName(), "core", "secret")
-	registryAuthRef := r.NormalizeName(ctx, harbor.GetName(), "registry", "basicauth")
-	secretRef := r.NormalizeName(ctx, harbor.GetName(), "jobservice", "secret")
+	coreSecretRef := r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String(), "secret")
+	registryAuthRef := r.NormalizeName(ctx, harbor.GetName(), controllers.Registry.String(), "basicauth")
+	secretRef := r.NormalizeName(ctx, harbor.GetName(), controllers.JobService.String(), "secret")
 	logLevel := harbor.Spec.LogLevel.JobService()
 
-	redisDSN := harbor.Spec.RedisDSN(goharborv1alpha2.JobServiceRedis)
+	redisDSN := harbor.Spec.RedisDSN(harbormetav1.JobServiceRedis)
 
-	tls := harbor.Spec.InternalTLS.GetComponentTLSSpec(r.GetInternalTLSCertificateSecretName(ctx, harbor, goharborv1alpha2.JobServiceTLS))
+	tls := harbor.Spec.InternalTLS.GetComponentTLSSpec(r.GetInternalTLSCertificateSecretName(ctx, harbor, harbormetav1.JobServiceTLS))
 
 	return &goharborv1alpha2.JobService{
 		ObjectMeta: metav1.ObjectMeta{

@@ -11,6 +11,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 )
 
 const (
@@ -78,7 +79,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registryCtl *goharborv1a
 			Name: "REGISTRY_HTTP_SECRET",
 			ValueFrom: &corev1.EnvVarSource{
 				SecretKeyRef: &corev1.SecretKeySelector{
-					Key: goharborv1alpha2.SharedSecretKey,
+					Key: harbormetav1.SharedSecretKey,
 					LocalObjectReference: corev1.LocalObjectReference{
 						Name: registry.Spec.HTTP.SecretRef,
 					},
@@ -93,7 +94,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registryCtl *goharborv1a
 			Name: "REGISTRY_REDIS_PASSWORD",
 			ValueFrom: &corev1.EnvVarSource{
 				SecretKeyRef: &corev1.SecretKeySelector{
-					Key: goharborv1alpha2.RedisPasswordKey,
+					Key: harbormetav1.RedisPasswordKey,
 					LocalObjectReference: corev1.LocalObjectReference{
 						Name: registry.Spec.Redis.PasswordRef,
 					},
@@ -155,7 +156,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registryCtl *goharborv1a
 	if registry.Spec.Authentication.HTPasswd != nil {
 		envs = append(envs, corev1.EnvVar{
 			Name:  "REGISTRY_AUTH_HTPASSWD_PATH",
-			Value: path.Join(AuthenticationHTPasswdPath, goharborv1alpha2.HTPasswdFileName),
+			Value: path.Join(AuthenticationHTPasswdPath, harbormetav1.HTPasswdFileName),
 		})
 
 		volumes = append(volumes, corev1.Volume{
@@ -166,8 +167,8 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registryCtl *goharborv1a
 					Optional:   &varFalse,
 					Items: []corev1.KeyToPath{
 						{
-							Key:  goharborv1alpha2.HTPasswdFileName,
-							Path: goharborv1alpha2.HTPasswdFileName,
+							Key:  harbormetav1.HTPasswdFileName,
+							Path: harbormetav1.HTPasswdFileName,
 						},
 					},
 				},
@@ -215,9 +216,9 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registryCtl *goharborv1a
 		})
 	}
 
-	port := goharborv1alpha2.RegistryControllerHTTPPortName
+	port := harbormetav1.RegistryControllerHTTPPortName
 	if registryCtl.Spec.TLS.Enabled() {
-		port = goharborv1alpha2.RegistryControllerHTTPSPortName
+		port = harbormetav1.RegistryControllerHTTPSPortName
 	}
 
 	httpGET := &corev1.HTTPGetAction{
@@ -255,10 +256,10 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registryCtl *goharborv1a
 							Name:  "registryctl",
 							Image: image,
 							Ports: []corev1.ContainerPort{{
-								Name:          goharborv1alpha2.RegistryControllerHTTPPortName,
+								Name:          harbormetav1.RegistryControllerHTTPPortName,
 								ContainerPort: httpPort,
 							}, {
-								Name:          goharborv1alpha2.RegistryControllerHTTPSPortName,
+								Name:          harbormetav1.RegistryControllerHTTPSPortName,
 								ContainerPort: httpsPort,
 							}},
 							ImagePullPolicy: corev1.PullAlways,

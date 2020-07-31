@@ -4,13 +4,14 @@ import (
 	"context"
 	"net/url"
 
+	"github.com/pkg/errors"
+	"github.com/sethvargo/go-password/password"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/graph"
-	"github.com/pkg/errors"
-	"github.com/sethvargo/go-password/password"
 )
 
 func (r *Reconciler) AddChartMuseumConfigurations(ctx context.Context, harbor *goharborv1alpha2.Harbor, tlsIssuer InternalTLSIssuer) (ChartMuseumInternalCertificate, ChartMuseumAuthSecret, error) {
@@ -34,14 +35,14 @@ func (r *Reconciler) AddChartMuseumConfigurations(ctx context.Context, harbor *g
 type ChartMuseumInternalCertificate graph.Resource
 
 func (r *Reconciler) AddChartMuseumInternalCertificate(ctx context.Context, harbor *goharborv1alpha2.Harbor, tlsIssuer InternalTLSIssuer) (ChartMuseumInternalCertificate, error) {
-	cert, err := r.GetInternalTLSCertificate(ctx, harbor, goharborv1alpha2.ChartMuseumTLS)
+	cert, err := r.GetInternalTLSCertificate(ctx, harbor, harbormetav1.ChartMuseumTLS)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot get TLS certificate")
+		return nil, errors.Wrap(err, "get")
 	}
 
 	certRes, err := r.Controller.AddCertificateToManage(ctx, cert, tlsIssuer)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot add TLS certificate")
+		return nil, errors.Wrap(err, "add")
 	}
 
 	return ChartMuseumInternalCertificate(certRes), nil
@@ -52,12 +53,12 @@ type ChartMuseumAuthSecret graph.Resource
 func (r *Reconciler) AddChartMuseumAuthenticationSecret(ctx context.Context, harbor *goharborv1alpha2.Harbor) (RegistryAuthSecret, error) {
 	authSecret, err := r.GetChartMuseumAuthenticationSecret(ctx, harbor)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot get secret")
+		return nil, errors.Wrap(err, "get")
 	}
 
 	authSecretRes, err := r.AddSecretToManage(ctx, authSecret)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot add secret")
+		return nil, errors.Wrap(err, "add")
 	}
 
 	return ChartMuseumAuthSecret(authSecretRes), nil
@@ -86,7 +87,7 @@ func (r *Reconciler) GetChartMuseumAuthenticationSecret(ctx context.Context, har
 			Namespace: namespace,
 		},
 		Immutable: &varFalse,
-		Type:      goharborv1alpha2.SecretTypeHTPasswd,
+		Type:      harbormetav1.SecretTypeHTPasswd,
 		StringData: map[string]string{
 			corev1.BasicAuthUsernameKey: ChartMuseumAuthenticationUsername,
 			corev1.BasicAuthPasswordKey: password,
@@ -103,12 +104,12 @@ func (r *Reconciler) AddChartMuseum(ctx context.Context, harbor *goharborv1alpha
 
 	chartmuseum, err := r.GetChartMuseum(ctx, harbor)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot get chartmuseum")
+		return nil, errors.Wrap(err, "get")
 	}
 
 	chartmuseumRes, err := r.AddBasicResource(ctx, chartmuseum, certificate)
 
-	return ChartMuseum(chartmuseumRes), errors.Wrap(err, "cannot add basic resource")
+	return ChartMuseum(chartmuseumRes), errors.Wrap(err, "add")
 }
 
 func (r *Reconciler) GetChartMuseum(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*goharborv1alpha2.ChartMuseum, error) {
@@ -116,9 +117,9 @@ func (r *Reconciler) GetChartMuseum(ctx context.Context, harbor *goharborv1alpha
 	namespace := harbor.GetNamespace()
 
 	basicAuthRef := r.NormalizeName(ctx, harbor.GetName(), "chartmuseum", "basicauth")
-	debug := harbor.Spec.LogLevel == goharborv1alpha2.HarborDebug
+	debug := harbor.Spec.LogLevel == harbormetav1.HarborDebug
 
-	redisDSN := harbor.Spec.RedisDSN(goharborv1alpha2.ChartMuseumRedis)
+	redisDSN := harbor.Spec.RedisDSN(harbormetav1.ChartMuseumRedis)
 
 	publicURL, err := url.Parse(harbor.Spec.ExternalURL)
 	if err != nil {
@@ -129,7 +130,7 @@ func (r *Reconciler) GetChartMuseum(ctx context.Context, harbor *goharborv1alpha
 	maxStorageObjects := int64(0)
 	parallelLimit := int32(0)
 
-	tls := harbor.Spec.InternalTLS.GetComponentTLSSpec(r.GetInternalTLSCertificateSecretName(ctx, harbor, goharborv1alpha2.ChartMuseumTLS))
+	tls := harbor.Spec.InternalTLS.GetComponentTLSSpec(r.GetInternalTLSCertificateSecretName(ctx, harbor, harbormetav1.ChartMuseumTLS))
 
 	return &goharborv1alpha2.ChartMuseum{
 		ObjectMeta: metav1.ObjectMeta{

@@ -1,7 +1,10 @@
 package v1alpha2
 
 import (
+	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 )
 
 // +genclient
@@ -23,7 +26,7 @@ type NotaryServer struct {
 
 	Spec NotaryServerSpec `json:"spec,omitempty"`
 
-	Status ComponentStatus `json:"status,omitempty"`
+	Status harbormetav1.ComponentStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -36,10 +39,10 @@ type NotaryServerList struct {
 
 // NotaryServerSpec defines the desired state of NotaryServer.
 type NotaryServerSpec struct {
-	ComponentSpec `json:",inline"`
+	harbormetav1.ComponentSpec `json:",inline"`
 
 	// +kubebuilder:validation:Optional
-	HTTPS *NotaryHTTPSSpec `json:"https,omitempty"`
+	TLS *harbormetav1.ComponentsTLSSpec `json:"tls,omitempty"`
 
 	// +kubebuilder:validation:Required
 	TrustService NotaryServerTrustServiceSpec `json:"trustService"`
@@ -57,6 +60,11 @@ type NotaryServerSpec struct {
 	Migration *NotaryMigrationSpec `json:"migration,omitempty"`
 }
 
+const (
+	NotaryServerTrustRemoteType = "remote"
+	NotaryServerTrustLocalType  = "local"
+)
+
 type NotaryServerTrustServiceSpec struct {
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Enum={"remote","local"}
@@ -72,9 +80,8 @@ type NotaryServerTrustServiceSpec struct {
 	Port int64 `json:"port,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Enum={"ecdsa","rsa","ed25519"}
 	// +kubebuilder:default=ecdsa
-	KeyAlgorithm string `json:"keyAlgorithm,omitempty"`
+	KeyAlgorithm certv1.KeyAlgorithm `json:"keyAlgorithm,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"

@@ -1,0 +1,18 @@
+apiVersion: cert-manager.io/v1alpha2
+kind: Issuer
+metadata:
+  name: sample-public-certificate
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: sample-public-certificate
+spec:
+  isCA: false
+  issuerRef:
+    name: sample-public-certificate
+  secretName: sample-public-certificate
+  dnsNames:
+  - core.harbor.domain

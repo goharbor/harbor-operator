@@ -23,19 +23,19 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"math/big"
 	"time"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 )
 
 func generateCertificate() map[string][]byte {
@@ -143,7 +143,7 @@ func generateCertificate() map[string][]byte {
 
 // setupPostgresql deploy a servicea deployment and a secret to run a postgresql instance
 // Based on https://hub.docker.com/_/postgres
-func setupPostgresql(ctx context.Context, ns string) goharborv1alpha2.OpacifiedDSN {
+func setupPostgresql(ctx context.Context, ns string) harbormetav1.PostgresConnectionWithParameters {
 	pgName := newName("pg")
 	pgPasswordName := newName("pg-password")
 
@@ -166,9 +166,9 @@ func setupPostgresql(ctx context.Context, ns string) goharborv1alpha2.OpacifiedD
 			Namespace: ns,
 		},
 		StringData: map[string]string{
-			goharborv1alpha2.PostgresqlPasswordKey: "th3Adm!nPa$$w0rd",
+			harbormetav1.PostgresqlPasswordKey: "th3Adm!nPa$$w0rd",
 		},
-		Type: goharborv1alpha2.SecretTypePostgresql,
+		Type: harbormetav1.SecretTypePostgresql,
 	})).To(Succeed())
 
 	Expect(k8sClient.Create(ctx, &appsv1.Deployment{
@@ -205,7 +205,7 @@ func setupPostgresql(ctx context.Context, ns string) goharborv1alpha2.OpacifiedD
 									LocalObjectReference: corev1.LocalObjectReference{
 										Name: pgPasswordName,
 									},
-									Key: goharborv1alpha2.PostgresqlPasswordKey,
+									Key: harbormetav1.PostgresqlPasswordKey,
 								},
 							},
 						}},
@@ -222,8 +222,20 @@ func setupPostgresql(ctx context.Context, ns string) goharborv1alpha2.OpacifiedD
 		},
 	})).To(Succeed())
 
-	return goharborv1alpha2.OpacifiedDSN{
-		DSN:         fmt.Sprintf("postgres://postgres@%s:5432/postgresql", pgName),
-		PasswordRef: pgPasswordName,
+	return harbormetav1.PostgresConnectionWithParameters{
+		PostgresConnection: harbormetav1.PostgresConnection{
+			PostgresCredentials: harbormetav1.PostgresCredentials{
+				PasswordRef: pgPasswordName,
+				Username:    "postgres",
+			},
+			Database: "postgresql",
+			Hosts: []harbormetav1.PostgresHostSpec{{
+				Host: pgName,
+				Port: 5432,
+			}},
+		},
+		Parameters: map[string]string{
+			harbormetav1.PostgresSSLModeKey: string(harbormetav1.PostgresSSLModeRequire),
+		},
 	}
 }

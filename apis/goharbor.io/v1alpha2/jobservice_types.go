@@ -5,11 +5,8 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-)
 
-const (
-	JobServiceHTTPPortName  = "http"
-	JobServiceHTTPSPortName = "https"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 )
 
 // +genclient
@@ -31,7 +28,7 @@ type JobService struct {
 
 	Spec JobServiceSpec `json:"spec,omitempty"`
 
-	Status ComponentStatus `json:"status,omitempty"`
+	Status harbormetav1.ComponentStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -44,14 +41,14 @@ type JobServiceList struct {
 
 // JobServiceSpec defines the desired state of JobService.
 type JobServiceSpec struct {
-	ComponentSpec `json:",inline"`
+	harbormetav1.ComponentSpec `json:",inline"`
 
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	SecretRef string `json:"secretRef"`
 
 	// +kubebuilder:validation:Optional
-	TLS *ComponentsTLSSpec `json:"tls,omitempty"`
+	TLS *harbormetav1.ComponentsTLSSpec `json:"tls,omitempty"`
 
 	// +kubebuilder:validation:Required
 	Core JobServiceCoreSpec `json:"core"`
@@ -150,7 +147,7 @@ func (r *JobServiceLoggerConfigSpec) Validate() error {
 
 type JobServiceLoggerConfigDatabaseSpec struct {
 	// +kubebuilder:validation:Required
-	Level JobServiceLogLevel `json:"level"`
+	Level harbormetav1.JobServiceLogLevel `json:"level"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="string"
@@ -160,7 +157,7 @@ type JobServiceLoggerConfigDatabaseSpec struct {
 
 type JobServiceLoggerConfigSTDOUTSpec struct {
 	// +kubebuilder:validation:Optional
-	Level JobServiceLogLevel `json:"level,omitempty"`
+	Level harbormetav1.JobServiceLogLevel `json:"level,omitempty"`
 }
 
 type JobServiceLoggerConfigFileSpec struct {
@@ -169,7 +166,7 @@ type JobServiceLoggerConfigFileSpec struct {
 
 	// +kubebuilder:validation:Required
 	// +kubebuilder:default="INFO"
-	Level JobServiceLogLevel `json:"level"`
+	Level harbormetav1.JobServiceLogLevel `json:"level"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="string"

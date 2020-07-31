@@ -1,8 +1,11 @@
 package v1alpha2
 
 import (
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
+
+const NotarySignerAPIPort = 7899
 
 // +genclient
 
@@ -23,7 +26,7 @@ type NotarySigner struct {
 
 	Spec NotarySignerSpec `json:"spec,omitempty"`
 
-	Status ComponentStatus `json:"status,omitempty"`
+	Status harbormetav1.ComponentStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -36,19 +39,10 @@ type NotarySignerList struct {
 
 // NotarySignerSpec defines the desired state of NotarySigner.
 type NotarySignerSpec struct {
-	ComponentSpec `json:",inline"`
+	harbormetav1.ComponentSpec `json:",inline"`
 
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
-	CertificateRef string `json:"certificateRef"`
-
-	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Pattern="^https?://.*$"
-	// The url exposed to clients to access notary
-	PublicURL string `json:"publicURL"`
-
-	// +kubebuilder:validation:Required
-	HTTPS NotaryHTTPSSpec `json:"https,omitempty"`
+	Authentication NotarySignerAuthenticationSpec `json:"authentatication"`
 
 	// +kubebuilder:validation:Optional
 	Logging NotaryLoggingSpec `json:"logging,omitempty"`
@@ -58,6 +52,12 @@ type NotarySignerSpec struct {
 
 	// +kubebuilder:validation:Optional
 	Migration *NotaryMigrationSpec `json:"migration,omitempty"`
+}
+
+type NotarySignerAuthenticationSpec struct {
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
+	CertificateRef string `json:"certificateRef"`
 }
 
 type NotarySignerStorageSpec struct {

@@ -11,10 +11,10 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 )
 
 const (
-	port                 = 7899
 	VolumeName           = "config"
 	ConfigPath           = "/etc/notary-signer"
 	HTTPSVolumeName      = "certificates"
@@ -41,28 +41,22 @@ func (r *Reconciler) GetDeployment(ctx context.Context, notary *goharborv1alpha2
 				},
 			},
 		},
+	}, {
+		Name: HTTPSVolumeName,
+		VolumeSource: corev1.VolumeSource{
+			Secret: &corev1.SecretVolumeSource{
+				SecretName: notary.Spec.Authentication.CertificateRef,
+			},
+		},
 	}}
 
 	volumeMounts := []corev1.VolumeMount{{
 		Name:      VolumeName,
 		MountPath: ConfigPath,
+	}, {
+		Name:      HTTPSVolumeName,
+		MountPath: HTTPSCertificatePath,
 	}}
-
-	if notary.Spec.HTTPS.CertificateRef != "" {
-		volumes = append(volumes, corev1.Volume{
-			Name: HTTPSVolumeName,
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					SecretName: notary.Spec.HTTPS.CertificateRef,
-				},
-			},
-		})
-
-		volumeMounts = append(volumeMounts, corev1.VolumeMount{
-			Name:      HTTPSVolumeName,
-			MountPath: HTTPSCertificatePath,
-		})
-	}
 
 	initContainers := []corev1.Container{}
 
@@ -102,45 +96,40 @@ func (r *Reconciler) GetDeployment(ctx context.Context, notary *goharborv1alpha2
 					AutomountServiceAccountToken: &varFalse,
 					Volumes:                      volumes,
 					InitContainers:               initContainers,
-					Containers: []corev1.Container{
-						{
-							Name:            "notary-signer",
-							Image:           image,
-							Args:            []string{"notary-signer", "-config", path.Join(ConfigPath, ConfigName)},
-							ImagePullPolicy: corev1.PullAlways,
-							VolumeMounts:    volumeMounts,
-							Ports: []corev1.ContainerPort{
-								{
-									ContainerPort: port,
-								},
-							},
-							ReadinessProbe: &corev1.Probe{
-								Handler: corev1.Handler{
-									TCPSocket: &corev1.TCPSocketAction{
-										Port: intstr.FromInt(port),
-									},
-								},
-							},
-							LivenessProbe: &corev1.Probe{
-								Handler: corev1.Handler{
-									TCPSocket: &corev1.TCPSocketAction{
-										Port: intstr.FromInt(port),
-									},
-								},
-							},
-							EnvFrom: []corev1.EnvFromSource{
-								{
-									Prefix: "NOTARY_SIGNER_",
-									SecretRef: &corev1.SecretEnvSource{
-										LocalObjectReference: corev1.LocalObjectReference{
-											Name: notary.Spec.Storage.AliasesRef,
-										},
-										Optional: &varFalse,
-									},
+					Containers: []corev1.Container{{
+						Name:            "notary-signer",
+						Image:           image,
+						Args:            []string{"notary-signer", "-config", path.Join(ConfigPath, ConfigName)},
+						ImagePullPolicy: corev1.PullAlways,
+						VolumeMounts:    volumeMounts,
+						Ports: []corev1.ContainerPort{{
+							ContainerPort: goharborv1alpha2.NotarySignerAPIPort,
+							Name:          harbormetav1.NotarySignerAPIPortName,
+						}},
+						ReadinessProbe: &corev1.Probe{
+							Handler: corev1.Handler{
+								TCPSocket: &corev1.TCPSocketAction{
+									Port: intstr.FromString(harbormetav1.NotarySignerAPIPortName),
 								},
 							},
 						},
-					},
+						LivenessProbe: &corev1.Probe{
+							Handler: corev1.Handler{
+								TCPSocket: &corev1.TCPSocketAction{
+									Port: intstr.FromString(harbormetav1.NotarySignerAPIPortName),
+								},
+							},
+						},
+						EnvFrom: []corev1.EnvFromSource{{
+							Prefix: "NOTARY_SIGNER_",
+							SecretRef: &corev1.SecretEnvSource{
+								LocalObjectReference: corev1.LocalObjectReference{
+									Name: notary.Spec.Storage.AliasesRef,
+								},
+								Optional: &varFalse,
+							},
+						}},
+					}},
 				},
 			},
 		},
