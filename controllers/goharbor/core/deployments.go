@@ -161,7 +161,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 			},
 		}),
 		common.WithChartMuseum: harbor.Value(fmt.Sprintf("%+v", core.Spec.Components.ChartRepository != nil)),
-		common.WithClair:       harbor.Value(fmt.Sprintf("%+v", core.Spec.Components.Clair != nil)),
+		common.WithClair:       harbor.Value("false"),
 		common.WithNotary:      harbor.Value(fmt.Sprintf("%+v", core.Spec.Components.NotaryServer != nil)),
 		common.WithTrivy:       harbor.Value(fmt.Sprintf("%+v", core.Spec.Components.Trivy != nil)),
 	})
@@ -326,49 +326,6 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 		envs = append(envs, urlConfig, corev1.EnvVar{
 			Name:  "CHART_CACHE_DRIVER",
 			Value: core.Spec.Components.ChartRepository.CacheDriver,
-		})
-	}
-
-	if core.Spec.Components.Clair != nil {
-		urlConfig, err := harbor.EnvVar(common.ClairAdapterURL, harbor.Value(core.Spec.Components.Clair.AdapterURL))
-		if err != nil {
-			return nil, errors.Wrap(err, "cannot configure clair")
-		}
-
-		sslMode, ok := core.Spec.Components.Clair.Database.Parameters[harbormetav1.PostgresSSLModeKey]
-		if !ok {
-			sslMode = ""
-		}
-
-		envs = append(envs, urlConfig, corev1.EnvVar{
-			Name:  "CLAIR_DB_HOST",
-			Value: core.Spec.Components.Clair.Database.Hosts[0].Host,
-		}, corev1.EnvVar{
-			Name:  "CLAIR_DB_PORT",
-			Value: fmt.Sprintf("%d", core.Spec.Components.Clair.Database.Hosts[0].Port),
-		}, corev1.EnvVar{
-			Name:  "CLAIR_DB_USERNAME",
-			Value: core.Spec.Components.Clair.Database.Username,
-		}, corev1.EnvVar{
-			Name:  "CLAIR_DB",
-			Value: core.Spec.Components.Clair.Database.Database,
-		}, corev1.EnvVar{
-			Name:  "CLAIR_DB_SSLMODE",
-			Value: sslMode,
-		}, corev1.EnvVar{
-			Name: "CLAIR_DB_PASSWORD",
-			ValueFrom: &corev1.EnvVarSource{
-				SecretKeyRef: &corev1.SecretKeySelector{
-					Key:      harbormetav1.PostgresqlPasswordKey,
-					Optional: &varFalse,
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: core.Spec.Components.Clair.Database.PasswordRef,
-					},
-				},
-			},
-		}, corev1.EnvVar{
-			Name:  "CLAIR_URL",
-			Value: core.Spec.Components.Clair.URL,
 		})
 	}
 

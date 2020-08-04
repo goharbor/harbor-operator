@@ -613,11 +613,6 @@ func (in *CoreComponentsSpec) DeepCopyInto(out *CoreComponentsSpec) {
 		*out = new(CoreComponentsTrivySpec)
 		**out = **in
 	}
-	if in.Clair != nil {
-		in, out := &in.Clair, &out.Clair
-		*out = new(CoreComponentsClairSpec)
-		(*in).DeepCopyInto(*out)
-	}
 	if in.ChartRepository != nil {
 		in, out := &in.ChartRepository, &out.ChartRepository
 		*out = new(CoreComponentsChartRepositorySpec)
