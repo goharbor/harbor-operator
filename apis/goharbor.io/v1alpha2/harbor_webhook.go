@@ -58,9 +58,9 @@ func (h *Harbor) ValidateDelete() error {
 func (h *Harbor) Validate() error {
 	var allErrs field.ErrorList
 
-	err := h.Spec.Persistence.ImageChartStorage.Validate()
+	err := h.Spec.ImageChartStorage.Validate()
 	if err != nil {
-		allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("persistence").Child("imageChartStorage"), h.Spec.Persistence.ImageChartStorage, err.Error()))
+		allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("persistence").Child("imageChartStorage"), h.Spec.ImageChartStorage, err.Error()))
 	}
 
 	if len(allErrs) == 0 {

@@ -3,6 +3,9 @@ kind: Kustomization
 commonLabels:
   sample: "true"
 
+resources:
+- storage.yaml
+
 bases:
 - ../harbor
 

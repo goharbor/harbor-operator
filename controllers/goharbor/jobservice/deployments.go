@@ -14,6 +14,7 @@ import (
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/pkg/config/harbor"
 )
 
@@ -244,34 +245,32 @@ func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1al
 					NodeSelector:                 jobservice.Spec.NodeSelector,
 					AutomountServiceAccountToken: &varFalse,
 					Volumes:                      volumes,
-					Containers: []corev1.Container{
-						{
-							Name:  "jobservice",
-							Image: image,
-							Ports: []corev1.ContainerPort{{
-								Name:          harbormetav1.JobServiceHTTPPortName,
-								ContainerPort: httpPort,
-							}, {
-								Name:          harbormetav1.JobServiceHTTPSPortName,
-								ContainerPort: httpsPort,
-							}},
+					Containers: []corev1.Container{{
+						Name:  controllers.JobService.String(),
+						Image: image,
+						Ports: []corev1.ContainerPort{{
+							Name:          harbormetav1.JobServiceHTTPPortName,
+							ContainerPort: httpPort,
+						}, {
+							Name:          harbormetav1.JobServiceHTTPSPortName,
+							ContainerPort: httpsPort,
+						}},
 
-							// https://github.com/goharbor/harbor/blob/master/make/photon/prepare/templates/jobservice/env.jinja
-							Env:             envs,
-							ImagePullPolicy: corev1.PullAlways,
-							LivenessProbe: &corev1.Probe{
-								Handler: corev1.Handler{
-									HTTPGet: httpGET,
-								},
+						// https://github.com/goharbor/harbor/blob/master/make/photon/prepare/templates/jobservice/env.jinja
+						Env:             envs,
+						ImagePullPolicy: corev1.PullAlways,
+						LivenessProbe: &corev1.Probe{
+							Handler: corev1.Handler{
+								HTTPGet: httpGET,
 							},
-							ReadinessProbe: &corev1.Probe{
-								Handler: corev1.Handler{
-									HTTPGet: httpGET,
-								},
-							},
-							VolumeMounts: volumeMounts,
 						},
-					},
+						ReadinessProbe: &corev1.Probe{
+							Handler: corev1.Handler{
+								HTTPGet: httpGET,
+							},
+						},
+						VolumeMounts: volumeMounts,
+					}},
 				},
 			},
 		},

@@ -12,6 +12,7 @@ import (
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	"github.com/goharbor/harbor-operator/controllers"
 )
 
 const (
@@ -195,6 +196,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1a
 		volumeMounts = append(volumeMounts, corev1.VolumeMount{
 			Name:      LocalStorageVolume,
 			MountPath: DefaultLocalStoragePath,
+			SubPath:   chartMuseum.Spec.Chart.Storage.FileSystem.Prefix,
 			ReadOnly:  false,
 		})
 	}
@@ -284,35 +286,33 @@ func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1a
 					AutomountServiceAccountToken: &varFalse,
 					Volumes:                      volumes,
 
-					Containers: []corev1.Container{
-						{
-							Name:  "chartmuseum",
-							Image: image,
-							Ports: []corev1.ContainerPort{{
-								Name:          harbormetav1.ChartMuseumHTTPPortName,
-								ContainerPort: httpPort,
-							}, {
-								Name:          harbormetav1.ChartMuseumHTTPSPortName,
-								ContainerPort: httpsPort,
-							}},
+					Containers: []corev1.Container{{
+						Name:  controllers.ChartMuseum.String(),
+						Image: image,
+						Ports: []corev1.ContainerPort{{
+							Name:          harbormetav1.ChartMuseumHTTPPortName,
+							ContainerPort: httpPort,
+						}, {
+							Name:          harbormetav1.ChartMuseumHTTPSPortName,
+							ContainerPort: httpsPort,
+						}},
 
-							EnvFrom: envFroms,
-							Env:     envs,
+						EnvFrom: envFroms,
+						Env:     envs,
 
-							VolumeMounts: volumeMounts,
+						VolumeMounts: volumeMounts,
 
-							LivenessProbe: &corev1.Probe{
-								Handler: corev1.Handler{
-									HTTPGet: httpGET,
-								},
-							},
-							ReadinessProbe: &corev1.Probe{
-								Handler: corev1.Handler{
-									HTTPGet: httpGET,
-								},
+						LivenessProbe: &corev1.Probe{
+							Handler: corev1.Handler{
+								HTTPGet: httpGET,
 							},
 						},
-					},
+						ReadinessProbe: &corev1.Probe{
+							Handler: corev1.Handler{
+								HTTPGet: httpGET,
+							},
+						},
+					}},
 				},
 			},
 		},
