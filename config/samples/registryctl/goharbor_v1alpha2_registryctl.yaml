@@ -4,3 +4,4 @@ metadata:
   name: sample
 spec:
   registryRef: harbor
+  authentication: {}

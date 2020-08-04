@@ -8,6 +8,7 @@ import (
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 )
 
@@ -54,6 +55,9 @@ func (r *Reconciler) GetRegistryCtl(ctx context.Context, harbor *goharborv1alpha
 
 	registryName := r.NormalizeName(ctx, harbor.GetName())
 
+	coreSecretRef := r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String(), "secret")
+	jobserviceSecretRef := r.NormalizeName(ctx, harbor.GetName(), controllers.JobService.String(), "secret")
+
 	tls := harbor.Spec.InternalTLS.GetComponentTLSSpec(r.GetInternalTLSCertificateSecretName(ctx, harbor, harbormetav1.RegistryControllerTLS))
 
 	return &goharborv1alpha2.RegistryController{
@@ -66,6 +70,10 @@ func (r *Reconciler) GetRegistryCtl(ctx context.Context, harbor *goharborv1alpha
 			RegistryRef:   registryName,
 			Log: goharborv1alpha2.RegistryControllerLogSpec{
 				Level: harbor.Spec.LogLevel.RegistryCtl(),
+			},
+			Authentication: goharborv1alpha2.RegistryControllerAuthenticationSpec{
+				CoreSecretRef:       coreSecretRef,
+				JobServiceSecretRef: jobserviceSecretRef,
 			},
 			TLS: tls,
 		},
