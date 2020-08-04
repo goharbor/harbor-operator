@@ -11,9 +11,6 @@ spec:
         host: core.harbor.domain
       tls:
         certificateRef: sample-public-certificate
-    notary:
-      ingress:
-        host: notary.harbor.domain
   encryptionKeyRef: core-database-encryption
   internalTLS:
     enabled: true
@@ -33,3 +30,7 @@ spec:
     username: postgres
     passwordRef: harbor-database-postgresql
     sslMode: disable
+  imageChartStorage:
+    filesystem:
+      registryPersistentVolume:
+        claimName: sample-harbor-registry

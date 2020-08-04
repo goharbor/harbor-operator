@@ -71,7 +71,7 @@ func newHarborController() controllerTest {
 	}
 }
 
-func setupHarborResourceDependencies(ctx context.Context, ns string) (string, string) {
+func setupHarborResourceDependencies(ctx context.Context, ns string) (string, string, string) {
 	adminSecretName := newName("admin-secret")
 
 	err := k8sClient.Create(ctx, &corev1.Secret{
@@ -101,11 +101,21 @@ func setupHarborResourceDependencies(ctx context.Context, ns string) (string, st
 	})
 	Expect(err).ToNot(HaveOccurred())
 
-	return adminSecretName, tokenIssuerName
+	pvcName := newName("pvc")
+
+	err = k8sClient.Create(ctx, &corev1.PersistentVolumeClaim{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      pvcName,
+			Namespace: ns,
+		},
+	})
+	Expect(err).ToNot(HaveOccurred())
+
+	return pvcName, adminSecretName, tokenIssuerName
 }
 
 func setupValidHarbor(ctx context.Context, ns string) (Resource, client.ObjectKey) {
-	adminSecretName, tokenIssuerName := setupHarborResourceDependencies(ctx, ns)
+	pvcName, adminSecretName, tokenIssuerName := setupHarborResourceDependencies(ctx, ns)
 
 	database := setupPostgresql(ctx, ns)
 
@@ -125,16 +135,13 @@ func setupValidHarbor(ctx context.Context, ns string) (Resource, client.ObjectKe
 				ExternalURL:            publicURL.String(),
 				HarborAdminPasswordRef: adminSecretName,
 				EncryptionKeyRef:       "encryption-key",
-				Persistence: goharborv1alpha2.HarborPersistenceSpec{
-					ImageChartStorage: goharborv1alpha2.HarborPersistenceImageChartStorageSpec{
-						FileSystem: &goharborv1alpha2.HarborPersistenceImageChartStorageFileSystemSpec{
-							RootDirectory: "/harbor",
-						},
-					},
-					PersistentVolumeClaim: goharborv1alpha2.HarborPersistencePersistentVolumeClaimComponentsSpec{
-						Registry: goharborv1alpha2.HarborPersistencePersistentVolumeClaim5GSpec{
-							HarborPersistencePersistentVolumeClaimComponentSpec: goharborv1alpha2.HarborPersistencePersistentVolumeClaimComponentSpec{
-								ExistingClaim: "test-registry",
+				ImageChartStorage: goharborv1alpha2.HarborStorageImageChartStorageSpec{
+					FileSystem: &goharborv1alpha2.HarborStorageImageChartStorageFileSystemSpec{
+						RegistryPersistentVolume: goharborv1alpha2.HarborStorageRegistryPersistentVolumeSpec{
+							HarborStoragePersistentVolumeSpec: goharborv1alpha2.HarborStoragePersistentVolumeSpec{
+								PersistentVolumeClaimVolumeSource: corev1.PersistentVolumeClaimVolumeSource{
+									ClaimName: pvcName,
+								},
 							},
 						},
 					},

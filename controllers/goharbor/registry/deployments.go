@@ -12,11 +12,8 @@ import (
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
-<<<<<<< HEAD
-=======
 	"github.com/goharbor/harbor-operator/controllers"
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
->>>>>>> 01d07a2... tomerge(registryctl)
 )
 
 const (
@@ -35,8 +32,9 @@ const (
 )
 
 var (
-	varFalse = false
-	varTrue  = true
+	varFalse       = false
+	varTrue        = true
+	fsGroup  int64 = 10000
 )
 
 const (
@@ -55,26 +53,22 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 
 	envs := []corev1.EnvVar{}
 
-	volumes := []corev1.Volume{
-		{
-			Name: VolumeName,
-			VolumeSource: corev1.VolumeSource{
-				ConfigMap: &corev1.ConfigMapVolumeSource{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: name,
-					},
-					Optional: &varFalse,
+	volumes := []corev1.Volume{{
+		Name: VolumeName,
+		VolumeSource: corev1.VolumeSource{
+			ConfigMap: &corev1.ConfigMapVolumeSource{
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: name,
 				},
+				Optional: &varFalse,
 			},
 		},
-	}
+	}}
 
-	volumeMounts := []corev1.VolumeMount{
-		{
-			Name:      VolumeName,
-			MountPath: ConfigPath,
-		},
-	}
+	volumeMounts := []corev1.VolumeMount{{
+		Name:      VolumeName,
+		MountPath: ConfigPath,
+	}}
 
 	if registry.Spec.HTTP.SecretRef != "" {
 		envs = append(envs, corev1.EnvVar{
@@ -246,8 +240,11 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 					NodeSelector:                 registry.Spec.NodeSelector,
 					AutomountServiceAccountToken: &varFalse,
 					Volumes:                      volumes,
+					SecurityContext: &corev1.PodSecurityContext{
+						FSGroup: &fsGroup,
+					},
 					Containers: []corev1.Container{{
-						Name:  "registry",
+						Name:  controllers.Registry.String(),
 						Image: image,
 						Ports: []corev1.ContainerPort{{
 							ContainerPort: apiPort,
@@ -283,8 +280,8 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 
 const registryContainerIndex = 0
 
-func (r *Reconciler) GetFilesystemStorageEnvs(ctx context.Context, registry *goharborv1alpha2.Registry, deploy *appsv1.Deployment) error {
-	regContainer := deploy.Spec.Template.Spec.Containers[registryContainerIndex]
+func (r *Reconciler) ApplyFilesystemStorageEnvs(ctx context.Context, registry *goharborv1alpha2.Registry, deploy *appsv1.Deployment) error {
+	regContainer := &deploy.Spec.Template.Spec.Containers[registryContainerIndex]
 
 	deploy.Spec.Template.Spec.Volumes = append(deploy.Spec.Template.Spec.Volumes, corev1.Volume{
 		Name:         StorageName,
@@ -294,14 +291,15 @@ func (r *Reconciler) GetFilesystemStorageEnvs(ctx context.Context, registry *goh
 	regContainer.VolumeMounts = append(regContainer.VolumeMounts, corev1.VolumeMount{
 		Name:      StorageName,
 		MountPath: StoragePath,
+		SubPath:   registry.Spec.Storage.Driver.FileSystem.Prefix,
 		ReadOnly:  false,
 	})
 
 	return nil
 }
 
-func (r *Reconciler) GetS3StorageEnvs(ctx context.Context, registry *goharborv1alpha2.Registry, deploy *appsv1.Deployment) error {
-	regContainer := deploy.Spec.Template.Spec.Containers[registryContainerIndex]
+func (r *Reconciler) ApplyS3StorageEnvs(ctx context.Context, registry *goharborv1alpha2.Registry, deploy *appsv1.Deployment) error {
+	regContainer := &deploy.Spec.Template.Spec.Containers[registryContainerIndex]
 
 	regContainer.Env = append(regContainer.Env, corev1.EnvVar{
 		Name: "REGISTRY_STORAGE_S3_SECRETKEY",
@@ -317,8 +315,8 @@ func (r *Reconciler) GetS3StorageEnvs(ctx context.Context, registry *goharborv1a
 	return nil
 }
 
-func (r *Reconciler) GetSwiftStorageEnvs(ctx context.Context, registry *goharborv1alpha2.Registry, deploy *appsv1.Deployment) error {
-	regContainer := deploy.Spec.Template.Spec.Containers[registryContainerIndex]
+func (r *Reconciler) ApplySwiftStorageEnvs(ctx context.Context, registry *goharborv1alpha2.Registry, deploy *appsv1.Deployment) error {
+	regContainer := &deploy.Spec.Template.Spec.Containers[registryContainerIndex]
 
 	regContainer.Env = append(regContainer.Env, corev1.EnvVar{
 		Name: "REGISTRY_STORAGE_SWIFT_PASSWORD",
@@ -358,11 +356,11 @@ var errNoStorageDriverFound = errors.New("no storage driver found")
 
 func (r *Reconciler) ApplyStorageConfiguration(ctx context.Context, registry *goharborv1alpha2.Registry, deploy *appsv1.Deployment) error {
 	if registry.Spec.Storage.Driver.S3 != nil {
-		return r.GetS3StorageEnvs(ctx, registry, deploy)
+		return r.ApplyS3StorageEnvs(ctx, registry, deploy)
 	}
 
 	if registry.Spec.Storage.Driver.Swift != nil {
-		return r.GetSwiftStorageEnvs(ctx, registry, deploy)
+		return r.ApplySwiftStorageEnvs(ctx, registry, deploy)
 	}
 
 	if registry.Spec.Storage.Driver.FileSystem != nil {

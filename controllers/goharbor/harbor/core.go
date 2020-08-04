@@ -391,7 +391,7 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1alpha2.Harbo
 						Credentials:   credentials,
 					},
 					Redis:               &registryRedisDSN,
-					StorageProviderName: harbor.Spec.Persistence.ImageChartStorage.Name(),
+					StorageProviderName: harbor.Spec.ImageChartStorage.ProviderName(),
 				},
 				JobService: goharborv1alpha2.CoreComponentsJobServiceSpec{
 					URL:       jobserviceURL,

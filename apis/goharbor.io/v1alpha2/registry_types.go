@@ -652,6 +652,9 @@ type RegistryStorageDriverFilesystemSpec struct {
 	// +kubebuilder:validation:Minimum=25
 	// +kubebuilder:default=100
 	MaxThreads int32 `json:"maxthreads,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	Prefix string `json:"prefix,omitempty"`
 }
 
 type RegistryStorageDriverS3Spec struct {

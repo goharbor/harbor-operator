@@ -16,6 +16,7 @@ import (
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/pkg/config/harbor"
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 )
@@ -426,7 +427,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 					AutomountServiceAccountToken: &varFalse,
 					Volumes:                      volumes,
 					Containers: []corev1.Container{{
-						Name:  "core",
+						Name:  controllers.Core.String(),
 						Image: image,
 						Ports: []corev1.ContainerPort{{
 							Name:          harbormetav1.CoreHTTPPortName,
