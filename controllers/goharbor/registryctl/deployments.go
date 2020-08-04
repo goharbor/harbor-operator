@@ -2,8 +2,10 @@ package registryctl
 
 import (
 	"context"
+	"fmt"
 	"path"
 
+	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -12,31 +14,32 @@ import (
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	"github.com/goharbor/harbor-operator/controllers"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/registry"
+	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
+	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 )
 
 const (
-	VolumeName                            = "registry-config"
+	VolumeName                            = "registryctl-config"
 	ConfigPath                            = "/etc/registryctl"
-	CompatibilitySchema1Path              = ConfigPath + "/compatibility-schema1"
-	CompatibilitySchema1VolumeName        = "compatibility-schema1-certificate"
-	AuthenticationHTPasswdPath            = ConfigPath + "/auth"
-	AuthenticationHTPasswdVolumeName      = "authentication-htpasswd"
 	InternalCertificatesVolumeName        = "internal-certificates"
 	InternalCertificateAuthorityDirectory = "/harbor_cust_cert"
 	InternalCertificatesPath              = ConfigPath + "/ssl"
-	StorageName                           = "storage"
-	StoragePath                           = "/var/lib/registry"
 	HealthPath                            = "/api/health"
 )
 
-var (
-	varFalse = false
-	varTrue  = true
-)
+var varFalse = false
 
 const (
 	httpsPort = 8443
 	httpPort  = 8080
+)
+
+const (
+	AffinityWeightConfigKey     = "affinity-weight"
+	AffinityWeightConfigDefault = 50
+	AffinityTopology            = "kubernetes.io/hostname"
 )
 
 func (r *Reconciler) GetDeployment(ctx context.Context, registryCtl *goharborv1alpha2.RegistryController) (*appsv1.Deployment, error) { // nolint:funlen
@@ -48,142 +51,180 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registryCtl *goharborv1a
 	name := r.NormalizeName(ctx, registryCtl.GetName())
 	namespace := registryCtl.GetNamespace()
 
-	registry, err := r.GetRegistry(ctx, registryCtl)
+	reg, err := r.GetRegistry(ctx, registryCtl)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot get registry")
 	}
 
-	envs := []corev1.EnvVar{}
+	deploy, err := r.Reconciler.GetDeployment(ctx, reg)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot get registry deployment")
+	}
 
-	volumes := []corev1.Volume{
-		{
-			Name: VolumeName,
-			VolumeSource: corev1.VolumeSource{
-				ConfigMap: &corev1.ConfigMapVolumeSource{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: name,
-					},
-					Optional: &varFalse,
+	deploy.ObjectMeta = metav1.ObjectMeta{
+		Name:      name,
+		Namespace: namespace,
+	}
+	deploy.Spec.Selector = &metav1.LabelSelector{
+		MatchLabels: map[string]string{
+			r.Label("name"):      name,
+			r.Label("namespace"): namespace,
+		},
+	}
+	deploy.Spec.Replicas = registryCtl.Spec.Replicas
+	deploy.Spec.Template.ObjectMeta = metav1.ObjectMeta{
+		Labels: map[string]string{
+			r.Label("name"):      name,
+			r.Label("namespace"): namespace,
+		},
+	}
+	deploy.Spec.Template.Spec.Volumes = append(deploy.Spec.Template.Spec.Volumes, corev1.Volume{
+		Name: VolumeName,
+		VolumeSource: corev1.VolumeSource{
+			ConfigMap: &corev1.ConfigMapVolumeSource{
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: name,
 				},
+				Optional: &varFalse,
 			},
+		},
+	})
+
+	affinityWeight, err := r.ConfigStore.GetItemValueInt(AffinityWeightConfigKey)
+	if err != nil {
+		if _, ok := err.(configstore.ErrItemNotFound); !ok {
+			return nil, errors.Wrap(err, "cannot get affinity weight")
+		}
+
+		affinityWeight = AffinityWeightConfigDefault
+	}
+
+	deploy.Spec.Template.Spec.Affinity = &corev1.Affinity{
+		PodAffinity: &corev1.PodAffinity{
+			PreferredDuringSchedulingIgnoredDuringExecution: []corev1.WeightedPodAffinityTerm{{
+				Weight: int32(affinityWeight),
+				PodAffinityTerm: corev1.PodAffinityTerm{
+					LabelSelector: &metav1.LabelSelector{
+						MatchLabels: map[string]string{
+							r.Reconciler.Label("name"): r.Reconciler.NormalizeName(ctx, reg.GetName()),
+						},
+					},
+					TopologyKey: AffinityTopology,
+				},
+			}},
 		},
 	}
 
-	volumeMounts := []corev1.VolumeMount{{
+	registryContainer, err := r.getRegistryContainer(deploy)
+	if err != nil {
+		return nil, serrors.UnrecoverrableError(errors.Wrap(err, "registry container not found"), serrors.OperatorReason, "cannot find registry container spec")
+	}
+
+	registryContainer.Name = controllers.RegistryController.String()
+	registryContainer.Image = image
+	registryContainer.Args = nil
+	registryContainer.Command = nil
+	registryContainer.VolumeMounts = append(registryContainer.VolumeMounts, corev1.VolumeMount{
 		Name:      VolumeName,
 		MountPath: ConfigPath,
-	}}
+	})
 
-	if registry.Spec.HTTP.SecretRef != "" {
-		envs = append(envs, corev1.EnvVar{
-			Name: "REGISTRY_HTTP_SECRET",
+	if registryCtl.Spec.Authentication.JobServiceSecretRef != "" {
+		registryContainer.Env = append(registryContainer.Env, corev1.EnvVar{
+			Name: "JOBSERVICE_SECRET",
 			ValueFrom: &corev1.EnvVarSource{
 				SecretKeyRef: &corev1.SecretKeySelector{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: registryCtl.Spec.Authentication.JobServiceSecretRef,
+					},
 					Key: harbormetav1.SharedSecretKey,
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: registry.Spec.HTTP.SecretRef,
-					},
-					Optional: &varFalse,
 				},
 			},
 		})
 	}
 
-	if registry.Spec.Redis != nil {
-		envs = append(envs, corev1.EnvVar{
-			Name: "REGISTRY_REDIS_PASSWORD",
+	if registryCtl.Spec.Authentication.CoreSecretRef != "" {
+		registryContainer.Env = append(registryContainer.Env, corev1.EnvVar{
+			Name: "CORE_SECRET",
 			ValueFrom: &corev1.EnvVarSource{
 				SecretKeyRef: &corev1.SecretKeySelector{
-					Key: harbormetav1.RedisPasswordKey,
 					LocalObjectReference: corev1.LocalObjectReference{
-						Name: registry.Spec.Redis.PasswordRef,
+						Name: registryCtl.Spec.Authentication.CoreSecretRef,
 					},
-					Optional: &varTrue,
+					Key: harbormetav1.SharedSecretKey,
 				},
 			},
-		})
-	}
-
-	if registry.Spec.Proxy != nil {
-		envs = append(envs, corev1.EnvVar{
-			Name: "REGISTRY_PROXY_PASSWORD",
-			ValueFrom: &corev1.EnvVarSource{
-				SecretKeyRef: &corev1.SecretKeySelector{
-					Key: corev1.BasicAuthPasswordKey,
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: registry.Spec.Proxy.BasicAuthRef,
-					},
-					Optional: &varTrue,
-				},
-			},
-		}, corev1.EnvVar{
-			Name: "REGISTRY_PROXY_USERNAME",
-			ValueFrom: &corev1.EnvVarSource{
-				SecretKeyRef: &corev1.SecretKeySelector{
-					Key: corev1.BasicAuthUsernameKey,
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: registry.Spec.Proxy.BasicAuthRef,
-					},
-					Optional: &varTrue,
-				},
-			},
-		})
-	}
-
-	if registry.Spec.Compatibility.Schema1.Enabled {
-		envs = append(envs, corev1.EnvVar{
-			Name:  "REGISTRY_COMPATIBILITY_SCHEMA1_SIGNINGKEYFILE",
-			Value: path.Join(CompatibilitySchema1Path, corev1.TLSPrivateKeyKey),
-		})
-
-		volumes = append(volumes, corev1.Volume{
-			Name: CompatibilitySchema1VolumeName,
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					SecretName: registry.Spec.Compatibility.Schema1.CertificateRef,
-					Optional:   &varFalse,
-				},
-			},
-		})
-
-		volumeMounts = append(volumeMounts, corev1.VolumeMount{
-			MountPath: CompatibilitySchema1Path,
-			Name:      CompatibilitySchema1VolumeName,
-			ReadOnly:  true,
-		})
-	}
-
-	if registry.Spec.Authentication.HTPasswd != nil {
-		envs = append(envs, corev1.EnvVar{
-			Name:  "REGISTRY_AUTH_HTPASSWD_PATH",
-			Value: path.Join(AuthenticationHTPasswdPath, harbormetav1.HTPasswdFileName),
-		})
-
-		volumes = append(volumes, corev1.Volume{
-			Name: AuthenticationHTPasswdVolumeName,
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					SecretName: registry.Spec.Authentication.HTPasswd.SecretRef,
-					Optional:   &varFalse,
-					Items: []corev1.KeyToPath{
-						{
-							Key:  harbormetav1.HTPasswdFileName,
-							Path: harbormetav1.HTPasswdFileName,
-						},
-					},
-				},
-			},
-		})
-
-		volumeMounts = append(volumeMounts, corev1.VolumeMount{
-			MountPath: AuthenticationHTPasswdPath,
-			Name:      AuthenticationHTPasswdVolumeName,
-			ReadOnly:  true,
 		})
 	}
 
 	if registryCtl.Spec.TLS.Enabled() {
-		volumeMounts = append(volumeMounts, corev1.VolumeMount{
+		r.applyTLSVolumeConfig(ctx, registryCtl, deploy)
+		r.applyTLSVolumeMountConfig(ctx, registryContainer)
+	}
+
+	registryContainer.Ports = []corev1.ContainerPort{{
+		Name:          harbormetav1.RegistryControllerHTTPPortName,
+		ContainerPort: httpPort,
+	}, {
+		Name:          harbormetav1.RegistryControllerHTTPSPortName,
+		ContainerPort: httpsPort,
+	}}
+
+	port := harbormetav1.RegistryControllerHTTPPortName
+	if registryCtl.Spec.TLS.Enabled() {
+		port = harbormetav1.RegistryControllerHTTPSPortName
+	}
+
+	probe := &corev1.Probe{
+		Handler: corev1.Handler{
+			HTTPGet: &corev1.HTTPGetAction{
+				Path:   HealthPath,
+				Port:   intstr.FromString(port),
+				Scheme: registryCtl.Spec.TLS.GetScheme(),
+			},
+		},
+	}
+
+	registryContainer.LivenessProbe = probe
+	registryContainer.ReadinessProbe = probe
+
+	return deploy, nil
+}
+
+var errContainerNotFound = fmt.Errorf("container %s not found", controllers.Registry.String())
+
+func (r *Reconciler) getRegistryContainer(deploy *appsv1.Deployment) (*corev1.Container, error) {
+	expectedName := controllers.Registry.String()
+
+	for i, container := range deploy.Spec.Template.Spec.Containers {
+		if container.Name == expectedName {
+			return &(deploy.Spec.Template.Spec.Containers[i]), nil
+		}
+	}
+
+	return nil, errContainerNotFound
+}
+
+func (r *Reconciler) applyTLSVolumeMountConfig(ctx context.Context, container *corev1.Container) {
+	found := false
+
+	for i, volumeMount := range container.VolumeMounts {
+		if volumeMount.Name == registry.InternalCertificatesVolumeName || volumeMount.Name == InternalCertificatesVolumeName {
+			container.VolumeMounts[i].Name = InternalCertificatesVolumeName
+
+			if volumeMount.MountPath == registry.InternalCertificatesPath {
+				logger.Get(ctx).V(0).Info("tls volumemount found, updating it")
+
+				container.VolumeMounts[i].MountPath = InternalCertificatesPath
+				found = true
+			}
+		}
+	}
+
+	if !found {
+		logger.Get(ctx).Info("tls volume mount not found, adding new one")
+
+		container.VolumeMounts = append(container.VolumeMounts, corev1.VolumeMount{
 			Name:      InternalCertificatesVolumeName,
 			MountPath: path.Join(InternalCertificateAuthorityDirectory, corev1.ServiceAccountRootCAKey),
 			SubPath:   corev1.ServiceAccountRootCAKey,
@@ -193,96 +234,33 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registryCtl *goharborv1a
 			MountPath: InternalCertificatesPath,
 			ReadOnly:  true,
 		})
+	}
+}
 
-		volumes = append(volumes, corev1.Volume{
-			Name: InternalCertificatesVolumeName,
-			VolumeSource: corev1.VolumeSource{
+func (r *Reconciler) applyTLSVolumeConfig(ctx context.Context, registryCtl *goharborv1alpha2.RegistryController, deploy *appsv1.Deployment) {
+	for i, volume := range deploy.Spec.Template.Spec.Volumes {
+		if volume.Name == registry.InternalCertificatesVolumeName {
+			logger.Get(ctx).V(0).Info("tls volume found, updating it")
+
+			deploy.Spec.Template.Spec.Volumes[i].Name = InternalCertificatesVolumeName
+			deploy.Spec.Template.Spec.Volumes[i].VolumeSource = corev1.VolumeSource{
 				Secret: &corev1.SecretVolumeSource{
 					SecretName: registryCtl.Spec.TLS.CertificateRef,
 				},
-			},
-		})
-	} else {
-		volumeMounts = append(volumeMounts, corev1.VolumeMount{
-			Name:      InternalCertificatesVolumeName,
-			MountPath: InternalCertificateAuthorityDirectory,
-		})
+			}
 
-		volumes = append(volumes, corev1.Volume{
-			Name: InternalCertificatesVolumeName,
-			VolumeSource: corev1.VolumeSource{
-				EmptyDir: &corev1.EmptyDirVolumeSource{},
-			},
-		})
+			return
+		}
 	}
 
-	port := harbormetav1.RegistryControllerHTTPPortName
-	if registryCtl.Spec.TLS.Enabled() {
-		port = harbormetav1.RegistryControllerHTTPSPortName
-	}
+	logger.Get(ctx).Info("tls volume not found, adding new one")
 
-	httpGET := &corev1.HTTPGetAction{
-		Path:   HealthPath,
-		Port:   intstr.FromString(port),
-		Scheme: registryCtl.Spec.TLS.GetScheme(),
-	}
-
-	deploy := &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
-		Spec: appsv1.DeploymentSpec{
-			Selector: &metav1.LabelSelector{
-				MatchLabels: map[string]string{
-					r.Label("name"):      name,
-					r.Label("namespace"): namespace,
-				},
-			},
-			Replicas: registryCtl.Spec.Replicas,
-			Template: corev1.PodTemplateSpec{
-				ObjectMeta: metav1.ObjectMeta{
-					Labels: map[string]string{
-						r.Label("name"):      name,
-						r.Label("namespace"): namespace,
-					},
-				},
-				Spec: corev1.PodSpec{
-					NodeSelector:                 registryCtl.Spec.NodeSelector,
-					AutomountServiceAccountToken: &varFalse,
-					Volumes:                      volumes,
-					Containers: []corev1.Container{
-						{
-							Name:  "registryctl",
-							Image: image,
-							Ports: []corev1.ContainerPort{{
-								Name:          harbormetav1.RegistryControllerHTTPPortName,
-								ContainerPort: httpPort,
-							}, {
-								Name:          harbormetav1.RegistryControllerHTTPSPortName,
-								ContainerPort: httpsPort,
-							}},
-							ImagePullPolicy: corev1.PullAlways,
-							LivenessProbe: &corev1.Probe{
-								Handler: corev1.Handler{
-									HTTPGet: httpGET,
-								},
-							},
-							ReadinessProbe: &corev1.Probe{
-								Handler: corev1.Handler{
-									HTTPGet: httpGET,
-								},
-							},
-							VolumeMounts: volumeMounts,
-							Env:          envs,
-						},
-					},
-				},
+	deploy.Spec.Template.Spec.Volumes = append(deploy.Spec.Template.Spec.Volumes, corev1.Volume{
+		Name: InternalCertificatesVolumeName,
+		VolumeSource: corev1.VolumeSource{
+			Secret: &corev1.SecretVolumeSource{
+				SecretName: registryCtl.Spec.TLS.CertificateRef,
 			},
 		},
-	}
-
-	err = r.ApplyStorageConfiguration(ctx, registry, deploy)
-
-	return deploy, errors.Wrap(err, "cannot apply storage configuration")
+	})
 }

@@ -11,3 +11,5 @@ port: 8080
 {{- end }}
 
 log_level: {{ default "info" .Spec.Log.Level }}
+
+registry_config: /etc/registry/config.yml
