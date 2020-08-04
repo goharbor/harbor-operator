@@ -12,15 +12,16 @@ require (
 	github.com/goharbor/harbor/src v0.0.0-20200728051037-1d361a89a056
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/huandu/xstrings v1.3.2 // indirect
-	github.com/imdario/mergo v0.3.9 // indirect
+	github.com/imdario/mergo v0.3.10 // indirect
 	github.com/jaegertracing/jaeger-lib v2.2.0+incompatible
 	github.com/jetstack/cert-manager v0.15.2
 	github.com/markbates/pkger v0.17.0
+	github.com/mitchellh/reflectwalk v1.0.1 // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/onsi/ginkgo v1.14.0
 	github.com/onsi/gomega v1.10.1
 	github.com/opentracing-contrib/go-stdlib v1.0.0
-	github.com/opentracing/opentracing-go v1.1.1-0.20190913142402-a7454ce5950e
+	github.com/opentracing/opentracing-go v1.2.0
 	github.com/ovh/configstore v0.3.2
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.7.0
@@ -29,7 +30,7 @@ require (
 	github.com/uber/jaeger-client-go v2.24.0+incompatible
 	github.com/uber/jaeger-lib v2.2.0+incompatible
 	go.uber.org/zap v1.15.0 // indirect
-	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
+	golang.org/x/crypto v0.0.0-20200728195943-123391ffb6de
 	golang.org/x/net v0.0.0-20200602114024-627f9648deb9 // indirect
 	golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a
 	golang.org/x/sys v0.0.0-20200620081246-981b61492c35 // indirect
