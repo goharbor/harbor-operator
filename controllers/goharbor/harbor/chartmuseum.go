@@ -103,7 +103,7 @@ func (r *Reconciler) GetChartMuseum(ctx context.Context, harbor *goharborv1alpha
 			Chart: goharborv1alpha2.ChartMuseumChartSpec{
 				AllowOvewrite: &varTrue,
 				Storage: goharborv1alpha2.ChartMuseumChartStorageSpec{
-					ChartMuseumChartStorageDriverSpec: harbor.Spec.Persistence.ImageChartStorage.ChartMuseum(),
+					ChartMuseumChartStorageDriverSpec: r.ChartMuseumStorage(ctx, harbor),
 					MaxStorageObjects:                 &maxStorageObjects,
 				},
 				Index: goharborv1alpha2.ChartMuseumChartIndexSpec{

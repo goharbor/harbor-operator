@@ -12,6 +12,7 @@ import (
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	"github.com/goharbor/harbor-operator/controllers"
 )
 
 const (
@@ -97,7 +98,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, notary *goharborv1alpha2
 					Volumes:                      volumes,
 					InitContainers:               initContainers,
 					Containers: []corev1.Container{{
-						Name:            "notary-signer",
+						Name:            controllers.NotarySigner.String(),
 						Image:           image,
 						Args:            []string{"notary-signer", "-config", path.Join(ConfigPath, ConfigName)},
 						ImagePullPolicy: corev1.PullAlways,

@@ -59,8 +59,8 @@ type HarborHelm1_4_0Spec struct {
 	// +kubebuilder:validation:Optional
 	InternalTLS HarborInternalTLSSpec `json:"internalTLS"`
 
-	// +kubebuilder:validation:Optional
-	Persistence HarborPersistenceSpec `json:"persistence,omitempty"`
+	// +kubebuilder:validation:Required
+	ImageChartStorage HarborStorageImageChartStorageSpec `json:"imageChartStorage"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default="info"
@@ -252,20 +252,7 @@ type TrivyComponentSpec struct {
 	harbormetav1.ComponentSpec `json:",inline"`
 }
 
-type HarborPersistenceSpec struct {
-	// Setting it to "keep" to avoid removing PVCs during a helm delete
-	// operation. Leaving it empty will delete PVCs after the chart deleted
-	// +kubebuilder:default="keep"
-	ResourcePolicy string `json:"resourcePolicy"`
-
-	// +kubebuilder:validation:Optional
-	PersistentVolumeClaim HarborPersistencePersistentVolumeClaimComponentsSpec `json:"persistentVolumeClaim,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	ImageChartStorage HarborPersistenceImageChartStorageSpec `json:"imageChartStorage,omitempty"`
-}
-
-type HarborPersistenceImageChartStorageSpec struct {
+type HarborStorageImageChartStorageSpec struct {
 	// +kubebuilder:validation:Optional
 	Redirect RegistryStorageRedirectSpec `json:"redirect,omitempty"`
 
@@ -273,91 +260,38 @@ type HarborPersistenceImageChartStorageSpec struct {
 	// FileSystem is an implementation of the storagedriver.StorageDriver interface which uses the local filesystem.
 	// The local filesystem can be a remote volume.
 	// See: https://docs.docker.com/registry/storage-drivers/filesystem/
-	FileSystem *HarborPersistenceImageChartStorageFileSystemSpec `json:"filesystem,omitempty"`
+	FileSystem *HarborStorageImageChartStorageFileSystemSpec `json:"filesystem,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// An implementation of the storagedriver.StorageDriver interface which uses Amazon S3 or S3 compatible services for object storage.
 	// See: https://docs.docker.com/registry/storage-drivers/s3/
-	S3 *HarborPersistenceImageChartStorageS3Spec `json:"s3,omitempty"`
+	S3 *HarborStorageImageChartStorageS3Spec `json:"s3,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// An implementation of the storagedriver.StorageDriver interface that uses OpenStack Swift for object storage.
 	// See: https://docs.docker.com/registry/storage-drivers/swift/
-	Swift *HarborPersistenceImageChartStorageSwiftSpec `json:"swift,omitempty"`
+	Swift *HarborStorageImageChartStorageSwiftSpec `json:"swift,omitempty"`
 }
 
-func (r *HarborPersistenceImageChartStorageSpec) Name() string {
+const (
+	S3DriverName         = "s3"
+	SwiftDriverName      = "swift"
+	FileSystemDriverName = "filesystem"
+)
+
+func (r *HarborStorageImageChartStorageSpec) ProviderName() string {
 	if r.S3 != nil {
-		return "s3"
+		return S3DriverName
 	}
 
 	if r.Swift != nil {
-		return "swift"
+		return SwiftDriverName
 	}
 
-	return "filesystem"
+	return FileSystemDriverName
 }
 
-func (r *HarborPersistenceImageChartStorageSpec) ChartMuseum() ChartMuseumChartStorageDriverSpec {
-	if r.S3 != nil {
-		return ChartMuseumChartStorageDriverSpec{
-			Amazon: r.S3.ChartMuseum(),
-		}
-	}
-
-	if r.Swift != nil {
-		return ChartMuseumChartStorageDriverSpec{
-			OpenStack: r.Swift.ChartMuseum(),
-		}
-	}
-
-	if r.FileSystem != nil {
-		return ChartMuseumChartStorageDriverSpec{
-			FileSystem: r.FileSystem.ChartMuseum(),
-		}
-	}
-
-	return ChartMuseumChartStorageDriverSpec{
-		FileSystem: &ChartMuseumChartStorageDriverFilesystemSpec{
-			VolumeSource: corev1.VolumeSource{
-				EmptyDir: &corev1.EmptyDirVolumeSource{},
-			},
-		},
-	}
-}
-
-func (r *HarborPersistenceImageChartStorageSpec) Registry() RegistryStorageDriverSpec {
-	if r.S3 != nil {
-		return RegistryStorageDriverSpec{
-			S3: &r.S3.RegistryStorageDriverS3Spec,
-		}
-	}
-
-	if r.Swift != nil {
-		return RegistryStorageDriverSpec{
-			Swift: &r.Swift.RegistryStorageDriverSwiftSpec,
-		}
-	}
-
-	if r.FileSystem != nil {
-		return RegistryStorageDriverSpec{
-			FileSystem: &RegistryStorageDriverFilesystemSpec{
-				VolumeSource: corev1.VolumeSource{},
-				MaxThreads:   r.FileSystem.MaxThreads,
-			},
-		}
-	}
-
-	return RegistryStorageDriverSpec{
-		FileSystem: &RegistryStorageDriverFilesystemSpec{
-			VolumeSource: corev1.VolumeSource{
-				EmptyDir: &corev1.EmptyDirVolumeSource{},
-			},
-		},
-	}
-}
-
-func (r *HarborPersistenceImageChartStorageSpec) Validate() error {
+func (r *HarborStorageImageChartStorageSpec) Validate() error {
 	found := 0
 
 	if r.FileSystem != nil {
@@ -382,10 +316,16 @@ func (r *HarborPersistenceImageChartStorageSpec) Validate() error {
 	}
 }
 
-type HarborPersistenceImageChartStorageFileSystemSpec struct {
+type HarborStorageImageChartStorageFileSystemSpec struct {
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default="/storage"
-	RootDirectory string `json:"rootDirectory,omitempty"`
+	ChartPersistentVolume *HarborStoragePersistentVolumeSpec `json:"chartPersistentVolume"`
+
+	// +kubebuilder:validation:Required
+	RegistryPersistentVolume HarborStorageRegistryPersistentVolumeSpec `json:"registryPersistentVolume"`
+}
+
+type HarborStorageRegistryPersistentVolumeSpec struct {
+	HarborStoragePersistentVolumeSpec `json:",inline"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=25
@@ -393,17 +333,11 @@ type HarborPersistenceImageChartStorageFileSystemSpec struct {
 	MaxThreads int32 `json:"maxthreads,omitempty"`
 }
 
-func (r *HarborPersistenceImageChartStorageFileSystemSpec) ChartMuseum() *ChartMuseumChartStorageDriverFilesystemSpec {
-	return &ChartMuseumChartStorageDriverFilesystemSpec{
-		VolumeSource: corev1.VolumeSource{},
-	}
-}
-
-type HarborPersistenceImageChartStorageS3Spec struct {
+type HarborStorageImageChartStorageS3Spec struct {
 	RegistryStorageDriverS3Spec `json:",inline"`
 }
 
-func (r *HarborPersistenceImageChartStorageS3Spec) ChartMuseum() *ChartMuseumChartStorageDriverAmazonSpec {
+func (r *HarborStorageImageChartStorageS3Spec) ChartMuseum() *ChartMuseumChartStorageDriverAmazonSpec {
 	return &ChartMuseumChartStorageDriverAmazonSpec{
 		AccessKeyID:     r.AccessKey,
 		AccessSecretRef: r.SecretKeyRef,
@@ -414,11 +348,15 @@ func (r *HarborPersistenceImageChartStorageS3Spec) ChartMuseum() *ChartMuseumCha
 	}
 }
 
-type HarborPersistenceImageChartStorageSwiftSpec struct {
+func (r *HarborStorageImageChartStorageS3Spec) Registry() *RegistryStorageDriverS3Spec {
+	return &r.RegistryStorageDriverS3Spec
+}
+
+type HarborStorageImageChartStorageSwiftSpec struct {
 	RegistryStorageDriverSwiftSpec `json:",inline"`
 }
 
-func (r *HarborPersistenceImageChartStorageSwiftSpec) ChartMuseum() *ChartMuseumChartStorageDriverOpenStackSpec {
+func (r *HarborStorageImageChartStorageSwiftSpec) ChartMuseum() *ChartMuseumChartStorageDriverOpenStackSpec {
 	return &ChartMuseumChartStorageDriverOpenStackSpec{
 		AuthenticationURL: r.AuthenticationURL,
 		Container:         r.Container,
@@ -433,61 +371,15 @@ func (r *HarborPersistenceImageChartStorageSwiftSpec) ChartMuseum() *ChartMuseum
 	}
 }
 
-type HarborPersistencePersistentVolumeClaimComponentsSpec struct {
-	// +kubebuilder:validation:Optional
-	Registry HarborPersistencePersistentVolumeClaim5GSpec `json:"registry,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	ChartMuseum HarborPersistencePersistentVolumeClaim5GSpec `json:"chartmuseum,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	JobService HarborPersistencePersistentVolumeClaim1GSpec `json:"jobservice,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	Database HarborPersistencePersistentVolumeClaim1GSpec `json:"database,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	Redis HarborPersistencePersistentVolumeClaim1GSpec `json:"redis,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	Trivy HarborPersistencePersistentVolumeClaim5GSpec `json:"trivy,omitempty"`
+func (r *HarborStorageImageChartStorageSwiftSpec) Registry() *RegistryStorageDriverSwiftSpec {
+	return &r.RegistryStorageDriverSwiftSpec
 }
 
-type HarborPersistencePersistentVolumeClaim5GSpec struct {
-	HarborPersistencePersistentVolumeClaimComponentSpec `json:",inline"`
+type HarborStoragePersistentVolumeSpec struct {
+	corev1.PersistentVolumeClaimVolumeSource `json:",inline"`
 
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Minimum=1
-	// +kubebuilder:default=5368709120
-	Size int64 `json:"size,omitempty"`
-}
-
-type HarborPersistencePersistentVolumeClaim1GSpec struct {
-	HarborPersistencePersistentVolumeClaimComponentSpec `json:",inline"`
-
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=1073741824
-	Size int64 `json:"size"`
-}
-
-type HarborPersistencePersistentVolumeClaimComponentSpec struct {
-	// +kubebuilder:validation:Optional
-	// Use the existing PVC which must be created manually before bound,
-	// and specify the "subPath" if the PVC is shared with other components
-	ExistingClaim string `json:"existingClaim,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	// Specify the "storageClass" used to provision the volume.
-	// Or the default StorageClass will be used(the default).
-	// Set it to "-" to disable dynamic provisioning
-	StorageClass string `json:"storageClass,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	SubPath string `json:"subPath,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:default="ReadWriteOnce"
-	AccessMode corev1.PersistentVolumeAccessMode `json:"accessMode,omitempty"`
+	Prefix string `json:"prefix,omitempty"`
 }
 
 type HarborInternalTLSSpec struct {
