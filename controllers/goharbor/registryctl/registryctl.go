@@ -30,6 +30,7 @@ const (
 
 // Reconciler reconciles a RegistryController object.
 type Reconciler struct {
+	*commonCtrl.Controller
 	registry.Reconciler
 }
 
@@ -88,7 +89,8 @@ func New(ctx context.Context, name string, configStore *configstore.Store) (comm
 
 	r := &Reconciler{}
 
-	r.Reconciler.Controller = commonCtrl.NewController(ctx, name, r, configStore)
+	r.Reconciler.Controller = commonCtrl.NewController(ctx, controllers.Registry.String(), r, configStore)
+	r.Controller = commonCtrl.NewController(ctx, name, r, configStore)
 
 	return r, nil
 }

@@ -2,6 +2,7 @@ package harbor
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 	"time"
 
@@ -13,6 +14,7 @@ import (
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers"
+	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 )
 
@@ -117,17 +119,21 @@ func (r *Reconciler) GetJobService(ctx context.Context, harbor *goharborv1alpha2
 		Scheme: harbor.Spec.InternalTLS.GetScheme(),
 		Host:   r.NormalizeName(ctx, harbor.GetName(), controllers.Registry.String()),
 	}).String()
-	registryControllerURL := (&url.URL{
+	serviceTokenURL := (&url.URL{
 		Scheme: harbor.Spec.InternalTLS.GetScheme(),
-		Host:   r.NormalizeName(ctx, harbor.GetName(), controllers.RegistryController.String()),
+		Host:   r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String()),
+		Path:   "/service/token",
 	}).String()
 
-	serviceTokenURL, err := url.Parse(harbor.Spec.ExternalURL)
+	registryctlPort, err := harbor.Spec.InternalTLS.GetInternalPort(harbormetav1.RegistryControllerTLS)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot parse externalURL")
+		return nil, serrors.UnrecoverrableError(errors.Wrap(err, "cannot get registryController port"), serrors.OperatorReason, "unable to configure registry controller url")
 	}
 
-	serviceTokenURL.Path += "/service/token"
+	registryControllerURL := (&url.URL{
+		Scheme: harbor.Spec.InternalTLS.GetScheme(),
+		Host:   fmt.Sprintf("%s:%d", r.NormalizeName(ctx, harbor.GetName(), controllers.RegistryController.String()), registryctlPort),
+	}).String()
 
 	redisDSN := harbor.Spec.RedisDSN(harbormetav1.JobServiceRedis)
 
@@ -172,7 +178,7 @@ func (r *Reconciler) GetJobService(ctx context.Context, harbor *goharborv1alpha2
 				ControllerURL: registryControllerURL,
 			},
 			TokenService: goharborv1alpha2.JobServiceTokenSpec{
-				URL: serviceTokenURL.String(),
+				URL: serviceTokenURL,
 			},
 			SecretRef: secretRef,
 			TLS:       tls,
