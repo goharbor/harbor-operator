@@ -10,6 +10,7 @@ import (
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers"
+	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 )
 
@@ -74,7 +75,7 @@ func (r *Reconciler) GetNotaryServer(ctx context.Context, harbor *goharborv1alph
 
 	serviceTokenURL, err := url.Parse(harbor.Spec.ExternalURL)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot parse externalURL")
+		return nil, serrors.UnrecoverrableError(errors.Wrap(err, "cannot parse externalURL"), serrors.InvalidSpecReason, "unable to configure service token")
 	}
 
 	serviceTokenURL.Path += "/service/token"

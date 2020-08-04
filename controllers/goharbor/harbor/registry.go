@@ -230,11 +230,11 @@ func (r *Reconciler) GetRegistry(ctx context.Context, harbor *goharborv1alpha2.H
 					TLS:          tls,
 				},
 				Storage: goharborv1alpha2.RegistryStorageSpec{
-					Driver: harbor.Spec.Persistence.ImageChartStorage.Registry(),
+					Driver: r.RegistryStorage(ctx, harbor),
 					Cache: goharborv1alpha2.RegistryStorageCacheSpec{
 						Blobdescriptor: "redis",
 					},
-					Redirect: harbor.Spec.Persistence.ImageChartStorage.Redirect,
+					Redirect: harbor.Spec.ImageChartStorage.Redirect,
 				},
 				Redis: &goharborv1alpha2.RegistryRedisSpec{
 					OpacifiedDSN: redisDSN,
