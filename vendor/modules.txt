@@ -34,7 +34,6 @@ github.com/go-logr/logr
 github.com/go-logr/zapr
 # github.com/gobuffalo/here v0.6.2
 ## explicit
-github.com/gobuffalo/here
 # github.com/gogo/protobuf v1.3.1
 github.com/gogo/protobuf/proto
 github.com/gogo/protobuf/sortkeys
@@ -90,13 +89,6 @@ github.com/jetstack/cert-manager/pkg/apis/meta/v1
 github.com/json-iterator/go
 # github.com/konsorten/go-windows-terminal-sequences v1.0.3
 github.com/konsorten/go-windows-terminal-sequences
-# github.com/markbates/pkger v0.17.0
-## explicit
-github.com/markbates/pkger
-github.com/markbates/pkger/here
-github.com/markbates/pkger/internal/maps
-github.com/markbates/pkger/pkging
-github.com/markbates/pkger/pkging/stdos
 # github.com/matttproud/golang_protobuf_extensions v1.0.1
 github.com/matttproud/golang_protobuf_extensions/pbutil
 # github.com/mitchellh/copystructure v1.0.0
