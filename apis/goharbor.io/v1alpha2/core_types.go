@@ -114,9 +114,6 @@ type CoreComponentsSpec struct {
 	Trivy *CoreComponentsTrivySpec `json:"trivy,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	Clair *CoreComponentsClairSpec `json:"clairAdapter,omitempty"`
-
-	// +kubebuilder:validation:Optional
 	ChartRepository *CoreComponentsChartRepositorySpec `json:"chartRepository,omitempty"`
 
 	// +kubebuilder:validation:Optional

@@ -8,14 +8,12 @@ require (
 	github.com/Masterminds/sprig v2.22.0+incompatible
 	github.com/go-kit/kit v0.10.0
 	github.com/go-logr/logr v0.1.0
-	github.com/gobuffalo/here v0.6.2 // indirect
 	github.com/goharbor/harbor/src v0.0.0-20200728051037-1d361a89a056
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/huandu/xstrings v1.3.2 // indirect
 	github.com/imdario/mergo v0.3.10 // indirect
 	github.com/jaegertracing/jaeger-lib v2.2.0+incompatible
 	github.com/jetstack/cert-manager v0.15.2
-	github.com/markbates/pkger v0.17.0
 	github.com/mitchellh/reflectwalk v1.0.1 // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/onsi/ginkgo v1.14.0
