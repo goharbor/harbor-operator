@@ -12,6 +12,11 @@ import (
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+<<<<<<< HEAD
+=======
+	"github.com/goharbor/harbor-operator/controllers"
+	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
+>>>>>>> 01d07a2... tomerge(registryctl)
 )
 
 const (
@@ -338,11 +343,20 @@ func (r *Reconciler) GetSwiftStorageEnvs(ctx context.Context, registry *goharbor
 	return nil
 }
 
-func (r *Reconciler) ApplyStorageConfiguration(ctx context.Context, registry *goharborv1alpha2.Registry, deploy *appsv1.Deployment) error {
-	if registry.Spec.Storage.Driver.FileSystem != nil {
-		return r.GetFilesystemStorageEnvs(ctx, registry, deploy)
-	}
+func (r *Reconciler) ApplyInMemoryStorageEnvs(ctx context.Context, registry *goharborv1alpha2.Registry, deploy *appsv1.Deployment) error {
+	regContainer := &deploy.Spec.Template.Spec.Containers[registryContainerIndex]
 
+	regContainer.Env = append(regContainer.Env, corev1.EnvVar{
+		Name:  "REGISTRY_STORAGE",
+		Value: "inmemory",
+	})
+
+	return nil
+}
+
+var errNoStorageDriverFound = errors.New("no storage driver found")
+
+func (r *Reconciler) ApplyStorageConfiguration(ctx context.Context, registry *goharborv1alpha2.Registry, deploy *appsv1.Deployment) error {
 	if registry.Spec.Storage.Driver.S3 != nil {
 		return r.GetS3StorageEnvs(ctx, registry, deploy)
 	}
@@ -351,5 +365,13 @@ func (r *Reconciler) ApplyStorageConfiguration(ctx context.Context, registry *go
 		return r.GetSwiftStorageEnvs(ctx, registry, deploy)
 	}
 
-	return nil
+	if registry.Spec.Storage.Driver.FileSystem != nil {
+		return r.ApplyFilesystemStorageEnvs(ctx, registry, deploy)
+	}
+
+	if registry.Spec.Storage.Driver.InMemory != nil {
+		return r.ApplyInMemoryStorageEnvs(ctx, registry, deploy)
+	}
+
+	return serrors.UnrecoverrableError(errNoStorageDriverFound, serrors.InvalidSpecReason, "unable to configure storage")
 }

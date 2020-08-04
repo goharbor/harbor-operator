@@ -145,7 +145,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 			},
 		}),
 		common.PostGreSQLDatabase:    harbor.Value(core.Spec.Database.Database),
-		common.CoreURL:               harbor.Value(core.Spec.ExternalEndpoint),
+		common.CoreURL:               harbor.Value(coreLocalURL),
 		common.CoreLocalURL:          harbor.Value(coreLocalURL),
 		common.RegistryControllerURL: harbor.Value(core.Spec.Components.Registry.ControllerURL),
 		common.RegistryURL:           harbor.Value(core.Spec.Components.Registry.RegistryURL),

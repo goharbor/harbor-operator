@@ -60,6 +60,19 @@ type RegistryControllerSpec struct {
 
 	// +kubebuilder:validation:Optional
 	TLS *harbormetav1.ComponentsTLSSpec `json:"tls,omitempty"`
+
+	// +kubebuilder:validation:Required
+	Authentication RegistryControllerAuthenticationSpec `json:"authentication"`
+}
+
+type RegistryControllerAuthenticationSpec struct {
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
+	CoreSecretRef string `json:"coreSecretRef,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
+	JobServiceSecretRef string `json:"jobServiceSecretRef,omitempty"`
 }
 
 type RegistryControllerLogSpec struct {
