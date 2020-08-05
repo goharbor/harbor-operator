@@ -1,0 +1,14 @@
+generatorOptions:
+  disableNameSuffixHash: true
+
+namePrefix: '{{ include "chart.fullname" . }}-'
+
+commonAnnotations:
+  # Trick so kustomize does not split the annotation value
+  cert-manager.io/cluster-issuer: '{{.Release.Namespace}}/{{. | include "chart.fullname"}}'
+
+patchesStrategicMerge:
+- webhook_endpoint_patch.yaml
+
+bases:
+- ../../webhook

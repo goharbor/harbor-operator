@@ -1,0 +1,141 @@
+image:
+  repository: goharbor/harbor-operator
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "dev"
+
+nameOverride: ""
+fullnameOverride: ""
+
+## Reference to one or more secrets to be used when pulling images
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+##
+imagePullSecrets: []
+# - name: "image-pull-secret"
+
+# Optional priority class to be used for the harbor-operator pods
+priorityClassName: ""
+rbac:
+  create: true
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+# Set the verbosity of harbor-operator. Range of 0 - 6 with 6 being the most verbose.
+logLevel: 2
+
+leaderElection:
+  # Override the namespace used to store the ConfigMap for leader election
+  namespace: "kube-system"
+
+replicaCount: 1
+
+strategy: {}
+  # type: RollingUpdate
+  # rollingUpdate:
+  #   maxSurge: 0
+  #   maxUnavailable: 1
+
+extraEnv:
+- name: CONFIGURATION_FROM
+  value: 'env:'
+  # - name: HARBOR_CONTROLLER_MAX_RECONCILE
+  #   value: '1'
+  # - name: HARBOR_CONTROLLER_WATCH_CHILDREN
+  #   value: 'true'
+
+resources: {}
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+# Pod Security Context
+# ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+securityContext: {}
+  # legacy securityContext parameter format: if enabled is set to true, only fsGroup and runAsUser are supported
+  # securityContext:
+  #   enabled: false
+  #   fsGroup: 1001
+  #   runAsUser: 1001
+  # to support additional securityContext parameters, omit the `enabled` parameter and simply specify the parameters
+  # you want to set, e.g.
+  # securityContext:
+  #   fsGroup: 1000
+  #   runAsUser: 1000
+  #   runAsNonRoot: true
+
+# Container Security Context to be set on the controller component container
+# ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+containerSecurityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+
+volumes: []
+
+volumeMounts: []
+
+# Optional additional annotations to add to the controller Deployment
+# deploymentAnnotations: {}
+
+# Optional additional annotations to add to the controller Pods
+# podAnnotations: {}
+
+podLabels: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+service:
+  type: ClusterIP
+  port: 443
+
+harborClass: ""
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+# expects input structure as per specification https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#toleration-v1-core
+# for example:
+#   tolerations:
+#   - key: foo.bar.com/role
+#     operator: Equal
+#     value: master
+#     effect: NoSchedule
+tolerations: []
+
+# expects input structure as per specification https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#affinity-v1-core
+# for example:
+#   affinity:
+#     nodeAffinity:
+#      requiredDuringSchedulingIgnoredDuringExecution:
+#        nodeSelectorTerms:
+#        - matchExpressions:
+#          - key: foo.bar.com/role
+#            operator: In
+#            values:
+#            - master
+affinity: {}
+
+certmanager:
+  enabled: true
+
+ingress:
+  enabled: false
