@@ -1,0 +1,10 @@
+generatorOptions:
+  disableNameSuffixHash: true
+
+namePrefix: '{{ include "chart.fullname" . }}-'
+
+patches:
+- patch_serviceaccount_binding.yaml
+
+bases:
+- ../../rbac

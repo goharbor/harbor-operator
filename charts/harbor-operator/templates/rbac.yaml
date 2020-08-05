@@ -1,0 +1,304 @@
+{{- if not .Values.rbac.create }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: leader-election-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - configmaps/status
+  verbs:
+  - get
+  - update
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  - secrets
+  - services
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  - services
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - cert-manager.io
+  resources:
+  - certificates
+  - issuers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - goharbor.io
+  resources:
+  - chartmuseums
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - goharbor.io
+  resources:
+  - chartmuseums
+  - cores
+  - jobservices
+  - notaryservers
+  - notarysigners
+  - portalsregitries
+  - registrycontrollers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - goharbor.io
+  resources:
+  - chartmuseums/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - goharbor.io
+  resources:
+  - cores
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - goharbor.io
+  resources:
+  - cores/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - goharbor.io
+  resources:
+  - harbors
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - goharbor.io
+  resources:
+  - harbors/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - goharbor.io
+  resources:
+  - jobservices
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - goharbor.io
+  resources:
+  - jobservices/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - goharbor.io
+  resources:
+  - notaryservers
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - goharbor.io
+  resources:
+  - notaryservers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - goharbor.io
+  resources:
+  - notarysigners
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - goharbor.io
+  resources:
+  - notarysigners/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - goharbor.io
+  resources:
+  - portals
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - goharbor.io
+  resources:
+  - portals/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - goharbor.io
+  resources:
+  - registries
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - goharbor.io
+  resources:
+  - registries/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - goharbor.io
+  resources:
+  - registrycontrollers
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - goharbor.io
+  resources:
+  - registrycontrollers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: leader-election-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: leader-election-role
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: manager-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: manager-role
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: system
+{{- end -}}
