@@ -3,6 +3,7 @@ package v1alpha2
 import (
 	"regexp"
 
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -25,7 +26,7 @@ type Trivy struct {
 
 	Spec TrivySpec `json:"spec,omitempty"`
 
-	Status ComponentStatus `json:"status,omitempty"`
+	Status harbormetav1.ComponentStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -39,7 +40,7 @@ type TrivyList struct {
 
 // TrivySpec defines the desired state of Trivy.
 type TrivySpec struct {
-	ComponentSpec `json:",inline"`
+	harbormetav1.ComponentSpec `json:",inline"`
 
 	// +kubebuilder:validation:Optional
 	Log TrivyLogSpec `json:"log,omitempty"`
@@ -172,7 +173,7 @@ func (r *TrivyServerSpec) Validate() map[string]error {
 
 type TrivyLogSpec struct {
 	// +kubebuilder:validation:Optional
-	Level TrivyLogLevel `json:"level,omitempty"`
+	Level harbormetav1.TrivyLogLevel `json:"level,omitempty"`
 }
 
 type TrivyHTTPSSpec struct {

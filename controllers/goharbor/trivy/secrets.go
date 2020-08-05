@@ -8,6 +8,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/pkg/errors"
 )
 
@@ -44,9 +45,9 @@ func (r *Reconciler) GetSecret(ctx context.Context, trivy *goharborv1alpha2.Triv
 			return nil, errors.Wrap(err, "cannot get redis password")
 		}
 
-		password, ok := passwordSecret.Data[goharborv1alpha2.RedisPasswordKey]
+		password, ok := passwordSecret.Data[harbormetav1.RedisPasswordKey]
 		if !ok {
-			return nil, errors.Errorf("%s not found in secret %s", goharborv1alpha2.RedisPasswordKey, trivy.Spec.Cache.Redis.PasswordRef)
+			return nil, errors.Errorf("%s not found in secret %s", harbormetav1.RedisPasswordKey, trivy.Spec.Cache.Redis.PasswordRef)
 		}
 
 		redisPassword = string(password)
