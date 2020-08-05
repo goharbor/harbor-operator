@@ -25,6 +25,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 )
 
 func newTrivyController() controllerTest {
@@ -46,7 +47,7 @@ func setupValidTrivy(ctx context.Context, ns string) (Resource, client.ObjectKey
 		},
 
 		Spec: goharborv1alpha2.TrivySpec{
-			ComponentSpec: goharborv1alpha2.ComponentSpec{
+			ComponentSpec: harbormetav1.ComponentSpec{
 				Replicas: &replicas,
 			},
 
@@ -63,7 +64,7 @@ func setupValidTrivy(ctx context.Context, ns string) (Resource, client.ObjectKey
 			},
 
 			Log: goharborv1alpha2.TrivyLogSpec{
-				Level: goharborv1alpha2.TrivyDefaultLevel,
+				Level: harbormetav1.TrivyDefaultLevel,
 			},
 		},
 	}
@@ -89,8 +90,8 @@ func updateTrivy(ctx context.Context, object Resource) {
 	trivy.Spec.Replicas = &replicas
 }
 
-func getTrivyStatusFunc(ctx context.Context, key client.ObjectKey) func() goharborv1alpha2.ComponentStatus {
-	return func() goharborv1alpha2.ComponentStatus {
+func getTrivyStatusFunc(ctx context.Context, key client.ObjectKey) func() harbormetav1.ComponentStatus {
+	return func() harbormetav1.ComponentStatus {
 		var trivy goharborv1alpha2.Trivy
 
 		err := k8sClient.Get(ctx, key, &trivy)
