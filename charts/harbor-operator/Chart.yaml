@@ -1,0 +1,35 @@
+apiVersion: v2
+name: harbor-operator
+description: Deploy Harbor Operator
+
+type: application
+
+# This is the chart version. This version number should be incremented each time you make changes
+# to the chart and its templates, including the app version.
+# Versions are expected to follow Semantic Versioning (https://semver.org/)
+version: 0.1.0
+
+kubeVersion: '>= 1.16.0'
+
+# This is the version number of the application being deployed. This version number should be
+# incremented each time you make changes to the application. Versions are not expected to
+# follow Semantic Versioning. They should reflect the version the application is using.
+appVersion: 0.0.0-dev
+
+home: https://github.com/goharbor/harbor-operator
+icon: https://branding.cncf.io/img/projects/harbor/icon/color/harbor-icon-color.svg
+
+dependencies:
+- name: cert-manager
+  repository: https://charts.jetstack.io
+  version: 0.16.0
+  condition: certmanager.enabled, global.certmanager.enabled
+  tags:
+  - certmanager
+
+- name: nginx-ingress
+  repository: https://kubernetes-charts.storage.googleapis.com
+  version:  1.41.2
+  condition: ingressController.enabled, global.ingressController.enabled
+  tags:
+  - ingressController

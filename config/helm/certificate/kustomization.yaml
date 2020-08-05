@@ -1,0 +1,12 @@
+generatorOptions:
+  disableNameSuffixHash: true
+
+namePrefix: '{{ include "chart.fullname" . }}-'
+
+namespace: '{{ .Release.Namespace }}'
+
+patchesStrategicMerge:
+- certificate_secret_patch.yaml
+
+bases:
+- ../../certmanager
