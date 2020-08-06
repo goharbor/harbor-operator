@@ -1,0 +1,33 @@
+# This file is for teaching kustomize how to substitute name in JobService
+nameReference:
+- kind: Secret
+  version: v1
+  fieldSpecs:
+  - kind: JobService
+    group: goharbor.io
+    path: spec/core/secretRef
+  - kind: JobService
+    group: goharbor.io
+    path: spec/core/secretRef
+  - kind: JobService
+    group: goharbor.io
+    path: spec/imagePullSecrets/items/name
+  - kind: JobService
+    group: goharbor.io
+    path: spec/registry/credentials/passwordRef
+  - kind: JobService
+    group: goharbor.io
+    path: spec/secretRef
+  - kind: JobService
+    group: goharbor.io
+    path: spec/tls/certificateRef
+  - kind: JobService
+    group: goharbor.io
+    path: spec/workerPool/redisPool/passwordRef
+
+- kind: ServiceAccount
+  version: v1
+  fieldSpecs:
+  - kind: JobService
+    group: goharbor.io
+    path: spec/serviceAccountName
