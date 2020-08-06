@@ -342,6 +342,11 @@ deploy-rbac: generate kustomize
 sample: sample-harbor
 
 .PHONY: sample
+sample-database: kustomize
+	$(KUSTOMIZE) build 'config/samples/database' \
+		| kubectl apply -f -
+
+.PHONY: sample
 sample-%: kustomize
 	$(KUSTOMIZE) build 'config/samples/$*' \
 		| kubectl apply -f -
