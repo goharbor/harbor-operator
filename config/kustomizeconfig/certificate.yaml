@@ -1,0 +1,22 @@
+# This file is for teaching kustomize how to substitute name in Certificate
+nameReference:
+- kind: Secret
+  version: v1
+  fieldSpecs:
+  - kind: Certificate
+    group: cert-manager.io
+    path: spec/secretName
+
+- kind: Issuer
+  group: cert-manager.io
+  fieldSpecs:
+  - kind: Certificate
+    group: cert-manager.io
+    path: spec/issuerRef/name
+
+- kind: ClusterIssuer
+  group: cert-manager.io
+  fieldSpecs:
+  - kind: Certificate
+    group: cert-manager.io
+    path: spec/issuerRef/name

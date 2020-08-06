@@ -1,0 +1,54 @@
+# This file is for teaching kustomize how to substitute name in Registry
+nameReference:
+- kind: Secret
+  version: v1
+  fieldSpecs:
+  - kind: Registry
+    group: goharbor.io
+    path: spec/authentication/htPasswd/secretRef
+  - kind: Registry
+    group: goharbor.io
+    path: spec/authentication/token/certificateRef
+  - kind: Registry
+    group: goharbor.io
+    path: spec/compatibility/schema1/certificateRef
+  - kind: Registry
+    group: goharbor.io
+    path: spec/http/secretRef
+  - kind: Registry
+    group: goharbor.io
+    path: spec/http/tls/certificateRef
+  - kind: Registry
+    group: goharbor.io
+    path: spec/imagePullSecrets/items/name
+  - kind: Registry
+    group: goharbor.io
+    path: spec/log/hooks/optionsRef
+  - kind: Registry
+    group: goharbor.io
+    path: spec/middlewares/registry/optionsRef
+  - kind: Registry
+    group: goharbor.io
+    path: spec/middlewares/repository/optionsRef
+  - kind: Registry
+    group: goharbor.io
+    path: spec/middlewares/storage/optionsRef
+  - kind: Registry
+    group: goharbor.io
+    path: spec/proxy/basicAuthRef
+  - kind: Registry
+    group: goharbor.io
+    path: spec/redis/passwordRef
+  - kind: Registry
+    group: goharbor.io
+    path: spec/storage/driver/s3/secretkeyRef
+  - kind: Registry
+    group: goharbor.io
+    path: spec/storage/driver/swift/passwordRef
+
+- kind: ServiceAccount
+  version: v1
+  fieldSpecs:
+  - kind: Registry
+    group: goharbor.io
+    path: spec/serviceAccountName

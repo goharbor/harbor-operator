@@ -1,0 +1,51 @@
+# This file is for teaching kustomize how to substitute name in Core
+nameReference:
+- kind: Secret
+  version: v1
+  fieldSpecs:
+  - kind: Core
+    group: goharbor.io
+    path: spec/adminInitialPasswordRef
+  - kind: Core
+    group: goharbor.io
+    path: spec/components/jobService/secretRef
+  - kind: Core
+    group: goharbor.io
+    path: spec/components/registry/credentials/passwordRef
+  - kind: Core
+    group: goharbor.io
+    path: spec/components/registry/redis/passwordRef
+  - kind: Core
+    group: goharbor.io
+    path: spec/components/tls/certificateRef
+  - kind: Core
+    group: goharbor.io
+    path: spec/components/tokenService/certificateRef
+  - kind: Core
+    group: goharbor.io
+    path: spec/csrfKeyRef
+  - kind: Core
+    group: goharbor.io
+    path: spec/database/encryptionKeyRef
+  - kind: Core
+    group: goharbor.io
+    path: spec/database/passwordRef
+  - kind: Core
+    group: goharbor.io
+    path: spec/publicCertificateRef
+  - kind: Core
+    group: goharbor.io
+    path: spec/redis/passwordRef
+  - kind: Core
+    group: goharbor.io
+    path: spec/secretRef
+  - kind: Core
+    group: goharbor.io
+    path: spec/imagePullSecrets/items/name
+
+- kind: ServiceAccount
+  version: v1
+  fieldSpecs:
+  - kind: Core
+    group: goharbor.io
+    path: spec/serviceAccountName
