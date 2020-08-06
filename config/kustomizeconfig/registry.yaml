@@ -45,6 +45,9 @@ nameReference:
   - kind: Registry
     group: goharbor.io
     path: spec/storage/driver/swift/passwordRef
+  - kind: Registry
+    group: goharbor.io
+    path: spec/storage/driver/swift/secretkeyRef
 
 - kind: ServiceAccount
   version: v1

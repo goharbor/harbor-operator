@@ -3,9 +3,6 @@ kind: Kustomization
 commonLabels:
   sample: "true"
 
-generatorOptions:
-  disableNameSuffixHash: true
-
 secretGenerator:
 - name: registry-htpasswd
   literals:
@@ -22,3 +19,6 @@ secretGenerator:
 
 resources:
 - goharbor_v1alpha2_registry.yaml
+
+bases:
+- ../../kustomizeconfig
