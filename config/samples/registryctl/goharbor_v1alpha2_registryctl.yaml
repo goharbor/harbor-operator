@@ -3,5 +3,5 @@ kind: RegistryController
 metadata:
   name: sample
 spec:
-  registryRef: harbor
+  registryRef: sample
   authentication: {}

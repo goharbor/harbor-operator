@@ -6,5 +6,7 @@ spec:
   chart:
     url: https://harbor.public/chartrepo
     storage:
-      driverName: local
-      secretRef: chartmuseum-storage
+      filesystem:
+        prefix: /charts
+        volumeSource:
+          emptyDir: {}

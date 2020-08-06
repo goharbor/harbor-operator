@@ -11,10 +11,12 @@ spec:
     dsn: redis://admin@harbor-redis-master:6379/0
     passwordRef: harbor-redis
   database:
-    host: harbor-database-postgresql
+    hosts:
+    - host: harbor-database-postgresql
+      port: 5432
     passwordRef: harbor-database-postgresql
     encryptionKeyRef: core-database-encryption
-    name: core
+    database: core
   components:
     chartRepository:
       url: http://harbor-chartmuseum

@@ -3,5 +3,6 @@ configurations:
 - certificate.yaml
 - chartmuseum.yaml
 - core.yaml
+- harbor.yaml
 - jobservice.yaml
 - registry.yaml
