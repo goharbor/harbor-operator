@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/ovh/configstore"
@@ -17,6 +18,8 @@ const (
 	DefaultConcurrentReconcile = 1
 	DefaultHarborClass         = ""
 )
+
+var ErrNotReady = errors.New("configuration not ready")
 
 func NewConfigWithDefaults() *configstore.Store {
 	defaultStore := configstore.NewStore()
