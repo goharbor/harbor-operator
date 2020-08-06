@@ -237,7 +237,6 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 					},
 				},
 				Spec: corev1.PodSpec{
-					NodeSelector:                 registry.Spec.NodeSelector,
 					AutomountServiceAccountToken: &varFalse,
 					Volumes:                      volumes,
 					SecurityContext: &corev1.PodSecurityContext{
@@ -253,7 +252,6 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 							ContainerPort: metricsPort,
 							Name:          harbormetav1.RegistryMetricsPortName,
 						}},
-						ImagePullPolicy: corev1.PullAlways,
 						LivenessProbe: &corev1.Probe{
 							Handler: corev1.Handler{
 								HTTPGet: httpGET,
@@ -274,6 +272,8 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 	}
 
 	err = r.ApplyStorageConfiguration(ctx, registry, deploy)
+
+	registry.Spec.ComponentSpec.ApplyToDeployment(deploy)
 
 	return deploy, errors.Wrap(err, "cannot apply storage configuration")
 }

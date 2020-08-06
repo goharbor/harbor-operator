@@ -402,7 +402,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 		Scheme: core.Spec.Components.TLS.GetScheme(),
 	}
 
-	return &appsv1.Deployment{
+	deploy := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
@@ -423,7 +423,6 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 					},
 				},
 				Spec: corev1.PodSpec{
-					NodeSelector:                 core.Spec.NodeSelector,
 					AutomountServiceAccountToken: &varFalse,
 					Volumes:                      volumes,
 					Containers: []corev1.Container{{
@@ -438,8 +437,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 						}},
 
 						// https://github.com/goharbor/harbor/blob/master/make/photon/prepare/templates/core/env.jinja
-						Env:             envs,
-						ImagePullPolicy: corev1.PullAlways,
+						Env: envs,
 						LivenessProbe: &corev1.Probe{
 							Handler: corev1.Handler{
 								HTTPGet: httpGET,
@@ -456,5 +454,9 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 				},
 			},
 		},
-	}, nil
+	}
+
+	core.Spec.ComponentSpec.ApplyToDeployment(deploy)
+
+	return deploy, nil
 }

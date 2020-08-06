@@ -188,6 +188,8 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registryCtl *goharborv1a
 	registryContainer.LivenessProbe = probe
 	registryContainer.ReadinessProbe = probe
 
+	registryCtl.Spec.ComponentSpec.ApplyToDeployment(deploy)
+
 	return deploy, nil
 }
 

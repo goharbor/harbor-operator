@@ -12,6 +12,7 @@ import (
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	"github.com/goharbor/harbor-operator/controllers"
 )
 
 const (
@@ -104,7 +105,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, portal *goharborv1alpha2
 		Scheme: portal.Spec.TLS.GetScheme(),
 	}
 
-	return &appsv1.Deployment{
+	deploy := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
@@ -125,12 +126,11 @@ func (r *Reconciler) GetDeployment(ctx context.Context, portal *goharborv1alpha2
 					},
 				},
 				Spec: corev1.PodSpec{
-					NodeSelector:                 portal.Spec.NodeSelector,
 					AutomountServiceAccountToken: &varFalse,
 					Volumes:                      volumes,
 					Containers: []corev1.Container{
 						{
-							Name:  "portal",
+							Name:  controllers.Portal.String(),
 							Image: image,
 							Ports: []corev1.ContainerPort{{
 								Name:          harbormetav1.JobServiceHTTPPortName,
@@ -139,11 +139,8 @@ func (r *Reconciler) GetDeployment(ctx context.Context, portal *goharborv1alpha2
 								Name:          harbormetav1.JobServiceHTTPSPortName,
 								ContainerPort: httpsPort,
 							}},
-
 							Env:          envs,
 							VolumeMounts: volumeMounts,
-
-							ImagePullPolicy: corev1.PullAlways,
 							LivenessProbe: &corev1.Probe{
 								Handler: corev1.Handler{
 									HTTPGet: httpGET,
@@ -160,5 +157,9 @@ func (r *Reconciler) GetDeployment(ctx context.Context, portal *goharborv1alpha2
 			},
 			Paused: false,
 		},
-	}, nil
+	}
+
+	portal.Spec.ComponentSpec.ApplyToDeployment(deploy)
+
+	return deploy, nil
 }
