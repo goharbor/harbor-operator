@@ -72,7 +72,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, notary *goharborv1alpha2
 		}
 	}
 
-	return &appsv1.Deployment{
+	deploy := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
@@ -93,16 +93,14 @@ func (r *Reconciler) GetDeployment(ctx context.Context, notary *goharborv1alpha2
 					},
 				},
 				Spec: corev1.PodSpec{
-					NodeSelector:                 notary.Spec.NodeSelector,
 					AutomountServiceAccountToken: &varFalse,
 					Volumes:                      volumes,
 					InitContainers:               initContainers,
 					Containers: []corev1.Container{{
-						Name:            controllers.NotarySigner.String(),
-						Image:           image,
-						Args:            []string{"notary-signer", "-config", path.Join(ConfigPath, ConfigName)},
-						ImagePullPolicy: corev1.PullAlways,
-						VolumeMounts:    volumeMounts,
+						Name:         controllers.NotarySigner.String(),
+						Image:        image,
+						Args:         []string{"notary-signer", "-config", path.Join(ConfigPath, ConfigName)},
+						VolumeMounts: volumeMounts,
 						Ports: []corev1.ContainerPort{{
 							ContainerPort: goharborv1alpha2.NotarySignerAPIPort,
 							Name:          harbormetav1.NotarySignerAPIPortName,
@@ -134,5 +132,9 @@ func (r *Reconciler) GetDeployment(ctx context.Context, notary *goharborv1alpha2
 				},
 			},
 		},
-	}, nil
+	}
+
+	notary.Spec.ComponentSpec.ApplyToDeployment(deploy)
+
+	return deploy, nil
 }
