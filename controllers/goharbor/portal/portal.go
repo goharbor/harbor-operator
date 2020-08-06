@@ -2,6 +2,7 @@ package portal
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
@@ -27,6 +28,8 @@ const (
 // Reconciler reconciles a Portal object.
 type Reconciler struct {
 	*commonCtrl.Controller
+
+	configError error
 }
 
 // +kubebuilder:rbac:groups=goharbor.io,resources=portals,verbs=get;list;watch
@@ -48,6 +51,16 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 	concurrentReconcile, err := r.ConfigStore.GetItemValueInt(config.ReconciliationKey)
 	if err != nil {
 		return errors.Wrap(err, "cannot get concurrent reconcile")
+	}
+
+	err = mgr.AddReadyzCheck(r.NormalizeName(ctx, "template"), func(req *http.Request) error { return r.configError })
+	if err != nil {
+		return errors.Wrap(err, "cannot add template ready check")
+	}
+
+	err = mgr.AddHealthzCheck(r.NormalizeName(ctx, "template"), func(req *http.Request) error { return r.configError })
+	if err != nil {
+		return errors.Wrap(err, "cannot add template health check")
 	}
 
 	return ctrl.NewControllerManagedBy(mgr).
@@ -73,15 +86,19 @@ func New(ctx context.Context, name string, configStore *configstore.Store) (comm
 		configTemplatePath = DefaultConfigTemplatePath
 	}
 
-	l := logger.Get(ctx).WithName("controller").WithName(name)
+	r := &Reconciler{
+		configError: config.ErrNotReady,
+	}
 
 	configStore.FileCustomRefresh(configTemplatePath, func(data []byte) ([]configstore.Item, error) {
-		l.Info("config reloaded", "path", configTemplatePath)
+		r.configError = nil
+
+		logger.Get(ctx).WithName("controller").WithName(name).
+			Info("config reloaded", "path", configTemplatePath)
 		// TODO reconcile all core
+
 		return []configstore.Item{configstore.NewItem(ConfigTemplateKey, string(data), config.DefaultPriority)}, nil
 	})
-
-	r := &Reconciler{}
 
 	r.Controller = commonCtrl.NewController(ctx, name, r, configStore)
 
