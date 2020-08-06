@@ -345,7 +345,7 @@ func (r *Reconciler) GetNotarySigner(ctx context.Context, harbor *goharborv1alph
 			Namespace: namespace,
 		},
 		Spec: goharborv1alpha2.NotarySignerSpec{
-			ComponentSpec: harbor.Spec.Notary.ComponentSpec,
+			ComponentSpec: harbor.Spec.Notary.Signer,
 			Authentication: goharborv1alpha2.NotarySignerAuthenticationSpec{
 				CertificateRef: certificateRef,
 			},

@@ -261,7 +261,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1a
 		Scheme: chartMuseum.Spec.Server.TLS.GetScheme(),
 	}
 
-	return &appsv1.Deployment{
+	deploy := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
@@ -316,5 +316,9 @@ func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1a
 				},
 			},
 		},
-	}, nil
+	}
+
+	chartMuseum.Spec.ComponentSpec.ApplyToDeployment(deploy)
+
+	return deploy, nil
 }

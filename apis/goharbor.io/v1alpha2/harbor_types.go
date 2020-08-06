@@ -76,13 +76,6 @@ type HarborHelm1_4_0Spec struct {
 	EncryptionKeyRef string `json:"encryptionKeyRef"`
 
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default="IfNotPresent"
-	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets,omitempty"`
-
-	// +kubebuilder:validation:Optional
 	// +kubebuilder:default="RollingUpdate"
 	UpdateStrategyType appsv1.DeploymentStrategyType `json:"updateStrategyType,omitempty"`
 
@@ -178,7 +171,11 @@ func (r *HarborDatabaseSpec) getSSLModeForNotary() harbormetav1.PostgresSSLMode 
 }
 
 type NotaryComponentSpec struct {
-	harbormetav1.ComponentSpec `json:",inline"`
+	// +kubebuilder:validation:Optional
+	Server harbormetav1.ComponentSpec `json:"server"`
+
+	// +kubebuilder:validation:Optional
+	Signer harbormetav1.ComponentSpec `json:"signer"`
 }
 
 type ExternalRedisSpec struct {

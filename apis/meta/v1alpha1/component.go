@@ -5,6 +5,7 @@ import (
 	"errors"
 	"math"
 
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/kustomize/kstatus/status"
 )
@@ -62,10 +63,9 @@ type ComponentSpec struct {
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Enum={"Always","Never","IfNotPresent"}
-	// +kubebuilder:default="IfNotPresent"
 	// Image pull policy.
 	// More info: https://kubernetes.io/docs/concepts/containers/images#updating-images
-	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy,omitempty"`
+	ImagePullPolicy *corev1.PullPolicy `json:"imagePullPolicy,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +listType:map
@@ -87,6 +87,20 @@ type ComponentSpec struct {
 	// Cannot be updated.
 	// More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
+}
+
+func (c *ComponentSpec) ApplyToDeployment(deploy *appsv1.Deployment) {
+	deploy.Spec.Replicas = c.Replicas
+	deploy.Spec.Template.Spec.ServiceAccountName = c.ServiceAccountName
+	for i := range deploy.Spec.Template.Spec.Containers {
+		if c.ImagePullPolicy != nil {
+			deploy.Spec.Template.Spec.Containers[i].ImagePullPolicy = *c.ImagePullPolicy
+		}
+		deploy.Spec.Template.Spec.Containers[i].Resources = c.Resources
+	}
+	deploy.Spec.Template.Spec.ImagePullSecrets = c.ImagePullSecrets
+	deploy.Spec.Template.Spec.NodeSelector = c.NodeSelector
+	deploy.Spec.Template.Spec.Tolerations = c.Tolerations
 }
 
 // +kubebuilder:validation:Type=object
