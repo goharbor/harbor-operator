@@ -1,0 +1,114 @@
+# This file is for teaching kustomize how to substitute name in Core
+nameReference:
+- kind: Secret
+  version: v1
+  fieldSpecs:
+  - kind: Harbor
+    group: goharbor.io
+    path: spec/adminInitialPasswordRef
+  - kind: Harbor
+    group: goharbor.io
+    path: spec/chartmuseum/imagePullSecrets/items/name
+  - kind: Harbor
+    group: goharbor.io
+    path: spec/core/imagePullSecrets/items/name
+  - kind: Harbor
+    group: goharbor.io
+    path: spec/database/passwordRef
+  - kind: Harbor
+    group: goharbor.io
+    path: spec/encryptionKeyRef
+  - kind: Harbor
+    group: goharbor.io
+    path: spec/expose/core/tls/certificateRef
+  - kind: Harbor
+    group: goharbor.io
+    path: spec/expose/notary/tls/certificateRef
+  - kind: Harbor
+    group: goharbor.io
+    path: spec/harborAdminPasswordRef
+  - kind: Harbor
+    group: goharbor.io
+    path: spec/imageChartStorage/s3/secretkeyRef
+  - kind: Harbor
+    group: goharbor.io
+    path: spec/imageChartStorage/swift/passwordRef
+  - kind: Harbor
+    group: goharbor.io
+    path: spec/imageChartStorage/swift/secretkeyRef
+  - kind: Harbor
+    group: goharbor.io
+    path: spec/jobservice/imagePullSecrets/items/name
+  - kind: Harbor
+    group: goharbor.io
+    path: spec/notary/server/imagePullSecrets/items/name
+  - kind: Harbor
+    group: goharbor.io
+    path: spec/notary/signer/imagePullSecrets/items/name
+  - kind: Harbor
+    group: goharbor.io
+    path: spec/portal/imagePullSecrets/items/name
+  - kind: Harbor
+    group: goharbor.io
+    path: spec/redis/passwordRef
+  - kind: Harbor
+    group: goharbor.io
+    path: spec/registry/imagePullSecrets/items/name
+  - kind: Harbor
+    group: goharbor.io
+    path: spec/registry/storageMiddlewares/optionsRef
+  - kind: Harbor
+    group: goharbor.io
+    path: spec/trivy/imagePullSecrets/items/name
+
+- kind: PersistentVolumeClaim
+  version: v1
+  fieldSpecs:
+  - kind: Harbor
+    group: goharbor.io
+    path: spec/imageChartStorage/filesystem/chartPersistentVolume/claimName
+  - kind: Harbor
+    group: goharbor.io
+    path: spec/imageChartStorage/filesystem/registryPersistentVolume/claimName
+
+- kind: Service
+  version: v1
+  fieldSpecs:
+  - kind: Harbor
+    group: goharbor.io
+    path: spec/database/hosts/host
+
+- kind: ServiceAccount
+  version: v1
+  fieldSpecs:
+  - kind: Harbor
+    group: goharbor.io
+    path: spec/chartmuseum/serviceAccountName
+  - kind: Harbor
+    group: goharbor.io
+    path: spec/core/serviceAccountName
+  - kind: Harbor
+    group: goharbor.io
+    path: spec/jobservice/serviceAccountName
+  - kind: Harbor
+    group: goharbor.io
+    path: spec/notary/server/serviceAccountName
+  - kind: Harbor
+    group: goharbor.io
+    path: spec/notary/signer/serviceAccountName
+  - kind: Harbor
+    group: goharbor.io
+    path: spec/portal/serviceAccountName
+  - kind: Harbor
+    group: goharbor.io
+    path: spec/registry/serviceAccountName
+  - kind: Harbor
+    group: goharbor.io
+    path: spec/trivy/serviceAccountName
+
+- kind: Issuer
+  group: cert-manager.io
+  fieldSpecs:
+  - kind: Harbor
+    group: goharbor.io
+    path: spec/core/tokenIssuer

@@ -7,4 +7,5 @@ resources:
 - goharbor_v1alpha2_registryctl.yaml
 
 bases:
+- ../../kustomizeconfig
 - ../registry
