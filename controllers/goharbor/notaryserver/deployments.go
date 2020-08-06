@@ -3,6 +3,7 @@ package notaryserver
 import (
 	"context"
 	"path"
+	"time"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -25,6 +26,8 @@ const (
 	TrustCertificatePath = ConfigPath + "/trust-certificates"
 	AuthVolumeName       = "auth-certificates"
 	AuthCertificatePath  = ConfigPath + "/auth-certificates"
+
+	initialDelayReadiness = 10 * time.Second
 )
 
 var varFalse = false
@@ -168,6 +171,8 @@ func (r *Reconciler) GetDeployment(ctx context.Context, notary *goharborv1alpha2
 							Handler: corev1.Handler{
 								HTTPGet: httpGET,
 							},
+							// App health endpoint is ready before checking database access and grpc connection
+							InitialDelaySeconds: int32(initialDelayReadiness.Seconds()),
 						},
 					}},
 				},
