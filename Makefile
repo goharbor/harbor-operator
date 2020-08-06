@@ -325,13 +325,6 @@ uninstall: generate kustomize
 	$(KUSTOMIZE) build config/crd \
 		| kubectl delete -f -
 
-# Deploy controller in the configured Kubernetes cluster in ~/.kube/config
-.PHONY: deploy
-deploy: generate kustomize
-	cd config/manager && $(KUSTOMIZE) edit set image controller="$(IMG)"
-	$(KUSTOMIZE) build config/default \
-		| kubectl apply --validate=false -f -
-
 # Deploy RBAC in the configured Kubernetes cluster in ~/.kube/config
 .PHONY: deploy-rbac
 deploy-rbac: generate kustomize
