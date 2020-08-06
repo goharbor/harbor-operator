@@ -3,9 +3,6 @@ kind: Kustomization
 commonLabels:
   sample: "true"
 
-generatorOptions:
-  disableNameSuffixHash: true
-
 resources:
 - goharbor_v1alpha2_core.yaml
 
@@ -37,4 +34,5 @@ secretGenerator:
   type: "kubernetes.io/tls"
 
 bases:
+- ../../kustomizeconfig
 - ../registry

@@ -3,11 +3,9 @@ kind: Kustomization
 commonLabels:
   sample: "true"
 
-generatorOptions:
-  disableNameSuffixHash: true
-
 resources:
 - goharbor_v1alpha2_jobservice.yaml
 
 bases:
+- ../../kustomizeconfig
 - ../core

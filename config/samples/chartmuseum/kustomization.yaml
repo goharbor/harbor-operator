@@ -3,14 +3,8 @@ kind: Kustomization
 commonLabels:
   sample: "true"
 
-generatorOptions:
-  disableNameSuffixHash: true
-
-secretGenerator:
-- name: chartmuseum-storage
-  literals:
-  - LOCAL_ROOTDIR=/tmp/chart
-  type: "goharbor.io/single-secret"
-
 resources:
 - goharbor_v1alpha2_chartmuseum.yaml
+
+bases:
+- ../../kustomizeconfig
