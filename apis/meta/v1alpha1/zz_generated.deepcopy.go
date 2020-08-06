@@ -16,6 +16,11 @@ func (in *ComponentSpec) DeepCopyInto(out *ComponentSpec) {
 		*out = new(int32)
 		**out = **in
 	}
+	if in.ImagePullPolicy != nil {
+		in, out := &in.ImagePullPolicy, &out.ImagePullPolicy
+		*out = new(v1.PullPolicy)
+		**out = **in
+	}
 	if in.ImagePullSecrets != nil {
 		in, out := &in.ImagePullSecrets, &out.ImagePullSecrets
 		*out = make([]v1.LocalObjectReference, len(*in))
