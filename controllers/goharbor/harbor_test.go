@@ -57,8 +57,9 @@ var _ = Context("Harbor reconciler", func() {
 			}
 			harbor.Default()
 
-			Expect(k8sClient.Create(ctx, harbor)).
-				Should(WithTransform(apierrs.IsInvalid, BeTrue()))
+			err := k8sClient.Create(ctx, harbor)
+			Expect(err).To(HaveOccurred())
+			Expect(err).To(WithTransform(apierrs.IsInvalid, BeTrue()))
 		})
 	})
 })
