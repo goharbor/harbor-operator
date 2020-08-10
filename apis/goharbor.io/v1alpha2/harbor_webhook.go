@@ -22,15 +22,6 @@ func (h *Harbor) SetupWebhookWithManager(ctx context.Context, mgr ctrl.Manager) 
 		Complete()
 }
 
-// +kubebuilder:webhook:path=/mutate-goharbor-io-v1alpha2-harbor,mutating=true,failurePolicy=fail,groups=goharbor.io,resources=harbors,verbs=create;update,versions=v1alpha2,name=mharbor.kb.io
-
-var _ webhook.Defaulter = &Harbor{}
-
-// Default implements webhook.Defaulter, so a webhook will be registered for the type.
-func (h *Harbor) Default() {
-	harborlog.Info("default", "name", h.Name)
-}
-
 // +kubebuilder:webhook:verbs=create;update,path=/validate-goharbor-io-v1alpha2-harbor,mutating=false,failurePolicy=fail,groups=goharbor.io,resources=harbors,versions=v1alpha2,name=vharbor.kb.io
 
 var _ webhook.Validator = &Harbor{}

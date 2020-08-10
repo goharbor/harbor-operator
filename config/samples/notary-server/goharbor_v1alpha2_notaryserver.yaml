@@ -4,12 +4,20 @@ metadata:
   name: sample
 spec:
   migration:
-    source:
-      dsn: github://holyhope@theupdateframework/notary/migrations/server/postgresql#v0.6.1
-      passwordRef: github-token
+    github:
+      credentialsRef: github-credentials
+      owner: theupdateframework
+      repositoryName: notary
+      path: /migrations/server/postgresql
+      reference: v0.6.1
   storage:
-    type: postgres
-    dsn: postgresql://postgres@notary-server-database-postgresql:5432/postgres?sslmode=disable
-    passwordRef: notary-server-database-postgresql
-  trustService:
-    type: local
+    postgres:
+      hosts:
+      - host: harbor-database-postgresql
+        port: 5432
+      username: postgres
+      passwordRef: harbor-database-password
+      database: notarysigner
+      parameters:
+        sslmode: disable
+  trustService: {}
