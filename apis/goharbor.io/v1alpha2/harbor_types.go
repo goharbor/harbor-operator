@@ -54,6 +54,7 @@ type HarborHelm1_4_0Spec struct {
 	Expose HarborExposeSpec `json:"expose"`
 
 	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Pattern="https?://.*"
 	ExternalURL string `json:"externalURL"`
 
 	// +kubebuilder:validation:Optional

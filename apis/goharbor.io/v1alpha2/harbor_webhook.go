@@ -2,6 +2,7 @@ package v1alpha2
 
 import (
 	"context"
+	"net/url"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -61,6 +62,15 @@ func (h *Harbor) Validate() error {
 	err := h.Spec.ImageChartStorage.Validate()
 	if err != nil {
 		allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("persistence").Child("imageChartStorage"), h.Spec.ImageChartStorage, err.Error()))
+	}
+
+	if len(allErrs) == 0 {
+		return nil
+	}
+
+	_, err = url.Parse(h.Spec.ExternalURL)
+	if err != nil {
+		allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("externalURL"), h.Spec.ExternalURL, err.Error()))
 	}
 
 	if len(allErrs) == 0 {
