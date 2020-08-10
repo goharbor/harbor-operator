@@ -525,6 +525,7 @@ spec:
                 - core
                 type: object
               externalURL:
+                pattern: https?://.*
                 type: string
               harborAdminPasswordRef:
                 pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
