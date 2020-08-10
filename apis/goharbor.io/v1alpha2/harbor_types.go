@@ -177,6 +177,15 @@ type NotaryComponentSpec struct {
 
 	// +kubebuilder:validation:Optional
 	Signer harbormetav1.ComponentSpec `json:"signer"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=true
+	// Inject migration configuration to notary resources
+	MigrationEnabled *bool `json:"migrationEnabled,omitempty"`
+}
+
+func (r *NotaryComponentSpec) IsMigrationEnabled() bool {
+	return r != nil && (r.MigrationEnabled == nil || *r.MigrationEnabled)
 }
 
 type ExternalRedisSpec struct {

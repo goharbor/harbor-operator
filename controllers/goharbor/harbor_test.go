@@ -55,7 +55,6 @@ var _ = Context("Harbor reconciler", func() {
 					},
 				},
 			}
-			harbor.Default()
 
 			err := k8sClient.Create(ctx, harbor)
 			Expect(err).To(HaveOccurred())
@@ -162,7 +161,6 @@ func setupValidHarbor(ctx context.Context, ns string) (Resource, client.ObjectKe
 			},
 		},
 	}
-	harbor.Default()
 
 	Expect(k8sClient.Create(ctx, harbor)).To(Succeed())
 

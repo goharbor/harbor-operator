@@ -10,3 +10,8 @@ configMapGenerator:
 - name: harbor-init-db
   files:
   - init-db.sql
+
+secretGenerator:
+- name: harbor-database-password
+  literals:
+  - postgresql-password=the-database-password

@@ -2,7 +2,7 @@
 # Image URL to use all building/pushing image targets
 IMG ?= goharbor/harbor-operator:dev
 
-CONFIGURATION_FROM ?= file:$(CURDIR)/config-dev.yml
+CONFIGURATION_FROM ?= env,file:$(CURDIR)/config-dev.yml
 export CONFIGURATION_FROM
 
 CHARTS_DIRECTORY      := $(CURDIR)/charts
@@ -26,12 +26,14 @@ export CHARTMUSEUM_TEMPLATE_PATH
 export NOTARYSERVER_TEMPLATE_PATH
 export NOTARYSIGNER_TEMPLATE_PATH
 
-# See https://github.com/settings/tokens for GITHUB_TOKEN. No permissions required.
-NOTARYSERVER_MIGRATION_SOURCE ?= github://holyhope:$${GITHUB_TOKEN}@theupdateframework/notary/migrations/server/postgresql\#v0.6.1
-NOTARYSIGNER_MIGRATION_SOURCE ?= github://holyhope:$${GITHUB_TOKEN}@theupdateframework/notary/migrations/signer/postgresql\#v0.6.1
+define NOTARY_MIGRATION_GITHUB_CREDENTIALS
+{
+	"user": "$(GITHUB_USER)",
+	"token": "$(GITHUB_TOKEN)"
+}
+endef
 
-export NOTARYSERVER_MIGRATION_SOURCE
-export NOTARYSIGNER_MIGRATION_SOURCE
+export NOTARY_MIGRATION_GITHUB_CREDENTIALS
 
 ########
 
@@ -49,7 +51,7 @@ GONOGENERATED_SOURCES       := $(sort $(shell grep -L 'DO NOT EDIT.' -- $(GO_SOU
 GOWITHTESTS_SOURCES         := $(sort $(subst $(CURDIR)/,,$(shell go list -test -f '$(gosourcetemplate)' ./...)))
 GO4CONTROLLERGEN_SOURCES    := $(sort $(shell grep -l '// +' -- $(GONOGENERATED_SOURCES)))
 
-.SUFFIXES:            # Delete the default suffixes
+.SUFFIXES:       # Delete the default suffixes
 .SUFFIXES: .go   # Define our suffix list
 
 ########
@@ -360,13 +362,25 @@ deploy-rbac: go-generate kustomize
 .PHONY: sample
 sample: sample-harbor
 
-.PHONY: sample
+.PHONY: sample-database
 sample-database: kustomize
 	$(KUSTOMIZE) build 'config/samples/database' \
 		| kubectl apply -f -
 
-.PHONY: sample
-sample-%: kustomize
+.PHONY: sample-github-secret
+sample-github-secret:
+	! test -z $(GITHUB_TOKEN)
+	! test -z $(GITHUB_USER)
+	kubectl create secret generic \
+		github-credentials \
+			--type=goharbor.io/github \
+			--from-literal=github-token=$(GITHUB_TOKEN) \
+			--from-literal=github-user=$(GITHUB_USER) \
+			--dry-run=client -o yaml \
+		| kubectl apply -f -
+
+.PHONY: sample-%
+sample-%: kustomize postgresql sample-github-secret
 	$(KUSTOMIZE) build 'config/samples/$*' \
 		| kubectl apply -f -
 	kubectl get goharbor
@@ -381,11 +395,11 @@ redis: helm
 		--set usePassword=true
 
 .PHONY: postgresql
-postgresql: helm
-	$(MAKE) sample-database
+postgresql: helm sample-database
 	$(HELM) repo add bitnami https://charts.bitnami.com/bitnami
 	$(HELM) upgrade --install harbor-database bitnami/postgresql \
-		--set-string initdbScriptsConfigMap=harbor-init-db
+		--set-string initdbScriptsConfigMap=harbor-init-db \
+		--set-string existingSecret=harbor-database-password
 
 INGRESS_NAMESPACE := nginx-ingress
 

@@ -59,12 +59,12 @@ func (r *Reconciler) GetDeployment(ctx context.Context, notary *goharborv1alpha2
 		MountPath: ConfigPath,
 	}}
 
-	if notary.Spec.TrustService.CertificateRef != "" {
+	if notary.Spec.TrustService.Remote != nil {
 		volumes = append(volumes, corev1.Volume{
 			Name: TrustVolumeName,
 			VolumeSource: corev1.VolumeSource{
 				Secret: &corev1.SecretVolumeSource{
-					SecretName: notary.Spec.TrustService.CertificateRef,
+					SecretName: notary.Spec.TrustService.Remote.CertificateRef,
 				},
 			},
 		})
@@ -91,12 +91,12 @@ func (r *Reconciler) GetDeployment(ctx context.Context, notary *goharborv1alpha2
 		})
 	}
 
-	if notary.Spec.Auth != nil {
+	if notary.Spec.Authentication != nil {
 		volumes = append(volumes, corev1.Volume{
 			Name: AuthVolumeName,
 			VolumeSource: corev1.VolumeSource{
 				Secret: &corev1.SecretVolumeSource{
-					SecretName: notary.Spec.Auth.Token.CertificateRef,
+					SecretName: notary.Spec.Authentication.Token.CertificateRef,
 				},
 			},
 		})
@@ -109,8 +109,8 @@ func (r *Reconciler) GetDeployment(ctx context.Context, notary *goharborv1alpha2
 
 	initContainers := []corev1.Container{}
 
-	if notary.Spec.Migration != nil {
-		migrationContainer, err := notary.Spec.Migration.GetMigrationContainer(ctx, &notary.Spec.Storage)
+	if notary.Spec.Migration.Enabled() {
+		migrationContainer, migrationVolumes, err := notary.Spec.Migration.GetMigrationContainer(ctx, &notary.Spec.Storage)
 		if err != nil {
 			return nil, errors.Wrap(err, "migrationContainer")
 		}
@@ -118,6 +118,8 @@ func (r *Reconciler) GetDeployment(ctx context.Context, notary *goharborv1alpha2
 		if migrationContainer != nil {
 			initContainers = append(initContainers, *migrationContainer)
 		}
+
+		volumes = append(volumes, migrationVolumes...)
 	}
 
 	httpGET := &corev1.HTTPGetAction{

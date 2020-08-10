@@ -1,9 +1,9 @@
 apiVersion: cert-manager.io/v1alpha2
 kind: Certificate
 metadata:
-  name: sample-signer
+  name: sample-server
 spec:
-  secretName: sample-signer
+  secretName: sample-server
   duration: 2160h # 90d
   renewBefore: 360h # 15d
   organization:
@@ -13,8 +13,8 @@ spec:
   keyAlgorithm: rsa
   keyEncoding: pkcs1
   usages:
-  - server auth
+  - client auth
   dnsNames:
-  - sample-notarysigner
+  - sample-notaryserver
   issuerRef:
     name: sample-signer

@@ -54,7 +54,7 @@ type NotaryServerSpec struct {
 	Storage NotaryStorageSpec `json:"storage,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	Auth *NotaryServerAuthSpec `json:"auth,omitempty"`
+	Authentication *NotaryServerAuthSpec `json:"authentication,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	Migration *NotaryMigrationSpec `json:"migration,omitempty"`
@@ -66,12 +66,13 @@ const (
 )
 
 type NotaryServerTrustServiceSpec struct {
-	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Enum={"remote","local"}
-	Type string `json:"type"`
-
 	// +kubebuilder:validation:Optional
-	Host string `json:"host,omitempty"`
+	Remote *NotaryServerTrustServiceRemoteSpec `json:"remote,omitempty"`
+}
+
+type NotaryServerTrustServiceRemoteSpec struct {
+	// +kubebuilder:validation:Required
+	Host string `json:"host"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=0
