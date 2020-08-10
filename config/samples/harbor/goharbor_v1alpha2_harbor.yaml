@@ -3,7 +3,7 @@ kind: Harbor
 metadata:
   name: sample
 spec:
-  harborAdminPasswordRef: sample-harbor-core-admin-password
+  harborAdminPasswordRef: admin-core-secret
   externalURL: https://core.harbor.domain
   expose:
     core:
