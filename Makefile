@@ -61,22 +61,12 @@ export TMPDIR
 all: manager
 
 # Run tests
-.PHONY: test
-test: generate
-	go test -vet=off ./... \
-		-coverprofile cover.out
-
-.PHONY: dependencies-test
-dependencies-test: fmt
-	go mod tidy
-	$(MAKE) vendor
-	git status
-	test -z "$$(git diff-index --diff-filter=d --name-only HEAD)"
-
+.PHONY:test
+test: go-test helm-test go-dependencies-test
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 .PHONY: run
-run: generate vendor $(TMPDIR)k8s-webhook-server/serving-certs
+run: go-generate vendor $(TMPDIR)k8s-webhook-server/serving-certs
 	go run *.go
 
 # Run linters against all files
@@ -100,6 +90,42 @@ dev-tools: \
 	stringer
 
 #####################
+#      Tests        #
+#####################
+
+.PHONY: go-dependencies-test
+go-dependencies-test: fmt
+	go mod tidy
+	$(MAKE) vendor
+	$(MAKE) diff
+
+.PHONY: generated-diff-test
+generated-diff-test: fmt generate
+	$(MAKE) diff
+
+.PHONY: diff
+diff:
+	git status
+	test -z "$$(git diff-index --diff-filter=d --name-only HEAD)"
+
+.PHONY: go-test
+go-test: go-generate
+	go test -vet=off ./... \
+		-coverprofile cover.out
+
+CHART_RELEASE_NAME ?= harbor-operator
+CHART_HARBOR_CLASS ?=
+
+.PHONY: helm-test
+helm-test: helm helm-install
+	cd $(CHART_HARBOR_OPERATOR) ; \
+	$(HELM) test $(CHART_RELEASE_NAME)
+
+helm-install: helm chart
+	$(HELM) upgrade --install $(CHART_RELEASE_NAME) $(CHART_HARBOR_OPERATOR) \
+		--set-string harborClass='${CHART_HARBOR_CLASS}'
+
+#####################
 #     Packaging     #
 #####################
 
@@ -107,7 +133,7 @@ RELEASE_VERSION ?= 0.0.0-dev
 
 # Build manager binary
 .PHONY: manager
-manager: generate vendor
+manager: go-generate vendor
 	go build \
 		-mod vendor \
 		-o bin/manager \
@@ -142,8 +168,7 @@ config/crd/bases: $(GO4CONTROLLERGEN_SOURCES)
 	touch "$@"
 
 .PHONY: generate
-generate: controller-gen stringer
-	go generate ./...
+generate: go-generate chart
 
 vendor: go.mod go.sum
 	go mod vendor
@@ -170,17 +195,17 @@ docker-push:
 
 # Run go linters
 .PHONY: go-lint
-go-lint: golangci-lint vet generate
+go-lint: golangci-lint vet go-generate
 	$(GOLANGCI_LINT) run --verbose
 
 # Run go fmt against code
 .PHONY: fmt
-fmt: generate
+fmt: go-generate
 	go fmt ./...
 
 # Run go vet against code
 .PHONY: vet
-vet: generate
+vet: go-generate
 	go vet ./...
 
 # Check markdown files syntax
@@ -315,19 +340,20 @@ helm-generate: $(subst config/crd/bases/,$(CHART_CRDS_PATH)/,$(wildcard config/c
 
 # Install CRDs into a cluster
 .PHONY: install
-install: generate kustomize
-	$(KUSTOMIZE) build config/crd \
-		| kubectl apply --validate=false -f -
+install: go-generate kustomize
+	kubectl apply -f config/crd/bases
 
 # Uninstall CRDs from a cluster
 .PHONY: uninstall
-uninstall: generate kustomize
-	$(KUSTOMIZE) build config/crd \
-		| kubectl delete -f -
+uninstall: go-generate kustomize
+	kubectl delete -f config/crd/bases
+
+go-generate: controller-gen stringer
+	go generate ./...
 
 # Deploy RBAC in the configured Kubernetes cluster in ~/.kube/config
 .PHONY: deploy-rbac
-deploy-rbac: generate kustomize
+deploy-rbac: go-generate kustomize
 	$(KUSTOMIZE) build config/rbac \
 		| kubectl apply --validate=false -f -
 
