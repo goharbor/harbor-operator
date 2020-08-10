@@ -15,37 +15,43 @@ import (
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers"
+	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 )
 
-func (r *Reconciler) AddNotarySignerConfigurations(ctx context.Context, harbor *goharborv1alpha2.Harbor) (NotarySignerCertificateIssuer, NotarySignerCertificate, NotarySignerEncryptionKey, error) {
+func (r *Reconciler) AddNotarySignerConfigurations(ctx context.Context, harbor *goharborv1alpha2.Harbor) (NotarySignerCertificateIssuer, NotarySignerCertificate, NotarySignerEncryptionKey, NotarySignerMigrationSecret, error) {
 	if harbor.Spec.Notary == nil {
-		return nil, nil, nil, nil
+		return nil, nil, nil, nil, nil
 	}
 
 	caIssuer, err := r.AddNotarySignerCertificateAuthorityIssuer(ctx, harbor)
 	if err != nil {
-		return nil, nil, nil, errors.Wrap(err, "ca-issuer")
+		return nil, nil, nil, nil, errors.Wrap(err, "ca-issuer")
 	}
 
 	ca, err := r.AddNotarySignerCertificateAuthority(ctx, harbor, caIssuer)
 	if err != nil {
-		return nil, nil, nil, errors.Wrap(err, "ca-issuer")
+		return nil, nil, nil, nil, errors.Wrap(err, "ca-issuer")
 	}
 
 	issuer, err := r.AddNotarySignerCertificateIssuer(ctx, harbor, ca)
 	if err != nil {
-		return nil, nil, nil, errors.Wrap(err, "issuer")
+		return nil, nil, nil, nil, errors.Wrap(err, "issuer")
 	}
 
 	certificate, err := r.AddNotarySignerCertificate(ctx, harbor, issuer)
 	if err != nil {
-		return nil, nil, nil, errors.Wrap(err, "certificate")
+		return nil, nil, nil, nil, errors.Wrap(err, "certificate")
+	}
+
+	migrationSecret, err := r.AddNotarySignerMigrationSecret(ctx, harbor)
+	if err != nil {
+		return nil, nil, nil, nil, errors.Wrap(err, "migration")
 	}
 
 	encryptionKey, err := r.AddNotarySignerEncryptionKey(ctx, harbor)
 
-	return issuer, certificate, encryptionKey, errors.Wrap(err, "encryption key")
+	return issuer, certificate, encryptionKey, migrationSecret, errors.Wrap(err, "encryption key")
 }
 
 const (
@@ -56,7 +62,7 @@ const (
 func (r *Reconciler) GetNotarySignerCertificateAuthority(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*certv1.Certificate, error) {
 	duration := NotarySignerCertificateAuthorityDurationDefaultConfig
 
-	durationValue, err := configstore.GetItemValue(NotarySignerCertificateAuthorityDurationConfigKey)
+	durationValue, err := r.ConfigStore.GetItemValue(NotarySignerCertificateAuthorityDurationConfigKey)
 	if err != nil {
 		if _, ok := err.(configstore.ErrItemNotFound); !ok {
 			return nil, err
@@ -84,13 +90,11 @@ func (r *Reconciler) GetNotarySignerCertificateAuthority(ctx context.Context, ha
 			CommonName: r.NormalizeName(ctx, harbor.GetName(), controllers.NotarySigner.String()),
 			IsCA:       true,
 			Usages: []certv1.KeyUsage{
-				certv1.UsageDigitalSignature,
-				certv1.UsageKeyEncipherment,
-				// certv1.UsageKeyAgreement,
 				certv1.UsageClientAuth,
-				// certv1.UsageCertSign,
-				// certv1.UsageCRLSign,
-				// certv1.UsageOCSPSigning,
+				certv1.UsageServerAuth,
+
+				certv1.UsageCertSign,
+				certv1.UsageCRLSign,
 			},
 		},
 	}, nil
@@ -240,7 +244,7 @@ const (
 )
 
 func (r *Reconciler) getNotarySignerCertificateDuration() (time.Duration, error) {
-	durationValue, err := configstore.GetItemValue(NotarySignerCertificateDurationConfigKey)
+	durationValue, err := r.ConfigStore.GetItemValue(NotarySignerCertificateDurationConfigKey)
 	if err != nil {
 		if _, ok := err.(configstore.ErrItemNotFound); ok {
 			return NotarySignerCertificateDurationDefaultConfig, nil
@@ -258,7 +262,7 @@ const (
 )
 
 func (r *Reconciler) getNotarySignerCertificateAlgorithm() (certv1.KeyAlgorithm, error) {
-	algorithm, err := configstore.GetItemValue(NotarySignerCertificateAlgorithmConfigKey)
+	algorithm, err := r.ConfigStore.GetItemValue(NotarySignerCertificateAlgorithmConfigKey)
 	if err != nil {
 		if _, ok := err.(configstore.ErrItemNotFound); ok {
 			return NotarySignerCertificateAlgorithmDefaultConfig, nil
@@ -300,18 +304,70 @@ func (r *Reconciler) GetNotarySignerCertificate(ctx context.Context, harbor *goh
 			Usages: []certv1.KeyUsage{
 				certv1.UsageDigitalSignature,
 				certv1.UsageKeyEncipherment,
-				// certv1.UsageKeyAgreement,
-				certv1.UsageClientAuth,
-				// certv1.UsageServerAuth,
+				certv1.UsageServerAuth,
 			},
 			IsCA: false,
 		},
 	}, nil
 }
 
+func (r *Reconciler) GetDefaultNotarySignerMigrationSource(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*goharborv1alpha2.NotaryMigrationGithubSpec, error) {
+	source, err := r.GetDefaultNotaryMigrationSource()
+	if err != nil {
+		return nil, err
+	}
+
+	return &goharborv1alpha2.NotaryMigrationGithubSpec{
+		CredentialsRef: r.NormalizeName(ctx, harbor.GetName(), controllers.NotarySigner.String(), "migration"),
+		Owner:          source.Owner,
+		Path:           source.Path,
+		Reference:      source.Reference,
+		RepositoryName: source.Repository,
+	}, nil
+}
+
+type NotarySignerMigrationSecret graph.Resource
+
+func (r *Reconciler) AddNotarySignerMigrationSecret(ctx context.Context, harbor *goharborv1alpha2.Harbor) (NotarySignerMigrationSecret, error) {
+	authSecret, err := r.GetNotarySignerMigrationSecret(ctx, harbor)
+	if err != nil {
+		return nil, errors.Wrap(err, "get")
+	}
+
+	authSecretRes, err := r.AddSecretToManage(ctx, authSecret)
+	if err != nil {
+		return nil, errors.Wrap(err, "add")
+	}
+
+	return NotarySignerMigrationSecret(authSecretRes), nil
+}
+
+func (r *Reconciler) GetNotarySignerMigrationSecret(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*corev1.Secret, error) {
+	name := r.NormalizeName(ctx, harbor.GetName(), controllers.NotarySigner.String(), "migration")
+	namespace := harbor.GetNamespace()
+
+	github, err := r.GetDefaultNotaryMigrationCredentials()
+	if err != nil {
+		return nil, serrors.UnrecoverrableError(err, serrors.OperatorReason, "cannot get default migration source")
+	}
+
+	return &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+		},
+		Immutable: &varFalse,
+		Type:      harbormetav1.SecretTypeGithubToken,
+		StringData: map[string]string{
+			harbormetav1.GithubTokenUserKey:     github.User,
+			harbormetav1.GithubTokenPasswordKey: github.Token,
+		},
+	}, nil
+}
+
 type NotarySigner graph.Resource
 
-func (r *Reconciler) AddNotarySigner(ctx context.Context, harbor *goharborv1alpha2.Harbor, certificate NotarySignerCertificate, encryptionKey NotarySignerEncryptionKey) (NotarySigner, error) {
+func (r *Reconciler) AddNotarySigner(ctx context.Context, harbor *goharborv1alpha2.Harbor, certificate NotarySignerCertificate, encryptionKey NotarySignerEncryptionKey, migrationSecret NotarySignerMigrationSecret) (NotarySigner, error) {
 	if harbor.Spec.Notary == nil {
 		return nil, nil
 	}
@@ -321,7 +377,7 @@ func (r *Reconciler) AddNotarySigner(ctx context.Context, harbor *goharborv1alph
 		return nil, errors.Wrap(err, "get")
 	}
 
-	notaryServerRes, err := r.AddBasicResource(ctx, notaryServer, certificate, encryptionKey)
+	notaryServerRes, err := r.AddBasicResource(ctx, notaryServer, certificate, encryptionKey, migrationSecret)
 
 	return NotarySigner(notaryServerRes), errors.Wrap(err, "add")
 }
@@ -331,12 +387,24 @@ func (r *Reconciler) GetNotarySigner(ctx context.Context, harbor *goharborv1alph
 	namespace := harbor.GetNamespace()
 
 	encryptionKeyAliasesRef := r.NormalizeName(ctx, harbor.GetName(), controllers.NotarySigner.String(), "encryption-key")
-
 	certificateRef := r.NormalizeName(ctx, harbor.GetName(), controllers.NotarySigner.String(), "authentication")
 
 	storage, err := harbor.Spec.Database.GetPostgresqlConnection(harbormetav1.NotarySignerComponent)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot get storage configuration")
+	}
+
+	var migration *goharborv1alpha2.NotaryMigrationSpec
+
+	if harbor.Spec.Notary.IsMigrationEnabled() {
+		migration = &goharborv1alpha2.NotaryMigrationSpec{}
+
+		github, err := r.GetDefaultNotarySignerMigrationSource(ctx, harbor)
+		if err != nil {
+			return nil, serrors.UnrecoverrableError(err, serrors.OperatorReason, "cannot get notary migration source")
+		}
+
+		migration.Github = github
 	}
 
 	return &goharborv1alpha2.NotarySigner{
@@ -358,6 +426,7 @@ func (r *Reconciler) GetNotarySigner(ctx context.Context, harbor *goharborv1alph
 				},
 				AliasesRef: encryptionKeyAliasesRef,
 			},
+			Migration: migration,
 		},
 	}, nil
 }

@@ -72,3 +72,16 @@ const (
 	// SharedSecretKey is the default password to use
 	DefaultAliasSecretKey = "default"
 )
+
+const (
+	// SecretTypeGithubToken contains credentials to contact Github API.
+	//
+	// Required field:
+	// - Secret.Data["github-token"] - The Github token
+	// - Secret.Data["github-user"]  - The Github username
+	SecretTypeGithubToken corev1.SecretType = "goharbor.io/github"
+
+	// SharedSecretKey is the default password to use
+	GithubTokenPasswordKey = "github-token"
+	GithubTokenUserKey     = "github-user"
+)

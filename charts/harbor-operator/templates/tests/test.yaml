@@ -79,6 +79,21 @@ type: goharbor.io/csrf
 ---
 apiVersion: v1
 data:
+  postgresql-password: dGhlLWRhdGFiYXNlLXBhc3N3b3Jk
+kind: Secret
+metadata:
+  annotations:
+    app.kubernetes.io/instance: ""
+    app.kubernetes.io/managed-by: ""
+    helm.sh/chart: ""
+    helm.sh/hook: test
+  labels:
+    sample: "true"
+  name: '{{ include "chart.fullname" . }}-harbor-database-password'
+type: Opaque
+---
+apiVersion: v1
+data:
   postgresql-password: T1Q5ckhjTVc0OA==
 kind: Secret
 metadata:
@@ -398,7 +413,7 @@ spec:
     hosts:
     - host: harbor-database-postgresql
       port: 5432
-    passwordRef: harbor-database-postgresql
+    passwordRef: harbor-database-password
     sslMode: disable
     username: postgres
   encryptionKeyRef: core-database-encryption
@@ -421,9 +436,12 @@ spec:
         claimName: sample-harbor-registry
   internalTLS:
     enabled: true
+  notary:
+    migrationEnabled: true
   redis:
-    address: harbor-redis-master
+    host: harbor-redis-master
     passwordRef: harbor-redis
+    port: 6379
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

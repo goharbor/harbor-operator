@@ -3,14 +3,7 @@ kind: Kustomization
 commonLabels:
   sample: "true"
 
-generatorOptions:
-  disableNameSuffixHash: true
-
 secretGenerator:
-- name: github-token
-  literals:
-  - secret=$(GITHUB_TOKEN)
-  type: "goharbor.io/single-secret"
 - name: notary-signer-aliases
   literals:
   - default=the-default-password
@@ -22,3 +15,5 @@ resources:
 - notarysigner-certificate-issuer.yaml
 - goharbor_v1alpha2_notarysigner.yaml
 
+bases:
+- ../../kustomizeconfig

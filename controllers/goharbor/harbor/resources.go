@@ -46,14 +46,14 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrapf(err, "cannot add %s configuration", controllers.ChartMuseum)
 	}
 
-	notaryServerCertificate, err := r.AddNotaryServerConfigurations(ctx, harbor, internalTLSIssuer)
-	if err != nil {
-		return errors.Wrapf(err, "cannot add %s configuration", controllers.NotaryServer)
-	}
-
-	_, notarySignerCertificate, encryptionKey, err := r.AddNotarySignerConfigurations(ctx, harbor)
+	notaryCertIssuer, notarySignerCertificate, encryptionKey, notarySignerMigrationSecret, err := r.AddNotarySignerConfigurations(ctx, harbor)
 	if err != nil {
 		return errors.Wrapf(err, "cannot add %s configuration", controllers.NotarySigner)
+	}
+
+	notaryAuthCert, notaryServerCertificate, notaryServerMigrationSecret, err := r.AddNotaryServerConfigurations(ctx, harbor, internalTLSIssuer, notaryCertIssuer)
+	if err != nil {
+		return errors.Wrapf(err, "cannot add %s configuration", controllers.NotaryServer)
 	}
 
 	registry, err := r.AddRegistry(ctx, harbor, registryCertificate, registryAuthSecret, registryHTTPSecret)
@@ -86,12 +86,12 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrapf(err, "cannot add %s", controllers.ChartMuseum)
 	}
 
-	notaryServer, err := r.AddNotaryServer(ctx, harbor, notaryServerCertificate)
+	notaryServer, err := r.AddNotaryServer(ctx, harbor, notaryServerCertificate, notaryAuthCert, notaryServerMigrationSecret)
 	if err != nil {
 		return errors.Wrapf(err, "cannot add %s", controllers.NotaryServer)
 	}
 
-	_, err = r.AddNotarySigner(ctx, harbor, notarySignerCertificate, encryptionKey)
+	_, err = r.AddNotarySigner(ctx, harbor, notarySignerCertificate, encryptionKey, notarySignerMigrationSecret)
 	if err != nil {
 		return errors.Wrapf(err, "cannot add %s", controllers.NotarySigner)
 	}

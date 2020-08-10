@@ -130,16 +130,35 @@ spec:
                         type: object
                       redis:
                         properties:
-                          dsn:
-                            pattern: .+://.+
-                            type: string
-                          passwordRef:
-                            description: If password is absent from dsn field, please
-                              specify it here
+                          certificateRef:
+                            description: Secret containing the client certificate
+                              to authenticate with.
                             pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
                             type: string
+                          database:
+                            default: 0
+                            description: The database number.
+                            format: int32
+                            maximum: 8
+                            minimum: 0
+                            type: integer
+                          host:
+                            description: Server hostname.
+                            minLength: 1
+                            type: string
+                          passwordRef:
+                            description: Secret containing the password to use when
+                              connecting to the server.
+                            pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                            type: string
+                          port:
+                            description: Server port.
+                            exclusiveMinimum: true
+                            format: int32
+                            minimum: 0
+                            type: integer
                         required:
-                        - dsn
+                        - host
                         type: object
                       storageProviderName:
                         minLength: 1
@@ -331,8 +350,21 @@ spec:
                 type: string
               redis:
                 properties:
-                  dsn:
-                    pattern: .+://.+
+                  certificateRef:
+                    description: Secret containing the client certificate to authenticate
+                      with.
+                    pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                    type: string
+                  database:
+                    default: 0
+                    description: The database number.
+                    format: int32
+                    maximum: 8
+                    minimum: 0
+                    type: integer
+                  host:
+                    description: Server hostname.
+                    minLength: 1
                     type: string
                   idleTimeout:
                     default: 30s
@@ -343,12 +375,18 @@ spec:
                     pattern: ([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?
                     type: string
                   passwordRef:
-                    description: If password is absent from dsn field, please specify
-                      it here
+                    description: Secret containing the password to use when connecting
+                      to the server.
                     pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
                     type: string
+                  port:
+                    description: Server port.
+                    exclusiveMinimum: true
+                    format: int32
+                    minimum: 0
+                    type: integer
                 required:
-                - dsn
+                - host
                 type: object
               replicas:
                 description: 'Replicas is the number of desired replicas. This is

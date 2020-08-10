@@ -26,7 +26,7 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrap(err, "cannot get service")
 	}
 
-	registry, err := r.Controller.AddExternalResource(ctx, &goharborv1alpha2.Registry{
+	registry, err := r.AddExternalResource(ctx, &goharborv1alpha2.Registry{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      registryctl.Spec.RegistryRef,
 			Namespace: registryctl.GetNamespace(),
@@ -36,7 +36,7 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrapf(err, "cannot add registry %s", registryctl.Spec.RegistryRef)
 	}
 
-	_, err = r.Controller.AddServiceToManage(ctx, service)
+	_, err = r.AddServiceToManage(ctx, service)
 	if err != nil {
 		return errors.Wrapf(err, "cannot add service %s", service.GetName())
 	}
@@ -46,7 +46,7 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrap(err, "cannot get configMap")
 	}
 
-	configMapResource, err := r.Controller.AddConfigMapToManage(ctx, cm)
+	configMapResource, err := r.AddConfigMapToManage(ctx, cm)
 	if err != nil {
 		return errors.Wrapf(err, "cannot add configMap %s", cm.GetName())
 	}
@@ -56,7 +56,7 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrap(err, "cannot get deployment")
 	}
 
-	_, err = r.Controller.AddDeploymentToManage(ctx, deployment, registry, configMapResource)
+	_, err = r.AddDeploymentToManage(ctx, deployment, registry, configMapResource)
 	if err != nil {
 		return errors.Wrapf(err, "cannot add deployment %s", deployment.GetName())
 	}

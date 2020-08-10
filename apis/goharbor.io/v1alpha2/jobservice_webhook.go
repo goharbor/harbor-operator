@@ -21,15 +21,6 @@ func (js *JobService) SetupWebhookWithManager(ctx context.Context, mgr ctrl.Mana
 		Complete()
 }
 
-// +kubebuilder:webhook:path=/mutate-goharbor-io-v1alpha2-jobservice,mutating=true,failurePolicy=fail,groups=goharbor.io,resources=jobservices,verbs=create;update,versions=v1alpha2,name=mjobservice.kb.io
-
-var _ webhook.Defaulter = &JobService{}
-
-// Default implements webhook.Defaulter, so a webhook will be registered for the type.
-func (js *JobService) Default() {
-	jobservicelog.Info("default", "name", js.Name)
-}
-
 // +kubebuilder:webhook:verbs=create;update,path=/validate-goharbor-io-v1alpha2-jobservice,mutating=false,failurePolicy=fail,groups=goharbor.io,resources=jobservices,versions=v1alpha2,name=vjobservice.kb.io
 
 var _ webhook.Validator = &JobService{}

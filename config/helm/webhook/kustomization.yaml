@@ -8,7 +8,9 @@ commonAnnotations:
   cert-manager.io/cluster-issuer: '{{.Release.Namespace}}/{{. | include "chart.fullname"}}'
 
 patchesStrategicMerge:
-- webhook_endpoint_patch.yaml
+- validatingwebhook_endpoint_patch.yaml
+# Uncomment this to enable mutating webhook patch
+# - mutatingwebhook_endpoint_patch.yaml
 
 bases:
 - ../../webhook

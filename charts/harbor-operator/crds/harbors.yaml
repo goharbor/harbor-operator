@@ -862,6 +862,10 @@ spec:
                 type: string
               notary:
                 properties:
+                  migrationEnabled:
+                    default: true
+                    description: Inject migration configuration to notary resources
+                    type: boolean
                   server:
                     properties:
                       imagePullPolicy:
@@ -1187,19 +1191,28 @@ spec:
                 type: object
               redis:
                 properties:
-                  address:
+                  certificateRef:
+                    description: Secret containing the client certificate to authenticate
+                      with.
+                    pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                    type: string
+                  host:
+                    description: Server hostname.
+                    minLength: 1
                     type: string
                   passwordRef:
+                    description: Secret containing the password to use when connecting
+                      to the server.
                     pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
                     type: string
                   port:
-                    default: 6379
+                    description: Server port.
                     exclusiveMinimum: true
                     format: int32
                     minimum: 0
                     type: integer
                 required:
-                - address
+                - host
                 type: object
               registry:
                 properties:
