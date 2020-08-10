@@ -40,8 +40,13 @@ func (c *Controller) prepareStatus(ctx context.Context, owner resources.Resource
 	}
 
 	err = c.Client.Status().Update(ctx, u)
+	if err != nil {
+		return errors.Wrap(err, "cannot update status")
+	}
 
-	return errors.Wrap(err, "cannot update status")
+	err = runtime.DefaultUnstructuredConverter.FromUnstructured(u.UnstructuredContent(), owner)
+
+	return errors.Wrap(err, "cannot update owner")
 }
 
 func (c *Controller) SetSuccessStatus(ctx context.Context, resource runtime.Object) error {
@@ -63,7 +68,14 @@ func (c *Controller) SetSuccessStatus(ctx context.Context, resource runtime.Obje
 	u := &unstructured.Unstructured{}
 	u.SetUnstructuredContent(data)
 
-	return c.Client.Status().Update(ctx, u)
+	err = c.Client.Status().Update(ctx, u)
+	if err != nil {
+		return errors.Wrap(err, "cannot update status")
+	}
+
+	err = runtime.DefaultUnstructuredConverter.FromUnstructured(u.UnstructuredContent(), resource)
+
+	return errors.Wrap(err, "cannot update resource")
 }
 
 func (c *Controller) SetSuccessConditions(ctx context.Context, data map[string]interface{}) error {
@@ -237,8 +249,13 @@ func (c *Controller) SetErrorStatus(ctx context.Context, resource runtime.Object
 	u.SetUnstructuredContent(data)
 
 	err = c.Client.Status().Update(ctx, u)
+	if err != nil {
+		return errors.Wrap(err, "cannot update status")
+	}
 
-	return errors.Wrap(err, "cannot update status")
+	err = runtime.DefaultUnstructuredConverter.FromUnstructured(u.UnstructuredContent(), resource)
+
+	return errors.Wrap(err, "cannot update resource")
 }
 
 func (c *Controller) SetErrorConditions(ctx context.Context, data map[string]interface{}, resultError error) error {
