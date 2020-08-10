@@ -2902,8 +2902,21 @@ spec:
                   redisPool:
                     description: RedisPoolConfig keeps redis worker info.
                     properties:
-                      dsn:
-                        pattern: .+://.+
+                      certificateRef:
+                        description: Secret containing the client certificate to authenticate
+                          with.
+                        pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                        type: string
+                      database:
+                        default: 0
+                        description: The database number.
+                        format: int32
+                        maximum: 8
+                        minimum: 0
+                        type: integer
+                      host:
+                        description: Server hostname.
+                        minLength: 1
                         type: string
                       idleTimeout:
                         default: 30s
@@ -2916,12 +2929,18 @@ spec:
                       namespace:
                         type: string
                       passwordRef:
-                        description: If password is absent from dsn field, please
-                          specify it here
+                        description: Secret containing the password to use when connecting
+                          to the server.
                         pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
                         type: string
+                      port:
+                        description: Server port.
+                        exclusiveMinimum: true
+                        format: int32
+                        minimum: 0
+                        type: integer
                     required:
-                    - dsn
+                    - host
                     type: object
                   workers:
                     default: 10

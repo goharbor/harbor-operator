@@ -1,0 +1,37 @@
+# This file is for teaching kustomize how to substitute name in NotarySigner
+
+# TODO Add configuration for spec/migration/fileSystem
+
+nameReference:
+- kind: Secret
+  version: v1
+  fieldSpecs:
+  - kind: NotarySigner
+    group: goharbor.io
+    path: spec/authentication/certificateRef
+  - kind: NotarySigner
+    group: goharbor.io
+    path: spec/imagePullSecrets/items/name
+  - kind: NotarySigner
+    group: goharbor.io
+    path: spec/migration/github/personalAccessTokenRef
+  - kind: NotarySigner
+    group: goharbor.io
+    path: spec/storage/aliasesRef
+  - kind: NotarySigner
+    group: goharbor.io
+    path: spec/storage/postgres/passwordRef
+
+- kind: ServiceAccount
+  version: v1
+  fieldSpecs:
+  - kind: NotarySigner
+    group: goharbor.io
+    path: spec/serviceAccountName
+
+- kind: Service
+  version: v1
+  fieldSpecs:
+  - kind: NotarySigner
+    group: goharbor.io
+    path: spec/storage/postgres/hosts/host

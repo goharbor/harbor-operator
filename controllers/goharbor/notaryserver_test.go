@@ -49,9 +49,6 @@ func setupValidNotaryServer(ctx context.Context, ns string) (Resource, client.Ob
 			Storage: goharborv1alpha2.NotaryStorageSpec{
 				Postgres: database,
 			},
-			TrustService: goharborv1alpha2.NotaryServerTrustServiceSpec{
-				Type: "local",
-			},
 		},
 	}
 

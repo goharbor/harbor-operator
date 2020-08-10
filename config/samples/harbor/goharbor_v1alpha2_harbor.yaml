@@ -28,7 +28,7 @@ spec:
     - host: harbor-database-postgresql
       port: 5432
     username: postgres
-    passwordRef: harbor-database-postgresql
+    passwordRef: harbor-database-password
     sslMode: disable
   imageChartStorage:
     filesystem:

@@ -4,9 +4,12 @@ import (
 	"context"
 
 	"github.com/pkg/errors"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
+	"github.com/goharbor/harbor-operator/pkg/graph"
 	"github.com/goharbor/harbor-operator/pkg/resources"
 )
 
@@ -30,12 +33,26 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrapf(err, "cannot add service %s", service.GetName())
 	}
 
+	var storageSecret graph.Resource
+
+	if notary.Spec.Storage.Postgres.PasswordRef != "" {
+		storageSecret, err = r.AddExternalResource(ctx, &corev1.Secret{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      notary.Spec.Storage.Postgres.PasswordRef,
+				Namespace: notary.GetNamespace(),
+			},
+		})
+		if err != nil {
+			return errors.Wrap(err, "cannot add migration secret")
+		}
+	}
+
 	configMap, err := r.GetConfigMap(ctx, notary)
 	if err != nil {
 		return errors.Wrap(err, "cannot get configMap")
 	}
 
-	configMapResource, err := r.Controller.AddConfigMapToManage(ctx, configMap)
+	configMapResource, err := r.Controller.AddConfigMapToManage(ctx, configMap, storageSecret)
 	if err != nil {
 		return errors.Wrapf(err, "cannot add configMap %s", configMap.GetName())
 	}
