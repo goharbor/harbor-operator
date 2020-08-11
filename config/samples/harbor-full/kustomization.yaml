@@ -12,3 +12,4 @@ bases:
 patchesStrategicMerge:
 - harbor_chartmuseum_patch.yaml
 - harbor_notary_patch.yaml
+- harbor_trivy_patch.yaml
