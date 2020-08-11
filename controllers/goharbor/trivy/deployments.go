@@ -2,11 +2,11 @@ package trivy
 
 import (
 	"context"
+	"strconv"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/intstr"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/pkg/errors"
@@ -150,17 +150,32 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.
 
 							LivenessProbe: &corev1.Probe{
 								Handler: corev1.Handler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path: LivenessProbe,
-										Port: intstr.FromInt(port),
+									Exec: &corev1.ExecAction{
+										Command: []string{
+											"curl",
+											"-k",
+											"--cacert",
+											InternalCertificatesPath + "/ca.crt",
+											"--key",
+											InternalCertificatesPath + "/tls.key",
+											"--cert", InternalCertificatesPath + "/tls.crt",
+											"https://localhost:" + strconv.Itoa(port) + LivenessProbe},
 									},
 								},
 							},
 							ReadinessProbe: &corev1.Probe{
 								Handler: corev1.Handler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path: ReadinessProbe,
-										Port: intstr.FromInt(port),
+									Exec: &corev1.ExecAction{
+										Command: []string{
+											"curl",
+											"-k",
+											"--cacert",
+											InternalCertificatesPath + "/ca.crt",
+											"--key",
+											InternalCertificatesPath + "/tls.key",
+											"--cert",
+											InternalCertificatesPath + "/tls.crt",
+											"https://localhost:" + strconv.Itoa(port) + ReadinessProbe},
 									},
 								},
 							},

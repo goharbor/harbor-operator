@@ -231,7 +231,8 @@ type ChartMuseumComponentSpec struct {
 
 type TrivyComponentSpec struct {
 	harbormetav1.ComponentSpec `json:",inline"`
-	SkipUpdate                 bool `json:"skipUpdate,omitempty"`
+	SkipUpdate                 bool   `json:"skipUpdate,omitempty"`
+	GithubToken                string `json:"githubToken,omitempty"`
 }
 
 type HarborStorageImageChartStorageSpec struct {
