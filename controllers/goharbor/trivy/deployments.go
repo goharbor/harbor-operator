@@ -17,14 +17,16 @@ var (
 )
 
 const (
-	ContainerName     = "trivy"
-	LivenessProbe     = "/probe/healthy"
-	ReadinessProbe    = "/probe/ready"
-	port              = 8080 // https://github.com/helm/chartmuseum/blob/969515a51413e1f1840fb99509401aa3c63deccd/pkg/config/vars.go#L135
-	CacheVolumeName   = "cache"
-	CacheVolumePath   = "/home/scanner/.cache/trivy"
-	ReportsVolumeName = "reports"
-	ReportsVolumePath = "/home/scanner/.cache/reports"
+	ContainerName                  = "trivy"
+	LivenessProbe                  = "/probe/healthy"
+	ReadinessProbe                 = "/probe/ready"
+	port                           = 8080 // https://github.com/helm/chartmuseum/blob/969515a51413e1f1840fb99509401aa3c63deccd/pkg/config/vars.go#L135
+	CacheVolumeName                = "cache"
+	CacheVolumePath                = "/home/scanner/.cache/trivy"
+	ReportsVolumeName              = "reports"
+	ReportsVolumePath              = "/home/scanner/.cache/reports"
+	InternalCertificatesVolumeName = "internal-certificates"
+	InternalCertificatesPath       = "/etc/harbor/ssl"
 )
 
 func (r *Reconciler) AddDeployment(ctx context.Context, trivy *goharborv1alpha2.Trivy) error {
@@ -65,6 +67,14 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.
 				EmptyDir: &corev1.EmptyDirVolumeSource{},
 			},
 		},
+		{
+			Name: InternalCertificatesVolumeName,
+			VolumeSource: corev1.VolumeSource{
+				Secret: &corev1.SecretVolumeSource{
+					SecretName: trivy.Spec.Server.TLS.CertificateRef,
+				},
+			},
+		},
 	}
 
 	volumesMount := []corev1.VolumeMount{
@@ -75,6 +85,11 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.
 		{
 			Name:      ReportsVolumeName,
 			MountPath: ReportsVolumePath,
+		},
+		{
+			Name:      InternalCertificatesVolumeName,
+			MountPath: InternalCertificatesPath,
+			ReadOnly:  true,
 		},
 	}
 

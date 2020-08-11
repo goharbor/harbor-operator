@@ -44,9 +44,9 @@ func (r *Reconciler) GetConfigMap(ctx context.Context, trivy *goharborv1alpha2.T
 			"SCANNER_LOG_LEVEL": string(trivy.Spec.Log.Level),
 
 			"SCANNER_API_SERVER_ADDR":            trivy.Spec.Server.Address,
-			"SCANNER_API_SERVER_TLS_CERTIFICATE": trivy.Spec.Server.HTTPS.CertificateRef,
-			"SCANNER_API_SERVER_TLS_KEY":         trivy.Spec.Server.HTTPS.KeyRef,
-			"SCANNER_API_SERVER_CLIENT_CAS":      trivy.Spec.Server.HTTPS.ClientCas,
+			"SCANNER_API_SERVER_TLS_CERTIFICATE": "/etc/harbor/ssl/tls.crt",
+			"SCANNER_API_SERVER_TLS_KEY":         "/etc/harbor/ssl/tls.key",
+			"SCANNER_API_SERVER_CLIENT_CAS":      "/etc/harbor/ssl/ca.crt",
 			"SCANNER_API_SERVER_READ_TIMEOUT":    trivy.Spec.Server.ReadTimeout.Duration.String(),
 			"SCANNER_API_SERVER_WRITE_TIMEOUT":   trivy.Spec.Server.WriteTimeout.Duration.String(),
 			"SCANNER_API_SERVER_IDLE_TIMEOUT":    trivy.Spec.Server.IdleTimeout.Duration.String(),
