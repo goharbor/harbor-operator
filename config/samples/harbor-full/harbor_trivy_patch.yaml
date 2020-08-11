@@ -3,4 +3,5 @@ kind: Harbor
 metadata:
   name: sample
 spec:
-  trivy: {}
+  trivy:
+    skipUpdate: true
