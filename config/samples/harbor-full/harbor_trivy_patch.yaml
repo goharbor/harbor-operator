@@ -5,3 +5,4 @@ metadata:
 spec:
   trivy:
     skipUpdate: true
+    githubToken: "GITHUB-TOKEN"
