@@ -96,6 +96,11 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrapf(err, "cannot add %s", controllers.NotarySigner)
 	}
 
+	_, err = r.AddTrivy(ctx, harbor)
+	if err != nil {
+		return errors.Wrapf(err, "cannot add %s", controllers.Trivy)
+	}
+
 	_, err = r.AddCoreIngress(ctx, harbor, core, portal, registry)
 	if err != nil {
 		return errors.Wrapf(err, "cannot add %s ingress", controllers.Core)

@@ -1,0 +1,6 @@
+apiVersion: goharbor.io/v1alpha2
+kind: Harbor
+metadata:
+  name: sample
+spec:
+  trivy: {}
