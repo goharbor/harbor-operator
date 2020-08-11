@@ -12,18 +12,18 @@ port: 8080
 allow.overwrite: {{ .Spec.Chart.AllowOvewrite }}
 
 auth:
-  anonymous.get: {{ .Spec.Auth.AnonymousGet }}
-{{- if .Spec.Auth.Bearer }}
-  {{- if .Spec.Auth.Bearer.CertificateRef }}
+  anonymous.get: {{ .Spec.Authentication.AnonymousGet }}
+{{- if .Spec.Authentication.Bearer }}
+  {{- if .Spec.Authentication.Bearer.CertificateRef }}
   cert-path: /etc/chartmuseum/auth-certificates/tls.crt
   {{- end }}
-  {{- if .Spec.Auth.Bearer.Realm }}
-  realm: {{ .Spec.Auth.Bearer.Realm }}
-  service: {{ .Spec.Auth.Bearer.Service }}
+  {{- if .Spec.Authentication.Bearer.Realm }}
+  realm: {{ .Spec.Authentication.Bearer.Realm }}
+  service: {{ .Spec.Authentication.Bearer.Service }}
   {{- end }}
 {{- end }}
 
-{{- if .Spec.Auth.Bearer }}
+{{- if .Spec.Authentication.Bearer }}
 bearer.auth: 1
 {{- end }}
 
