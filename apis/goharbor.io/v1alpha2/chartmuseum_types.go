@@ -44,7 +44,7 @@ type ChartMuseumSpec struct {
 	Log ChartMuseumLogSpec `json:"log,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	Auth ChartMuseumAuthSpec `json:"auth,omitempty"`
+	Authentication ChartMuseumAuthSpec `json:"authentication,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	Server ChartMuseumServerSpec `json:"server,omitempty"`
