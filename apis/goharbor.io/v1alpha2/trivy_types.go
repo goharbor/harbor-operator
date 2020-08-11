@@ -56,7 +56,7 @@ type TrivySpec struct {
 
 type TrivyServerSpec struct {
 	// +kubebuilder:validation:Optional
-	HTTPS TrivyHTTPSSpec `json:"https,omitempty"`
+	TLS *harbormetav1.ComponentsTLSSpec `json:"tls,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="string"
@@ -175,21 +175,6 @@ func (r *TrivyServerSpec) Validate() map[string]error {
 type TrivyLogSpec struct {
 	// +kubebuilder:validation:Optional
 	Level harbormetav1.TrivyLogLevel `json:"level,omitempty"`
-}
-
-type TrivyHTTPSSpec struct {
-	// +kubebuilder:validation:Optionnal
-	// Reference to secret containing tls certificate
-	CertificateRef string `json:"certificateRef"`
-
-	// +kubebuilder:validation:Optionnal
-	// Reference to secret containing tls key
-	KeyRef string `json:"keyRef"`
-
-	// +kubebuilder:validation:Optionnal
-	// A list of absolute paths to x509 root certificate authorities
-	// that the api use if required to verify a client certificate
-	ClientCas string `json:"clientCasList"`
 }
 
 type TrivyCacheSpec struct {
