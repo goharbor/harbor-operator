@@ -725,7 +725,7 @@ type RegistryStorageDriverSwiftSpec struct {
 	// +kubebuilder:validation:Required
 	// URL for obtaining an auth token.
 	// https://storage.myprovider.com/v2.0 or https://storage.myprovider.com/v3/auth
-	AuthenticationURL string `json:"authurl"`
+	AuthURL string `json:"authurl"`
 
 	// +kubebuilder:validation:Required
 	// The Openstack user name.

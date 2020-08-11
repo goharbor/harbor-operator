@@ -66,13 +66,13 @@ func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1a
 		MountPath: ConfigPath,
 	}}
 
-	if chartMuseum.Spec.Auth.BasicAuthRef != "" {
+	if chartMuseum.Spec.Authentication.BasicAuthRef != "" {
 		envs = append(envs, corev1.EnvVar{
 			Name: "BASIC_AUTH_USER",
 			ValueFrom: &corev1.EnvVarSource{
 				SecretKeyRef: &corev1.SecretKeySelector{
 					LocalObjectReference: corev1.LocalObjectReference{
-						Name: chartMuseum.Spec.Auth.BasicAuthRef,
+						Name: chartMuseum.Spec.Authentication.BasicAuthRef,
 					},
 					Key: corev1.BasicAuthUsernameKey,
 				},
@@ -82,7 +82,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1a
 			ValueFrom: &corev1.EnvVarSource{
 				SecretKeyRef: &corev1.SecretKeySelector{
 					LocalObjectReference: corev1.LocalObjectReference{
-						Name: chartMuseum.Spec.Auth.BasicAuthRef,
+						Name: chartMuseum.Spec.Authentication.BasicAuthRef,
 					},
 					Key: corev1.BasicAuthPasswordKey,
 				},

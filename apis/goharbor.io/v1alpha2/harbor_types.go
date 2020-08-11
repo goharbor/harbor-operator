@@ -101,9 +101,6 @@ type HarborComponentsSpec struct {
 	ChartMuseum *ChartMuseumComponentSpec `json:"chartmuseum,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	Clair *ClairComponentSpec `json:"clair,omitempty"`
-
-	// +kubebuilder:validation:Optional
 	Trivy *TrivyComponentSpec `json:"trivy,omitempty"`
 
 	// +kubebuilder:validation:Optional
@@ -241,20 +238,6 @@ type ChartMuseumComponentSpec struct {
 	harbormetav1.ComponentSpec `json:",inline"`
 }
 
-type ClairComponentSpec struct {
-	harbormetav1.ComponentSpec `json:",inline"`
-
-	// +kubebuilder:validation:Optional
-	// One of clair redis dsn or global redis component must be specified
-	Redis *OpacifiedDSN `json:"redis,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Type="string"
-	// +kubebuilder:validation:Pattern="([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?"
-	// +kubebuilder:default="12h"
-	Interval *metav1.Duration `json:"updatersInterval,omitempty"`
-}
-
 type TrivyComponentSpec struct {
 	harbormetav1.ComponentSpec `json:",inline"`
 }
@@ -365,7 +348,7 @@ type HarborStorageImageChartStorageSwiftSpec struct {
 
 func (r *HarborStorageImageChartStorageSwiftSpec) ChartMuseum() *ChartMuseumChartStorageDriverOpenStackSpec {
 	return &ChartMuseumChartStorageDriverOpenStackSpec{
-		AuthenticationURL: r.AuthenticationURL,
+		AuthenticationURL: r.AuthURL,
 		Container:         r.Container,
 		Domain:            r.Domain,
 		DomainID:          r.DomainID,

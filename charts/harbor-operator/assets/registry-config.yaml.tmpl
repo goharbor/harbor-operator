@@ -101,7 +101,7 @@ storage:
   swift:
     username: {{ .Spec.Storage.Driver.Swift.Username }}
     # password: setted through environment variable
-    authurl: {{ .Spec.Storage.Driver.Swift.AuthenticationURL }}
+    authurl: {{ .Spec.Storage.Driver.Swift.AuthURL }}
     container: {{ .Spec.Storage.Driver.Swift.Container }}
     prefix: {{ .Spec.Storage.Driver.Swift.Prefix }}
     insecureskipverify: {{ .Spec.Storage.Driver.Swift.InsecureSkipVerify }}

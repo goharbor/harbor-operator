@@ -58,7 +58,7 @@ spec:
           spec:
             description: ChartMuseumSpec defines the desired state of ChartMuseum.
             properties:
-              auth:
+              authentication:
                 properties:
                   anonymousGet:
                     default: false
