@@ -14,7 +14,7 @@ const (
 	RegistryTLS           = ComponentWithTLS(RegistryComponent)
 	RegistryControllerTLS = ComponentWithTLS(RegistryControllerComponent)
 	NotaryServerTLS       = ComponentWithTLS(NotaryServerComponent)
-	ClairTLS              = ComponentWithTLS(ClairComponent)
+	TrivyTLS              = ComponentWithTLS(TrivyComponent)
 )
 
 func (r ComponentWithTLS) String() string {
