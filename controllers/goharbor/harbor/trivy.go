@@ -64,6 +64,7 @@ func (r *Reconciler) GetTrivy(ctx context.Context, harbor *goharborv1alpha2.Harb
 	redisDSN := harbor.Spec.RedisDSN(harbormetav1.TrivyRedis)
 
 	skipUpdate := harbor.Spec.Trivy.SkipUpdate
+	githubToken := harbor.Spec.Trivy.GithubToken
 
 	tls := harbor.Spec.InternalTLS.GetComponentTLSSpec(r.GetInternalTLSCertificateSecretName(ctx, harbor, harbormetav1.TrivyTLS))
 
@@ -78,8 +79,9 @@ func (r *Reconciler) GetTrivy(ctx context.Context, harbor *goharborv1alpha2.Harb
 				Redis: redisDSN,
 			},
 			Server: goharborv1alpha2.TrivyServerSpec{
-				TLS:        tls,
-				SkipUpdate: skipUpdate,
+				TLS:         tls,
+				SkipUpdate:  skipUpdate,
+				GithubToken: githubToken,
 			},
 		},
 	}, nil
