@@ -314,6 +314,17 @@ func (c *HarborCore) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 												},
 											},
 										},
+									}, {
+										Name: csrfKey,
+										ValueFrom: &corev1.EnvVarSource{
+											SecretKeyRef: &corev1.SecretKeySelector{
+												Key:      csrfKey,
+												Optional: &varFalse,
+												LocalObjectReference: corev1.LocalObjectReference{
+													Name: c.harbor.NormalizeComponentName(goharborv1alpha1.CoreName),
+												},
+											},
+										},
 									},
 									cacheEnv,
 								},
