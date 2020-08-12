@@ -88,7 +88,7 @@ spec:
               log:
                 properties:
                   level:
-                    description: CoreLogLevel is the log level for RegistryController.
+                    description: RegistryCtlLogLevel is the log level for RegistryController.
                     enum:
                     - debug
                     - info

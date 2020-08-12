@@ -4,12 +4,17 @@ metadata:
   name: sample
 spec:
   secretRef: jobservice-secret
+  tokenService:
+    url: http://sample-core/service/token
   core:
     secretRef: core-secret
-    url: http://harbor-core
+    url: http://sample-core
   registry:
-    username: harbor_registry_user
-    passwordRef: registry-password
+    url: http://sample-registry
+    controllerURL: http://sample-registryctl
+    credentials:
+      username: harbor_registry_user
+      passwordRef: registry-password
   workerPool:
     redisPool:
       host: harbor-redis-master
@@ -17,8 +22,8 @@ spec:
       database: 1
       passwordRef: harbor-redis
   jobLoggers:
-  - name: STD_OUTPUT
-    level: INFO
+    stdout:
+      level: INFO
   loggers:
-  - name: STD_OUTPUT
-    level: INFO
+    stdout:
+      level: INFO
