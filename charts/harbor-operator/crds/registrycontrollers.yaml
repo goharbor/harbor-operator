@@ -88,6 +88,7 @@ spec:
               log:
                 properties:
                   level:
+                    default: info
                     description: RegistryCtlLogLevel is the log level for RegistryController.
                     enum:
                     - debug

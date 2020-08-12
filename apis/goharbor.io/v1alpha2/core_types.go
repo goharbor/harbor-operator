@@ -282,6 +282,7 @@ type CoreProxySpec struct {
 
 type CoreLogSpec struct {
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:default="info"
 	Level harbormetav1.CoreLogLevel `json:"level,omitempty"`
 }
 

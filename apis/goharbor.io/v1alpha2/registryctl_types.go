@@ -77,6 +77,7 @@ type RegistryControllerAuthenticationSpec struct {
 
 type RegistryControllerLogSpec struct {
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:default="info"
 	Level harbormetav1.RegistryCtlLogLevel `json:"level,omitempty"`
 }
 

@@ -2,7 +2,6 @@ package v1alpha1
 
 // +kubebuilder:validation:Type=string
 // +kubebuilder:validation:Enum={"debug","info","warning","error","fatal"}
-// +kubebuilder:default="info"
 // HarborLogLevel is the log level for Harbor.
 type HarborLogLevel string
 
@@ -16,7 +15,6 @@ const (
 
 // +kubebuilder:validation:Type=string
 // +kubebuilder:validation:Enum={"debug","info","warn","error"}
-// +kubebuilder:default="info"
 // CoreLogLevel is the log level for Core.
 type CoreLogLevel string
 
@@ -44,7 +42,6 @@ func (l HarborLogLevel) Core() CoreLogLevel {
 
 // +kubebuilder:validation:Type=string
 // +kubebuilder:validation:Enum={"debug","info","warn","error"}
-// +kubebuilder:default="info"
 // RegistryLogLevel is the log level for Registry.
 type RegistryLogLevel string
 
@@ -72,7 +69,6 @@ func (l HarborLogLevel) Registry() RegistryLogLevel {
 
 // +kubebuilder:validation:Type=string
 // +kubebuilder:validation:Enum={"text","json","logstash"}
-// +kubebuilder:default="text"
 // RegistryLogFormatter is the log formatter for Registry.
 type RegistryLogFormatter string
 
@@ -114,7 +110,6 @@ func (l HarborLogLevel) RegistryCtl() RegistryCtlLogLevel {
 
 // +kubebuilder:validation:Type=string
 // +kubebuilder:validation:Enum={"DEBUG","INFO","WARNING","ERROR","FATAL"}
-// +kubebuilder:default="INFO"
 // JobServiceLogLevel is the log level for JobService.
 type JobServiceLogLevel string
 
@@ -146,7 +141,6 @@ func (l HarborLogLevel) JobService() JobServiceLogLevel {
 
 // +kubebuilder:validation:Type=string
 // +kubebuilder:validation:Enum={"debug","info","warning","error","fatal","panic"}
-// +kubebuilder:default="info"
 // NotaryLogLevel is the log level for NotaryServer and NotarySigner.
 type NotaryLogLevel string
 
