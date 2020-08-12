@@ -194,7 +194,7 @@ func (r *Reconciler) GetRegistry(ctx context.Context, harbor *goharborv1alpha2.H
 	authenticationSecretName := r.NormalizeName(ctx, harbor.GetName(), controllers.Registry.String(), "basicauth")
 	httpSecretName := r.NormalizeName(ctx, harbor.GetName(), controllers.Registry.String(), "http")
 
-	redisDSN := harbor.Spec.RedisDSN(harbormetav1.RegistryRedis)
+	redis := harbor.Spec.RedisConnection(harbormetav1.RegistryRedis)
 
 	tls := harbor.Spec.InternalTLS.GetComponentTLSSpec(r.GetInternalTLSCertificateSecretName(ctx, harbor, harbormetav1.RegistryTLS))
 
@@ -237,7 +237,7 @@ func (r *Reconciler) GetRegistry(ctx context.Context, harbor *goharborv1alpha2.H
 					Redirect: harbor.Spec.ImageChartStorage.Redirect,
 				},
 				Redis: &goharborv1alpha2.RegistryRedisSpec{
-					OpacifiedDSN: redisDSN,
+					RedisConnection: redis,
 				},
 			},
 		},

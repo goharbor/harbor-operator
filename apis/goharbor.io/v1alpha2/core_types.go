@@ -76,7 +76,7 @@ type CoreSpec struct {
 }
 
 type CoreRedisSpec struct {
-	OpacifiedDSN `json:",inline"`
+	harbormetav1.RedisConnection `json:",inline"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="string"
@@ -162,7 +162,7 @@ type CoreComponentsRegistrySpec struct {
 	RegistryControllerConnectionSpec `json:",inline"`
 
 	// +kubebuilder:validation:Optional
-	Redis *OpacifiedDSN `json:"redis,omitempty"`
+	Redis *harbormetav1.RedisConnection `json:"redis,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=false

@@ -186,24 +186,15 @@ func (r *NotaryComponentSpec) IsMigrationEnabled() bool {
 }
 
 type ExternalRedisSpec struct {
-	// +kubebuilder:validation:Required
-	Address string `json:"address"`
-
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Minimum=0
-	// +kubebuilder:validation:ExclusiveMinimum=true
-	// +kubebuilder:default=6379
-	Port int32 `json:"port,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
-	PasswordRef string `json:"passwordRef,omitempty"`
+	harbormetav1.RedisHostSpec    `json:",inline"`
+	harbormetav1.RedisCredentials `json:",inline"`
 }
 
-func (r *HarborComponentsSpec) RedisDSN(component harbormetav1.ComponentWithRedis) OpacifiedDSN {
-	return OpacifiedDSN{
-		DSN:         fmt.Sprintf("redis://%s:%d/%d", r.Redis.Address, r.Redis.Port, component.Index()),
-		PasswordRef: r.Redis.PasswordRef,
+func (r *HarborComponentsSpec) RedisConnection(component harbormetav1.ComponentWithRedis) harbormetav1.RedisConnection {
+	return harbormetav1.RedisConnection{
+		RedisCredentials: r.Redis.RedisCredentials,
+		RedisHostSpec:    r.Redis.RedisHostSpec,
+		Database:         component.Index(),
 	}
 }
 

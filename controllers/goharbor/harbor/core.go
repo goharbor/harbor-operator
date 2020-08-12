@@ -359,9 +359,9 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1alpha2.Harbo
 	}).String()
 	tokenCertificateRef := r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String(), "tokencert")
 
-	registryRedisDSN := harbor.Spec.RedisDSN(harbormetav1.RegistryRedis)
+	registryRedis := harbor.Spec.RedisConnection(harbormetav1.RegistryRedis)
 
-	coreRedisDSN := harbor.Spec.RedisDSN(harbormetav1.CoreRedis)
+	coreRedis := harbor.Spec.RedisConnection(harbormetav1.CoreRedis)
 
 	tls := harbor.Spec.InternalTLS.GetComponentTLSSpec(r.GetInternalTLSCertificateSecretName(ctx, harbor, harbormetav1.CoreTLS))
 
@@ -390,7 +390,7 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1alpha2.Harbo
 						ControllerURL: registryCtlURL,
 						Credentials:   credentials,
 					},
-					Redis:               &registryRedisDSN,
+					Redis:               &registryRedis,
 					StorageProviderName: harbor.Spec.ImageChartStorage.ProviderName(),
 				},
 				JobService: goharborv1alpha2.CoreComponentsJobServiceSpec{
@@ -419,7 +419,7 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1alpha2.Harbo
 			},
 			ExternalEndpoint: harbor.Spec.ExternalURL,
 			Redis: goharborv1alpha2.CoreRedisSpec{
-				OpacifiedDSN: coreRedisDSN,
+				RedisConnection: coreRedis,
 			},
 			Proxy: harbor.Spec.Proxy,
 		},

@@ -12,7 +12,9 @@ spec:
     passwordRef: registry-password
   workerPool:
     redisPool:
-      dsn: redis://harbor-redis-master:6379/1
+      host: harbor-redis-master
+      port: 6379
+      database: 1
       passwordRef: harbor-redis
   jobLoggers:
   - name: STD_OUTPUT
