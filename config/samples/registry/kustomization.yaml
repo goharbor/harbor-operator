@@ -14,7 +14,7 @@ secretGenerator:
   type: "goharbor.io/single-secret"
 - name: registry-secret
   literals:
-  - secret=unsecured-http-secret
+  - REGISTRY_HTTP_SECRET=unsecured-http-secret
   type: "goharbor.io/single-secret"
 
 resources:

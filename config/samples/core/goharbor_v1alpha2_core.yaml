@@ -8,13 +8,16 @@ spec:
   csrfKeyRef: csrf-key
   externalEndpoint: https://harbor.public
   redis:
-    dsn: redis://admin@harbor-redis-master:6379/0
+    host: harbor-redis-master
+    port: 6379
+    database: 0
     passwordRef: harbor-redis
   database:
     hosts:
     - host: harbor-database-postgresql
       port: 5432
-    passwordRef: harbor-database-postgresql
+    username: postgres
+    passwordRef: harbor-database-password
     encryptionKeyRef: core-database-encryption
     database: core
   components:

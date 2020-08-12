@@ -1,0 +1,18 @@
+# This file is for teaching kustomize how to substitute name in Portal
+nameReference:
+- kind: Secret
+  version: v1
+  fieldSpecs:
+  - kind: Portal
+    group: goharbor.io
+    path: spec/imagePullSecrets/items/name
+  - kind: Portal
+    group: goharbor.io
+    path: spec/tls/certificateRef
+
+- kind: ServiceAccount
+  version: v1
+  fieldSpecs:
+  - kind: Portal
+    group: goharbor.io
+    path: spec/serviceAccountName
