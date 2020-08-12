@@ -173,10 +173,10 @@ spec:
                         type: string
                       threshold:
                         default: 3
+                        exclusiveMinimum: true
                         format: int32
+                        minimum: 0
                         type: integer
-                    required:
-                    - enabled
                     type: object
                   tcp:
                     items:
@@ -328,6 +328,9 @@ spec:
                   type: object
                 type: array
               log:
+                default:
+                  formatter: text
+                  level: info
                 properties:
                   accessLog:
                     properties:
@@ -341,6 +344,7 @@ spec:
                     type: object
                   formatter:
                     default: text
+                    description: RegistryLogFormatter is the log formatter for Registry.
                     enum:
                     - text
                     - json
@@ -365,7 +369,8 @@ spec:
                       type: object
                     type: array
                   level:
-                    description: CoreLogLevel is the log level for Registry.
+                    default: info
+                    description: RegistryLogLevel is the log level for Registry.
                     enum:
                     - debug
                     - info
