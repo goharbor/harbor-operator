@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"path"
+	"strings"
 
 	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
@@ -229,7 +230,7 @@ func (r *Reconciler) applyTLSVolumeMountConfig(ctx context.Context, container *c
 		container.VolumeMounts = append(container.VolumeMounts, corev1.VolumeMount{
 			Name:      InternalCertificatesVolumeName,
 			MountPath: path.Join(InternalCertificateAuthorityDirectory, corev1.ServiceAccountRootCAKey),
-			SubPath:   corev1.ServiceAccountRootCAKey,
+			SubPath:   strings.TrimLeft(corev1.ServiceAccountRootCAKey, "/"),
 			ReadOnly:  true,
 		}, corev1.VolumeMount{
 			Name:      InternalCertificatesVolumeName,
