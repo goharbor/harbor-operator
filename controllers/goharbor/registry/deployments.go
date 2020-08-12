@@ -3,6 +3,7 @@ package registry
 import (
 	"context"
 	"path"
+	"strings"
 
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
@@ -180,7 +181,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 		volumeMounts = append(volumeMounts, corev1.VolumeMount{
 			Name:      InternalCertificatesVolumeName,
 			MountPath: path.Join(InternalCertificateAuthorityDirectory, corev1.ServiceAccountRootCAKey),
-			SubPath:   corev1.ServiceAccountRootCAKey,
+			SubPath:   strings.TrimLeft(corev1.ServiceAccountRootCAKey, "/"),
 			ReadOnly:  true,
 		}, corev1.VolumeMount{
 			Name:      InternalCertificatesVolumeName,
@@ -291,7 +292,7 @@ func (r *Reconciler) ApplyFilesystemStorageEnvs(ctx context.Context, registry *g
 	regContainer.VolumeMounts = append(regContainer.VolumeMounts, corev1.VolumeMount{
 		Name:      StorageName,
 		MountPath: StoragePath,
-		SubPath:   registry.Spec.Storage.Driver.FileSystem.Prefix,
+		SubPath:   strings.TrimLeft(registry.Spec.Storage.Driver.FileSystem.Prefix, "/"),
 		ReadOnly:  false,
 	})
 
