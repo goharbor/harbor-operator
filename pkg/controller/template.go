@@ -8,11 +8,12 @@ import (
 	"text/template"
 
 	"github.com/Masterminds/sprig"
+	"github.com/opentracing/opentracing-go"
+	"github.com/pkg/errors"
+
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	resources "github.com/goharbor/harbor-operator/pkg/resources"
 	template2 "github.com/goharbor/harbor-operator/pkg/template"
-	"github.com/opentracing/opentracing-go"
-	"github.com/pkg/errors"
 )
 
 func (c *Controller) Funcs(ctx context.Context, owner resources.Resource) template.FuncMap {
@@ -29,7 +30,7 @@ func (c *Controller) GetTemplatedConfig(ctx context.Context, templateConfig stri
 	span, ctx := opentracing.StartSpanFromContext(ctx, "GetTemplatedConfig")
 	defer span.Finish()
 
-	template, err := template.New("template").
+	t, err := template.New("template").
 		Funcs(sprig.TxtFuncMap()).
 		Funcs(c.Funcs(ctx, owner)).
 		Parse(templateConfig)
@@ -45,13 +46,17 @@ func (c *Controller) GetTemplatedConfig(ctx context.Context, templateConfig stri
 	go func() {
 		defer writer.Close()
 
-		errTemplate = template.Execute(writer, owner)
+		errTemplate = t.Execute(writer, owner)
 	}()
 
 	configContent, err := ioutil.ReadAll(reader)
 
 	if errTemplate != nil {
-		return nil, serrors.UnrecoverrableError(errTemplate, "operatorCompatibility", fmt.Sprintf("cannot process config template: %v", errTemplate))
+		if _, ok := errTemplate.(*template.ExecError); ok {
+			return nil, serrors.UnrecoverrableError(errTemplate, "operatorCompatibility", fmt.Sprintf("cannot process config template: %v", errTemplate))
+		}
+
+		return nil, serrors.UnrecoverrableError(errTemplate, serrors.OperatorReason, fmt.Sprintf("cannot process config template: %v", errTemplate))
 	}
 
 	if err != nil {
