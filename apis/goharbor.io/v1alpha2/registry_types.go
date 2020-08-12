@@ -63,6 +63,7 @@ func (r *RegistrySpec) Default() {
 
 type RegistryConfig01 struct {
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:default={"level":"info","formatter":"text"}
 	Log RegistryLogSpec `json:"log,omitempty"`
 
 	// +kubebuilder:validation:Optional
@@ -154,12 +155,12 @@ type RegistryLogSpec struct {
 	AccessLog RegistryAccessLogSpec `json:"accessLog,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:default="info"
 	Level harbormetav1.RegistryLogLevel `json:"level,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Enum={"text","json","logstash"}
 	// +kubebuilder:default="text"
-	Formatter string `json:"formatter,omitempty"`
+	Formatter harbormetav1.RegistryLogFormatter `json:"formatter,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	Fields map[string]string `json:"fields,omitempty"`
@@ -329,13 +330,15 @@ type RegistryHealthSpec struct {
 }
 
 type RegistryHealthStorageDriverSpec struct {
-	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
-	Enabled bool `json:"enabled"`
+	Enabled *bool `json:"enabled,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Minimum=0
+	// +kubebuilder:validation:ExclusiveMinimum=true
 	// +kubebuilder:default=3
-	Threshold *int32 `json:"threshold,omitempty"`
+	Threshold int32 `json:"threshold,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="string"
