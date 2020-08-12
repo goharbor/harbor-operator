@@ -10,10 +10,12 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/yaml"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers"
+	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 )
 
@@ -174,15 +176,20 @@ func (r *Reconciler) GetRegistryHTTPSecret(ctx context.Context, harbor *goharbor
 		return nil, errors.Wrap(err, "generate secret")
 	}
 
+	encodedSecret, err := yaml.Marshal(secret)
+	if err != nil {
+		return nil, serrors.UnrecoverrableError(err, serrors.OperatorReason, "cannot encode secret")
+	}
+
 	return &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
 		},
 		Immutable: &varTrue,
-		Type:      harbormetav1.SecretTypeSingle,
+		Type:      harbormetav1.SecretTypeRegistry,
 		StringData: map[string]string{
-			harbormetav1.SharedSecretKey: secret,
+			harbormetav1.RegistryHTTPSecret: string(encodedSecret),
 		},
 	}, nil
 }
