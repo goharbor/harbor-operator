@@ -89,11 +89,21 @@ spec:
                   type: object
                 type: array
               jobLoggers:
+                default:
+                  files:
+                  - level: INFO
+                    sweeper: 720h
+                    volume:
+                      emptyDir:
+                        sizeLimit: 100Mi
+                  stdout:
+                    level: INFO
                 description: Job logger configurations
                 properties:
                   database:
                     properties:
                       level:
+                        default: INFO
                         description: JobServiceLogLevel is the log level for JobService.
                         enum:
                         - DEBUG
@@ -105,8 +115,6 @@ spec:
                       sweeper:
                         pattern: ([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?
                         type: string
-                    required:
-                    - level
                     type: object
                   files:
                     items:
@@ -1411,14 +1419,13 @@ spec:
                               - volumePath
                               type: object
                           type: object
-                      required:
-                      - level
                       type: object
                     nullable: true
                     type: array
                   stdout:
                     properties:
                       level:
+                        default: INFO
                         description: JobServiceLogLevel is the log level for JobService.
                         enum:
                         - DEBUG
@@ -1430,11 +1437,15 @@ spec:
                     type: object
                 type: object
               loggers:
+                default:
+                  stdout:
+                    level: INFO
                 description: Logger configurations
                 properties:
                   database:
                     properties:
                       level:
+                        default: INFO
                         description: JobServiceLogLevel is the log level for JobService.
                         enum:
                         - DEBUG
@@ -1446,8 +1457,6 @@ spec:
                       sweeper:
                         pattern: ([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?
                         type: string
-                    required:
-                    - level
                     type: object
                   files:
                     items:
@@ -2752,14 +2761,13 @@ spec:
                               - volumePath
                               type: object
                           type: object
-                      required:
-                      - level
                       type: object
                     nullable: true
                     type: array
                   stdout:
                     properties:
                       level:
+                        default: INFO
                         description: JobServiceLogLevel is the log level for JobService.
                         enum:
                         - DEBUG
@@ -2951,8 +2959,6 @@ spec:
                 type: object
             required:
             - core
-            - jobLoggers
-            - loggers
             - registry
             - secretRef
             - tokenService

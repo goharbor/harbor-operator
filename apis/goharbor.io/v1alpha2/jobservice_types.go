@@ -60,13 +60,15 @@ type JobServiceSpec struct {
 	// Configurations of worker pool
 	WorkerPool JobServicePoolSpec `json:"workerPool"`
 
-	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default={"stdout":{"level":"INFO"},"files":{{"volume":{"emptyDir":{"sizeLimit":"100Mi"}},"level":"INFO","sweeper":"720h"}}}
 	// Job logger configurations
-	JobLoggers JobServiceLoggerConfigSpec `json:"jobLoggers"`
+	JobLoggers JobServiceLoggerConfigSpec `json:"jobLoggers,omitempty"`
 
-	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default={"stdout":{"level":"INFO"}}
 	// Logger configurations
-	Loggers JobServiceLoggerConfigSpec `json:"loggers"`
+	Loggers JobServiceLoggerConfigSpec `json:"loggers,omitempty"`
 
 	// +kubebuilder:validation:Required
 	Registry RegistryControllerConnectionSpec `json:"registry"`
@@ -119,7 +121,7 @@ type JobServicePoolSpec struct {
 	// +kubebuilder:default="redis"
 	Backend string `json:"backend,omitempty"`
 
-	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Required
 	Redis JobServicePoolRedisSpec `json:"redisPool,omitempty"`
 }
 
@@ -155,8 +157,9 @@ func (r *JobServiceLoggerConfigSpec) Validate() error {
 }
 
 type JobServiceLoggerConfigDatabaseSpec struct {
-	// +kubebuilder:validation:Required
-	Level harbormetav1.JobServiceLogLevel `json:"level"`
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default="INFO"
+	Level harbormetav1.JobServiceLogLevel `json:"level,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="string"
@@ -166,6 +169,7 @@ type JobServiceLoggerConfigDatabaseSpec struct {
 
 type JobServiceLoggerConfigSTDOUTSpec struct {
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:default="INFO"
 	Level harbormetav1.JobServiceLogLevel `json:"level,omitempty"`
 }
 
@@ -173,9 +177,9 @@ type JobServiceLoggerConfigFileSpec struct {
 	// +kubebuilder:validation:Optional
 	Volume *corev1.VolumeSource `json:"volume,omitempty"`
 
-	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Optional
 	// +kubebuilder:default="INFO"
-	Level harbormetav1.JobServiceLogLevel `json:"level"`
+	Level harbormetav1.JobServiceLogLevel `json:"level,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="string"

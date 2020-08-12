@@ -21,9 +21,3 @@ spec:
       port: 6379
       database: 1
       passwordRef: harbor-redis
-  jobLoggers:
-    stdout:
-      level: INFO
-  loggers:
-    stdout:
-      level: INFO
