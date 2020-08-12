@@ -135,7 +135,7 @@ func (r *Reconciler) GetJobService(ctx context.Context, harbor *goharborv1alpha2
 		Host:   fmt.Sprintf("%s:%d", r.NormalizeName(ctx, harbor.GetName(), controllers.RegistryController.String()), registryctlPort),
 	}).String()
 
-	redisDSN := harbor.Spec.RedisDSN(harbormetav1.JobServiceRedis)
+	redis := harbor.Spec.RedisConnection(harbormetav1.JobServiceRedis)
 
 	tls := harbor.Spec.InternalTLS.GetComponentTLSSpec(r.GetInternalTLSCertificateSecretName(ctx, harbor, harbormetav1.JobServiceTLS))
 
@@ -166,7 +166,7 @@ func (r *Reconciler) GetJobService(ctx context.Context, harbor *goharborv1alpha2
 			WorkerPool: goharborv1alpha2.JobServicePoolSpec{
 				WorkerCount: harbor.Spec.JobService.WorkerCount,
 				Redis: goharborv1alpha2.JobServicePoolRedisSpec{
-					OpacifiedDSN: redisDSN,
+					RedisConnection: redis,
 				},
 			},
 			Registry: goharborv1alpha2.RegistryControllerConnectionSpec{

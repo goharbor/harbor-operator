@@ -70,7 +70,7 @@ func (r *Reconciler) GetChartMuseum(ctx context.Context, harbor *goharborv1alpha
 	basicAuthRef := r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String(), "secret")
 	debug := harbor.Spec.LogLevel == harbormetav1.HarborDebug
 
-	redisDSN := harbor.Spec.RedisDSN(harbormetav1.ChartMuseumRedis)
+	redis := harbor.Spec.RedisConnection(harbormetav1.ChartMuseumRedis)
 
 	publicURL, err := url.Parse(harbor.Spec.ExternalURL)
 	if err != nil {
@@ -98,7 +98,7 @@ func (r *Reconciler) GetChartMuseum(ctx context.Context, harbor *goharborv1alpha
 				TLS: tls,
 			},
 			Cache: goharborv1alpha2.ChartMuseumCacheSpec{
-				Redis: &redisDSN,
+				Redis: &redis,
 			},
 			Chart: goharborv1alpha2.ChartMuseumChartSpec{
 				AllowOvewrite: &varTrue,

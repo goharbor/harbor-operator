@@ -87,9 +87,14 @@ func setupValidJobService(ctx context.Context, ns string) (Resource, client.Obje
 			},
 			WorkerPool: goharborv1alpha2.JobServicePoolSpec{
 				Redis: goharborv1alpha2.JobServicePoolRedisSpec{
-					OpacifiedDSN: goharborv1alpha2.OpacifiedDSN{
-						DSN:         "redis://the.redis.url",
-						PasswordRef: redisSecret,
+					RedisConnection: harbormetav1.RedisConnection{
+						RedisCredentials: harbormetav1.RedisCredentials{
+							PasswordRef: redisSecret,
+						},
+						RedisHostSpec: harbormetav1.RedisHostSpec{
+							Host: "the.redis.url",
+						},
+						Database: harbormetav1.JobServiceRedis.Index(),
 					},
 				},
 			},

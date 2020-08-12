@@ -172,9 +172,14 @@ func setupValidCore(ctx context.Context, ns string) (Resource, client.ObjectKey)
 							PasswordRef: registryCtlPassword,
 						},
 					},
-					Redis: &goharborv1alpha2.OpacifiedDSN{
-						DSN:         "redis://registry-redis/2",
-						PasswordRef: redisPassword,
+					Redis: &harbormetav1.RedisConnection{
+						RedisHostSpec: harbormetav1.RedisHostSpec{
+							Host: "registry-redis",
+						},
+						RedisCredentials: harbormetav1.RedisCredentials{
+							PasswordRef: redisPassword,
+						},
+						Database: 2,
 					},
 				},
 				JobService: goharborv1alpha2.CoreComponentsJobServiceSpec{
@@ -186,9 +191,14 @@ func setupValidCore(ctx context.Context, ns string) (Resource, client.ObjectKey)
 				},
 			},
 			Redis: goharborv1alpha2.CoreRedisSpec{
-				OpacifiedDSN: goharborv1alpha2.OpacifiedDSN{
-					DSN:         "redis://the.redis.url/0",
-					PasswordRef: redisPassword,
+				RedisConnection: harbormetav1.RedisConnection{
+					RedisHostSpec: harbormetav1.RedisHostSpec{
+						Host: "the.redis.url",
+					},
+					RedisCredentials: harbormetav1.RedisCredentials{
+						PasswordRef: redisPassword,
+					},
+					Database: harbormetav1.CoreRedis.Index(),
 				},
 			},
 		},
