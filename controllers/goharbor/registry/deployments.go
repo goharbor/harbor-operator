@@ -72,10 +72,10 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 
 	if registry.Spec.HTTP.SecretRef != "" {
 		envs = append(envs, corev1.EnvVar{
-			Name: "REGISTRY_HTTP_SECRET",
+			Name: harbormetav1.RegistryHTTPSecret,
 			ValueFrom: &corev1.EnvVarSource{
 				SecretKeyRef: &corev1.SecretKeySelector{
-					Key: harbormetav1.SharedSecretKey,
+					Key: harbormetav1.RegistryHTTPSecret,
 					LocalObjectReference: corev1.LocalObjectReference{
 						Name: registry.Spec.HTTP.SecretRef,
 					},

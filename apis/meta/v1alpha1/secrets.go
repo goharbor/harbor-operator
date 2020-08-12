@@ -81,7 +81,20 @@ const (
 	// - Secret.Data["github-user"]  - The Github username
 	SecretTypeGithubToken corev1.SecretType = "goharbor.io/github"
 
-	// SharedSecretKey is the default password to use
+	// GithubTokenPasswordKey is the token to use with the account
 	GithubTokenPasswordKey = "github-token"
-	GithubTokenUserKey     = "github-user"
+	// GithubTokenUserKey is the github account to use
+	GithubTokenUserKey = "github-user"
+)
+
+const (
+	// SecretTypeRegistry contains secret to configure a Docker registry.
+	//
+	// Registry try to yaml unmarshal fields.
+	// So all fiels must be yaml marshalled.
+	// Otherwise, a string starting with yaml special character may break the configuration.
+	SecretTypeRegistry corev1.SecretType = "goharbor.io/registry"
+
+	// RegistryHTTPSecret is the http secret
+	RegistryHTTPSecret = "REGISTRY_HTTP_SECRET"
 )

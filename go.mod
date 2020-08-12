@@ -43,4 +43,5 @@ require (
 	k8s.io/utils v0.0.0-20200619165400-6e3d28b6ed19 // indirect
 	sigs.k8s.io/controller-runtime v0.6.1-0.20200528151803-676c350bd1f3
 	sigs.k8s.io/kustomize/kstatus v0.0.2
+	sigs.k8s.io/yaml v1.2.0
 )
