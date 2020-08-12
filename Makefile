@@ -112,6 +112,9 @@ diff:
 
 .PHONY: go-test
 go-test: go-generate
+ifeq (, $(USE_EXISTING_CLUSTER))
+	echo "Warning: USE_EXISTING_CLUSTER variable is not defined" >&2
+endif
 	go test -vet=off ./... \
 		-coverprofile cover.out
 
