@@ -94,7 +94,7 @@ spec:
                   database:
                     properties:
                       level:
-                        description: CoreLogLevel is the log level for JobService.
+                        description: JobServiceLogLevel is the log level for JobService.
                         enum:
                         - DEBUG
                         - INFO
@@ -113,7 +113,7 @@ spec:
                       properties:
                         level:
                           default: INFO
-                          description: CoreLogLevel is the log level for JobService.
+                          description: JobServiceLogLevel is the log level for JobService.
                           enum:
                           - DEBUG
                           - INFO
@@ -1419,7 +1419,7 @@ spec:
                   stdout:
                     properties:
                       level:
-                        description: CoreLogLevel is the log level for JobService.
+                        description: JobServiceLogLevel is the log level for JobService.
                         enum:
                         - DEBUG
                         - INFO
@@ -1435,7 +1435,7 @@ spec:
                   database:
                     properties:
                       level:
-                        description: CoreLogLevel is the log level for JobService.
+                        description: JobServiceLogLevel is the log level for JobService.
                         enum:
                         - DEBUG
                         - INFO
@@ -1454,7 +1454,7 @@ spec:
                       properties:
                         level:
                           default: INFO
-                          description: CoreLogLevel is the log level for JobService.
+                          description: JobServiceLogLevel is the log level for JobService.
                           enum:
                           - DEBUG
                           - INFO
@@ -2760,7 +2760,7 @@ spec:
                   stdout:
                     properties:
                       level:
-                        description: CoreLogLevel is the log level for JobService.
+                        description: JobServiceLogLevel is the log level for JobService.
                         enum:
                         - DEBUG
                         - INFO
