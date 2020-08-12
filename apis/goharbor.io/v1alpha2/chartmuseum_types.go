@@ -348,7 +348,7 @@ type ChartMuseumDisableSpec struct {
 type ChartMuseumCacheSpec struct {
 	// +kubebuilder:validation:Optional
 	// Redis cache store
-	Redis *OpacifiedDSN `json:"redis,omitempty"`
+	Redis *harbormetav1.RedisConnection `json:"redis,omitempty"`
 }
 
 func init() { // nolint:gochecknoinits

@@ -53,7 +53,7 @@ type RegistrySpec struct {
 
 func (r *RegistrySpec) Default() {
 	if r.Storage.Cache.Blobdescriptor == "" {
-		if r.Redis.DSN == "" {
+		if r.Redis == nil {
 			r.Storage.Cache.Blobdescriptor = "inmemory"
 		} else {
 			r.Storage.Cache.Blobdescriptor = "redis"
@@ -110,7 +110,7 @@ type RegistryProxySpec struct {
 }
 
 type RegistryRedisSpec struct {
-	OpacifiedDSN `json:",inline"`
+	harbormetav1.RedisConnection `json:",inline"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="string"

@@ -3,7 +3,6 @@ package core
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
@@ -44,11 +43,6 @@ func (r *Reconciler) GetSecret(ctx context.Context, core *goharborv1alpha2.Core)
 		redisPassword = string(password)
 	}
 
-	redisDSN, err := core.Spec.Redis.GetDSN(redisPassword)
-	if err != nil {
-		return nil, errors.Wrap(err, "cannot get redis DSN")
-	}
-
 	var registryPassword string
 
 	if core.Spec.Components.Registry.Redis.PasswordRef != "" {
@@ -70,10 +64,7 @@ func (r *Reconciler) GetSecret(ctx context.Context, core *goharborv1alpha2.Core)
 		registryPassword = string(password)
 	}
 
-	registryCacheDSN, err := core.Spec.Components.Registry.Redis.GetDSN(registryPassword)
-	if err != nil {
-		return nil, errors.Wrap(err, "cannot get registry redis dsn")
-	}
+	registryCacheDSN := core.Spec.Components.Registry.Redis.GetDSNStringWithRawPassword(registryPassword)
 
 	return &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
@@ -81,8 +72,8 @@ func (r *Reconciler) GetSecret(ctx context.Context, core *goharborv1alpha2.Core)
 			Namespace: namespace,
 		},
 		StringData: map[string]string{
-			RedisDSNKey:         fmt.Sprintf("%s:%s,100,%s,%s,%.0f", redisDSN.Hostname(), redisDSN.Port(), redisPassword, strings.Trim(redisDSN.EscapedPath(), "/"), core.Spec.Redis.IdleTimeout.Duration.Seconds()),
-			RegistryRedisDSNKey: registryCacheDSN.String(),
+			RedisDSNKey:         fmt.Sprintf("%s:%d,100,%s,%d,%.0f", core.Spec.Redis.Host, core.Spec.Redis.Port, redisPassword, core.Spec.Redis.Database, core.Spec.Redis.IdleTimeout.Duration.Seconds()),
+			RegistryRedisDSNKey: registryCacheDSN,
 		},
 	}, nil
 }

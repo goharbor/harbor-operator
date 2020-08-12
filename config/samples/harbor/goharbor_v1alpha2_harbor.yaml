@@ -21,7 +21,8 @@ spec:
       name: service-token
       kind: Issuer
   redis:
-    address: harbor-redis-master
+    host: harbor-redis-master
+    port: 6379
     passwordRef: harbor-redis
   database:
     hosts:
