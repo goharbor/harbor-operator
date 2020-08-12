@@ -14,7 +14,9 @@ spec:
       realm: "harbor-registry"
       secretRef: registry-htpasswd
   redis:
-    dsn: redis://admin@harbor-redis-master:6379/2
+    host: harbor-redis-master
+    port: 6379
+    database: 2
     passwordRef: harbor-redis
   http:
     secretRef: registry-secret

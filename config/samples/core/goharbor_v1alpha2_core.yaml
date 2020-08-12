@@ -33,7 +33,9 @@ spec:
         username: harbor_registry_user
         passwordRef: registry-password
       redis:
-        dsn: redis://admin@harbor-redis-master:6379/2
+        host: harbor-redis-master
+        database: 2
+        port: 6379
         passwordRef: harbor-redis
     notaryServer:
       url: http://harbor-notary-server

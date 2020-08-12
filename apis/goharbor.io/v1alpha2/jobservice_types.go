@@ -90,7 +90,7 @@ type JobServiceCoreSpec struct {
 
 // RedisPoolConfig keeps redis worker info.
 type JobServicePoolRedisSpec struct {
-	OpacifiedDSN `json:",inline"`
+	harbormetav1.RedisConnection `json:",inline"`
 
 	// +kubebuilder:validation:Optional
 	Namespace string `json:"namespace,omitempty"`
