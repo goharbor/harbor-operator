@@ -314,6 +314,7 @@ spec:
               log:
                 properties:
                   level:
+                    default: info
                     description: CoreLogLevel is the log level for Core.
                     enum:
                     - debug

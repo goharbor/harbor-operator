@@ -30,7 +30,7 @@ type RedisHostSpec struct {
 	// Server port.
 	Port int32 `json:"port,omitempty"`
 }
- 
+
 type RedisCredentials struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
@@ -44,8 +44,8 @@ type RedisCredentials struct {
 }
 
 type RedisConnection struct {
-	RedisCredentials `json:",inline"`
 	RedisHostSpec    `json:",inline"`
+	RedisCredentials `json:",inline"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=0
