@@ -55,6 +55,20 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 
 	deploymentDependencies = append(deploymentDependencies, configMapResource)
 
+	if registry.Spec.HTTP.SecretRef != "" {
+		httpSecret, err := r.AddExternalTypedSecret(ctx, &corev1.Secret{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      registry.Spec.HTTP.SecretRef,
+				Namespace: registry.GetNamespace(),
+			},
+		}, harbormetav1.SecretTypeRegistry)
+		if err != nil {
+			return errors.Wrap(err, "cannot add http secret")
+		}
+
+		deploymentDependencies = append(deploymentDependencies, httpSecret)
+	}
+
 	deployment, err := r.GetDeployment(ctx, registry)
 	if err != nil {
 		return errors.Wrap(err, "cannot get deployment")
