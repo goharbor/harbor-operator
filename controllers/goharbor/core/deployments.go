@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 	"path"
+	"strings"
 	"time"
 
 	"github.com/goharbor/harbor/src/common"
@@ -95,13 +96,13 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 	volumeMounts := []corev1.VolumeMount{{
 		Name:      VolumeName,
 		MountPath: path.Join(ConfigPath, ConfigName),
-		SubPath:   ConfigName,
+		SubPath:   strings.TrimLeft(ConfigName, "/"),
 		ReadOnly:  true,
 	}, {
 		Name:      EncryptionKeyVolumeName,
 		ReadOnly:  true,
 		MountPath: path.Join(ConfigPath, EncryptionKeyPath),
-		SubPath:   EncryptionKeyPath,
+		SubPath:   strings.TrimLeft(EncryptionKeyPath, "/"),
 	}, {
 		Name:      TokenStorageVolumeName,
 		ReadOnly:  false,
@@ -110,7 +111,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 		Name:      ServiceTokenCertificateVolumeName,
 		ReadOnly:  true,
 		MountPath: ServiceTokenCertificatePath,
-		SubPath:   corev1.TLSPrivateKeyKey,
+		SubPath:   strings.TrimLeft(corev1.TLSPrivateKeyKey, "/"),
 	}}
 
 	scheme := "http"
@@ -361,7 +362,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 		volumeMounts = append(volumeMounts, corev1.VolumeMount{
 			Name:      InternalCertificatesVolumeName,
 			MountPath: path.Join(InternalCertificateAuthorityDirectory, corev1.ServiceAccountRootCAKey),
-			SubPath:   corev1.ServiceAccountRootCAKey,
+			SubPath:   strings.TrimLeft(corev1.ServiceAccountRootCAKey, "/"),
 			ReadOnly:  true,
 		}, corev1.VolumeMount{
 			Name:      InternalCertificatesVolumeName,
