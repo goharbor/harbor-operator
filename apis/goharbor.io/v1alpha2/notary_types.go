@@ -14,6 +14,7 @@ import (
 
 type NotaryLoggingSpec struct {
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:default="info"
 	Level harbormetav1.NotaryLogLevel `json:"level,omitempty"`
 }
 

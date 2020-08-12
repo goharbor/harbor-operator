@@ -104,6 +104,7 @@ spec:
               logging:
                 properties:
                   level:
+                    default: info
                     description: NotaryLogLevel is the log level for NotaryServer
                       and NotarySigner.
                     enum:
