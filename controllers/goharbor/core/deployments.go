@@ -333,6 +333,15 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 	}
 
 	if core.Spec.Components.Trivy != nil {
+		adapterURL, err := harbor.EnvVar(common.TrivyAdapterURL, harbor.Value(core.Spec.Components.Trivy.AdapterURL))
+		if err != nil {
+			return nil, errors.Wrap(err, "cannot configure trivy")
+		}
+
+		envs = append(envs, adapterURL)
+	}
+
+	if core.Spec.Components.Trivy != nil {
 		adapterURLConfig, err := harbor.EnvVar(common.TrivyAdapterURL, harbor.Value(core.Spec.Components.Trivy.AdapterURL))
 		if err != nil {
 			return nil, errors.Wrap(err, "cannot configure trivy")

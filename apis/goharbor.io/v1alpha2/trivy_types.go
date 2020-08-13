@@ -3,6 +3,7 @@ package v1alpha2
 import (
 	"regexp"
 
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
@@ -52,6 +53,10 @@ type TrivySpec struct {
 	// +kubebuilder:validation:Required
 	// Cache stores
 	Cache TrivyCacheSpec `json:"cache,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default={"reports":{"volumeSource":{"emptyDir":{"sizeLimit":"1Gi"}}},"cache":{"volumeSource":{"emptyDir":{"sizeLimit":"1Gi"}}}}
+	Storage TrivyStorageSpec `json:"storage,omitempty"`
 }
 
 type TrivyServerSpec struct {
@@ -84,16 +89,6 @@ type TrivyServerSpec struct {
 	// +kubebuilder:validation:Pattern=".*:[0-9]{0,5}"
 	// Binding address for the API server
 	Address string `json:"address,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:default="/home/scanner/.cache/trivy"
-	// Trivy cache directory
-	CacheDir string `json:"cacheDir,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:default="/home/scanner/.cache/reports"
-	// Trivy reports directory
-	ReportsDir string `json:"reportsDir,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// Comma-separated list of vulnerability types.
@@ -242,6 +237,32 @@ type TrivyCacheSpec struct {
 	// +kubebuilder:validation:Pattern="([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?"
 	// The timeout for writing a single Redis command
 	PoolWriteTimeout *metav1.Duration `json:"poolWriteTimeout,omitempty"`
+}
+
+type TrivyStorageSpec struct {
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default={"volumeSource":{"emptyDir":{"sizeLimit":"1Gi"}}}
+	Reports TrivyStorageReportsSpec `json:"reports,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default={"volumeSource":{"emptyDir":{"sizeLimit":"1Gi"}}}
+	Cache TrivyStorageCacheSpec `json:"cache,omitempty"`
+}
+
+type TrivyStorageReportsSpec struct {
+	// +kubebuilder:validation:Required
+	VolumeSource corev1.VolumeSource `json:"volumeSource"`
+
+	// +kubebuilder:validation:Optionel
+	Prefix string `json:"prefix,omitempty"`
+}
+
+type TrivyStorageCacheSpec struct {
+	// +kubebuilder:validation:Required
+	VolumeSource corev1.VolumeSource `json:"volumeSource"`
+
+	// +kubebuilder:validation:Optionel
+	Prefix string `json:"prefix,omitempty"`
 }
 
 func init() { // nolint:gochecknoinits

@@ -29,7 +29,7 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - description: The semver Harbor version
+    - description: The semver version
       jsonPath: .spec.version
       name: Version
       priority: 5
@@ -41,7 +41,7 @@ spec:
     name: v1alpha2
     schema:
       openAPIV3Schema:
-        description: Core is the Schema for the registries API.
+        description: Core is the Schema for the Core API.
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
