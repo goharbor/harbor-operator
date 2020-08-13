@@ -215,7 +215,7 @@ vet: go-generate
 
 # Check markdown files syntax
 .PHONY: md-lint
-md-lint: markdownlint
+md-lint: markdownlint $(CHART_HARBOR_OPERATOR)/README.md
 	$(MARKDOWNLINT) \
 		-c "$(CURDIR)/.markdownlint.json" \
 		--ignore "$(CURDIR)/vendor" \
@@ -328,16 +328,25 @@ $(CHART_TEMPLATE_PATH)/issuer.yaml: kustomize config/certmanager $(wildcard conf
 	$(KUSTOMIZE) cfg grep --annotate=false 'kind=Issuer' \
 		>> $(CHART_TEMPLATE_PATH)/issuer.yaml
 
+$(CHART_HARBOR_OPERATOR)/charts: $(CHART_HARBOR_OPERATOR)/Chart.lock
+	$(HELM) dependency build $(CHART_HARBOR_OPERATOR)
+
+$(CHART_HARBOR_OPERATOR)/Chart.lock: $(CHART_HARBOR_OPERATOR)/Chart.yaml
+	$(HELM) dependency update $(CHART_HARBOR_OPERATOR)
+
+$(CHART_HARBOR_OPERATOR)/README.md: helm-docs $(CHART_HARBOR_OPERATOR)/README.md.gotmpl $(CHART_HARBOR_OPERATOR)/values.yaml $(CHART_HARBOR_OPERATOR)/Chart.yaml
+	cd $(CHART_HARBOR_OPERATOR) ; $(HELM_DOCS)
+
 .PHONY:chart
 chart: helm-generate
 
 .PHONY:helm-generate
-helm-generate: $(subst config/crd/bases/,$(CHART_CRDS_PATH)/,$(wildcard config/crd/bases/*.yaml)) \
+helm-generate: $(CHART_HARBOR_OPERATOR)/README.md $(subst config/crd/bases/,$(CHART_CRDS_PATH)/,$(wildcard config/crd/bases/*.yaml)) \
 	$(CHART_TEMPLATE_PATH)/role.yaml $(CHART_TEMPLATE_PATH)/clusterrole.yaml \
 	$(CHART_TEMPLATE_PATH)/rolebinding.yaml $(CHART_TEMPLATE_PATH)/clusterrolebinding.yaml \
 	$(CHART_TEMPLATE_PATH)/mutatingwebhookconfiguration.yaml $(CHART_TEMPLATE_PATH)/validatingwebhookconfiguration.yaml \
 	$(CHART_TEMPLATE_PATH)/certificate.yaml $(CHART_TEMPLATE_PATH)/issuer.yaml \
-	$(CHART_TESTS_PATH)/test.yaml
+	$(CHART_HARBOR_OPERATOR)/charts $(CHART_TESTS_PATH)/test.yaml
 
 #####################
 #    Dev helpers    #
@@ -607,4 +616,16 @@ ifeq (, $(shell which checkmake))
 CHECKMAKE=$(GOBIN)/checkmake
 else
 CHECKMAKE=$(shell which checkmake)
+endif
+
+# find or download helm-docs
+# download helm-docs if necessary
+.PHONY: helm-docs
+helm-docs:
+ifeq (, $(shell which helm-docs))
+	# https://github.com/norwoodj/helm-docs/tree/master#installation
+	GO_DEPENDENCY='github.com/norwoodj/helm-docs/cmd/helm-docs@v0.15.0' $(MAKE) go-binary
+HELM_DOCS=$(GOBIN)/helm-docs
+else
+HELM_DOCS=$(shell which helm-docs)
 endif
