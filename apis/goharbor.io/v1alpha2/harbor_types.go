@@ -64,6 +64,9 @@ type HarborHelm1_4_0Spec struct {
 	ImageChartStorage HarborStorageImageChartStorageSpec `json:"imageChartStorage"`
 
 	// +kubebuilder:validation:Optional
+	TrivyStorage *HarborStorageTrivyStorageSpec `json:"trivyStorage,omitempty"`
+
+	// +kubebuilder:validation:Optional
 	// +kubebuilder:default="info"
 	LogLevel harbormetav1.HarborLogLevel `json:"logLevel,omitempty"`
 
@@ -254,6 +257,20 @@ type HarborStorageImageChartStorageSpec struct {
 	// An implementation of the storagedriver.StorageDriver interface that uses OpenStack Swift for object storage.
 	// See: https://docs.docker.com/registry/storage-drivers/swift/
 	Swift *HarborStorageImageChartStorageSwiftSpec `json:"swift,omitempty"`
+}
+
+type HarborStorageTrivyStorageSpec struct {
+	// +kubebuilder:validation:Optional
+	// FileSystem is an implementation of the storagedriver.StorageDriver interface which uses the local filesystem.
+	// The local filesystem can be a remote volume.
+	// See: https://docs.docker.com/registry/storage-drivers/filesystem/
+	ReportsPersistentVolume *HarborStoragePersistentVolumeSpec `json:"reportsPersistentVolume,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// FileSystem is an implementation of the storagedriver.StorageDriver interface which uses the local filesystem.
+	// The local filesystem can be a remote volume.
+	// See: https://docs.docker.com/registry/storage-drivers/filesystem/
+	CachePersistentVolume *HarborStoragePersistentVolumeSpec `json:"cachePersistentVolume,omitempty"`
 }
 
 const (

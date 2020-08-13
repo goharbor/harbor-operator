@@ -2,11 +2,14 @@ package trivy
 
 import (
 	"context"
-	"strconv"
+	"fmt"
+	"net/url"
+	"path"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/pkg/errors"
@@ -54,44 +57,10 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.
 		return nil, errors.Wrapf(err, "cannot get image for deploy: %s", name)
 	}
 
-	volumes := []corev1.Volume{
-		{
-			Name: CacheVolumeName,
-			VolumeSource: corev1.VolumeSource{
-				EmptyDir: &corev1.EmptyDirVolumeSource{},
-			},
-		},
-		{
-			Name: ReportsVolumeName,
-			VolumeSource: corev1.VolumeSource{
-				EmptyDir: &corev1.EmptyDirVolumeSource{},
-			},
-		},
-		{
-			Name: InternalCertificatesVolumeName,
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					SecretName: trivy.Spec.Server.TLS.CertificateRef,
-				},
-			},
-		},
-	}
-
-	volumesMount := []corev1.VolumeMount{
-		{
-			Name:      CacheVolumeName,
-			MountPath: CacheVolumePath,
-		},
-		{
-			Name:      ReportsVolumeName,
-			MountPath: ReportsVolumePath,
-		},
-		{
-			Name:      InternalCertificatesVolumeName,
-			MountPath: InternalCertificatesPath,
-			ReadOnly:  true,
-		},
-	}
+	var volumes []corev1.Volume
+	var volumesMount []corev1.VolumeMount
+	var livenessProbe corev1.Probe
+	var readinessProbe corev1.Probe
 
 	envFroms := []corev1.EnvFromSource{
 		{
@@ -108,6 +77,160 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.
 				},
 			},
 		},
+	}
+
+	if trivy.Spec.Server.TLS != nil {
+		volumes = append(volumes, corev1.Volume{
+			Name: InternalCertificatesVolumeName,
+			VolumeSource: corev1.VolumeSource{
+				Secret: &corev1.SecretVolumeSource{
+					SecretName: trivy.Spec.Server.TLS.CertificateRef,
+				},
+			},
+		})
+
+		volumesMount = append(volumesMount, corev1.VolumeMount{
+			Name:      InternalCertificatesVolumeName,
+			MountPath: InternalCertificatesPath,
+			ReadOnly:  true,
+		})
+	}
+
+	if trivy.Spec.Storage != nil {
+		if trivy.Spec.Storage.Reports != nil {
+			volumes = append(volumes, corev1.Volume{
+				Name:         ReportsVolumeName,
+				VolumeSource: trivy.Spec.Storage.Reports.VolumeSource,
+			})
+
+			volumesMount = append(volumesMount, corev1.VolumeMount{
+				Name:      ReportsVolumeName,
+				MountPath: ReportsVolumePath,
+				ReadOnly:  false,
+			})
+		} else {
+			volumes = append(volumes, corev1.Volume{
+				Name: ReportsVolumeName,
+				VolumeSource: corev1.VolumeSource{
+					EmptyDir: &corev1.EmptyDirVolumeSource{},
+				},
+			})
+
+			volumesMount = append(volumesMount, corev1.VolumeMount{
+				Name:      ReportsVolumeName,
+				MountPath: ReportsVolumePath,
+			})
+		}
+
+		if trivy.Spec.Storage.Cache != nil {
+			volumes = append(volumes, corev1.Volume{
+				Name:         CacheVolumeName,
+				VolumeSource: trivy.Spec.Storage.Cache.VolumeSource,
+			})
+
+			volumesMount = append(volumesMount, corev1.VolumeMount{
+				Name:      CacheVolumeName,
+				MountPath: CacheVolumePath,
+				ReadOnly:  false,
+			})
+		} else {
+			volumes = append(volumes, corev1.Volume{
+				Name: CacheVolumeName,
+				VolumeSource: corev1.VolumeSource{
+					EmptyDir: &corev1.EmptyDirVolumeSource{},
+				},
+			})
+
+			volumesMount = append(volumesMount, corev1.VolumeMount{
+				Name:      CacheVolumeName,
+				MountPath: CacheVolumePath,
+			})
+		}
+	} else {
+		volumes = append(volumes,
+			corev1.Volume{
+				Name: ReportsVolumeName,
+				VolumeSource: corev1.VolumeSource{
+					EmptyDir: &corev1.EmptyDirVolumeSource{},
+				},
+			},
+			corev1.Volume{
+				Name: CacheVolumeName,
+				VolumeSource: corev1.VolumeSource{
+					EmptyDir: &corev1.EmptyDirVolumeSource{},
+				},
+			},
+		)
+
+		volumesMount = append(volumesMount,
+			corev1.VolumeMount{
+				Name:      ReportsVolumeName,
+				MountPath: ReportsVolumePath,
+			},
+			corev1.VolumeMount{
+				Name:      CacheVolumeName,
+				MountPath: CacheVolumePath,
+			})
+	}
+
+	if trivy.Spec.Server.TLS != nil {
+		livenessProbe = corev1.Probe{
+			Handler: corev1.Handler{
+				Exec: &corev1.ExecAction{
+					Command: []string{
+						"curl",
+						"--resolve", fmt.Sprintf("%s:%d:%s", r.NormalizeName(ctx, trivy.GetName()), port, "127.0.0.1"),
+						"--cacert", path.Join(InternalCertificatesPath, "ca.crt"),
+						"--key", path.Join(InternalCertificatesPath, "tls.key"),
+						"--cert", path.Join(InternalCertificatesPath, "tls.crt"),
+						(&url.URL{
+							Scheme: "https",
+							Host:   fmt.Sprintf("%s:%d", r.NormalizeName(ctx, trivy.GetName()), port),
+							Path:   LivenessProbe,
+						}).String(),
+					},
+				},
+			},
+		}
+	} else {
+		livenessProbe = corev1.Probe{
+			Handler: corev1.Handler{
+				HTTPGet: &corev1.HTTPGetAction{
+					Path: LivenessProbe,
+					Port: intstr.FromInt(port),
+				},
+			},
+		}
+	}
+
+	if trivy.Spec.Server.TLS != nil {
+		readinessProbe = corev1.Probe{
+			Handler: corev1.Handler{
+				Exec: &corev1.ExecAction{
+					Command: []string{
+						"curl",
+						"--resolve", fmt.Sprintf("%s:%d:%s", r.NormalizeName(ctx, trivy.GetName()), port, "127.0.0.1"),
+						"--cacert", path.Join(InternalCertificatesPath, "ca.crt"),
+						"--key", path.Join(InternalCertificatesPath, "tls.key"),
+						"--cert", path.Join(InternalCertificatesPath, "tls.crt"),
+						(&url.URL{
+							Scheme: "https",
+							Host:   fmt.Sprintf("%s:%d", r.NormalizeName(ctx, trivy.GetName()), port),
+							Path:   ReadinessProbe,
+						}).String(),
+					},
+				},
+			},
+		}
+	} else {
+		readinessProbe = corev1.Probe{
+			Handler: corev1.Handler{
+				HTTPGet: &corev1.HTTPGetAction{
+					Path: ReadinessProbe,
+					Port: intstr.FromInt(port),
+				},
+			},
+		}
 	}
 
 	return &appsv1.Deployment{
@@ -148,37 +271,8 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.
 							EnvFrom:      envFroms,
 							VolumeMounts: volumesMount,
 
-							LivenessProbe: &corev1.Probe{
-								Handler: corev1.Handler{
-									Exec: &corev1.ExecAction{
-										Command: []string{
-											"curl",
-											"-k",
-											"--cacert",
-											InternalCertificatesPath + "/ca.crt",
-											"--key",
-											InternalCertificatesPath + "/tls.key",
-											"--cert", InternalCertificatesPath + "/tls.crt",
-											"https://localhost:" + strconv.Itoa(port) + LivenessProbe},
-									},
-								},
-							},
-							ReadinessProbe: &corev1.Probe{
-								Handler: corev1.Handler{
-									Exec: &corev1.ExecAction{
-										Command: []string{
-											"curl",
-											"-k",
-											"--cacert",
-											InternalCertificatesPath + "/ca.crt",
-											"--key",
-											InternalCertificatesPath + "/tls.key",
-											"--cert",
-											InternalCertificatesPath + "/tls.crt",
-											"https://localhost:" + strconv.Itoa(port) + ReadinessProbe},
-									},
-								},
-							},
+							LivenessProbe:  &livenessProbe,
+							ReadinessProbe: &readinessProbe,
 						},
 					},
 				},

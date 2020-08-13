@@ -33,6 +33,15 @@ func (r *Reconciler) AddConfigMap(ctx context.Context, trivy *goharborv1alpha2.T
 func (r *Reconciler) GetConfigMap(ctx context.Context, trivy *goharborv1alpha2.Trivy) (*corev1.ConfigMap, error) {
 	name := r.NormalizeName(ctx, trivy.GetName())
 	namespace := trivy.GetNamespace()
+	var certificate string
+	var key string
+	var cas string
+
+	if trivy.Spec.Server.TLS != nil {
+		certificate = "/etc/harbor/ssl/tls.crt"
+		key = "/etc/harbor/ssl/tls.key"
+		cas = "/etc/harbor/ssl/ca.crt"
+	}
 
 	return &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
@@ -44,15 +53,15 @@ func (r *Reconciler) GetConfigMap(ctx context.Context, trivy *goharborv1alpha2.T
 			"SCANNER_LOG_LEVEL": string(trivy.Spec.Log.Level),
 
 			"SCANNER_API_SERVER_ADDR":            trivy.Spec.Server.Address,
-			"SCANNER_API_SERVER_TLS_CERTIFICATE": "/etc/harbor/ssl/tls.crt",
-			"SCANNER_API_SERVER_TLS_KEY":         "/etc/harbor/ssl/tls.key",
-			"SCANNER_API_SERVER_CLIENT_CAS":      "/etc/harbor/ssl/ca.crt",
+			"SCANNER_API_SERVER_TLS_CERTIFICATE": certificate,
+			"SCANNER_API_SERVER_TLS_KEY":         key,
+			"SCANNER_API_SERVER_CLIENT_CAS":      cas,
 			"SCANNER_API_SERVER_READ_TIMEOUT":    trivy.Spec.Server.ReadTimeout.Duration.String(),
 			"SCANNER_API_SERVER_WRITE_TIMEOUT":   trivy.Spec.Server.WriteTimeout.Duration.String(),
 			"SCANNER_API_SERVER_IDLE_TIMEOUT":    trivy.Spec.Server.IdleTimeout.Duration.String(),
 
-			"SCANNER_TRIVY_CACHE_DIR":      trivy.Spec.Server.CacheDir,
-			"SCANNER_TRIVY_REPORTS_DIR":    trivy.Spec.Server.ReportsDir,
+			"SCANNER_TRIVY_CACHE_DIR":      "/home/scanner/.cache/trivy",
+			"SCANNER_TRIVY_REPORTS_DIR":    "/home/scanner/.cache/reports",
 			"SCANNER_TRIVY_DEBUG_MODE":     strconv.FormatBool(trivy.Spec.Server.DebugMode),
 			"SCANNER_TRIVY_VULN_TYPE":      GetVulnerabilities(trivy.Spec.Server.VulnType),
 			"SCANNER_TRIVY_SEVERITY":       GetSeverities(trivy.Spec.Server.Severity),
