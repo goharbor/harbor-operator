@@ -343,6 +343,19 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1alpha2.Harbo
 		}
 	}
 
+	var trivy *goharborv1alpha2.CoreComponentsTrivySpec
+
+	if harbor.Spec.Trivy != nil {
+		trivyURL := (&url.URL{
+			Scheme: harbor.Spec.InternalTLS.GetScheme(),
+			Host:   r.NormalizeName(ctx, harbor.GetName(), controllers.Trivy.String()),
+		}).String()
+		trivy = &goharborv1alpha2.CoreComponentsTrivySpec{
+			AdapterURL: trivyURL,
+			URL:        trivyURL,
+		}
+	}
+
 	adminPasswordRef := r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String(), "admin-password")
 	coreSecretRef := r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String(), "secret")
 	encryptionKeyRef := r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String(), "encryptionkey")
@@ -405,7 +418,8 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1alpha2.Harbo
 					URL:            tokenServiceURL,
 					CertificateRef: tokenCertificateRef,
 				},
-				TLS: tls,
+				Trivy: trivy,
+				TLS:   tls,
 			},
 			CoreConfig: goharborv1alpha2.CoreConfig{
 				AdminInitialPasswordRef: adminPasswordRef,

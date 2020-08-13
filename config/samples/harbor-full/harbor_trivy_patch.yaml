@@ -4,5 +4,10 @@ metadata:
   name: sample
 spec:
   trivy:
-    skipUpdate: true
+    skipUpdate: false
     githubToken: "GITHUB-TOKEN"
+  trivyStorage:
+    reportsPersistentVolume:
+      claimName: sample-harbor-trivy-reports
+    cachePersistentVolume:
+      claimName: sample-harbor-trivy-cache

@@ -39,6 +39,48 @@ func (r *Reconciler) ChartMuseumStorage(ctx context.Context, harbor *goharborv1a
 	}
 }
 
+func (r *Reconciler) TrivyReportsStorage(ctx context.Context, harbor *goharborv1alpha2.Harbor) goharborv1alpha2.TrivyStorageReportsSpec {
+	if harbor.Spec.TrivyStorage != nil {
+		if harbor.Spec.TrivyStorage.ReportsPersistentVolume != nil {
+			pvc := &harbor.Spec.TrivyStorage.ReportsPersistentVolume.PersistentVolumeClaimVolumeSource
+
+			return goharborv1alpha2.TrivyStorageReportsSpec{
+				VolumeSource: corev1.VolumeSource{
+					PersistentVolumeClaim: pvc,
+				},
+				Prefix: "/home/scanner/.cache/reports",
+			}
+		}
+	}
+
+	return goharborv1alpha2.TrivyStorageReportsSpec{
+		VolumeSource: corev1.VolumeSource{
+			EmptyDir: &corev1.EmptyDirVolumeSource{},
+		},
+	}
+}
+
+func (r *Reconciler) TrivyCacheStorage(ctx context.Context, harbor *goharborv1alpha2.Harbor) goharborv1alpha2.TrivyStorageCacheSpec {
+	if harbor.Spec.TrivyStorage != nil {
+		if harbor.Spec.TrivyStorage.CachePersistentVolume != nil {
+			pvc := &harbor.Spec.TrivyStorage.CachePersistentVolume.PersistentVolumeClaimVolumeSource
+
+			return goharborv1alpha2.TrivyStorageCacheSpec{
+				VolumeSource: corev1.VolumeSource{
+					PersistentVolumeClaim: pvc,
+				},
+				Prefix: "/home/scanner/.cache/trivy",
+			}
+		}
+	}
+
+	return goharborv1alpha2.TrivyStorageCacheSpec{
+		VolumeSource: corev1.VolumeSource{
+			EmptyDir: &corev1.EmptyDirVolumeSource{},
+		},
+	}
+}
+
 func (r *Reconciler) RegistryStorage(ctx context.Context, harbor *goharborv1alpha2.Harbor) goharborv1alpha2.RegistryStorageDriverSpec {
 	if harbor.Spec.ImageChartStorage.S3 != nil {
 		return goharborv1alpha2.RegistryStorageDriverSpec{

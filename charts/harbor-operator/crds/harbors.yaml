@@ -1212,6 +1212,8 @@ spec:
                 type: object
               trivy:
                 properties:
+                  githubToken:
+                    type: string
                   imagePullPolicy:
                     description: 'Image pull policy. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images'
                     enum:
@@ -1268,6 +1270,8 @@ spec:
                     description: 'ServiceAccountName is the name of the ServiceAccount
                       to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                     type: string
+                  skipUpdate:
+                    type: boolean
                   tolerations:
                     description: If specified, the pod's tolerations.
                     items:
@@ -1309,6 +1313,47 @@ spec:
                           type: string
                       type: object
                     type: array
+                type: object
+              trivyStorage:
+                properties:
+                  cachePersistentVolume:
+                    description: 'FileSystem is an implementation of the storagedriver.StorageDriver
+                      interface which uses the local filesystem. The local filesystem
+                      can be a remote volume. See: https://docs.docker.com/registry/storage-drivers/filesystem/'
+                    properties:
+                      claimName:
+                        description: 'ClaimName is the name of a PersistentVolumeClaim
+                          in the same namespace as the pod using this volume. More
+                          info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#persistentvolumeclaims'
+                        type: string
+                      prefix:
+                        type: string
+                      readOnly:
+                        description: Will force the ReadOnly setting in VolumeMounts.
+                          Default false.
+                        type: boolean
+                    required:
+                    - claimName
+                    type: object
+                  reportsPersistentVolume:
+                    description: 'FileSystem is an implementation of the storagedriver.StorageDriver
+                      interface which uses the local filesystem. The local filesystem
+                      can be a remote volume. See: https://docs.docker.com/registry/storage-drivers/filesystem/'
+                    properties:
+                      claimName:
+                        description: 'ClaimName is the name of a PersistentVolumeClaim
+                          in the same namespace as the pod using this volume. More
+                          info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#persistentvolumeclaims'
+                        type: string
+                      prefix:
+                        type: string
+                      readOnly:
+                        description: Will force the ReadOnly setting in VolumeMounts.
+                          Default false.
+                        type: boolean
+                    required:
+                    - claimName
+                    type: object
                 type: object
               updateStrategyType:
                 default: RollingUpdate
