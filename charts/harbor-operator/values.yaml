@@ -199,3 +199,7 @@ certmanager:
 ingress:
   # ingress.enabled -- Whether to install ingress controller Helm chart
   enabled: false
+
+prometheusOperator:
+  # prometheusOperator.enabled -- Whether to install prometheus operator Helm chart
+  enabled: false
