@@ -3,11 +3,9 @@ package main
 import (
 	"os"
 
-	"github.com/go-logr/logr"
 	"github.com/ovh/configstore"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	// +kubebuilder:scaffold:imports
 
@@ -28,16 +26,16 @@ const (
 	exitCodeFailure = 1
 )
 
-func getLogger() logr.Logger {
-	development, err := configstore.Filter().GetItemValueBool("dev-mode")
+func main() {
+	setupLog := ctrl.Log.WithName("setup")
+	ctx := logger.Context(setupLog)
+
+	err := setup.SetupLogger(ctx, OperatorName, OperatorVersion)
 	if err != nil {
-		development = true
+		setupLog.Error(err, "unable to create logger")
+		os.Exit(exitCodeFailure)
 	}
 
-	return zap.Logger(development)
-}
-
-func main() {
 	// uses env var CONFIGURATION_FROM=... to initialize config
 	// examples of possible values:
 	// CONFIGURATION_FROM=file:/etc/cfg1.conf,file:/etc/cfg2.conf
@@ -45,13 +43,8 @@ func main() {
 	// ...
 	configstore.InitFromEnvironment()
 
-	setupLog := ctrl.Log.WithName("setup")
-	ctx := logger.Context(setupLog)
-	logger := getLogger()
-
 	application.SetName(&ctx, OperatorName)
 	application.SetVersion(&ctx, OperatorVersion)
-	ctrl.SetLogger(logger)
 
 	scheme, err := scheme.New(ctx)
 	if err != nil {
