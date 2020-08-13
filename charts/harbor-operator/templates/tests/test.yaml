@@ -442,6 +442,14 @@ spec:
     host: harbor-redis-master
     passwordRef: harbor-redis
     port: 6379
+  trivy:
+    githubToken: GITHUB-TOKEN
+    skipUpdate: false
+  trivyStorage:
+    cachePersistentVolume:
+      claimName: sample-harbor-trivy-cache
+    reportsPersistentVolume:
+      claimName: sample-harbor-trivy-reports
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -473,6 +481,44 @@ metadata:
   labels:
     sample: "true"
   name: '{{ include "chart.fullname" . }}-sample-harbor-registry'
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  volumeMode: Filesystem
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    app.kubernetes.io/instance: ""
+    app.kubernetes.io/managed-by: ""
+    helm.sh/chart: ""
+    helm.sh/hook: test
+  labels:
+    sample: "true"
+  name: '{{ include "chart.fullname" . }}-sample-harbor-trivy-cache'
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  volumeMode: Filesystem
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    app.kubernetes.io/instance: ""
+    app.kubernetes.io/managed-by: ""
+    helm.sh/chart: ""
+    helm.sh/hook: test
+  labels:
+    sample: "true"
+  name: '{{ include "chart.fullname" . }}-sample-harbor-trivy-reports'
 spec:
   accessModes:
   - ReadWriteOnce

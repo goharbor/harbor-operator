@@ -61,7 +61,7 @@ func (r *Reconciler) GetTrivy(ctx context.Context, harbor *goharborv1alpha2.Harb
 	name := r.NormalizeName(ctx, harbor.GetName())
 	namespace := harbor.GetNamespace()
 
-	redisDSN := harbor.Spec.RedisDSN(harbormetav1.TrivyRedis)
+	redis := harbor.Spec.RedisConnection(harbormetav1.TrivyRedis)
 
 	skipUpdate := harbor.Spec.Trivy.SkipUpdate
 	githubToken := harbor.Spec.Trivy.GithubToken
@@ -76,7 +76,11 @@ func (r *Reconciler) GetTrivy(ctx context.Context, harbor *goharborv1alpha2.Harb
 		Spec: goharborv1alpha2.TrivySpec{
 			ComponentSpec: harbor.Spec.Trivy.ComponentSpec,
 			Cache: goharborv1alpha2.TrivyCacheSpec{
-				Redis: redisDSN,
+				Redis: redis,
+			},
+			Storage: goharborv1alpha2.TrivyStorageSpec{
+				Reports: r.TrivyReportsStorage(ctx, harbor),
+				Cache:   r.TrivyCacheStorage(ctx, harbor),
 			},
 			Server: goharborv1alpha2.TrivyServerSpec{
 				TLS:         tls,

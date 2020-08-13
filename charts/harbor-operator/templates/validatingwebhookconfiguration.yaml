@@ -99,3 +99,21 @@ webhooks:
     - UPDATE
     resources:
     - registries
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: '{{ include "chart.fullname" . }}-webhook-service'
+      namespace: system
+      path: /validate-goharbor-io-v1alpha2-trivy
+  failurePolicy: Fail
+  name: mtrivy.kb.io
+  rules:
+  - apiGroups:
+    - goharbor.io
+    apiVersions:
+    - v1alpha2
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - trivies

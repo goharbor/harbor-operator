@@ -52,9 +52,7 @@ func setupValidTrivy(ctx context.Context, ns string) (Resource, client.ObjectKey
 			},
 
 			Server: goharborv1alpha2.TrivyServerSpec{
-				Address:    ":8080",
-				CacheDir:   "/home/scanner/.cache/trivy",
-				ReportsDir: "/home/scanner/.cache/reports",
+				Address: ":8080",
 			},
 
 			Cache: goharborv1alpha2.TrivyCacheSpec{
