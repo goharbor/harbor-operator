@@ -1,141 +1,201 @@
 image:
+  # image.repository -- The image repository whose default is the chart appVersion.
   repository: goharbor/harbor-operator
+  # image.pullPolicy -- The image pull policy for the controller.
   pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
+  # image.tag -- The image tag whose default is the chart appVersion.
   tag: "dev"
 
 nameOverride: ""
 fullnameOverride: ""
 
-## Reference to one or more secrets to be used when pulling images
-## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-##
+# imagePullSecrets -- Reference to one or more secrets to be used when pulling images
+# <https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/>
+# For example:
+# `[
+#   {"name":"image-pull-secret"}
+# ]`
 imagePullSecrets: []
-# - name: "image-pull-secret"
 
-# Optional priority class to be used for the harbor-operator pods
+# priorityClassName -- priority class to be used for the harbor-operator pods
 priorityClassName: ""
+
 rbac:
+  # rbac.create -- Whether to install Role Based Access Control
   create: true
 
 serviceAccount:
-  # Specifies whether a service account should be created
+  # serviceAccount.create -- Specifies whether a service account should be created
   create: true
-  # Annotations to add to the service account
+  # serviceAccount.annotations -- Annotations to add to the service account
   annotations: {}
-  # The name of the service account to use.
+  # serviceAccount.name -- The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
   name: ""
 
-# Set the verbosity of harbor-operator. Range of 0 - 6 with 6 being the most verbose.
-logLevel: 2
+# logLevel -- Set the verbosity of controller. Range of 0 - 6 with 6 being the most verbose.
+# Info level is 4.
+logLevel: 4
 
 leaderElection:
-  # Override the namespace used to store the ConfigMap for leader election
+  # leaderElection.namespace -- The namespace used to store the ConfigMap for leader election
   namespace: "kube-system"
 
+# replicaCount -- Number of replicas for the controller
 replicaCount: 1
 
+# strategy -- Expects input structure as per specification <https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#deploymentstrategy-v1-apps>
+# For example:
+# `{
+#   "type": "RollingUpdate",
+#   "rollingUpdate": {
+#     "maxSurge": 0,
+#     "maxUnavailable": 1
+#   }
+# }`
 strategy: {}
-  # type: RollingUpdate
-  # rollingUpdate:
-  #   maxSurge: 0
-  #   maxUnavailable: 1
 
+# extraEnv -- Environment variables to inject in controller
 extraEnv:
-- name: CONFIGURATION_FROM
-  value: 'env:'
-  # - name: HARBOR_CONTROLLER_MAX_RECONCILE
-  #   value: '1'
-  # - name: HARBOR_CONTROLLER_WATCH_CHILDREN
-  #   value: 'true'
+- name: HARBOR_CONTROLLER_MAX_RECONCILE
+  value: '1'
+- name: HARBOR_CONTROLLER_WATCH_CHILDREN
+  value: 'true'
 
+# resources -- Expects input structure as per specification <https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#resourcerequirements-v1-core>
+# `{
+#   "limits": {
+#     "cpu": "100m",
+#     "memory": "128Mi"
+#   },
+#   "requests: {
+#     "cpu": "100m",
+#     "memory": "128Mi"
+#   }
+# }`
 resources: {}
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
 
-# Pod Security Context
-# ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
-securityContext: {}
-  # legacy securityContext parameter format: if enabled is set to true, only fsGroup and runAsUser are supported
-  # securityContext:
-  #   enabled: false
-  #   fsGroup: 1001
-  #   runAsUser: 1001
-  # to support additional securityContext parameters, omit the `enabled` parameter and simply specify the parameters
-  # you want to set, e.g.
-  # securityContext:
-  #   fsGroup: 1000
-  #   runAsUser: 1000
-  #   runAsNonRoot: true
-
-# Container Security Context to be set on the controller component container
-# ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
-containerSecurityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-
+# volumes -- Expects input structure as per specification <https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#volume-v1-core>
+# For example:
+# `[
+#   {
+#     "name": "test-volume",
+#     "awsElasticBlockStore": {
+#       "volumeID": "<volume-id>",
+#       "fsType": "ext4"
+#     }
+#   }
+# ]`
 volumes: []
 
+# volumeMounts -- Expects input structure as per specification <https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#volumemount-v1-core>
+# For example:
+# `[
+#   {
+#     "mountPath": "/test-ebs",
+#     "name": "test-volume"
+#   }
+# ]`
 volumeMounts: []
 
-# Optional additional annotations to add to the controller Deployment
-# deploymentAnnotations: {}
+# deploymentAnnotations -- Additional annotations to add to the controller Deployment
+deploymentAnnotations: {}
 
-# Optional additional annotations to add to the controller Pods
-# podAnnotations: {}
+# podAnnotations -- Additional annotations to add to the controller Pods
+podAnnotations: {}
 
+# podLabels -- Additional labels to add to the controller Pods
 podLabels: {}
 
+# podSecurityContext -- Expects input structure as per specification <https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#podsecuritycontext-v1-core>
+# For example:
+# `{
+#   "fsGroup": 2000,
+#   "runAsUser": 1000,
+#   "runAsNonRoot": true
+# }`
 podSecurityContext: {}
-  # fsGroup: 2000
 
+# <https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#servicespec-v1-core>
 service:
+  # service.type -- Service type to use
   type: ClusterIP
+  # service.port -- Expose port for WebHook controller
   port: 443
 
+# harborClass -- Class name of the Harbor operator
 harborClass: ""
 
 autoscaling:
+  # autoscaling.enabled -- Whether to enabled [Horizontal Pod Autoscaling](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/)
   enabled: false
+  # autoscaling.minReplicas -- Minimum conroller replicas
   minReplicas: 1
+  # autoscaling.maxReplicas -- Maximum conroller replicas
   maxReplicas: 100
+  # autoscaling.targetCPUUtilizationPercentage -- CPU usage target for autoscaling
   targetCPUUtilizationPercentage: 80
-  # targetMemoryUtilizationPercentage: 80
+  # autoscaling.targetMemoryUtilizationPercentage -- Memory usage target for autoscaling
+  # @default -- No target
+  targetMemoryUtilizationPercentage: 0
 
+# nodeSelector -- Expects input structure as per specification <https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#nodeselector-v1-core>
+# For example:
+# `[
+#   {
+#     "matchExpressions": [
+#       {
+#         "key": "kubernetes.io/e2e-az-name",
+#         "operator": "In",
+#         "values": [
+#           "e2e-az1",
+#           "e2e-az2"
+#         ]
+#       }
+#     ]
+#   }
+# ]`
 nodeSelector: {}
 
-# expects input structure as per specification https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#toleration-v1-core
-# for example:
-#   tolerations:
-#   - key: foo.bar.com/role
-#     operator: Equal
-#     value: master
-#     effect: NoSchedule
+# tolerations -- Expects input structure as per specification <https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#toleration-v1-core>
+# For example:
+# `[
+#   {
+#     "key": "foo.bar.com/role",
+#     "operator": "Equal",
+#     "value": "master",
+#     "effect": "NoSchedule"
+#   }
+# ]`
 tolerations: []
 
-# expects input structure as per specification https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#affinity-v1-core
-# for example:
-#   affinity:
-#     nodeAffinity:
-#      requiredDuringSchedulingIgnoredDuringExecution:
-#        nodeSelectorTerms:
-#        - matchExpressions:
-#          - key: foo.bar.com/role
-#            operator: In
-#            values:
-#            - master
+# affinity -- Expects input structure as per specification <https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#affinity-v1-core>
+# For example:
+# `{
+#   "nodeAffinity": {
+#     "requiredDuringSchedulingIgnoredDuringExecution": {
+#       "nodeSelectorTerms": [
+#         {
+#           "matchExpressions": [
+#             {
+#               "key": "foo.bar.com/role",
+#               "operator": "In",
+#               "values": [
+#                 "master"
+#               ]
+#             }
+#           ]
+#         }
+#       ]
+#     }
+#   }
+# }`
 affinity: {}
 
 certmanager:
+  # certmanager.enabled -- Whether to install cert-manager Helm chart
   enabled: true
 
 ingress:
+  # ingress.enabled -- Whether to install ingress controller Helm chart
   enabled: false
