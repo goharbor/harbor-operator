@@ -33,3 +33,10 @@ dependencies:
   condition: ingressController.enabled, global.ingressController.enabled
   tags:
   - ingressController
+
+- name: prometheus-operator
+  repository: https://kubernetes-charts.storage.googleapis.com
+  version:  9.3.1
+  condition: prometheusOperator.enabled, global.prometheusOperator.enabled
+  tags:
+  - prometheusOperator
