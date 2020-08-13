@@ -29,7 +29,7 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - description: The semver Harbor version
+    - description: The semver version
       jsonPath: .spec.version
       name: Version
       priority: 5
