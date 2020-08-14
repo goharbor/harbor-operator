@@ -68,7 +68,7 @@ test: go-test helm-test go-dependencies-test
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 .PHONY: run
-run: go-generate vendor $(TMPDIR)k8s-webhook-server/serving-certs
+run: go-generate vendor certmanager $(TMPDIR)k8s-webhook-server/serving-certs/tls.crt
 	go run *.go
 
 # Run linters against all files
@@ -413,11 +413,15 @@ postgresql: helm sample-database
 		--set-string initdbScriptsConfigMap=harbor-init-db \
 		--set-string existingSecret=harbor-database-password
 
+.PHONY: kube-namespace
+kube-namespace:
+	kubectl get namespace $(NAMESPACE) 2>&1 > /dev/null || kubectl create namespace $(NAMESPACE)
+
 INGRESS_NAMESPACE := nginx-ingress
 
 .PHONY: ingress
 ingress: helm
-	kubectl get namespace $(INGRESS_NAMESPACE) || kubectl create namespace $(INGRESS_NAMESPACE)
+	$(MAKE) kube-namespace NAMESPACE=$(INGRESS_NAMESPACE)
 	$(HELM) upgrade --install nginx stable/nginx-ingress \
 		--namespace $(INGRESS_NAMESPACE) \
 		--set-string controller.config.proxy-body-size=0
@@ -426,7 +430,7 @@ CERTMANAGER_NAMESPACE := cert-manager
 
 .PHONY: certmanager
 certmanager: helm jetstack
-	kubectl get namespace $(CERTMANAGER_NAMESPACE) || kubectl create namespace $(CERTMANAGER_NAMESPACE)
+	$(MAKE) kube-namespace NAMESPACE=$(CERTMANAGER_NAMESPACE)
 	$(HELM) upgrade --install certmanager jetstack/cert-manager \
 		--namespace $(CERTMANAGER_NAMESPACE) \
 		--version v0.15.1 \
@@ -441,9 +445,9 @@ jetstack:
 .PHONY: dev-certificate
 dev-certificate:
 	$(RM) -r "$(TMPDIR)k8s-webhook-server/serving-certs"
-	$(MAKE) "$(TMPDIR)k8s-webhook-server/serving-certs"
+	$(TMPDIR)k8s-webhook-server/serving-certs/tls.crt
 
-$(TMPDIR)k8s-webhook-server/serving-certs:
+$(TMPDIR)k8s-webhook-server/serving-certs/tls.crt:
 	mkdir -p "$(TMPDIR)k8s-webhook-server/serving-certs"
 	openssl req \
 		-new \
