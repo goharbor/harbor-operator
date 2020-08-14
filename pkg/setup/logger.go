@@ -21,7 +21,7 @@ func FromLogrusToZapLevel(level logrus.Level) zapcore.Level {
 	return zapcore.Level(int8(logrus.InfoLevel) - int8(level) + int8(zapcore.InfoLevel))
 }
 
-func SetupLogger(ctx context.Context, name, version string) error {
+func Logger(ctx context.Context, name, version string) error {
 	level := logrus.InfoLevel
 
 	store := configstore.NewStore()
