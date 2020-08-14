@@ -24,3 +24,4 @@ issues:
       linters:
       - funlen
       - dupl
+      - gomnd

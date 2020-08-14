@@ -1,7 +1,32 @@
-domain: ovhcloud.com
+domain: goharbor.io
+multigroup: true
 repo: github.com/goharbor/harbor-operator
 resources:
-- group: containerregistry
+- group: goharbor
   kind: Harbor
-  version: v1alpha1
+  version: v1alpha2
+- group: goharbor
+  kind: Portal
+  version: v1alpha2
+- group: goharbor
+  kind: Registry
+  version: v1alpha2
+- group: goharbor
+  kind: RegistryController
+  version: v1alpha2
+- group: goharbor
+  kind: NotaryServer
+  version: v1alpha2
+- group: goharbor
+  kind: NotarySigner
+  version: v1alpha2
+- group: goharbor
+  kind: Clair
+  version: v1alpha2
+- group: goharbor
+  kind: Trivy
+  version: v1alpha2
+- group: goharbor
+  kind: Core
+  version: v1alpha2
 version: "2"

@@ -1,0 +1,24 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+commonLabels:
+  sample: "true"
+
+secretGenerator:
+- name: registry-htpasswd
+  literals:
+  - htpasswd=harbor_registry_user:$2y$10$9L4Tc0DJbFFMB6RdSCunrOpTHdwhid4ktBJmLD00bYgqkkGOvll3m
+  type: "goharbor.io/htpasswd"
+- name: registry-password
+  literals:
+  - secret=harbor_registry_password
+  type: "goharbor.io/single-secret"
+- name: registry-secret
+  literals:
+  - REGISTRY_HTTP_SECRET=unsecured-http-secret
+  type: "goharbor.io/single-secret"
+
+resources:
+- goharbor_v1alpha2_registry.yaml
+
+bases:
+- ../../kustomizeconfig

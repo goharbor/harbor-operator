@@ -1,0 +1,14 @@
+apiVersion: goharbor.io/v1alpha2
+kind: Harbor
+metadata:
+  name: sample
+spec:
+  chartmuseum: {}
+  imageChartStorage:
+    filesystem:
+      chartPersistentVolume:
+        claimName: sample-harbor-chart
+  expose:
+    notary:
+      ingress:
+        host: notary.harbor.domain

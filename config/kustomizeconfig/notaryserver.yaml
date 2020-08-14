@@ -1,0 +1,46 @@
+# This file is for teaching kustomize how to substitute name in NotaryServer
+
+# TODO Add configuration for spec/migration/fileSystem
+
+nameReference:
+- kind: Secret
+  version: v1
+  fieldSpecs:
+  - kind: NotaryServer
+    group: goharbor.io
+    path: spec/authentication/token/certificateRef
+  - kind: NotaryServer
+    group: goharbor.io
+    path: spec/imagePullSecrets/items/name
+  - kind: NotaryServer
+    group: goharbor.io
+    path: spec/migration/github/personalAccessTokenRef
+  - kind: NotaryServer
+    group: goharbor.io
+    path: spec/storage/aliasesRef
+  - kind: NotaryServer
+    group: goharbor.io
+    path: spec/storage/postgres/passwordRef
+  - kind: NotaryServer
+    group: goharbor.io
+    path: spec/tls/certificateRef
+  - kind: NotaryServer
+    group: goharbor.io
+    path: spec/trustService/certificateRef
+
+- kind: ServiceAccount
+  version: v1
+  fieldSpecs:
+  - kind: NotaryServer
+    group: goharbor.io
+    path: spec/serviceAccountName
+
+- kind: Service
+  version: v1
+  fieldSpecs:
+  - kind: NotaryServer
+    group: goharbor.io
+    path: spec/storage/postgres/hosts/host
+  - kind: NotaryServer
+    group: goharbor.io
+    path: spec/trustService/remote/host

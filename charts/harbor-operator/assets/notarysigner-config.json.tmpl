@@ -1,0 +1,25 @@
+{{/* https://github.com/theupdateframework/notary/blob/master/docs/reference/server-config.md */}}
+{
+  "server": {
+    "tls_cert_file": "/etc/notary-signer/certificates/tls.crt",
+    "tls_key_file": "/etc/notary-signer/certificates/tls.key",
+    "client_ca_file": "/etc/notary-signer/certificates/ca.crt",
+    "grpc_addr": ":7899"
+  },
+  {{- if .Spec.Logging.Level }}
+  "logging": {
+    "level": "{{ .Spec.Logging.Level }}"
+  },
+  {{- end }}
+  "storage": {
+    "backend": "postgres",
+    "db_url": "{{ .Spec.Storage.GetPasswordFieldKey | secretData .Spec.Storage.Postgres.PostgresConnection.PostgresCredentials.PasswordRef | .Spec.Storage.Postgres.GetDSN | toString }}",
+    "default_alias": "default"
+  },
+  "caching": {
+    "max_age": {
+      "current_metadata": 300,
+      "consistent_metadata": 31536000
+    }
+  }
+}

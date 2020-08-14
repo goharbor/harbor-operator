@@ -1,0 +1,25 @@
+apiVersion: goharbor.io/v1alpha2
+kind: NotarySigner
+metadata:
+  name: sample
+spec:
+  migration:
+    github:
+      credentialsRef: github-credentials
+      owner: theupdateframework
+      repositoryName: notary
+      path: /migrations/server/postgresql
+      reference: v0.6.1
+  authentatication:
+    certificateRef: sample-signer
+  storage:
+    aliasesRef: notary-signer-aliases
+    postgres:
+      hosts:
+      - host: harbor-database-postgresql
+        port: 5432
+      username: postgres
+      passwordRef: harbor-database-password
+      database: notarysigner
+      parameters:
+        sslmode: disable

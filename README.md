@@ -31,11 +31,20 @@ As any project in this repository, do not hesitate to raise issues or suggest co
 Harbor components is controlled by a custom Harbor resource.
 With ConfigMaps and [Secrets](https://kubernetes.io/docs/concepts/configuration/secret/), it handles almost all configuration combination.
 
+### Supported storage configuration
+
+- [X] filesystem: A storage driver configured to use a directory tree in the a kubernetes volume.
+- [X] s3: A driver storing objects in an Amazon Simple Storage Service (S3) bucket.
+- [X] swift: A driver storing objects in Openstack Swift.
+- [ ] azure: A driver storing objects in Microsoft Azure Blob Storage.
+- [ ] oss: A driver storing objects in Aliyun OSS.
+- [ ] gcs: A driver storing objects in a Google Cloud Storage bucket.
+
 ### Deploy a new stack
 
 This operator is able to deploy an Harbor stack, fully or partially.
 
-Following components are always deployed:
+When Creating the `Harbor` resource, following components are always deployed:
 
 - Harbor Core
 - Registry
@@ -48,6 +57,7 @@ Following components are optional:
 - ChartMuseum
 - Notary
 - Clair
+- Trivy
 
 ### Delete the stack
 
@@ -55,7 +65,7 @@ When deleting the Harbor resource, all linked components are deleted. With two H
 
 ### Adding/Removing a component
 
-It is possible to add and delete ChartMuseum, Notary and Clair by editing the Harbor resource.
+It is possible to add and delete ChartMuseum, Notary, Clair and Trivy by editing the Harbor resource.
 
 ### Future features
 
@@ -64,17 +74,17 @@ It is possible to add and delete ChartMuseum, Notary and Clair by editing the Ha
 
 ## Installation
 
-See [install documentation](https://github.com/goharbor/harbor-operator/blob/master/docs/installation/installation.md).
+See [install documentation](./docs/installation/installation.md).
 
 ## Compatibility
 
 ### Supported platforms
 
-- [Kubernetes](https://kubernetes.io/docs/concepts/overview/kubernetes-api/) >= 1.15
+- [Kubernetes](https://kubernetes.io/docs/concepts/overview/kubernetes-api/) >= 1.16
 
 ### Harbor version
 
-This Operator currently only supports Harbor version 1.10.x
+This Operator currently only supports Harbor version 2.0
 
 ## Howto's
 
@@ -89,7 +99,7 @@ Now, this project is maintained and developed by the [Harbor operator workgroup]
 ## Community
 
 - Slack channel `#harbor-operator-dev` at [CNCF Workspace](https://slack.cncf.io)
-- Send mail to Harbor dev mail group:  harbor-dev@lists.cncf.io
+- Send mail to Harbor dev mail group: harbor-dev@lists.cncf.io
 
 ## Additional documentation
 

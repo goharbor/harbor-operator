@@ -1,0 +1,22 @@
+# This file is for teaching kustomize how to substitute name in RegistryController
+nameReference:
+- kind: Secret
+  version: v1
+  fieldSpecs:
+  - kind: Registry
+    group: goharbor.io
+    path: spec/imagePullSecrets/items/name
+
+- kind: ServiceAccount
+  version: v1
+  fieldSpecs:
+  - kind: Registry
+    group: goharbor.io
+    path: spec/serviceAccountName
+
+- kind: Registry
+  group: goharbor.io
+  fieldSpecs:
+  - kind: RegistryController
+    group: goharbor.io
+    path: spec/registryRef

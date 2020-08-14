@@ -19,34 +19,49 @@ import (
 const (
 	WebHookPort = 9443
 	MetricsPort = 8080
+	ProbePort   = 5000
+
+	ManagerConfigKey = "operator"
 )
 
 func New(ctx context.Context, scheme *runtime.Scheme) (manager.Manager, error) {
-	var mgrConfig *manager.Options = &ctrl.Options{
-		MetricsBindAddress: fmt.Sprintf(":%d", MetricsPort),
-		LeaderElection:     false,
-		Port:               WebHookPort,
+	var mgrConfig manager.Options = ctrl.Options{
+		MetricsBindAddress:     fmt.Sprintf(":%d", MetricsPort),
+		LeaderElection:         false,
+		Port:                   WebHookPort,
+		HealthProbeBindAddress: fmt.Sprintf(":%d", ProbePort),
+		Scheme:                 scheme,
 	}
 
-	log := logger.Get(ctx)
-
 	item, err := configstore.Filter().
-		Slice("operator").
-		Unmarshal(func() interface{} { return &manager.Options{} }).
+		Slice(ManagerConfigKey).
+		Unmarshal(func() interface{} {
+			config := mgrConfig
+			return &config
+		}).
 		GetFirstItem()
-	if err == nil {
-		// todo
+	if err != nil {
+		if _, ok := err.(configstore.ErrItemNotFound); !ok {
+			return nil, errors.Wrap(err, "cannot get configuration")
+		}
+	} else {
 		config, err := item.Unmarshaled()
 		if err != nil {
 			return nil, errors.Wrap(err, "unable to get configuration")
 		}
 
-		mgrConfig = config.(*manager.Options)
+		mgrConfig = *config.(*manager.Options)
 	}
 
-	mgrConfig.Scheme = scheme
-
-	log.Info("Manager initialized", "Metrics.Address", mgrConfig.MetricsBindAddress, "LeaderElection.Enabled", mgrConfig.LeaderElection, "LeaderElection.Namespace", mgrConfig.LeaderElectionNamespace, "LeaderElection.ID", mgrConfig.LeaderElectionID)
+	logger.Get(ctx).Info(
+		"Manager initialized",
+		"Webhook.Port", mgrConfig.Port,
+		"Metrics.Address", mgrConfig.MetricsBindAddress,
+		"Probe.Address", mgrConfig.HealthProbeBindAddress,
+		"LeaderElection.Enabled", mgrConfig.LeaderElection,
+		"LeaderElection.Namespace", mgrConfig.LeaderElectionNamespace,
+		"LeaderElection.ID", mgrConfig.LeaderElectionID,
+	)
 
 	config, err := ctrl.GetConfig()
 	if err != nil {
@@ -57,7 +72,7 @@ func New(ctx context.Context, scheme *runtime.Scheme) (manager.Manager, error) {
 		return &nettracing.Transport{RoundTripper: rt}
 	})
 
-	mgr, err := ctrl.NewManager(config, *mgrConfig)
+	mgr, err := ctrl.NewManager(config, mgrConfig)
 
 	return mgr, errors.Wrap(err, "unable to get the manager")
 }

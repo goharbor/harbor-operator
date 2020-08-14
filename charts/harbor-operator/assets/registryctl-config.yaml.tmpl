@@ -1,0 +1,15 @@
+{{- if .Spec.TLS.Enabled }}
+protocol: https
+port: 8443
+
+https_config:
+  cert: /etc/registryctl/ssl/tls.crt
+  key: /etc/registryctl/ssl/tls.key
+{{- else }}
+protocol: http
+port: 8080
+{{- end }}
+
+log_level: {{ default "info" .Spec.Log.Level }}
+
+registry_config: /etc/registry/config.yml

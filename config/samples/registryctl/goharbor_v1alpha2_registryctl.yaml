@@ -1,0 +1,7 @@
+apiVersion: goharbor.io/v1alpha2
+kind: RegistryController
+metadata:
+  name: sample
+spec:
+  registryRef: sample
+  authentication: {}

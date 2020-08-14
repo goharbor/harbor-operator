@@ -1,0 +1,23 @@
+apiVersion: goharbor.io/v1alpha2
+kind: JobService
+metadata:
+  name: sample
+spec:
+  secretRef: jobservice-secret
+  tokenService:
+    url: http://sample-core/service/token
+  core:
+    secretRef: core-secret
+    url: http://sample-core
+  registry:
+    url: http://sample-registry
+    controllerURL: http://sample-registryctl
+    credentials:
+      username: harbor_registry_user
+      passwordRef: registry-password
+  workerPool:
+    redisPool:
+      host: harbor-redis-master
+      port: 6379
+      database: 1
+      passwordRef: harbor-redis

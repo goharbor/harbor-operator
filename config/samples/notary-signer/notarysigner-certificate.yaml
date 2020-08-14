@@ -1,0 +1,20 @@
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: sample-signer
+spec:
+  secretName: sample-signer
+  duration: 2160h # 90d
+  renewBefore: 360h # 15d
+  organization:
+  - goharbor
+  isCA: false
+  keySize: 2048
+  keyAlgorithm: rsa
+  keyEncoding: pkcs1
+  usages:
+  - server auth
+  dnsNames:
+  - sample-notarysigner
+  issuerRef:
+    name: sample-signer

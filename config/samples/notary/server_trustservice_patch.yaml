@@ -1,0 +1,10 @@
+apiVersion: goharbor.io/v1alpha2
+kind: NotaryServer
+metadata:
+  name: sample
+spec:
+  trustService:
+    remote:
+      host: sample-notarysigner
+      port: 7899
+      certificateRef: sample-server
