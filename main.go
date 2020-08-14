@@ -4,14 +4,13 @@ import (
 	"os"
 
 	"github.com/go-logr/logr"
+	harbor1alpha1 "github.com/goharbor/harbor-operator/api/v1alpha1"
 	"github.com/ovh/configstore"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	// +kubebuilder:scaffold:imports
-
-	goharborv1alpha1 "github.com/goharbor/harbor-operator/api/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/controllers/harbor"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	"github.com/goharbor/harbor-operator/pkg/manager"
@@ -82,7 +81,7 @@ func main() {
 		os.Exit(exitCodeFailure)
 	}
 
-	if err := (&goharborv1alpha1.Harbor{}).SetupWebhookWithManager(mgr); err != nil {
+	if err := (&harbor1alpha1.Harbor{}).SetupWebhookWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create webhook", "webhook", "Harbor")
 		os.Exit(exitCodeFailure)
 	}
