@@ -126,7 +126,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 
 	// Only one host is supported
 	if len(core.Spec.Database.Hosts) == 0 {
-		return nil, serrors.UnrecoverrableError(errors.New("cannot get a database host"), serrors.InvalidSpecReason, "cannot get a database host")
+		return nil, serrors.UnrecoverrableError(harbormetav1.NewErrPostgresNoHost(), serrors.InvalidSpecReason, "cannot get a database host")
 	}
 
 	firstDatabaseHost := core.Spec.Database.Hosts[0]

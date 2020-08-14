@@ -17,7 +17,7 @@ func (r *Reconciler) NewEmpty(_ context.Context) resources.Resource {
 	return &goharborv1alpha2.NotaryServer{}
 }
 
-func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resource) error {
+func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resource) error { // nolint:funlen
 	notaryserver, ok := resource.(*goharborv1alpha2.NotaryServer)
 	if !ok {
 		return serrors.UnrecoverrableError(errors.Errorf("%+v", resource), serrors.OperatorReason, "unable to add resource")

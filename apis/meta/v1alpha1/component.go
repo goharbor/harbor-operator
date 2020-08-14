@@ -92,12 +92,15 @@ type ComponentSpec struct {
 func (c *ComponentSpec) ApplyToDeployment(deploy *appsv1.Deployment) {
 	deploy.Spec.Replicas = c.Replicas
 	deploy.Spec.Template.Spec.ServiceAccountName = c.ServiceAccountName
+
 	for i := range deploy.Spec.Template.Spec.Containers {
 		if c.ImagePullPolicy != nil {
 			deploy.Spec.Template.Spec.Containers[i].ImagePullPolicy = *c.ImagePullPolicy
 		}
+
 		deploy.Spec.Template.Spec.Containers[i].Resources = c.Resources
 	}
+
 	deploy.Spec.Template.Spec.ImagePullSecrets = c.ImagePullSecrets
 	deploy.Spec.Template.Spec.NodeSelector = c.NodeSelector
 	deploy.Spec.Template.Spec.Tolerations = c.Tolerations

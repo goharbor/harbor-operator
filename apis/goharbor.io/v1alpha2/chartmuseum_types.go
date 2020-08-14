@@ -128,6 +128,7 @@ type ChartMuseumChartRepoSpec struct {
 	// +kubebuilder:validation:Minimum=0
 	// +kubebuilder:default=1
 	// Levels of nested repos for multitenancy
+	// Harbor: must be set to 1 to support project namespace
 	Depth *int32 `json:"depth,omitempty"`
 }
 
@@ -256,12 +257,14 @@ type ChartMuseumPostFormFieldNameSpec struct {
 	// +kubebuilder:validation:MinLength=1
 	// +kubebuilder:default="chart"
 	// Form field which will be queried for the chart file content
+	// Harbor: Expecting chart to use with Harbor
 	Chart string `json:"chart,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:MinLength=1
 	// +kubebuilder:default="prov"
 	// Form field which will be queried for the provenance file content
+	// Harbor: Expecting prov to use with Harbor
 	Provenance string `json:"provenance,omitempty"`
 }
 
@@ -296,6 +299,7 @@ type ChartMuseumAuthSpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	// Reference to secret containing basic http authentication
+	// Harbor: Harbor try to connect using chart_controller username
 	BasicAuthRef string `json:"basicAuthRef,omitempty"`
 
 	// +kubebuilder:validation:Optional
