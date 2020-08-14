@@ -65,7 +65,8 @@ spec:
                     description: Allow anonymous GET operations when auth is used
                     type: boolean
                   basicAuthRef:
-                    description: Reference to secret containing basic http authentication
+                    description: 'Reference to secret containing basic http authentication
+                      Harbor: Harbor try to connect using chart_controller username'
                     pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
                     type: string
                   bearer:
@@ -155,14 +156,14 @@ spec:
                     properties:
                       chart:
                         default: chart
-                        description: Form field which will be queried for the chart
-                          file content
+                        description: 'Form field which will be queried for the chart
+                          file content Harbor: Expecting chart to use with Harbor'
                         minLength: 1
                         type: string
                       provenance:
                         default: prov
-                        description: Form field which will be queried for the provenance
-                          file content
+                        description: 'Form field which will be queried for the provenance
+                          file content Harbor: Expecting prov to use with Harbor'
                         minLength: 1
                         type: string
                     type: object
@@ -170,7 +171,8 @@ spec:
                     properties:
                       depth:
                         default: 1
-                        description: Levels of nested repos for multitenancy
+                        description: 'Levels of nested repos for multitenancy Harbor:
+                          must be set to 1 to support project namespace'
                         format: int32
                         minimum: 0
                         type: integer

@@ -115,7 +115,7 @@ const migrationImage = "migrate/migrate"
 
 var varFalse = false
 
-func (r *NotaryMigrationSpec) GetMigrationContainer(ctx context.Context, storage *NotaryStorageSpec) (*corev1.Container, []corev1.Volume, error) {
+func (r *NotaryMigrationSpec) GetMigrationContainer(ctx context.Context, storage *NotaryStorageSpec) (*corev1.Container, []corev1.Volume, error) { // nolint:funlen
 	migrationEnvs := []corev1.EnvVar{}
 	migrationVolumes := []corev1.Volume{}
 	migrationVolumeMounts := []corev1.VolumeMount{}
@@ -141,7 +141,7 @@ func (r *NotaryMigrationSpec) GetMigrationContainer(ctx context.Context, storage
 
 	migrationSourceURL, err := r.DSNWithVariable(ctx)
 	if err != nil {
-		if err == ErrNoMigrationConfiguration {
+		if errors.Is(err, ErrNoMigrationConfiguration) {
 			return nil, nil, serrors.UnrecoverrableError(err, serrors.InvalidSpecReason, "cannot get migration dsn")
 		}
 
@@ -173,16 +173,20 @@ func (r *NotaryMigrationSpec) GetMigrationContainer(ctx context.Context, storage
 			},
 		})
 	}
+
 	if r.FileSystem != nil {
 		const mountPath = "/mnt/source"
+
 		migrationEnvs = append(migrationEnvs, corev1.EnvVar{
 			Name:  NotaryMigrationSourceVolumeMountVariableName,
 			Value: mountPath,
 		})
+
 		migrationVolumes = append(migrationVolumes, corev1.Volume{
 			Name:         "source",
 			VolumeSource: r.FileSystem.VolumeSource,
 		})
+
 		migrationVolumeMounts = append(migrationVolumeMounts, corev1.VolumeMount{
 			Name:      "source",
 			MountPath: mountPath,

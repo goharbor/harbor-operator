@@ -224,7 +224,7 @@ const (
 	NotaryServerAuthenticationService = "harbor-notary"
 )
 
-func (r *Reconciler) GetNotaryServer(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*goharborv1alpha2.NotaryServer, error) {
+func (r *Reconciler) GetNotaryServer(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*goharborv1alpha2.NotaryServer, error) { // nolint:funlen
 	name := r.NormalizeName(ctx, harbor.GetName())
 	namespace := harbor.GetNamespace()
 

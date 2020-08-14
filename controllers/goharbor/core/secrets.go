@@ -18,7 +18,7 @@ const (
 	RegistryRedisDSNKey = "_REDIS_URL_REG"
 )
 
-func (r *Reconciler) GetSecret(ctx context.Context, core *goharborv1alpha2.Core) (*corev1.Secret, error) { // nolint:funlen
+func (r *Reconciler) GetSecret(ctx context.Context, core *goharborv1alpha2.Core) (*corev1.Secret, error) {
 	name := r.NormalizeName(ctx, core.GetName())
 	namespace := core.GetNamespace()
 

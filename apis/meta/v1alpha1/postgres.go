@@ -18,6 +18,17 @@ const (
 	ClairDatabase        = "clair"
 )
 
+type ErrPostgresNoHost bool
+
+func (err *ErrPostgresNoHost) Error() string {
+	return "postgres: no host found"
+}
+
+func NewErrPostgresNoHost() *ErrPostgresNoHost {
+	err := ErrPostgresNoHost(false)
+	return &err
+}
+
 type PostgresHostSpec struct {
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:MinLength=1

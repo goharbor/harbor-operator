@@ -79,7 +79,7 @@ const (
 	// Required field:
 	// - Secret.Data["github-token"] - The Github token
 	// - Secret.Data["github-user"]  - The Github username
-	SecretTypeGithubToken corev1.SecretType = "goharbor.io/github"
+	SecretTypeGithubToken corev1.SecretType = "goharbor.io/github" // nolint:gosec
 
 	// GithubTokenPasswordKey is the token to use with the account
 	GithubTokenPasswordKey = "github-token"
@@ -91,10 +91,10 @@ const (
 	// SecretTypeRegistry contains secret to configure a Docker registry.
 	//
 	// Registry try to yaml unmarshal fields.
-	// So all fiels must be yaml marshalled.
+	// So all fields must be yaml marshalled.
 	// Otherwise, a string starting with yaml special character may break the configuration.
-	SecretTypeRegistry corev1.SecretType = "goharbor.io/registry"
+	SecretTypeRegistry corev1.SecretType = "goharbor.io/registry" // nolint:gosec
 
 	// RegistryHTTPSecret is the http secret
-	RegistryHTTPSecret = "REGISTRY_HTTP_SECRET"
+	RegistryHTTPSecret = "REGISTRY_HTTP_SECRET" // nolint:gosec
 )
