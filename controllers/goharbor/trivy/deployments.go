@@ -57,8 +57,24 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.
 		return nil, errors.Wrapf(err, "cannot get image for deploy: %s", name)
 	}
 
-	var volumes []corev1.Volume
-	var volumesMount []corev1.VolumeMount
+	volumes := []corev1.Volume{{
+		Name:         ReportsVolumeName,
+		VolumeSource: trivy.Spec.Storage.Reports.VolumeSource,
+	}, {
+		Name:         CacheVolumeName,
+		VolumeSource: trivy.Spec.Storage.Cache.VolumeSource,
+	}}
+
+	volumesMount := []corev1.VolumeMount{{
+		Name:      ReportsVolumeName,
+		MountPath: ReportsVolumePath,
+		ReadOnly:  false,
+	}, {
+		Name:      CacheVolumeName,
+		MountPath: CacheVolumePath,
+		ReadOnly:  false,
+	}}
+
 	var livenessProbe corev1.Probe
 	var readinessProbe corev1.Probe
 
@@ -79,7 +95,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.
 		},
 	}
 
-	if trivy.Spec.Server.TLS != nil {
+	if trivy.Spec.Server.TLS.Enabled() {
 		volumes = append(volumes, corev1.Volume{
 			Name: InternalCertificatesVolumeName,
 			VolumeSource: corev1.VolumeSource{
@@ -94,83 +110,6 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.
 			MountPath: InternalCertificatesPath,
 			ReadOnly:  true,
 		})
-	}
-
-	if trivy.Spec.Storage != nil {
-		if trivy.Spec.Storage.Reports != nil {
-			volumes = append(volumes, corev1.Volume{
-				Name:         ReportsVolumeName,
-				VolumeSource: trivy.Spec.Storage.Reports.VolumeSource,
-			})
-
-			volumesMount = append(volumesMount, corev1.VolumeMount{
-				Name:      ReportsVolumeName,
-				MountPath: ReportsVolumePath,
-				ReadOnly:  false,
-			})
-		} else {
-			volumes = append(volumes, corev1.Volume{
-				Name: ReportsVolumeName,
-				VolumeSource: corev1.VolumeSource{
-					EmptyDir: &corev1.EmptyDirVolumeSource{},
-				},
-			})
-
-			volumesMount = append(volumesMount, corev1.VolumeMount{
-				Name:      ReportsVolumeName,
-				MountPath: ReportsVolumePath,
-			})
-		}
-
-		if trivy.Spec.Storage.Cache != nil {
-			volumes = append(volumes, corev1.Volume{
-				Name:         CacheVolumeName,
-				VolumeSource: trivy.Spec.Storage.Cache.VolumeSource,
-			})
-
-			volumesMount = append(volumesMount, corev1.VolumeMount{
-				Name:      CacheVolumeName,
-				MountPath: CacheVolumePath,
-				ReadOnly:  false,
-			})
-		} else {
-			volumes = append(volumes, corev1.Volume{
-				Name: CacheVolumeName,
-				VolumeSource: corev1.VolumeSource{
-					EmptyDir: &corev1.EmptyDirVolumeSource{},
-				},
-			})
-
-			volumesMount = append(volumesMount, corev1.VolumeMount{
-				Name:      CacheVolumeName,
-				MountPath: CacheVolumePath,
-			})
-		}
-	} else {
-		volumes = append(volumes,
-			corev1.Volume{
-				Name: ReportsVolumeName,
-				VolumeSource: corev1.VolumeSource{
-					EmptyDir: &corev1.EmptyDirVolumeSource{},
-				},
-			},
-			corev1.Volume{
-				Name: CacheVolumeName,
-				VolumeSource: corev1.VolumeSource{
-					EmptyDir: &corev1.EmptyDirVolumeSource{},
-				},
-			},
-		)
-
-		volumesMount = append(volumesMount,
-			corev1.VolumeMount{
-				Name:      ReportsVolumeName,
-				MountPath: ReportsVolumePath,
-			},
-			corev1.VolumeMount{
-				Name:      CacheVolumeName,
-				MountPath: CacheVolumePath,
-			})
 	}
 
 	if trivy.Spec.Server.TLS != nil {

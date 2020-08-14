@@ -55,7 +55,8 @@ type TrivySpec struct {
 	Cache TrivyCacheSpec `json:"cache,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	Storage *TrivyStorageSpec `json:"storage"`
+	// +kubebuilder:default={"reports":{"volumeSource":{"emptyDir":{"sizeLimit":"1Gi"}}},"cache":{"volumeSource":{"emptyDir":{"sizeLimit":"1Gi"}}}}
+	Storage TrivyStorageSpec `json:"storage,omitempty"`
 }
 
 type TrivyServerSpec struct {
@@ -240,10 +241,12 @@ type TrivyCacheSpec struct {
 
 type TrivyStorageSpec struct {
 	// +kubebuilder:validation:Optional
-	Reports *TrivyStorageReportsSpec `json:"reports"`
+	// +kubebuilder:default={"volumeSource":{"emptyDir":{"sizeLimit":"1Gi"}}}
+	Reports TrivyStorageReportsSpec `json:"reports,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	Cache *TrivyStorageCacheSpec `json:"cache"`
+	// +kubebuilder:default={"volumeSource":{"emptyDir":{"sizeLimit":"1Gi"}}}
+	Cache TrivyStorageCacheSpec `json:"cache,omitempty"`
 }
 
 type TrivyStorageReportsSpec struct {
