@@ -125,7 +125,7 @@ jobs:
 
   operator-kubernetes-resources:
     runs-on: ubuntu-latest
-    name: 'kubernetes_resources: ./config/default'
+    name: 'kubernetes_resources: ./config/rbac'
     steps: 
     - uses: actions/setup-go@v2
       with:
@@ -135,7 +135,7 @@ jobs:
     - uses: azure/k8s-bake@v1
       with:
         renderEngine: 'kustomize'
-        kustomizationPath: './config/default'
+        kustomizationPath: './config/rbac'
         kubectl-version: 'latest'
 
   samples-kubernetes-resources:
@@ -147,6 +147,36 @@ jobs:
       with:
         renderEngine: 'kustomize'
         kustomizationPath: './config/samples'
+        kubectl-version: 'latest'
+
+  kubernetes-resources:
+    runs-on: ubuntu-latest
+    name: 'kubernetes_resources: ./config/${{ matrix.path }}'
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # https://github.com/jetstack/cert-manager/tags
+        path:
+        - samples/chartmuseum
+        - samples/core
+        - samples/database
+        - samples/harbor
+        - samples/harbor-full
+        - samples/jobservice
+        - samples/notary
+        - samples/notary-server
+        - samples/notary-signer
+        - samples/portal
+        - samples/registry
+        - samples/registryctl
+
+    steps: 
+    - uses: actions/checkout@v2
+    - uses: azure/k8s-bake@v1
+      with:
+        renderEngine: 'kustomize'
+        kustomizationPath: './config/samples/${{ matrix.sample }}'
         kubectl-version: 'latest'
 
   # Documentation
