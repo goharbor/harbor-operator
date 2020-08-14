@@ -30,7 +30,7 @@ func main() {
 	setupLog := ctrl.Log.WithName("setup")
 	ctx := logger.Context(setupLog)
 
-	err := setup.SetupLogger(ctx, OperatorName, OperatorVersion)
+	err := setup.Logger(ctx, OperatorName, OperatorVersion)
 	if err != nil {
 		setupLog.Error(err, "unable to create logger")
 		os.Exit(exitCodeFailure)

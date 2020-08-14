@@ -4,7 +4,7 @@
 
 ```bash
 git clone https://github.com/goharbor/harbor-operator.git
-cd harbor-core-operator
+cd harbor-operator
 ```
 
 You developped a new cool feature? Fixed an annoying bug? We would be happy to hear from you!
@@ -15,7 +15,7 @@ Have a look in [CONTRIBUTING.md](https://github.com/goharbor/harbor-operator/blo
 
 ### Packages
 
-- [Go 1.13+](https://golang.org/)
+- [Go 1.14+](https://golang.org/)
 - [Helm](https://helm.sh/)
 - [Docker](https://docker.com) & [Docker Compose](https://docs.docker.com/compose/install/)
 - [OpenSSL](https://www.openssl.org/)

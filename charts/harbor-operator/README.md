@@ -6,16 +6,6 @@ Deploy Harbor Operator
 
 **Homepage:** <https://github.com/goharbor/harbor-operator>
 
-## Requirements
-
-Kubernetes: `>= 1.16.0`
-
-| Repository | Name | Version |
-|------------|------|---------|
-| https://charts.jetstack.io | cert-manager | 0.16.0 |
-| https://kubernetes-charts.storage.googleapis.com | nginx-ingress | 1.41.2 |
-| https://kubernetes-charts.storage.googleapis.com | prometheus-operator | 9.3.1 |
-
 ## Values
 
 | Key | Type | Default | Description |

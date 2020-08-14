@@ -74,7 +74,7 @@ type RegistryLogFormatter string
 
 const (
 	RegistryTextFormatter     RegistryLogFormatter = "text"
-	RegistryJsonFormatter     RegistryLogFormatter = "json"
+	RegistryJSONFormatter     RegistryLogFormatter = "json"
 	RegistryLogstashFormatter RegistryLogFormatter = "logstash"
 )
 
