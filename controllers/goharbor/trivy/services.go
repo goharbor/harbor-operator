@@ -10,10 +10,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
-)
-
-const (
-	PublicPort = 80
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 )
 
 func (r *Reconciler) AddService(ctx context.Context, trivy *goharborv1alpha2.Trivy) error {
@@ -42,12 +39,15 @@ func (r *Reconciler) GetService(ctx context.Context, trivy *goharborv1alpha2.Tri
 			Namespace: namespace,
 		},
 		Spec: corev1.ServiceSpec{
-			Ports: []corev1.ServicePort{
-				{
-					Port:       PublicPort,
-					TargetPort: intstr.FromInt(port),
-				},
-			},
+			Ports: []corev1.ServicePort{{
+				Name:       harbormetav1.TrivyHTTPPortName,
+				Port:       harbormetav1.HTTPPort,
+				TargetPort: intstr.FromString(harbormetav1.TrivyHTTPPortName),
+			}, {
+				Name:       harbormetav1.TrivyHTTPSPortName,
+				Port:       harbormetav1.HTTPSPort,
+				TargetPort: intstr.FromString(harbormetav1.TrivyHTTPSPortName),
+			}},
 			Selector: map[string]string{
 				r.Label("name"):      name,
 				r.Label("namespace"): namespace,

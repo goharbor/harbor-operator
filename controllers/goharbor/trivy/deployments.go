@@ -6,13 +6,14 @@ import (
 	"net/url"
 	"path"
 
+	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
-	"github.com/pkg/errors"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 )
 
 var (
@@ -23,13 +24,17 @@ const (
 	ContainerName                  = "trivy"
 	LivenessProbe                  = "/probe/healthy"
 	ReadinessProbe                 = "/probe/ready"
-	port                           = 8080 // https://github.com/helm/chartmuseum/blob/969515a51413e1f1840fb99509401aa3c63deccd/pkg/config/vars.go#L135
 	CacheVolumeName                = "cache"
 	CacheVolumePath                = "/home/scanner/.cache/trivy"
 	ReportsVolumeName              = "reports"
 	ReportsVolumePath              = "/home/scanner/.cache/reports"
 	InternalCertificatesVolumeName = "internal-certificates"
 	InternalCertificatesPath       = "/etc/harbor/ssl"
+)
+
+const (
+	httpsPort = 8443
+	httpPort  = 8080
 )
 
 func (r *Reconciler) AddDeployment(ctx context.Context, trivy *goharborv1alpha2.Trivy) error {
@@ -75,25 +80,19 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.
 		ReadOnly:  false,
 	}}
 
-	var livenessProbe corev1.Probe
-	var readinessProbe corev1.Probe
-
-	envFroms := []corev1.EnvFromSource{
-		{
-			ConfigMapRef: &corev1.ConfigMapEnvSource{
-				LocalObjectReference: corev1.LocalObjectReference{
-					Name: name,
-				},
+	envFroms := []corev1.EnvFromSource{{
+		ConfigMapRef: &corev1.ConfigMapEnvSource{
+			LocalObjectReference: corev1.LocalObjectReference{
+				Name: name,
 			},
 		},
-		{
-			SecretRef: &corev1.SecretEnvSource{
-				LocalObjectReference: corev1.LocalObjectReference{
-					Name: name,
-				},
+	}, {
+		SecretRef: &corev1.SecretEnvSource{
+			LocalObjectReference: corev1.LocalObjectReference{
+				Name: name,
 			},
 		},
-	}
+	}}
 
 	if trivy.Spec.Server.TLS.Enabled() {
 		volumes = append(volumes, corev1.Volume{
@@ -110,66 +109,6 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.
 			MountPath: InternalCertificatesPath,
 			ReadOnly:  true,
 		})
-	}
-
-	if trivy.Spec.Server.TLS != nil {
-		livenessProbe = corev1.Probe{
-			Handler: corev1.Handler{
-				Exec: &corev1.ExecAction{
-					Command: []string{
-						"curl",
-						"--resolve", fmt.Sprintf("%s:%d:%s", r.NormalizeName(ctx, trivy.GetName()), port, "127.0.0.1"),
-						"--cacert", path.Join(InternalCertificatesPath, "ca.crt"),
-						"--key", path.Join(InternalCertificatesPath, "tls.key"),
-						"--cert", path.Join(InternalCertificatesPath, "tls.crt"),
-						(&url.URL{
-							Scheme: "https",
-							Host:   fmt.Sprintf("%s:%d", r.NormalizeName(ctx, trivy.GetName()), port),
-							Path:   LivenessProbe,
-						}).String(),
-					},
-				},
-			},
-		}
-	} else {
-		livenessProbe = corev1.Probe{
-			Handler: corev1.Handler{
-				HTTPGet: &corev1.HTTPGetAction{
-					Path: LivenessProbe,
-					Port: intstr.FromInt(port),
-				},
-			},
-		}
-	}
-
-	if trivy.Spec.Server.TLS != nil {
-		readinessProbe = corev1.Probe{
-			Handler: corev1.Handler{
-				Exec: &corev1.ExecAction{
-					Command: []string{
-						"curl",
-						"--resolve", fmt.Sprintf("%s:%d:%s", r.NormalizeName(ctx, trivy.GetName()), port, "127.0.0.1"),
-						"--cacert", path.Join(InternalCertificatesPath, "ca.crt"),
-						"--key", path.Join(InternalCertificatesPath, "tls.key"),
-						"--cert", path.Join(InternalCertificatesPath, "tls.crt"),
-						(&url.URL{
-							Scheme: "https",
-							Host:   fmt.Sprintf("%s:%d", r.NormalizeName(ctx, trivy.GetName()), port),
-							Path:   ReadinessProbe,
-						}).String(),
-					},
-				},
-			},
-		}
-	} else {
-		readinessProbe = corev1.Probe{
-			Handler: corev1.Handler{
-				HTTPGet: &corev1.HTTPGetAction{
-					Path: ReadinessProbe,
-					Port: intstr.FromInt(port),
-				},
-			},
-		}
 	}
 
 	return &appsv1.Deployment{
@@ -197,25 +136,57 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.
 					AutomountServiceAccountToken: &varFalse,
 					Volumes:                      volumes,
 
-					Containers: []corev1.Container{
-						{
-							Name:  ContainerName,
-							Image: image,
-							Ports: []corev1.ContainerPort{
-								{
-									ContainerPort: port,
-								},
-							},
+					Containers: []corev1.Container{{
+						Name:  ContainerName,
+						Image: image,
+						Ports: []corev1.ContainerPort{{
+							Name:          harbormetav1.TrivyHTTPPortName,
+							ContainerPort: httpPort,
+						}, {
+							Name:          harbormetav1.TrivyHTTPSPortName,
+							ContainerPort: httpsPort,
+						}},
 
-							EnvFrom:      envFroms,
-							VolumeMounts: volumesMount,
+						EnvFrom:      envFroms,
+						VolumeMounts: volumesMount,
 
-							LivenessProbe:  &livenessProbe,
-							ReadinessProbe: &readinessProbe,
-						},
-					},
+						LivenessProbe:  r.getProbe(ctx, name, trivy.Spec.Server.TLS.Enabled(), LivenessProbe),
+						ReadinessProbe: r.getProbe(ctx, name, trivy.Spec.Server.TLS.Enabled(), ReadinessProbe),
+					}},
 				},
 			},
 		},
 	}, nil
+}
+
+func (r *Reconciler) getProbe(ctx context.Context, hostname string, tlsEnabled bool, probePath string) *corev1.Probe {
+	if tlsEnabled {
+		return &corev1.Probe{
+			Handler: corev1.Handler{
+				Exec: &corev1.ExecAction{
+					Command: []string{
+						"curl",
+						"--resolve", fmt.Sprintf("%s:%d:%s", r.NormalizeName(ctx, hostname), httpsPort, "127.0.0.1"),
+						"--cacert", path.Join(InternalCertificatesPath, "ca.crt"),
+						"--key", path.Join(InternalCertificatesPath, "tls.key"),
+						"--cert", path.Join(InternalCertificatesPath, "tls.crt"),
+						(&url.URL{
+							Scheme: "https",
+							Host:   fmt.Sprintf("%s:%d", r.NormalizeName(ctx, hostname), httpsPort),
+							Path:   probePath,
+						}).String(),
+					},
+				},
+			},
+		}
+	}
+
+	return &corev1.Probe{
+		Handler: corev1.Handler{
+			HTTPGet: &corev1.HTTPGetAction{
+				Path: probePath,
+				Port: intstr.FromInt(httpPort),
+			},
+		},
+	}
 }
