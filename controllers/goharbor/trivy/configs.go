@@ -2,8 +2,8 @@ package trivy
 
 import (
 	"context"
-	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/pkg/errors"
 
@@ -29,7 +29,7 @@ func (r *Reconciler) AddConfigMap(ctx context.Context, trivy *goharborv1alpha2.T
 	return nil
 }
 
-// Get the config map linked to the trivy deployment.
+// GetConfigMap get the config map linked to the trivy deployment.
 func (r *Reconciler) GetConfigMap(ctx context.Context, trivy *goharborv1alpha2.Trivy) (*corev1.ConfigMap, error) {
 	name := r.NormalizeName(ctx, trivy.GetName())
 	namespace := trivy.GetNamespace()
@@ -85,32 +85,24 @@ func (r *Reconciler) GetConfigMap(ctx context.Context, trivy *goharborv1alpha2.T
 	}, nil
 }
 
-// Explode array of vulnerabilities type into a string separated by commas.
+// GetVulnerabilities joins array of vulnerabilities type into a string separated by commas.
 func GetVulnerabilities(vulnType []goharborv1alpha2.TrivyServerVulnerabilityType) string {
-	vulnerabilities := ""
+	vulnerabilities := make([]string, len(vulnType))
 
 	for index, v := range vulnType {
-		if index == 0 {
-			vulnerabilities = string(v)
-		} else {
-			vulnerabilities = fmt.Sprintf("%s,%s", vulnerabilities, v)
-		}
+		vulnerabilities[index] = string(v)
 	}
 
-	return vulnerabilities
+	return strings.Join(vulnerabilities, ",")
 }
 
-// Explode array of severities type into a string separated by commas.
+// GetSeverities joins array of severities type into a string separated by commas.
 func GetSeverities(sevType []goharborv1alpha2.TrivyServerSeverityType) string {
-	severities := ""
+	severities := make([]string, len(sevType))
 
-	for index, s := range sevType {
-		if index == 0 {
-			severities = string(s)
-		} else {
-			severities = fmt.Sprintf("%s,%s", severities, s)
-		}
+	for index, v := range sevType {
+		severities[index] = string(v)
 	}
 
-	return severities
+	return strings.Join(severities, ",")
 }
