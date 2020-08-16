@@ -23,7 +23,6 @@ import (
 )
 
 var varFalse = false
-var errDatabaseHost = errors.New("cannot get a database host")
 
 const (
 	healthCheckPeriod                     = 90 * time.Second

@@ -33,9 +33,8 @@ func (r *Reconciler) AddConfigMap(ctx context.Context, trivy *goharborv1alpha2.T
 func (r *Reconciler) GetConfigMap(ctx context.Context, trivy *goharborv1alpha2.Trivy) (*corev1.ConfigMap, error) {
 	name := r.NormalizeName(ctx, trivy.GetName())
 	namespace := trivy.GetNamespace()
-	var certificate string
-	var key string
-	var cas string
+
+	var certificate, key, cas string
 
 	if trivy.Spec.Server.TLS != nil {
 		certificate = "/etc/harbor/ssl/tls.crt"
