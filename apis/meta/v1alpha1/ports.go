@@ -37,3 +37,8 @@ const (
 const (
 	NotarySignerAPIPortName = "api"
 )
+
+const (
+	TrivyHTTPPortName  = "http"
+	TrivyHTTPSPortName = "https"
+)
