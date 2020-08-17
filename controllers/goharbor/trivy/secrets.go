@@ -9,23 +9,22 @@ import (
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	"github.com/goharbor/harbor-operator/pkg/graph"
 	"github.com/pkg/errors"
 )
 
-func (r *Reconciler) AddSecret(ctx context.Context, trivy *goharborv1alpha2.Trivy) error {
-	// Forge the secret resource
+func (r *Reconciler) AddSecret(ctx context.Context, trivy *goharborv1alpha2.Trivy) (graph.Resource, error) {
 	secret, err := r.GetSecret(ctx, trivy)
 	if err != nil {
-		return errors.Wrap(err, "cannot get secret")
+		return nil, errors.Wrap(err, "get")
 	}
 
-	// Add secret to reconciler controller
-	_, err = r.Controller.AddSecretToManage(ctx, secret)
+	secretRes, err := r.Controller.AddSecretToManage(ctx, secret)
 	if err != nil {
-		return errors.Wrapf(err, "cannot manage secret %s", secret.GetName())
+		return nil, errors.Wrap(err, "add")
 	}
 
-	return nil
+	return secretRes, nil
 }
 
 func (r *Reconciler) GetSecret(ctx context.Context, trivy *goharborv1alpha2.Trivy) (*corev1.Secret, error) {
@@ -34,12 +33,12 @@ func (r *Reconciler) GetSecret(ctx context.Context, trivy *goharborv1alpha2.Triv
 	name := r.NormalizeName(ctx, trivy.GetName())
 	namespace := trivy.GetNamespace()
 
-	if trivy.Spec.Cache.Redis.PasswordRef != "" {
+	if trivy.Spec.Redis.PasswordRef != "" {
 		var passwordSecret corev1.Secret
 
 		err := r.Client.Get(ctx, types.NamespacedName{
 			Namespace: namespace,
-			Name:      trivy.Spec.Cache.Redis.PasswordRef,
+			Name:      trivy.Spec.Redis.PasswordRef,
 		}, &passwordSecret)
 		if err != nil {
 			return nil, errors.Wrap(err, "cannot get redis password")
@@ -47,13 +46,13 @@ func (r *Reconciler) GetSecret(ctx context.Context, trivy *goharborv1alpha2.Triv
 
 		password, ok := passwordSecret.Data[harbormetav1.RedisPasswordKey]
 		if !ok {
-			return nil, errors.Errorf("%s not found in secret %s", harbormetav1.RedisPasswordKey, trivy.Spec.Cache.Redis.PasswordRef)
+			return nil, errors.Errorf("%s not found in secret %s", harbormetav1.RedisPasswordKey, trivy.Spec.Redis.PasswordRef)
 		}
 
 		redisPassword = string(password)
 	}
 
-	redisDSN := trivy.Spec.Cache.Redis.GetDSN(redisPassword)
+	redisDSN := trivy.Spec.Redis.GetDSN(redisPassword)
 
 	return &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
