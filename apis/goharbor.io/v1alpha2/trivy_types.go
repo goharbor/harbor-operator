@@ -1,8 +1,6 @@
 package v1alpha2
 
 import (
-	"regexp"
-
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -44,24 +42,45 @@ type TrivyList struct {
 type TrivySpec struct {
 	harbormetav1.ComponentSpec `json:",inline"`
 
+	harbormetav1.TrivyVulnerabilityTypes `json:",inline"`
+
+	harbormetav1.TrivySeverityTypes `json:",inline"`
+
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:default={"level":"info"}
 	Log TrivyLogSpec `json:"log,omitempty"`
 
+	// +kubebuilder:validation:Required
+	Server TrivyServerSpec `json:"server"`
+
 	// +kubebuilder:validation:Optional
-	Server TrivyServerSpec `json:"server,omitempty"`
+	Update TrivyUpdateSpec `json:"update,omitempty"`
 
 	// +kubebuilder:validation:Required
-	// Cache stores
-	Cache TrivyCacheSpec `json:"cache,omitempty"`
+	// Redis cache store
+	Redis TrivyRedisSpec `json:"redis,omitempty"`
+
+	// +kubebuilder:validation:Required
+	Storage TrivyStorageSpec `json:"storage"`
+}
+
+type TrivyUpdateSpec struct {
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=false
+	// The flag to enable or disable Trivy DB downloads from GitHub
+	Skip bool `json:"skip"`
 
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default={"reports":{"volumeSource":{"emptyDir":{"sizeLimit":"1Gi"}}},"cache":{"volumeSource":{"emptyDir":{"sizeLimit":"1Gi"}}}}
-	Storage TrivyStorageSpec `json:"storage,omitempty"`
+	// The GitHub access token to download Trivy DB (see GitHub rate limiting)
+	GithubTokenRef string `json:"githubTokenRef,omitempty"`
 }
 
 type TrivyServerSpec struct {
 	// +kubebuilder:validation:Optional
 	TLS *harbormetav1.ComponentsTLSSpec `json:"tls,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	ClientCertificateAuthorityRefs []string `json:"clientCertificateAuthorityRefs,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="string"
@@ -85,22 +104,6 @@ type TrivyServerSpec struct {
 	IdleTimeout *metav1.Duration `json:"idleTimeout,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=":8080"
-	// +kubebuilder:validation:Pattern=".*:[0-9]{0,5}"
-	// Binding address for the API server
-	Address string `json:"address,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	// Comma-separated list of vulnerability types.
-	// Possible values are os and library.
-	VulnType []TrivyServerVulnerabilityType `json:"vulnType,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	// Comma-separated list of vulnerabilities
-	// severities to be displayed
-	Severity []TrivyServerSeverityType `json:"severity,omitempty"`
-
-	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=false
 	// The flag to display only fixed vulnerabilities
 	IgnoreUnfixed bool `json:"ignoreUnfixed,omitempty"`
@@ -112,86 +115,77 @@ type TrivyServerSpec struct {
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=false
-	// The flag to enable or disable Trivy DB downloads from GitHub
-	SkipUpdate bool `json:"skipUpdate,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=false
 	// The flag to skip verifying registry certificate
 	Insecure bool `json:"insecure,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// The GitHub access token to download Trivy DB (see GitHub rate limiting)
-	GithubToken string `json:"githubToken,omitempty"`
+	Proxy *TrivyServerProxySpec `json:"proxy,omitempty"`
+}
 
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Pattern="http?://.+"
-	// The URL of the HTTP proxy server
-	HTTProxy string `json:"httpProxy,omitempty"`
-
-	// +kubebuilder:validation:Optional
+type TrivyServerProxySpec struct {
+	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Pattern="https?://.+"
-	// The URL of the HTTPS proxy server
-	HTTPSProxy string `json:"httpsProxy,omitempty"`
+	// The URL of the proxy server
+	URL string `json:"URL"`
 
 	// +kubebuilder:validation:Optional
 	// The URLs that the proxy settings do not apply to
 	NoProxy []string `json:"noProxy,omitempty"`
 }
 
-// +kubebuilder:validation:Enum={"os","library"}
-// +kubebuilder:default={"os","library"}
-// TrivyServerVulnerabilityType represents a CVE vulnerability type for trivy.
-type TrivyServerVulnerabilityType string
-
-// +kubebuilder:validation:Enum={"UNKNOWN","LOW","MEDIUM","HIGH","CRITICAL"}
-// +kubebuilder:default={"UNKNOWN","LOW","MEDIUM","HIGH","CRITICAL"}
-// TrivyServerSeverityType represents a CVE severity type for trivy.
-type TrivyServerSeverityType string
-
-var trivyURLValidationRegexp = regexp.MustCompile(`https?://.+`)
-
 type TrivyLogSpec struct {
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:default="info"
 	Level harbormetav1.TrivyLogLevel `json:"level,omitempty"`
 }
 
-type TrivyCacheSpec struct {
+type TrivyRedisSpec struct {
+	harbormetav1.RedisConnection `json:",inline"`
+
 	// +kubebuilder:validation:Required
-	// Redis cache store
-	Redis harbormetav1.RedisConnection `json:"redis,omitempty"`
+	Pool TrivyRedisPoolSpec `json:"pool,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default="harbor.scanner.trivy:store"
 	// The namespace for keys in the Redis store
-	RedisNamespace string `json:"redisNamespace,omitempty"`
+	Namespace string `json:"namespace,omitempty"`
 
+	// +kubebuilder:validation:Optional
+	Jobs TrivyRedisJobsSpec `json:"jobs,omitempty"`
+}
+
+type TrivyRedisJobsSpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="string"
 	// +kubebuilder:default="1h"
 	// +kubebuilder:validation:Pattern="([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?"
 	// The time to live for persisting scan jobs and associated scan reports
-	RedisScanJobTTL *metav1.Duration `json:"redisScanJobTTL,omitempty"`
+	ScanTTL *metav1.Duration `json:"scanTTL,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default="harbor.scanner.trivy:job-queue"
 	// The namespace for keys in the scan jobs queue backed by Redis
-	QueueRedisNamespace string `json:"queueRedisNamespace,omitempty"`
+	Namespace string `json:"Namespace,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=1
+	// +kubebuilder:validation:Minimum=0
 	// The number of workers to spin-up for the scan jobs queue
-	QueueWorkerConcurrency int `json:"queueWorkerConcurrency,omitempty"`
+	WorkerConcurrency int `json:"workerConcurrency,omitempty"`
+}
 
+type TrivyRedisPoolSpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=5
+	// +kubebuilder:validation:Minimum=0
 	// The max number of connections allocated by the Redis connection pool
-	PoolMaxActive int `json:"poolMaxActive,omitempty"`
+	MaxActive int `json:"maxActive,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=5
+	// +kubebuilder:validation:Minimum=0
 	// The max number of idle connections in the Redis connection pool
-	PoolMaxIdle int `json:"poolMaxIdle,omitempty"`
+	MaxIdle int `json:"maxIdle,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="string"
@@ -199,51 +193,42 @@ type TrivyCacheSpec struct {
 	// +kubebuilder:validation:Pattern="([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?"
 	// The duration after which idle connections to the Redis server are closed.
 	// If the value is zero, then idle connections are not closed.
-	PoolIdleTimeout *metav1.Duration `json:"poolIdleTimeout,omitempty"`
+	IdleTimeout *metav1.Duration `json:"idleTimeout,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="string"
 	// +kubebuilder:default="1s"
 	// +kubebuilder:validation:Pattern="([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?"
 	// The timeout for connecting to the Redis server
-	PoolConnectionTimeout *metav1.Duration `json:"poolConnectionTimeout,omitempty"`
+	ConnectionTimeout *metav1.Duration `json:"connectionTimeout,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="string"
 	// +kubebuilder:default="1s"
 	// +kubebuilder:validation:Pattern="([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?"
 	// The timeout for reading a single Redis command reply
-	PoolReadTimeout *metav1.Duration `json:"poolReadTimeout,omitempty"`
+	ReadTimeout *metav1.Duration `json:"readTimeout,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="string"
 	// +kubebuilder:default="1s"
 	// +kubebuilder:validation:Pattern="([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?"
 	// The timeout for writing a single Redis command
-	PoolWriteTimeout *metav1.Duration `json:"poolWriteTimeout,omitempty"`
+	WriteTimeout *metav1.Duration `json:"writeTimeout,omitempty"`
 }
 
 type TrivyStorageSpec struct {
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:default={"volumeSource":{"emptyDir":{"sizeLimit":"1Gi"}}}
-	Reports TrivyStorageReportsSpec `json:"reports,omitempty"`
+	// +kubebuilder:validation:Required
+	Reports TrivyStorageVolumeSpec `json:"reports"`
 
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:default={"volumeSource":{"emptyDir":{"sizeLimit":"1Gi"}}}
-	Cache TrivyStorageCacheSpec `json:"cache,omitempty"`
+	// +kubebuilder:validation:Required
+	Cache TrivyStorageVolumeSpec `json:"cache"`
 }
 
-type TrivyStorageReportsSpec struct {
-	// +kubebuilder:validation:Required
-	VolumeSource corev1.VolumeSource `json:"volumeSource"`
-
-	// +kubebuilder:validation:Optionel
-	Prefix string `json:"prefix,omitempty"`
-}
-
-type TrivyStorageCacheSpec struct {
-	// +kubebuilder:validation:Required
-	VolumeSource corev1.VolumeSource `json:"volumeSource"`
+type TrivyStorageVolumeSpec struct {
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default={"emptyDir":{"sizeLimit":"1Gi"}}
+	VolumeSource corev1.VolumeSource `json:"volumeSource,omitempty"`
 
 	// +kubebuilder:validation:Optionel
 	Prefix string `json:"prefix,omitempty"`

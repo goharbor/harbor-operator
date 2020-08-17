@@ -48,95 +48,6 @@ spec:
           spec:
             description: TrivySpec defines the desired state of Trivy.
             properties:
-              cache:
-                description: Cache stores
-                properties:
-                  poolConnectionTimeout:
-                    default: 1s
-                    description: The timeout for connecting to the Redis server
-                    pattern: ([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?
-                    type: string
-                  poolIdleTimeout:
-                    default: 5m
-                    description: The duration after which idle connections to the
-                      Redis server are closed. If the value is zero, then idle connections
-                      are not closed.
-                    pattern: ([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?
-                    type: string
-                  poolMaxActive:
-                    default: 5
-                    description: The max number of connections allocated by the Redis
-                      connection pool
-                    type: integer
-                  poolMaxIdle:
-                    default: 5
-                    description: The max number of idle connections in the Redis connection
-                      pool
-                    type: integer
-                  poolReadTimeout:
-                    default: 1s
-                    description: The timeout for reading a single Redis command reply
-                    pattern: ([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?
-                    type: string
-                  poolWriteTimeout:
-                    default: 1s
-                    description: The timeout for writing a single Redis command
-                    pattern: ([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?
-                    type: string
-                  queueRedisNamespace:
-                    default: harbor.scanner.trivy:job-queue
-                    description: The namespace for keys in the scan jobs queue backed
-                      by Redis
-                    type: string
-                  queueWorkerConcurrency:
-                    default: 1
-                    description: The number of workers to spin-up for the scan jobs
-                      queue
-                    type: integer
-                  redis:
-                    description: Redis cache store
-                    properties:
-                      certificateRef:
-                        description: Secret containing the client certificate to authenticate
-                          with.
-                        pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
-                        type: string
-                      database:
-                        default: 0
-                        description: The database number.
-                        format: int32
-                        maximum: 8
-                        minimum: 0
-                        type: integer
-                      host:
-                        description: Server hostname.
-                        minLength: 1
-                        type: string
-                      passwordRef:
-                        description: Secret containing the password to use when connecting
-                          to the server.
-                        pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
-                        type: string
-                      port:
-                        description: Server port.
-                        exclusiveMinimum: true
-                        format: int32
-                        minimum: 0
-                        type: integer
-                    required:
-                    - host
-                    type: object
-                  redisNamespace:
-                    default: harbor.scanner.trivy:store
-                    description: The namespace for keys in the Redis store
-                    type: string
-                  redisScanJobTTL:
-                    default: 1h
-                    description: The time to live for persisting scan jobs and associated
-                      scan reports
-                    pattern: ([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?
-                    type: string
-                type: object
               imagePullPolicy:
                 description: 'Image pull policy. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images'
                 enum:
@@ -156,8 +67,11 @@ spec:
                   type: object
                 type: array
               log:
+                default:
+                  level: info
                 properties:
                   level:
+                    default: info
                     description: TrivyLogLevel is the log level for Trivy.
                     enum:
                     - debug
@@ -174,6 +88,101 @@ spec:
                 description: 'NodeSelector is a selector which must be true for the
                   component to fit on a node. Selector which must match a node''s
                   labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/'
+                type: object
+              redis:
+                description: Redis cache store
+                properties:
+                  certificateRef:
+                    description: Secret containing the client certificate to authenticate
+                      with.
+                    pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                    type: string
+                  database:
+                    default: 0
+                    description: The database number.
+                    format: int32
+                    maximum: 8
+                    minimum: 0
+                    type: integer
+                  host:
+                    description: Server hostname.
+                    minLength: 1
+                    type: string
+                  jobs:
+                    properties:
+                      Namespace:
+                        default: harbor.scanner.trivy:job-queue
+                        description: The namespace for keys in the scan jobs queue
+                          backed by Redis
+                        type: string
+                      scanTTL:
+                        default: 1h
+                        description: The time to live for persisting scan jobs and
+                          associated scan reports
+                        pattern: ([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?
+                        type: string
+                      workerConcurrency:
+                        default: 1
+                        description: The number of workers to spin-up for the scan
+                          jobs queue
+                        minimum: 0
+                        type: integer
+                    type: object
+                  namespace:
+                    default: harbor.scanner.trivy:store
+                    description: The namespace for keys in the Redis store
+                    type: string
+                  passwordRef:
+                    description: Secret containing the password to use when connecting
+                      to the server.
+                    pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                    type: string
+                  pool:
+                    properties:
+                      connectionTimeout:
+                        default: 1s
+                        description: The timeout for connecting to the Redis server
+                        pattern: ([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?
+                        type: string
+                      idleTimeout:
+                        default: 5m
+                        description: The duration after which idle connections to
+                          the Redis server are closed. If the value is zero, then
+                          idle connections are not closed.
+                        pattern: ([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?
+                        type: string
+                      maxActive:
+                        default: 5
+                        description: The max number of connections allocated by the
+                          Redis connection pool
+                        minimum: 0
+                        type: integer
+                      maxIdle:
+                        default: 5
+                        description: The max number of idle connections in the Redis
+                          connection pool
+                        minimum: 0
+                        type: integer
+                      readTimeout:
+                        default: 1s
+                        description: The timeout for reading a single Redis command
+                          reply
+                        pattern: ([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?
+                        type: string
+                      writeTimeout:
+                        default: 1s
+                        description: The timeout for writing a single Redis command
+                        pattern: ([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?
+                        type: string
+                    type: object
+                  port:
+                    description: Server port.
+                    exclusiveMinimum: true
+                    format: int32
+                    minimum: 0
+                    type: integer
+                required:
+                - host
                 type: object
               replicas:
                 description: 'Replicas is the number of desired replicas. This is
@@ -203,27 +212,14 @@ spec:
                 type: object
               server:
                 properties:
-                  address:
-                    default: :8080
-                    description: Binding address for the API server
-                    pattern: .*:[0-9]{0,5}
-                    type: string
+                  clientCertificateAuthorityRefs:
+                    items:
+                      type: string
+                    type: array
                   debugMode:
                     default: false
                     description: The flag to enable or disable Trivy debug mode
                     type: boolean
-                  githubToken:
-                    description: The GitHub access token to download Trivy DB (see
-                      GitHub rate limiting)
-                    type: string
-                  httpProxy:
-                    description: The URL of the HTTP proxy server
-                    pattern: http?://.+
-                    type: string
-                  httpsProxy:
-                    description: The URL of the HTTPS proxy server
-                    pattern: https?://.+
-                    type: string
                   idleTimeout:
                     default: 60s
                     description: Idle timeout
@@ -237,35 +233,26 @@ spec:
                     default: false
                     description: The flag to skip verifying registry certificate
                     type: boolean
-                  noProxy:
-                    description: The URLs that the proxy settings do not apply to
-                    items:
-                      type: string
-                    type: array
+                  proxy:
+                    properties:
+                      URL:
+                        description: The URL of the proxy server
+                        pattern: https?://.+
+                        type: string
+                      noProxy:
+                        description: The URLs that the proxy settings do not apply
+                          to
+                        items:
+                          type: string
+                        type: array
+                    required:
+                    - URL
+                    type: object
                   readTimeout:
                     default: 15s
                     description: Socket timeout
                     pattern: ([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?
                     type: string
-                  severity:
-                    description: Comma-separated list of vulnerabilities severities
-                      to be displayed
-                    items:
-                      description: TrivyServerSeverityType represents a CVE severity
-                        type for trivy.
-                      enum:
-                      - UNKNOWN
-                      - LOW
-                      - MEDIUM
-                      - HIGH
-                      - CRITICAL
-                      type: string
-                    type: array
-                  skipUpdate:
-                    default: false
-                    description: The flag to enable or disable Trivy DB downloads
-                      from GitHub
-                    type: boolean
                   tls:
                     properties:
                       certificateRef:
@@ -274,17 +261,6 @@ spec:
                     required:
                     - certificateRef
                     type: object
-                  vulnType:
-                    description: Comma-separated list of vulnerability types. Possible
-                      values are os and library.
-                    items:
-                      description: TrivyServerVulnerabilityType represents a CVE vulnerability
-                        type for trivy.
-                      enum:
-                      - os
-                      - library
-                      type: string
-                    type: array
                   writeTimeout:
                     default: 15s
                     description: Socket timeout
@@ -295,26 +271,35 @@ spec:
                 description: 'ServiceAccountName is the name of the ServiceAccount
                   to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                 type: string
-              storage:
+              severities:
                 default:
-                  cache:
-                    volumeSource:
-                      emptyDir:
-                        sizeLimit: 1Gi
-                  reports:
-                    volumeSource:
-                      emptyDir:
-                        sizeLimit: 1Gi
+                - UNKNOWN
+                - LOW
+                - MEDIUM
+                - HIGH
+                - CRITICAL
+                description: List of severities to be displayed
+                items:
+                  description: TrivyServerSeverityType represents a CVE severity type
+                    for trivy.
+                  enum:
+                  - UNKNOWN
+                  - LOW
+                  - MEDIUM
+                  - HIGH
+                  - CRITICAL
+                  type: string
+                type: array
+              storage:
                 properties:
                   cache:
-                    default:
-                      volumeSource:
-                        emptyDir:
-                          sizeLimit: 1Gi
                     properties:
                       prefix:
                         type: string
                       volumeSource:
+                        default:
+                          emptyDir:
+                            sizeLimit: 1Gi
                         description: Represents the source of a volume to mount. Only
                           one of its members may be specified.
                         properties:
@@ -1568,18 +1553,15 @@ spec:
                             - volumePath
                             type: object
                         type: object
-                    required:
-                    - volumeSource
                     type: object
                   reports:
-                    default:
-                      volumeSource:
-                        emptyDir:
-                          sizeLimit: 1Gi
                     properties:
                       prefix:
                         type: string
                       volumeSource:
+                        default:
+                          emptyDir:
+                            sizeLimit: 1Gi
                         description: Represents the source of a volume to mount. Only
                           one of its members may be specified.
                         properties:
@@ -2833,9 +2815,10 @@ spec:
                             - volumePath
                             type: object
                         type: object
-                    required:
-                    - volumeSource
                     type: object
+                required:
+                - cache
+                - reports
                 type: object
               tolerations:
                 description: If specified, the pod's tolerations.
@@ -2877,6 +2860,34 @@ spec:
                       type: string
                   type: object
                 type: array
+              update:
+                properties:
+                  githubTokenRef:
+                    description: The GitHub access token to download Trivy DB (see
+                      GitHub rate limiting)
+                    type: string
+                  skip:
+                    default: false
+                    description: The flag to enable or disable Trivy DB downloads
+                      from GitHub
+                    type: boolean
+                type: object
+              vulnerabilityTypes:
+                default:
+                - os
+                - library
+                description: Comma-separated list of vulnerability types.
+                items:
+                  description: TrivyServerVulnerabilityType represents a CVE vulnerability
+                    type for trivy.
+                  enum:
+                  - os
+                  - library
+                  type: string
+                type: array
+            required:
+            - server
+            - storage
             type: object
           status:
             description: ComponentStatus represents the current status of the resource.

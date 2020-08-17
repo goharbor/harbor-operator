@@ -14,16 +14,14 @@ import (
 )
 
 func (r *Reconciler) AddService(ctx context.Context, trivy *goharborv1alpha2.Trivy) error {
-	// Forge the service resource
 	service, err := r.GetService(ctx, trivy)
 	if err != nil {
-		return errors.Wrap(err, "cannot get service")
+		return errors.Wrap(err, "get")
 	}
 
-	// Add service to reconciler controller
 	_, err = r.Controller.AddServiceToManage(ctx, service)
 	if err != nil {
-		return errors.Wrapf(err, "cannot manage service %s", service.GetName())
+		return errors.Wrap(err, "add")
 	}
 
 	return nil

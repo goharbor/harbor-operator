@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 	"path"
+	"strings"
 
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
@@ -14,6 +15,7 @@ import (
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	"github.com/goharbor/harbor-operator/pkg/graph"
 )
 
 var (
@@ -37,7 +39,7 @@ const (
 	httpPort  = 8080
 )
 
-func (r *Reconciler) AddDeployment(ctx context.Context, trivy *goharborv1alpha2.Trivy) error {
+func (r *Reconciler) AddDeployment(ctx context.Context, trivy *goharborv1alpha2.Trivy, dependencies ...graph.Resource) error {
 	// Forge the deploy resource
 	deploy, err := r.GetDeployment(ctx, trivy)
 	if err != nil {
@@ -45,7 +47,7 @@ func (r *Reconciler) AddDeployment(ctx context.Context, trivy *goharborv1alpha2.
 	}
 
 	// Add deploy to reconciler controller
-	_, err = r.Controller.AddDeploymentToManage(ctx, deploy)
+	_, err = r.Controller.AddDeploymentToManage(ctx, deploy, dependencies...)
 	if err != nil {
 		return errors.Wrapf(err, "cannot manage deploy %s", deploy.GetName())
 	}
@@ -69,7 +71,6 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.
 		Name:         CacheVolumeName,
 		VolumeSource: trivy.Spec.Storage.Cache.VolumeSource,
 	}}
-
 	volumesMount := []corev1.VolumeMount{{
 		Name:      ReportsVolumeName,
 		MountPath: ReportsVolumePath,
@@ -79,7 +80,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.
 		MountPath: CacheVolumePath,
 		ReadOnly:  false,
 	}}
-
+	envs := []corev1.EnvVar{}
 	envFroms := []corev1.EnvFromSource{{
 		ConfigMapRef: &corev1.ConfigMapEnvSource{
 			LocalObjectReference: corev1.LocalObjectReference{
@@ -93,6 +94,22 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.
 			},
 		},
 	}}
+
+	if trivy.Spec.Update.GithubTokenRef != "" {
+		envs = append(envs, corev1.EnvVar{
+			Name: "SCANNER_TRIVY_GITHUB_TOKEN",
+			ValueFrom: &corev1.EnvVarSource{
+				SecretKeyRef: &corev1.SecretKeySelector{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: trivy.Spec.Update.GithubTokenRef,
+					},
+					Key: harbormetav1.GithubTokenPasswordKey,
+				},
+			},
+		})
+	}
+
+	address := fmt.Sprintf(":%d", httpPort)
 
 	if trivy.Spec.Server.TLS.Enabled() {
 		volumes = append(volumes, corev1.Volume{
@@ -109,7 +126,29 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.
 			MountPath: InternalCertificatesPath,
 			ReadOnly:  true,
 		})
+
+		cas := append(trivy.Spec.Server.ClientCertificateAuthorityRefs,
+			path.Join(InternalCertificatesPath, corev1.ServiceAccountRootCAKey),
+		)
+
+		envs = append(envs, corev1.EnvVar{
+			Name:  "SCANNER_API_SERVER_TLS_CERTIFICATE",
+			Value: path.Join(InternalCertificatesPath, corev1.TLSCertKey),
+		}, corev1.EnvVar{
+			Name:  "SCANNER_API_SERVER_TLS_KEY",
+			Value: path.Join(InternalCertificatesPath, corev1.TLSPrivateKeyKey),
+		}, corev1.EnvVar{
+			Name:  "SCANNER_API_SERVER_CLIENT_CAS",
+			Value: strings.Join(cas, ","),
+		})
+
+		address = fmt.Sprintf(":%d", httpsPort)
 	}
+
+	envs = append(envs, corev1.EnvVar{
+		Name:  "SCANNER_API_SERVER_ADDR",
+		Value: address,
+	})
 
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -147,11 +186,12 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.
 							ContainerPort: httpsPort,
 						}},
 
+						Env:          envs,
 						EnvFrom:      envFroms,
 						VolumeMounts: volumesMount,
 
-						LivenessProbe:  r.getProbe(ctx, name, trivy.Spec.Server.TLS.Enabled(), LivenessProbe),
-						ReadinessProbe: r.getProbe(ctx, name, trivy.Spec.Server.TLS.Enabled(), ReadinessProbe),
+						LivenessProbe:  r.getProbe(ctx, trivy, LivenessProbe),
+						ReadinessProbe: r.getProbe(ctx, trivy, ReadinessProbe),
 					}},
 				},
 			},
@@ -159,20 +199,22 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.
 	}, nil
 }
 
-func (r *Reconciler) getProbe(ctx context.Context, hostname string, tlsEnabled bool, probePath string) *corev1.Probe {
-	if tlsEnabled {
+func (r *Reconciler) getProbe(ctx context.Context, trivy *goharborv1alpha2.Trivy, probePath string) *corev1.Probe {
+	if trivy.Spec.Server.TLS.Enabled() {
+		hostname := r.NormalizeName(ctx, trivy.GetName())
+
 		return &corev1.Probe{
 			Handler: corev1.Handler{
 				Exec: &corev1.ExecAction{
 					Command: []string{
-						"curl",
-						"--resolve", fmt.Sprintf("%s:%d:%s", r.NormalizeName(ctx, hostname), httpsPort, "127.0.0.1"),
-						"--cacert", path.Join(InternalCertificatesPath, "ca.crt"),
-						"--key", path.Join(InternalCertificatesPath, "tls.key"),
-						"--cert", path.Join(InternalCertificatesPath, "tls.crt"),
+						"curl", "-sSL",
+						"--resolve", fmt.Sprintf("%s:%d:%s", hostname, httpsPort, "127.0.0.1"),
+						"--cacert", path.Join(InternalCertificatesPath, corev1.ServiceAccountRootCAKey),
+						"--key", path.Join(InternalCertificatesPath, corev1.TLSPrivateKeyKey),
+						"--cert", path.Join(InternalCertificatesPath, corev1.TLSCertKey),
 						(&url.URL{
 							Scheme: "https",
-							Host:   fmt.Sprintf("%s:%d", r.NormalizeName(ctx, hostname), httpsPort),
+							Host:   fmt.Sprintf("%s:%d", hostname, httpsPort),
 							Path:   probePath,
 						}).String(),
 					},

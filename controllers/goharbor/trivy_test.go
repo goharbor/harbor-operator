@@ -51,22 +51,14 @@ func setupValidTrivy(ctx context.Context, ns string) (Resource, client.ObjectKey
 				Replicas: &replicas,
 			},
 
-			Server: goharborv1alpha2.TrivyServerSpec{
-				Address: ":8080",
-			},
-
-			Cache: goharborv1alpha2.TrivyCacheSpec{
-				Redis: harbormetav1.RedisConnection{
+			Redis: goharborv1alpha2.TrivyRedisSpec{
+				RedisConnection: harbormetav1.RedisConnection{
 					RedisHostSpec: harbormetav1.RedisHostSpec{
 						Host: "10.2.1.14",
 						Port: 6379,
 					},
 					Database: 5,
 				},
-			},
-
-			Log: goharborv1alpha2.TrivyLogSpec{
-				Level: harbormetav1.TrivyDefaultLevel,
 			},
 		},
 	}

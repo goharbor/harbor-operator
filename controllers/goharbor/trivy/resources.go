@@ -3,10 +3,15 @@ package trivy
 import (
 	"context"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
-	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
-	"github.com/goharbor/harbor-operator/pkg/resources"
 	"github.com/pkg/errors"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
+	"github.com/goharbor/harbor-operator/pkg/graph"
+	"github.com/goharbor/harbor-operator/pkg/resources"
 )
 
 func (r *Reconciler) NewEmpty(_ context.Context) resources.Resource {
@@ -14,34 +19,41 @@ func (r *Reconciler) NewEmpty(_ context.Context) resources.Resource {
 }
 
 func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resource) error {
-	// Fetch the trivy resources definition
 	trivy, ok := resource.(*goharborv1alpha2.Trivy)
 	if !ok {
 		return serrors.UnrecoverrableError(errors.Errorf("%+v", resource), serrors.OperatorReason, "unable to add resource")
 	}
 
-	// Add Trivy service resources with a public port for Trivy deployment
 	err := r.AddService(ctx, trivy)
 	if err != nil {
-		return errors.Wrap(err, "cannot add service")
+		return errors.Wrap(err, "service")
 	}
 
-	// Add Trivy config map resources with all Trivy custom definition
-	err = r.AddConfigMap(ctx, trivy)
-	if err != nil {
-		return errors.Wrap(err, "cannot add config map")
+	var github graph.Resource
+
+	if trivy.Spec.Update.GithubTokenRef != "" {
+		github, err = r.AddExternalTypedSecret(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{
+			Name:      trivy.Spec.Update.GithubTokenRef,
+			Namespace: trivy.GetNamespace(),
+		}}, harbormetav1.SecretTypeGithubToken)
+		if err != nil {
+			return errors.Wrap(err, "github")
+		}
 	}
 
-	// Add Trivy secret resources with creds for Redis
-	err = r.AddSecret(ctx, trivy)
+	cm, err := r.AddConfigMap(ctx, trivy)
 	if err != nil {
-		return errors.Wrap(err, "cannot add secret")
+		return errors.Wrap(err, "configmap")
 	}
 
-	// Add Trivy deployment and volumes resources
-	err = r.AddDeployment(ctx, trivy)
+	secret, err := r.AddSecret(ctx, trivy)
 	if err != nil {
-		return errors.Wrap(err, "cannot add deployment")
+		return errors.Wrap(err, "secret")
+	}
+
+	err = r.AddDeployment(ctx, trivy, cm, secret, github)
+	if err != nil {
+		return errors.Wrap(err, "deployment")
 	}
 
 	return nil
