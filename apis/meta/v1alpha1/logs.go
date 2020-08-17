@@ -114,18 +114,17 @@ func (l HarborLogLevel) RegistryCtl() RegistryCtlLogLevel {
 type JobServiceLogLevel string
 
 const (
-	JobServiceDebug        JobServiceLogLevel = "DEBUG"
-	JobServiceInfo         JobServiceLogLevel = "INFO"
-	JobServiceWarning      JobServiceLogLevel = "WARNING"
-	JobServiceError        JobServiceLogLevel = "ERROR"
-	JobServiceFatal        JobServiceLogLevel = "FATAL"
-	JobServiceDefaultLevel JobServiceLogLevel = JobServiceInfo
+	JobServiceDebug   JobServiceLogLevel = "DEBUG"
+	JobServiceInfo    JobServiceLogLevel = "INFO"
+	JobServiceWarning JobServiceLogLevel = "WARNING"
+	JobServiceError   JobServiceLogLevel = "ERROR"
+	JobServiceFatal   JobServiceLogLevel = "FATAL"
 )
 
 func (l HarborLogLevel) JobService() JobServiceLogLevel {
 	switch l {
 	default:
-		return JobServiceDefaultLevel
+		return JobServiceInfo
 	case HarborDebug:
 		return JobServiceDebug
 	case HarborInfo:
@@ -145,19 +144,18 @@ func (l HarborLogLevel) JobService() JobServiceLogLevel {
 type NotaryLogLevel string
 
 const (
-	NotaryDebug        NotaryLogLevel = "debug"
-	NotaryInfo         NotaryLogLevel = "info"
-	NotaryWarning      NotaryLogLevel = "warning"
-	NotaryError        NotaryLogLevel = "error"
-	NotaryFatal        NotaryLogLevel = "fatal"
-	NotaryPanic        NotaryLogLevel = "panic"
-	NotaryDefaultLevel NotaryLogLevel = NotaryInfo
+	NotaryDebug   NotaryLogLevel = "debug"
+	NotaryInfo    NotaryLogLevel = "info"
+	NotaryWarning NotaryLogLevel = "warning"
+	NotaryError   NotaryLogLevel = "error"
+	NotaryFatal   NotaryLogLevel = "fatal"
+	NotaryPanic   NotaryLogLevel = "panic"
 )
 
 func (l HarborLogLevel) Notary() NotaryLogLevel {
 	switch l {
 	default:
-		return NotaryDefaultLevel
+		return NotaryInfo
 	case HarborDebug:
 		return NotaryDebug
 	case HarborInfo:
@@ -173,24 +171,22 @@ func (l HarborLogLevel) Notary() NotaryLogLevel {
 
 // +kubebuilder:validation:Type=string
 // +kubebuilder:validation:Enum={"debug","info","warning","error","fatal","panic"}
-// +kubebuilder:default="info"
 // TrivyLogLevel is the log level for Trivy.
 type TrivyLogLevel string
 
 const (
-	TrivyDebug        TrivyLogLevel = "debug"
-	TrivyInfo         TrivyLogLevel = "info"
-	TrivyWarning      TrivyLogLevel = "warning"
-	TrivyError        TrivyLogLevel = "error"
-	TrivyFatal        TrivyLogLevel = "fatal"
-	TrivyPanic        TrivyLogLevel = "panic"
-	TrivyDefaultLevel TrivyLogLevel = TrivyInfo
+	TrivyDebug   TrivyLogLevel = "debug"
+	TrivyInfo    TrivyLogLevel = "info"
+	TrivyWarning TrivyLogLevel = "warning"
+	TrivyError   TrivyLogLevel = "error"
+	TrivyFatal   TrivyLogLevel = "fatal"
+	TrivyPanic   TrivyLogLevel = "panic"
 )
 
 func (l HarborLogLevel) Trivy() TrivyLogLevel {
 	switch l {
 	default:
-		return TrivyDefaultLevel
+		return TrivyInfo
 	case HarborDebug:
 		return TrivyDebug
 	case HarborInfo:
