@@ -151,22 +151,6 @@ type TrivyServerSeverityType string
 
 var trivyURLValidationRegexp = regexp.MustCompile(`https?://.+`)
 
-func (r *TrivyServerSpec) Validate() map[string]error {
-	errors := map[string]error{}
-
-	if len(r.NoProxy) > 0 {
-		for _, url := range r.NoProxy {
-			matched := trivyURLValidationRegexp.MatchString(url)
-			if !matched {
-				errors["NoProxy"] = ErrWrongURLFormat
-				break
-			}
-		}
-	}
-
-	return errors
-}
-
 type TrivyLogSpec struct {
 	// +kubebuilder:validation:Optional
 	Level harbormetav1.TrivyLogLevel `json:"level,omitempty"`
