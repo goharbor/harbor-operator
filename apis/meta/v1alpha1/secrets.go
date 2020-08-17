@@ -78,7 +78,6 @@ const (
 	//
 	// Required field:
 	// - Secret.Data["github-token"] - The Github token
-	// - Secret.Data["github-user"]  - The Github username
 	SecretTypeGithubToken corev1.SecretType = "goharbor.io/github" // nolint:gosec
 
 	// GithubTokenPasswordKey is the token to use with the account
