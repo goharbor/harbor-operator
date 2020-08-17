@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 	"path"
+	"strconv"
 	"strings"
 	"time"
 
@@ -162,10 +163,10 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 				},
 			},
 		}),
-		common.WithChartMuseum: harbor.Value(fmt.Sprintf("%+v", core.Spec.Components.ChartRepository != nil)),
+		common.WithChartMuseum: harbor.Value(strconv.FormatBool(core.Spec.Components.ChartRepository != nil)),
 		common.WithClair:       harbor.Value("false"),
-		common.WithNotary:      harbor.Value(fmt.Sprintf("%+v", core.Spec.Components.NotaryServer != nil)),
-		common.WithTrivy:       harbor.Value(fmt.Sprintf("%+v", core.Spec.Components.Trivy != nil)),
+		common.WithNotary:      harbor.Value(strconv.FormatBool(core.Spec.Components.NotaryServer != nil)),
+		common.WithTrivy:       harbor.Value(strconv.FormatBool(core.Spec.Components.Trivy != nil)),
 	})
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot configure environment variables")
@@ -255,10 +256,10 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 		Value: "true", // TODO
 	}, {
 		Name:  "SYNC_REGISTRY",
-		Value: fmt.Sprintf("%+v", core.Spec.Components.Registry.Sync),
+		Value: strconv.FormatBool(core.Spec.Components.Registry.Sync),
 	}, {
 		Name:  "INTERNAL_TLS_ENABLED",
-		Value: fmt.Sprintf("%v", core.Spec.Components.TLS != nil),
+		Value: strconv.FormatBool(core.Spec.Components.TLS.Enabled()),
 	}}...)
 
 	if core.Spec.Database.MaxIdleConnections != nil {

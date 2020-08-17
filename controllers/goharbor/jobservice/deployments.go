@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"path"
+	"strconv"
 
 	"github.com/goharbor/harbor/src/common"
 	"github.com/pkg/errors"
@@ -94,7 +95,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1al
 		},
 	}, corev1.EnvVar{
 		Name:  "INTERNAL_TLS_ENABLED",
-		Value: fmt.Sprintf("%v", jobservice.Spec.TLS.Enabled()),
+		Value: strconv.FormatBool(jobservice.Spec.TLS.Enabled()),
 	})
 	volumes := []corev1.Volume{{
 		Name: ConfigVolumeName,
