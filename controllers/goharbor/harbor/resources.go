@@ -56,7 +56,7 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrapf(err, "cannot add %s configuration", controllers.NotaryServer)
 	}
 
-	trivyCertificate, err := r.AddTrivyConfigurations(ctx, harbor, internalTLSIssuer)
+	trivyCertificate, trivyUpdateSecret, err := r.AddTrivyConfigurations(ctx, harbor, internalTLSIssuer)
 	if err != nil {
 		return errors.Wrapf(err, "cannot add %s configuration", controllers.Trivy)
 	}
@@ -101,7 +101,7 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrapf(err, "cannot add %s", controllers.NotarySigner)
 	}
 
-	_, err = r.AddTrivy(ctx, harbor, trivyCertificate)
+	_, err = r.AddTrivy(ctx, harbor, trivyCertificate, trivyUpdateSecret)
 	if err != nil {
 		return errors.Wrapf(err, "cannot add %s", controllers.Trivy)
 	}
