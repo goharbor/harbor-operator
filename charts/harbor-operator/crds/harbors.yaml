@@ -1212,8 +1212,6 @@ spec:
                 type: object
               trivy:
                 properties:
-                  githubToken:
-                    type: string
                   imagePullPolicy:
                     description: 'Image pull policy. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images'
                     enum:
@@ -1271,6 +1269,9 @@ spec:
                       to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                     type: string
                   skipUpdate:
+                    default: false
+                    description: The flag to enable or disable Trivy DB downloads
+                      from GitHub
                     type: boolean
                   tolerations:
                     description: If specified, the pod's tolerations.
