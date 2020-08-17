@@ -3,7 +3,6 @@ package trivy
 import (
 	"context"
 	"strconv"
-	"strings"
 
 	"github.com/pkg/errors"
 
@@ -11,36 +10,29 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	"github.com/goharbor/harbor-operator/pkg/graph"
 )
 
-func (r *Reconciler) AddConfigMap(ctx context.Context, trivy *goharborv1alpha2.Trivy) error {
+func (r *Reconciler) AddConfigMap(ctx context.Context, trivy *goharborv1alpha2.Trivy) (graph.Resource, error) {
 	// Forge the ConfigMap resource
 	cm, err := r.GetConfigMap(ctx, trivy)
 	if err != nil {
-		return errors.Wrap(err, "cannot get config map")
+		return nil, errors.Wrap(err, "get")
 	}
 
 	// Add config map to reconciler controller
-	_, err = r.Controller.AddConfigMapToManage(ctx, cm)
+	cmResource, err := r.Controller.AddConfigMapToManage(ctx, cm)
 	if err != nil {
-		return errors.Wrapf(err, "cannot manage config map %s", cm.GetName())
+		return nil, errors.Wrap(err, "add")
 	}
 
-	return nil
+	return cmResource, nil
 }
 
 // GetConfigMap get the config map linked to the trivy deployment.
 func (r *Reconciler) GetConfigMap(ctx context.Context, trivy *goharborv1alpha2.Trivy) (*corev1.ConfigMap, error) {
 	name := r.NormalizeName(ctx, trivy.GetName())
 	namespace := trivy.GetNamespace()
-
-	var certificate, key, cas string
-
-	if trivy.Spec.Server.TLS != nil {
-		certificate = "/etc/harbor/ssl/tls.crt"
-		key = "/etc/harbor/ssl/tls.key"
-		cas = "/etc/harbor/ssl/ca.crt"
-	}
 
 	return &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
@@ -51,58 +43,31 @@ func (r *Reconciler) GetConfigMap(ctx context.Context, trivy *goharborv1alpha2.T
 		Data: map[string]string{
 			"SCANNER_LOG_LEVEL": string(trivy.Spec.Log.Level),
 
-			"SCANNER_API_SERVER_ADDR":            trivy.Spec.Server.Address,
-			"SCANNER_API_SERVER_TLS_CERTIFICATE": certificate,
-			"SCANNER_API_SERVER_TLS_KEY":         key,
-			"SCANNER_API_SERVER_CLIENT_CAS":      cas,
-			"SCANNER_API_SERVER_READ_TIMEOUT":    trivy.Spec.Server.ReadTimeout.Duration.String(),
-			"SCANNER_API_SERVER_WRITE_TIMEOUT":   trivy.Spec.Server.WriteTimeout.Duration.String(),
-			"SCANNER_API_SERVER_IDLE_TIMEOUT":    trivy.Spec.Server.IdleTimeout.Duration.String(),
+			"SCANNER_API_SERVER_READ_TIMEOUT":  trivy.Spec.Server.ReadTimeout.Duration.String(),
+			"SCANNER_API_SERVER_WRITE_TIMEOUT": trivy.Spec.Server.WriteTimeout.Duration.String(),
+			"SCANNER_API_SERVER_IDLE_TIMEOUT":  trivy.Spec.Server.IdleTimeout.Duration.String(),
 
 			"SCANNER_TRIVY_CACHE_DIR":      "/home/scanner/.cache/trivy",
 			"SCANNER_TRIVY_REPORTS_DIR":    "/home/scanner/.cache/reports",
 			"SCANNER_TRIVY_DEBUG_MODE":     strconv.FormatBool(trivy.Spec.Server.DebugMode),
-			"SCANNER_TRIVY_VULN_TYPE":      GetVulnerabilities(trivy.Spec.Server.VulnType),
-			"SCANNER_TRIVY_SEVERITY":       GetSeverities(trivy.Spec.Server.Severity),
+			"SCANNER_TRIVY_VULN_TYPE":      trivy.Spec.TrivyVulnerabilityTypes.GetValue(),
+			"SCANNER_TRIVY_SEVERITY":       trivy.Spec.TrivySeverityTypes.GetValue(),
 			"SCANNER_TRIVY_IGNORE_UNFIXED": strconv.FormatBool(trivy.Spec.Server.IgnoreUnfixed),
-			"SCANNER_TRIVY_SKIP_UPDATE":    strconv.FormatBool(trivy.Spec.Server.SkipUpdate),
-			"SCANNER_TRIVY_GITHUB_TOKEN":   trivy.Spec.Server.GithubToken,
+			"SCANNER_TRIVY_SKIP_UPDATE":    strconv.FormatBool(trivy.Spec.Update.Skip),
 			"SCANNER_TRIVY_INSECURE":       strconv.FormatBool(trivy.Spec.Server.Insecure),
 
-			"SCANNER_STORE_REDIS_NAMESPACE":    trivy.Spec.Cache.RedisNamespace,
-			"SCANNER_STORE_REDIS_SCAN_JOB_TTL": trivy.Spec.Cache.RedisScanJobTTL.Duration.String(),
+			"SCANNER_STORE_REDIS_NAMESPACE":    trivy.Spec.Redis.Namespace,
+			"SCANNER_STORE_REDIS_SCAN_JOB_TTL": trivy.Spec.Redis.Jobs.ScanTTL.Duration.String(),
 
-			"SCANNER_JOB_QUEUE_REDIS_NAMESPACE":    trivy.Spec.Cache.QueueRedisNamespace,
-			"SCANNER_JOB_QUEUE_WORKER_CONCURRENCY": strconv.Itoa(trivy.Spec.Cache.QueueWorkerConcurrency),
+			"SCANNER_JOB_QUEUE_REDIS_NAMESPACE":    trivy.Spec.Redis.Jobs.Namespace,
+			"SCANNER_JOB_QUEUE_WORKER_CONCURRENCY": strconv.Itoa(trivy.Spec.Redis.Jobs.WorkerConcurrency),
 
-			"SCANNER_REDIS_POOL_IDLE_TIMEOUT":       trivy.Spec.Cache.PoolIdleTimeout.Duration.String(),
-			"SCANNER_REDIS_POOL_CONNECTION_TIMEOUT": trivy.Spec.Cache.PoolConnectionTimeout.Duration.String(),
-			"SCANNER_REDIS_POOL_READ_TIMEOUT":       trivy.Spec.Cache.PoolReadTimeout.Duration.String(),
-			"SCANNER_REDIS_POOL_WRITE_TIMEOUT":      trivy.Spec.Cache.PoolWriteTimeout.Duration.String(),
-			"SCANNER_REDIS_POOL_MAX_ACTIVE":         strconv.Itoa(trivy.Spec.Cache.PoolMaxActive),
-			"SCANNER_REDIS_POOL_MAX_IDLE":           strconv.Itoa(trivy.Spec.Cache.PoolMaxIdle),
+			"SCANNER_REDIS_POOL_IDLE_TIMEOUT":       trivy.Spec.Redis.Pool.IdleTimeout.Duration.String(),
+			"SCANNER_REDIS_POOL_CONNECTION_TIMEOUT": trivy.Spec.Redis.Pool.ConnectionTimeout.Duration.String(),
+			"SCANNER_REDIS_POOL_READ_TIMEOUT":       trivy.Spec.Redis.Pool.ReadTimeout.Duration.String(),
+			"SCANNER_REDIS_POOL_WRITE_TIMEOUT":      trivy.Spec.Redis.Pool.WriteTimeout.Duration.String(),
+			"SCANNER_REDIS_POOL_MAX_ACTIVE":         strconv.Itoa(trivy.Spec.Redis.Pool.MaxActive),
+			"SCANNER_REDIS_POOL_MAX_IDLE":           strconv.Itoa(trivy.Spec.Redis.Pool.MaxIdle),
 		},
 	}, nil
-}
-
-// GetVulnerabilities joins array of vulnerabilities type into a string separated by commas.
-func GetVulnerabilities(vulnType []goharborv1alpha2.TrivyServerVulnerabilityType) string {
-	vulnerabilities := make([]string, len(vulnType))
-
-	for index, v := range vulnType {
-		vulnerabilities[index] = string(v)
-	}
-
-	return strings.Join(vulnerabilities, ",")
-}
-
-// GetSeverities joins array of severities type into a string separated by commas.
-func GetSeverities(sevType []goharborv1alpha2.TrivyServerSeverityType) string {
-	severities := make([]string, len(sevType))
-
-	for index, v := range sevType {
-		severities[index] = string(v)
-	}
-
-	return strings.Join(severities, ",")
 }
