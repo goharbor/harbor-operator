@@ -7,30 +7,6 @@ import (
 
 const NotaryMigrationGithubCredentialsConfigKey = "notary-migration-github-credentials"
 
-type GithubCredentials struct {
-	User  string `json:"user"`
-	Token string `json:"token"`
-}
-
-func (r *Reconciler) GetDefaultNotaryMigrationCredentials() (*GithubCredentials, error) {
-	item, err := configstore.Filter().
-		Slice(NotaryMigrationGithubCredentialsConfigKey).
-		Unmarshal(func() interface{} {
-			return &GithubCredentials{}
-		}).
-		GetFirstItem()
-	if err != nil {
-		return nil, err
-	}
-
-	config, err := item.Unmarshaled()
-	if err != nil {
-		return nil, errors.Wrap(err, "invalid")
-	}
-
-	return config.(*GithubCredentials), nil
-}
-
 const NotaryMigrationGithubSourceConfigKey = "notary-migration-github-source"
 
 type GithubSource struct {

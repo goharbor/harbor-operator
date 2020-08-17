@@ -234,8 +234,11 @@ type ChartMuseumComponentSpec struct {
 
 type TrivyComponentSpec struct {
 	harbormetav1.ComponentSpec `json:",inline"`
-	SkipUpdate                 bool   `json:"skipUpdate,omitempty"`
-	GithubToken                string `json:"githubToken,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=false
+	// The flag to enable or disable Trivy DB downloads from GitHub
+	SkipUpdate bool `json:"skipUpdate"`
 }
 
 type HarborStorageImageChartStorageSpec struct {

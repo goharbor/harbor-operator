@@ -183,7 +183,7 @@ func (r *Reconciler) GetNotaryServerMigrationSecret(ctx context.Context, harbor 
 	name := r.NormalizeName(ctx, harbor.GetName(), controllers.NotaryServer.String(), "migration")
 	namespace := harbor.GetNamespace()
 
-	github, err := r.GetDefaultNotaryMigrationCredentials()
+	github, err := r.GetGithubCredentials(NotaryMigrationGithubCredentialsConfigKey)
 	if err != nil {
 		return nil, serrors.UnrecoverrableError(err, serrors.OperatorReason, "cannot get default migration source")
 	}
