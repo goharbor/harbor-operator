@@ -40,10 +40,27 @@ func (c *HarborCore) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 	cacheEnv := corev1.EnvVar{
 		Name: "_REDIS_URL_REG",
 	}
+
 	if len(c.harbor.Spec.Components.Registry.CacheSecret) > 0 {
 		cacheEnv.ValueFrom = &corev1.EnvVarSource{
 			SecretKeyRef: &corev1.SecretKeySelector{
 				Key:      goharborv1alpha1.HarborRegistryURLKey,
+				Optional: &varTrue,
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: c.harbor.Spec.Components.Registry.CacheSecret,
+				},
+			},
+		}
+	}
+
+	coreURLEnv := corev1.EnvVar{
+		Name: "_REDIS_URL",
+	}
+
+	if len(c.harbor.Spec.Components.Core.CacheSecret) > 0 {
+		coreURLEnv.ValueFrom = &corev1.EnvVarSource{
+			SecretKeyRef: &corev1.SecretKeySelector{
+				Key:      goharborv1alpha1.HarborCoreURLKey,
 				Optional: &varTrue,
 				LocalObjectReference: corev1.LocalObjectReference{
 					Name: c.harbor.Spec.Components.Registry.CacheSecret,
@@ -327,6 +344,7 @@ func (c *HarborCore) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 										},
 									},
 									cacheEnv,
+									coreURLEnv,
 								},
 								EnvFrom: []corev1.EnvFromSource{
 									{

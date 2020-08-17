@@ -131,6 +131,9 @@ type CoreComponent struct {
 
 	// +kubebuilder:validation:Required
 	DatabaseSecret string `json:"databaseSecret"`
+
+	// +kubebuilder:validation:Required
+	CacheSecret string `json:"cacheSecret"`
 }
 
 type PortalComponent struct {
