@@ -7,7 +7,7 @@ metadata:
   name: test-postgresql-headless
   labels:
     app.kubernetes.io/name: postgresql
-    helm.sh/chart: postgresql-9.2.0
+    helm.sh/chart: postgresql-9.2.1
     app.kubernetes.io/instance: test
     app.kubernetes.io/managed-by: Helm
 spec:
@@ -28,7 +28,7 @@ metadata:
   name: test-postgresql
   labels:
     app.kubernetes.io/name: postgresql
-    helm.sh/chart: postgresql-9.2.0
+    helm.sh/chart: postgresql-9.2.1
     app.kubernetes.io/instance: test
     app.kubernetes.io/managed-by: Helm
   annotations:
@@ -50,7 +50,7 @@ metadata:
   name: test-postgresql
   labels:
     app.kubernetes.io/name: postgresql
-    helm.sh/chart: postgresql-9.2.0
+    helm.sh/chart: postgresql-9.2.1
     app.kubernetes.io/instance: test
     app.kubernetes.io/managed-by: Helm
   annotations:
@@ -69,7 +69,7 @@ spec:
       name: test-postgresql
       labels:
         app.kubernetes.io/name: postgresql
-        helm.sh/chart: postgresql-9.2.0
+        helm.sh/chart: postgresql-9.2.1
         app.kubernetes.io/instance: test
         app.kubernetes.io/managed-by: Helm
         role: master
@@ -78,7 +78,7 @@ spec:
         fsGroup: 1001
       containers:
         - name: test-postgresql
-          image: docker.io/bitnami/postgresql:11.8.0-debian-10-r76
+          image: docker.io/bitnami/postgresql:11.9.0-debian-10-r0
           imagePullPolicy: "IfNotPresent"
           resources:
             requests:
