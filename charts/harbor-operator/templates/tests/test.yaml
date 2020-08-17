@@ -443,7 +443,6 @@ spec:
     passwordRef: harbor-redis
     port: 6379
   trivy:
-    githubToken: GITHUB-TOKEN
     skipUpdate: false
   trivyStorage:
     cachePersistentVolume:
