@@ -16,8 +16,8 @@ import (
 // +resource:path=core
 // +kubebuilder:subresource:status
 // +kubebuilder:resource:categories="goharbor"
-// +kubebuilder:printcolumn:name="Version",type=string,JSONPath=`.spec.version`,description="The semver version",priority=5
-// +kubebuilder:printcolumn:name="Replicas",type=string,JSONPath=`.spec.replicas`,description="The number of replicas",priority=0
+// +kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`,description="Timestamp representing the server time when this object was created. It is not guaranteed to be set in happens-before order across separate operations. Clients may not set this value. It is represented in RFC3339 form and is in UTC.",priority=1
+// +kubebuilder:printcolumn:name="Failure",type=string,JSONPath=`.status.conditions[?(@.type=="Failed")].message`,description="Human readable message describing the failure",priority=5
 // Core is the Schema for the Core API.
 type Core struct {
 	metav1.TypeMeta   `json:",inline"`
@@ -39,6 +39,7 @@ type CoreList struct {
 // CoreSpec defines the desired state of Core.
 type CoreSpec struct {
 	harbormetav1.ComponentSpec `json:",inline"`
+
 	// https://github.com/goharbor/harbor/blob/master/src/common/config/metadata/metadatalist.go#L62
 	CoreConfig `json:",inline"`
 
