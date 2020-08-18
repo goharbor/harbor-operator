@@ -25,6 +25,7 @@ const (
 	CoreError   CoreLogLevel = "error"
 )
 
+// Core get the log level for Core component.
 func (l HarborLogLevel) Core() CoreLogLevel {
 	switch l {
 	default:
@@ -52,6 +53,7 @@ const (
 	RegistryError   RegistryLogLevel = "error"
 )
 
+// Registry get the log level for Registry component.
 func (l HarborLogLevel) Registry() RegistryLogLevel {
 	switch l {
 	default:
@@ -91,6 +93,7 @@ const (
 	RegistryCtlFatal   RegistryCtlLogLevel = "fatal"
 )
 
+// RegistryCtl get the log level for RegistryController component.
 func (l HarborLogLevel) RegistryCtl() RegistryCtlLogLevel {
 	switch l {
 	default:
@@ -121,6 +124,7 @@ const (
 	JobServiceFatal   JobServiceLogLevel = "FATAL"
 )
 
+// JobService get the log level for JobService component.
 func (l HarborLogLevel) JobService() JobServiceLogLevel {
 	switch l {
 	default:
@@ -152,6 +156,7 @@ const (
 	NotaryPanic   NotaryLogLevel = "panic"
 )
 
+// Notary get the log level for Notary component.
 func (l HarborLogLevel) Notary() NotaryLogLevel {
 	switch l {
 	default:
@@ -183,6 +188,7 @@ const (
 	TrivyPanic   TrivyLogLevel = "panic"
 )
 
+// Trivy get the log level for Trivy component.
 func (l HarborLogLevel) Trivy() TrivyLogLevel {
 	switch l {
 	default:
