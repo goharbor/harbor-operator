@@ -60,7 +60,7 @@ func (r *Reconciler) GetConfigMap(ctx context.Context, trivy *goharborv1alpha2.T
 			"SCANNER_STORE_REDIS_SCAN_JOB_TTL": trivy.Spec.Redis.Jobs.ScanTTL.Duration.String(),
 
 			"SCANNER_JOB_QUEUE_REDIS_NAMESPACE":    trivy.Spec.Redis.Jobs.Namespace,
-			"SCANNER_JOB_QUEUE_WORKER_CONCURRENCY": strconv.Itoa(trivy.Spec.Redis.Jobs.WorkerConcurrency),
+			"SCANNER_JOB_QUEUE_WORKER_CONCURRENCY": "1", // More may corrupt trivy.db file
 
 			"SCANNER_REDIS_POOL_IDLE_TIMEOUT":       trivy.Spec.Redis.Pool.IdleTimeout.Duration.String(),
 			"SCANNER_REDIS_POOL_CONNECTION_TIMEOUT": trivy.Spec.Redis.Pool.ConnectionTimeout.Duration.String(),
