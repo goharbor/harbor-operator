@@ -166,12 +166,6 @@ type TrivyRedisJobsSpec struct {
 	// +kubebuilder:default="harbor.scanner.trivy:job-queue"
 	// The namespace for keys in the scan jobs queue backed by Redis
 	Namespace string `json:"Namespace,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=1
-	// +kubebuilder:validation:Minimum=0
-	// The number of workers to spin-up for the scan jobs queue
-	WorkerConcurrency int `json:"workerConcurrency,omitempty"`
 }
 
 type TrivyRedisPoolSpec struct {

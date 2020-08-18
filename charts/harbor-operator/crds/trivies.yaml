@@ -125,12 +125,6 @@ spec:
                           associated scan reports
                         pattern: ([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?
                         type: string
-                      workerConcurrency:
-                        default: 1
-                        description: The number of workers to spin-up for the scan
-                          jobs queue
-                        minimum: 0
-                        type: integer
                     type: object
                   namespace:
                     default: harbor.scanner.trivy:store
