@@ -127,10 +127,6 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.
 			ReadOnly:  true,
 		})
 
-		cas := append(trivy.Spec.Server.ClientCertificateAuthorityRefs,
-			path.Join(InternalCertificatesPath, corev1.ServiceAccountRootCAKey),
-		)
-
 		envs = append(envs, corev1.EnvVar{
 			Name:  "SCANNER_API_SERVER_TLS_CERTIFICATE",
 			Value: path.Join(InternalCertificatesPath, corev1.TLSCertKey),
@@ -139,7 +135,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.
 			Value: path.Join(InternalCertificatesPath, corev1.TLSPrivateKeyKey),
 		}, corev1.EnvVar{
 			Name:  "SCANNER_API_SERVER_CLIENT_CAS",
-			Value: strings.Join(cas, ","),
+			Value: strings.Join(trivy.Spec.Server.ClientCertificateAuthorityRefs, ","),
 		})
 
 		address = fmt.Sprintf(":%d", httpsPort)
