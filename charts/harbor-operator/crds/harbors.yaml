@@ -31,14 +31,23 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - description: The semver Harbor version
-      jsonPath: .spec.version
-      name: Version
-      priority: 5
-      type: string
     - description: The public URL to the Harbor application
       jsonPath: .spec.externalURL
       name: Public URL
+      priority: 5
+      type: string
+    - description: Timestamp representing the server time when this object was created.
+        It is not guaranteed to be set in happens-before order across separate operations.
+        Clients may not set this value. It is represented in RFC3339 form and is in
+        UTC.
+      jsonPath: .metadata.creationTimestamp
+      name: Age
+      priority: 1
+      type: date
+    - description: Human readable message describing the failure
+      jsonPath: .status.conditions[?(@.type=="Failed")].message
+      name: Failure
+      priority: 5
       type: string
     name: v1alpha2
     schema:
