@@ -228,7 +228,7 @@ docker-lint: hadolint
 make-lint: checkmake
 	$(CHECKMAKE) Makefile
 
-helm-lint: helm
+helm-lint: helm helm-generate
 	$(HELM) lint $(CHART_HARBOR_OPERATOR)
 
 ####################
