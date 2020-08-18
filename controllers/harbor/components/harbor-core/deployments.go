@@ -63,7 +63,7 @@ func (c *HarborCore) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 				Key:      goharborv1alpha1.HarborCoreURLKey,
 				Optional: &varTrue,
 				LocalObjectReference: corev1.LocalObjectReference{
-					Name: c.harbor.Spec.Components.Registry.CacheSecret,
+					Name: c.harbor.Spec.Components.Core.CacheSecret,
 				},
 			},
 		}
