@@ -12,6 +12,7 @@ import (
 
 	goharborv1alpha1 "github.com/goharbor/harbor-operator/api/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/factories/application"
+	"github.com/goharbor/harbor-operator/pkg/ingress"
 )
 
 func (n *Notary) GetIngresses(ctx context.Context) []*netv1.Ingress {
@@ -30,9 +31,15 @@ func (n *Notary) GetIngresses(ctx context.Context) []*netv1.Ingress {
 		tls = []netv1.IngressTLS{
 			{
 				SecretName: n.harbor.Spec.TLSSecretName,
+				Hosts: []string{
+					host[0],
+				},
 			},
 		}
 	}
+
+	// Add annotations for cert-manager awareness
+	annotations := ingress.GenerateIngressCertAnnotations(n.harbor.Spec)
 
 	return []*netv1.Ingress{
 		{
@@ -45,6 +52,7 @@ func (n *Notary) GetIngresses(ctx context.Context) []*netv1.Ingress {
 					"operator":                    operatorName,
 					"kubernetes.io/ingress.class": goharborv1alpha1.NotaryName,
 				},
+				Annotations: annotations,
 			},
 			Spec: netv1.IngressSpec{
 				TLS: tls,

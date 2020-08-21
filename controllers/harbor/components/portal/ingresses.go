@@ -5,6 +5,8 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/goharbor/harbor-operator/pkg/ingress"
+
 	"github.com/pkg/errors"
 	netv1 "k8s.io/api/networking/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -30,9 +32,15 @@ func (p *Portal) GetIngresses(ctx context.Context) []*netv1.Ingress { // nolint:
 		tls = []netv1.IngressTLS{
 			{
 				SecretName: p.harbor.Spec.TLSSecretName,
+				Hosts: []string{
+					host[0],
+				},
 			},
 		}
 	}
+
+	// Add annotations for cert-manager awareness
+	annotations := ingress.GenerateIngressCertAnnotations(p.harbor.Spec)
 
 	return []*netv1.Ingress{
 		{
@@ -44,6 +52,7 @@ func (p *Portal) GetIngresses(ctx context.Context) []*netv1.Ingress { // nolint:
 					"harbor":   harborName,
 					"operator": operatorName,
 				},
+				Annotations: annotations,
 			},
 			Spec: netv1.IngressSpec{
 				TLS: tls,
