@@ -15,8 +15,12 @@
 package ingress
 
 import (
+	"net/url"
+	"strings"
+
 	"github.com/goharbor/harbor-operator/api/v1alpha1"
 	"github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
+	"github.com/pkg/errors"
 )
 
 // GenerateIngressCertAnnotations generates the cert-manager related annotations for cert-manager
@@ -37,4 +41,16 @@ func GenerateIngressCertAnnotations(spec v1alpha1.HarborSpec) map[string]string 
 	}
 
 	return annotations
+}
+
+// GetHostAndSchema gets the host domain and schema from the spec
+func GetHostAndSchema(accessURL string) (scheme string, host string, err error) {
+	u, err := url.Parse(accessURL)
+	if err != nil {
+		return "", "", errors.Wrap(err, "invalid public URL")
+	}
+
+	hosts := strings.SplitN(u.Host, ":", 1)
+
+	return u.Scheme, hosts[0], nil
 }

@@ -3,12 +3,11 @@ package notary
 import (
 	"context"
 
+	"github.com/goharbor/harbor-operator/pkg/factories/application"
+	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	"github.com/ovh/configstore"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	"github.com/goharbor/harbor-operator/pkg/factories/application"
-	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 )
 
 const (
@@ -28,10 +27,13 @@ type certificateEncryption struct {
 }
 
 func (n *Notary) GetCertificates(ctx context.Context) []*certv1.Certificate {
+	if n.harbor.Spec.Components.Notary == nil {
+		// Not configured
+		return make([]*certv1.Certificate, 0)
+	}
+
 	operatorName := application.GetName(ctx)
 	harborName := n.harbor.Name
-
-	url := n.harbor.Spec.Components.Notary.PublicURL
 
 	encryption := &certificateEncryption{
 		KeySize:      notaryCertificateKeySize,
@@ -62,7 +64,7 @@ func (n *Notary) GetCertificates(ctx context.Context) []*certv1.Certificate {
 				},
 			},
 			Spec: certv1.CertificateSpec{
-				CommonName:   url,
+				CommonName:   n.harbor.NormalizeComponentName(NotarySignerName),
 				Organization: []string{"Harbor Operator"},
 				SecretName:   n.harbor.NormalizeComponentName(notaryCertificateName),
 				KeySize:      encryption.KeySize,

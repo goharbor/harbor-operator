@@ -2,36 +2,40 @@ package notary
 
 import (
 	"context"
-	"net/url"
-	"strings"
-
-	"github.com/pkg/errors"
-	netv1 "k8s.io/api/networking/v1beta1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/intstr"
+	"fmt"
 
 	goharborv1alpha1 "github.com/goharbor/harbor-operator/api/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/factories/application"
+	"github.com/goharbor/harbor-operator/pkg/ingress"
+	netv1 "k8s.io/api/networking/v1beta1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-func (n *Notary) GetIngresses(ctx context.Context) []*netv1.Ingress {
+func (n *Notary) GetIngresses(ctx context.Context) []*netv1.Ingress { // nolint:funlen
+	if n.harbor.Spec.Components.Notary == nil {
+		// Not configured
+		return make([]*netv1.Ingress, 0)
+	}
+
 	operatorName := application.GetName(ctx)
 	harborName := n.harbor.Name
 
-	u, err := url.Parse(n.harbor.Spec.Components.Notary.PublicURL)
+	scheme, h, err := ingress.GetHostAndSchema(n.harbor.Spec.Components.Notary.PublicURL)
 	if err != nil {
-		panic(errors.Wrap(err, "invalid url"))
+		panic(err)
 	}
 
-	host := strings.SplitN(u.Host, ":", 1)
+	// Add annotations for cert-manager awareness
+	annotations := ingress.GenerateIngressCertAnnotations(n.harbor.Spec)
 
 	var tls []netv1.IngressTLS
-	if u.Scheme == "https" {
+	if scheme == "https" {
 		tls = []netv1.IngressTLS{
 			{
-				SecretName: n.harbor.NormalizeComponentName(notaryCertificateName),
+				SecretName: fmt.Sprintf("%s-%s", n.harbor.Spec.TLSSecretName, goharborv1alpha1.NotaryName),
 				Hosts: []string{
-					host[0],
+					h,
 				},
 			},
 		}
@@ -48,12 +52,13 @@ func (n *Notary) GetIngresses(ctx context.Context) []*netv1.Ingress {
 					"operator":                    operatorName,
 					"kubernetes.io/ingress.class": goharborv1alpha1.NotaryName,
 				},
+				Annotations: annotations,
 			},
 			Spec: netv1.IngressSpec{
 				TLS: tls,
 				Rules: []netv1.IngressRule{
 					{
-						Host: host[0],
+						Host: h,
 						IngressRuleValue: netv1.IngressRuleValue{
 							HTTP: &netv1.HTTPIngressRuleValue{
 								Paths: []netv1.HTTPIngressPath{

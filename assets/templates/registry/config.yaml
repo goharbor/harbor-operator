@@ -14,7 +14,6 @@ http:
     X-Content-Type-Options: [nosniff]
   net: tcp
   addr: {{ env.Getenv "API_ADDRESS" | quote }}
-  relativeurls: true
   prefix: /
 health:
   storagedriver:
