@@ -5,8 +5,6 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/goharbor/harbor-operator/pkg/ingress"
-
 	"github.com/pkg/errors"
 	netv1 "k8s.io/api/networking/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -31,7 +29,7 @@ func (r *Registry) GetIngresses(ctx context.Context) []*netv1.Ingress { // nolin
 	if u.Scheme == "https" {
 		tls = []netv1.IngressTLS{
 			{
-				SecretName: r.harbor.Spec.TLSSecretName,
+				SecretName: r.harbor.NormalizeComponentName(registryCertName),
 				Hosts: []string{
 					host[0],
 				},
@@ -39,8 +37,7 @@ func (r *Registry) GetIngresses(ctx context.Context) []*netv1.Ingress { // nolin
 		}
 	}
 
-	// Add annotations for cert-manager awareness
-	annotations := ingress.GenerateIngressCertAnnotations(r.harbor.Spec)
+	annotations := make(map[string]string)
 	// resolve 413(Too Large Entity) error when push large image. It only works for NGINX ingress.
 	annotations["nginx.ingress.kubernetes.io/proxy-body-size"] = "0"
 

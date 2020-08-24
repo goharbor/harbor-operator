@@ -15,6 +15,7 @@ import (
 const (
 	defaultKeyAlgorithm = certv1.RSAKeyAlgorithm
 	defaultKeySize      = 4096
+	registryCertName    = "registry-certificate"
 )
 
 type certificateEncryption struct {
@@ -49,7 +50,7 @@ func (r *Registry) GetCertificates(ctx context.Context) []*certv1.Certificate {
 	return []*certv1.Certificate{
 		{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      r.harbor.NormalizeComponentName(goharborv1alpha1.RegistryName),
+				Name:      r.harbor.NormalizeComponentName(registryCertName),
 				Namespace: r.harbor.Namespace,
 				Labels: map[string]string{
 					"app":      goharborv1alpha1.RegistryName,
@@ -60,7 +61,7 @@ func (r *Registry) GetCertificates(ctx context.Context) []*certv1.Certificate {
 			Spec: certv1.CertificateSpec{
 				CommonName:   url,
 				Organization: []string{"Harbor Operator"},
-				SecretName:   r.harbor.NormalizeComponentName(goharborv1alpha1.CertificateName),
+				SecretName:   r.harbor.NormalizeComponentName(registryCertName),
 				KeySize:      encryption.KeySize,
 				KeyAlgorithm: encryption.KeyAlgorithm,
 				// https://github.com/goharbor/harbor/blob/ba4764c61d7da76f584f808f7d16b017db576fb4/src/jobservice/generateCerts.sh#L24-L26
