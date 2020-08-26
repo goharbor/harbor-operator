@@ -37,7 +37,7 @@ Please repeat following steps for each components requiring a database: `clair`,
 3. Create the computed secret with correct keys (see [`api/v1alpha1/harbor_secret_format.go`](../../api/v1alpha1/harbor_secret_format.go))
 
    ```bash
-   kubectl create secret "$COMPONENT-database" \
+   kubectl create secret generic "$COMPONENT-database" \
       --from-literal host="$COMPONENT-database-postgresql" \
       --from-literal port='5432' \
       --from-literal database='postgres' \

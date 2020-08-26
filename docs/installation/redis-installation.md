@@ -32,7 +32,7 @@ Please repeat following steps for each components requiring a redis: `chartmuseu
 2. Create the computed secret with correct keys (see [`api/v1alpha1/harbor_secret_format.go`](../../api/v1alpha1/harbor_secret_format.go))
 
    ```bash
-   kubectl create secret "$COMPONENT-redis" \
+   kubectl create secret generic "$COMPONENT-redis" \
       --from-literal url="redis://${COMPONENT}-redis-master-0:6379/0" \
       --from-literal namespace=''
    ```
