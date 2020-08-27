@@ -259,6 +259,10 @@ spec:
                     required:
                     - certificateRef
                     type: object
+                  tokenServiceCertificateAuthorityRefs:
+                    items:
+                      type: string
+                    type: array
                   writeTimeout:
                     default: 15s
                     description: Socket timeout

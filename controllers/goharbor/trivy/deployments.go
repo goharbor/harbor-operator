@@ -24,15 +24,17 @@ var (
 )
 
 const (
-	ContainerName                  = "trivy"
-	LivenessProbe                  = "/probe/healthy"
-	ReadinessProbe                 = "/probe/ready"
-	CacheVolumeName                = "cache"
-	CacheVolumePath                = "/home/scanner/.cache/trivy"
-	ReportsVolumeName              = "reports"
-	ReportsVolumePath              = "/home/scanner/.cache/reports"
-	InternalCertificatesVolumeName = "internal-certificates"
-	InternalCertificatesPath       = "/etc/harbor/ssl"
+	ContainerName                         = "trivy"
+	LivenessProbe                         = "/probe/healthy"
+	ReadinessProbe                        = "/probe/ready"
+	CacheVolumeName                       = "cache"
+	CacheVolumePath                       = "/home/scanner/.cache/trivy"
+	ReportsVolumeName                     = "reports"
+	ReportsVolumePath                     = "/home/scanner/.cache/reports"
+	InternalCertificatesVolumeName        = "internal-certificates"
+	InternalCertificateAuthorityDirectory = "/harbor_cust_cert"
+	InternalCertificatesPath              = "/etc/harbor/ssl"
+	PublicCertificatesVolumeName          = "public-certificates"
 )
 
 const (
@@ -81,6 +83,27 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.
 		MountPath: CacheVolumePath,
 		ReadOnly:  false,
 	}}
+
+	for i, ref := range trivy.Spec.Server.TokenServiceCertificateAuthorityRefs {
+		volumeName := fmt.Sprintf("%s-%d", PublicCertificatesVolumeName, i)
+
+		volumes = append(volumes, corev1.Volume{
+			Name: volumeName,
+			VolumeSource: corev1.VolumeSource{
+				Secret: &corev1.SecretVolumeSource{
+					SecretName: ref,
+				},
+			},
+		})
+
+		volumesMount = append(volumesMount, corev1.VolumeMount{
+			Name:      volumeName,
+			MountPath: path.Join(InternalCertificateAuthorityDirectory, fmt.Sprintf("%d-%s", i, corev1.ServiceAccountRootCAKey)),
+			ReadOnly:  true,
+			SubPath:   corev1.ServiceAccountRootCAKey,
+		})
+	}
+
 	envs := []corev1.EnvVar{}
 	envFroms := []corev1.EnvFromSource{{
 		ConfigMapRef: &corev1.ConfigMapEnvSource{

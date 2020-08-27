@@ -3423,6 +3423,11 @@ func (in *TrivyServerSpec) DeepCopyInto(out *TrivyServerSpec) {
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
+	if in.TokenServiceCertificateAuthorityRefs != nil {
+		in, out := &in.TokenServiceCertificateAuthorityRefs, &out.TokenServiceCertificateAuthorityRefs
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	if in.ReadTimeout != nil {
 		in, out := &in.ReadTimeout, &out.ReadTimeout
 		*out = new(v1.Duration)
