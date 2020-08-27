@@ -62,6 +62,7 @@ func (r *Reconciler) GetSecret(ctx context.Context, trivy *goharborv1alpha2.Triv
 		StringData: map[string]string{
 			"SCANNER_REDIS_URL":           redisDSN.String(),
 			"SCANNER_JOB_QUEUE_REDIS_URL": redisDSN.String(),
+			"SCANNER_STORE_REDIS_URL":     redisDSN.String(),
 		},
 	}, nil
 }
