@@ -83,6 +83,9 @@ type TrivyServerSpec struct {
 	ClientCertificateAuthorityRefs []string `json:"clientCertificateAuthorityRefs,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	TokenServiceCertificateAuthorityRefs []string `json:"tokenServiceCertificateAuthorityRefs,omitempty"`
+
+	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="string"
 	// +kubebuilder:default="15s"
 	// +kubebuilder:validation:Pattern="([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?"
