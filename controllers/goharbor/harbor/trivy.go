@@ -129,7 +129,8 @@ func (r *Reconciler) GetTrivy(ctx context.Context, harbor *goharborv1alpha2.Harb
 				Cache:   r.TrivyCacheStorage(ctx, harbor),
 			},
 			Server: goharborv1alpha2.TrivyServerSpec{
-				TLS: tls,
+				TLS:                                  tls,
+				TokenServiceCertificateAuthorityRefs: []string{harbor.Spec.Expose.Core.TLS.CertificateRef},
 			},
 			Update: goharborv1alpha2.TrivyUpdateSpec{
 				Skip:           harbor.Spec.Trivy.SkipUpdate,
