@@ -5,3 +5,7 @@ metadata:
 spec:
   notary:
     migrationEnabled: true
+  expose:
+    notary:
+      ingress:
+        host: notary.harbor.domain
