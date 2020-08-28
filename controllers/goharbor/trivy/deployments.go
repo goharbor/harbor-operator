@@ -18,8 +18,8 @@ import (
 )
 
 var (
-	varFalse = false
-	trivyUid = int64(10000)
+	varFalse       = false
+	trivyUID int64 = 10000
 )
 
 const (
@@ -195,7 +195,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.
 					Volumes:                      volumes,
 
 					SecurityContext: &corev1.PodSecurityContext{
-						FSGroup: &trivyUid,
+						FSGroup: &trivyUID,
 					},
 
 					Containers: []corev1.Container{{
