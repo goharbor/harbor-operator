@@ -37,6 +37,10 @@ func Logger(ctx context.Context, name, version string) error {
 		level = logrus.DebugLevel
 	}
 
+	if !development {
+		logrus.SetFormatter(&logrus.JSONFormatter{})
+	}
+
 	levelValue, err := store.GetItemValueInt(LogLevelConfigKey)
 	if err != nil {
 		if _, ok := err.(configstore.ErrItemNotFound); !ok {
