@@ -3,18 +3,15 @@ package main
 import (
 	"os"
 
-	"github.com/ovh/configstore"
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	ctrl "sigs.k8s.io/controller-runtime"
-
-	// +kubebuilder:scaffold:imports
-
 	"github.com/goharbor/harbor-operator/pkg/factories/application"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	"github.com/goharbor/harbor-operator/pkg/manager"
 	"github.com/goharbor/harbor-operator/pkg/scheme"
 	"github.com/goharbor/harbor-operator/pkg/setup"
 	"github.com/goharbor/harbor-operator/pkg/tracing"
+	"github.com/ovh/configstore"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 const (

@@ -3,11 +3,10 @@ package mutation
 import (
 	"context"
 
+	"github.com/goharbor/harbor-operator/pkg/resources"
 	netv1 "k8s.io/api/networking/v1beta1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-
-	"github.com/goharbor/harbor-operator/pkg/resources"
 )
 
 func NewIngress(mutate resources.Mutable) (result resources.Mutable) {

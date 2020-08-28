@@ -5,17 +5,16 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/goharbor/harbor-operator/pkg/config"
+	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
+	"github.com/goharbor/harbor-operator/pkg/event-filter/class"
+	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
-
-	"github.com/goharbor/harbor-operator/pkg/config"
-	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
-	"github.com/goharbor/harbor-operator/pkg/event-filter/class"
-	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 )
 
 const (

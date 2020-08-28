@@ -8,12 +8,11 @@ import (
 	"text/template"
 
 	"github.com/Masterminds/sprig"
-	"github.com/opentracing/opentracing-go"
-	"github.com/pkg/errors"
-
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	resources "github.com/goharbor/harbor-operator/pkg/resources"
 	template2 "github.com/goharbor/harbor-operator/pkg/template"
+	"github.com/opentracing/opentracing-go"
+	"github.com/pkg/errors"
 )
 
 func (c *Controller) Funcs(ctx context.Context, owner resources.Resource) template.FuncMap {

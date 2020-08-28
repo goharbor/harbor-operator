@@ -4,17 +4,16 @@ import (
 	"context"
 	"fmt"
 
+	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
+	"github.com/goharbor/harbor-operator/pkg/factories/logger"
+	"github.com/goharbor/harbor-operator/pkg/resources"
+	sstatus "github.com/goharbor/harbor-operator/pkg/status"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/kustomize/kstatus/status"
-
-	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
-	"github.com/goharbor/harbor-operator/pkg/factories/logger"
-	"github.com/goharbor/harbor-operator/pkg/resources"
-	sstatus "github.com/goharbor/harbor-operator/pkg/status"
 )
 
 func (c *Controller) prepareStatus(ctx context.Context, owner resources.Resource) error {

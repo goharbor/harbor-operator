@@ -3,10 +3,9 @@ package controller
 import (
 	"context"
 
-	ctrl "sigs.k8s.io/controller-runtime"
-
 	sgraph "github.com/goharbor/harbor-operator/pkg/controller/internal/graph"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
+	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 func (c *Controller) NewContext(req ctrl.Request) context.Context {

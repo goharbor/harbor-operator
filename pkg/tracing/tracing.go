@@ -6,6 +6,8 @@ import (
 	"sync"
 
 	kit_log "github.com/go-kit/kit/log"
+	"github.com/goharbor/harbor-operator/pkg/factories/application"
+	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	jaeger_kit "github.com/jaegertracing/jaeger-lib/client/log/go-kit"
 	"github.com/opentracing/opentracing-go"
 	"github.com/ovh/configstore"
@@ -14,9 +16,6 @@ import (
 	jaeger_cnf "github.com/uber/jaeger-client-go/config"
 	jaeger_metrics "github.com/uber/jaeger-lib/metrics"
 	jaeger_prom "github.com/uber/jaeger-lib/metrics/prometheus"
-
-	"github.com/goharbor/harbor-operator/pkg/factories/application"
-	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 )
 
 var jaegerProm jaeger_metrics.Factory

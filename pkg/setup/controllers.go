@@ -4,10 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ovh/configstore"
-	"github.com/pkg/errors"
-	"sigs.k8s.io/controller-runtime/pkg/manager"
-
 	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/chartmuseum"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/core"
@@ -21,6 +17,9 @@ import (
 	"github.com/goharbor/harbor-operator/controllers/goharbor/trivy"
 	"github.com/goharbor/harbor-operator/pkg/config"
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
+	"github.com/ovh/configstore"
+	"github.com/pkg/errors"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
 
 const (

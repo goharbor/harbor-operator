@@ -5,16 +5,15 @@ import (
 	"fmt"
 	"time"
 
+	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
+	"github.com/goharbor/harbor-operator/pkg/factories/logger"
+	"github.com/goharbor/harbor-operator/pkg/resources/checksum"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-
-	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
-	"github.com/goharbor/harbor-operator/pkg/factories/logger"
-	"github.com/goharbor/harbor-operator/pkg/resources/checksum"
 )
 
 const (

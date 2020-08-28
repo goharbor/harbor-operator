@@ -4,17 +4,14 @@ import (
 	"context"
 	"time"
 
+	. "github.com/goharbor/harbor-operator/pkg/resources/statuscheck"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	"github.com/goharbor/harbor-operator/pkg/scheme"
 	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	cmmeta "github.com/jetstack/cert-manager/pkg/apis/meta/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	// +kubebuilder:scaffold:imports
-
-	. "github.com/goharbor/harbor-operator/pkg/resources/statuscheck"
-	"github.com/goharbor/harbor-operator/pkg/scheme"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Rcfer to

@@ -3,9 +3,8 @@ package harbor
 import (
 	"context"
 
-	corev1 "k8s.io/api/core/v1"
-
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	corev1 "k8s.io/api/core/v1"
 )
 
 func (r *Reconciler) ChartMuseumStorage(ctx context.Context, harbor *goharborv1alpha2.Harbor) goharborv1alpha2.ChartMuseumChartStorageDriverSpec {

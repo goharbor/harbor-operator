@@ -4,15 +4,14 @@ import (
 	"context"
 	"time"
 
+	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	"github.com/goharbor/harbor-operator/pkg/graph"
 	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	v1 "github.com/jetstack/cert-manager/pkg/apis/meta/v1"
 	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
-	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
-	"github.com/goharbor/harbor-operator/pkg/graph"
 )
 
 func (r *Reconciler) AddInternalTLSConfiguration(ctx context.Context, harbor *goharborv1alpha2.Harbor) (InternalTLSCertificateAuthorityIssuer, InternalTLSCertificateAuthority, InternalTLSIssuer, error) {

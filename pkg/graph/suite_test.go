@@ -4,12 +4,12 @@ import (
 	"context"
 	"testing"
 
+	. "github.com/goharbor/harbor-operator/pkg/graph"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 	// +kubebuilder:scaffold:imports
-	. "github.com/goharbor/harbor-operator/pkg/graph"
+	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to

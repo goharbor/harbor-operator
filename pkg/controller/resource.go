@@ -3,6 +3,15 @@ package controller
 import (
 	"context"
 
+	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
+	sgraph "github.com/goharbor/harbor-operator/pkg/controller/internal/graph"
+	"github.com/goharbor/harbor-operator/pkg/factories/logger"
+	"github.com/goharbor/harbor-operator/pkg/factories/owner"
+	"github.com/goharbor/harbor-operator/pkg/graph"
+	"github.com/goharbor/harbor-operator/pkg/resources"
+	"github.com/goharbor/harbor-operator/pkg/resources/checksum"
+	"github.com/goharbor/harbor-operator/pkg/resources/mutation"
+	"github.com/goharbor/harbor-operator/pkg/resources/statuscheck"
 	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
@@ -15,16 +24,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-
-	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
-	sgraph "github.com/goharbor/harbor-operator/pkg/controller/internal/graph"
-	"github.com/goharbor/harbor-operator/pkg/factories/logger"
-	"github.com/goharbor/harbor-operator/pkg/factories/owner"
-	"github.com/goharbor/harbor-operator/pkg/graph"
-	"github.com/goharbor/harbor-operator/pkg/resources"
-	"github.com/goharbor/harbor-operator/pkg/resources/checksum"
-	"github.com/goharbor/harbor-operator/pkg/resources/mutation"
-	"github.com/goharbor/harbor-operator/pkg/resources/statuscheck"
 )
 
 type Resource struct {

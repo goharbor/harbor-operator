@@ -3,20 +3,17 @@ package statuscheck_test
 import (
 	"context"
 
+	. "github.com/goharbor/harbor-operator/pkg/resources/statuscheck"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	"github.com/goharbor/harbor-operator/pkg/scheme"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/kustomize/kstatus/status"
-
-	// +kubebuilder:scaffold:imports
-
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
-	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
-	. "github.com/goharbor/harbor-operator/pkg/resources/statuscheck"
-	"github.com/goharbor/harbor-operator/pkg/scheme"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Rcfer to

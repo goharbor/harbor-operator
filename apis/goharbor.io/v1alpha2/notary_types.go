@@ -5,11 +5,10 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/pkg/errors"
-	corev1 "k8s.io/api/core/v1"
-
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
+	"github.com/pkg/errors"
+	corev1 "k8s.io/api/core/v1"
 )
 
 type NotaryLoggingSpec struct {

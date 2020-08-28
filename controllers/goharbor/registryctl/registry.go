@@ -3,9 +3,8 @@ package registryctl
 import (
 	"context"
 
-	"k8s.io/apimachinery/pkg/types"
-
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	"k8s.io/apimachinery/pkg/types"
 )
 
 // +kubebuilder:rbac:groups=goharbor.io,resources=registries,verbs=get;list;watch

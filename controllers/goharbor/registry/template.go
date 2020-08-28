@@ -4,13 +4,12 @@ import (
 	"context"
 	"text/template"
 
+	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
-
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 )
 
 func (r *Reconciler) GetDataFuncFromArraySecret(ctx context.Context, getter func(int) (interface{}, types.NamespacedName, error), itemsCount int) (func(interface{}) (map[string]string, error), error) {
