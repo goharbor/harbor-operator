@@ -10,7 +10,7 @@ commonAnnotations:
   app.kubernetes.io/managed-by: ''
 
 resources:
-- postgresql/helm-harbor.yaml
+- postgresql/helm.yaml
 
 patchesStrategicMerge:
 - harbor_class_patch.yaml

@@ -260,7 +260,7 @@ $(CHART_TESTS_PATH)/test.yaml: kustomize config/tests/postgresql/helm.yaml $(wil
 config/tests/postgresql/helm.yaml: helm
 	$(HELM) repo add bitnami https://charts.bitnami.com/bitnami
 	echo '# $(DO_NOT_EDIT)' > config/helm/tests/postgresql/helm.yaml
-	$(HELM) template test bitnami/postgresql \
+	$(HELM) template harbor-operator-test bitnami/postgresql \
 		--set-string initdbScriptsConfigMap=harbor-init-db \
 		--set-string existingSecret='test-postgresql' \
 	>> config/helm/tests/postgresql/helm.yaml

@@ -4,11 +4,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: test-postgresql-headless
+  name: harbor-operator-test-postgresql-headless
   labels:
     app.kubernetes.io/name: postgresql
-    helm.sh/chart: postgresql-9.2.1
-    app.kubernetes.io/instance: test
+    helm.sh/chart: postgresql-9.3.3
+    app.kubernetes.io/instance: harbor-operator-test
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -19,17 +19,17 @@ spec:
       targetPort: tcp-postgresql
   selector:
     app.kubernetes.io/name: postgresql
-    app.kubernetes.io/instance: test
+    app.kubernetes.io/instance: harbor-operator-test
 ---
 # Source: postgresql/templates/svc.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: test-postgresql
+  name: harbor-operator-test-postgresql
   labels:
     app.kubernetes.io/name: postgresql
-    helm.sh/chart: postgresql-9.2.1
-    app.kubernetes.io/instance: test
+    helm.sh/chart: postgresql-9.3.3
+    app.kubernetes.io/instance: harbor-operator-test
     app.kubernetes.io/managed-by: Helm
   annotations:
 spec:
@@ -40,45 +40,45 @@ spec:
       targetPort: tcp-postgresql
   selector:
     app.kubernetes.io/name: postgresql
-    app.kubernetes.io/instance: test
+    app.kubernetes.io/instance: harbor-operator-test
     role: master
 ---
 # Source: postgresql/templates/statefulset.yaml
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: test-postgresql
+  name: harbor-operator-test-postgresql
   labels:
     app.kubernetes.io/name: postgresql
-    helm.sh/chart: postgresql-9.2.1
-    app.kubernetes.io/instance: test
+    helm.sh/chart: postgresql-9.3.3
+    app.kubernetes.io/instance: harbor-operator-test
     app.kubernetes.io/managed-by: Helm
   annotations:
 spec:
-  serviceName: test-postgresql-headless
+  serviceName: harbor-operator-test-postgresql-headless
   replicas: 1
   updateStrategy:
     type: RollingUpdate
   selector:
     matchLabels:
       app.kubernetes.io/name: postgresql
-      app.kubernetes.io/instance: test
+      app.kubernetes.io/instance: harbor-operator-test
       role: master
   template:
     metadata:
-      name: test-postgresql
+      name: harbor-operator-test-postgresql
       labels:
         app.kubernetes.io/name: postgresql
-        helm.sh/chart: postgresql-9.2.1
-        app.kubernetes.io/instance: test
+        helm.sh/chart: postgresql-9.3.3
+        app.kubernetes.io/instance: harbor-operator-test
         app.kubernetes.io/managed-by: Helm
         role: master
     spec:      
       securityContext:
         fsGroup: 1001
       containers:
-        - name: test-postgresql
-          image: docker.io/bitnami/postgresql:11.9.0-debian-10-r0
+        - name: harbor-operator-test-postgresql
+          image: docker.io/bitnami/postgresql:11.9.0-debian-10-r1
           imagePullPolicy: "IfNotPresent"
           resources:
             requests:
