@@ -26,21 +26,30 @@ const (
 	exitCodeFailure = 1
 )
 
+var exitCode = 0
+
+func SetExitCode(value int) {
+	exitCode = value
+}
+
+func GetExitCode() int {
+	return exitCode
+}
+
 func main() {
+	defer func() { os.Exit(GetExitCode()) }()
+
 	setupLog := ctrl.Log.WithName("setup")
 	ctx := logger.Context(setupLog)
 
 	err := setup.Logger(ctx, OperatorName, OperatorVersion)
 	if err != nil {
 		setupLog.Error(err, "unable to create logger")
-		os.Exit(exitCodeFailure)
+		SetExitCode(exitCodeFailure)
+
+		return
 	}
 
-	// uses env var CONFIGURATION_FROM=... to initialize config
-	// examples of possible values:
-	// CONFIGURATION_FROM=file:/etc/cfg1.conf,file:/etc/cfg2.conf
-	// CONFIGURATION_FROM=env
-	// ...
 	configstore.InitFromEnvironment()
 
 	application.SetName(&ctx, OperatorName)
@@ -49,25 +58,33 @@ func main() {
 	scheme, err := scheme.New(ctx)
 	if err != nil {
 		setupLog.Error(err, "unable to create scheme")
-		os.Exit(exitCodeFailure)
+		SetExitCode(exitCodeFailure)
+
+		return
 	}
 
 	mgr, err := manager.New(ctx, scheme)
 	if err != nil {
 		setupLog.Error(err, "unable to create manager")
-		os.Exit(exitCodeFailure)
+		SetExitCode(exitCodeFailure)
+
+		return
 	}
 
 	traCon, err := tracing.New(ctx)
 	if err != nil {
 		setupLog.Error(err, "unable to create tracer")
-		os.Exit(exitCodeFailure)
+		SetExitCode(exitCodeFailure)
+
+		return
 	}
 	defer traCon.Close()
 
 	if err := (setup.WithManager(ctx, mgr)); err != nil {
 		setupLog.Error(err, "unable to setup controllers")
-		os.Exit(exitCodeFailure)
+		SetExitCode(exitCodeFailure)
+
+		return
 	}
 
 	// +kubebuilder:scaffold:builder
@@ -76,6 +93,8 @@ func main() {
 
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 		setupLog.Error(err, "cannot start manager")
-		os.Exit(exitCodeFailure)
+		SetExitCode(exitCodeFailure)
+
+		return
 	}
 }
