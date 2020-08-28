@@ -32,9 +32,9 @@ const (
 )
 
 var (
-	varFalse       = false
-	varTrue        = true
-	fsGroup  int64 = 10000
+	varFalse          = false
+	varTrue           = true
+	registryUID int64 = 10000
 )
 
 const (
@@ -240,7 +240,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 					AutomountServiceAccountToken: &varFalse,
 					Volumes:                      volumes,
 					SecurityContext: &corev1.PodSecurityContext{
-						FSGroup: &fsGroup,
+						FSGroup: &registryUID,
 					},
 					Containers: []corev1.Container{{
 						Name:  controllers.Registry.String(),
