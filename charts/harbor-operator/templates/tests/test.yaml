@@ -94,24 +94,6 @@ type: Opaque
 ---
 apiVersion: v1
 data:
-  postgresql-password: T1Q5ckhjTVc0OA==
-kind: Secret
-metadata:
-  annotations:
-    app.kubernetes.io/instance: ""
-    app.kubernetes.io/managed-by: ""
-    helm.sh/chart: ""
-    helm.sh/hook: test
-  labels:
-    app.kubernetes.io/instance: harbor-test
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/name: postgresql
-    helm.sh/chart: postgresql-9.1.4
-  name: '{{ include "chart.fullname" . }}-harbor-test-postgresql'
-type: Opaque
----
-apiVersion: v1
-data:
   secret: dW5zZWN1cmUtam9ic2VydmljZS1zZWNyZXQ=
 kind: Secret
 metadata:
@@ -147,18 +129,18 @@ metadata:
     helm.sh/chart: ""
     helm.sh/hook: test
   labels:
-    app.kubernetes.io/instance: harbor-test
+    app.kubernetes.io/instance: harbor-operator-test
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: postgresql
-    helm.sh/chart: postgresql-9.1.4
-  name: '{{ include "chart.fullname" . }}-harbor-test-postgresql'
+    helm.sh/chart: postgresql-9.3.3
+  name: '{{ include "chart.fullname" . }}-harbor-operator-test-postgresql'
 spec:
   ports:
   - name: tcp-postgresql
     port: 5432
     targetPort: tcp-postgresql
   selector:
-    app.kubernetes.io/instance: harbor-test
+    app.kubernetes.io/instance: harbor-operator-test
     app.kubernetes.io/name: postgresql
     role: master
   type: ClusterIP
@@ -172,11 +154,11 @@ metadata:
     helm.sh/chart: ""
     helm.sh/hook: test
   labels:
-    app.kubernetes.io/instance: harbor-test
+    app.kubernetes.io/instance: harbor-operator-test
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: postgresql
-    helm.sh/chart: postgresql-9.1.4
-  name: '{{ include "chart.fullname" . }}-harbor-test-postgresql-headless'
+    helm.sh/chart: postgresql-9.3.3
+  name: '{{ include "chart.fullname" . }}-harbor-operator-test-postgresql-headless'
 spec:
   clusterIP: None
   ports:
@@ -184,7 +166,7 @@ spec:
     port: 5432
     targetPort: tcp-postgresql
   selector:
-    app.kubernetes.io/instance: harbor-test
+    app.kubernetes.io/instance: harbor-operator-test
     app.kubernetes.io/name: postgresql
   type: ClusterIP
 ---
@@ -197,19 +179,19 @@ metadata:
     helm.sh/chart: ""
     helm.sh/hook: test
   labels:
-    app.kubernetes.io/instance: harbor-test
+    app.kubernetes.io/instance: harbor-operator-test
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: postgresql
-    helm.sh/chart: postgresql-9.1.4
-  name: '{{ include "chart.fullname" . }}-harbor-test-postgresql'
+    helm.sh/chart: postgresql-9.3.3
+  name: '{{ include "chart.fullname" . }}-harbor-operator-test-postgresql'
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/instance: harbor-test
+      app.kubernetes.io/instance: harbor-operator-test
       app.kubernetes.io/name: postgresql
       role: master
-  serviceName: '{{ include "chart.fullname" . }}-harbor-test-postgresql-headless'
+  serviceName: '{{ include "chart.fullname" . }}-harbor-operator-test-postgresql-headless'
   template:
     metadata:
       annotations:
@@ -218,12 +200,12 @@ spec:
         helm.sh/chart: ""
         helm.sh/hook: test
       labels:
-        app.kubernetes.io/instance: harbor-test
+        app.kubernetes.io/instance: harbor-operator-test
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: postgresql
-        helm.sh/chart: postgresql-9.1.4
+        helm.sh/chart: postgresql-9.3.3
         role: master
-      name: harbor-test-postgresql
+      name: harbor-operator-test-postgresql
     spec:
       containers:
       - env:
@@ -241,12 +223,12 @@ spec:
           valueFrom:
             secretKeyRef:
               key: postgresql-password
-              name: '{{ include "chart.fullname" . }}-harbor-test-postgresql'
+              name: '{{ include "chart.fullname" . }}-test-postgresql'
         - name: POSTGRESQL_ENABLE_LDAP
           value: "no"
         - name: POSTGRESQL_ENABLE_TLS
           value: "no"
-        image: docker.io/bitnami/postgresql:11.8.0-debian-10-r76
+        image: docker.io/bitnami/postgresql:11.9.0-debian-10-r1
         imagePullPolicy: IfNotPresent
         livenessProbe:
           exec:
@@ -259,7 +241,7 @@ spec:
           periodSeconds: 10
           successThreshold: 1
           timeoutSeconds: 5
-        name: harbor-test-postgresql
+        name: harbor-operator-test-postgresql
         ports:
         - containerPort: 5432
           name: tcp-postgresql
