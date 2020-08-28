@@ -522,7 +522,7 @@ endif
 golangci-lint:
 ifeq (, $(shell which golangci-lint))
 	# https://github.com/golangci/golangci-lint#install
-	GO_DEPENDENCY='github.com/golangci/golangci-lint/cmd/golangci-lint@v1.27.0' $(MAKE) go-binary
+	GO_DEPENDENCY='github.com/golangci/golangci-lint/cmd/golangci-lint@e2d717b873ff02afab1903f34889cb8b621d7723' $(MAKE) go-binary
 GOLANGCI_LINT=$(GOBIN)/golangci-lint
 else
 GOLANGCI_LINT=$(shell which golangci-lint)
