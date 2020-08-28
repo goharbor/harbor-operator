@@ -9,8 +9,7 @@ import (
 var graphKey = "graph"
 
 func WithGraph(ctx context.Context) context.Context {
-	g := graph.NewResourceManager()
-	return context.WithValue(ctx, &graphKey, g)
+	return context.WithValue(ctx, &graphKey, graph.NewResourceManager())
 }
 
 func Get(ctx context.Context) graph.Manager {

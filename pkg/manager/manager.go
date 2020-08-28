@@ -35,7 +35,9 @@ func New(ctx context.Context, scheme *runtime.Scheme) (manager.Manager, error) {
 	item, err := configstore.Filter().
 		Slice(ManagerConfigKey).
 		Unmarshal(func() interface{} {
+			// Duplicate mgrConfig
 			config := mgrConfig
+
 			return &config
 		}).
 		GetFirstItem()

@@ -26,6 +26,7 @@ func (err *ErrPostgresNoHost) Error() string {
 
 func NewErrPostgresNoHost() *ErrPostgresNoHost {
 	err := ErrPostgresNoHost(false)
+
 	return &err
 }
 

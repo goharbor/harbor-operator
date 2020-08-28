@@ -16,11 +16,13 @@ func GetOwnerMutation(scheme *runtime.Scheme, owner metav1.Object) resources.Mut
 		resourceMeta, ok := result.(metav1.Object)
 		if !ok {
 			logger.Get(ctx).Info("Cannot mutate owner: unexpected resource type")
+
 			return func() error { return nil }
 		}
 
 		return func() error {
 			err := controllerutil.SetControllerReference(owner, resourceMeta, scheme)
+
 			return errors.Wrapf(err, "cannot set controller reference for %+v", result)
 		}
 	}

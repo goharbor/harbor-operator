@@ -69,6 +69,7 @@ func WabhooksWithManager(ctx context.Context, mgr manager.Manager) error {
 
 		if !ok {
 			logger.Get(ctx).Info("Controller disabled", "controller", name)
+
 			continue
 		}
 

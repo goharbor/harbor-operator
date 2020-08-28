@@ -154,30 +154,35 @@ func (r *Reconciler) GetConfigFuncs(ctx context.Context, registry *goharborv1alp
 	g.Go(func() error {
 		var err error
 		hookDataFunc, err = r.GetHookDataFunc(gctx, registry)
+
 		return errors.Wrap(err, "hook")
 	})
 
 	g.Go(func() error {
 		var err error
 		reportingData, err = r.GetReportingDataFunc(gctx, registry)
+
 		return errors.Wrap(err, "reporting")
 	})
 
 	g.Go(func() error {
 		var err error
 		registryMiddlewareData, err = r.GetRegistryMiddlewareDataFunc(gctx, registry)
+
 		return errors.Wrap(err, "registry middleware")
 	})
 
 	g.Go(func() error {
 		var err error
 		repositoryMiddlewareData, err = r.GetRepositoryMiddlewareDataFunc(gctx, registry)
+
 		return errors.Wrap(err, "repository middleware")
 	})
 
 	g.Go(func() error {
 		var err error
 		storageMiddlewareData, err = r.GetStorageMiddlewareDataFunc(gctx, registry)
+
 		return errors.Wrap(err, "storage middleware")
 	})
 

@@ -35,6 +35,7 @@ func (c *Controller) prepareStatus(ctx context.Context, owner resources.Resource
 
 	if stop {
 		logger.Get(ctx).Info("nothing to do")
+
 		return nil
 	}
 
