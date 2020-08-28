@@ -6,10 +6,10 @@ package v1alpha1
 type IngressController string
 
 const (
-	// Default ingress controller
+	// Default ingress controller.
 	IngressControllerDefault IngressController = "default"
-	// Google Cloud Engine ingress controller
+	// Google Cloud Engine ingress controller.
 	IngressControllerGCE IngressController = "gce"
-	// NSX-T Container Plugin ingress controller
+	// NSX-T Container Plugin ingress controller.
 	IngressControllerNCP IngressController = "ncp"
 )
