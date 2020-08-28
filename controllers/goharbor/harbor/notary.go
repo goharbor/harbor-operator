@@ -28,6 +28,7 @@ func (r *Reconciler) GetDefaultNotaryMigrationSource() (*GithubSource, error) {
 		Slice(NotaryMigrationGithubSourceConfigKey).
 		Unmarshal(func() interface{} {
 			copy := defaultSource
+
 			return &copy
 		}).
 		GetFirstItem()

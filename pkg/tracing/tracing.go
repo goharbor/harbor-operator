@@ -30,6 +30,7 @@ func Init(ctx context.Context, jaegerConfig *jaeger_cnf.Configuration) (io.Close
 	traceLogger := logger.Get(ctx).WithName("tracing")
 	logger := jaeger_kit.NewLogger(kit_log.LoggerFunc(func(i ...interface{}) error {
 		traceLogger.Info("message", i...)
+
 		return nil
 	}))
 

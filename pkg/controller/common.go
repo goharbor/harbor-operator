@@ -104,11 +104,13 @@ func (c *Controller) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		// Request object not found, could have been deleted after reconcile request.
 		// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
 		l.Info("Object does not exists")
+
 		return ctrl.Result{}, nil
 	}
 
 	if !object.GetDeletionTimestamp().IsZero() {
 		logger.Get(ctx).Info("Object is being deleted")
+
 		return ctrl.Result{}, nil
 	}
 

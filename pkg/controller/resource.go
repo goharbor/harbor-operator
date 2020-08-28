@@ -89,6 +89,7 @@ func (c *Controller) ProcessFunc(ctx context.Context, resource metav1.Object, de
 			for key := range res.resource.GetAnnotations() {
 				if checksum.IsStaticAnnotation(key) {
 					changed = true
+
 					break
 				}
 			}

@@ -20,6 +20,7 @@ func GetMetaMutation(getter MetaGetter, setter MetaSetter, key, value string, kv
 		resultMeta, ok := result.(metav1.Object)
 		if !ok {
 			logger.Get(ctx).Info("Cannot mutate meta: unexpected resource type")
+
 			return func() error { return nil }
 		}
 
@@ -48,6 +49,7 @@ func GetTemplateMetaMutation(getter MetaGetter, setter MetaSetter, key, value st
 		resultDeployment, ok := result.(*appsv1.Deployment)
 		if !ok {
 			logger.Get(ctx).Info("Cannot mutate meta: unexpected resource type")
+
 			return func() error { return nil }
 		}
 

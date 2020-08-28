@@ -73,5 +73,6 @@ func (v ValueFrom) GetValue() string {
 
 func (v ValueFrom) GetValueFrom() *corev1.EnvVarSource {
 	source := corev1.EnvVarSource(v)
+
 	return &source
 }

@@ -85,12 +85,14 @@ func (c *Controller) DeploymentMutateFn(ctx context.Context, dependencies ...gra
 			res, ok := dep.(*Resource)
 			if !ok {
 				logger.Get(ctx).Info("Cannot add dependency checksum", "resource", dep)
+
 				continue
 			}
 
 			depRemote, ok := res.resource.DeepCopyObject().(resources.Resource)
 			if !ok {
 				logger.Get(ctx).Info("Cannot add dependency checksum", "resource", dep)
+
 				continue
 			}
 
