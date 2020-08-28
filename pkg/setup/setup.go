@@ -3,11 +3,10 @@ package setup
 import (
 	"context"
 
+	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
-
-	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 )
 
 func WithManager(ctx context.Context, mgr manager.Manager) error {

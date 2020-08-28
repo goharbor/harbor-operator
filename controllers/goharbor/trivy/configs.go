@@ -4,13 +4,11 @@ import (
 	"context"
 	"strconv"
 
-	"github.com/pkg/errors"
-
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-operator/pkg/graph"
+	"github.com/pkg/errors"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func (r *Reconciler) AddConfigMap(ctx context.Context, trivy *goharborv1alpha2.Trivy) (graph.Resource, error) {

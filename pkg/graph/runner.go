@@ -4,10 +4,9 @@ import (
 	"context"
 	"sync"
 
-	"golang.org/x/sync/errgroup"
-
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	"github.com/opentracing/opentracing-go"
+	"golang.org/x/sync/errgroup"
 )
 
 func (rm *resourceManager) Run(ctx context.Context) error {

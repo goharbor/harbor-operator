@@ -3,22 +3,20 @@ package controller_test
 import (
 	"context"
 
-	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
+	. "github.com/goharbor/harbor-operator/pkg/controller"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
+	"github.com/goharbor/harbor-operator/pkg/factories/application"
+	"github.com/goharbor/harbor-operator/pkg/graph"
+	"github.com/goharbor/harbor-operator/pkg/resources"
+	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1beta1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
 	controllerruntime "sigs.k8s.io/controller-runtime"
-
-	// +kubebuilder:scaffold:imports
-
-	. "github.com/goharbor/harbor-operator/pkg/controller"
-	"github.com/goharbor/harbor-operator/pkg/factories/application"
-	"github.com/goharbor/harbor-operator/pkg/graph"
-	"github.com/goharbor/harbor-operator/pkg/resources"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to

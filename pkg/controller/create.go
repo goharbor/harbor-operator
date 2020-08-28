@@ -3,12 +3,11 @@ package controller
 import (
 	"context"
 
+	"github.com/goharbor/harbor-operator/pkg/graph"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	"github.com/goharbor/harbor-operator/pkg/graph"
 )
 
 func (c *Controller) Create(ctx context.Context, node graph.Resource) error {

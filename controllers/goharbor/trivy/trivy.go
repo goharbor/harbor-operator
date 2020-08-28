@@ -4,18 +4,16 @@ import (
 	"context"
 	"time"
 
+	"github.com/goharbor/harbor-operator/pkg/config"
+	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
+	"github.com/goharbor/harbor-operator/pkg/event-filter/class"
+	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
-
-	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
-
-	"github.com/goharbor/harbor-operator/pkg/config"
-	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
-	"github.com/goharbor/harbor-operator/pkg/event-filter/class"
 )
 
 const (

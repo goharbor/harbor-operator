@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	nettracing "github.com/opentracing-contrib/go-stdlib/nethttp"
 	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
@@ -12,8 +13,6 @@ import (
 	"k8s.io/client-go/transport"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
-
-	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 )
 
 const (

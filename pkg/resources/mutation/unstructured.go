@@ -3,11 +3,10 @@ package mutation
 import (
 	"context"
 
+	"github.com/goharbor/harbor-operator/pkg/resources"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-
-	"github.com/goharbor/harbor-operator/pkg/resources"
 )
 
 func NewUnstructured(mutate resources.Mutable) (result resources.Mutable) {

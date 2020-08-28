@@ -4,17 +4,14 @@ import (
 	"context"
 	"fmt"
 
+	. "github.com/goharbor/harbor-operator/pkg/event-filter/class"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/event"
-
-	// +kubebuilder:scaffold:imports
-
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
-	. "github.com/goharbor/harbor-operator/pkg/event-filter/class"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Rcfer to

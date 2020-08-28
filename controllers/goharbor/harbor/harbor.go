@@ -4,6 +4,10 @@ import (
 	"context"
 	"time"
 
+	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	"github.com/goharbor/harbor-operator/pkg/config"
+	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
+	"github.com/goharbor/harbor-operator/pkg/event-filter/class"
 	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
@@ -11,11 +15,6 @@ import (
 	netv1 "k8s.io/api/networking/v1beta1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
-
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
-	"github.com/goharbor/harbor-operator/pkg/config"
-	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
-	"github.com/goharbor/harbor-operator/pkg/event-filter/class"
 )
 
 const (

@@ -3,11 +3,10 @@ package mutation
 import (
 	"context"
 
+	"github.com/goharbor/harbor-operator/pkg/resources"
 	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-
-	"github.com/goharbor/harbor-operator/pkg/resources"
 )
 
 func NewCertificate(mutate resources.Mutable) (result resources.Mutable) {

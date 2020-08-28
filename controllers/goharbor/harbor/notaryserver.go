@@ -5,18 +5,17 @@ import (
 	"net/url"
 	"time"
 
+	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	"github.com/goharbor/harbor-operator/controllers"
+	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
+	"github.com/goharbor/harbor-operator/pkg/graph"
 	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	v1 "github.com/jetstack/cert-manager/pkg/apis/meta/v1"
 	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
-	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
-	"github.com/goharbor/harbor-operator/controllers"
-	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
-	"github.com/goharbor/harbor-operator/pkg/graph"
 )
 
 func (r *Reconciler) AddNotaryServerConfigurations(ctx context.Context, harbor *goharborv1alpha2.Harbor, tlsIssuer InternalTLSIssuer, notaryIssuer NotarySignerCertificateIssuer) (NotaryServerCertificate, NotaryServerInternalCertificate, NotaryServerMigrationSecret, error) {

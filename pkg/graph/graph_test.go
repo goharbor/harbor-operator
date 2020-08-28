@@ -3,13 +3,12 @@ package graph_test
 import (
 	"context"
 
+	. "github.com/goharbor/harbor-operator/pkg/graph"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	corev1 "k8s.io/api/core/v1"
 	// +kubebuilder:scaffold:imports
-
-	. "github.com/goharbor/harbor-operator/pkg/graph"
+	corev1 "k8s.io/api/core/v1"
 )
 
 var _ = Describe("With a dependency manager", func() {

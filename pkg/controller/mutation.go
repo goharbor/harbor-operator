@@ -5,16 +5,15 @@ import (
 	"fmt"
 	"strings"
 
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-
 	cmutation "github.com/goharbor/harbor-operator/pkg/controller/mutation"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	"github.com/goharbor/harbor-operator/pkg/factories/owner"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 	"github.com/goharbor/harbor-operator/pkg/resources"
 	"github.com/pkg/errors"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
 const (

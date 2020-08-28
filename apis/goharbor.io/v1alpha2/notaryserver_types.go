@@ -1,10 +1,9 @@
 package v1alpha2
 
 import (
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 )
 
 // +genclient

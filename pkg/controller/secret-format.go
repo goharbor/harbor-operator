@@ -3,14 +3,13 @@ package controller
 import (
 	"context"
 
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
+	"github.com/goharbor/harbor-operator/pkg/graph"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
-	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
-	"github.com/goharbor/harbor-operator/pkg/graph"
 )
 
 var errSecretInvalidTyped = errors.New("unexpected secret type")

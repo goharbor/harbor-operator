@@ -3,13 +3,12 @@ package mutation
 import (
 	"context"
 
+	"github.com/goharbor/harbor-operator/pkg/factories/logger"
+	"github.com/goharbor/harbor-operator/pkg/resources"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-
-	"github.com/goharbor/harbor-operator/pkg/factories/logger"
-	"github.com/goharbor/harbor-operator/pkg/resources"
 )
 
 func GetOwnerMutation(scheme *runtime.Scheme, owner metav1.Object) resources.Mutable {

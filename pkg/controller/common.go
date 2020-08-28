@@ -4,14 +4,6 @@ import (
 	"context"
 
 	"github.com/go-logr/logr"
-	"github.com/opentracing/opentracing-go"
-	"github.com/ovh/configstore"
-	"github.com/pkg/errors"
-	apierrs "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	sgraph "github.com/goharbor/harbor-operator/pkg/controller/internal/graph"
 	"github.com/goharbor/harbor-operator/pkg/factories/application"
@@ -19,6 +11,13 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/factories/owner"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 	"github.com/goharbor/harbor-operator/pkg/resources"
+	"github.com/opentracing/opentracing-go"
+	"github.com/ovh/configstore"
+	"github.com/pkg/errors"
+	apierrs "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type ResourceManager interface {

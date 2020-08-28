@@ -2,15 +2,15 @@ package common_test
 
 import (
 	"context"
-	// +kubebuilder:scaffold:imports
 
+	. "github.com/goharbor/harbor-operator/pkg/status"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
+	// +kubebuilder:scaffold:imports
 	"github.com/onsi/gomega/types"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/kustomize/kstatus/status"
-
-	. "github.com/goharbor/harbor-operator/pkg/status"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to

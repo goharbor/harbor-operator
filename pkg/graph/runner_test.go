@@ -4,15 +4,13 @@ import (
 	"context"
 	"sync/atomic"
 
+	. "github.com/goharbor/harbor-operator/pkg/graph"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	// +kubebuilder:scaffold:imports
 	"github.com/onsi/gomega/types"
 	corev1 "k8s.io/api/core/v1"
-
-	// +kubebuilder:scaffold:imports
-
-	. "github.com/goharbor/harbor-operator/pkg/graph"
 )
 
 var _ = Describe("Walk a dependency manager", func() {

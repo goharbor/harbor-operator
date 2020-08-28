@@ -5,12 +5,11 @@ import (
 	"crypto/sha256"
 	"fmt"
 
+	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	"github.com/goharbor/harbor-operator/pkg/resources/checksum"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
-	"github.com/goharbor/harbor-operator/pkg/resources/checksum"
 )
 
 const (

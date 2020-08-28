@@ -3,12 +3,11 @@ package harbor
 import (
 	"context"
 
-	"github.com/pkg/errors"
-
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-operator/controllers"
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	"github.com/goharbor/harbor-operator/pkg/resources"
+	"github.com/pkg/errors"
 )
 
 func (r *Reconciler) NewEmpty(_ context.Context) resources.Resource {

@@ -7,7 +7,6 @@ import (
 	. "github.com/onsi/gomega"
 
 	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
-	// +kubebuilder:scaffold:imports
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to
