@@ -20,7 +20,7 @@ spec:
         - /manager
         args:
         - --enable-leader-election
-        image: goharbor/harbor-operator:dev
+        image: controller:latest
         name: manager
         resources:
           limits:
