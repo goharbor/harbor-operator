@@ -49,6 +49,13 @@ nameReference:
     group: goharbor.io
     path: spec/storage/driver/swift/secretkeyRef
 
+- kind: PersistentVolumeClaim
+  version: v1
+  fieldSpecs:
+  - kind: Registry
+    group: goharbor.io
+    path: spec/storage/driver/filesystem/volumeSource/persistentVolumeClaim/claimName
+
 - kind: ServiceAccount
   version: v1
   fieldSpecs:

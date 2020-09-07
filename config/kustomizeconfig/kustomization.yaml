@@ -8,3 +8,4 @@ configurations:
 - portal.yaml
 - registry.yaml
 - registryctl.yaml
+- trivy.yaml
