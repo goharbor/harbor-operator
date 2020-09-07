@@ -70,11 +70,17 @@ spec:
         - mountPath: /tmp/k8s-webhook-server/serving-certs
           name: certificates
           readOnly: true
+        - mountPath: /etc/harbor-operator
+          name: configuration-templates
+          readOnly: true
       volumes:
       - name: certificates
         secret:
           defaultMode: 420
           secretName: '{{ include "chart.fullname" . }}-certificate'
+      - name: configuration-templates
+        configMap:
+          name: '{{ include "chart.fullname" . }}'
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

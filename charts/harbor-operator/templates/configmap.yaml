@@ -5,4 +5,8 @@ metadata:
   labels:
     {{- include "chart.labels" . | nindent 4 }}
 data:
-  {{- (.Files.Glob "../assets/*").AsConfig | indent 2 }}
+  {{- $files := .Files }}
+  {{- range $path, $_ :=  .Files.Glob "assets/*" }}
+  {{ base $path }}: |-
+    {{- $files.Get $path | nindent 4 }}
+  {{- end }}
