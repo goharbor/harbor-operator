@@ -1,6 +1,3 @@
-generatorOptions:
-  disableNameSuffixHash: true
-
 namePrefix: '{{ include "chart.fullname" . }}-'
 
 commonAnnotations:

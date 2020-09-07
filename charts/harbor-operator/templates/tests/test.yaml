@@ -170,6 +170,82 @@ spec:
     app.kubernetes.io/name: postgresql
   type: ClusterIP
 ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    app.kubernetes.io/instance: ""
+    app.kubernetes.io/managed-by: ""
+    helm.sh/chart: ""
+    helm.sh/hook: test
+  labels:
+    sample: "true"
+  name: '{{ include "chart.fullname" . }}-sample-harbor-chart'
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  volumeMode: Filesystem
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    app.kubernetes.io/instance: ""
+    app.kubernetes.io/managed-by: ""
+    helm.sh/chart: ""
+    helm.sh/hook: test
+  labels:
+    sample: "true"
+  name: '{{ include "chart.fullname" . }}-sample-harbor-registry'
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  volumeMode: Filesystem
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    app.kubernetes.io/instance: ""
+    app.kubernetes.io/managed-by: ""
+    helm.sh/chart: ""
+    helm.sh/hook: test
+  labels:
+    sample: "true"
+  name: '{{ include "chart.fullname" . }}-sample-harbor-trivy-cache'
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  volumeMode: Filesystem
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    app.kubernetes.io/instance: ""
+    app.kubernetes.io/managed-by: ""
+    helm.sh/chart: ""
+    helm.sh/hook: test
+  labels:
+    sample: "true"
+  name: '{{ include "chart.fullname" . }}-sample-harbor-trivy-reports'
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  volumeMode: Filesystem
+---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -387,6 +463,7 @@ metadata:
     sample: "true"
   name: '{{ include "chart.fullname" . }}-sample'
 spec:
+  chartmuseum: {}
   core:
     tokenIssuer:
       kind: Issuer
@@ -420,10 +497,12 @@ spec:
     enabled: true
   notary:
     migrationEnabled: true
+  portal: {}
   redis:
     host: harbor-redis-master
     passwordRef: harbor-redis
     port: 6379
+  registry: {}
   trivy:
     skipUpdate: false
   trivyStorage:
