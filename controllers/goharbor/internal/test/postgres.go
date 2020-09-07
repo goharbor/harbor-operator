@@ -19,13 +19,11 @@ package test
 import (
 	"context"
 
-	. "github.com/onsi/gomega"
-
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	"github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 )
 
 // SetupPostgresql deploy a servicea deployment and a secret to run a postgresql instance
@@ -36,7 +34,7 @@ func SetupPostgresql(ctx context.Context, ns string) harbormetav1.PostgresConnec
 	pgName := NewName("pg")
 	pgPasswordName := NewName("pg-password")
 
-	Expect(k8sClient.Create(ctx, &corev1.Service{
+	gomega.Expect(k8sClient.Create(ctx, &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      pgName,
 			Namespace: ns,
@@ -47,9 +45,9 @@ func SetupPostgresql(ctx context.Context, ns string) harbormetav1.PostgresConnec
 				Port: 5432,
 			}},
 		},
-	})).To(Succeed())
+	})).To(gomega.Succeed())
 
-	Expect(k8sClient.Create(ctx, &corev1.Secret{
+	gomega.Expect(k8sClient.Create(ctx, &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      pgPasswordName,
 			Namespace: ns,
@@ -58,9 +56,9 @@ func SetupPostgresql(ctx context.Context, ns string) harbormetav1.PostgresConnec
 			harbormetav1.PostgresqlPasswordKey: "th3Adm!nPa$$w0rd",
 		},
 		Type: harbormetav1.SecretTypePostgresql,
-	})).To(Succeed())
+	})).To(gomega.Succeed())
 
-	Expect(k8sClient.Create(ctx, &appsv1.Deployment{
+	gomega.Expect(k8sClient.Create(ctx, &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      pgName,
 			Namespace: ns,
@@ -109,7 +107,7 @@ func SetupPostgresql(ctx context.Context, ns string) harbormetav1.PostgresConnec
 				},
 			},
 		},
-	})).To(Succeed())
+	})).To(gomega.Succeed())
 
 	return harbormetav1.PostgresConnectionWithParameters{
 		PostgresConnection: harbormetav1.PostgresConnection{

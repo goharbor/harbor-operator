@@ -3,14 +3,13 @@ package controller
 import (
 	"context"
 
+	"github.com/goharbor/harbor-operator/pkg/config"
+	"github.com/goharbor/harbor-operator/pkg/event-filter/class"
 	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
-
-	"github.com/goharbor/harbor-operator/pkg/config"
-	"github.com/goharbor/harbor-operator/pkg/event-filter/class"
 )
 
 func (c *Controller) Builder(ctx context.Context, mgr ctrl.Manager) (*builder.Builder, error) {
