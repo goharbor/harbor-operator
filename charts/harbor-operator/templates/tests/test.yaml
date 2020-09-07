@@ -117,7 +117,7 @@ metadata:
     app.kubernetes.io/managed-by: ""
     helm.sh/chart: ""
     helm.sh/hook: test
-  name: '{{ include "chart.fullname" . }}-test-postgresql'
+  name: '{{ include "chart.fullname" . }}-test-postgresql-67tt569477'
 type: Opaque
 ---
 apiVersion: v1
@@ -223,7 +223,7 @@ spec:
           valueFrom:
             secretKeyRef:
               key: postgresql-password
-              name: '{{ include "chart.fullname" . }}-test-postgresql'
+              name: '{{ include "chart.fullname" . }}-test-postgresql-67tt569477'
         - name: POSTGRESQL_ENABLE_LDAP
           value: "no"
         - name: POSTGRESQL_ENABLE_TLS
@@ -431,79 +431,3 @@ spec:
       claimName: '{{ include "chart.fullname" . }}-sample-harbor-trivy-cache'
     reportsPersistentVolume:
       claimName: '{{ include "chart.fullname" . }}-sample-harbor-trivy-reports'
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  annotations:
-    app.kubernetes.io/instance: ""
-    app.kubernetes.io/managed-by: ""
-    helm.sh/chart: ""
-    helm.sh/hook: test
-  labels:
-    sample: "true"
-  name: '{{ include "chart.fullname" . }}-sample-harbor-chart'
-spec:
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 5Gi
-  volumeMode: Filesystem
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  annotations:
-    app.kubernetes.io/instance: ""
-    app.kubernetes.io/managed-by: ""
-    helm.sh/chart: ""
-    helm.sh/hook: test
-  labels:
-    sample: "true"
-  name: '{{ include "chart.fullname" . }}-sample-harbor-registry'
-spec:
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 5Gi
-  volumeMode: Filesystem
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  annotations:
-    app.kubernetes.io/instance: ""
-    app.kubernetes.io/managed-by: ""
-    helm.sh/chart: ""
-    helm.sh/hook: test
-  labels:
-    sample: "true"
-  name: '{{ include "chart.fullname" . }}-sample-harbor-trivy-cache'
-spec:
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 5Gi
-  volumeMode: Filesystem
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  annotations:
-    app.kubernetes.io/instance: ""
-    app.kubernetes.io/managed-by: ""
-    helm.sh/chart: ""
-    helm.sh/hook: test
-  labels:
-    sample: "true"
-  name: '{{ include "chart.fullname" . }}-sample-harbor-trivy-reports'
-spec:
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 5Gi
-  volumeMode: Filesystem
