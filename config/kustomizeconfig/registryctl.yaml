@@ -3,14 +3,14 @@ nameReference:
 - kind: Secret
   version: v1
   fieldSpecs:
-  - kind: Registry
+  - kind: RegistryController
     group: goharbor.io
     path: spec/imagePullSecrets/items/name
 
 - kind: ServiceAccount
   version: v1
   fieldSpecs:
-  - kind: Registry
+  - kind: RegistryController
     group: goharbor.io
     path: spec/serviceAccountName
 
