@@ -28,7 +28,7 @@ nameReference:
 - kind: PersistentVolumeClaim
   version: v1
   fieldSpecs:
-  - kind: Registry
+  - kind: ChartMuseum
     group: goharbor.io
     path: spec/chart/storage/filesystem/volumeSource/persistentVolumeClaim/claimName
 
