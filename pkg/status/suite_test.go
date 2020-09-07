@@ -6,7 +6,6 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	// +kubebuilder:scaffold:imports
 	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 )
 

@@ -2,14 +2,16 @@ package graph_test
 
 import (
 	"context"
+	"fmt"
+	"sync"
 	"sync/atomic"
+	"time"
 
 	. "github.com/goharbor/harbor-operator/pkg/graph"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	// +kubebuilder:scaffold:imports
-	"github.com/onsi/gomega/types"
+	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -23,8 +25,7 @@ var _ = Describe("Walk a dependency manager", func() {
 
 	Context("With no resource", func() {
 		It("Should not call any function", func() {
-			err := rm.Run(ctx)
-			Expect(err).ToNot(HaveOccurred())
+			Expect(rm.Run(ctx)).To(Succeed())
 		})
 	})
 
@@ -47,8 +48,7 @@ var _ = Describe("Walk a dependency manager", func() {
 		})
 
 		It("Should call the function only once", func() {
-			err := rm.Run(ctx)
-			Expect(err).ToNot(HaveOccurred())
+			Expect(rm.Run(ctx)).To(Succeed())
 
 			Expect(counter).To(BeEquivalentTo(1))
 		})
@@ -58,27 +58,30 @@ var _ = Describe("Walk a dependency manager", func() {
 		var counter int32
 
 		BeforeEach(func() {
-			counter = 0
+			counterMap := sync.Map{}
 
 			add1 := func(ctx context.Context, resource Resource) error {
 				defer GinkgoRecover()
+
+				_, exists := counterMap.LoadOrStore(resource, true)
+				Expect(exists).To(BeFalse())
 
 				atomic.AddInt32(&counter, 1)
 
 				return nil
 			}
 
-			err := rm.AddResource(ctx, &corev1.Namespace{}, nil, add1)
-			Expect(err).ToNot(HaveOccurred())
+			Expect(rm.AddResource(ctx, &corev1.Namespace{}, nil, add1)).
+				To(Succeed())
 
-			err = rm.AddResource(ctx, &corev1.Secret{}, nil, add1)
-			Expect(err).ToNot(HaveOccurred())
+			Expect(rm.AddResource(ctx, &corev1.Secret{}, nil, add1)).
+				To(Succeed())
 
-			err = rm.AddResource(ctx, &corev1.ConfigMap{}, nil, add1)
-			Expect(err).ToNot(HaveOccurred())
+			Expect(rm.AddResource(ctx, &corev1.ConfigMap{}, nil, add1)).
+				To(Succeed())
 
-			err = rm.AddResource(ctx, &corev1.Node{}, nil, add1)
-			Expect(err).ToNot(HaveOccurred())
+			Expect(rm.AddResource(ctx, &corev1.Node{}, nil, add1)).
+				To(Succeed())
 		})
 
 		It("Should call the function exatly 4 times", func() {
@@ -89,63 +92,132 @@ var _ = Describe("Walk a dependency manager", func() {
 		})
 	})
 
-	Context("With a dependencies tree", func() {
-		var expectations []types.GomegaMatcher
-
+	FContext("With a dependencies tree", func() {
+		var expected int32
 		var counter int32
 
 		BeforeEach(func() {
 			counter = 0
+			expected = 0
 
-			countAndCheck := func(ctx context.Context, resource Resource) error {
-				defer GinkgoRecover()
+			countAndCheck := func(expectedResource Resource, validIndexes ...interface{}) func(ctx context.Context, resource Resource) error {
+				return func(ctx context.Context, resource Resource) error {
+					defer GinkgoRecover()
 
-				Expect(resource).To(expectations[int(atomic.AddInt32(&counter, 1)-1)%len(expectations)])
+					Expect(resource).To(Equal(expectedResource))
+					Expect(atomic.AddInt32(&counter, 1)).
+						To(WithTransform(
+							func(v int32) int { return 1 + int((v-1)%expected) },
+							BeElementOf(validIndexes...),
+						))
 
-				return nil
+					return nil
+				}
 			}
 
-			expectations = []types.GomegaMatcher{}
-
 			ns := &corev1.Namespace{}
-			err := rm.AddResource(ctx, ns, nil, countAndCheck)
-			Expect(err).ToNot(HaveOccurred())
-
-			expectations = append(expectations, Equal(ns))
+			Expect(rm.AddResource(ctx, ns, nil, countAndCheck(ns, 1))).
+				To(Succeed())
+			expected++
 
 			secret := &corev1.Secret{}
-			err = rm.AddResource(ctx, secret, []Resource{ns}, countAndCheck)
-			Expect(err).ToNot(HaveOccurred())
+			Expect(rm.AddResource(ctx, secret, []Resource{ns}, countAndCheck(secret, 2, 3))).
+				To(Succeed())
+			expected++
 
 			cm := &corev1.ConfigMap{}
-			err = rm.AddResource(ctx, cm, []Resource{ns}, countAndCheck)
-			Expect(err).ToNot(HaveOccurred())
-
-			expectations = append(expectations, BeElementOf(secret, cm), BeElementOf(secret, cm))
+			Expect(rm.AddResource(ctx, cm, []Resource{ns}, countAndCheck(cm, 2, 3))).
+				To(Succeed())
+			expected++
 
 			no := &corev1.Node{}
-			err = rm.AddResource(ctx, no, []Resource{secret, cm}, countAndCheck)
-			Expect(err).ToNot(HaveOccurred())
-
-			expectations = append(expectations, Equal(no))
+			Expect(rm.AddResource(ctx, no, []Resource{secret, cm}, countAndCheck(no, 4))).
+				To(Succeed())
+			expected++
 		})
 
 		It("Should call the function in the right order", func() {
-			err := rm.Run(ctx)
-			Expect(err).ToNot(HaveOccurred())
+			Expect(rm.Run(ctx)).To(Succeed())
 
-			Expect(counter).To(BeEquivalentTo(len(expectations)))
+			Expect(counter).To(Equal(expected))
 		})
 
 		It("Should accept multiple runs", func() {
-			const runCount = 2
+			const runCount = 3
 
-			for i := 0; i < runCount; i++ {
-				err := rm.Run(ctx)
-				Expect(err).ToNot(HaveOccurred())
+			for i := int32(1); i <= runCount; i++ {
+				Expect(rm.Run(ctx)).To(Succeed())
 
-				Expect(counter).To(BeEquivalentTo((i + 1) * len(expectations)))
+				Expect(counter).To(Equal(i * expected))
 			}
+		})
+	})
+
+	Context("With errored node", func() {
+		var expectedError error
+		var resource Resource
+
+		BeforeEach(func() {
+			expectedError = errors.New("test error")
+
+			raiseError := func(ctx context.Context, resource Resource) error {
+				return expectedError
+			}
+
+			resource = &corev1.Namespace{}
+
+			Expect(rm.AddResource(ctx, resource, nil, raiseError)).
+				To(Succeed())
+		})
+
+		It("Should return the right error", func() {
+			err := rm.Run(ctx)
+			Expect(err).To(HaveOccurred())
+
+			Expect(err).To(Equal(expectedError))
+		})
+
+		Describe("Linear graph", func() {
+			BeforeEach(func() {
+				fail := func(ctx context.Context, resource Resource) error {
+					defer GinkgoRecover()
+
+					Fail("func should not be executed")
+
+					return nil
+				}
+
+				Expect(rm.AddResource(ctx, &corev1.Secret{}, []Resource{resource}, fail)).
+					To(Succeed())
+			})
+
+			It("Should not trigger child nodes", func() {
+				Expect(rm.Run(ctx)).ToNot(Succeed())
+			})
+		})
+
+		Describe("Parallel graph", func() {
+			BeforeEach(func() {
+				watch := func(ctx context.Context, resource Resource) error {
+					defer GinkgoRecover()
+
+					select {
+					case <-time.After(1500 * time.Millisecond):
+						Fail("context not canceled after timeout")
+					case <-ctx.Done():
+						fmt.Fprintf(GinkgoWriter, "context canceled")
+					}
+
+					return nil
+				}
+
+				Expect(rm.AddResource(ctx, &corev1.Secret{}, []Resource{resource}, watch)).
+					To(Succeed())
+			})
+
+			It("Should cancel context of sibling nodes", func() {
+				Expect(rm.Run(ctx)).ToNot(Succeed())
+			})
 		})
 	})
 })

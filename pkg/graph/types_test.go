@@ -5,7 +5,6 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	// +kubebuilder:scaffold:imports
 	corev1 "k8s.io/api/core/v1"
 )
 

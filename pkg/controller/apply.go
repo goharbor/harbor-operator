@@ -44,7 +44,9 @@ func (c *Controller) apply(ctx context.Context, res *Resource) (controllerutil.O
 					return errors.Wrap(err, "max retry exceeded")
 				}
 
-				l.V(1).Info(fmt.Sprintf("Failed to update resource, retrying in %v...", RetryDelay))
+				l.Info(fmt.Sprintf("Failed to update resource: %v", err))
+
+				l.V(1).Info(fmt.Sprintf("Retrying update in %v...", RetryDelay))
 
 				time.Sleep(RetryDelay)
 				retry.Go(f)

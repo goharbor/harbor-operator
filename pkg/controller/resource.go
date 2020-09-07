@@ -22,6 +22,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
@@ -30,6 +31,17 @@ type Resource struct {
 	mutable   resources.Mutable
 	checkable resources.Checkable
 	resource  resources.Resource
+}
+
+func (c *Controller) SetGVK(ctx context.Context, resource resources.Resource) error {
+	gvks, _, err := c.Scheme.ObjectKinds(resource)
+	if err != nil {
+		return errors.Wrap(err, "groupVersionKind")
+	}
+
+	resource.SetGroupVersionKind(gvks[0])
+
+	return nil
 }
 
 func (c *Controller) ProcessFunc(ctx context.Context, resource metav1.Object, dependencies ...graph.Resource) func(context.Context, graph.Resource) error { // nolint:funlen
@@ -142,10 +154,37 @@ func (c *Controller) AddServiceToManage(ctx context.Context, resource *corev1.Se
 		return nil, nil
 	}
 
+	err := c.SetGVK(ctx, resource)
+	if err != nil {
+		return nil, errors.Wrap(err, "gvk")
+	}
+
 	res := &Resource{
-		mutable:   mutation.NewService(c.GlobalMutateFn(ctx)),
-		checkable: statuscheck.BasicCheck,
-		resource:  resource,
+		mutable: mutation.NewService(c.GlobalMutateFn(ctx)),
+		checkable: func(ctx context.Context, object runtime.Object) (bool, error) {
+			service := object.(*corev1.Service)
+
+			ok, err := statuscheck.BasicCheck(ctx, service)
+			if err != nil || !ok {
+				return ok, err
+			}
+
+			var endpoint corev1.Endpoints
+
+			c.Client.Get(ctx, types.NamespacedName{
+				Namespace: service.GetNamespace(),
+				Name:      service.GetName(),
+			}, &endpoint)
+
+			ports := make([]string, len(service.Spec.Ports))
+
+			for i, port := range service.Spec.Ports {
+				ports[i] = port.Name
+			}
+
+			return statuscheck.EndpointCheck(ctx, &endpoint, ports...)
+		},
+		resource: resource,
 	}
 
 	g := sgraph.Get(ctx)
@@ -162,14 +201,13 @@ func (c *Controller) AddBasicResource(ctx context.Context, resource resources.Re
 		return nil, errors.Wrap(err, "cannot convert resource to unstuctured")
 	}
 
-	gvks, _, err := c.Scheme.ObjectKinds(resource)
+	err = c.SetGVK(ctx, resource)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot object kind")
+		return nil, errors.Wrap(err, "gvk")
 	}
 
 	u := &unstructured.Unstructured{}
 	u.SetUnstructuredContent(data)
-	u.SetGroupVersionKind(gvks[0])
 
 	return c.AddUnsctructuredToManage(ctx, u, dependencies...)
 }
@@ -177,6 +215,11 @@ func (c *Controller) AddBasicResource(ctx context.Context, resource resources.Re
 func (c *Controller) AddExternalResource(ctx context.Context, resource resources.Resource, dependencies ...graph.Resource) (graph.Resource, error) {
 	if resource == nil {
 		return nil, nil
+	}
+
+	err := c.SetGVK(ctx, resource)
+	if err != nil {
+		return nil, errors.Wrap(err, "gvk")
 	}
 
 	res := &Resource{
@@ -199,6 +242,11 @@ func (c *Controller) AddExternalTypedSecret(ctx context.Context, secret *corev1.
 
 	resource := secret.DeepCopy()
 
+	err := c.SetGVK(ctx, resource)
+	if err != nil {
+		return nil, errors.Wrap(err, "gvk")
+	}
+
 	resource.Type = secretType
 
 	res := &Resource{
@@ -217,6 +265,11 @@ func (c *Controller) AddExternalTypedSecret(ctx context.Context, secret *corev1.
 func (c *Controller) AddCertificateToManage(ctx context.Context, resource *certv1.Certificate, dependencies ...graph.Resource) (graph.Resource, error) {
 	if resource == nil {
 		return nil, nil
+	}
+
+	err := c.SetGVK(ctx, resource)
+	if err != nil {
+		return nil, errors.Wrap(err, "gvk")
 	}
 
 	res := &Resource{
@@ -238,6 +291,11 @@ func (c *Controller) AddIssuerToManage(ctx context.Context, resource *certv1.Iss
 		return nil, nil
 	}
 
+	err := c.SetGVK(ctx, resource)
+	if err != nil {
+		return nil, errors.Wrap(err, "gvk")
+	}
+
 	res := &Resource{
 		mutable:   mutation.NewIssuer(c.GlobalMutateFn(ctx)),
 		checkable: statuscheck.IssuerCheck,
@@ -255,6 +313,11 @@ func (c *Controller) AddIssuerToManage(ctx context.Context, resource *certv1.Iss
 func (c *Controller) AddIngressToManage(ctx context.Context, resource *netv1.Ingress, dependencies ...graph.Resource) (graph.Resource, error) {
 	if resource == nil {
 		return nil, nil
+	}
+
+	err := c.SetGVK(ctx, resource)
+	if err != nil {
+		return nil, errors.Wrap(err, "gvk")
 	}
 
 	res := &Resource{
@@ -276,6 +339,11 @@ func (c *Controller) AddSecretToManage(ctx context.Context, resource *corev1.Sec
 		return nil, nil
 	}
 
+	err := c.SetGVK(ctx, resource)
+	if err != nil {
+		return nil, errors.Wrap(err, "gvk")
+	}
+
 	res := &Resource{
 		mutable:   mutation.NewSecret(c.GlobalMutateFn(ctx), true, false),
 		checkable: statuscheck.True,
@@ -293,6 +361,11 @@ func (c *Controller) AddSecretToManage(ctx context.Context, resource *corev1.Sec
 func (c *Controller) AddImmutableSecretToManage(ctx context.Context, resource *corev1.Secret, dependencies ...graph.Resource) (graph.Resource, error) {
 	if resource == nil {
 		return nil, nil
+	}
+
+	err := c.SetGVK(ctx, resource)
+	if err != nil {
+		return nil, errors.Wrap(err, "gvk")
 	}
 
 	res := &Resource{
@@ -314,6 +387,11 @@ func (c *Controller) AddConfigMapToManage(ctx context.Context, resource *corev1.
 		return nil, nil
 	}
 
+	err := c.SetGVK(ctx, resource)
+	if err != nil {
+		return nil, errors.Wrap(err, "gvk")
+	}
+
 	res := &Resource{
 		mutable:   mutation.NewConfigMap(c.GlobalMutateFn(ctx)),
 		checkable: statuscheck.True,
@@ -333,10 +411,17 @@ func (c *Controller) AddDeploymentToManage(ctx context.Context, resource *appsv1
 		return nil, nil
 	}
 
+	err := c.SetGVK(ctx, resource)
+	if err != nil {
+		return nil, errors.Wrap(err, "gvk")
+	}
+
 	res := &Resource{
-		mutable:   mutation.NewDeployment(c.DeploymentMutateFn(ctx, dependencies...)),
-		checkable: statuscheck.BasicCheck,
-		resource:  resource,
+		mutable: mutation.NewDeployment(c.DeploymentMutateFn(ctx, dependencies...)),
+		checkable: func(ctx context.Context, object runtime.Object) (bool, error) {
+			return statuscheck.BasicCheck(ctx, object)
+		},
+		resource: resource,
 	}
 
 	g := sgraph.Get(ctx)

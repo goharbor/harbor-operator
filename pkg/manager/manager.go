@@ -6,10 +6,10 @@ import (
 	"net/http"
 
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
+	"github.com/goharbor/harbor-operator/pkg/scheme"
 	nettracing "github.com/opentracing-contrib/go-stdlib/nethttp"
 	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/transport"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -23,13 +23,18 @@ const (
 	ManagerConfigKey = "operator"
 )
 
-func New(ctx context.Context, scheme *runtime.Scheme) (manager.Manager, error) {
+func New(ctx context.Context) (manager.Manager, error) {
+	s, err := scheme.New(ctx)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to create scheme")
+	}
+
 	var mgrConfig manager.Options = ctrl.Options{
 		MetricsBindAddress:     fmt.Sprintf(":%d", MetricsPort),
 		LeaderElection:         false,
 		Port:                   WebHookPort,
 		HealthProbeBindAddress: fmt.Sprintf(":%d", ProbePort),
-		Scheme:                 scheme,
+		Scheme:                 s,
 	}
 
 	item, err := configstore.Filter().

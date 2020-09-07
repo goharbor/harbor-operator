@@ -44,21 +44,25 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should match", func() {
-						ok := cf.Create(event.CreateEvent{Meta: h.GetObjectMeta(), Object: h})
-						Expect(ok).To(BeTrue())
+						Ω(cf.Create(event.CreateEvent{Meta: h.GetObjectMeta(), Object: h})).
+							Should(BeTrue())
 					})
 				})
 
 				Context("With other annotations", func() {
 					BeforeEach(func() {
+						annotationKey := "not-an-ingress-class-annotation"
+						Ω(annotationKey).
+							ShouldNot(BeEquivalentTo(goharborv1alpha2.HarborClassAnnotation))
+
 						h.SetAnnotations(map[string]string{
-							fmt.Sprintf("%s-false", goharborv1alpha2.HarborClassAnnotation): "",
+							annotationKey: "a class?",
 						})
 					})
 
 					It("Should match", func() {
-						ok := cf.Create(event.CreateEvent{Meta: h.GetObjectMeta(), Object: h})
-						Expect(ok).To(BeTrue())
+						Ω(cf.Create(event.CreateEvent{Meta: h.GetObjectMeta(), Object: h})).
+							Should(BeTrue())
 					})
 				})
 
@@ -70,12 +74,12 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should match", func() {
-						ok := cf.Create(event.CreateEvent{Meta: h.GetObjectMeta(), Object: h})
-						Expect(ok).To(BeTrue())
+						Ω(cf.Create(event.CreateEvent{Meta: h.GetObjectMeta(), Object: h})).
+							Should(BeTrue())
 					})
 				})
 
-				Context("With other-class should not match", func() {
+				Context("With other-class", func() {
 					BeforeEach(func() {
 						h.SetAnnotations(map[string]string{
 							goharborv1alpha2.HarborClassAnnotation: "other-class",
@@ -83,8 +87,8 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should not match", func() {
-						ok := cf.Create(event.CreateEvent{Meta: h.GetObjectMeta(), Object: h})
-						Expect(ok).To(BeFalse())
+						Ω(cf.Create(event.CreateEvent{Meta: h.GetObjectMeta(), Object: h})).
+							Should(BeFalse())
 					})
 				})
 			})
@@ -104,21 +108,25 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should match", func() {
-						ok := cf.Delete(event.DeleteEvent{Meta: h.GetObjectMeta(), Object: h})
-						Expect(ok).To(BeTrue())
+						Ω(cf.Delete(event.DeleteEvent{Meta: h.GetObjectMeta(), Object: h})).
+							Should(BeTrue())
 					})
 				})
 
 				Context("With other annotations", func() {
 					BeforeEach(func() {
+						annotationKey := "not-an-ingress-class-annotation"
+						Ω(annotationKey).
+							ShouldNot(BeEquivalentTo(goharborv1alpha2.HarborClassAnnotation))
+
 						h.SetAnnotations(map[string]string{
-							fmt.Sprintf("%s-false", goharborv1alpha2.HarborClassAnnotation): "",
+							annotationKey: "a class?",
 						})
 					})
 
 					It("Should match", func() {
-						ok := cf.Delete(event.DeleteEvent{Meta: h.GetObjectMeta(), Object: h})
-						Expect(ok).To(BeTrue())
+						Ω(cf.Delete(event.DeleteEvent{Meta: h.GetObjectMeta(), Object: h})).
+							Should(BeTrue())
 					})
 				})
 
@@ -130,12 +138,12 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should match", func() {
-						ok := cf.Delete(event.DeleteEvent{Meta: h.GetObjectMeta(), Object: h})
-						Expect(ok).To(BeTrue())
+						Ω(cf.Delete(event.DeleteEvent{Meta: h.GetObjectMeta(), Object: h})).
+							Should(BeTrue())
 					})
 				})
 
-				Context("With other-class should not match", func() {
+				Context("With other-class", func() {
 					BeforeEach(func() {
 						h.SetAnnotations(map[string]string{
 							goharborv1alpha2.HarborClassAnnotation: "other-class",
@@ -143,12 +151,12 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should not match", func() {
-						ok := cf.Delete(event.DeleteEvent{Meta: h.GetObjectMeta(), Object: h})
-						Expect(ok).To(BeFalse())
+						Ω(cf.Delete(event.DeleteEvent{Meta: h.GetObjectMeta(), Object: h})).
+							Should(BeFalse())
 					})
 				})
 
-				Context("With the right class should match", func() {
+				Context("With the right class", func() {
 					BeforeEach(func() {
 						h.SetAnnotations(map[string]string{
 							goharborv1alpha2.HarborClassAnnotation: cf.ClassName,
@@ -156,8 +164,8 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should match", func() {
-						ok := cf.Delete(event.DeleteEvent{Meta: h.GetObjectMeta(), Object: h})
-						Expect(ok).To(BeTrue())
+						Ω(cf.Delete(event.DeleteEvent{Meta: h.GetObjectMeta(), Object: h})).
+							Should(BeTrue())
 					})
 				})
 			})
@@ -177,21 +185,25 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should match", func() {
-						ok := cf.Generic(event.GenericEvent{Meta: h.GetObjectMeta(), Object: h})
-						Expect(ok).To(BeTrue())
+						Ω(cf.Generic(event.GenericEvent{Meta: h.GetObjectMeta(), Object: h})).
+							Should(BeTrue())
 					})
 				})
 
 				Context("With other annotations", func() {
 					BeforeEach(func() {
+						annotationKey := "not-an-ingress-class-annotation"
+						Ω(annotationKey).
+							ShouldNot(BeEquivalentTo(goharborv1alpha2.HarborClassAnnotation))
+
 						h.SetAnnotations(map[string]string{
-							fmt.Sprintf("%s-false", goharborv1alpha2.HarborClassAnnotation): "",
+							annotationKey: "a class?",
 						})
 					})
 
 					It("Should match", func() {
-						ok := cf.Generic(event.GenericEvent{Meta: h.GetObjectMeta(), Object: h})
-						Expect(ok).To(BeTrue())
+						Ω(cf.Generic(event.GenericEvent{Meta: h.GetObjectMeta(), Object: h})).
+							Should(BeTrue())
 					})
 				})
 
@@ -203,12 +215,12 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should match", func() {
-						ok := cf.Generic(event.GenericEvent{Meta: h.GetObjectMeta(), Object: h})
-						Expect(ok).To(BeTrue())
+						Ω(cf.Generic(event.GenericEvent{Meta: h.GetObjectMeta(), Object: h})).
+							Should(BeTrue())
 					})
 				})
 
-				Context("With other-class should not match", func() {
+				Context("With other-class", func() {
 					BeforeEach(func() {
 						h.SetAnnotations(map[string]string{
 							goharborv1alpha2.HarborClassAnnotation: "other-class",
@@ -216,12 +228,12 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should not match", func() {
-						ok := cf.Generic(event.GenericEvent{Meta: h.GetObjectMeta(), Object: h})
-						Expect(ok).To(BeFalse())
+						Ω(cf.Generic(event.GenericEvent{Meta: h.GetObjectMeta(), Object: h})).
+							Should(BeFalse())
 					})
 				})
 
-				Context("With the right class should match", func() {
+				Context("With the right class", func() {
 					BeforeEach(func() {
 						h.SetAnnotations(map[string]string{
 							goharborv1alpha2.HarborClassAnnotation: cf.ClassName,
@@ -229,8 +241,8 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should match", func() {
-						ok := cf.Generic(event.GenericEvent{Meta: h.GetObjectMeta(), Object: h})
-						Expect(ok).To(BeTrue())
+						Ω(cf.Generic(event.GenericEvent{Meta: h.GetObjectMeta(), Object: h})).
+							Should(BeTrue())
 					})
 				})
 			})
@@ -262,8 +274,8 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
-								Expect(ok).To(BeTrue())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})).
+									Should(BeTrue())
 							})
 						})
 
@@ -275,8 +287,8 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
-								Expect(ok).To(BeTrue())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})).
+									Should(BeTrue())
 							})
 						})
 
@@ -288,21 +300,24 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
-								Expect(ok).To(BeTrue())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})).
+									Should(BeTrue())
 							})
 						})
 
 						Context("To resource with other-class", func() {
 							BeforeEach(func() {
+								className := "other-class"
+								Ω(className).ShouldNot(BeEquivalentTo(cf.ClassName))
+
 								newResource.SetAnnotations(map[string]string{
-									goharborv1alpha2.HarborClassAnnotation: "other-class",
+									goharborv1alpha2.HarborClassAnnotation: className,
 								})
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
-								Expect(ok).To(BeTrue())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})).
+									Should(BeTrue())
 							})
 						})
 					})
@@ -328,8 +343,8 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1alpha2.Harbor{}})
-								Expect(ok).To(BeTrue())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1alpha2.Harbor{}})).
+									Should(BeTrue())
 							})
 						})
 
@@ -341,8 +356,8 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1alpha2.Harbor{}})
-								Expect(ok).To(BeTrue())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1alpha2.Harbor{}})).
+									Should(BeTrue())
 							})
 						})
 
@@ -354,21 +369,24 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1alpha2.Harbor{}})
-								Expect(ok).To(BeTrue())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1alpha2.Harbor{}})).
+									Should(BeTrue())
 							})
 						})
 
 						Context("With other-class", func() {
 							BeforeEach(func() {
+								className := "other-class"
+								Ω(className).ShouldNot(BeEquivalentTo(cf.ClassName))
+
 								newResource.SetAnnotations(map[string]string{
-									goharborv1alpha2.HarborClassAnnotation: "other-class",
+									goharborv1alpha2.HarborClassAnnotation: className,
 								})
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1alpha2.Harbor{}})
-								Expect(ok).To(BeTrue())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1alpha2.Harbor{}})).
+									Should(BeTrue())
 							})
 						})
 					})
@@ -394,8 +412,8 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1alpha2.Harbor{}})
-								Expect(ok).To(BeTrue())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1alpha2.Harbor{}})).
+									Should(BeTrue())
 							})
 						})
 
@@ -407,8 +425,8 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1alpha2.Harbor{}})
-								Expect(ok).To(BeTrue())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1alpha2.Harbor{}})).
+									Should(BeTrue())
 							})
 						})
 
@@ -420,21 +438,24 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1alpha2.Harbor{}})
-								Expect(ok).To(BeTrue())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1alpha2.Harbor{}})).
+									Should(BeTrue())
 							})
 						})
 
 						Context("To resource with other-class", func() {
 							BeforeEach(func() {
+								className := "other-class"
+								Ω(className).ShouldNot(BeEquivalentTo(cf.ClassName))
+
 								newResource.SetAnnotations(map[string]string{
-									goharborv1alpha2.HarborClassAnnotation: "other-class",
+									goharborv1alpha2.HarborClassAnnotation: className,
 								})
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1alpha2.Harbor{}})
-								Expect(ok).To(BeTrue())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1alpha2.Harbor{}})).
+									Should(BeTrue())
 							})
 						})
 					})
@@ -460,8 +481,8 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1alpha2.Harbor{}})
-								Expect(ok).To(BeTrue())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1alpha2.Harbor{}})).
+									Should(BeTrue())
 							})
 						})
 
@@ -473,8 +494,8 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1alpha2.Harbor{}})
-								Expect(ok).To(BeTrue())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1alpha2.Harbor{}})).
+									Should(BeTrue())
 							})
 						})
 
@@ -486,21 +507,24 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1alpha2.Harbor{}})
-								Expect(ok).To(BeTrue())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1alpha2.Harbor{}})).
+									Should(BeTrue())
 							})
 						})
 
 						Context("With other-class", func() {
 							BeforeEach(func() {
+								className := "other-class"
+								Ω(className).ShouldNot(BeEquivalentTo(cf.ClassName))
+
 								newResource.SetAnnotations(map[string]string{
-									goharborv1alpha2.HarborClassAnnotation: "other-class",
+									goharborv1alpha2.HarborClassAnnotation: className,
 								})
 							})
 
 							It("Should not match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1alpha2.Harbor{}})
-								Expect(ok).To(BeFalse())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1alpha2.Harbor{}})).
+									Should(BeFalse())
 							})
 						})
 					})
@@ -531,21 +555,25 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should match", func() {
-						ok := cf.Create(event.CreateEvent{Meta: h.GetObjectMeta(), Object: h})
-						Expect(ok).To(BeFalse())
+						Ω(cf.Create(event.CreateEvent{Meta: h.GetObjectMeta(), Object: h})).
+							Should(BeFalse())
 					})
 				})
 
 				Context("with other annotations", func() {
 					BeforeEach(func() {
+						annotationKey := "not-an-ingress-class-annotation"
+						Ω(annotationKey).
+							ShouldNot(BeEquivalentTo(goharborv1alpha2.HarborClassAnnotation))
+
 						h.SetAnnotations(map[string]string{
-							fmt.Sprintf("%s-false", goharborv1alpha2.HarborClassAnnotation): "",
+							annotationKey: "a class?",
 						})
 					})
 
 					It("Should match", func() {
-						ok := cf.Create(event.CreateEvent{Meta: h.GetObjectMeta(), Object: h})
-						Expect(ok).To(BeFalse())
+						Ω(cf.Create(event.CreateEvent{Meta: h.GetObjectMeta(), Object: h})).
+							Should(BeFalse())
 					})
 				})
 
@@ -557,25 +585,25 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should match", func() {
-						ok := cf.Create(event.CreateEvent{Meta: h.GetObjectMeta(), Object: h})
-						Expect(ok).To(BeFalse())
+						Ω(cf.Create(event.CreateEvent{Meta: h.GetObjectMeta(), Object: h})).
+							Should(BeFalse())
 					})
 				})
 
-				Context("resource with other-class should not match", func() {
+				Context("resource with other-class", func() {
 					BeforeEach(func() {
 						h.SetAnnotations(map[string]string{
 							goharborv1alpha2.HarborClassAnnotation: "other-class",
 						})
 					})
 
-					It("Should match", func() {
-						ok := cf.Create(event.CreateEvent{Meta: h.GetObjectMeta(), Object: h})
-						Expect(ok).To(BeFalse())
+					It("Should not match", func() {
+						Ω(cf.Create(event.CreateEvent{Meta: h.GetObjectMeta(), Object: h})).
+							Should(BeFalse())
 					})
 				})
 
-				Context("resource with the right class should match", func() {
+				Context("resource with the right class", func() {
 					BeforeEach(func() {
 						h.SetAnnotations(map[string]string{
 							goharborv1alpha2.HarborClassAnnotation: cf.ClassName,
@@ -583,8 +611,8 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should match", func() {
-						ok := cf.Create(event.CreateEvent{Meta: h.GetObjectMeta(), Object: h})
-						Expect(ok).To(BeTrue())
+						Ω(cf.Create(event.CreateEvent{Meta: h.GetObjectMeta(), Object: h})).
+							Should(BeTrue())
 					})
 				})
 			})
@@ -604,21 +632,25 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should match", func() {
-						ok := cf.Delete(event.DeleteEvent{Meta: h.GetObjectMeta(), Object: h})
-						Expect(ok).To(BeFalse())
+						Ω(cf.Delete(event.DeleteEvent{Meta: h.GetObjectMeta(), Object: h})).
+							Should(BeFalse())
 					})
 				})
 
 				Context("With other annotations", func() {
 					BeforeEach(func() {
+						annotationKey := "not-an-ingress-class-annotation"
+						Ω(annotationKey).
+							ShouldNot(BeEquivalentTo(goharborv1alpha2.HarborClassAnnotation))
+
 						h.SetAnnotations(map[string]string{
-							fmt.Sprintf("%s-false", goharborv1alpha2.HarborClassAnnotation): "",
+							annotationKey: "a class?",
 						})
 					})
 
 					It("Should match", func() {
-						ok := cf.Delete(event.DeleteEvent{Meta: h.GetObjectMeta(), Object: h})
-						Expect(ok).To(BeFalse())
+						Ω(cf.Delete(event.DeleteEvent{Meta: h.GetObjectMeta(), Object: h})).
+							Should(BeFalse())
 					})
 				})
 
@@ -630,12 +662,12 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should match", func() {
-						ok := cf.Delete(event.DeleteEvent{Meta: h.GetObjectMeta(), Object: h})
-						Expect(ok).To(BeFalse())
+						Ω(cf.Delete(event.DeleteEvent{Meta: h.GetObjectMeta(), Object: h})).
+							Should(BeFalse())
 					})
 				})
 
-				Context("resource with other-class should not match", func() {
+				Context("resource with other-class", func() {
 					BeforeEach(func() {
 						h.SetAnnotations(map[string]string{
 							goharborv1alpha2.HarborClassAnnotation: "other-class",
@@ -643,12 +675,12 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should not match", func() {
-						ok := cf.Delete(event.DeleteEvent{Meta: h.GetObjectMeta(), Object: h})
-						Expect(ok).To(BeFalse())
+						Ω(cf.Delete(event.DeleteEvent{Meta: h.GetObjectMeta(), Object: h})).
+							Should(BeFalse())
 					})
 				})
 
-				Context("resource with the right class should match", func() {
+				Context("resource with the right class", func() {
 					BeforeEach(func() {
 						h.SetAnnotations(map[string]string{
 							goharborv1alpha2.HarborClassAnnotation: cf.ClassName,
@@ -656,8 +688,8 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should match", func() {
-						ok := cf.Delete(event.DeleteEvent{Meta: h.GetObjectMeta(), Object: h})
-						Expect(ok).To(BeTrue())
+						Ω(cf.Delete(event.DeleteEvent{Meta: h.GetObjectMeta(), Object: h})).
+							Should(BeTrue())
 					})
 				})
 			})
@@ -677,21 +709,25 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should not match", func() {
-						ok := cf.Generic(event.GenericEvent{Meta: h.GetObjectMeta(), Object: h})
-						Expect(ok).To(BeFalse())
+						Ω(cf.Generic(event.GenericEvent{Meta: h.GetObjectMeta(), Object: h})).
+							Should(BeFalse())
 					})
 				})
 
 				Context("Harbor with other annotations", func() {
 					BeforeEach(func() {
+						annotationKey := "not-an-ingress-class-annotation"
+						Ω(annotationKey).
+							ShouldNot(BeEquivalentTo(goharborv1alpha2.HarborClassAnnotation))
+
 						h.SetAnnotations(map[string]string{
-							fmt.Sprintf("%s-false", goharborv1alpha2.HarborClassAnnotation): "",
+							annotationKey: "a class?",
 						})
 					})
 
 					It("Should not match", func() {
-						ok := cf.Generic(event.GenericEvent{Meta: h.GetObjectMeta(), Object: h})
-						Expect(ok).To(BeFalse())
+						Ω(cf.Generic(event.GenericEvent{Meta: h.GetObjectMeta(), Object: h})).
+							Should(BeFalse())
 					})
 				})
 
@@ -703,12 +739,12 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should not match", func() {
-						ok := cf.Generic(event.GenericEvent{Meta: h.GetObjectMeta(), Object: h})
-						Expect(ok).To(BeFalse())
+						Ω(cf.Generic(event.GenericEvent{Meta: h.GetObjectMeta(), Object: h})).
+							Should(BeFalse())
 					})
 				})
 
-				Context("resource with other-class should not match", func() {
+				Context("resource with other-class", func() {
 					BeforeEach(func() {
 						h.SetAnnotations(map[string]string{
 							goharborv1alpha2.HarborClassAnnotation: "other-class",
@@ -716,12 +752,12 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should not match", func() {
-						ok := cf.Generic(event.GenericEvent{Meta: h.GetObjectMeta(), Object: h})
-						Expect(ok).To(BeFalse())
+						Ω(cf.Generic(event.GenericEvent{Meta: h.GetObjectMeta(), Object: h})).
+							Should(BeFalse())
 					})
 				})
 
-				Context("resource with the right class should match", func() {
+				Context("resource with the right class", func() {
 					BeforeEach(func() {
 						h.SetAnnotations(map[string]string{
 							goharborv1alpha2.HarborClassAnnotation: cf.ClassName,
@@ -729,8 +765,8 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should match", func() {
-						ok := cf.Generic(event.GenericEvent{Meta: h.GetObjectMeta(), Object: h})
-						Expect(ok).To(BeTrue())
+						Ω(cf.Generic(event.GenericEvent{Meta: h.GetObjectMeta(), Object: h})).
+							Should(BeTrue())
 					})
 				})
 			})
@@ -762,8 +798,8 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should not match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
-								Expect(ok).To(BeFalse())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})).
+									Should(BeFalse())
 							})
 						})
 
@@ -775,8 +811,8 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should not match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
-								Expect(ok).To(BeFalse())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})).
+									Should(BeFalse())
 							})
 						})
 
@@ -788,21 +824,24 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should not match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
-								Expect(ok).To(BeFalse())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})).
+									Should(BeFalse())
 							})
 						})
 
 						Context("With other-class", func() {
 							BeforeEach(func() {
+								className := "other-class"
+								Ω(className).ShouldNot(BeEquivalentTo(cf.ClassName))
+
 								newResource.SetAnnotations(map[string]string{
-									goharborv1alpha2.HarborClassAnnotation: "other-class",
+									goharborv1alpha2.HarborClassAnnotation: className,
 								})
 							})
 
 							It("Should not match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
-								Expect(ok).To(BeFalse())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})).
+									Should(BeFalse())
 							})
 						})
 
@@ -814,8 +853,8 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
-								Expect(ok).To(BeTrue())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})).
+									Should(BeTrue())
 							})
 						})
 					})
@@ -841,8 +880,8 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should not match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
-								Expect(ok).To(BeFalse())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})).
+									Should(BeFalse())
 							})
 						})
 
@@ -854,8 +893,8 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should not match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
-								Expect(ok).To(BeFalse())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})).
+									Should(BeFalse())
 							})
 						})
 
@@ -867,21 +906,24 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should not match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
-								Expect(ok).To(BeFalse())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})).
+									Should(BeFalse())
 							})
 						})
 
 						Context("With other-class", func() {
 							BeforeEach(func() {
+								className := "other-class"
+								Ω(className).ShouldNot(BeEquivalentTo(cf.ClassName))
+
 								newResource.SetAnnotations(map[string]string{
-									goharborv1alpha2.HarborClassAnnotation: "other-class",
+									goharborv1alpha2.HarborClassAnnotation: className,
 								})
 							})
 
 							It("Should not match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
-								Expect(ok).To(BeFalse())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})).
+									Should(BeFalse())
 							})
 						})
 
@@ -893,8 +935,8 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
-								Expect(ok).To(BeTrue())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})).
+									Should(BeTrue())
 							})
 						})
 					})
@@ -920,8 +962,8 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should not match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
-								Expect(ok).To(BeFalse())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})).
+									Should(BeFalse())
 							})
 						})
 
@@ -933,8 +975,8 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should not match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
-								Expect(ok).To(BeFalse())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})).
+									Should(BeFalse())
 							})
 						})
 
@@ -946,21 +988,24 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should not match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
-								Expect(ok).To(BeFalse())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})).
+									Should(BeFalse())
 							})
 						})
 
 						Context("With other-class", func() {
 							BeforeEach(func() {
+								className := "other-class"
+								Ω(className).ShouldNot(BeEquivalentTo(cf.ClassName))
+
 								newResource.SetAnnotations(map[string]string{
-									goharborv1alpha2.HarborClassAnnotation: "other-class",
+									goharborv1alpha2.HarborClassAnnotation: className,
 								})
 							})
 
 							It("Should not match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
-								Expect(ok).To(BeFalse())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})).
+									Should(BeFalse())
 							})
 						})
 
@@ -972,8 +1017,8 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
-								Expect(ok).To(BeTrue())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})).
+									Should(BeTrue())
 							})
 						})
 					})
@@ -999,8 +1044,8 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should not match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
-								Expect(ok).To(BeFalse())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})).
+									Should(BeFalse())
 							})
 						})
 
@@ -1012,8 +1057,8 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should not match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
-								Expect(ok).To(BeFalse())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})).
+									Should(BeFalse())
 							})
 						})
 
@@ -1025,21 +1070,24 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should not match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
-								Expect(ok).To(BeFalse())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})).
+									Should(BeFalse())
 							})
 						})
 
 						Context("With other-class", func() {
 							BeforeEach(func() {
+								className := "other-class"
+								Ω(className).ShouldNot(BeEquivalentTo(cf.ClassName))
+
 								newResource.SetAnnotations(map[string]string{
-									goharborv1alpha2.HarborClassAnnotation: "other-class",
+									goharborv1alpha2.HarborClassAnnotation: className,
 								})
 							})
 
 							It("Should not match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
-								Expect(ok).To(BeFalse())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})).
+									Should(BeFalse())
 							})
 						})
 
@@ -1051,8 +1099,8 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
-								Expect(ok).To(BeTrue())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})).
+									Should(BeTrue())
 							})
 						})
 					})
@@ -1078,8 +1126,8 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
-								Expect(ok).To(BeTrue())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})).
+									Should(BeTrue())
 							})
 						})
 
@@ -1091,8 +1139,8 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
-								Expect(ok).To(BeTrue())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})).
+									Should(BeTrue())
 							})
 						})
 
@@ -1104,21 +1152,24 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
-								Expect(ok).To(BeTrue())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})).
+									Should(BeTrue())
 							})
 						})
 
 						Context("With other-class", func() {
 							BeforeEach(func() {
+								className := "other-class"
+								Ω(className).ShouldNot(BeEquivalentTo(cf.ClassName))
+
 								newResource.SetAnnotations(map[string]string{
-									goharborv1alpha2.HarborClassAnnotation: "other-class",
+									goharborv1alpha2.HarborClassAnnotation: className,
 								})
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
-								Expect(ok).To(BeTrue())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})).
+									Should(BeTrue())
 							})
 						})
 
@@ -1130,8 +1181,8 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
-								Expect(ok).To(BeTrue())
+								Ω(cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})).
+									Should(BeTrue())
 							})
 						})
 					})

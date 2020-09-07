@@ -41,9 +41,9 @@ func NewController(ctx context.Context, name string, rm ResourceManager, config 
 	return &Controller{
 		Name:        name,
 		Version:     application.GetVersion(ctx),
+		ConfigStore: config,
 		rm:          rm,
 		Log:         ctrl.Log.WithName(application.GetName(ctx)).WithName("controller").WithValues("controller", name),
-		ConfigStore: config,
 	}
 }
 

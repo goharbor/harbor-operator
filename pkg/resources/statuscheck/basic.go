@@ -17,5 +17,15 @@ func BasicCheck(ctx context.Context, object runtime.Object) (bool, error) {
 	resource := &unstructured.Unstructured{}
 	resource.SetUnstructuredContent(data)
 
-	return UnstructuredCheck(ctx, resource)
+	ok, err := UnstructuredCheck(ctx, resource)
+	if err != nil {
+		return ok, err
+	}
+
+	err = runtime.DefaultUnstructuredConverter.FromUnstructured(resource.UnstructuredContent(), object)
+	if err != nil {
+		return false, errors.Wrap(err, "cannot populate from unstructured")
+	}
+
+	return ok, nil
 }

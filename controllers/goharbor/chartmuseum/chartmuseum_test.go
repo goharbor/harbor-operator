@@ -24,39 +24,38 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-
 	"golang.org/x/net/html"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime/serializer"
-	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/rest"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
-	"github.com/goharbor/harbor-operator/pkg/factories/application"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/rest"
 )
 
-const (
-	defaultGenerationNumber int64 = 1
-)
-
-var (
-	ns = SetupTest()
-)
+const defaultGenerationNumber int64 = 1
 
 var _ = Describe("ChartMuseum", func() {
-	var chartMuseum *goharborv1alpha2.ChartMuseum
+	var (
+		ns          = test.InitNamespace(func() context.Context { return ctx })
+		chartMuseum goharborv1alpha2.ChartMuseum
+	)
 
 	BeforeEach(func() {
-		chartMuseum = &goharborv1alpha2.ChartMuseum{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      test.NewName("chartmuseum"),
-				Namespace: ns.GetName(),
-			},
+		chartMuseum.ObjectMeta = metav1.ObjectMeta{
+			Name:      test.NewName("chartmuseum"),
+			Namespace: ns.GetName(),
 		}
 	})
+
+	JustAfterEach(test.LogOnFailureFunc(&ctx, func() types.NamespacedName {
+		return types.NamespacedName{
+			Name:      reconciler.NormalizeName(ctx, chartMuseum.GetName()),
+			Namespace: chartMuseum.GetNamespace(),
+		}
+	}))
 
 	Context("Without TLS", func() {
 		BeforeEach(func() {
@@ -77,74 +76,112 @@ var _ = Describe("ChartMuseum", func() {
 		})
 
 		It("Should works", func() {
-			By("Creating new resource")
+			By("Creating new resource", func() {
+				Ω(test.GetClient(ctx).Create(ctx, &chartMuseum)).
+					Should(test.SuccessOrExists)
 
-			Expect(test.GetClient(ctx).Create(ctx, chartMuseum)).
-				To(Succeed())
+				Eventually(func() error { return test.GetClient(ctx).Get(ctx, test.GetNamespacedName(&chartMuseum), &chartMuseum) }, time.Minute, 5*time.Second).
+					Should(Succeed(), "resource should exists")
 
-			Eventually(func() error { return test.GetClient(ctx).Get(ctx, test.GetNamespacedName(chartMuseum), chartMuseum) }, time.Minute, 5*time.Second).
-				Should(Succeed(), "resource should exists")
+				Ω(chartMuseum.GetGeneration()).
+					Should(Equal(defaultGenerationNumber), "Generation should not be updated")
 
-			Expect(chartMuseum.GetGeneration()).
-				Should(Equal(defaultGenerationNumber), "ObservedGeneration should not be updated")
+				Eventually(func() (int64, error) {
+					err := test.GetClient(ctx).Create(ctx, &chartMuseum)
+					if err != nil {
+						return 0, err
+					}
 
-			test.EnsureReady(ctx, chartMuseum, time.Minute, 5*time.Second)
+					return chartMuseum.Status.ObservedGeneration, nil
+				}, 5*time.Second).
+					Should(Equal(chartMuseum.GetGeneration()), "ObservedGeneration should be updated")
 
-			IntegTest(ctx, chartMuseum)
+				test.EnsureReady(ctx, &chartMuseum, time.Minute, 5*time.Second)
 
-			By("Updating resource spec")
+				IntegTest(ctx, &chartMuseum)
+			})
 
-			test.ScaleUp(ctx, chartMuseum)
+			By("Updating resource spec", func() {
+				test.ScaleUp(ctx, &chartMuseum)
 
-			Expect(test.GetClient(ctx).Get(ctx, test.GetNamespacedName(chartMuseum), chartMuseum)).
-				To(Succeed(), "resource should still be accessible")
+				Ω(test.GetClient(ctx).Get(ctx, test.GetNamespacedName(&chartMuseum), &chartMuseum)).
+					Should(Succeed(), "resource should still be accessible")
 
-			test.EnsureReady(ctx, chartMuseum, time.Minute, 5*time.Second)
+				test.EnsureReady(ctx, &chartMuseum, time.Minute, 5*time.Second)
 
-			IntegTest(ctx, chartMuseum)
+				IntegTest(ctx, &chartMuseum)
+			})
 
-			By("Deleting resource")
+			By("Deleting resource", func() {
+				Ω(test.GetClient(ctx).Delete(ctx, &chartMuseum)).Should(Succeed())
 
-			Expect(test.GetClient(ctx).Delete(ctx, chartMuseum)).To(Succeed())
-
-			Eventually(func() error { return test.GetClient(ctx).Get(ctx, test.GetNamespacedName(chartMuseum), chartMuseum) }, time.Minute, 5*time.Second).
-				ShouldNot(Succeed(), "Resource should no more exist")
+				Eventually(func() error {
+					return test.GetClient(ctx).Get(ctx, test.GetNamespacedName(&chartMuseum), &chartMuseum)
+				}, time.Minute, 5*time.Second).
+					ShouldNot(Succeed(), "Resource should no more exist")
+			})
 		})
 	})
 })
 
 func IntegTest(ctx context.Context, chartMuseum *goharborv1alpha2.ChartMuseum) {
-	config := rest.CopyConfig(cfg)
-	config.APIPath = "api"
-	config = rest.AddUserAgent(config, fmt.Sprintf("%s(%s)", application.GetName(ctx), application.GetVersion(ctx)))
-	config.NegotiatedSerializer = serializer.NewCodecFactory(test.GetScheme(ctx))
-	config.GroupVersion = &corev1.SchemeGroupVersion
-
-	client, err := rest.UnversionedRESTClientFor(config)
+	client, err := rest.UnversionedRESTClientFor(test.NewRestConfig(ctx))
 	Expect(err).ToNot(HaveOccurred())
 
-	name := reconciler.NormalizeName(ctx, chartMuseum.GetName())
-	namespace := ns.GetName()
+	namespacedName := types.NamespacedName{
+		Name:      reconciler.NormalizeName(ctx, chartMuseum.GetName()),
+		Namespace: chartMuseum.GetNamespace(),
+	}
 
-	Eventually(func() error {
-		return test.GetClient(ctx).Get(ctx, types.NamespacedName{
-			Name:      name,
-			Namespace: namespace,
-		}, &corev1.Endpoints{})
-	}, 5*time.Second, 200*time.Millisecond).Should(Succeed())
+	/*
+		Eventually(func() error {
+			endpoint := &corev1.Endpoints{}
 
-	time.Sleep(10 * time.Second)
+			err := test.GetClient(ctx).Get(ctx, namespacedName, endpoint)
+			if err != nil {
+				return err
+			}
+
+			ok, err := statuscheck.EndpointCheck(ctx, endpoint, harbormetav1.ChartMuseumHTTPPortName)
+			if err != nil {
+				return err
+			}
+
+			if !ok {
+				return errors.New("not ready") // nolint:goerr113
+			}
+
+			return nil
+		}, 30*time.Second, 100*time.Millisecond).Should(Succeed())
+
+		var pods corev1.PodList
+		Ω(
+			client.Get().
+				Resource("pods").
+				Namespace(chartMuseum.GetNamespace()).
+				Param("labelSelector", strings.Join([]string{
+					fmt.Sprintf("%s=%s", reconciler.Label("name"), reconciler.NormalizeName(ctx, chartMuseum.Name)),
+					fmt.Sprintf("%s=%s", controller.OperatorNameLabel, reconciler.GetName()),
+					fmt.Sprintf("%s=%s", controller.OperatorVersionLabel, reconciler.GetVersion()),
+				}, ",")).
+				Do(ctx).
+				Into(&pods)).
+			Should(Succeed())
+
+		Ω(pods.Items).ShouldNot(HaveLen(0))
+	*/
 
 	result, err := client.Get().
 		Resource("services").
-		Namespace(namespace).
-		Name(fmt.Sprintf("%s:%d", name, harbormetav1.HTTPPort)).
+		Namespace(namespacedName.Namespace).
+		Name(fmt.Sprintf("%s:%d", namespacedName.Name, harbormetav1.HTTPPort)).
 		SubResource("proxy").
 		Suffix("/").
 		DoRaw(ctx)
+	Ω(err).Should(Succeed())
 
-	Expect(err).ToNot(HaveOccurred())
-
-	_, err = html.Parse(bytes.NewReader(result))
-	Expect(err).ToNot(HaveOccurred())
+	Ω(html.Parse(bytes.NewReader(result))).
+		Should(WithTransform(func(node *html.Node) string {
+			return node.FirstChild.NextSibling.FirstChild.FirstChild.NextSibling.FirstChild.Data
+		}, Equal("Welcome to ChartMuseum!")))
 }

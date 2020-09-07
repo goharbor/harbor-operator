@@ -7,7 +7,6 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	// +kubebuilder:scaffold:imports
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -20,33 +19,49 @@ var _ = Describe("With a dependency manager", func() {
 	})
 
 	Describe("Add resource with nil function", func() {
-		It("Should fail", func() {
-			secret := &corev1.Secret{}
+		var resource Resource
 
-			err := rm.AddResource(ctx, secret, nil, nil)
-			Expect(err).To(HaveOccurred())
+		BeforeEach(func() {
+			resource = &corev1.Secret{}
+		})
+
+		It("Should fail", func() {
+			Expect(rm.AddResource(ctx, resource, nil, nil)).
+				ToNot(Succeed())
 		})
 	})
 
 	Describe("Add 2 times the same resources", func() {
+		var resource Resource
+
+		BeforeEach(func() {
+			resource = &corev1.Secret{}
+		})
+
 		It("Should fail", func() {
-			secret := &corev1.Secret{}
+			noOp := func(ctx context.Context, resource Resource) error { return nil }
 
-			err := rm.AddResource(ctx, secret, nil, func(ctx context.Context, resource Resource) error { return nil })
-			Expect(err).ToNot(HaveOccurred())
+			Expect(rm.AddResource(ctx, resource, nil, noOp)).
+				To(Succeed())
 
-			err = rm.AddResource(ctx, secret, nil, func(ctx context.Context, resource Resource) error { return nil })
-			Expect(err).To(HaveOccurred())
+			Expect(rm.AddResource(ctx, resource, nil, noOp)).
+				ToNot(Succeed())
 		})
 	})
 
 	Describe("Add a resource with an unknown dependency", func() {
-		It("Should fail", func() {
-			cm := &corev1.ConfigMap{}
-			secret := &corev1.Secret{}
+		var resource, dependency Resource
 
-			err := rm.AddResource(ctx, secret, []Resource{cm}, func(ctx context.Context, resource Resource) error { return nil })
-			Expect(err).To(HaveOccurred())
+		BeforeEach(func() {
+			resource = &corev1.ConfigMap{}
+			dependency = &corev1.Secret{}
+		})
+
+		It("Should fail", func() {
+			noOp := func(ctx context.Context, resource Resource) error { return nil }
+
+			Expect(rm.AddResource(ctx, resource, []Resource{dependency}, noOp)).
+				ToNot(Succeed())
 		})
 	})
 })
