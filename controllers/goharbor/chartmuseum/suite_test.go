@@ -15,33 +15,22 @@ package chartmuseum_test
 
 import (
 	"context"
-	"math/rand"
-	"path"
 	"testing"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	core "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/rest"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
-
-	// +kubebuilder:scaffold:imports
-
 	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/chartmuseum"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
 	"github.com/goharbor/harbor-operator/pkg/config"
+	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to
 // http://onsi.github.io/ginkgo/ to learn more about Ginkgo.
 
 var (
-	cfg        *rest.Config
 	stopCh     chan struct{}
 	ctx        context.Context
 	reconciler *chartmuseum.Reconciler
@@ -56,30 +45,11 @@ func TestAPIs(t *testing.T) {
 }
 
 var _ = BeforeSuite(func(done Done) {
-	rand.Seed(GinkgoRandomSeed())
+	ctx = test.InitSuite()
 
-	ctx = test.NewContext(path.Join("..", "..", ".."))
+	By("Configuring controller")
 
-	By("bootstrapping test environment")
-	var err error
-	cfg, err = test.GetEnvironment(ctx).Start()
-	Expect(err).ToNot(HaveOccurred())
-	Expect(cfg).ToNot(BeNil())
-
-	k8sClient, err := client.New(cfg, client.Options{Scheme: test.GetScheme(ctx)})
-	Expect(err).ToNot(HaveOccurred())
-	Expect(k8sClient).ToNot(BeNil())
-
-	ctx = test.SetClient(ctx, k8sClient)
-
-	// +kubebuilder:scaffold:scheme
-
-	mgr, err := ctrl.NewManager(cfg, ctrl.Options{
-		MetricsBindAddress: "0",
-		Scheme:             test.GetScheme(ctx),
-	})
-	Expect(err).NotTo(HaveOccurred(), "failed to create manager")
-
+	mgr := test.GetManager(ctx)
 	name := controllers.ChartMuseum.String()
 
 	configStore := config.NewConfigWithDefaults()
@@ -95,8 +65,12 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(reconciler.SetupWithManager(ctx, mgr)).
 		To(Succeed())
 
+	stopCh = make(chan struct{})
+
 	go func() {
 		defer GinkgoRecover()
+
+		By("Starting manager")
 
 		Expect(mgr.Start(stopCh)).
 			To(Succeed(), "failed to start manager")
@@ -108,34 +82,5 @@ var _ = BeforeSuite(func(done Done) {
 var _ = AfterSuite(func() {
 	close(stopCh)
 
-	By("tearing down the test environment")
-	Expect(test.GetEnvironment(ctx).Stop()).
-		To(Succeed())
+	test.AfterSuite(ctx)
 })
-
-// SetupTest will set up a testing environment.
-// This includes:
-// * creating a Namespace to be used during the test
-// * starting the Harbor Reconciler
-// * stopping the Harbor Reconciler after the test ends
-// Call this function at the start of each of your tests.
-func SetupTest() *core.Namespace {
-	ns := &core.Namespace{}
-
-	BeforeEach(func() {
-		stopCh = make(chan struct{})
-		*ns = core.Namespace{
-			ObjectMeta: metav1.ObjectMeta{Name: test.NewName("ns")},
-		}
-
-		err := test.GetClient(ctx).Create(ctx, ns)
-		Expect(err).NotTo(HaveOccurred(), "failed to create test namespace")
-	})
-
-	AfterEach(func() {
-		err := test.GetClient(ctx).Delete(ctx, ns)
-		Expect(err).NotTo(HaveOccurred(), "failed to delete test namespace")
-	})
-
-	return ns
-}

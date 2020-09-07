@@ -2,87 +2,58 @@ package test
 
 import (
 	"context"
+	"fmt"
+	"time"
 
-	. "github.com/onsi/gomega"
-	. "github.com/onsi/gomega/gstruct"
-
-	"github.com/goharbor/harbor-operator/pkg/factories/application"
-	corev1 "k8s.io/api/core/v1"
+	"github.com/goharbor/harbor-operator/pkg/resources/statuscheck"
+	"github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
-	"sigs.k8s.io/kustomize/kstatus/status"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func EnsureReady(ctx context.Context, object runtime.Object, timeouts ...interface{}) {
-	data, err := runtime.DefaultUnstructuredConverter.ToUnstructured(object)
-	Expect(err).ToNot((HaveOccurred()))
+	matchReadyStatus, f := getStatusCheckFunc(ctx, object)
 
-	gvk := GetGVK(ctx, object)
-	namespacedName := GetNamespacedName(object)
+	gomega.Eventually(f, timeouts...).
+		Should(matchReadyStatus, "resource should be applied")
+
+	gomega.Expect(GetClient(ctx).Get(ctx, GetNamespacedName(object), object)).
+		ToNot(gomega.HaveOccurred())
+
+	gomega.Consistently(f, 2*time.Second).
+		Should(matchReadyStatus, "once ready, status should be constant")
+}
+
+func getStatusCheckFunc(ctx context.Context, object runtime.Object) (gomega.OmegaMatcher, func() (interface{}, error)) {
 	k8sClient := GetClient(ctx)
 
-	generation, ok, err := unstructured.NestedInt64(data, "metadata", "generation")
-	Expect(err).ToNot(HaveOccurred())
-	Expect(ok).To(BeTrue())
-
-	Eventually(func() interface{} {
-		u := &unstructured.Unstructured{}
-
-		u.SetUnstructuredContent(data)
-		u.SetGroupVersionKind(gvk)
-
-		Expect(k8sClient.Get(ctx, namespacedName, u)).
-			To(Succeed())
-
-		r, ok, err := unstructured.NestedFieldNoCopy(u.UnstructuredContent(), "status")
-		Expect(err).
-			ToNot(HaveOccurred())
-		if !ok {
-			return map[string]interface{}{}
+	return gomega.BeTrue(), func() (interface{}, error) {
+		err := k8sClient.Get(ctx, GetNamespacedName(object), object)
+		if err != nil {
+			return false, err
 		}
 
-		return r
-	}, timeouts...).
-		Should(MatchKeys(IgnoreExtras, Keys{
-			"observedGeneration": BeEquivalentTo(generation),
-			"conditions": ContainElements(MatchKeys(IgnoreExtras, Keys{
-				"type":   BeEquivalentTo(status.ConditionInProgress),
-				"status": BeEquivalentTo(corev1.ConditionFalse),
-			}), MatchKeys(IgnoreExtras, Keys{
-				"type":   BeEquivalentTo(status.ConditionFailed),
-				"status": BeEquivalentTo(corev1.ConditionFalse),
-			})),
-			"operator": MatchKeys(IgnoreExtras, Keys{
-				"controllerVersion": BeEquivalentTo(application.GetVersion(ctx)),
-			}),
-		}), "resource should be applied")
-
-	Expect(runtime.DefaultUnstructuredConverter.FromUnstructured(data, object)).
-		To(Succeed())
+		return statuscheck.BasicCheck(ctx, object)
+	}
 }
 
 func ScaleUp(ctx context.Context, object runtime.Object) {
 	data, err := runtime.DefaultUnstructuredConverter.ToUnstructured(object)
-	Expect(err).ToNot((HaveOccurred()))
-
-	gvk := GetGVK(ctx, object)
-	k8sClient := GetClient(ctx)
-
-	u := &unstructured.Unstructured{}
-
-	u.SetUnstructuredContent(data)
-	u.SetGroupVersionKind(gvk)
+	gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 	replicas, ok, err := unstructured.NestedInt64(data, "spec", "replicas")
-	Expect(err).ToNot(HaveOccurred())
+	gomega.Expect(err).ToNot(gomega.HaveOccurred())
+
 	if !ok {
 		replicas = 1
 	}
 
 	replicas++
 
-	unstructured.SetNestedField(data, replicas, "spec", "replicas")
+	patch := fmt.Sprintf(`[{"op":"replace","path":"/spec/replicas","value":%d}]`, replicas)
 
-	Expect(k8sClient.Update(ctx, object)).
-		To(Succeed())
+	gomega.Expect(GetClient(ctx).Patch(ctx, object, client.RawPatch(types.JSONPatchType, []byte(patch)))).
+		To(gomega.Succeed())
 }

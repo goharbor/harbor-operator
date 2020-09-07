@@ -26,3 +26,9 @@ issues:
     - funlen
     - gci
     - gomnd
+  - path: controllers/goharbor/internal/test
+    linters:
+    - dupl
+    - funlen
+    - gci
+    - gomnd

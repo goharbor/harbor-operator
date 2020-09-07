@@ -27,15 +27,14 @@ import (
 	"math/big"
 	"time"
 
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
-
+	"github.com/onsi/ginkgo"
+	"github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 )
 
 func GenerateCertificate() map[string][]byte {
 	caKey, err := rsa.GenerateKey(rand.Reader, 2048)
-	Expect(err).ToNot(HaveOccurred())
+	gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 	//	x509.KeyUsageDigitalSignature
 	var ca *x509.Certificate
@@ -43,7 +42,7 @@ func GenerateCertificate() map[string][]byte {
 	reader, writer := io.Pipe()
 
 	go func() {
-		defer GinkgoRecover()
+		defer ginkgo.GinkgoRecover()
 
 		now := time.Now()
 		template := x509.Certificate{
@@ -59,48 +58,48 @@ func GenerateCertificate() map[string][]byte {
 		}
 
 		certBytes, err := x509.CreateCertificate(rand.Reader, &template, &template, &caKey.PublicKey, caKey)
-		Expect(err).ToNot(HaveOccurred())
+		gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 		ca, err = x509.ParseCertificate(certBytes)
-		Expect(err).ToNot(HaveOccurred())
+		gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
-		Expect(pem.Encode(writer, &pem.Block{Type: "CERTIFICATE", Bytes: certBytes})).
-			To(Succeed())
+		gomega.Expect(pem.Encode(writer, &pem.Block{Type: "CERTIFICATE", Bytes: certBytes})).
+			To(gomega.Succeed())
 
-		Expect(writer.Close()).To(Succeed())
+		gomega.Expect(writer.Close()).To(gomega.Succeed())
 	}()
 
 	caPublicBytes, err := ioutil.ReadAll(reader)
-	Expect(err).ToNot(HaveOccurred())
+	gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
-	Expect(reader.Close()).To(Succeed())
+	gomega.Expect(reader.Close()).To(gomega.Succeed())
 
 	priv, err := rsa.GenerateKey(rand.Reader, 2048)
-	Expect(err).ToNot(HaveOccurred())
+	gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 	reader, writer = io.Pipe()
 
 	go func() {
-		defer GinkgoRecover()
+		defer ginkgo.GinkgoRecover()
 
 		privBytes, err := x509.MarshalPKCS8PrivateKey(priv)
-		Expect(err).ToNot(HaveOccurred())
+		gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
-		Expect(pem.Encode(writer, &pem.Block{Type: "PRIVATE KEY", Bytes: privBytes})).
-			To(Succeed())
+		gomega.Expect(pem.Encode(writer, &pem.Block{Type: "PRIVATE KEY", Bytes: privBytes})).
+			To(gomega.Succeed())
 
-		Expect(writer.Close()).To(Succeed())
+		gomega.Expect(writer.Close()).To(gomega.Succeed())
 	}()
 
 	privBytes, err := ioutil.ReadAll(reader)
-	Expect(err).ToNot(HaveOccurred())
+	gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
-	Expect(reader.Close()).To(Succeed())
+	gomega.Expect(reader.Close()).To(gomega.Succeed())
 
 	reader, writer = io.Pipe()
 
 	go func() {
-		defer GinkgoRecover()
+		defer ginkgo.GinkgoRecover()
 
 		now := time.Now()
 		template := x509.Certificate{
@@ -116,18 +115,18 @@ func GenerateCertificate() map[string][]byte {
 		}
 
 		certBytes, err := x509.CreateCertificate(rand.Reader, &template, ca, &priv.PublicKey, priv)
-		Expect(err).ToNot(HaveOccurred())
+		gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
-		Expect(pem.Encode(writer, &pem.Block{Type: "CERTIFICATE", Bytes: certBytes})).
-			To(Succeed())
+		gomega.Expect(pem.Encode(writer, &pem.Block{Type: "CERTIFICATE", Bytes: certBytes})).
+			To(gomega.Succeed())
 
-		Expect(writer.Close()).To(Succeed())
+		gomega.Expect(writer.Close()).To(gomega.Succeed())
 	}()
 
 	publicBytes, err := ioutil.ReadAll(reader)
-	Expect(err).ToNot(HaveOccurred())
+	gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
-	Expect(reader.Close()).To(Succeed())
+	gomega.Expect(reader.Close()).To(gomega.Succeed())
 
 	return map[string][]byte{
 		corev1.TLSPrivateKeyKey:        privBytes,
