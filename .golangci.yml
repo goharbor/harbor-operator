@@ -91,3 +91,9 @@ issues:
     - gci
     - goerr113
     - gomnd
+  - path: controllers/goharbor/internal/test
+    linters:
+    - dupl
+    - funlen
+    - gci
+    - gomnd
