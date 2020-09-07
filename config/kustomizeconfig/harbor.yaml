@@ -117,4 +117,4 @@ nameReference:
   fieldSpecs:
   - kind: Harbor
     group: goharbor.io
-    path: spec/core/tokenIssuer
+    path: spec/core/tokenIssuer/name

@@ -1,4 +1,4 @@
-# This file is for teaching kustomize how to substitute name in RegistryController
+# This file is for teaching kustomize how to substitute name in Trivy
 nameReference:
 - kind: Secret
   version: v1
