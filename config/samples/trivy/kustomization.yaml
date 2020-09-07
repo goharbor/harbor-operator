@@ -3,10 +3,8 @@ kind: Kustomization
 commonLabels:
   sample: "true"
 
-secretGenerator:
-- name: trivy
-  literals:
-  - htpasswd=harbor_registry_user:$2y$10$9L4Tc0DJbFFMB6RdSCunrOpTHdwhid4ktBJmLD00bYgqkkGOvll3m
-
 resources:
 - goharbor_v1alpha2_trivy.yaml
+
+bases:
+- ../../kustomizeconfig

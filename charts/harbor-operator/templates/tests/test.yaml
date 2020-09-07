@@ -29,7 +29,7 @@ metadata:
     helm.sh/hook: test
   labels:
     sample: "true"
-  name: '{{ include "chart.fullname" . }}-admin-core-secret'
+  name: '{{ include "chart.fullname" . }}-admin-core-secret-7274ck5bh5'
 type: goharbor.io/single-secret
 ---
 apiVersion: v1
@@ -44,7 +44,7 @@ metadata:
     helm.sh/hook: test
   labels:
     sample: "true"
-  name: '{{ include "chart.fullname" . }}-core-database-encryption'
+  name: '{{ include "chart.fullname" . }}-core-database-encryption-dddh7f9gfg'
 type: goharbor.io/single-secret
 ---
 apiVersion: v1
@@ -59,7 +59,7 @@ metadata:
     helm.sh/hook: test
   labels:
     sample: "true"
-  name: '{{ include "chart.fullname" . }}-core-secret'
+  name: '{{ include "chart.fullname" . }}-core-secret-m77cc2b6k2'
 type: goharbor.io/single-secret
 ---
 apiVersion: v1
@@ -74,7 +74,7 @@ metadata:
     helm.sh/hook: test
   labels:
     sample: "true"
-  name: '{{ include "chart.fullname" . }}-csrf-key'
+  name: '{{ include "chart.fullname" . }}-csrf-key-dmb742k6m2'
 type: goharbor.io/csrf
 ---
 apiVersion: v1
@@ -104,7 +104,7 @@ metadata:
     helm.sh/hook: test
   labels:
     sample: "true"
-  name: '{{ include "chart.fullname" . }}-jobservice-secret'
+  name: '{{ include "chart.fullname" . }}-jobservice-secret-ffkf2d298g'
 type: goharbor.io/single-secret
 ---
 apiVersion: v1
@@ -310,7 +310,7 @@ spec:
   commonName: harbor-sample
   isCA: true
   issuerRef:
-    name: harbor-sample
+    name: '{{ include "chart.fullname" . }}-harbor-sample'
   secretName: harbor-sample-ca
 ---
 apiVersion: cert-manager.io/v1alpha2
@@ -329,7 +329,7 @@ spec:
   - core.harbor.domain
   isCA: false
   issuerRef:
-    name: sample-public-certificate
+    name: '{{ include "chart.fullname" . }}-sample-public-certificate'
   secretName: sample-public-certificate
 ---
 apiVersion: cert-manager.io/v1alpha2
@@ -390,15 +390,15 @@ spec:
   core:
     tokenIssuer:
       kind: Issuer
-      name: service-token
+      name: '{{ include "chart.fullname" . }}-service-token'
   database:
     hosts:
     - host: harbor-database-postgresql
       port: 5432
-    passwordRef: harbor-database-password
+    passwordRef: '{{ include "chart.fullname" . }}-harbor-database-password'
     sslMode: disable
     username: postgres
-  encryptionKeyRef: core-database-encryption
+  encryptionKeyRef: '{{ include "chart.fullname" . }}-core-database-encryption-dddh7f9gfg'
   expose:
     core:
       ingress:
@@ -409,13 +409,13 @@ spec:
       ingress:
         host: notary.harbor.domain
   externalURL: https://core.harbor.domain
-  harborAdminPasswordRef: admin-core-secret
+  harborAdminPasswordRef: '{{ include "chart.fullname" . }}-admin-core-secret-7274ck5bh5'
   imageChartStorage:
     filesystem:
       chartPersistentVolume:
-        claimName: sample-harbor-chart
+        claimName: '{{ include "chart.fullname" . }}-sample-harbor-chart'
       registryPersistentVolume:
-        claimName: sample-harbor-registry
+        claimName: '{{ include "chart.fullname" . }}-sample-harbor-registry'
   internalTLS:
     enabled: true
   notary:
@@ -428,9 +428,9 @@ spec:
     skipUpdate: false
   trivyStorage:
     cachePersistentVolume:
-      claimName: sample-harbor-trivy-cache
+      claimName: '{{ include "chart.fullname" . }}-sample-harbor-trivy-cache'
     reportsPersistentVolume:
-      claimName: sample-harbor-trivy-reports
+      claimName: '{{ include "chart.fullname" . }}-sample-harbor-trivy-reports'
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

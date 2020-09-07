@@ -70,6 +70,12 @@ nameReference:
   - kind: Harbor
     group: goharbor.io
     path: spec/imageChartStorage/filesystem/registryPersistentVolume/claimName
+  - kind: Harbor
+    group: goharbor.io
+    path: spec/trivyStorage/cachePersistentVolume/claimName
+  - kind: Harbor
+    group: goharbor.io
+    path: spec/trivyStorage/reportsPersistentVolume/claimName
 
 - kind: Service
   version: v1
