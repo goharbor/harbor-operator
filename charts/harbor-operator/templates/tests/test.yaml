@@ -132,7 +132,7 @@ metadata:
     app.kubernetes.io/instance: harbor-operator-test
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: postgresql
-    helm.sh/chart: postgresql-9.3.3
+    helm.sh/chart: postgresql-9.4.0
   name: '{{ include "chart.fullname" . }}-harbor-operator-test-postgresql'
 spec:
   ports:
@@ -157,7 +157,7 @@ metadata:
     app.kubernetes.io/instance: harbor-operator-test
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: postgresql
-    helm.sh/chart: postgresql-9.3.3
+    helm.sh/chart: postgresql-9.4.0
   name: '{{ include "chart.fullname" . }}-harbor-operator-test-postgresql-headless'
 spec:
   clusterIP: None
@@ -182,7 +182,7 @@ metadata:
     app.kubernetes.io/instance: harbor-operator-test
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: postgresql
-    helm.sh/chart: postgresql-9.3.3
+    helm.sh/chart: postgresql-9.4.0
   name: '{{ include "chart.fullname" . }}-harbor-operator-test-postgresql'
 spec:
   replicas: 1
@@ -203,7 +203,7 @@ spec:
         app.kubernetes.io/instance: harbor-operator-test
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: postgresql
-        helm.sh/chart: postgresql-9.3.3
+        helm.sh/chart: postgresql-9.4.0
         role: master
       name: harbor-operator-test-postgresql
     spec:
