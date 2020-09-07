@@ -108,6 +108,7 @@ generated-diff-test: fmt generate
 .PHONY: diff
 diff:
 	git status
+	git diff
 	test -z "$$(git diff-index --diff-filter=d --name-only HEAD)"
 
 .PHONY: go-test
