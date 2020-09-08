@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+commonLabels:
+  sample: "true"
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+secretGenerator:
+- name: harbor-redis
+  literals:
+  - redis-password=the-redis-password
