@@ -176,7 +176,7 @@ jobs:
     - uses: azure/k8s-bake@v1
       with:
         renderEngine: 'kustomize'
-        kustomizationPath: './config/samples/${{ matrix.sample }}'
+        kustomizationPath: './config/${{ matrix.path }}'
         kubectl-version: 'latest'
 
   # Documentation
