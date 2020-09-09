@@ -3,8 +3,8 @@ kind: Kustomization
 
 images:
 - name: controller
-  newName: controller
-  newTag: latest
+  newName: goharbor/harbor-operator
+  newTag: dev
 
 configMapGenerator:
 - literals:
