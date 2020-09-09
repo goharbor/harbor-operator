@@ -64,7 +64,7 @@ all: manager
 
 # Run tests
 .PHONY:test
-test: go-test helm-test go-dependencies-test
+test: go-test go-dependencies-test
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 .PHONY: run
@@ -122,13 +122,10 @@ endif
 CHART_RELEASE_NAME ?= harbor-operator
 CHART_HARBOR_CLASS ?=
 
-.PHONY: helm-test
-helm-test: helm helm-install
-	cd $(CHART_HARBOR_OPERATOR) ; \
-	$(HELM) test $(CHART_RELEASE_NAME)
-
 helm-install: helm chart
 	$(HELM) upgrade --install $(CHART_RELEASE_NAME) $(CHART_HARBOR_OPERATOR) \
+		--set-string image.repository="$(shell echo $(IMG) | sed 's/:.*//')" \
+		--set-string image.tag="$(shell echo $(IMG) | sed 's/.*://')" \
 		--set-string harborClass='${CHART_HARBOR_CLASS}'
 
 #####################
@@ -238,7 +235,6 @@ helm-lint: helm helm-generate
 
 CHART_CRDS_PATH       := $(CHART_HARBOR_OPERATOR)/crds
 CHART_TEMPLATE_PATH   := $(CHART_HARBOR_OPERATOR)/templates
-CHART_TESTS_PATH      := $(CHART_TEMPLATE_PATH)/tests
 
 CRD_GROUP := goharbor.io
 
@@ -250,21 +246,6 @@ $(CHART_CRDS_PATH)/$(CRD_GROUP)_%.yaml: kustomize config/crd/bases $(wildcard co
 	$(KUSTOMIZE) build --reorder legacy config/helm/crds | \
 	$(KUSTOMIZE) cfg grep --annotate=false 'metadata.name=$*\.$(subst .,\.,$(CRD_GROUP))' \
 		>> $(CHART_CRDS_PATH)/$*.yaml
-
-.PHONY: $(CHART_TESTS_PATH)/test.yaml
-$(CHART_TESTS_PATH)/test.yaml: kustomize config/tests/postgresql/helm.yaml $(wildcard config/helm/tests/*) $(wildcard config/samples/harbor-full/*)
-	echo '# $(DO_NOT_EDIT)' > $(CHART_TESTS_PATH)/test.yaml
-	$(KUSTOMIZE) build --reorder legacy 'config/helm/tests' \
-		>> $(CHART_TESTS_PATH)/test.yaml
-
-.PHONY: config/tests/postgresql/helm.yaml
-config/tests/postgresql/helm.yaml: helm
-	$(HELM) repo add bitnami https://charts.bitnami.com/bitnami
-	echo '# $(DO_NOT_EDIT)' > config/helm/tests/postgresql/helm.yaml
-	$(HELM) template harbor-operator-test bitnami/postgresql \
-		--set-string initdbScriptsConfigMap=harbor-init-db \
-		--set-string existingSecret='test-postgresql' \
-	>> config/helm/tests/postgresql/helm.yaml
 
 $(CHART_TEMPLATE_PATH)/role.yaml: kustomize config/rbac $(wildcard config/helm/rbac/*) $(wildcard config/rbac/*)
 	echo '# $(DO_NOT_EDIT)' > $(CHART_TEMPLATE_PATH)/role.yaml
@@ -347,7 +328,7 @@ helm-generate: $(CHART_HARBOR_OPERATOR)/README.md $(subst config/crd/bases/,$(CH
 	$(CHART_TEMPLATE_PATH)/rolebinding.yaml $(CHART_TEMPLATE_PATH)/clusterrolebinding.yaml \
 	$(CHART_TEMPLATE_PATH)/mutatingwebhookconfiguration.yaml $(CHART_TEMPLATE_PATH)/validatingwebhookconfiguration.yaml \
 	$(CHART_TEMPLATE_PATH)/certificate.yaml $(CHART_TEMPLATE_PATH)/issuer.yaml \
-	$(CHART_HARBOR_OPERATOR)/charts $(CHART_TESTS_PATH)/test.yaml
+	$(CHART_HARBOR_OPERATOR)/charts
 
 #####################
 #    Dev helpers    #
