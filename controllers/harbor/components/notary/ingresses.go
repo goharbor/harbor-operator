@@ -2,7 +2,6 @@ package notary
 
 import (
 	"context"
-	"fmt"
 
 	goharborv1alpha1 "github.com/goharbor/harbor-operator/api/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/factories/application"
@@ -33,7 +32,7 @@ func (n *Notary) GetIngresses(ctx context.Context) []*netv1.Ingress { // nolint:
 	if scheme == "https" {
 		tls = []netv1.IngressTLS{
 			{
-				SecretName: fmt.Sprintf("%s-%s", n.harbor.Spec.TLSSecretName, goharborv1alpha1.NotaryName),
+				SecretName: n.harbor.Spec.TLSSecretName,
 				Hosts: []string{
 					h,
 				},

@@ -28,6 +28,10 @@ import (
 func GenerateIngressCertAnnotations(spec v1alpha1.HarborSpec) map[string]string {
 	// Add annotations for cert-manager awareness
 	annotations := make(map[string]string)
+	if len(spec.TLSSecretName) > 0 {
+		return annotations
+	}
+
 	issuer := spec.CertificateIssuerRef.Name
 
 	// If name is configured
