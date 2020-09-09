@@ -37,6 +37,8 @@ const (
 	HarborCoreDatabaseNameKey     = "database"
 	HarborCoreDatabaseUserKey     = "username"
 	HarborCoreDatabasePasswordKey = "password"
+	// ipaddress:port[,weight,password,database_index]
+	HarborCoreURLKey = "url"
 )
 
 const (

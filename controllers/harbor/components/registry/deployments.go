@@ -205,10 +205,12 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 												},
 											},
 										},
-									}, {
-										Name:  "REGISTRY_HTTP_HOST",
-										Value: r.harbor.Spec.PublicURL,
-									}, {
+									},
+									//{
+									//Name:  "REGISTRY_HTTP_HOST",
+									//Value: r.harbor.Spec.PublicURL,
+									//},
+									{
 										Name:  "REGISTRY_AUTH_TOKEN_REALM",
 										Value: fmt.Sprintf("%s/service/token", r.harbor.Spec.PublicURL),
 									}, {
@@ -264,10 +266,11 @@ func (r *Registry) GetDeployments(ctx context.Context) []*appsv1.Deployment { //
 									},
 								},
 								Env: []corev1.EnvVar{
-									{
+									/*{
 										Name:  "REGISTRY_HTTP_HOST",
 										Value: r.harbor.Spec.PublicURL,
-									}, {
+									},*/
+									{
 										Name:  "REGISTRY_AUTH_TOKEN_REALM",
 										Value: fmt.Sprintf("%s/service/token", r.harbor.Spec.PublicURL),
 									}, {

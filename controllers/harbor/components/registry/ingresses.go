@@ -2,37 +2,39 @@ package registry
 
 import (
 	"context"
-	"net/url"
-	"strings"
-
-	"github.com/pkg/errors"
-	netv1 "k8s.io/api/networking/v1beta1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/intstr"
 
 	goharborv1alpha1 "github.com/goharbor/harbor-operator/api/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/factories/application"
+	"github.com/goharbor/harbor-operator/pkg/ingress"
+	netv1 "k8s.io/api/networking/v1beta1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 func (r *Registry) GetIngresses(ctx context.Context) []*netv1.Ingress { // nolint:funlen
 	operatorName := application.GetName(ctx)
 	harborName := r.harbor.Name
 
-	u, err := url.Parse(r.harbor.Spec.PublicURL)
+	scheme, h, err := ingress.GetHostAndSchema(r.harbor.Spec.PublicURL)
 	if err != nil {
-		panic(errors.Wrap(err, "invalid url"))
+		panic(err)
 	}
 
-	host := strings.SplitN(u.Host, ":", 1) // nolint:mnd
-
 	var tls []netv1.IngressTLS
-	if u.Scheme == "https" {
+	if scheme == "https" {
 		tls = []netv1.IngressTLS{
 			{
 				SecretName: r.harbor.Spec.TLSSecretName,
+				Hosts: []string{
+					h,
+				},
 			},
 		}
 	}
+
+	annotations := make(map[string]string)
+	// resolve 413(Too Large Entity) error when push large image. It only works for NGINX ingress.
+	annotations["nginx.ingress.kubernetes.io/proxy-body-size"] = "0"
 
 	return []*netv1.Ingress{
 		{
@@ -44,16 +46,13 @@ func (r *Registry) GetIngresses(ctx context.Context) []*netv1.Ingress { // nolin
 					"harbor":   harborName,
 					"operator": operatorName,
 				},
-				Annotations: map[string]string{
-					// resolve 413(Too Large Entity) error when push large image. It only works for NGINX ingress.
-					"nginx.ingress.kubernetes.io/proxy-body-size": "0",
-				},
+				Annotations: annotations,
 			},
 			Spec: netv1.IngressSpec{
 				TLS: tls,
 				Rules: []netv1.IngressRule{
 					{
-						Host: host[0],
+						Host: h,
 						IngressRuleValue: netv1.IngressRuleValue{
 							HTTP: &netv1.HTTPIngressRuleValue{
 								Paths: []netv1.HTTPIngressPath{

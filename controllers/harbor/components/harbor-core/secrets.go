@@ -14,8 +14,10 @@ import (
 )
 
 const (
-	keyLength = 16
-	secretKey = "secretKey"
+	keyLength   = 16
+	keyLength32 = 32
+	secretKey   = "secretKey"
+	csrfKey     = "CSRF_KEY"
 )
 
 func (c *HarborCore) GetSecrets(ctx context.Context) []*corev1.Secret {
@@ -36,6 +38,7 @@ func (c *HarborCore) GetSecrets(ctx context.Context) []*corev1.Secret {
 			StringData: map[string]string{
 				"secret":  password.MustGenerate(keyLength, 5, 0, false, true),
 				secretKey: password.MustGenerate(keyLength, 5, 0, false, true),
+				csrfKey:   password.MustGenerate(keyLength32, 10, 0, false, true),
 			},
 		},
 	}

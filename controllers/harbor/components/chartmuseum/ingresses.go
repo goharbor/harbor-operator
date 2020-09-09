@@ -2,10 +2,9 @@ package chartmuseum
 
 import (
 	"context"
-	"net/url"
-	"strings"
 
-	"github.com/pkg/errors"
+	"github.com/goharbor/harbor-operator/pkg/ingress"
+
 	netv1 "k8s.io/api/networking/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -15,18 +14,21 @@ import (
 )
 
 func (c *ChartMuseum) GetIngresses(ctx context.Context) []*netv1.Ingress { // nolint:funlen
+	if c.harbor.Spec.Components.ChartMuseum == nil {
+		// Not configured
+		return make([]*netv1.Ingress, 0)
+	}
+
 	operatorName := application.GetName(ctx)
 	harborName := c.harbor.Name
 
-	u, err := url.Parse(c.harbor.Spec.PublicURL)
+	scheme, h, err := ingress.GetHostAndSchema(c.harbor.Spec.PublicURL)
 	if err != nil {
-		panic(errors.Wrap(err, "invalid url"))
+		panic(err)
 	}
 
-	host := strings.SplitN(u.Host, ":", 1) // nolint:mnd
-
 	var tls []netv1.IngressTLS
-	if u.Scheme == "https" {
+	if scheme == "https" {
 		tls = []netv1.IngressTLS{
 			{
 				SecretName: c.harbor.Spec.TLSSecretName,
@@ -49,7 +51,7 @@ func (c *ChartMuseum) GetIngresses(ctx context.Context) []*netv1.Ingress { // no
 				TLS: tls,
 				Rules: []netv1.IngressRule{
 					{
-						Host: host[0],
+						Host: h,
 						IngressRuleValue: netv1.IngressRuleValue{
 							HTTP: &netv1.HTTPIngressRuleValue{
 								Paths: []netv1.HTTPIngressPath{
