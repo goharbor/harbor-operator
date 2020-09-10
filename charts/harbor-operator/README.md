@@ -37,7 +37,7 @@ Deploy Harbor Operator
 | prometheusOperator.enabled | bool | `false` | Whether to install prometheus operator Helm chart |
 | rbac.create | bool | `true` | Whether to install Role Based Access Control |
 | replicaCount | int | `1` | Number of replicas for the controller |
-| resources | object | `{}` | Expects input structure as per specification <https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#resourcerequirements-v1-core> `{   "limits": {     "cpu": "100m",     "memory": "128Mi"   },   "requests: {     "cpu": "100m",     "memory": "128Mi"   } }` |
+| resources | object | `{"limits":{"cpu":"500m","memory":"300Mi"},"requests":{"cpu":"300m","memory":"200Mi"}}` | Expects input structure as per specification <https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#resourcerequirements-v1-core> |
 | service.port | int | `443` | Expose port for WebHook controller |
 | service.type | string | `"ClusterIP"` | Service type to use |
 | serviceAccount.annotations | object | `{}` | Annotations to add to the service account |

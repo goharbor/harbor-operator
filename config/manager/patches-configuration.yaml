@@ -2,16 +2,16 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: controller-manager
-  namespace: system
 spec:
   template:
     spec:
       containers:
       - name: manager
-        env:
-        - name: 'CONFIGURATION_FROM'
-          value: 'env:'
-        envFrom:
-          - configMapRef:
-              name: operator-config
-              optional: true
+        volumeMounts:
+        - mountPath: /etc/harbor-operator
+          name: configuration-templates
+          readOnly: true
+      volumes:
+      - name: configuration-templates
+        configMap:
+          name: config-template

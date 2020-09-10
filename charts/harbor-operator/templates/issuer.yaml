@@ -3,6 +3,6 @@ apiVersion: cert-manager.io/v1alpha2
 kind: Issuer
 metadata:
   name: '{{ include "chart.fullname" . }}-selfsigned-issuer'
-  namespace: '{{ .Release.Namespace }}'
+  namespace: {{ .Release.Namespace | quote }}
 spec:
   selfSigned: {}

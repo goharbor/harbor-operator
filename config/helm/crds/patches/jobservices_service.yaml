@@ -16,5 +16,5 @@ spec:
         caBundle: Cg==
         service:
           namespace: system
-          name: '{{ include "chart.fullname" . }}'
+          name: '{{ include "chart.fullname" . | quote }}'
           path: /convert
