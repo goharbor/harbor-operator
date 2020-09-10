@@ -2,14 +2,12 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: controller-manager
-  namespace: system
   labels:
     control-plane: controller-manager
 spec:
   selector:
     matchLabels:
       control-plane: controller-manager
-  replicas: 1
   template:
     metadata:
       labels:
@@ -20,7 +18,7 @@ spec:
         - /manager
         args:
         - --enable-leader-election
-        image: controller
+        image: goharbor/harbor-operator:dev
         name: manager
         resources:
           limits:
@@ -29,4 +27,22 @@ spec:
           requests:
             cpu: 300m
             memory: 200Mi
+        ports:
+        - name: ready
+          containerPort: 5000
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: ready
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: ready
+        env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+                fieldPath: metadata.namespace
+
       terminationGracePeriodSeconds: 10

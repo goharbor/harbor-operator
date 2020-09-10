@@ -1,10 +1,13 @@
+namePrefix: '{{ include "chart.fullname" . }}-'
+
+namespace: '{{ .Release.Namespace | quote }}'
+
 generatorOptions:
   disableNameSuffixHash: true
 
-namePrefix: '{{ include "chart.fullname" . }}-'
-
 patches:
-- patch_serviceaccount_binding.yaml
+- patch_leaderelection_binding.yaml
+- patch_manager_binding.yaml
 
 bases:
 - ../../rbac

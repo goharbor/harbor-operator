@@ -1,0 +1,38 @@
+namePrefix: '{{ include "chart.fullname" . }}-'
+
+namespace: '{{ .Release.Namespace | quote }}'
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+images:
+- name: goharbor/harbor-operator:dev
+  newName: '{{.Values.image.repository}}'
+  newTag: '{{.Values.image.tag|default .Chart.AppVersion}}'
+
+patches:
+- patch_deployment_config.yaml
+- patch_deployment_webhook.yaml
+
+patchesJson6902:
+- target:
+    version: v1
+    group: apps
+    kind: Deployment
+    name: controller-manager
+  path: patch_deployment_metadata.yaml
+- target:
+    version: v1
+    group: apps
+    kind: Deployment
+    name: controller-manager
+  path: patch_deployment_resources.yaml
+- target:
+    version: v1
+    group: apps
+    kind: Deployment
+    name: controller-manager
+  path: patch_deployment_security.yaml
+
+bases:
+- ../../default

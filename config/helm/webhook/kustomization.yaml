@@ -1,7 +1,9 @@
+namePrefix: '{{ include "chart.fullname" . }}-'
+
+namespace: '{{ .Release.Namespace | quote }}'
+
 generatorOptions:
   disableNameSuffixHash: true
-
-namePrefix: '{{ include "chart.fullname" . }}-'
 
 commonAnnotations:
   # Trick so kustomize does not split the annotation value
