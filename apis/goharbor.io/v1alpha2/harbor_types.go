@@ -236,6 +236,10 @@ type TrivyComponentSpec struct {
 	harbormetav1.ComponentSpec `json:",inline"`
 
 	// +kubebuilder:validation:Optional
+	// The name of the secret containing the token to connect to GitHub API.
+	GithubTokenRef string `json:"githubTokenRef,omitempty"`
+
+	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=false
 	// The flag to enable or disable Trivy DB downloads from GitHub
 	SkipUpdate bool `json:"skipUpdate"`
