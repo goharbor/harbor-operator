@@ -60,9 +60,6 @@ type HarborSpec struct {
 	ImageChartStorage HarborStorageImageChartStorageSpec `json:"imageChartStorage"`
 
 	// +kubebuilder:validation:Optional
-	TrivyStorage *HarborStorageTrivyStorageSpec `json:"trivyStorage,omitempty"`
-
-	// +kubebuilder:validation:Optional
 	// +kubebuilder:default="info"
 	LogLevel harbormetav1.HarborLogLevel `json:"logLevel,omitempty"`
 
@@ -241,6 +238,9 @@ type TrivyComponentSpec struct {
 	// +kubebuilder:default=false
 	// The flag to enable or disable Trivy DB downloads from GitHub
 	SkipUpdate bool `json:"skipUpdate"`
+
+	// +kubebuilder:validation:Required
+	Storage HarborStorageTrivyStorageSpec `json:"storage"`
 }
 
 type HarborStorageImageChartStorageSpec struct {
@@ -266,15 +266,13 @@ type HarborStorageImageChartStorageSpec struct {
 
 type HarborStorageTrivyStorageSpec struct {
 	// +kubebuilder:validation:Optional
-	// FileSystem is an implementation of the storagedriver.StorageDriver interface which uses the local filesystem.
-	// The local filesystem can be a remote volume.
-	// See: https://docs.docker.com/registry/storage-drivers/filesystem/
+	// ReportsPersistentVolume specify the persistent volume used to store Trivy reports.
+	// If empty, empty dir will be used.
 	ReportsPersistentVolume *HarborStoragePersistentVolumeSpec `json:"reportsPersistentVolume,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// FileSystem is an implementation of the storagedriver.StorageDriver interface which uses the local filesystem.
-	// The local filesystem can be a remote volume.
-	// See: https://docs.docker.com/registry/storage-drivers/filesystem/
+	// CachePersistentVolume specify the persistent volume used to store Trivy cache.
+	// If empty, empty dir will be used.
 	CachePersistentVolume *HarborStoragePersistentVolumeSpec `json:"cachePersistentVolume,omitempty"`
 }
 
