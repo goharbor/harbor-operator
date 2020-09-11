@@ -155,21 +155,13 @@ func (r *NotaryMigrationSpec) GetMigrationContainer(ctx context.Context, storage
 					LocalObjectReference: corev1.LocalObjectReference{
 						Name: r.Github.CredentialsRef,
 					},
-					Key:      harbormetav1.GithubTokenPasswordKey,
+					Key:      harbormetav1.GithubTokenKey,
 					Optional: &varFalse,
 				},
 			},
 		}, corev1.EnvVar{
-			Name: NotaryMigrationSourceUserVariableName,
-			ValueFrom: &corev1.EnvVarSource{
-				SecretKeyRef: &corev1.SecretKeySelector{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: r.Github.CredentialsRef,
-					},
-					Key:      harbormetav1.GithubTokenUserKey,
-					Optional: &varFalse,
-				},
-			},
+			Name:  NotaryMigrationSourceUserVariableName,
+			Value: "notary",
 		})
 	}
 

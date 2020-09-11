@@ -126,7 +126,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.
 					LocalObjectReference: corev1.LocalObjectReference{
 						Name: trivy.Spec.Update.GithubTokenRef,
 					},
-					Key: harbormetav1.GithubTokenPasswordKey,
+					Key: harbormetav1.GithubTokenKey,
 				},
 			},
 		})

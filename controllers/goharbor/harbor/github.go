@@ -2,54 +2,28 @@ package harbor
 
 import (
 	"github.com/ovh/configstore"
-	"github.com/pkg/errors"
 )
 
-const GithubCredentialsConfigKey = "github-credentials"
+const GithubCredentialsConfigKey = "github-token"
 
-type GithubCredentials struct {
-	User  string `json:"user"`
-	Token string `json:"token"`
-}
-
-func (r *Reconciler) GetDefaultGithubCredentials() (*GithubCredentials, error) {
-	item, err := configstore.Filter().
-		Slice(GithubCredentialsConfigKey).
-		Unmarshal(func() interface{} {
-			return &GithubCredentials{}
-		}).
-		GetFirstItem()
+func (r *Reconciler) GetDefaultGithubToken() (string, error) {
+	token, err := configstore.Filter().GetItemValue(GithubCredentialsConfigKey)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	config, err := item.Unmarshaled()
-	if err != nil {
-		return nil, errors.Wrap(err, "invalid")
-	}
-
-	return config.(*GithubCredentials), nil
+	return token, nil
 }
 
-func (r *Reconciler) GetGithubCredentials(configKey string) (*GithubCredentials, error) {
-	item, err := configstore.Filter().
-		Slice(configKey).
-		Unmarshal(func() interface{} {
-			return &GithubCredentials{}
-		}).
-		GetFirstItem()
+func (r *Reconciler) GetGithubToken(configKey string) (string, error) {
+	token, err := configstore.Filter().GetItemValue(configKey)
 	if err != nil {
 		if _, ok := err.(configstore.ErrItemNotFound); ok {
-			return r.GetDefaultGithubCredentials()
+			return r.GetDefaultGithubToken()
 		}
 
-		return nil, err
+		return "", err
 	}
 
-	config, err := item.Unmarshaled()
-	if err != nil {
-		return nil, errors.Wrap(err, "invalid")
-	}
-
-	return config.(*GithubCredentials), nil
+	return token, nil
 }
