@@ -93,10 +93,10 @@ type ChartMuseumChartSpec struct {
 	// Form fields which will be queried
 	PostFormFieldName ChartMuseumPostFormFieldNameSpec `json:"postFormFieldName,omitempty"`
 
-	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Pattern="https?://.*"
 	// The absolute url for .tgzs in index.yaml
-	URL string `json:"url"`
+	URL string `json:"url,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
