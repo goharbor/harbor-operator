@@ -49,9 +49,7 @@ var _ = Context("Harbor reconciler", func() {
 					Namespace: ns.Name,
 				},
 				Spec: goharborv1alpha2.HarborSpec{
-					HarborHelm1_4_0Spec: goharborv1alpha2.HarborHelm1_4_0Spec{
-						ExternalURL: "123::bad::dns",
-					},
+					ExternalURL: "123::bad::dns",
 				},
 			}
 
@@ -130,32 +128,30 @@ func setupValidHarbor(ctx context.Context, ns string) (Resource, client.ObjectKe
 			Namespace: ns,
 		},
 		Spec: goharborv1alpha2.HarborSpec{
-			HarborHelm1_4_0Spec: goharborv1alpha2.HarborHelm1_4_0Spec{
-				ExternalURL:            publicURL.String(),
-				HarborAdminPasswordRef: adminSecretName,
-				EncryptionKeyRef:       "encryption-key",
-				ImageChartStorage: goharborv1alpha2.HarborStorageImageChartStorageSpec{
-					FileSystem: &goharborv1alpha2.HarborStorageImageChartStorageFileSystemSpec{
-						RegistryPersistentVolume: goharborv1alpha2.HarborStorageRegistryPersistentVolumeSpec{
-							HarborStoragePersistentVolumeSpec: goharborv1alpha2.HarborStoragePersistentVolumeSpec{
-								PersistentVolumeClaimVolumeSource: corev1.PersistentVolumeClaimVolumeSource{
-									ClaimName: pvcName,
-								},
+			ExternalURL:            publicURL.String(),
+			HarborAdminPasswordRef: adminSecretName,
+			EncryptionKeyRef:       "encryption-key",
+			ImageChartStorage: goharborv1alpha2.HarborStorageImageChartStorageSpec{
+				FileSystem: &goharborv1alpha2.HarborStorageImageChartStorageFileSystemSpec{
+					RegistryPersistentVolume: goharborv1alpha2.HarborStorageRegistryPersistentVolumeSpec{
+						HarborStoragePersistentVolumeSpec: goharborv1alpha2.HarborStoragePersistentVolumeSpec{
+							PersistentVolumeClaimVolumeSource: corev1.PersistentVolumeClaimVolumeSource{
+								ClaimName: pvcName,
 							},
 						},
 					},
 				},
-				HarborComponentsSpec: goharborv1alpha2.HarborComponentsSpec{
-					Core: goharborv1alpha2.CoreComponentSpec{
-						TokenIssuer: cmmeta.ObjectReference{
-							Name: tokenIssuerName,
-						},
+			},
+			HarborComponentsSpec: goharborv1alpha2.HarborComponentsSpec{
+				Core: goharborv1alpha2.CoreComponentSpec{
+					TokenIssuer: cmmeta.ObjectReference{
+						Name: tokenIssuerName,
 					},
-					Database: goharborv1alpha2.HarborDatabaseSpec{
-						PostgresCredentials: database.PostgresCredentials,
-						Hosts:               database.Hosts,
-						SSLMode:             harbormetav1.PostgresSSLMode(database.Parameters[harbormetav1.PostgresSSLModeKey]),
-					},
+				},
+				Database: goharborv1alpha2.HarborDatabaseSpec{
+					PostgresCredentials: database.PostgresCredentials,
+					Hosts:               database.Hosts,
+					SSLMode:             harbormetav1.PostgresSSLMode(database.Parameters[harbormetav1.PostgresSSLModeKey]),
 				},
 			},
 		},

@@ -44,10 +44,6 @@ type HarborList struct {
 
 // HarborSpec defines the desired state of Harbor.
 type HarborSpec struct {
-	HarborHelm1_4_0Spec `json:",inline"`
-}
-
-type HarborHelm1_4_0Spec struct {
 	HarborComponentsSpec `json:",inline"`
 
 	// +kubebuilder:validation:Required
