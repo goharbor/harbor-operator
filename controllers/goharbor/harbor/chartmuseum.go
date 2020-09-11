@@ -76,6 +76,11 @@ func (r *Reconciler) GetChartMuseum(ctx context.Context, harbor *goharborv1alpha
 		return nil, errors.Wrap(err, "cannot parseexternalURL")
 	}
 
+	chartServerURL := ""
+	if harbor.Spec.ChartMuseum.AbsoluteURL {
+		chartServerURL = publicURL.String()
+	}
+
 	publicURL.Path += "/chartrepo"
 	maxStorageObjects := int64(0)
 	parallelLimit := int32(0)
@@ -108,7 +113,7 @@ func (r *Reconciler) GetChartMuseum(ctx context.Context, harbor *goharborv1alpha
 				Index: goharborv1alpha2.ChartMuseumChartIndexSpec{
 					ParallelLimit: &parallelLimit,
 				},
-				URL: publicURL.String(),
+				URL: chartServerURL,
 			},
 			Log: goharborv1alpha2.ChartMuseumLogSpec{
 				Debug: debug,

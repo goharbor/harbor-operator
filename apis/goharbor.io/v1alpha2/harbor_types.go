@@ -230,6 +230,12 @@ type RegistryComponentSpec struct {
 
 type ChartMuseumComponentSpec struct {
 	harbormetav1.ComponentSpec `json:",inline"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=false
+	// Harbor defaults ChartMuseum to returning relative urls,
+	// if you want using absolute url you should enable it
+	AbsoluteURL bool `json:"absoluteUrl"`
 }
 
 type TrivyComponentSpec struct {
