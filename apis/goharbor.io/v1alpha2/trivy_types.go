@@ -226,7 +226,7 @@ type TrivyStorageVolumeSpec struct {
 	// +kubebuilder:default={"emptyDir":{"sizeLimit":"1Gi"}}
 	VolumeSource corev1.VolumeSource `json:"volumeSource,omitempty"`
 
-	// +kubebuilder:validation:Optionel
+	// +kubebuilder:validation:Optional
 	Prefix string `json:"prefix,omitempty"`
 }
 
