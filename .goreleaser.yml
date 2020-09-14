@@ -1,6 +1,7 @@
 before:
   hooks:
-    - make generate
+  - make generate {{ if .Tag }}RELEASE_VERSION={{ .Tag }}{{ end }}
+
 builds:
 - env:
   - CGO_ENABLED=0
@@ -19,5 +20,7 @@ changelog:
     - '^chore'
     - '^Merge '
     - '[Ty]ypo'
+
 release:
   draft: true
+  prerelease: auto
