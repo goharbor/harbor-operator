@@ -32,3 +32,6 @@ changelog:
 release:
   draft: true
   prerelease: auto
+
+  extra_files:
+  - glob: charts/*.tgz

@@ -19,3 +19,14 @@ jobs:
         IMAGE_NAME: goharbor/harbor-operator
         TAG_NAME: dev
         LATEST: 'false'
+
+  charts:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Package charts
+      run: make helm-generate
+    - uses: actions/upload-artifact@v2
+      with:
+        name: charts
+        path: charts/*.tgz
