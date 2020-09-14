@@ -155,18 +155,17 @@ release: goreleaser
 	$(GORELEASER) release --rm-dist
 
 .PHONY: manifests
-manifests: controller-gen
-	$(MAKE) config/rbac config/crd/bases config/webhook
+manifests: config/rbac config/crd/bases config/webhook
 
-config/webhook: $(GO4CONTROLLERGEN_SOURCES)
+config/webhook: controller-gen $(GO4CONTROLLERGEN_SOURCES)
 	$(CONTROLLER_GEN) webhook output:artifacts:config="$@" paths="./..."
 	touch "$@"
 
-config/rbac: $(GO4CONTROLLERGEN_SOURCES)
+config/rbac: controller-gen $(GO4CONTROLLERGEN_SOURCES)
 	$(CONTROLLER_GEN) rbac:roleName="manager-role" output:artifacts:config="$@" paths="./..."
 	touch "$@"
 
-config/crd/bases: $(GO4CONTROLLERGEN_SOURCES)
+config/crd/bases: controller-gen $(GO4CONTROLLERGEN_SOURCES)
 	$(CONTROLLER_GEN) crd:crdVersions="v1" output:artifacts:config="$@" paths="./..."
 	touch "$@"
 
