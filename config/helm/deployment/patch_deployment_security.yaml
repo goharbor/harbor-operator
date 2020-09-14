@@ -1,0 +1,24 @@
+ - op: replace
+   path: /spec/template/spec/securityContext
+   value: '{{- toYaml .Values.podSecurityContext | nindent 8 }}'
+ - op: replace
+   path: /spec/template/spec/serviceAccountName
+   value: '{{ include "chart.serviceAccountName" . | quote }}'
+ - op: replace
+   path: /spec/template/spec/tolerations
+   value: '{{- toYaml .Values.tolerations | nindent 8 }}'
+ - op: replace
+   path: /spec/template/spec/affinity
+   value: '{{- toYaml .Values.affinity | nindent 8 }}'
+ - op: replace
+   path: /spec/template/spec/nodeSelector
+   value: '{{- toYaml .Values.nodeSelector | nindent 8 }}'
+# - op: replace
+#   path: /spec/template/spec/imagePullSecrets
+#   value: '{{- toYaml .Values.imagePullSecrets | nindent 8 }}'
+ - op: test
+   path: /spec/template/spec/containers/0/name
+   value: manager
+ - op: replace
+   path: /spec/template/spec/containers/0/imagePullPolicy
+   value: '{{ .Values.image.pullPolicy | quote }}'

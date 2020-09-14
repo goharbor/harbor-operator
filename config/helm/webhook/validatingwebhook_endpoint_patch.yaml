@@ -7,18 +7,18 @@ webhooks:
 - name: vharbor.kb.io
   clientConfig:
     service:
-      name: '{{ include "chart.fullname" . }}'
-      namespace: '{{ .Release.Namespace }}'
+      name: '{{ include "chart.fullname" . | quote }}'
+      namespace: '{{ .Release.Namespace | quote }}'
       port: '{{ .Values.service.port }}'
 - name: vjobservice.kb.io
   clientConfig:
     service:
-      name: '{{ include "chart.fullname" . }}'
-      namespace: '{{ .Release.Namespace }}'
+      name: '{{ include "chart.fullname" . | quote }}'
+      namespace: '{{ .Release.Namespace | quote }}'
       port: '{{ .Values.service.port }}'
 - name: vregistry.kb.io
   clientConfig:
     service:
-      name: '{{ include "chart.fullname" . }}'
-      namespace: '{{ .Release.Namespace }}'
+      name: '{{ include "chart.fullname" . | quote }}'
+      namespace: '{{ .Release.Namespace | quote }}'
       port: '{{ .Values.service.port }}'

@@ -1,0 +1,6 @@
+ - op: test
+   path: /spec/template/spec/containers/0/name
+   value: manager
+ - op: replace
+   path: /spec/template/spec/containers/0/resources
+   value: '{{- toYaml .Values.resources | nindent 10 }}'

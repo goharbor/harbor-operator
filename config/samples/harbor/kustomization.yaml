@@ -3,9 +3,6 @@ kind: Kustomization
 commonLabels:
   sample: "true"
 
-generatorOptions:
-  disableNameSuffixHash: true
-
 resources:
 - https.yaml
 - internal_tls.yaml
@@ -34,3 +31,6 @@ secretGenerator:
   literals:
   - secret=unsecure-jobservice-secret
   type: "goharbor.io/single-secret"
+
+bases:
+- ../../kustomizeconfig

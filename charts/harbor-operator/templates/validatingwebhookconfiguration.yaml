@@ -3,14 +3,14 @@ apiVersion: admissionregistration.k8s.io/v1beta1
 kind: ValidatingWebhookConfiguration
 metadata:
   annotations:
-    cert-manager.io/cluster-issuer: {{.Release.Namespace}}/{{. | include "chart.fullname"}}
+    cert-manager.io/cluster-issuer: '{{.Release.Namespace}}/{{. | include "chart.fullname"}}'
   name: '{{ include "chart.fullname" . }}-validating-webhook-configuration'
 webhooks:
 - clientConfig:
     caBundle: Cg==
     service:
-      name: {{ include "chart.fullname" . }}
-      namespace: {{ .Release.Namespace }}
+      name: {{ include "chart.fullname" . | quote }}
+      namespace: {{ .Release.Namespace | quote }}
       path: /validate-goharbor-io-v1alpha2-harbor
       port: {{ .Values.service.port }}
   failurePolicy: Fail
@@ -28,8 +28,8 @@ webhooks:
 - clientConfig:
     caBundle: Cg==
     service:
-      name: {{ include "chart.fullname" . }}
-      namespace: {{ .Release.Namespace }}
+      name: {{ include "chart.fullname" . | quote }}
+      namespace: {{ .Release.Namespace | quote }}
       path: /validate-goharbor-io-v1alpha2-jobservice
       port: {{ .Values.service.port }}
   failurePolicy: Fail
@@ -48,7 +48,7 @@ webhooks:
     caBundle: Cg==
     service:
       name: '{{ include "chart.fullname" . }}-webhook-service'
-      namespace: system
+      namespace: {{ .Release.Namespace | quote }}
       path: /validate-goharbor-io-v1alpha2-notaryserver
   failurePolicy: Fail
   name: vnotaryserver.kb.io
@@ -66,7 +66,7 @@ webhooks:
     caBundle: Cg==
     service:
       name: '{{ include "chart.fullname" . }}-webhook-service'
-      namespace: system
+      namespace: {{ .Release.Namespace | quote }}
       path: /validate-goharbor-io-v1alpha2-notarysigner
   failurePolicy: Fail
   name: vnotarysigner.kb.io
@@ -83,8 +83,8 @@ webhooks:
 - clientConfig:
     caBundle: Cg==
     service:
-      name: {{ include "chart.fullname" . }}
-      namespace: {{ .Release.Namespace }}
+      name: {{ include "chart.fullname" . | quote }}
+      namespace: {{ .Release.Namespace | quote }}
       path: /validate-goharbor-io-v1alpha2-registry
       port: {{ .Values.service.port }}
   failurePolicy: Fail

@@ -4,7 +4,7 @@ metadata:
   name: sample
 spec:
   redis:
-    host: "harbor-redis-master"
+    host: harbor-redis-master
     port: 6379
     database: 5
     passwordRef: harbor-redis

@@ -71,7 +71,7 @@ jobs:
         - "1.17"
         # - "1.18" # TODO check why Registry and RegistryCtl controllers tests fail
 
-    steps: 
+    steps:
     - uses: actions/setup-go@v2
       with:
         go-version: 1.14
@@ -176,7 +176,7 @@ jobs:
     - uses: azure/k8s-bake@v1
       with:
         renderEngine: 'kustomize'
-        kustomizationPath: './config/samples/${{ matrix.sample }}'
+        kustomizationPath: './config/${{ matrix.path }}'
         kubectl-version: 'latest'
 
   # Documentation

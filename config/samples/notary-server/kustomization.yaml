@@ -6,3 +6,5 @@ commonLabels:
 resources:
 - goharbor_v1alpha2_notaryserver.yaml
 
+bases:
+- ../../kustomizeconfig

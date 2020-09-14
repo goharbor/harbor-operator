@@ -1,8 +1,12 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "chart.fullname" . }}
-  labels:
-    {{- include "chart.labels" . | nindent 4 }}
+  labels: {{- include "chart.labels" . | nindent 4 }}
+  name: '{{ include "chart.fullname" . }}-config-template'
+  namespace: {{ .Release.Namespace | quote }}
 data:
-  {{- (.Files.Glob "../assets/*").AsConfig | indent 2 }}
+  {{- $files := .Files}}
+  {{- range $path, $_ :=  .Files.Glob "assets/*.tmpl" }}
+    {{- base $path | nindent 2 }}: |-
+      {{- $files.Get $path | nindent 4 }}
+  {{- end }}

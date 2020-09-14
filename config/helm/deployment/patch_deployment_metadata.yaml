@@ -1,0 +1,12 @@
+ - op: replace
+   path: /metadata/labels
+   value: '{{- include "chart.labels" . | nindent 4 }}'
+ - op: replace
+   path: /spec/selector/matchLabels
+   value: '{{- include "chart.selectorLabels" . | nindent 6 }}'
+ - op: replace
+   path: /spec/template/metadata/labels
+   value: '{{- include "chart.selectorLabels" . | nindent 8 }}'
+ - op: replace
+   path: /spec/template/metadata/annotations
+   value: '{{- toYaml .Values.podAnnotations | nindent 8 }}'

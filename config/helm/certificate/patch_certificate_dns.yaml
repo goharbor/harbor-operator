@@ -2,13 +2,7 @@ apiVersion: cert-manager.io/v1alpha2
 kind: Certificate
 metadata:
   name: serving-cert
-  namespace: system
 spec:
-  # $(SERVICE_NAME) and $(SERVICE_NAMESPACE) will be substituted by kustomize
   dnsNames:
   - '{{ include "chart.fullname" . }}.{{ .Release.Namespace }}.svc'
   - '{{ include "chart.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local'
-  issuerRef:
-    kind: Issuer
-    name: selfsigned-issuer
-  secretName: '{{ include "chart.fullname" . }}-certificate'

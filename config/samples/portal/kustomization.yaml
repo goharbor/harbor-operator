@@ -5,3 +5,6 @@ commonLabels:
 
 resources:
 - goharbor_v1alpha2_portal.yaml
+
+bases:
+- ../../kustomizeconfig

@@ -7,18 +7,18 @@ webhooks:
 - name: mharbor.kb.io
   clientConfig:
     service:
-      name: '{{ include "chart.fullname" . }}'
-      namespace: '{{ .Release.Namespace }}'
+      name: '{{ include "chart.fullname" . | quote }}'
+      namespace: '{{ .Release.Namespace | quote }}'
       port: '{{ .Values.service.port }}'
 - name: mjobservice.kb.io
   clientConfig:
     service:
-      name: '{{ include "chart.fullname" . }}'
-      namespace: '{{ .Release.Namespace }}'
+      name: '{{ include "chart.fullname" . | quote }}'
+      namespace: '{{ .Release.Namespace | quote }}'
       port: '{{ .Values.service.port }}'
 - name: mharbor.kb.io
   clientConfig:
     service:
-      name: '{{ include "chart.fullname" . }}'
-      namespace: '{{ .Release.Namespace }}'
+      name: '{{ include "chart.fullname" . | quote }}'
+      namespace: '{{ .Release.Namespace | quote }}'
       port: '{{ .Values.service.port }}'

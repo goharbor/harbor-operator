@@ -86,8 +86,10 @@ rules:
   - jobservices
   - notaryservers
   - notarysigners
-  - portalsregitries
+  - portals
+  - registries
   - registrycontrollers
+  - trivies
   verbs:
   - create
   - delete

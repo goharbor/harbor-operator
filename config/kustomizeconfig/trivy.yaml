@@ -1,0 +1,43 @@
+# This file is for teaching kustomize how to substitute name in Trivy
+nameReference:
+- kind: Secret
+  version: v1
+  fieldSpecs:
+  - kind: Trivy
+    group: goharbor.io
+    path: spec/server/tls/certificateRef
+  - kind: Trivy
+    group: goharbor.io
+    path: spec/server/items/clientCertificateAuthorityRefs
+  - kind: Trivy
+    group: goharbor.io
+    path: spec/server/items/TokenServiceCertificateAuthorityRefs
+  - kind: Trivy
+    group: goharbor.io
+    path: spec/update/githubTokenRef
+  - kind: Trivy
+    group: goharbor.io
+    path: spec/redis/passwordRef
+  - kind: Trivy
+    group: goharbor.io
+    path: spec/redis/certificateRef
+  - kind: Trivy
+    group: goharbor.io
+    path: spec/imagePullSecrets/items/name
+
+- kind: PersistentVolumeClaim
+  version: v1
+  fieldSpecs:
+  - kind: Trivy
+    group: goharbor.io
+    path: spec/storage/reports/volumeSource/persistentVolumeClaim/claimName
+  - kind: Trivy
+    group: goharbor.io
+    path: spec/storage/cache/volumeSource/persistentVolumeClaim/claimName
+
+- kind: ServiceAccount
+  version: v1
+  fieldSpecs:
+  - kind: Trivy
+    group: goharbor.io
+    path: spec/serviceAccountName
