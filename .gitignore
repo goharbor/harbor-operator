@@ -26,7 +26,8 @@ config/rbac/role.yaml
 config/webhook/manifests.yaml
 
 ## Helm packages
-charts *.tgz
+charts/index.yaml
+charts/*.tgz
 
 ## Mac file
 .DS_Store
