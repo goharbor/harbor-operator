@@ -24,6 +24,12 @@ jobs:
 
         - \`docker pull goharbor/harbor-operator:$tag\`
         EOF
+    - name: Import GPG key
+      id: import_gpg
+      uses: crazy-max/ghaction-import-gpg@v3
+      with:
+        gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+        passphrase: ${{ secrets.GPG_PASSPHRASE }}
     - name: Run GoReleaser
       uses: goreleaser/goreleaser-action@v1
       with:
@@ -31,4 +37,5 @@ jobs:
         args: release --rm-dist --release-footer /tmp/release.txt
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
 
