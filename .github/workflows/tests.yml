@@ -193,3 +193,23 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - run: make md-lint
+
+  # Go Releaser
+  release:
+    runs-on: ubuntu-latest
+    name: 'release: snapshot'
+    steps:
+    - uses: actions/setup-go@v2
+      with:
+        go-version: 1.14
+    - uses: actions/checkout@v2
+    - name: Import GPG key
+      id: import_gpg
+      uses: crazy-max/ghaction-import-gpg@v3
+      with:
+        gpg-private-key: "${{ secrets.GPG_PRIVATE_KEY }}"
+        passphrase: "${{ secrets.GPG_PASSPHRASE }}"
+    - run: make release-test
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
