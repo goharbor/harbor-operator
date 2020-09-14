@@ -35,3 +35,6 @@ release:
 
   extra_files:
   - glob: charts/*.tgz
+
+signs:
+- artifacts: checksum
