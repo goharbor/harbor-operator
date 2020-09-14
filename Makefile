@@ -119,6 +119,10 @@ endif
 	go test -vet=off ./... \
 		-coverprofile cover.out
 
+.PHONY: release
+release-test: goreleaser
+	$(GORELEASER) release --rm-dist --snapshot
+
 CHART_RELEASE_NAME ?= harbor-operator
 CHART_HARBOR_CLASS ?=
 

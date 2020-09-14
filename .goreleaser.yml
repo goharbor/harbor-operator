@@ -10,6 +10,14 @@ builds:
   - linux
   goarch:
   - amd64
+  ldflags:
+  # Get path to OperatorVersion using: $(go list -m)
+  - -X github.com/goharbor/harbor-operator.OperatorVersion={{ if .Tag }}{{ .Tag }}{{ else }}dev{{ end }}
+
+dockers:
+- image_templates:
+  - holyhope/harbor-operator:{{ .Tag }}
+
 changelog:
   sort: asc
   filters:
