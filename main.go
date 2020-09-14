@@ -15,8 +15,9 @@ import (
 )
 
 const (
-	OperatorName    = "harbor-operator"
-	OperatorVersion = "devel"
+	name    = "harbor-operator"
+	version = "dev"
+	commit  = "none"
 )
 
 const (
@@ -39,7 +40,7 @@ func main() {
 	setupLog := ctrl.Log.WithName("setup")
 	ctx := logger.Context(setupLog)
 
-	err := setup.Logger(ctx, OperatorName, OperatorVersion)
+	err := setup.Logger(ctx, name, version)
 	if err != nil {
 		setupLog.Error(err, "unable to create logger")
 		SetExitCode(exitCodeFailure)
@@ -49,8 +50,8 @@ func main() {
 
 	configstore.InitFromEnvironment()
 
-	application.SetName(&ctx, OperatorName)
-	application.SetVersion(&ctx, OperatorVersion)
+	application.SetName(&ctx, name)
+	application.SetVersion(&ctx, version)
 
 	scheme, err := scheme.New(ctx)
 	if err != nil {
@@ -86,7 +87,7 @@ func main() {
 
 	// +kubebuilder:scaffold:builder
 
-	setupLog.Info("starting manager", "version", OperatorVersion)
+	setupLog.Info("starting manager", "version", version, "commit", commit)
 
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 		setupLog.Error(err, "cannot start manager")
