@@ -1,3 +1,5 @@
+name: dev
+
 on:
   push:
     branches:
