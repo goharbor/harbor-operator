@@ -183,13 +183,26 @@ go.sum: go.mod $(GONOGENERATED_SOURCES)
 
 # Build the docker image
 .PHONY: docker-build
-docker-build:
-	docker build . -t "$(IMG)"
+docker-build: dist/harbor-operator_linux_amd64/manager
+	docker build dist/harbor-operator_linux_amd64 \
+		-f Dockerfile \
+		-t "$(IMG)"
 
 # Push the docker image
 .PHONY: docker-push
 docker-push:
 	docker push "$(IMG)"
+
+dist/harbor-operator_linux_amd64/manager:
+	mkdir -p dist/harbor-operator_linux_amd64
+	CGO_ENABLED=0 \
+    GOOS="linux" \
+    GOARCH="amd64" \
+	go build \
+		-mod vendor \
+		-o dist/harbor-operator_linux_amd64/manager \
+		-ldflags "-X $$(go list -m).OperatorVersion=$(RELEASE_VERSION)" \
+		*.go
 
 #####################
 #      Linters      #
