@@ -25,7 +25,7 @@ func (r *Reconciler) AddTrivyConfigurations(ctx context.Context, harbor *goharbo
 
 	var secret TrivyUpdateSecret
 
-	if harbor.Spec.Trivy.GithubTokenRef != "" {
+	if harbor.Spec.Trivy.GithubTokenRef == "" {
 		secret, err = r.AddTrivyUpdateSecret(ctx, harbor)
 		if err != nil {
 			return nil, nil, errors.Wrap(err, "update secret")
