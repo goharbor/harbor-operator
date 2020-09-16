@@ -32,9 +32,6 @@ func (p *Portal) GetIngresses(ctx context.Context) []*netv1.Ingress { // nolint:
 		}
 	}
 
-	// Add annotations for cert-manager awareness
-	annotations := ingress.GenerateIngressCertAnnotations(p.harbor.Spec)
-
 	return []*netv1.Ingress{
 		{
 			ObjectMeta: metav1.ObjectMeta{
@@ -45,7 +42,6 @@ func (p *Portal) GetIngresses(ctx context.Context) []*netv1.Ingress { // nolint:
 					"harbor":   harborName,
 					"operator": operatorName,
 				},
-				Annotations: annotations,
 			},
 			Spec: netv1.IngressSpec{
 				TLS: tls,

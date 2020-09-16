@@ -32,6 +32,9 @@ func (c *ChartMuseum) GetIngresses(ctx context.Context) []*netv1.Ingress { // no
 		tls = []netv1.IngressTLS{
 			{
 				SecretName: c.harbor.Spec.TLSSecretName,
+				Hosts: []string{
+					h,
+				},
 			},
 		}
 	}

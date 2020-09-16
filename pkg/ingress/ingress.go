@@ -18,30 +18,8 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/goharbor/harbor-operator/api/v1alpha1"
-	"github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	"github.com/pkg/errors"
 )
-
-// GenerateIngressCertAnnotations generates the cert-manager related annotations for cert-manager
-// identifying the ingress can creating cert for the detected ingress.
-func GenerateIngressCertAnnotations(spec v1alpha1.HarborSpec) map[string]string {
-	// Add annotations for cert-manager awareness
-	annotations := make(map[string]string)
-	issuer := spec.CertificateIssuerRef.Name
-
-	// If name is configured
-	if len(issuer) > 0 {
-		if spec.CertificateIssuerRef.Kind == v1alpha2.ClusterIssuerKind {
-			annotations[v1alpha2.IngressClusterIssuerNameAnnotationKey] = issuer
-		} else {
-			// Treat as default kind: v1alpha2.IssuerKind
-			annotations[v1alpha2.IngressIssuerNameAnnotationKey] = issuer
-		}
-	}
-
-	return annotations
-}
 
 // GetHostAndSchema gets the host domain and schema from the spec
 func GetHostAndSchema(accessURL string) (scheme string, host string, err error) {

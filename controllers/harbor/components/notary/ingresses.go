@@ -2,7 +2,6 @@ package notary
 
 import (
 	"context"
-	"fmt"
 
 	goharborv1alpha1 "github.com/goharbor/harbor-operator/api/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/factories/application"
@@ -26,14 +25,11 @@ func (n *Notary) GetIngresses(ctx context.Context) []*netv1.Ingress { // nolint:
 		panic(err)
 	}
 
-	// Add annotations for cert-manager awareness
-	annotations := ingress.GenerateIngressCertAnnotations(n.harbor.Spec)
-
 	var tls []netv1.IngressTLS
 	if scheme == "https" {
 		tls = []netv1.IngressTLS{
 			{
-				SecretName: fmt.Sprintf("%s-%s", n.harbor.Spec.TLSSecretName, goharborv1alpha1.NotaryName),
+				SecretName: n.harbor.Spec.TLSSecretName,
 				Hosts: []string{
 					h,
 				},
@@ -52,7 +48,6 @@ func (n *Notary) GetIngresses(ctx context.Context) []*netv1.Ingress { // nolint:
 					"operator":                    operatorName,
 					"kubernetes.io/ingress.class": goharborv1alpha1.NotaryName,
 				},
-				Annotations: annotations,
 			},
 			Spec: netv1.IngressSpec{
 				TLS: tls,
