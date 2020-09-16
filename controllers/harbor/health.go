@@ -4,14 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-
-	"github.com/opentracing/opentracing-go"
-	"github.com/pkg/errors"
-	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/runtime/serializer"
-	"k8s.io/client-go/rest"
+	"io/ioutil"
+	"net/http"
 
 	goharborv1alpha1 "github.com/goharbor/harbor-operator/api/v1alpha1"
+	"github.com/opentracing/opentracing-go"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -64,33 +62,20 @@ func (r *Reconciler) GetHealth(ctx context.Context, harbor *goharborv1alpha1.Har
 	span, ctx := opentracing.StartSpanFromContext(ctx, "check")
 	defer span.Finish()
 
-	config := rest.CopyConfig(r.RestConfig)
-	config.APIPath = "api"
-	config = rest.AddUserAgent(config, fmt.Sprintf("%s(%s)", r.GetName(), r.GetVersion()))
-	config.NegotiatedSerializer = serializer.NewCodecFactory(r.Scheme)
-	config.GroupVersion = &corev1.SchemeGroupVersion
-
-	client, err := rest.UnversionedRESTClientFor(config)
-	if err != nil {
-		return nil, errors.Wrap(err, "cannot get rest client")
-	}
-
-	// https://kubernetes.io/docs/tasks/administer-cluster/access-cluster-services/#manually-constructing-apiserver-proxy-urls
-
-	result, err := client.Get().
-		Context(ctx).
-		Resource("services").
-		Namespace(harbor.GetNamespace()).
-		Name(harbor.NormalizeComponentName(goharborv1alpha1.CoreName)).
-		SubResource("proxy").
-		Suffix(HarborHealthEndpoint).
-		DoRaw()
+	// access in-cluster service
+	url := fmt.Sprintf("http://%s.%s%s", harbor.NormalizeComponentName(goharborv1alpha1.CoreName), harbor.GetNamespace(), HarborHealthEndpoint)
+	resp, err := http.Get(url)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot get health response")
 	}
 
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot get health response body.")
+	}
+
 	health := &APIHealth{}
-	err = json.Unmarshal(result, health)
+	err = json.Unmarshal(body, health)
 
 	return health, errors.Wrap(err, "unexpected health response")
 }
