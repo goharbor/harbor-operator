@@ -59,12 +59,11 @@ func (h *APIHealth) GetUnhealthyComponents() []string {
 }
 
 func (r *Reconciler) GetHealth(ctx context.Context, harbor *goharborv1alpha1.Harbor) (*APIHealth, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "check")
+	span, _ := opentracing.StartSpanFromContext(ctx, "check")
 	defer span.Finish()
 
 	// access in-cluster service
-	url := fmt.Sprintf("http://%s.%s%s", harbor.NormalizeComponentName(goharborv1alpha1.CoreName), harbor.GetNamespace(), HarborHealthEndpoint)
-	resp, err := http.Get(url)
+	resp, err := http.Get(fmt.Sprintf("http://%s.%s%s", harbor.NormalizeComponentName(goharborv1alpha1.CoreName), harbor.GetNamespace(), HarborHealthEndpoint))
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot get health response")
 	}
