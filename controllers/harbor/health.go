@@ -64,11 +64,13 @@ func (r *Reconciler) GetHealth(ctx context.Context, harbor *goharborv1alpha1.Har
 
 	// access in-cluster service
 	resp, err := http.Get(fmt.Sprintf("http://%s.%s%s", harbor.NormalizeComponentName(goharborv1alpha1.CoreName), harbor.GetNamespace(), HarborHealthEndpoint))
+
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot get health response")
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
+
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot get health response body.")
 	}
