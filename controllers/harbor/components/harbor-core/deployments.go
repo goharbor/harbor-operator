@@ -138,6 +138,12 @@ func (c *HarborCore) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 								Name: "certificate",
 								VolumeSource: corev1.VolumeSource{
 									Secret: &corev1.SecretVolumeSource{
+										Items: []corev1.KeyToPath{
+											{
+												Key:  "tls.key",
+												Path: "private_key.pem",
+											},
+										},
 										SecretName: c.harbor.NormalizeComponentName(goharborv1alpha1.CertificateName),
 									},
 								},
@@ -388,8 +394,7 @@ func (c *HarborCore) GetDeployments(ctx context.Context) []*appsv1.Deployment { 
 									}, {
 										Name:      "certificate",
 										ReadOnly:  true,
-										MountPath: path.Join(coreConfigPath, "private_key.pem"),
-										SubPath:   "tls.key",
+										MountPath: path.Join(coreConfigPath, "cert"),
 									}, {
 										Name:      "psc",
 										ReadOnly:  false,
