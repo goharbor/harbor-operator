@@ -92,6 +92,13 @@ func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1a
 
 	envFroms := []corev1.EnvFromSource{}
 
+	if chartMuseum.Spec.Chart.URL != "" {
+		envs = append(envs, corev1.EnvVar{
+			Name:  "CHART_URL",
+			Value: chartMuseum.Spec.Chart.URL,
+		})
+	}
+
 	if chartMuseum.Spec.Chart.Storage.Amazon != nil {
 		envs = append(envs, corev1.EnvVar{
 			Name:  "STORAGE",
