@@ -396,6 +396,11 @@ sample-database: kustomize
 	$(KUSTOMIZE) build --reorder legacy 'config/samples/database' \
 		| kubectl apply -f -
 
+.PHONY: sample-redis
+sample-redis: kustomize
+	$(KUSTOMIZE) build 'config/samples/redis' \
+		| kubectl apply -f -
+
 .PHONY: sample-github-secret
 sample-github-secret:
 	! test -z $(GITHUB_TOKEN)
@@ -409,18 +414,20 @@ sample-github-secret:
 		| kubectl apply -f -
 
 .PHONY: sample-%
-sample-%: kustomize postgresql sample-github-secret
+sample-%: kustomize postgresql redis sample-github-secret
 	$(KUSTOMIZE) build --reorder legacy 'config/samples/$*' \
 		| kubectl apply -f -
 	kubectl get goharbor
 
 .PHONY: install-dependencies
-install-dependencies: certmanager redis postgresql ingress
+install-dependencies: certmanager postgresql redis ingress
 
 .PHONY: redis
-redis: helm
+redis: helm sample-redis
 	$(HELM) repo add bitnami https://charts.bitnami.com/bitnami
 	$(HELM) upgrade --install harbor-redis bitnami/redis \
+		--set-string existingSecret=harbor-redis \
+		--set-string existingSecretPasswordKey=redis-password \
 		--set usePassword=true
 
 .PHONY: postgresql

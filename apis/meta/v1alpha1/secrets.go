@@ -80,10 +80,8 @@ const (
 	// - Secret.Data["github-token"] - The Github token.
 	SecretTypeGithubToken corev1.SecretType = "goharbor.io/github" // nolint:gosec
 
-	// GithubTokenPasswordKey is the token to use with the account.
-	GithubTokenPasswordKey = "github-token"
-	// GithubTokenUserKey is the github account to use.
-	GithubTokenUserKey = "github-user"
+	// GithubTokenKey is the token to use with the account.
+	GithubTokenKey = "github-token"
 )
 
 const (

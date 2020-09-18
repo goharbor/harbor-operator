@@ -23,9 +23,13 @@ func (r *Reconciler) AddTrivyConfigurations(ctx context.Context, harbor *goharbo
 		return nil, nil, errors.Wrap(err, "certificate")
 	}
 
-	secret, err := r.AddTrivyUpdateSecret(ctx, harbor)
-	if err != nil {
-		return nil, nil, errors.Wrap(err, "update secret")
+	var secret TrivyUpdateSecret
+
+	if harbor.Spec.Trivy.GithubTokenRef == "" {
+		secret, err = r.AddTrivyUpdateSecret(ctx, harbor)
+		if err != nil {
+			return nil, nil, errors.Wrap(err, "update secret")
+		}
 	}
 
 	return certificate, secret, nil
@@ -69,7 +73,7 @@ func (r *Reconciler) GetTrivyUpdateSecret(ctx context.Context, harbor *goharborv
 	name := r.NormalizeName(ctx, harbor.GetName(), controllers.Trivy.String(), "github")
 	namespace := harbor.GetNamespace()
 
-	github, err := r.GetGithubCredentials(TrivyGithubCredentialsConfigKey)
+	token, err := r.GetGithubToken(TrivyGithubCredentialsConfigKey)
 	if err != nil {
 		return nil, serrors.UnrecoverrableError(err, serrors.OperatorReason, "cannot get default github credentials")
 	}
@@ -82,8 +86,7 @@ func (r *Reconciler) GetTrivyUpdateSecret(ctx context.Context, harbor *goharborv
 		Immutable: &varFalse,
 		Type:      harbormetav1.SecretTypeGithubToken,
 		StringData: map[string]string{
-			harbormetav1.GithubTokenUserKey:     github.User,
-			harbormetav1.GithubTokenPasswordKey: github.Token,
+			harbormetav1.GithubTokenKey: token,
 		},
 	}, nil
 }
@@ -111,6 +114,11 @@ func (r *Reconciler) GetTrivy(ctx context.Context, harbor *goharborv1alpha2.Harb
 
 	redis := harbor.Spec.RedisConnection(harbormetav1.TrivyRedis)
 
+	githubTokenRef := harbor.Spec.Trivy.GithubTokenRef
+	if githubTokenRef == "" {
+		githubTokenRef = r.NormalizeName(ctx, harbor.GetName(), controllers.Trivy.String(), "github")
+	}
+
 	tls := harbor.Spec.InternalTLS.GetComponentTLSSpec(r.GetInternalTLSCertificateSecretName(ctx, harbor, harbormetav1.TrivyTLS))
 
 	return &goharborv1alpha2.Trivy{
@@ -133,7 +141,7 @@ func (r *Reconciler) GetTrivy(ctx context.Context, harbor *goharborv1alpha2.Harb
 			},
 			Update: goharborv1alpha2.TrivyUpdateSpec{
 				Skip:           harbor.Spec.Trivy.SkipUpdate,
-				GithubTokenRef: r.NormalizeName(ctx, harbor.GetName(), controllers.Trivy.String(), "github"),
+				GithubTokenRef: githubTokenRef,
 			},
 		},
 	}, nil
