@@ -5,8 +5,8 @@ metadata:
 spec:
   trivy:
     skipUpdate: false
-  trivyStorage:
-    reportsPersistentVolume:
-      claimName: sample-harbor-trivy-reports
-    cachePersistentVolume:
-      claimName: sample-harbor-trivy-cache
+    storage:
+      reportsPersistentVolume:
+        claimName: sample-harbor-trivy-reports
+      cachePersistentVolume:
+        claimName: sample-harbor-trivy-cache
