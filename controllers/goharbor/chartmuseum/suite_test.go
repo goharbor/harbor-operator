@@ -15,10 +15,12 @@ package chartmuseum_test
 
 import (
 	"context"
+	"path"
 	"testing"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/ovh/configstore"
 
 	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/chartmuseum"
@@ -31,9 +33,10 @@ import (
 // http://onsi.github.io/ginkgo/ to learn more about Ginkgo.
 
 var (
-	stopCh     chan struct{}
-	ctx        context.Context
-	reconciler *chartmuseum.Reconciler
+	stopCh      chan struct{}
+	ctx         context.Context
+	reconciler  *chartmuseum.Reconciler
+	harborClass string
 )
 
 func TestAPIs(t *testing.T) {
@@ -51,8 +54,10 @@ var _ = BeforeSuite(func(done Done) {
 
 	mgr := test.GetManager(ctx)
 	name := controllers.ChartMuseum.String()
+	harborClass = test.NewName(name)
 
-	configStore := config.NewConfigWithDefaults()
+	configStore, provider := test.NewConfig(ctx, chartmuseum.ConfigTemplatePathKey, path.Base(chartmuseum.DefaultConfigTemplatePath))
+	provider.Add(configstore.NewItem(config.HarborClassKey, harborClass, 100))
 	configStore.Env(name)
 
 	commonReconciler, err := chartmuseum.New(ctx, name, configStore)
@@ -80,7 +85,7 @@ var _ = BeforeSuite(func(done Done) {
 }, 60)
 
 var _ = AfterSuite(func() {
-	close(stopCh)
+	defer test.AfterSuite(ctx)
 
-	test.AfterSuite(ctx)
+	close(stopCh)
 })

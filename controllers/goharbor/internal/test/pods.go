@@ -74,7 +74,7 @@ func Logs(ctx context.Context, deployment types.NamespacedName) map[string][]byt
 	return results
 }
 
-func LogOnFailureFunc(ctx *context.Context, name func() types.NamespacedName) interface{} {
+func LogsAll(ctx *context.Context, name func() types.NamespacedName) interface{} {
 	return func(done ginkgo.Done) {
 		defer close(done)
 
