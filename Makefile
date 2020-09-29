@@ -23,15 +23,6 @@ export CHARTMUSEUM_TEMPLATE_PATH
 export NOTARYSERVER_TEMPLATE_PATH
 export NOTARYSIGNER_TEMPLATE_PATH
 
-define GITHUB_CREDENTIALS
-{
-	"user": "$(GITHUB_USER)",
-	"token": "$(GITHUB_TOKEN)"
-}
-endef
-
-export GITHUB_CREDENTIALS
-
 CHARTS_DIRECTORY      := charts
 CHART_HARBOR_OPERATOR := $(CHARTS_DIRECTORY)/harbor-operator
 
@@ -404,12 +395,10 @@ sample-redis: kustomize
 .PHONY: sample-github-secret
 sample-github-secret:
 	! test -z $(GITHUB_TOKEN)
-	! test -z $(GITHUB_USER)
 	kubectl create secret generic \
 		github-credentials \
 			--type=goharbor.io/github \
 			--from-literal=github-token=$(GITHUB_TOKEN) \
-			--from-literal=github-user=$(GITHUB_USER) \
 			--dry-run=client -o yaml \
 		| kubectl apply -f -
 
