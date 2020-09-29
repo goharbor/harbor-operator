@@ -17,14 +17,13 @@ limitations under the License.
 package chartmuseum_test
 
 import (
-	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"golang.org/x/net/html"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
@@ -47,10 +46,13 @@ var _ = Describe("ChartMuseum", func() {
 		chartMuseum.ObjectMeta = metav1.ObjectMeta{
 			Name:      test.NewName("chartmuseum"),
 			Namespace: ns.GetName(),
+			Annotations: map[string]string{
+				goharborv1alpha2.HarborClassAnnotation: harborClass,
+			},
 		}
 	})
 
-	JustAfterEach(test.LogOnFailureFunc(&ctx, func() types.NamespacedName {
+	JustAfterEach(test.LogsAll(&ctx, func() types.NamespacedName {
 		return types.NamespacedName{
 			Name:      reconciler.NormalizeName(ctx, chartMuseum.GetName()),
 			Namespace: chartMuseum.GetNamespace(),
@@ -86,23 +88,18 @@ var _ = Describe("ChartMuseum", func() {
 				Ω(chartMuseum.GetGeneration()).
 					Should(Equal(defaultGenerationNumber), "Generation should not be updated")
 
-				Eventually(func() (int64, error) {
-					err := test.GetClient(ctx).Create(ctx, &chartMuseum)
-					if err != nil {
-						return 0, err
-					}
-
-					return chartMuseum.Status.ObservedGeneration, nil
-				}, 5*time.Second).
-					Should(Equal(chartMuseum.GetGeneration()), "ObservedGeneration should be updated")
-
 				test.EnsureReady(ctx, &chartMuseum, time.Minute, 5*time.Second)
 
 				IntegTest(ctx, &chartMuseum)
 			})
 
 			By("Updating resource spec", func() {
+				oldGeneration := chartMuseum.GetGeneration()
+
 				test.ScaleUp(ctx, &chartMuseum)
+
+				Ω(chartMuseum.GetGeneration()).
+					Should(BeNumerically(">", oldGeneration), "ObservedGeneration should be updated")
 
 				Ω(test.GetClient(ctx).Get(ctx, test.GetNamespacedName(&chartMuseum), &chartMuseum)).
 					Should(Succeed(), "resource should still be accessible")
@@ -113,7 +110,8 @@ var _ = Describe("ChartMuseum", func() {
 			})
 
 			By("Deleting resource", func() {
-				Ω(test.GetClient(ctx).Delete(ctx, &chartMuseum)).Should(Succeed())
+				Ω(test.GetClient(ctx).Delete(ctx, &chartMuseum)).
+					Should(Succeed())
 
 				Eventually(func() error {
 					return test.GetClient(ctx).Get(ctx, test.GetNamespacedName(&chartMuseum), &chartMuseum)
@@ -133,55 +131,25 @@ func IntegTest(ctx context.Context, chartMuseum *goharborv1alpha2.ChartMuseum) {
 		Namespace: chartMuseum.GetNamespace(),
 	}
 
-	/*
-		Eventually(func() error {
-			endpoint := &corev1.Endpoints{}
+	// Make sure chart museum is up and running
+	time.Sleep(60 * time.Second)
 
-			err := test.GetClient(ctx).Get(ctx, namespacedName, endpoint)
-			if err != nil {
-				return err
-			}
-
-			ok, err := statuscheck.EndpointCheck(ctx, endpoint, harbormetav1.ChartMuseumHTTPPortName)
-			if err != nil {
-				return err
-			}
-
-			if !ok {
-				return errors.New("not ready") // nolint:goerr113
-			}
-
-			return nil
-		}, 30*time.Second, 100*time.Millisecond).Should(Succeed())
-
-		var pods corev1.PodList
-		Ω(
-			client.Get().
-				Resource("pods").
-				Namespace(chartMuseum.GetNamespace()).
-				Param("labelSelector", strings.Join([]string{
-					fmt.Sprintf("%s=%s", reconciler.Label("name"), reconciler.NormalizeName(ctx, chartMuseum.Name)),
-					fmt.Sprintf("%s=%s", controller.OperatorNameLabel, reconciler.GetName()),
-					fmt.Sprintf("%s=%s", controller.OperatorVersionLabel, reconciler.GetVersion()),
-				}, ",")).
-				Do(ctx).
-				Into(&pods)).
-			Should(Succeed())
-
-		Ω(pods.Items).ShouldNot(HaveLen(0))
-	*/
-
-	result, err := client.Get().
+	proxyReq := client.Get().
 		Resource("services").
 		Namespace(namespacedName.Namespace).
-		Name(fmt.Sprintf("%s:%d", namespacedName.Name, harbormetav1.HTTPPort)).
+		Name(fmt.Sprintf("%s:%s", namespacedName.Name, harbormetav1.ChartMuseumHTTPPortName)).
 		SubResource("proxy").
-		Suffix("/").
-		DoRaw(ctx)
-	Ω(err).Should(Succeed())
+		Suffix("health")
 
-	Ω(html.Parse(bytes.NewReader(result))).
-		Should(WithTransform(func(node *html.Node) string {
-			return node.FirstChild.NextSibling.FirstChild.FirstChild.NextSibling.FirstChild.Data
-		}, Equal("Welcome to ChartMuseum!")))
+	Ω(proxyReq.DoRaw(ctx)).
+		Should(WithTransform(func(result []byte) bool {
+			var health struct {
+				Healthy bool `json:"healthy"`
+			}
+
+			Ω(json.Unmarshal(result, &health)).
+				Should(Succeed())
+
+			return health.Healthy
+		}, BeTrue()))
 }
