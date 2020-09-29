@@ -156,5 +156,7 @@ func (c *Controller) Run(ctx context.Context, owner resources.Resource) error {
 		return errors.Wrap(err, "cannot prepare owner status")
 	}
 
-	return sgraph.Get(ctx).Run(ctx)
+	g := sgraph.Get(ctx)
+
+	return g.Run(ctx)
 }

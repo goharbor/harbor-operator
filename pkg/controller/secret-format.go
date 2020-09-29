@@ -23,9 +23,9 @@ func (c *Controller) EnsureSecretType(ctx context.Context, node graph.Resource) 
 	span, ctx := opentracing.StartSpanFromContext(ctx, "checkSecretType")
 	defer span.Finish()
 
-	gvk := c.AddGVKToSpan(ctx, span, res.resource)
+	gvk := c.AddGVKToSpan(ctx, span, res.Resource)
 
-	objectKey, err := client.ObjectKeyFromObject(res.resource)
+	objectKey, err := client.ObjectKeyFromObject(res.Resource)
 	if err != nil {
 		return serrors.UnrecoverrableError(err, serrors.OperatorReason, "cannot get object key")
 	}
@@ -39,15 +39,15 @@ func (c *Controller) EnsureSecretType(ctx context.Context, node graph.Resource) 
 	err = c.Client.Get(ctx, objectKey, secret)
 	if err != nil {
 		// TODO Check if the error is a temporary error or a unrecoverrable one
-		return errors.Wrapf(err, "cannot get %s %s/%s", gvk, res.resource.GetNamespace(), res.resource.GetName())
+		return errors.Wrapf(err, "cannot get %s %s/%s", gvk, res.Resource.GetNamespace(), res.Resource.GetName())
 	}
 
-	expectedSecretType := res.resource.(*corev1.Secret).Type
+	expectedSecretType := res.Resource.(*corev1.Secret).Type
 
 	switch secret.Type { // nolint:exhaustive
 	default:
 		return errors.Wrapf(errSecretInvalidTyped, "got %s expected %s", secret.Type, expectedSecretType)
-	case res.resource.(*corev1.Secret).Type:
+	case res.Resource.(*corev1.Secret).Type:
 		return nil
 	case corev1.SecretTypeOpaque:
 		switch expectedSecretType { // nolint:exhaustive

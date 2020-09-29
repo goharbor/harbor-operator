@@ -19,7 +19,7 @@ func BasicCheck(ctx context.Context, object runtime.Object) (bool, error) {
 
 	ok, err := UnstructuredCheck(ctx, resource)
 	if err != nil {
-		return ok, err
+		return false, err
 	}
 
 	err = runtime.DefaultUnstructuredConverter.FromUnstructured(resource.UnstructuredContent(), object)

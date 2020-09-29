@@ -92,7 +92,7 @@ var _ = Describe("Walk a dependency manager", func() {
 		})
 	})
 
-	FContext("With a dependencies tree", func() {
+	Context("With a dependencies tree", func() {
 		var expected int32
 		var counter int32
 

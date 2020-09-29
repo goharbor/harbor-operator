@@ -33,9 +33,9 @@ func (c *Controller) apply(ctx context.Context, res *Resource) (controllerutil.O
 		span, ctx := opentracing.StartSpanFromContext(ctx, "applyAndRetry")
 		defer span.Finish()
 
-		result := res.resource.DeepCopyObject()
+		result := res.Resource.DeepCopyObject()
 
-		op, err := controllerutil.CreateOrUpdate(ctx, c.Client, result, res.mutable(ctx, res.resource, result))
+		op, err := controllerutil.CreateOrUpdate(ctx, c.Client, result, res.Mutable(ctx, res.Resource, result))
 		if err != nil { //nolint:nestif
 			span.SetTag("error", err)
 
@@ -68,7 +68,7 @@ func (c *Controller) apply(ctx context.Context, res *Resource) (controllerutil.O
 
 		span.SetTag("operation.result", op)
 
-		checksum.CopyMarkers(result.(metav1.Object), res.resource)
+		checksum.CopyMarkers(result.(metav1.Object), res.Resource)
 
 		opResult = op
 

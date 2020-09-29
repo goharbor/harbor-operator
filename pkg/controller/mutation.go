@@ -89,15 +89,15 @@ func (c *Controller) DeploymentMutateFn(ctx context.Context, dependencies ...gra
 				continue
 			}
 
-			depRemote, ok := res.resource.DeepCopyObject().(resources.Resource)
+			depRemote, ok := res.Resource.DeepCopyObject().(resources.Resource)
 			if !ok {
 				logger.Get(ctx).Info("Cannot add dependency checksum", "resource", dep)
 
 				continue
 			}
 
-			name := res.resource.GetName()
-			namespace := res.resource.GetNamespace()
+			name := res.Resource.GetName()
+			namespace := res.Resource.GetNamespace()
 
 			err := c.Client.Get(ctx, types.NamespacedName{
 				Name:      name,

@@ -28,9 +28,9 @@ import (
 )
 
 type Resource struct {
-	mutable   resources.Mutable
-	checkable resources.Checkable
-	resource  resources.Resource
+	Mutable   resources.Mutable
+	Checkable resources.Checkable
+	Resource  resources.Resource
 }
 
 func (c *Controller) SetGVK(ctx context.Context, resource resources.Resource) error {
@@ -51,7 +51,7 @@ func (c *Controller) ProcessFunc(ctx context.Context, resource metav1.Object, de
 
 	for _, dep := range dependencies {
 		if dep, ok := dep.(*Resource); ok {
-			depManager.Add(ctx, dep.resource, true)
+			depManager.Add(ctx, dep.Resource, true)
 		}
 	}
 
@@ -64,9 +64,9 @@ func (c *Controller) ProcessFunc(ctx context.Context, resource metav1.Object, de
 		span, ctx := opentracing.StartSpanFromContext(ctx, "process")
 		defer span.Finish()
 
-		namespace, name := res.resource.GetNamespace(), res.resource.GetName()
+		namespace, name := res.Resource.GetNamespace(), res.Resource.GetName()
 
-		gvk := c.AddGVKToSpan(ctx, span, res.resource)
+		gvk := c.AddGVKToSpan(ctx, span, res.Resource)
 		l := logger.Get(ctx).WithValues(
 			"resource.apiVersion", gvk.GroupVersion(),
 			"resource.kind", gvk.Kind,
@@ -79,12 +79,12 @@ func (c *Controller) ProcessFunc(ctx context.Context, resource metav1.Object, de
 			SetTag("resource.name", name).
 			SetTag("resource.namespace", namespace)
 
-		objectKey, err := client.ObjectKeyFromObject(res.resource)
+		objectKey, err := client.ObjectKeyFromObject(res.Resource)
 		if err != nil {
 			return serrors.UnrecoverrableError(err, serrors.OperatorReason, "cannot get object key")
 		}
 
-		result := res.resource.DeepCopyObject()
+		result := res.Resource.DeepCopyObject()
 
 		err = c.Client.Get(ctx, objectKey, result)
 		if err != nil {
@@ -92,13 +92,13 @@ func (c *Controller) ProcessFunc(ctx context.Context, resource metav1.Object, de
 				return errors.Wrap(err, "cannot get resource")
 			}
 		} else {
-			checksum.CopyMarkers(result.(metav1.Object), res.resource)
+			checksum.CopyMarkers(result.(metav1.Object), res.Resource)
 		}
 
-		if !depManager.ChangedFor(ctx, res.resource) {
+		if !depManager.ChangedFor(ctx, res.Resource) {
 			changed := false
 
-			for key := range res.resource.GetAnnotations() {
+			for key := range res.Resource.GetAnnotations() {
 				if checksum.IsStaticAnnotation(key) {
 					changed = true
 
@@ -113,11 +113,11 @@ func (c *Controller) ProcessFunc(ctx context.Context, resource metav1.Object, de
 			}
 		}
 
-		res.mutable.AppendMutation(func(ctx context.Context, resource, result runtime.Object) controllerutil.MutateFn {
+		res.Mutable.AppendMutation(func(ctx context.Context, resource, result runtime.Object) controllerutil.MutateFn {
 			return func() error {
 				if res, ok := result.(metav1.Object); ok {
 					depManager.AddAnnotations(res)
-					depManager.AddAnnotations(r.(*Resource).resource)
+					depManager.AddAnnotations(r.(*Resource).Resource)
 				}
 
 				return nil
@@ -136,9 +136,9 @@ func (c *Controller) AddUnsctructuredToManage(ctx context.Context, resource *uns
 	}
 
 	res := &Resource{
-		mutable:   mutation.NewUnstructured(c.GlobalMutateFn(ctx)),
-		checkable: statuscheck.UnstructuredCheck,
-		resource:  resource,
+		Mutable:   mutation.NewUnstructured(c.GlobalMutateFn(ctx)),
+		Checkable: statuscheck.UnstructuredCheck,
+		Resource:  resource,
 	}
 
 	g := sgraph.Get(ctx)
@@ -149,10 +149,12 @@ func (c *Controller) AddUnsctructuredToManage(ctx context.Context, resource *uns
 	return res, g.AddResource(ctx, res, dependencies, c.ProcessFunc(ctx, resource, dependencies...))
 }
 
-func (c *Controller) AddServiceToManage(ctx context.Context, resource *corev1.Service, dependencies ...graph.Resource) (graph.Resource, error) {
-	if resource == nil {
+func (c *Controller) AddServiceToManage(ctx context.Context, service *corev1.Service, dependencies ...graph.Resource) (graph.Resource, error) {
+	if service == nil {
 		return nil, nil
 	}
+
+	resource := service.DeepCopyObject().(*corev1.Service)
 
 	err := c.SetGVK(ctx, resource)
 	if err != nil {
@@ -160,8 +162,8 @@ func (c *Controller) AddServiceToManage(ctx context.Context, resource *corev1.Se
 	}
 
 	res := &Resource{
-		mutable: mutation.NewService(c.GlobalMutateFn(ctx)),
-		checkable: func(ctx context.Context, object runtime.Object) (bool, error) {
+		Mutable: mutation.NewService(c.GlobalMutateFn(ctx)),
+		Checkable: func(ctx context.Context, object runtime.Object) (bool, error) {
 			service := object.(*corev1.Service)
 
 			ok, err := statuscheck.BasicCheck(ctx, service)
@@ -184,7 +186,7 @@ func (c *Controller) AddServiceToManage(ctx context.Context, resource *corev1.Se
 
 			return statuscheck.EndpointCheck(ctx, &endpoint, ports...)
 		},
-		resource: resource,
+		Resource: resource,
 	}
 
 	g := sgraph.Get(ctx)
@@ -223,8 +225,8 @@ func (c *Controller) AddExternalResource(ctx context.Context, resource resources
 	}
 
 	res := &Resource{
-		checkable: statuscheck.BasicCheck,
-		resource:  resource,
+		Checkable: statuscheck.BasicCheck,
+		Resource:  resource,
 	}
 
 	g := sgraph.Get(ctx)
@@ -250,8 +252,8 @@ func (c *Controller) AddExternalTypedSecret(ctx context.Context, secret *corev1.
 	resource.Type = secretType
 
 	res := &Resource{
-		checkable: statuscheck.BasicCheck,
-		resource:  resource,
+		Checkable: statuscheck.BasicCheck,
+		Resource:  resource,
 	}
 
 	g := sgraph.Get(ctx)
@@ -273,9 +275,9 @@ func (c *Controller) AddCertificateToManage(ctx context.Context, resource *certv
 	}
 
 	res := &Resource{
-		mutable:   mutation.NewCertificate(c.GlobalMutateFn(ctx)),
-		checkable: statuscheck.CertificateCheck,
-		resource:  resource,
+		Mutable:   mutation.NewCertificate(c.GlobalMutateFn(ctx)),
+		Checkable: statuscheck.CertificateCheck,
+		Resource:  resource,
 	}
 
 	g := sgraph.Get(ctx)
@@ -297,9 +299,9 @@ func (c *Controller) AddIssuerToManage(ctx context.Context, resource *certv1.Iss
 	}
 
 	res := &Resource{
-		mutable:   mutation.NewIssuer(c.GlobalMutateFn(ctx)),
-		checkable: statuscheck.IssuerCheck,
-		resource:  resource,
+		Mutable:   mutation.NewIssuer(c.GlobalMutateFn(ctx)),
+		Checkable: statuscheck.IssuerCheck,
+		Resource:  resource,
 	}
 
 	g := sgraph.Get(ctx)
@@ -321,9 +323,9 @@ func (c *Controller) AddIngressToManage(ctx context.Context, resource *netv1.Ing
 	}
 
 	res := &Resource{
-		mutable:   mutation.NewIngress(c.GlobalMutateFn(ctx)),
-		checkable: statuscheck.BasicCheck,
-		resource:  resource,
+		Mutable:   mutation.NewIngress(c.GlobalMutateFn(ctx)),
+		Checkable: statuscheck.IngressCheck,
+		Resource:  resource,
 	}
 
 	g := sgraph.Get(ctx)
@@ -345,9 +347,9 @@ func (c *Controller) AddSecretToManage(ctx context.Context, resource *corev1.Sec
 	}
 
 	res := &Resource{
-		mutable:   mutation.NewSecret(c.GlobalMutateFn(ctx), true, false),
-		checkable: statuscheck.True,
-		resource:  resource,
+		Mutable:   mutation.NewSecret(c.GlobalMutateFn(ctx), true, false),
+		Checkable: statuscheck.True,
+		Resource:  resource,
 	}
 
 	g := sgraph.Get(ctx)
@@ -369,9 +371,9 @@ func (c *Controller) AddImmutableSecretToManage(ctx context.Context, resource *c
 	}
 
 	res := &Resource{
-		mutable:   mutation.NewSecret(c.GlobalMutateFn(ctx), false, false),
-		checkable: statuscheck.True,
-		resource:  resource,
+		Mutable:   mutation.NewSecret(c.GlobalMutateFn(ctx), false, false),
+		Checkable: statuscheck.True,
+		Resource:  resource,
 	}
 
 	g := sgraph.Get(ctx)
@@ -382,10 +384,12 @@ func (c *Controller) AddImmutableSecretToManage(ctx context.Context, resource *c
 	return res, g.AddResource(ctx, res, dependencies, c.ProcessFunc(ctx, resource, dependencies...))
 }
 
-func (c *Controller) AddConfigMapToManage(ctx context.Context, resource *corev1.ConfigMap, dependencies ...graph.Resource) (graph.Resource, error) {
-	if resource == nil {
+func (c *Controller) AddConfigMapToManage(ctx context.Context, configmap *corev1.ConfigMap, dependencies ...graph.Resource) (graph.Resource, error) {
+	if configmap == nil {
 		return nil, nil
 	}
+
+	resource := configmap.DeepCopyObject().(*corev1.ConfigMap)
 
 	err := c.SetGVK(ctx, resource)
 	if err != nil {
@@ -393,9 +397,9 @@ func (c *Controller) AddConfigMapToManage(ctx context.Context, resource *corev1.
 	}
 
 	res := &Resource{
-		mutable:   mutation.NewConfigMap(c.GlobalMutateFn(ctx)),
-		checkable: statuscheck.True,
-		resource:  resource,
+		Mutable:   mutation.NewConfigMap(c.GlobalMutateFn(ctx)),
+		Checkable: statuscheck.True,
+		Resource:  resource,
 	}
 
 	g := sgraph.Get(ctx)
@@ -406,10 +410,12 @@ func (c *Controller) AddConfigMapToManage(ctx context.Context, resource *corev1.
 	return res, g.AddResource(ctx, res, dependencies, c.ProcessFunc(ctx, resource, dependencies...))
 }
 
-func (c *Controller) AddDeploymentToManage(ctx context.Context, resource *appsv1.Deployment, dependencies ...graph.Resource) (graph.Resource, error) {
-	if resource == nil {
+func (c *Controller) AddDeploymentToManage(ctx context.Context, deployment *appsv1.Deployment, dependencies ...graph.Resource) (graph.Resource, error) {
+	if deployment == nil {
 		return nil, nil
 	}
+
+	resource := deployment.DeepCopyObject().(*appsv1.Deployment)
 
 	err := c.SetGVK(ctx, resource)
 	if err != nil {
@@ -417,11 +423,11 @@ func (c *Controller) AddDeploymentToManage(ctx context.Context, resource *appsv1
 	}
 
 	res := &Resource{
-		mutable: mutation.NewDeployment(c.DeploymentMutateFn(ctx, dependencies...)),
-		checkable: func(ctx context.Context, object runtime.Object) (bool, error) {
+		Mutable: mutation.NewDeployment(c.DeploymentMutateFn(ctx, dependencies...)),
+		Checkable: func(ctx context.Context, object runtime.Object) (bool, error) {
 			return statuscheck.BasicCheck(ctx, object)
 		},
-		resource: resource,
+		Resource: resource,
 	}
 
 	g := sgraph.Get(ctx)

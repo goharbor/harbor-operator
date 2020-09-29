@@ -19,9 +19,9 @@ func (c *Controller) Create(ctx context.Context, node graph.Resource) error {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "applyResource")
 	defer span.Finish()
 
-	gvk := c.AddGVKToSpan(ctx, span, res.resource)
+	gvk := c.AddGVKToSpan(ctx, span, res.Resource)
 
-	objectKey, err := client.ObjectKeyFromObject(res.resource)
+	objectKey, err := client.ObjectKeyFromObject(res.Resource)
 	if err != nil {
 		return errors.Wrap(err, "cannot get object key")
 	}
@@ -30,13 +30,13 @@ func (c *Controller) Create(ctx context.Context, node graph.Resource) error {
 		SetTag("Resource.Name", objectKey.Name).
 		SetTag("Resource.Namespace", objectKey.Namespace)
 
-	err = c.Client.Create(ctx, res.resource)
+	err = c.Client.Create(ctx, res.Resource)
 	if err != nil {
 		if apierrs.IsAlreadyExists(err) {
 			return nil
 		}
 
-		return errors.Wrapf(err, "cannot create %s %s/%s", gvk, res.resource.GetNamespace(), res.resource.GetNamespace())
+		return errors.Wrapf(err, "cannot create %s %s/%s", gvk, res.Resource.GetNamespace(), res.Resource.GetNamespace())
 	}
 
 	return nil
