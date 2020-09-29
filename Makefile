@@ -1,6 +1,7 @@
 
 # Image URL to use all building/pushing image targets
 IMG ?= goharbor/harbor-operator:dev
+RELEASE_VERSION ?= 0.0.0-dev
 
 CONFIGURATION_FROM ?= env,file:$(CURDIR)/config-dev.yml
 export CONFIGURATION_FROM
@@ -126,8 +127,8 @@ release-test: goreleaser
 CHART_RELEASE_NAME ?= harbor-operator
 CHART_HARBOR_CLASS ?=
 
-helm-install: helm chart
-	$(HELM) upgrade --install $(CHART_RELEASE_NAME) $(CHART_HARBOR_OPERATOR) \
+helm-install: helm $(CHARTS_DIRECTORY)/harbor-operator-$(RELEASE_VERSION).tgz
+	$(HELM) upgrade --install $(CHART_RELEASE_NAME) $(CHARTS_DIRECTORY)/harbor-operator-$(RELEASE_VERSION).tgz \
 		--set-string image.repository="$(shell echo $(IMG) | sed 's/:.*//')" \
 		--set-string image.tag="$(shell echo $(IMG) | sed 's/.*://')" \
 		--set-string harborClass='${CHART_HARBOR_CLASS}'
@@ -135,8 +136,6 @@ helm-install: helm chart
 #####################
 #     Packaging     #
 #####################
-
-RELEASE_VERSION ?= 0.0.0-dev
 
 # Build manager binary
 .PHONY: manager
