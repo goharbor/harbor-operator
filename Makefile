@@ -245,9 +245,9 @@ endif
 kubebuilder:
 ifeq (, $(shell which kubebuilder))
 	# https://kubebuilder.io/quick-start.html#installation
-	curl -sSL "https://go.kubebuilder.io/dl/2.0.1/$(shell go env GOOS)/$(shell go env GOARCH)" \
+	curl -sSL "https://go.kubebuilder.io/dl/2.3.1/$(shell go env GOOS)/$(shell go env GOARCH)" \
 		| tar -xz -C /tmp/
-	mv /tmp/kubebuilder_2.0.1_$(shell go env GOOS)_$(shell go env GOARCH)/bin/* $(GOBIN)
+	mv /tmp/kubebuilder_2.3.1_$(shell go env GOOS)_$(shell go env GOARCH)/bin/* $(GOBIN)
 KUBEBUILDER=$(GOBIN)/kubebuilder
 else
 KUBEBUILDER=$(shell which kubebuilder)
