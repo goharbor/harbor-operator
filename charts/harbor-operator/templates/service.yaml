@@ -8,7 +8,7 @@ spec:
   type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.service.port }}
-      targetPort: webhook
+      targetPort: webhook-server
       protocol: TCP
       name: https
   selector:
