@@ -29,4 +29,7 @@ resources:
 - group: goharbor
   kind: Core
   version: v1alpha2
+- group: goharbor.io
+  kind: HarborCluster
+  version: v1alpha2
 version: "2"
