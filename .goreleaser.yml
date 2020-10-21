@@ -1,6 +1,8 @@
 before:
   hooks:
+  - echo Tag {{ .Tag }}
   - make generate {{ if .Tag }}RELEASE_VERSION={{ .Tag }}{{ end }}
+  - git diff
 
 builds:
 - env:
