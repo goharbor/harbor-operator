@@ -74,6 +74,10 @@ type RedisSpec struct {
 	Server   *RedisServer   `json:"server,omitempty"`
 	Sentinel *RedisSentinel `json:"sentinel,omitempty"`
 
+	// External params following.
+	// The secret must contains "password".
+	SecretName string `json:"secretName,omitempty"`
+
 	// Maximum number of socket connections.
 	// Default is 10 connections per every CPU as reported by runtime.NumCPU.
 	PoolSize int `json:"poolSize,omitempty"`
