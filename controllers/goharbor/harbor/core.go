@@ -166,6 +166,10 @@ const (
 )
 
 func (r *Reconciler) GetCoreAdminPassword(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*corev1.Secret, error) {
+	if len(harbor.Spec.HarborAdminPasswordRef) > 0 {
+		return nil, nil
+	}
+
 	name := r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String(), "admin-password")
 	namespace := harbor.GetNamespace()
 
@@ -355,7 +359,11 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1alpha2.Harbo
 		}
 	}
 
-	adminPasswordRef := r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String(), "admin-password")
+	adminPasswordRef := harbor.Spec.HarborAdminPasswordRef
+	if len(adminPasswordRef) == 0 {
+		adminPasswordRef = r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String(), "admin-password")
+	}
+
 	coreSecretRef := r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String(), "secret")
 	encryptionKeyRef := r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String(), "encryptionkey")
 	csrfRef := r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String(), "csrf")
