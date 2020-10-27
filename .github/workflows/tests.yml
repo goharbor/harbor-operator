@@ -61,7 +61,6 @@ jobs:
     runs-on: ubuntu-latest
     name: K8S v${{ matrix.k8sVersion }} (CM v${{ matrix.certManager }})
     env:
-      KUBECONFIG: /tmp/kubeconfig-microk8s.yaml
       USE_EXISTING_CLUSTER: true
 
     strategy:
@@ -75,6 +74,7 @@ jobs:
 
         # https://snapcraft.io/microk8s
         k8sVersion:
+        - "1.17"
         - "1.18"
         - "1.19"
 
@@ -82,32 +82,32 @@ jobs:
     - uses: actions/setup-go@v2
       with:
         go-version: 1.14
+
     - name: Install Kubernetes v${{ matrix.k8sVersion }}
       run: |
-        sudo snap install microk8s --channel='${{ matrix.k8sVersion }}/stable' --classic
-
-        sudo microk8s.start
-
-        # https://microk8s.io/docs/addons
-        sudo microk8s.enable dns storage ingress registry
-    - name: Wait for Kubernetes to be ready
-      timeout-minutes: 15
-      run: |
-        sudo microk8s.status
-        while [[ ! $(sudo microk8s.kubectl cluster-info) ]] ; do
-          echo "kubernetes not ready yet..." >&2
-          sleep 1
-        done
-        sudo microk8s.config > "${KUBECONFIG}"
+        which kind || (curl -Lo ./kind https://github.com/kubernetes-sigs/kind/releases/download/v0.7.0/kind-$(uname)-amd64; sudo install kind /usr/local/bin/)
+        cat <<EOF | kind create cluster --name harbor --config=-
+        kind: Cluster
+        apiVersion: kind.x-k8s.io/v1alpha4
+        nodes:
+        - role: control-plane
+        - role: worker
+        - role: worker
+        EOF
 
     - name: Install CertManager v${{ matrix.certManager }}
       run: |
         # Try the recet way to install crd or fallback to the old one
         version='${{ matrix.certManager }}'
-        shortVersion="${version%.*}"
-        set -ex
         kubectl apply -f "https://github.com/jetstack/cert-manager/releases/download/v${version}/cert-manager.yaml"
-        kubectl wait --for=condition=Ready pod --all --timeout 300s -n cert-manager
+        sleep 5
+        time kubectl -n cert-manager wait --for=condition=Available deployment --all --timeout 300s
+
+    - name: Install Ingress
+      run: |
+        kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.35.0/deploy/static/provider/baremetal/deploy.yaml
+        sleep 5
+        time kubectl -n ingress-nginx wait --for=condition=Available deployment --all --timeout 300s
 
     - uses: actions/checkout@v2
     - name: go tests
@@ -116,34 +116,58 @@ jobs:
 
     - name: build harbor-operator
       run: |
-        make docker-build IMG=localhost:32000/harbor-operator:dev_test
-        skopeo copy docker-daemon:localhost:32000/harbor-operator:dev_test docker://localhost:32000/harbor-operator:dev_test --tls-verify=false
+        make docker-build IMG=harbor-operator:dev_test
+        kind load docker-image harbor-operator:dev_test --name harbor
 
     - name: install harbor-operator
       run: |
         set -ex
         kubectl create ns harbor-operator-ns
         cd config/default
-        kustomize edit set image goharbor/harbor-operator=localhost:32000/harbor-operator:dev_test
+        kustomize edit set image goharbor/harbor-operator=harbor-operator:dev_test
         kustomize build | kubectl apply -f -
 
-        # make helm-install IMG=localhost:32000/harbor-operator:dev_test
+        # make helm-install IMG=harbor-operator:dev_test
 
-        kubectl wait --for=condition=Ready pod --all --timeout 300s -n harbor-operator-ns
+        if ! time kubectl -n harbor-operator-ns wait --for=condition=Available deployment --all --timeout 300s; then
+          kubectl get all -n harbor-operator-ns
+          exit 1
+        fi
 
     - name: install harbor
       run: |
         export GITHUB_TOKEN=xxx
         set -ex
         make sample
-        kubectl wait --for=condition=Ready pod --all --timeout 300s || (kubectl get all; exit 1)
-        kubectl get all
+        for i in $(seq 1 6);do
+          sleep 30
+          echo $i
+          kubectl get all
+        done
+        if ! time kubectl wait --for=condition=Ready pod --all --timeout 600s ;then
+          echo install harbor failed
+          kubectl get all
+
+          for n in $(kubectl get po |grep -v Running|grep -v NAME|awk '{print $1}');do
+            echo describe $n
+            kubectl describe pod $n
+            echo show log $n
+            kubectl log $n || true
+          done
+          exit 1
+        else
+          kubectl get all
+        fi
+        free -h
 
     - name: test harbor
       run: |
         set -ex
+        sudo kubectl get -n ingress-nginx service/ingress-nginx-controller
+        sudo kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 443:443 80:80 --address=0.0.0.0 &
+        sleep 10
         echo 127.0.0.1 core.harbor.domain | sudo tee -a /etc/hosts
-        curl https://core.harbor.domain/api/v2.0/systeminfo -H "Host: core.harbor.domain" -i -k
+        curl https://core.harbor.domain/api/v2.0/systeminfo -i -k
         sudo mkdir -p /etc/docker/certs.d/core.harbor.domain
         kubectl get secret sample-public-certificate -o jsonpath='{.data.ca\.crt}' \
           | base64 --decode \
