@@ -271,7 +271,7 @@ $(CHART_HARBOR_OPERATOR)/assets:
 	ln -vs ../../config/config/assets '$@'
 
 $(CHART_TEMPLATE_PATH)/deployment.yaml: kustomize $(wildcard config/helm/deployment/*) $(wildcard config/manager/*) $(wildcard config/config/*)
-	echo '# $(DO_NOT_EDIT)' > $(CHART_TEMPLATE_PATH)/deployment.yaml
+	echo '{{- /* $(DO_NOT_EDIT) */ -}}' > $(CHART_TEMPLATE_PATH)/deployment.yaml
 	$(KUSTOMIZE) build --reorder legacy config/helm/deployment | \
 	$(KUSTOMIZE) cfg grep --annotate=false 'kind=Deployment' | \
 	sed "s/'\({{[^}}]*}}\)'/\1/g" \
@@ -279,7 +279,7 @@ $(CHART_TEMPLATE_PATH)/deployment.yaml: kustomize $(wildcard config/helm/deploym
 	cat config/helm/deployment/foot.yaml >> $(CHART_TEMPLATE_PATH)/deployment.yaml
 
 $(CHART_TEMPLATE_PATH)/role.yaml: kustomize $(wildcard config/helm/rbac/*) $(wildcard config/rbac/*)
-	echo '# $(DO_NOT_EDIT)' > $(CHART_TEMPLATE_PATH)/role.yaml
+	echo '{{- /* $(DO_NOT_EDIT) */ -}}' > $(CHART_TEMPLATE_PATH)/role.yaml
 	echo '{{- if .Values.rbac.create }}' >> $(CHART_TEMPLATE_PATH)/role.yaml
 	$(KUSTOMIZE) build --reorder legacy config/helm/rbac | \
 	$(KUSTOMIZE) cfg grep --annotate=false 'kind=Role' | \
@@ -290,7 +290,7 @@ $(CHART_TEMPLATE_PATH)/role.yaml: kustomize $(wildcard config/helm/rbac/*) $(wil
 	echo '{{- end -}}' >> $(CHART_TEMPLATE_PATH)/role.yaml
 
 $(CHART_TEMPLATE_PATH)/clusterrole.yaml: kustomize $(wildcard config/helm/rbac/*) $(wildcard config/rbac/*)
-	echo '# $(DO_NOT_EDIT)' > $(CHART_TEMPLATE_PATH)/clusterrole.yaml
+	echo '{{- /* $(DO_NOT_EDIT) */ -}}' > $(CHART_TEMPLATE_PATH)/clusterrole.yaml
 	echo '{{- if .Values.rbac.create }}' >> $(CHART_TEMPLATE_PATH)/clusterrole.yaml
 	$(KUSTOMIZE) build --reorder legacy config/helm/rbac | \
 	$(KUSTOMIZE) cfg grep --annotate=false 'kind=ClusterRole' | \
@@ -300,7 +300,7 @@ $(CHART_TEMPLATE_PATH)/clusterrole.yaml: kustomize $(wildcard config/helm/rbac/*
 	echo '{{- end -}}' >> $(CHART_TEMPLATE_PATH)/clusterrole.yaml
 
 $(CHART_TEMPLATE_PATH)/rolebinding.yaml: kustomize $(wildcard config/helm/rbac/*) $(wildcard config/rbac/*)
-	echo '# $(DO_NOT_EDIT)' > $(CHART_TEMPLATE_PATH)/rolebinding.yaml
+	echo '{{- /* $(DO_NOT_EDIT) */ -}}' > $(CHART_TEMPLATE_PATH)/rolebinding.yaml
 	echo '{{- if .Values.rbac.create }}' >> $(CHART_TEMPLATE_PATH)/rolebinding.yaml
 	$(KUSTOMIZE) build --reorder legacy config/helm/rbac | \
 	$(KUSTOMIZE) cfg grep --annotate=false 'kind=RoleBinding' | \
@@ -310,7 +310,7 @@ $(CHART_TEMPLATE_PATH)/rolebinding.yaml: kustomize $(wildcard config/helm/rbac/*
 	echo '{{- end -}}' >> $(CHART_TEMPLATE_PATH)/rolebinding.yaml
 
 $(CHART_TEMPLATE_PATH)/clusterrolebinding.yaml: kustomize $(wildcard config/helm/rbac/*) $(wildcard config/rbac/*)
-	echo '# $(DO_NOT_EDIT)' > $(CHART_TEMPLATE_PATH)/clusterrolebinding.yaml
+	echo '{{- /* $(DO_NOT_EDIT) */ -}}' > $(CHART_TEMPLATE_PATH)/clusterrolebinding.yaml
 	echo '{{- if .Values.rbac.create }}' >> $(CHART_TEMPLATE_PATH)/clusterrolebinding.yaml
 	$(KUSTOMIZE) build --reorder legacy config/helm/rbac | \
 	$(KUSTOMIZE) cfg grep --annotate=false 'kind=ClusterRoleBinding' | \
@@ -319,28 +319,28 @@ $(CHART_TEMPLATE_PATH)/clusterrolebinding.yaml: kustomize $(wildcard config/helm
 	echo '{{- end -}}' >> $(CHART_TEMPLATE_PATH)/clusterrolebinding.yaml
 
 $(CHART_TEMPLATE_PATH)/validatingwebhookconfiguration.yaml: kustomize $(wildcard config/helm/webhook/*) $(wildcard config/webhook/*)
-	echo '# $(DO_NOT_EDIT)' > $(CHART_TEMPLATE_PATH)/validatingwebhookconfiguration.yaml
+	echo '{{- /* $(DO_NOT_EDIT) */ -}}' > $(CHART_TEMPLATE_PATH)/validatingwebhookconfiguration.yaml
 	$(KUSTOMIZE) build --reorder legacy config/helm/webhook | \
 	$(KUSTOMIZE) cfg grep --annotate=false 'kind=ValidatingWebhookConfiguration' | \
 	sed "s/'\({{[^}}]*}}\)'/\1/g" \
 		>> $(CHART_TEMPLATE_PATH)/validatingwebhookconfiguration.yaml
 
 $(CHART_TEMPLATE_PATH)/mutatingwebhookconfiguration.yaml: kustomize $(wildcard config/helm/webhook/*) $(wildcard config/webhook/*)
-	echo '# $(DO_NOT_EDIT)' > $(CHART_TEMPLATE_PATH)/mutatingwebhookconfiguration.yaml
+	echo '{{- /* $(DO_NOT_EDIT) */ -}}' > $(CHART_TEMPLATE_PATH)/mutatingwebhookconfiguration.yaml
 	$(KUSTOMIZE) build --reorder legacy config/helm/webhook | \
 	$(KUSTOMIZE) cfg grep --annotate=false 'kind=MutatingWebhookConfiguration' | \
 	sed "s/'\({{[^}}]*}}\)'/\1/g" \
 		>> $(CHART_TEMPLATE_PATH)/mutatingwebhookconfiguration.yaml
 
 $(CHART_TEMPLATE_PATH)/certificate.yaml: kustomize $(wildcard config/helm/certmanager/*) $(wildcard config/certmanager/*)
-	echo '# $(DO_NOT_EDIT)' > $(CHART_TEMPLATE_PATH)/certificate.yaml
+	echo '{{- /* $(DO_NOT_EDIT) */ -}}' > $(CHART_TEMPLATE_PATH)/certificate.yaml
 	$(KUSTOMIZE) build --reorder legacy config/helm/certificate | \
 	$(KUSTOMIZE) cfg grep --annotate=false 'kind=Certificate' | \
 	sed "s/'\({{[^}}]*}}\)'/\1/g" \
 		>> $(CHART_TEMPLATE_PATH)/certificate.yaml
 
 $(CHART_TEMPLATE_PATH)/issuer.yaml: kustomize $(wildcard config/helm/certmanager/*) $(wildcard config/certmanager/*)
-	echo '# $(DO_NOT_EDIT)' > $(CHART_TEMPLATE_PATH)/issuer.yaml
+	echo '{{- /* $(DO_NOT_EDIT) */ -}}' > $(CHART_TEMPLATE_PATH)/issuer.yaml
 	$(KUSTOMIZE) build --reorder legacy config/helm/certificate | \
 	$(KUSTOMIZE) cfg grep --annotate=false 'kind=Issuer' | \
 	sed "s/'\({{[^}}]*}}\)'/\1/g" \
