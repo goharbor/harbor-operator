@@ -1,44 +1,40 @@
 package lcm
 
 import (
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// This package container interface of harbor cluster service lifecycle manage.
-
+// Controller is designed to handle the lifecycle of the related incluster deployed services like psql, redis and minio.
 type Controller interface {
-	// Provision the new dependent service by the related section of cluster spec.
-	Provision() (*CRStatus, error)
+	// Apply the changes to the cluster including:
+	// - creat new if the designed resource is not existing
+	// - update the resource if the related spec has been changed
+	// - scale the resources if the replica is changed
+	//
+	// Equal to the previous method "Reconcile()" of lcm Controller
+	Apply(spec *v1alpha2.HarborCluster) (*CRStatus, error)
 
-	// Delete the service
+	// Delete the related resources if the resource configuration is removed from the spec.
+	// As we support connecting to the external or incluster provisioned dependent services,
+	// the dependent service may switch from incluster to external mode and then the incluster
+	// services may need to be unloaded.
 	Delete() (*CRStatus, error)
 
-	// Scale will get the replicas of components, and update the crd.
-	Scale() (*CRStatus, error)
-
-	// Scale up
-	ScaleUp(newReplicas uint64) (*CRStatus, error)
-
-	// Scale down
-	ScaleDown(newReplicas uint64) (*CRStatus, error)
-
-	// Update the service
-	Update(spec *goharborv1alpha2.HarborCluster) (*CRStatus, error)
-
-	// More...
+	// Upgrade the specified resource to the given version.
+	Upgrade(spec *v1alpha2.HarborCluster) (*CRStatus, error)
 }
 
 type CRStatus struct {
-	Condition  goharborv1alpha2.HarborClusterCondition `json:"condition"`
-	Properties Properties                              `json:"properties"`
+	Condition  v1alpha2.HarborClusterCondition `json:"condition"`
+	Properties Properties                      `json:"properties"`
 }
 
 // New returns new CRStatus
-func New(conditionType goharborv1alpha2.HarborClusterConditionType) *CRStatus {
+func New(conditionType v1alpha2.HarborClusterConditionType) *CRStatus {
 	return &CRStatus{
-		Condition: goharborv1alpha2.HarborClusterCondition{
+		Condition: v1alpha2.HarborClusterCondition{
 			LastTransitionTime: metav1.Now(),
 			Type:               conditionType,
 		},
