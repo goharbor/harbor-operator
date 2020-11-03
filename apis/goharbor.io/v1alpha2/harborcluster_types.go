@@ -59,15 +59,15 @@ type HarborClusterSpec struct {
 
 	// Cache configuration for in-cluster cache services
 	// +optional
-	Cache *Cache `json:"cache,omitempty"`
+	InClusterCache *Cache `json:"inClusterCache,omitempty"`
 
 	// Database configuration for in-cluster database service
 	// +optional
-	Database *Database `json:"database,omitempty"`
+	InClusterDatabase *Database `json:"inClusterDatabase,omitempty"`
 
 	// Storage configuration for in-cluster storage service
 	// +optional
-	Storage *Storage `json:"storage,omitempty"`
+	InClusterStorage *Storage `json:"inClusterStorage,omitempty"`
 }
 
 type Cache struct {
@@ -242,6 +242,6 @@ type HarborClusterList struct {
 	Items           []HarborCluster `json:"items"`
 }
 
-func init() {
+func init() { // nolint:gochecknoinits
 	SchemeBuilder.Register(&HarborCluster{}, &HarborClusterList{})
 }

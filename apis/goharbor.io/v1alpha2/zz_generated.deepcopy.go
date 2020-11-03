@@ -995,18 +995,18 @@ func (in *HarborClusterSpec) DeepCopyInto(out *HarborClusterSpec) {
 		*out = new(CoreProxySpec)
 		(*in).DeepCopyInto(*out)
 	}
-	if in.Cache != nil {
-		in, out := &in.Cache, &out.Cache
+	if in.InClusterCache != nil {
+		in, out := &in.InClusterCache, &out.InClusterCache
 		*out = new(Cache)
 		(*in).DeepCopyInto(*out)
 	}
-	if in.Database != nil {
-		in, out := &in.Database, &out.Database
+	if in.InClusterDatabase != nil {
+		in, out := &in.InClusterDatabase, &out.InClusterDatabase
 		*out = new(Database)
 		(*in).DeepCopyInto(*out)
 	}
-	if in.Storage != nil {
-		in, out := &in.Storage, &out.Storage
+	if in.InClusterStorage != nil {
+		in, out := &in.InClusterStorage, &out.InClusterStorage
 		*out = new(Storage)
 		(*in).DeepCopyInto(*out)
 	}
