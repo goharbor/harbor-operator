@@ -21,16 +21,16 @@ spec:
         command:
         - /manager
         env:
-        - name: NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
         - name: CONFIGURATION_FROM
           value: 'env:'
         - name: CLASSNAME
           value: {{ .Values.harborClass | quote }}
         - name: LOG_LEVEL
           value: {{ .Values.logLevel | quote }}
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
         image: '{{.Values.image.repository}}:{{.Values.image.tag|default .Chart.AppVersion}}'
         imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
         livenessProbe:
@@ -39,14 +39,14 @@ spec:
             port: ready
         name: manager
         ports:
-        - containerPort: 5000
-          name: ready
-          protocol: TCP
         - containerPort: 9443
           name: webhook-server
           protocol: TCP
         - containerPort: 8080
           name: metrics
+          protocol: TCP
+        - containerPort: 5000
+          name: ready
           protocol: TCP
         readinessProbe:
           httpGet:
@@ -54,11 +54,11 @@ spec:
             port: ready
         resources: {{- toYaml .Values.resources | nindent 10 }}
         volumeMounts:
-        - mountPath: /etc/harbor-operator
-          name: configuration-templates
-          readOnly: true
         - mountPath: /tmp/k8s-webhook-server/serving-certs
           name: cert
+          readOnly: true
+        - mountPath: /etc/harbor-operator
+          name: configuration-templates
           readOnly: true
       nodeSelector: {{- toYaml .Values.nodeSelector | nindent 8 }}
       securityContext: {{- toYaml .Values.podSecurityContext | nindent 8 }}
@@ -66,13 +66,13 @@ spec:
       terminationGracePeriodSeconds: 10
       tolerations: {{- toYaml .Values.tolerations | nindent 8 }}
       volumes:
-      - configMap:
-          name: '{{ include "chart.fullname" . }}-config-template'
-        name: configuration-templates
       - name: cert
         secret:
           defaultMode: 420
           secretName: '{{ include "chart.fullname" . }}-certificate'
+      - configMap:
+          name: '{{ include "chart.fullname" . }}-config-template'
+        name: configuration-templates
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}

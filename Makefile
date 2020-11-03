@@ -118,7 +118,7 @@ release-test: goreleaser
 CHART_RELEASE_NAME ?= harbor-operator
 CHART_HARBOR_CLASS ?=
 
-helm-install: helm $(CHARTS_DIRECTORY)/harbor-operator-$(RELEASE_VERSION).tgz
+helm-install: helm helm-generate
 	$(HELM) upgrade --install $(CHART_RELEASE_NAME) $(CHARTS_DIRECTORY)/harbor-operator-$(RELEASE_VERSION).tgz \
 		--set-string image.repository="$(shell echo $(IMG) | sed 's/:.*//')" \
 		--set-string image.tag="$(shell echo $(IMG) | sed 's/.*://')" \
