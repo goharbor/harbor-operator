@@ -6,7 +6,7 @@ Kubernetes API running (see [Supported platforms](https://github.com/goharbor/ha
 
 ### Minimal
 
-1. [CertManager](https://docs.cert-manager.io) (version >= 1.11) and an [issuer](https://cert-manager.io/docs/configuration/selfsigned/).
+1. [CertManager](https://docs.cert-manager.io) (version >= 0.12) and an [issuer](https://cert-manager.io/docs/configuration/selfsigned/).
 2. Redis for Job Service (such as [Redis HA Helm chart](https://github.com/bitnami/charts/tree/master/bitnami/redis)).
 3. Core database (such as [PostgreSQL Helm chart](https://github.com/bitnami/charts/tree/master/bitnami/postgresql)).
 4. Registry storage backend (such as any S3 compatible object storage).
@@ -33,25 +33,16 @@ Kubernetes API running (see [Supported platforms](https://github.com/goharbor/ha
    make docker-push  IMG=the.registry/goharbor/harbor-operator:dev
    ```
 
-3. Deploy requirements.
-   The following command deploys [databases](./database-installation.md)
-   and [redis](./redis-installation.md) needed to run a harbor.
-
+3. Deploy the operator.
+  
    ```bash
-   make install-dependencies
+   make helm-install IMG=the.registry/goharbor/harbor-operator:dev
    ```
 
-4. Deploy the application into new namespace
+4. Ensure the pod harbor-operator-controller-manager-xxx is running
 
    ```bash
-   kubectl create namespace harbor-operator-system
-   make deploy
-   ```
-
-5. Ensure the operator is running
-
-   ```bash
-   kubectl get po -n harbor-operator-system
+   kubectl get pod
    ```
 
 ## Deploy the sample
@@ -72,11 +63,11 @@ Kubernetes API running (see [Supported platforms](https://github.com/goharbor/ha
      | base64 --decode
    ```
 
-3. Access to Portal with the publicURL `kubectl get harbor harbor-sample -o jsonpath='{.spec.publicURL}'.
+3. Access to Portal with the publicURL `kubectl get harbor sample -o jsonpath='{.spec.externalURL}''.
    Connect with the admin user and with the following password.
 
    ```bash
-   kubectl get secret "$(kubectl get harbor harbor-sample -o jsonpath='{.spec.adminPasswordSecret}')" -o jsonpath='{.data.password}' \
+   kubectl get secret "$(kubectl get harbor sample -o jsonpath='{.spec.harborAdminPasswordRef}')" -o jsonpath='{.data.secret}' \
      | base64 --decode
    ```
 
@@ -85,65 +76,3 @@ Few customizations are available:
 - [Custom Registry storage](./registry-storage-configuration.md)
 - [Database configuration](./database-installation.md)
 - [Redis configuration](./redis-installation.md)
-
-## Some notes
-
-### using on KIND k8s with NodePort
-
-Reference [kind ingress](https://kind.sigs.k8s.io/docs/user/ingress/)
-
-1. create cluster with at multi worker nodes and export port on 1 node
-
-   ```bash
-   cat <<EOF | kind create cluster --config=-
-   kind: Cluster
-   apiVersion: kind.x-k8s.io/v1alpha4
-   nodes:
-   - role: control-plane
-   kubeadmConfigPatches:
-   - |
-      kind: InitConfiguration
-      nodeRegistration:
-         kubeletExtraArgs:
-         node-labels: "ingress-ready=true"
-         authorization-mode: "AlwaysAllow"
-   extraPortMappings:
-   - containerPort: 80
-      hostPort: 80
-      protocol: TCP
-   - containerPort: 443
-      hostPort: 443
-      protocol: TCP
-   - role: worker
-   - role: worker
-   - role: worker
-   EOF
-   ```
-
-2. install nginx-ingress with NodePort
-
-   ```bash
-   helm install nginx stable/nginx-ingress \
-      --set-string 'controller.config.proxy-body-size'=0 \
-      --set-string 'controller.nodeSelector.ingress-ready'=true \
-      --set 'controller.service.type'=NodePort \
-      --set 'controller.tolerations[0].key'=node-role.kubernetes.io/master \
-      --set 'controller.tolerations[0].operator'=Equal \
-      --set 'controller.tolerations[0].effect'=NoSchedule
-   ```
-
-### install the cert
-
-1. get the cert name
-
-   ```bash
-   kubectl get h harbor-sample -o jsonpath='{.spec.tlsSecretName}'
-   ```
-
-2. install cert for docker
-
-   ```bash
-   kubectl get secret "$(kubectl get h harbor-sample -o jsonpath='{.spec.tlsSecretName}')" -o jsonpath='{.data.ca\.crt}' \
-     | base64 --decode \
-     | sudo tee "/etc/docker/certs.d/$LBAAS_DOMAIN/ca.crt"
-   ```

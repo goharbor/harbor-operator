@@ -33,7 +33,7 @@ jobs:
     - name: Run GoReleaser
       uses: goreleaser/goreleaser-action@v1
       with:
-        version: v0.129.0
+        version: v0.145.0
         args: release --rm-dist --release-footer /tmp/release.txt
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

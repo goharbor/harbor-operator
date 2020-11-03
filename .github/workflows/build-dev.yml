@@ -1,25 +1,32 @@
-name: dev
+name: Dev Image
 
 on:
   push:
     branches:
     - master
+    - develop
+    - release-*
 
 jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Build manager
+      run: |
+        mkdir ./target
+        echo -n "dev_${GITHUB_REF##refs/*/}" > ./target/TAG_NAME
+        make dist/harbor-operator_linux_amd64/manager
     - name: Docker Build & Push to Docker Hub
       uses: opspresso/action-docker@master
       with:
         args: --docker
       env:
-        USERNAME: ${{ secrets.DOCKER_USER }}
-        PASSWORD: ${{ secrets.DOCKER_TOKEN }}
+        BUILD_PATH: dist/harbor-operator_linux_amd64
         DOCKERFILE: Dockerfile
+        USERNAME: '${{ secrets.DOCKER_USER }}'
+        PASSWORD: '${{ secrets.DOCKER_TOKEN }}'
         IMAGE_NAME: goharbor/harbor-operator
-        TAG_NAME: dev
         LATEST: 'false'
 
   charts:
