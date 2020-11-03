@@ -14,16 +14,16 @@ type Controller interface {
 	// - scale the resources if the replica is changed
 	//
 	// Equal to the previous method "Reconcile()" of lcm Controller
-	Apply(spec *v1alpha2.HarborCluster) (*CRStatus, error)
+	Apply(harborcluster *v1alpha2.HarborCluster) (*CRStatus, error)
 
 	// Delete the related resources if the resource configuration is removed from the spec.
 	// As we support connecting to the external or incluster provisioned dependent services,
 	// the dependent service may switch from incluster to external mode and then the incluster
 	// services may need to be unloaded.
-	Delete() (*CRStatus, error)
+	Delete(harborcluster *v1alpha2.HarborCluster) (*CRStatus, error)
 
 	// Upgrade the specified resource to the given version.
-	Upgrade(spec *v1alpha2.HarborCluster) (*CRStatus, error)
+	Upgrade(harborcluster *v1alpha2.HarborCluster) (*CRStatus, error)
 }
 
 type CRStatus struct {

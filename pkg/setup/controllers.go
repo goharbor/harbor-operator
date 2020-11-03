@@ -3,6 +3,7 @@ package setup
 import (
 	"context"
 	"fmt"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/harborcluster"
 
 	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/chartmuseum"
@@ -37,6 +38,7 @@ var controllersBuilder = map[controllers.Controller]func(context.Context, string
 	controllers.Portal:             portal.New,
 	controllers.ChartMuseum:        chartmuseum.New,
 	controllers.Trivy:              trivy.New,
+	controllers.HarborCluster:      harborcluster.New,
 }
 
 type ControllerFactory func(context.Context, string, string, *configstore.Store) (commonCtrl.Reconciler, error)

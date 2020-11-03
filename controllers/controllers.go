@@ -17,4 +17,5 @@ const (
 	Clair                                // clair
 	Trivy                                // trivy
 	Harbor                               // harbor
+	HarborCluster                        // harborcluster
 )

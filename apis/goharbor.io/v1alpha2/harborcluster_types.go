@@ -1,12 +1,9 @@
 package v1alpha2
 
 import (
-	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-
-	harbormeta "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -25,37 +22,7 @@ type HarborClusterSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	HarborComponentsSpec `json:",inline"`
-
-	// +kubebuilder:validation:Required
-	Expose HarborExposeSpec `json:"expose"`
-
-	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Pattern="https?://.*"
-	ExternalURL string `json:"externalURL"`
-
-	// +kubebuilder:validation:Optional
-	InternalTLS HarborInternalTLSSpec `json:"internalTLS"`
-
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:default="info"
-	LogLevel harbormeta.HarborLogLevel `json:"logLevel,omitempty"`
-
-	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
-	HarborAdminPasswordRef string `json:"harborAdminPasswordRef"`
-
-	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
-	// The secret key used for encryption.
-	EncryptionKeyRef string `json:"encryptionKeyRef"`
-
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:default="RollingUpdate"
-	UpdateStrategyType appsv1.DeploymentStrategyType `json:"updateStrategyType,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	Proxy *CoreProxySpec `json:"proxy,omitempty"`
+	HarborSpec `json:",inline"`
 
 	// Cache configuration for in-cluster cache services
 	// +optional
@@ -68,6 +35,12 @@ type HarborClusterSpec struct {
 	// Storage configuration for in-cluster storage service
 	// +optional
 	InClusterStorage *Storage `json:"inClusterStorage,omitempty"`
+
+	// harbor version to be deployed, this version determines the image tags of harbor service components
+	// +kubebuilder:validation:Required
+	// https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
+	// +kubebuilder:validation:Pattern="^(?P<major>0|[1-9]\\d*)\\.(?P<minor>0|[1-9]\\d*)\\.(?P<patch>0|[1-9]\\d*)(?:-(?P<prerelease>(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+	Version string `json:"version"`
 }
 
 type Cache struct {
