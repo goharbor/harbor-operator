@@ -1,0 +1,31 @@
+name: Release Image
+
+on:
+  release:
+    types:
+      - created
+      - published
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      # opspresso/action-docker use body of ./target/TAG_NAME as docker tag
+      # https://github.com/opspresso/action-docker#common-env
+      - name: Build manager
+        run: |
+          mkdir ./target
+          echo -n "${GITHUB_REF##refs/*/}" > ./target/TAG_NAME
+          make dist/harbor-operator_linux_amd64/manager
+      - name: Docker Build & Push to Docker Hub
+        uses: opspresso/action-docker@master
+        with:
+          args: --docker
+        env:
+          BUILD_PATH: dist/harbor-operator_linux_amd64
+          DOCKERFILE: Dockerfile
+          USERNAME: '${{ secrets.DOCKER_USER }}'
+          PASSWORD: '${{ secrets.DOCKER_TOKEN }}'
+          IMAGE_NAME: goharbor/harbor-operator
+          LATEST: 'false'
