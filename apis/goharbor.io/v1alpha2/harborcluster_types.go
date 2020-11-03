@@ -4,12 +4,21 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	harbormeta "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
+
+var (
+	HarborClusterGVK = schema.GroupVersionKind{
+		Group:   GroupVersion.Group,
+		Version: GroupVersion.Version,
+		Kind:    "HarborCluster",
+	}
+)
 
 // HarborClusterSpec defines the desired state of HarborCluster
 type HarborClusterSpec struct {
@@ -195,6 +204,17 @@ type HarborClusterCondition struct {
 	// +optional
 	Message string `json:"message,omitempty"`
 }
+
+// the name of component used harbor cluster.
+type Component string
+
+// all Component used in harbor cluster full stack.
+const (
+	ComponentHarbor   Component = "harbor"
+	ComponentCache    Component = "cache"
+	ComponentStorage  Component = "storage"
+	ComponentDatabase Component = "database"
+)
 
 // +kubebuilder:object:root=true
 // +kubebuilder:printcolumn:name="Version",type=string,JSONPath=`.spec.version`,description="The semver Harbor version",priority=0
