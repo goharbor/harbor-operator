@@ -30,9 +30,9 @@ dependencies:
 - name: nginx-ingress
   repository: https://kubernetes-charts.storage.googleapis.com
   version:  1.41.2
-  condition: ingressController.enabled, global.ingressController.enabled
+  condition: ingress.enabled, global.ingress.enabled
   tags:
-  - ingressController
+  - ingress
 
 - name: prometheus-operator
   repository: https://kubernetes-charts.storage.googleapis.com
