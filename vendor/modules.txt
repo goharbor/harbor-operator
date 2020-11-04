@@ -11,6 +11,9 @@ github.com/Masterminds/semver
 github.com/Masterminds/sprig
 # github.com/beorn7/perks v1.0.1
 github.com/beorn7/perks/quantile
+# github.com/blang/semver v3.5.0+incompatible
+## explicit
+github.com/blang/semver
 # github.com/cespare/xxhash/v2 v2.1.1
 github.com/cespare/xxhash/v2
 # github.com/davecgh/go-spew v1.1.1

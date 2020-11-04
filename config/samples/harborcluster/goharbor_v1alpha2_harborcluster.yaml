@@ -1,0 +1,32 @@
+apiVersion: goharbor.io/v1alpha2
+kind: HarborCluster
+metadata:
+  name: harborcluster-sample
+spec:
+  harborAdminPasswordRef: admin-core-secret
+  externalURL: https://core.harbor.domain
+  expose:
+    core:
+      ingress:
+        host: core.harbor.domain
+      tls:
+        certificateRef: sample-public-certificate
+  encryptionKeyRef: core-database-encryption
+  internalTLS:
+    enabled: true
+  portal: {}
+  registry: {}
+  core:
+    tokenIssuer:
+      name: service-token
+      kind: Issuer
+  imageChartStorage:
+    filesystem:
+      registryPersistentVolume:
+        claimName: sample-harbor-registry
+  inClusterCache:
+    kind: redis
+  inClusterDatabase:
+    kind: postgreSQL
+  inClusterStorage:
+    kind: minIO

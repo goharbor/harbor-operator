@@ -1,64 +1,46 @@
 package v1alpha2
 
 import (
-	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	harbormeta "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
+
+var (
+	HarborClusterGVK = schema.GroupVersionKind{
+		Group:   GroupVersion.Group,
+		Version: GroupVersion.Version,
+		Kind:    "HarborCluster",
+	}
+)
 
 // HarborClusterSpec defines the desired state of HarborCluster
 type HarborClusterSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	HarborComponentsSpec `json:",inline"`
-
-	// +kubebuilder:validation:Required
-	Expose HarborExposeSpec `json:"expose"`
-
-	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Pattern="https?://.*"
-	ExternalURL string `json:"externalURL"`
-
-	// +kubebuilder:validation:Optional
-	InternalTLS HarborInternalTLSSpec `json:"internalTLS"`
-
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:default="info"
-	LogLevel harbormeta.HarborLogLevel `json:"logLevel,omitempty"`
-
-	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
-	HarborAdminPasswordRef string `json:"harborAdminPasswordRef"`
-
-	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
-	// The secret key used for encryption.
-	EncryptionKeyRef string `json:"encryptionKeyRef"`
-
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:default="RollingUpdate"
-	UpdateStrategyType appsv1.DeploymentStrategyType `json:"updateStrategyType,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	Proxy *CoreProxySpec `json:"proxy,omitempty"`
+	HarborSpec `json:",inline"`
 
 	// Cache configuration for in-cluster cache services
 	// +optional
-	Cache *Cache `json:"cache,omitempty"`
+	InClusterCache *Cache `json:"inClusterCache,omitempty"`
 
 	// Database configuration for in-cluster database service
 	// +optional
-	Database *Database `json:"database,omitempty"`
+	InClusterDatabase *Database `json:"inClusterDatabase,omitempty"`
 
 	// Storage configuration for in-cluster storage service
 	// +optional
-	Storage *Storage `json:"storage,omitempty"`
+	InClusterStorage *Storage `json:"inClusterStorage,omitempty"`
+
+	// harbor version to be deployed, this version determines the image tags of harbor service components
+	// +kubebuilder:validation:Required
+	// https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
+	// +kubebuilder:validation:Pattern="^(?P<major>0|[1-9]\\d*)\\.(?P<minor>0|[1-9]\\d*)\\.(?P<patch>0|[1-9]\\d*)(?:-(?P<prerelease>(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+	Version string `json:"version"`
 }
 
 type Cache struct {
@@ -196,9 +178,20 @@ type HarborClusterCondition struct {
 	Message string `json:"message,omitempty"`
 }
 
+// the name of component used harbor cluster.
+type Component string
+
+// all Component used in harbor cluster full stack.
+const (
+	ComponentHarbor   Component = "harbor"
+	ComponentCache    Component = "cache"
+	ComponentStorage  Component = "storage"
+	ComponentDatabase Component = "database"
+)
+
 // +kubebuilder:object:root=true
 // +kubebuilder:printcolumn:name="Version",type=string,JSONPath=`.spec.version`,description="The semver Harbor version",priority=0
-// +kubebuilder:printcolumn:name="Public URL",type=string,JSONPath=`.spec.publicURL`,description="The public URL to the Harbor application",priority=0
+// +kubebuilder:printcolumn:name="Public URL",type=string,JSONPath=`.spec.externalURL`,description="The public URL to the Harbor application",priority=0
 // +kubebuilder:printcolumn:name="Service Ready", type=string,JSONPath=`.status.conditions[?(@.type=="ServiceReady")].status`,description="The current status of the new Harbor spec",priority=10
 // +kubebuilder:printcolumn:name="Cache Ready", type=string,JSONPath=`.status.conditions[?(@.type=="CacheReady")].status`,description="The current status of the new Cache spec",priority=20
 // +kubebuilder:printcolumn:name="Database Ready", type=string,JSONPath=`.status.conditions[?(@.type=="DatabaseReady")].status`,description="The current status of the new Database spec",priority=20
@@ -222,6 +215,6 @@ type HarborClusterList struct {
 	Items           []HarborCluster `json:"items"`
 }
 
-func init() {
+func init() { // nolint:gochecknoinits
 	SchemeBuilder.Register(&HarborCluster{}, &HarborClusterList{})
 }
