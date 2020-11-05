@@ -18,7 +18,3 @@ func (r *Reconciler) GetImage(ctx context.Context) (string, error) {
 
 	return image, nil
 }
-
-func (r *Reconciler) GetDBMigratorImage(ctx context.Context) (string, error) {
-	return "migrate/migrate", nil
-}

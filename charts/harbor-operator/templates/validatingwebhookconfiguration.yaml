@@ -66,9 +66,10 @@ webhooks:
 - clientConfig:
     caBundle: Cg==
     service:
-      name: '{{ include "chart.fullname" . }}-webhook-service'
+      name: {{ include "chart.fullname" . | quote }}
       namespace: {{ .Release.Namespace | quote }}
       path: /validate-goharbor-io-v1alpha2-notaryserver
+      port: {{ .Values.service.port }}
   failurePolicy: Fail
   name: vnotaryserver.kb.io
   rules:
@@ -84,9 +85,10 @@ webhooks:
 - clientConfig:
     caBundle: Cg==
     service:
-      name: '{{ include "chart.fullname" . }}-webhook-service'
+      name: {{ include "chart.fullname" . | quote }}
       namespace: {{ .Release.Namespace | quote }}
       path: /validate-goharbor-io-v1alpha2-notarysigner
+      port: {{ .Values.service.port }}
   failurePolicy: Fail
   name: vnotarysigner.kb.io
   rules:

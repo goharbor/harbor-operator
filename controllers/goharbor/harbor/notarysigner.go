@@ -7,7 +7,6 @@ import (
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers"
-	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	v1 "github.com/jetstack/cert-manager/pkg/apis/meta/v1"
@@ -18,39 +17,34 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func (r *Reconciler) AddNotarySignerConfigurations(ctx context.Context, harbor *goharborv1alpha2.Harbor) (NotarySignerCertificateIssuer, NotarySignerCertificate, NotarySignerEncryptionKey, NotarySignerMigrationSecret, error) {
+func (r *Reconciler) AddNotarySignerConfigurations(ctx context.Context, harbor *goharborv1alpha2.Harbor) (NotarySignerCertificateIssuer, NotarySignerCertificate, NotarySignerEncryptionKey, error) {
 	if harbor.Spec.Notary == nil {
-		return nil, nil, nil, nil, nil
+		return nil, nil, nil, nil
 	}
 
 	caIssuer, err := r.AddNotarySignerCertificateAuthorityIssuer(ctx, harbor)
 	if err != nil {
-		return nil, nil, nil, nil, errors.Wrap(err, "ca-issuer")
+		return nil, nil, nil, errors.Wrap(err, "ca-issuer")
 	}
 
 	ca, err := r.AddNotarySignerCertificateAuthority(ctx, harbor, caIssuer)
 	if err != nil {
-		return nil, nil, nil, nil, errors.Wrap(err, "ca-issuer")
+		return nil, nil, nil, errors.Wrap(err, "ca-issuer")
 	}
 
 	issuer, err := r.AddNotarySignerCertificateIssuer(ctx, harbor, ca)
 	if err != nil {
-		return nil, nil, nil, nil, errors.Wrap(err, "issuer")
+		return nil, nil, nil, errors.Wrap(err, "issuer")
 	}
 
 	certificate, err := r.AddNotarySignerCertificate(ctx, harbor, issuer)
 	if err != nil {
-		return nil, nil, nil, nil, errors.Wrap(err, "certificate")
-	}
-
-	migrationSecret, err := r.AddNotarySignerMigrationSecret(ctx, harbor)
-	if err != nil {
-		return nil, nil, nil, nil, errors.Wrap(err, "migration")
+		return nil, nil, nil, errors.Wrap(err, "certificate")
 	}
 
 	encryptionKey, err := r.AddNotarySignerEncryptionKey(ctx, harbor)
 
-	return issuer, certificate, encryptionKey, migrationSecret, errors.Wrap(err, "encryption key")
+	return issuer, certificate, encryptionKey, errors.Wrap(err, "encryption key")
 }
 
 const (
@@ -310,62 +304,11 @@ func (r *Reconciler) GetNotarySignerCertificate(ctx context.Context, harbor *goh
 	}, nil
 }
 
-func (r *Reconciler) GetDefaultNotarySignerMigrationSource(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*goharborv1alpha2.NotaryMigrationGithubSpec, error) {
-	source, err := r.GetDefaultNotaryMigrationSource()
-	if err != nil {
-		return nil, err
-	}
-
-	return &goharborv1alpha2.NotaryMigrationGithubSpec{
-		CredentialsRef: r.NormalizeName(ctx, harbor.GetName(), controllers.NotarySigner.String(), "migration"),
-		Owner:          source.Owner,
-		Path:           source.Path,
-		Reference:      source.Reference,
-		RepositoryName: source.Repository,
-	}, nil
-}
-
 type NotarySignerMigrationSecret graph.Resource
-
-func (r *Reconciler) AddNotarySignerMigrationSecret(ctx context.Context, harbor *goharborv1alpha2.Harbor) (NotarySignerMigrationSecret, error) {
-	authSecret, err := r.GetNotarySignerMigrationSecret(ctx, harbor)
-	if err != nil {
-		return nil, errors.Wrap(err, "get")
-	}
-
-	authSecretRes, err := r.AddSecretToManage(ctx, authSecret)
-	if err != nil {
-		return nil, errors.Wrap(err, "add")
-	}
-
-	return NotarySignerMigrationSecret(authSecretRes), nil
-}
-
-func (r *Reconciler) GetNotarySignerMigrationSecret(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*corev1.Secret, error) {
-	name := r.NormalizeName(ctx, harbor.GetName(), controllers.NotarySigner.String(), "migration")
-	namespace := harbor.GetNamespace()
-
-	token, err := r.GetGithubToken(NotaryMigrationGithubCredentialsConfigKey)
-	if err != nil {
-		return nil, serrors.UnrecoverrableError(err, serrors.OperatorReason, "cannot get default migration source")
-	}
-
-	return &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
-		Immutable: &varFalse,
-		Type:      harbormetav1.SecretTypeGithubToken,
-		StringData: map[string]string{
-			harbormetav1.GithubTokenKey: token,
-		},
-	}, nil
-}
 
 type NotarySigner graph.Resource
 
-func (r *Reconciler) AddNotarySigner(ctx context.Context, harbor *goharborv1alpha2.Harbor, certificate NotarySignerCertificate, encryptionKey NotarySignerEncryptionKey, migrationSecret NotarySignerMigrationSecret) (NotarySigner, error) {
+func (r *Reconciler) AddNotarySigner(ctx context.Context, harbor *goharborv1alpha2.Harbor, certificate NotarySignerCertificate, encryptionKey NotarySignerEncryptionKey) (NotarySigner, error) {
 	if harbor.Spec.Notary == nil {
 		return nil, nil
 	}
@@ -375,7 +318,7 @@ func (r *Reconciler) AddNotarySigner(ctx context.Context, harbor *goharborv1alph
 		return nil, errors.Wrap(err, "get")
 	}
 
-	notaryServerRes, err := r.AddBasicResource(ctx, notaryServer, certificate, encryptionKey, migrationSecret)
+	notaryServerRes, err := r.AddBasicResource(ctx, notaryServer, certificate, encryptionKey)
 
 	return NotarySigner(notaryServerRes), errors.Wrap(err, "add")
 }
@@ -392,18 +335,7 @@ func (r *Reconciler) GetNotarySigner(ctx context.Context, harbor *goharborv1alph
 		return nil, errors.Wrap(err, "cannot get storage configuration")
 	}
 
-	var migration *goharborv1alpha2.NotaryMigrationSpec
-
-	if harbor.Spec.Notary.IsMigrationEnabled() {
-		migration = &goharborv1alpha2.NotaryMigrationSpec{}
-
-		github, err := r.GetDefaultNotarySignerMigrationSource(ctx, harbor)
-		if err != nil {
-			return nil, serrors.UnrecoverrableError(err, serrors.OperatorReason, "cannot get notary migration source")
-		}
-
-		migration.Github = github
-	}
+	migrationEnabled := harbor.Spec.Notary.IsMigrationEnabled()
 
 	return &goharborv1alpha2.NotarySigner{
 		ObjectMeta: metav1.ObjectMeta{
@@ -424,7 +356,7 @@ func (r *Reconciler) GetNotarySigner(ctx context.Context, harbor *goharborv1alph
 				},
 				AliasesRef: encryptionKeyAliasesRef,
 			},
-			Migration: migration,
+			MigrationEnabled: &migrationEnabled,
 		},
 	}, nil
 }

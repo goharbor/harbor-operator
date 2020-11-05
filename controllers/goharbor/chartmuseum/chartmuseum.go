@@ -23,7 +23,7 @@ const (
 	DefaultConfigTemplatePath = "/etc/harbor-operator/chartmuseum-config.yaml.tmpl"
 	ConfigTemplateKey         = "template-content"
 	ConfigImageKey            = "docker-image"
-	DefaultImage              = "goharbor/chartmuseum-photon:v2.0.0"
+	DefaultImage              = "ap.cicd.harbor.vmwarecna.net/proxy/goharbor/chartmuseum-photon:v2.0.0"
 )
 
 // Reconciler reconciles a Chartmuseum object.

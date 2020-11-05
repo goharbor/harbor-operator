@@ -21,7 +21,7 @@ const (
 	DefaultConfigTemplatePath = "/etc/harbor-operator/portal-config.conf.tmpl"
 	ConfigTemplateKey         = "template-content"
 	ConfigImageKey            = "docker-image"
-	DefaultImage              = "goharbor/harbor-portal:v2.0.0"
+	DefaultImage              = "ap.cicd.harbor.vmwarecna.net/proxy/goharbor/harbor-portal:v2.0.0"
 )
 
 // Reconciler reconciles a Portal object.

@@ -56,7 +56,7 @@ type NotaryServerSpec struct {
 	Authentication *NotaryServerAuthSpec `json:"authentication,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	Migration *NotaryMigrationSpec `json:"migration,omitempty"`
+	MigrationEnabled *bool `json:"migrationEnabled,omitempty"`
 }
 
 const (
