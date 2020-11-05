@@ -5,17 +5,17 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/lcm"
 )
 
-type RedisReconciler struct {
+type RedisController struct {
 }
 
-func (r RedisReconciler) Apply(harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
+func (r *RedisController) Apply(harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
 	panic("implement me")
 }
 
-func (r RedisReconciler) Delete(harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
+func (r *RedisController) Delete(harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
 	panic("implement me")
 }
 
-func (r RedisReconciler) Upgrade(harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
+func (r *RedisController) Upgrade(harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
 	panic("implement me")
 }
