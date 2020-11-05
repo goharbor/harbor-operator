@@ -31,3 +31,13 @@ const (
 	InClusterDatabaseName        = "postgres"
 	InClusterDatabasePasswordKey = "password"
 )
+
+const (
+	PostgresCRDResourceKind   = "postgresql"
+	PostgresCRDResourcePlural = "postgresqls"
+
+	// GroupName is the group name for the operator CRDs
+	GroupName = "acid.zalan.do"
+
+	APIVersion = "v1"
+)

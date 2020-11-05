@@ -3,8 +3,9 @@ package database
 import (
 	"fmt"
 
-	"github.com/goharbor/harbor-cluster-operator/controllers/database/api"
-	pg "github.com/zalando/postgres-operator/pkg/apis/acid.zalan.do/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+
+	"github.com/goharbor/harbor-operator/controllers/goharbor/harborcluster/database/api"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -12,9 +13,10 @@ import (
 )
 
 var (
-	databaseGVR  = pg.SchemeGroupVersion.WithResource(pg.PostgresCRDResourcePlural)
-	databaseKind = "postgresql"
-	databaseApi  = "acid.zalan.do/v1"
+	SchemeGroupVersion = schema.GroupVersion{Group: GroupName, Version: APIVersion}
+	databaseGVR        = SchemeGroupVersion.WithResource(PostgresCRDResourcePlural)
+	databaseKind       = "postgresql"
+	databaseApi        = "acid.zalan.do/v1"
 )
 
 // GetPostgresCR returns PostgreSqls CRs

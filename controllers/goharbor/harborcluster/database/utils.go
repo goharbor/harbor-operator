@@ -3,9 +3,7 @@ package database
 import (
 	"fmt"
 
-	"github.com/goharbor/harbor-cluster-operator/controllers/database/api"
-
-	//pg "github.com/zalando/postgres-operator/pkg/apis/acid.zalan.do/v1"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/harborcluster/database/api"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
