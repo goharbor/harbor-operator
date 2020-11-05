@@ -16,7 +16,7 @@ func (r *Reconciler) NewEmpty(_ context.Context) resources.Resource {
 	return &goharborv1alpha2.NotaryServer{}
 }
 
-func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resource) error { // nolint:funlen
+func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resource) error {
 	notaryserver, ok := resource.(*goharborv1alpha2.NotaryServer)
 	if !ok {
 		return serrors.UnrecoverrableError(errors.Errorf("%+v", resource), serrors.OperatorReason, "unable to add resource")
@@ -25,20 +25,6 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 	service, err := r.GetService(ctx, notaryserver)
 	if err != nil {
 		return errors.Wrap(err, "cannot get service")
-	}
-
-	var migrationSecret graph.Resource
-
-	if notaryserver.Spec.Migration.Enabled() && notaryserver.Spec.Migration.Github != nil {
-		migrationSecret, err = r.AddExternalResource(ctx, &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      notaryserver.Spec.Migration.Github.CredentialsRef,
-				Namespace: notaryserver.GetNamespace(),
-			},
-		})
-		if err != nil {
-			return errors.Wrap(err, "cannot add migration secret")
-		}
 	}
 
 	var storageSecret graph.Resource
@@ -75,7 +61,7 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrap(err, "cannot get deployment")
 	}
 
-	_, err = r.AddDeploymentToManage(ctx, deployment, configMapResource, migrationSecret)
+	_, err = r.AddDeploymentToManage(ctx, deployment, configMapResource)
 	if err != nil {
 		return errors.Wrapf(err, "cannot add deployment %s", deployment.GetName())
 	}
