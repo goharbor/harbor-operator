@@ -2,7 +2,6 @@ package harborcluster
 
 import (
 	"github.com/go-logr/logr"
-	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/harborcluster/cache"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/harborcluster/database"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/harborcluster/harbor"
@@ -14,23 +13,18 @@ import (
 	"k8s.io/client-go/tools/record"
 )
 
-type ServiceReconciler interface {
-	// Reconcile the dependent service.
-	Reconcile(harborCluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error)
-}
-
 type ServiceGetter interface {
 	// For Redis
-	Cache() ServiceReconciler
+	Cache() lcm.Controller
 
 	// For database
-	Database() ServiceReconciler
+	Database() lcm.Controller
 
 	// For storage
-	Storage() ServiceReconciler
+	Storage() lcm.Controller
 
 	// For harbor itself
-	Harbor() ServiceReconciler
+	Harbor() lcm.Controller
 }
 
 type GetOptions struct {
@@ -59,18 +53,18 @@ func NewServiceGetterImpl(options *GetOptions) ServiceGetter {
 	}
 }
 
-func (impl *ServiceGetterImpl) Harbor() ServiceReconciler {
+func (impl *ServiceGetterImpl) Harbor() lcm.Controller {
 	return impl.harborReconciler
 }
 
-func (impl *ServiceGetterImpl) Cache() ServiceReconciler {
+func (impl *ServiceGetterImpl) Cache() lcm.Controller {
 	return impl.redisReconciler
 }
 
-func (impl *ServiceGetterImpl) Database() ServiceReconciler {
+func (impl *ServiceGetterImpl) Database() lcm.Controller {
 	return impl.databaseReconciler
 }
 
-func (impl *ServiceGetterImpl) Storage() ServiceReconciler {
+func (impl *ServiceGetterImpl) Storage() lcm.Controller {
 	return impl.storageReconciler
 }
