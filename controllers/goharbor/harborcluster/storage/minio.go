@@ -5,17 +5,17 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/lcm"
 )
 
-type MinIOReconciler struct {
+type MinIOController struct {
 }
 
-func (m MinIOReconciler) Apply(harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
+func (m *MinIOController) Apply(harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
 	panic("implement me")
 }
 
-func (m MinIOReconciler) Delete(harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
+func (m *MinIOController) Delete(harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
 	panic("implement me")
 }
 
-func (m MinIOReconciler) Upgrade(harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
+func (m *MinIOController) Upgrade(harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
 	panic("implement me")
 }

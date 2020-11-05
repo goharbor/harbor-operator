@@ -5,17 +5,17 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/lcm"
 )
 
-type HarborReconciler struct {
+type HarborController struct {
 }
 
-func (harbor *HarborReconciler) Apply(harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
+func (harbor *HarborController) Apply(harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
 	panic("implement me")
 }
 
-func (harbor *HarborReconciler) Delete(harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
+func (harbor *HarborController) Delete(harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
 	panic("implement me")
 }
 
-func (harbor *HarborReconciler) Upgrade(harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
+func (harbor *HarborController) Upgrade(harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
 	panic("implement me")
 }
