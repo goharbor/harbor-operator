@@ -19,3 +19,7 @@ func (p *PostgreSQLController) Delete(harborcluster *v1alpha2.HarborCluster) (*l
 func (p *PostgreSQLController) Upgrade(harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
 	panic("implement me")
 }
+
+func NewDatabaseController() lcm.Controller {
+	return &PostgreSQLController{}
+}

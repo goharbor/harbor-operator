@@ -19,3 +19,7 @@ func (r *RedisController) Delete(harborcluster *v1alpha2.HarborCluster) (*lcm.CR
 func (r *RedisController) Upgrade(harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
 	panic("implement me")
 }
+
+func NewCacheController() lcm.Controller {
+	return &RedisController{}
+}

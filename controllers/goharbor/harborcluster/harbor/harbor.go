@@ -19,3 +19,7 @@ func (harbor *HarborController) Delete(harborcluster *v1alpha2.HarborCluster) (*
 func (harbor *HarborController) Upgrade(harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
 	panic("implement me")
 }
+
+func NewHarborController() lcm.Controller {
+	return &HarborController{}
+}
