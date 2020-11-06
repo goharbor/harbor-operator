@@ -25,7 +25,7 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 	}
 
 	componentToStatus := r.DefaultComponentStatus()
-	cacheStatus, err := r.Cache().Apply(harborcluster)
+	cacheStatus, err := r.CacheCtrl.Apply(harborcluster)
 	componentToStatus[v1alpha2.ComponentCache] = cacheStatus
 	if err != nil {
 		r.Log.Error(err, "error when reconcile cache component.")
@@ -36,7 +36,7 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return err
 	}
 
-	dbStatus, err := r.Database().Apply(harborcluster)
+	dbStatus, err := r.DatabaseCtrl.Apply(harborcluster)
 	componentToStatus[v1alpha2.ComponentDatabase] = dbStatus
 	if err != nil {
 		r.Log.Error(err, "error when reconcile database component.")
@@ -47,7 +47,7 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return err
 	}
 
-	storageStatus, err := r.Storage().Apply(harborcluster)
+	storageStatus, err := r.StorageCtrl.Apply(harborcluster)
 	componentToStatus[v1alpha2.ComponentStorage] = storageStatus
 	if err != nil {
 		r.Log.Error(err, "error when reconcile storage component.")
@@ -81,7 +81,7 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 	//}
 	//r.option.ImageGetter = imageGetter
 
-	harborStatus, err := r.Harbor().Apply(harborcluster)
+	harborStatus, err := r.HarborCtrl.Apply(harborcluster)
 	if err != nil {
 		r.Log.Error(err, "error when reconcile harbor service.")
 		return err

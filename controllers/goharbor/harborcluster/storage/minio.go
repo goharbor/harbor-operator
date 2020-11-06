@@ -19,3 +19,7 @@ func (m *MinIOController) Delete(harborcluster *v1alpha2.HarborCluster) (*lcm.CR
 func (m *MinIOController) Upgrade(harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
 	panic("implement me")
 }
+
+func NewMinIOController() lcm.Controller {
+	return &MinIOController{}
+}
