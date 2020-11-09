@@ -2,8 +2,12 @@ package harborcluster
 
 import (
 	"context"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/harborcluster/cache"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/harborcluster/database"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/harborcluster/harbor"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/harborcluster/storage"
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
-	"github.com/goharbor/harbor-operator/pkg/k8s"
+	"github.com/goharbor/harbor-operator/pkg/lcm"
 	"github.com/ovh/configstore"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
@@ -14,7 +18,10 @@ import (
 type Reconciler struct {
 	*commonCtrl.Controller
 
-	ServiceGetter
+	CacheCtrl    lcm.Controller
+	DatabaseCtrl lcm.Controller
+	StorageCtrl  lcm.Controller
+	HarborCtrl   lcm.Controller
 }
 
 // +kubebuilder:rbac:groups=goharbor.goharbor.io,resources=harborclusters,verbs=get;list;watch;create;update;patch;delete
@@ -28,22 +35,20 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 
 func New(ctx context.Context, name string, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
 
-	dClient, err := k8s.NewDynamicClient()
-	if err != nil {
-		return nil, err
-	}
+	//dClient, err := k8s.NewDynamicClient()
+	//if err != nil {
+	//	return nil, err
+	//}
 
 	r := &Reconciler{}
 
-	option := &GetOptions{
-		Client:  k8s.WrapClient(ctx, r.Client),
-		Log:     r.Log,
-		DClient: k8s.WrapDClient(dClient),
-		Scheme:  r.Scheme,
-	}
-	r.ServiceGetter = NewServiceGetterImpl(option)
-
 	r.Controller = commonCtrl.NewController(ctx, name, r, configStore)
+
+	// TODO add args to service controller
+	r.CacheCtrl = cache.NewCacheController()
+	r.DatabaseCtrl = database.NewDatabaseController()
+	r.StorageCtrl = storage.NewMinIOController()
+	r.HarborCtrl = harbor.NewHarborController()
 
 	return r, nil
 }
