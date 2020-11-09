@@ -2,6 +2,7 @@ package harborcluster
 
 import (
 	"context"
+
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
 	"github.com/goharbor/harbor-operator/pkg/k8s"
 	"github.com/ovh/configstore"
@@ -41,7 +42,7 @@ func New(ctx context.Context, name string, configStore *configstore.Store) (comm
 		DClient: k8s.WrapDClient(dClient),
 		Scheme:  r.Scheme,
 	}
-	r.ServiceGetter = NewServiceGetterImpl(option)
+	r.ServiceGetter = NewSefrviceGetterImpl(option)
 
 	r.Controller = commonCtrl.NewController(ctx, name, r, configStore)
 
