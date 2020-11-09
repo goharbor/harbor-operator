@@ -9,6 +9,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	"github.com/go-logr/logr"
+	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-operator/pkg/k8s"
 	"github.com/goharbor/harbor-operator/pkg/lcm"
@@ -100,4 +101,16 @@ func (p *PostgreSQLReconciler) ScaleUp(newReplicas uint64) (*lcm.CRStatus, error
 
 func (p *PostgreSQLReconciler) ScaleDown(newReplicas uint64) (*lcm.CRStatus, error) {
 	panic("implement me")
+}
+
+func (p *PostgreSQLController) Delete(harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
+	panic("implement me")
+}
+
+func (p *PostgreSQLController) Upgrade(harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
+	panic("implement me")
+}
+
+func NewDatabaseController() lcm.Controller {
+	return &PostgreSQLController{}
 }

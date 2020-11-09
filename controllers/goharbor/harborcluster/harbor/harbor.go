@@ -5,10 +5,21 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/lcm"
 )
 
-type HarborReconciler struct {
+type HarborController struct {
 }
 
-// Reconciler implements the reconcile logic of services
-func (harbor *HarborReconciler) Reconcile(harborCluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
+func (harbor *HarborController) Apply(harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
 	panic("implement me")
+}
+
+func (harbor *HarborController) Delete(harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
+	panic("implement me")
+}
+
+func (harbor *HarborController) Upgrade(harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
+	panic("implement me")
+}
+
+func NewHarborController() lcm.Controller {
+	return &HarborController{}
 }
