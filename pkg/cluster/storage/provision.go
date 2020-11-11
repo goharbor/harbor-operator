@@ -8,8 +8,8 @@ import (
 	"reflect"
 	"strings"
 
-	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-cluster-operator/controllers/common"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	minio "github.com/goharbor/harbor-operator/pkg/cluster/storage/minio/api/v1"
 	"github.com/goharbor/harbor-operator/pkg/lcm"
 	corev1 "k8s.io/api/core/v1"
@@ -20,31 +20,80 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-func (m *MinIOReconciler) ProvisionInClusterSecretAsS3(minioInstamnce *minio.Tenant) (*lcm.CRStatus, error) {
-	inClusterSecret, chartMuseumSecret, err := m.generateInClusterSecret(minioInstamnce)
-	if err != nil {
-		return minioNotReadyStatus(GetMinIOSecretError, err.Error()), err
-	}
-	err = m.KubeClient.Create(inClusterSecret)
-	if err != nil && !k8serror.IsAlreadyExists(err) {
-		return minioNotReadyStatus(GetMinIOSecretError, err.Error()), err
-	}
-
-	err = m.KubeClient.Create(chartMuseumSecret)
-	if err != nil && !k8serror.IsAlreadyExists(err) {
-		return minioNotReadyStatus(CreateChartMuseumStorageSecretError, err.Error()), err
-	}
-
+func (m *MinIOController) ProvisionMinIOProperties(minioInstamnce *minio.Tenant) (*lcm.CRStatus, error) {
 	properties := &lcm.Properties{}
-	properties.Add(lcm.InClusterSecretForStorage, inClusterSecret.Name)
-	if m.HarborCluster.Spec.ChartMuseum != nil {
-		properties.Add(lcm.ChartMuseumSecretForStorage, m.getChartMuseumSecretName())
+	data,err := m.getMinIOProperties(minioInstamnce)
+	if err != nil {
+		return minioNotReadyStatus(getMinIOProperties, err.Error()), err
 	}
+	properties.Add(lcm.InClusterSecretForStorage, data)
 
 	return minioReadyStatus(properties), nil
 }
 
-func (m *MinIOReconciler) generateInClusterSecret(minioInstance *minio.Tenant) (inClusterSecret *corev1.Secret, chartMuseumSecret *corev1.Secret, err error) {
+func (m *MinIOController) getMinIOProperties(minioInstance *minio.Tenant) (*goharborv1.RegistryStorageDriverS3Spec, error) {
+	accessKey, secretKey, err := m.getCredsFromSecret()
+	if err != nil {
+		return nil, err
+	}
+	secretKeyRef := m.createSecretKeyRef(secretKey, minioInstance)
+	err = m.KubeClient.Create(secretKeyRef)
+	if err != nil && !k8serror.IsAlreadyExists(err) {
+		return nil, err
+	}
+	var endpoint string
+	if !m.HarborCluster.Spec.ImageChartStorage.Redirect.Disable {
+		_, endpoint, err = GetMinIOHostAndSchema(m.HarborCluster.Spec.ExternalURL)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		endpoint = fmt.Sprintf("http://%s.%s.svc:%s", m.getServiceName(), m.HarborCluster.Namespace, "9000")
+	}
+
+	secure := false
+	v4Auth := false
+	s3 := &goharborv1.RegistryStorageDriverS3Spec{
+		AccessKey:      string(accessKey),
+		SecretKeyRef:   secretKeyRef.Name,
+		Region:         DefaultRegion,
+		RegionEndpoint: endpoint,
+		Bucket:         DefaultBucket,
+		Secure:         &secure,
+		V4Auth:         &v4Auth,
+	}
+
+	return s3, nil
+}
+
+func (m *MinIOController) createSecretKeyRef(secretKey []byte, minioInstance *minio.Tenant) *corev1.Secret {
+	data := map[string]string{
+		"secretkey": string(secretKey),
+	}
+	dataJson, _ := json.Marshal(&data)
+	s3KeySecret := &corev1.Secret{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: "v1",
+			Kind:       "Secret",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:        m.getServiceName(),
+			Namespace:   m.HarborCluster.Namespace,
+			Labels:      m.getLabels(),
+			Annotations: m.generateAnnotations(),
+			OwnerReferences: []metav1.OwnerReference{
+				*metav1.NewControllerRef(minioInstance, HarborClusterMinIOGVK),
+			},
+		},
+		Type: corev1.SecretTypeOpaque,
+		Data: map[string][]byte{
+			s3Storage: dataJson,
+		},
+	}
+	return s3KeySecret
+}
+
+func (m *MinIOController) generateInClusterSecret(minioInstance *minio.Tenant) (inClusterSecret *corev1.Secret, chartMuseumSecret *corev1.Secret, err error) {
 	labels := m.getLabels()
 	labels[LabelOfStorageType] = inClusterStorage
 	accessKey, secretKey, err := m.getCredsFromSecret()
@@ -123,7 +172,7 @@ func (m *MinIOReconciler) generateInClusterSecret(minioInstance *minio.Tenant) (
 	return inClusterSecret, chartMuseumSecret, nil
 }
 
-func (m *MinIOReconciler) Provision() (*lcm.CRStatus, error) {
+func (m *MinIOController) Provision() (*lcm.CRStatus, error) {
 	credsSecret := m.generateCredsSecret()
 	err := m.KubeClient.Create(credsSecret)
 	if err != nil && !k8serror.IsAlreadyExists(err) {
@@ -186,7 +235,7 @@ func GetMinIOHostAndSchema(accessURL string) (scheme string, host string, err er
 	return u.Scheme, minioHost, nil
 }
 
-func (m *MinIOReconciler) generateIngress() *netv1.Ingress {
+func (m *MinIOController) generateIngress() *netv1.Ingress {
 	_, minioHost, err := GetMinIOHostAndSchema(m.HarborCluster.Spec.ExternalURL)
 	if err != nil {
 		panic(err)
@@ -238,7 +287,7 @@ func (m *MinIOReconciler) generateIngress() *netv1.Ingress {
 	}
 }
 
-func (m *MinIOReconciler) generateMinIOCR() *minio.Tenant {
+func (m *MinIOController) generateMinIOCR() *minio.Tenant {
 	return &minio.Tenant{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       minio.MinIOCRDResourceKind,
@@ -294,15 +343,15 @@ func (m *MinIOReconciler) generateMinIOCR() *minio.Tenant {
 	}
 }
 
-func (m *MinIOReconciler) getServiceName() string {
+func (m *MinIOController) getServiceName() string {
 	return m.HarborCluster.Name + "-" + DefaultMinIO
 }
 
-func (m *MinIOReconciler) getServicePort() int32 {
+func (m *MinIOController) getServicePort() int32 {
 	return 9000
 }
 
-func (m *MinIOReconciler) getResourceRequirements() *corev1.ResourceRequirements {
+func (m *MinIOController) getResourceRequirements() *corev1.ResourceRequirements {
 	isEmpty := reflect.DeepEqual(m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Resources, corev1.ResourceRequirements{})
 	if !isEmpty {
 		return &m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Resources
@@ -321,7 +370,7 @@ func (m *MinIOReconciler) getResourceRequirements() *corev1.ResourceRequirements
 	}
 }
 
-func (m *MinIOReconciler) getVolumeClaimTemplate() *corev1.PersistentVolumeClaim {
+func (m *MinIOController) getVolumeClaimTemplate() *corev1.PersistentVolumeClaim {
 	isEmpty := reflect.DeepEqual(m.HarborCluster.Spec.InClusterStorage.MinIOSpec.VolumeClaimTemplate, corev1.PersistentVolumeClaim{})
 	if !isEmpty {
 		return &m.HarborCluster.Spec.InClusterStorage.MinIOSpec.VolumeClaimTemplate
@@ -340,16 +389,16 @@ func (m *MinIOReconciler) getVolumeClaimTemplate() *corev1.PersistentVolumeClaim
 	}
 }
 
-func (m *MinIOReconciler) getLabels() map[string]string {
+func (m *MinIOController) getLabels() map[string]string {
 	return map[string]string{"type": "harbor-cluster-minio", "app": "minio"}
 }
 
-func (m *MinIOReconciler) generateAnnotations() map[string]string {
+func (m *MinIOController) generateAnnotations() map[string]string {
 	// TODO
 	return nil
 }
 
-func (m *MinIOReconciler) generateService() *corev1.Service {
+func (m *MinIOController) generateService() *corev1.Service {
 	return &corev1.Service{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "v1",
@@ -376,7 +425,7 @@ func (m *MinIOReconciler) generateService() *corev1.Service {
 	}
 }
 
-func (m *MinIOReconciler) generateCredsSecret() *corev1.Secret {
+func (m *MinIOController) generateCredsSecret() *corev1.Secret {
 	credsAccesskey := common.RandomString(8, "a")
 	credsSecretkey := common.RandomString(8, "a")
 
@@ -398,7 +447,7 @@ func (m *MinIOReconciler) generateCredsSecret() *corev1.Secret {
 	}
 }
 
-func (m *MinIOReconciler) getCredsFromSecret() ([]byte, []byte, error) {
+func (m *MinIOController) getCredsFromSecret() ([]byte, []byte, error) {
 	var minIOSecret corev1.Secret
 	namespaced := m.getMinIOSecretNamespacedName()
 	err := m.KubeClient.Get(namespaced, &minIOSecret)

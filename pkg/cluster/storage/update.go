@@ -4,7 +4,7 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/lcm"
 )
 
-func (m *MinIOReconciler) Update() (*lcm.CRStatus, error) {
+func (m *MinIOController) Update() (*lcm.CRStatus, error) {
 	m.CurrentMinIOCR.Spec = m.DesiredMinIOCR.Spec
 	err := m.KubeClient.Update(m.CurrentMinIOCR)
 	if err != nil {
