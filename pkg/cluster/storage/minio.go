@@ -21,17 +21,12 @@ import (
 
 const (
 	inClusterStorage = "inCluster"
-	azureStorage     = "azure"
-	gcsStorage       = "gcs"
 	s3Storage        = "s3"
-	swiftStorage     = "swift"
-	ossStorage       = "oss"
 
 	DefaultExternalSecretSuffix     = "harbor-cluster-storage"
 	ChartMuseumExternalSecretSuffix = "chart-museum-storage"
 
 	DefaultCredsSecret          = "minio-creds"
-	ExternalStorageSecretSuffix = "Secret"
 
 	DefaultZone   = "zone-harbor"
 	DefaultMinIO  = "minio"
@@ -41,7 +36,8 @@ const (
 	LabelOfStorageType = "storageType"
 )
 
-type MinIOReconciler struct {
+type MinIOController struct {
+	// TODO remove, use params harborcluster instead of HarborCluster.
 	HarborCluster         *goharborv1.HarborCluster
 	KubeClient            k8s.Client
 	Ctx                   context.Context
@@ -63,8 +59,13 @@ var (
 	}
 )
 
+// TODO soulsee
+func NewMinIOController() lcm.Controller {
+	return &MinIOController{}
+}
+
 // Reconciler implements the reconcile logic of minIO service
-func (m *MinIOReconciler) Apply() (*lcm.CRStatus, error) {
+func (m *MinIOController) Apply(harborcluster *goharborv1.HarborCluster)  (*lcm.CRStatus, error) {
 	var minioCR minio.Tenant
 
 	m.DesiredMinIOCR = m.generateMinIOCR()
@@ -100,13 +101,13 @@ func (m *MinIOReconciler) Apply() (*lcm.CRStatus, error) {
 		if err != nil {
 			return minioNotReadyStatus(CreateDefaultBucketError, err.Error()), err
 		}
-		return m.ProvisionInClusterSecretAsS3(&minioCR)
+		return m.ProvisionMinIOProperties(&minioCR)
 	}
 
 	return minioUnknownStatus(), nil
 }
 
-func (m *MinIOReconciler) minioInit() error {
+func (m *MinIOController) minioInit() error {
 	accessKey, secretKey, err := m.getCredsFromSecret()
 	if err != nil {
 		return err
@@ -127,15 +128,15 @@ func (m *MinIOReconciler) minioInit() error {
 	return err
 }
 
-func (m *MinIOReconciler) checkMinIOUpdate() bool {
+func (m *MinIOController) checkMinIOUpdate() bool {
 	return m.DesiredMinIOCR.Spec.Image != m.CurrentMinIOCR.Spec.Image
 }
 
-func (m *MinIOReconciler) checkExternalUpdate() bool {
+func (m *MinIOController) checkExternalUpdate() bool {
 	return !cmp.Equal(m.DesiredExternalSecret.DeepCopy().Data, m.CurrentExternalSecret.DeepCopy().Data)
 }
 
-func (m *MinIOReconciler) checkMinIOScale() (bool, error) {
+func (m *MinIOController) checkMinIOScale() (bool, error) {
 	currentReplicas := m.CurrentMinIOCR.Spec.Zones[0].Servers
 	desiredReplicas := m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Replicas
 	if currentReplicas == desiredReplicas {
@@ -154,7 +155,7 @@ func (m *MinIOReconciler) checkMinIOScale() (bool, error) {
 	return false, fmt.Errorf("for distributed mode, supply 4 to 16 drives (should be even)")
 }
 
-func (m *MinIOReconciler) checkMinIOReady() (bool, error) {
+func (m *MinIOController) checkMinIOReady() (bool, error) {
 	var minioCR minio.Tenant
 	err := m.KubeClient.Get(m.getMinIONamespacedName(), &minioCR)
 
@@ -166,32 +167,32 @@ func (m *MinIOReconciler) checkMinIOReady() (bool, error) {
 	return false, err
 }
 
-func (m *MinIOReconciler) getMinIONamespacedName() types.NamespacedName {
+func (m *MinIOController) getMinIONamespacedName() types.NamespacedName {
 	return types.NamespacedName{
 		Namespace: m.HarborCluster.Namespace,
 		Name:      m.getServiceName(),
 	}
 }
 
-func (m *MinIOReconciler) getMinIOSecretNamespacedName() types.NamespacedName {
+func (m *MinIOController) getMinIOSecretNamespacedName() types.NamespacedName {
 	return types.NamespacedName{
 		Namespace: m.HarborCluster.Namespace,
 		Name:      m.HarborCluster.Name + "-" + DefaultCredsSecret,
 	}
 }
 
-func (m *MinIOReconciler) getExternalSecretNamespacedName() types.NamespacedName {
+func (m *MinIOController) getExternalSecretNamespacedName() types.NamespacedName {
 	return types.NamespacedName{
 		Namespace: m.HarborCluster.Namespace,
 		Name:      m.getExternalSecretName(),
 	}
 }
 
-func (m *MinIOReconciler) getExternalSecretName() string {
+func (m *MinIOController) getExternalSecretName() string {
 	return m.HarborCluster.Name + "-" + DefaultExternalSecretSuffix
 }
 
-func (m *MinIOReconciler) getChartMuseumSecretName() string {
+func (m *MinIOController) getChartMuseumSecretName() string {
 	return fmt.Sprintf("%s-%s", m.HarborCluster.Name, ChartMuseumExternalSecretSuffix)
 }
 
@@ -235,11 +236,11 @@ func minioReadyStatus(properties *lcm.Properties) *lcm.CRStatus {
 }
 
 // TODO Deprecated
-func (m *MinIOReconciler) ScaleUp(newReplicas uint64) (*lcm.CRStatus, error) {
+func (m *MinIOController) ScaleUp(newReplicas uint64) (*lcm.CRStatus, error) {
 	panic("implement me")
 }
 
 // TODO Deprecated
-func (m *MinIOReconciler) ScaleDown(newReplicas uint64) (*lcm.CRStatus, error) {
+func (m *MinIOController) ScaleDown(newReplicas uint64) (*lcm.CRStatus, error) {
 	panic("implement me")
 }
