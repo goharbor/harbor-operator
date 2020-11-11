@@ -3,6 +3,8 @@ package database
 import (
 	"fmt"
 
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+
 	"github.com/goharbor/harbor-operator/controllers/goharbor/harborcluster/database/api"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -14,21 +16,21 @@ const (
 	DefaultDatabaseVersion = "12"
 )
 
-func (p *PostgreSQLReconciler) GetDatabases() map[string]string {
+func (p *PostgreSQLController) GetDatabases() map[string]string {
 	databases := map[string]string{
-		CoreDatabase: "zalando",
+		CoreDatabase: harbormetav1.CoreDatabase,
 	}
 
 	if p.HarborCluster.Spec.Notary != nil {
-		databases[NotaryServerDatabase] = "zalando"
-		databases[NotarySignerDatabase] = "zalando"
+		databases[NotaryServerDatabase] = harbormetav1.NotaryServerDatabase
+		databases[NotarySignerDatabase] = harbormetav1.NotarySignerDatabase
 	}
 
 	return databases
 }
 
 // GetDatabaseConn is getting database connection
-func (p *PostgreSQLReconciler) GetDatabaseConn(secretName string) (*Connect, error) {
+func (p *PostgreSQLController) GetDatabaseConn(secretName string) (*Connect, error) {
 	secret, err := p.GetSecret(secretName)
 	if err != nil {
 		return nil, err
@@ -46,7 +48,7 @@ func (p *PostgreSQLReconciler) GetDatabaseConn(secretName string) (*Connect, err
 }
 
 // GetSecret returns the database connection Secret
-func (p *PostgreSQLReconciler) GetSecret(secretName string) (map[string][]byte, error) {
+func (p *PostgreSQLController) GetSecret(secretName string) (map[string][]byte, error) {
 	secret := &corev1.Secret{}
 	err := p.Client.Get(types.NamespacedName{Name: secretName, Namespace: p.HarborCluster.Namespace}, secret)
 	if err != nil {
@@ -57,7 +59,7 @@ func (p *PostgreSQLReconciler) GetSecret(secretName string) (map[string][]byte, 
 }
 
 // GetPostgreResource returns postgres resource
-func (p *PostgreSQLReconciler) GetPostgreResource() api.Resources {
+func (p *PostgreSQLController) GetPostgreResource() api.Resources {
 	resources := api.Resources{}
 
 	if p.HarborCluster.Spec.InClusterDatabase.PostgresSQLSpec == nil {
@@ -89,7 +91,7 @@ func (p *PostgreSQLReconciler) GetPostgreResource() api.Resources {
 }
 
 // GetRedisServerReplica returns postgres replicas
-func (p *PostgreSQLReconciler) GetPostgreReplica() int32 {
+func (p *PostgreSQLController) GetPostgreReplica() int32 {
 	if p.HarborCluster.Spec.InClusterDatabase.PostgresSQLSpec == nil {
 		return DefaultDatabaseReplica
 	}
@@ -101,7 +103,7 @@ func (p *PostgreSQLReconciler) GetPostgreReplica() int32 {
 }
 
 // GetPostgreStorageSize returns Postgre storage size
-func (p *PostgreSQLReconciler) GetPostgreStorageSize() string {
+func (p *PostgreSQLController) GetPostgreStorageSize() string {
 	if p.HarborCluster.Spec.InClusterDatabase.PostgresSQLSpec == nil {
 		return DefaultDatabaseMemory
 	}
@@ -112,7 +114,7 @@ func (p *PostgreSQLReconciler) GetPostgreStorageSize() string {
 	return p.HarborCluster.Spec.InClusterDatabase.PostgresSQLSpec.Storage
 }
 
-func (p *PostgreSQLReconciler) GetPostgreVersion() string {
+func (p *PostgreSQLController) GetPostgreVersion() string {
 	if p.HarborCluster.Spec.InClusterDatabase.PostgresSQLSpec == nil {
 		return DefaultDatabaseVersion
 	}

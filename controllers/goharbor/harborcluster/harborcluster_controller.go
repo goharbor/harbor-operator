@@ -3,6 +3,13 @@ package harborcluster
 import (
 	"context"
 
+	"github.com/go-logr/logr"
+	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
+
+	"k8s.io/apimachinery/pkg/runtime"
+
+	"github.com/goharbor/harbor-operator/pkg/k8s"
+
 	"github.com/goharbor/harbor-operator/controllers/goharbor/harborcluster/cache"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/harborcluster/database"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/harborcluster/harbor"
@@ -36,10 +43,24 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 
 func New(ctx context.Context, name string, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
 
-	//dClient, err := k8s.NewDynamicClient()
-	//if err != nil {
-	//	return nil, err
-	//}
+	scheme := newScheme()
+	dClient, err := k8s.NewDynamicClient()
+	if err != nil {
+		return nil, err
+	}
+
+	client, err := k8s.NewClient(scheme)
+	if err != nil {
+		return nil, err
+	}
+
+	option := &k8s.GetOptions{
+		CXT:     ctx,
+		Client:  k8s.WrapClient(ctx, client),
+		Log:     newLog(),
+		DClient: k8s.WrapDClient(dClient),
+		Scheme:  scheme,
+	}
 
 	r := &Reconciler{}
 
@@ -47,9 +68,20 @@ func New(ctx context.Context, name string, configStore *configstore.Store) (comm
 
 	// TODO add args to service controller
 	r.CacheCtrl = cache.NewCacheController()
-	r.DatabaseCtrl = database.NewDatabaseController()
+	r.DatabaseCtrl = database.NewDatabaseController(option)
 	r.StorageCtrl = storage.NewMinIOController()
 	r.HarborCtrl = harbor.NewHarborController()
 
 	return r, nil
+}
+
+func newScheme() *runtime.Scheme {
+	scheme := runtime.NewScheme()
+	_ = clientgoscheme.AddToScheme(scheme)
+
+	return scheme
+}
+
+func newLog() logr.Logger {
+	return ctrl.Log.WithName("controllers").WithName("HarborCluster")
 }

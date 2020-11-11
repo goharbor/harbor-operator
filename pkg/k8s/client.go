@@ -2,9 +2,11 @@ package k8s
 
 import (
 	"context"
-	"k8s.io/apimachinery/pkg/runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"time"
+
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/rest"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // DefaultTimeout is a reasonable timeout to use with the Client.
@@ -72,4 +74,22 @@ func (w *ClusterClient) Update(obj runtime.Object) error {
 // Delete wraps a controller-runtime client.Delete call with a context.
 func (w *ClusterClient) Delete(obj runtime.Object, opts ...client.DeleteOption) error {
 	return w.crClient.Delete(w.ctx, obj, opts...)
+}
+
+//NewClient returns the client interface.
+func NewClient(scheme *runtime.Scheme) (client.Client, error) {
+	var (
+		config *rest.Config
+		err    error
+	)
+
+	config, err = rest.InClusterConfig()
+	if err != nil {
+		config, err = ExternalConfig()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return client.New(config, client.Options{Scheme: scheme})
 }

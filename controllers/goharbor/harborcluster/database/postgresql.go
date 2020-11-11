@@ -15,20 +15,17 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/lcm"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/tools/record"
 )
 
-type PostgreSQLReconciler struct {
+type PostgreSQLController struct {
 	HarborCluster *goharborv1alpha2.HarborCluster
 	Ctx           context.Context
 	Client        k8s.Client
-	Recorder      record.EventRecorder
 	Log           logr.Logger
 	DClient       k8s.DClient
 	Scheme        *runtime.Scheme
 	ExpectCR      *unstructured.Unstructured
 	ActualCR      *unstructured.Unstructured
-	Labels        map[string]string
 }
 
 type Connect struct {
@@ -39,28 +36,11 @@ type Connect struct {
 	Database string
 }
 
-func (p PostgreSQLReconciler) Reconcile(harborCluster *goharborv1alpha2.HarborCluster) (*lcm.CRStatus, error) {
-	if p.HarborCluster.Spec.InClusterDatabase.PostgresSQLSpec == nil {
-		return databaseUnknownStatus(), nil
-	}
+func (p *PostgreSQLController) Apply(harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
 
 	p.Client.WithContext(p.Ctx)
 	p.DClient.WithContext(p.Ctx)
-
-	crStatus, err := p.Apply()
-	if err != nil {
-		return databaseNotReadyStatus(ApplyDatabaseHealthError, err.Error()), err
-	}
-
-	crStatus, err = p.Readiness()
-	if err != nil {
-		return databaseNotReadyStatus(CheckDatabaseHealthError, err.Error()), err
-	}
-
-	return crStatus, nil
-}
-
-func (p *PostgreSQLReconciler) Apply() (*lcm.CRStatus, error) {
+	p.HarborCluster = harborcluster
 
 	crdClient := p.DClient.WithResource(databaseGVR).WithNamespace(p.HarborCluster.Namespace)
 	name := fmt.Sprintf("%s-%s", p.HarborCluster.Namespace, p.HarborCluster.Name)
@@ -84,23 +64,11 @@ func (p *PostgreSQLReconciler) Apply() (*lcm.CRStatus, error) {
 	p.ActualCR = actualCR
 	p.ExpectCR = expectCR
 
-	return p.Update()
-}
+	if _, err := p.Update(); err != nil {
+		return databaseNotReadyStatus(CheckDatabaseHealthError, err.Error()), err
+	}
 
-func (p *PostgreSQLReconciler) Delete() (*lcm.CRStatus, error) {
-	panic("implement me")
-}
-
-func (p *PostgreSQLReconciler) Scale() (*lcm.CRStatus, error) {
-	panic("implement me")
-}
-
-func (p *PostgreSQLReconciler) ScaleUp(newReplicas uint64) (*lcm.CRStatus, error) {
-	panic("implement me")
-}
-
-func (p *PostgreSQLReconciler) ScaleDown(newReplicas uint64) (*lcm.CRStatus, error) {
-	panic("implement me")
+	return p.Readiness()
 }
 
 func (p *PostgreSQLController) Delete(harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
@@ -111,6 +79,12 @@ func (p *PostgreSQLController) Upgrade(harborcluster *v1alpha2.HarborCluster) (*
 	panic("implement me")
 }
 
-func NewDatabaseController() lcm.Controller {
-	return &PostgreSQLController{}
+func NewDatabaseController(options *k8s.GetOptions) lcm.Controller {
+	return &PostgreSQLController{
+		Ctx:     options.CXT,
+		Client:  options.Client,
+		Log:     options.Log,
+		DClient: options.DClient,
+		Scheme:  options.Scheme,
+	}
 }

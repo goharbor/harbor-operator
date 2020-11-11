@@ -3,6 +3,8 @@ package database
 import (
 	"fmt"
 
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"github.com/goharbor/harbor-operator/controllers/goharbor/harborcluster/database/api"
@@ -20,7 +22,7 @@ var (
 )
 
 // GetPostgresCR returns PostgreSqls CRs
-func (p *PostgreSQLReconciler) GetPostgresCR() (*unstructured.Unstructured, error) {
+func (p *PostgreSQLController) GetPostgresCR() (*unstructured.Unstructured, error) {
 	resource := p.GetPostgreResource()
 	replica := p.GetPostgreReplica()
 	storageSize := p.GetPostgreStorageSize()
@@ -36,7 +38,6 @@ func (p *PostgreSQLReconciler) GetPostgresCR() (*unstructured.Unstructured, erro
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: p.HarborCluster.Namespace,
-			Labels:    p.Labels,
 		},
 		Spec: api.PostgresSpec{
 			Volume: api.Volume{
@@ -97,34 +98,15 @@ func GetUsers() map[string]api.UserFlags {
 }
 
 //GetDatabaseSecret returns database connection secret
-func (p *PostgreSQLReconciler) GetDatabaseSecret(conn *Connect, secretName, propertyName string) *corev1.Secret {
+func (p *PostgreSQLController) GetDatabaseSecret(conn *Connect, secretName string) *corev1.Secret {
 	secret := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      secretName,
 			Namespace: p.HarborCluster.Namespace,
-			Labels:    p.Labels,
 		},
 		StringData: map[string]string{
-			"host":     conn.Host,
-			"port":     conn.Port,
-			"database": conn.Database,
-			"username": conn.Username,
-			"password": conn.Password,
+			harbormetav1.PostgresqlPasswordKey: conn.Password,
 		},
-	}
-
-	if propertyName == HarborClair {
-		secret.StringData["database"] = ClairDatabase
-		secret.StringData["ssl"] = "disable"
-	}
-
-	if propertyName == HarborNotaryServer {
-		secret.StringData["database"] = NotaryServerDatabase
-		secret.StringData["ssl"] = "disable"
-	}
-	if propertyName == HarborNotarySigner {
-		secret.StringData["database"] = NotarySignerDatabase
-		secret.StringData["ssl"] = "disable"
 	}
 
 	return secret

@@ -18,11 +18,7 @@ import (
 // - perform any postgresqls downscale (left for downscale phase)
 // - perform any postgresqls upscale (left for upscale phase)
 // - perform any pod upgrade (left for rolling upgrade phase)
-func (p *PostgreSQLReconciler) Deploy() (*lcm.CRStatus, error) {
-
-	if p.HarborCluster.Spec.InClusterCache.Kind == "external" {
-		return databaseUnknownStatus(), nil
-	}
+func (p *PostgreSQLController) Deploy() (*lcm.CRStatus, error) {
 
 	var expectCR *unstructured.Unstructured
 

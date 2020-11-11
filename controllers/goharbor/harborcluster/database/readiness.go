@@ -4,7 +4,9 @@ import (
 	"errors"
 	"fmt"
 
-	goharborv2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+
+	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 
 	"github.com/goharbor/harbor-operator/pkg/lcm"
 	"github.com/jackc/pgx/v4"
@@ -39,12 +41,14 @@ const (
 // - create postgre connection pool
 // - ping postgre server
 // - return postgre properties if postgre has available
-func (p *PostgreSQLReconciler) Readiness() (*lcm.CRStatus, error) {
+func (p *PostgreSQLController) Readiness() (*lcm.CRStatus, error) {
 	var (
 		conn   *Connect
 		client *pgx.Conn
 		err    error
 	)
+
+	name := p.HarborCluster.Name
 
 	conn, client, err = p.GetInClusterDatabaseInfo()
 	if err != nil {
@@ -64,30 +68,42 @@ func (p *PostgreSQLReconciler) Readiness() (*lcm.CRStatus, error) {
 		"name", p.HarborCluster.Name)
 
 	properties := &lcm.Properties{}
-	components := map[string]string{
-		HarborCore: CoreSecretName,
+	if err := p.DeployComponentSecret(conn, getDatabasePasswordRefName(name)); err != nil {
+		return nil, err
 	}
+	addProperties(name, conn, properties)
 
-	if p.HarborCluster.Spec.Notary != nil {
-		components[HarborNotaryServer] = NotaryServerSecretName
-		components[HarborNotarySigner] = NotarySignerSecretName
-	}
-
-	for key, component := range components {
-		secretName := getComponentSecretName(component)
-		propertyName := getPropertyName(key)
-		if err := p.DeployComponentSecret(conn, component, secretName, key); err != nil {
-			return nil, err
-		}
-		properties.Add(propertyName, secretName)
-	}
-
-	crStatus := lcm.New(goharborv2.DatabaseReady).
+	crStatus := lcm.New(goharborv1alpha2.DatabaseReady).
 		WithStatus(corev1.ConditionTrue).
 		WithReason("database already ready").
 		WithMessage("harbor component database secrets are already create.").
 		WithProperties(*properties)
 	return crStatus, nil
+}
+
+func addProperties(name string, conn *Connect, properties *lcm.Properties) {
+	db := getHarborDatabaseSpec(name, conn)
+	properties.Add("database", db)
+}
+
+func getHarborDatabaseSpec(name string, conn *Connect) *goharborv1alpha2.HarborDatabaseSpec {
+	return &goharborv1alpha2.HarborDatabaseSpec{
+		PostgresCredentials: harbormetav1.PostgresCredentials{
+			Username:    "zalando",
+			PasswordRef: getDatabasePasswordRefName(name),
+		},
+		Hosts: []harbormetav1.PostgresHostSpec{
+			{
+				Host: conn.Host,
+				Port: InClusterDatabasePortInt32,
+			},
+		},
+		SSLMode: harbormetav1.PostgresSSLModeDisable,
+	}
+}
+
+func getDatabasePasswordRefName(name string) string {
+	return fmt.Sprintf("%s-%s-%s", name, "database", "password")
 }
 
 func getPropertyName(key string) string {
@@ -99,11 +115,10 @@ func getComponentSecretName(component string) string {
 }
 
 // DeployComponentSecret deploy harbor component database secret
-func (p *PostgreSQLReconciler) DeployComponentSecret(conn *Connect,
-	component, secretName, propertyName string) error {
+func (p *PostgreSQLController) DeployComponentSecret(conn *Connect, secretName string) error {
 
 	secret := &corev1.Secret{}
-	sc := p.GetDatabaseSecret(conn, secretName, propertyName)
+	sc := p.GetDatabaseSecret(conn, secretName)
 
 	if err := controllerutil.SetControllerReference(p.HarborCluster, sc, p.Scheme); err != nil {
 		return err
@@ -112,8 +127,7 @@ func (p *PostgreSQLReconciler) DeployComponentSecret(conn *Connect,
 	if kerr.IsNotFound(err) {
 		p.Log.Info("Creating Harbor Component Secret",
 			"namespace", p.HarborCluster.Namespace,
-			"name", secretName,
-			"component", component)
+			"name", secretName)
 		return p.Client.Create(sc)
 	} else if err != nil {
 		return err
@@ -122,7 +136,7 @@ func (p *PostgreSQLReconciler) DeployComponentSecret(conn *Connect,
 }
 
 // GetInClusterDatabaseInfo returns inCluster database connection client
-func (p *PostgreSQLReconciler) GetInClusterDatabaseInfo() (*Connect, *pgx.Conn, error) {
+func (p *PostgreSQLController) GetInClusterDatabaseInfo() (*Connect, *pgx.Conn, error) {
 	var (
 		connect *Connect
 		client  *pgx.Conn
@@ -150,7 +164,7 @@ func (p *PostgreSQLReconciler) GetInClusterDatabaseInfo() (*Connect, *pgx.Conn, 
 }
 
 // GetInClusterDatabaseConn returns inCluster database connection info
-func (p *PostgreSQLReconciler) GetInClusterDatabaseConn(name, pw string) (*Connect, error) {
+func (p *PostgreSQLController) GetInClusterDatabaseConn(name, pw string) (*Connect, error) {
 	host, err := p.GetInClusterHost(name)
 	if err != nil {
 		return nil, err
@@ -170,7 +184,7 @@ func GenInClusterPasswordSecretName(teamID, name string) string {
 }
 
 // GetInClusterHost returns the Database master pod ip or service name
-func (p *PostgreSQLReconciler) GetInClusterHost(name string) (string, error) {
+func (p *PostgreSQLController) GetInClusterHost(name string) (string, error) {
 	var (
 		url string
 		err error
@@ -188,12 +202,12 @@ func (p *PostgreSQLReconciler) GetInClusterHost(name string) (string, error) {
 	return url, nil
 }
 
-func (p *PostgreSQLReconciler) GetDatabaseName() string {
+func (p *PostgreSQLController) GetDatabaseName() string {
 	return fmt.Sprintf("%s-%s", p.HarborCluster.Namespace, p.HarborCluster.Name)
 }
 
 // GetInClusterDatabasePassword is get inCluster postgresql password
-func (p *PostgreSQLReconciler) GetInClusterDatabasePassword() (string, error) {
+func (p *PostgreSQLController) GetInClusterDatabasePassword() (string, error) {
 	var pw string
 
 	secretName := GenInClusterPasswordSecretName(p.HarborCluster.Namespace, p.HarborCluster.Name)
@@ -212,7 +226,7 @@ func (p *PostgreSQLReconciler) GetInClusterDatabasePassword() (string, error) {
 }
 
 // GetStatefulSetPods returns the postgresql master pod
-func (p *PostgreSQLReconciler) GetStatefulSetPods() (*corev1.PodList, error) {
+func (p *PostgreSQLController) GetStatefulSetPods() (*corev1.PodList, error) {
 	name := p.GetDatabaseName()
 	label := map[string]string{
 		"application":  "spilo",
@@ -234,7 +248,7 @@ func (p *PostgreSQLReconciler) GetStatefulSetPods() (*corev1.PodList, error) {
 }
 
 // GetMasterPodsIP returns postgresql master node ip
-func (p *PostgreSQLReconciler) GetMasterPodsIP() (string, error) {
+func (p *PostgreSQLController) GetMasterPodsIP() (string, error) {
 	var masterIP string
 	podList, err := p.GetStatefulSetPods()
 	if err != nil {

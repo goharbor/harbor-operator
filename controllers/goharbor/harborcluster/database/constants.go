@@ -26,10 +26,11 @@ const (
 )
 
 const (
-	InClusterDatabasePort        = "5432"
-	InClusterDatabaseUserName    = "postgres"
-	InClusterDatabaseName        = "postgres"
-	InClusterDatabasePasswordKey = "password"
+	InClusterDatabasePort              = "5432"
+	InClusterDatabasePortInt32   int32 = 5432
+	InClusterDatabaseUserName          = "postgres"
+	InClusterDatabaseName              = "postgres"
+	InClusterDatabasePasswordKey       = "password"
 )
 
 const (

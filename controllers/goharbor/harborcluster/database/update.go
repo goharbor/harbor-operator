@@ -6,14 +6,13 @@ import (
 	"github.com/goharbor/harbor-operator/controllers/goharbor/harborcluster/database/api"
 	"github.com/goharbor/harbor-operator/pkg/lcm"
 	"github.com/google/go-cmp/cmp"
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
 // Update reconcile will update PostgreSQL CR.
-func (p *PostgreSQLReconciler) Update() (*lcm.CRStatus, error) {
+func (p *PostgreSQLController) Update() (*lcm.CRStatus, error) {
 
 	name := fmt.Sprintf("%s-%s", p.HarborCluster.Namespace, p.HarborCluster.Name)
 
@@ -36,8 +35,6 @@ func (p *PostgreSQLReconciler) Update() (*lcm.CRStatus, error) {
 	}
 
 	if !IsEqual(expectCR, actualCR) {
-		msg := fmt.Sprintf(MessageDatabaseUpdate, name)
-		p.Recorder.Event(p.HarborCluster, corev1.EventTypeNormal, RollingUpgradesDatabase, msg)
 
 		p.Log.Info(
 			"Update Database resource",
