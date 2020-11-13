@@ -79,12 +79,19 @@ func (p *PostgreSQLController) Upgrade(harborcluster *v1alpha2.HarborCluster) (*
 	panic("implement me")
 }
 
-func NewDatabaseController(options *k8s.GetOptions) lcm.Controller {
+func NewDatabaseController(ctx context.Context, options ...k8s.Option) lcm.Controller {
+
+	o := &k8s.CtrlOptions{}
+
+	for _, option := range options {
+		option(o)
+	}
+
 	return &PostgreSQLController{
-		Ctx:     options.CXT,
-		Client:  options.Client,
-		Log:     options.Log,
-		DClient: options.DClient,
-		Scheme:  options.Scheme,
+		Ctx:     ctx,
+		Client:  o.Client,
+		Log:     o.Log,
+		DClient: o.DClient,
+		Scheme:  o.Scheme,
 	}
 }

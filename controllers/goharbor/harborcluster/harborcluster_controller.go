@@ -3,11 +3,6 @@ package harborcluster
 import (
 	"context"
 
-	"github.com/go-logr/logr"
-	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
-
-	"k8s.io/apimachinery/pkg/runtime"
-
 	"github.com/goharbor/harbor-operator/pkg/k8s"
 
 	"github.com/goharbor/harbor-operator/controllers/goharbor/harborcluster/cache"
@@ -36,6 +31,23 @@ type Reconciler struct {
 // +kubebuilder:rbac:groups=goharbor.goharbor.io,resources=harborclusters/status,verbs=get;update;patch
 
 func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) error {
+
+	dClient, err := k8s.NewDynamicClient()
+	if err != nil {
+		r.Log.Error(err, "unable to create dynamic client")
+		return err
+	}
+
+	r.CacheCtrl = cache.NewCacheController()
+	r.DatabaseCtrl = database.NewDatabaseController(ctx,
+		k8s.WithLog(r.Log),
+		k8s.WithScheme(mgr.GetScheme()),
+		k8s.WithDClient(k8s.WrapDClient(dClient)),
+		k8s.WithClient(k8s.WrapClient(ctx, mgr.GetClient())),
+	)
+	r.StorageCtrl = storage.NewMinIOController()
+	r.HarborCtrl = harbor.NewHarborController()
+
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&goharborv1alpha2.HarborCluster{}).
 		Complete(r)
@@ -43,45 +55,9 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 
 func New(ctx context.Context, name string, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
 
-	scheme := newScheme()
-	dClient, err := k8s.NewDynamicClient()
-	if err != nil {
-		return nil, err
-	}
-
-	client, err := k8s.NewClient(scheme)
-	if err != nil {
-		return nil, err
-	}
-
-	option := &k8s.GetOptions{
-		CXT:     ctx,
-		Client:  k8s.WrapClient(ctx, client),
-		Log:     newLog(),
-		DClient: k8s.WrapDClient(dClient),
-		Scheme:  scheme,
-	}
-
 	r := &Reconciler{}
 
 	r.Controller = commonCtrl.NewController(ctx, name, r, configStore)
 
-	// TODO add args to service controller
-	r.CacheCtrl = cache.NewCacheController()
-	r.DatabaseCtrl = database.NewDatabaseController(option)
-	r.StorageCtrl = storage.NewMinIOController()
-	r.HarborCtrl = harbor.NewHarborController()
-
 	return r, nil
-}
-
-func newScheme() *runtime.Scheme {
-	scheme := runtime.NewScheme()
-	_ = clientgoscheme.AddToScheme(scheme)
-
-	return scheme
-}
-
-func newLog() logr.Logger {
-	return ctrl.Log.WithName("controllers").WithName("HarborCluster")
 }
