@@ -5,6 +5,18 @@ metadata:
 spec:
   harborAdminPasswordRef: admin-core-secret
   externalURL: https://core.harbor.domain
+  redis:
+    host: harbor-redis-master
+    port: 6379
+    passwordRef: harbor-redis
+  database:
+    hosts:
+      - host: harbor-database-postgresql
+        port: 5432
+    username: postgres
+    passwordRef: harbor-database-password
+    sslMode: disable
+  version: "1.10.0"
   expose:
     core:
       ingress:
@@ -25,8 +37,18 @@ spec:
       registryPersistentVolume:
         claimName: sample-harbor-registry
   inClusterCache:
-    kind: redis
-  inClusterDatabase:
-    kind: postgreSQL
-  inClusterStorage:
-    kind: minIO
+    kind: Redis
+    redisSpec:
+      server:
+        replicas: 1
+        resources:
+          limits:
+            cpu: 500m
+            memory: 500Mi
+          requests:
+            cpu: 100m
+            memory: 250Mi
+  #inClusterDatabase:
+   # kind: PostgresSQL
+  #inClusterStorage:
+    #kind: MinIO

@@ -10,6 +10,7 @@ require (
 	github.com/go-kit/kit v0.10.0
 	github.com/go-logr/logr v0.2.1-0.20200730175230-ee2de8da5be6
 	github.com/goharbor/harbor-cluster-operator v0.5.0
+	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/goharbor/harbor/src v0.0.0-20200728051037-1d361a89a056
 	github.com/google/go-cmp v0.5.1
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
@@ -29,6 +30,7 @@ require (
 	github.com/prometheus/client_golang v1.7.1
 	github.com/sethvargo/go-password v0.1.3
 	github.com/sirupsen/logrus v1.6.0
+	github.com/spotahome/redis-operator v1.0.0
 	github.com/uber/jaeger-client-go v2.24.0+incompatible
 	github.com/uber/jaeger-lib v2.2.0+incompatible
 	go.uber.org/zap v1.15.0
