@@ -10,7 +10,7 @@ kind: Certificate
 metadata:
   name: sample-public-certificate
 spec:
-  isCA: false
+  isCA: true
   issuerRef:
     name: sample-public-certificate
   secretName: sample-public-certificate

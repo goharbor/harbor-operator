@@ -136,7 +136,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, notary *goharborv1alpha2
 			Value: "notary_server",
 		}, corev1.EnvVar{
 			Name:  "MIGRATIONS_PATH",
-			Value: "/migrations/signer/postgresql",
+			Value: "/migrations/server/postgresql",
 		})
 	}
 
