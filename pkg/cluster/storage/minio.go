@@ -6,8 +6,8 @@ import (
 
 	"github.com/go-logr/logr"
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
-	"github.com/goharbor/harbor-operator/pkg/k8s"
 	minio "github.com/goharbor/harbor-operator/pkg/cluster/storage/minio/api/v1"
+	"github.com/goharbor/harbor-operator/pkg/k8s"
 	"github.com/goharbor/harbor-operator/pkg/lcm"
 	"github.com/google/go-cmp/cmp"
 	corev1 "k8s.io/api/core/v1"
@@ -20,13 +20,13 @@ import (
 )
 
 const (
-	inClusterStorage = "inCluster"
-	s3Storage        = "s3"
+	Storage   = "storage"
+	s3Storage = "s3"
 
 	DefaultExternalSecretSuffix     = "harbor-cluster-storage"
 	ChartMuseumExternalSecretSuffix = "chart-museum-storage"
 
-	DefaultCredsSecret          = "minio-creds"
+	DefaultCredsSecret = "minio-creds"
 
 	DefaultZone   = "zone-harbor"
 	DefaultMinIO  = "minio"
@@ -65,7 +65,7 @@ func NewMinIOController() lcm.Controller {
 }
 
 // Reconciler implements the reconcile logic of minIO service
-func (m *MinIOController) Apply(harborcluster *goharborv1.HarborCluster)  (*lcm.CRStatus, error) {
+func (m *MinIOController) Apply(harborcluster *goharborv1.HarborCluster) (*lcm.CRStatus, error) {
 	var minioCR minio.Tenant
 
 	m.DesiredMinIOCR = m.generateMinIOCR()
@@ -233,14 +233,4 @@ func minioReadyStatus(properties *lcm.Properties) *lcm.CRStatus {
 		},
 		Properties: *properties,
 	}
-}
-
-// TODO Deprecated
-func (m *MinIOController) ScaleUp(newReplicas uint64) (*lcm.CRStatus, error) {
-	panic("implement me")
-}
-
-// TODO Deprecated
-func (m *MinIOController) ScaleDown(newReplicas uint64) (*lcm.CRStatus, error) {
-	panic("implement me")
 }

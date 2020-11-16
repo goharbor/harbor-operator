@@ -5,7 +5,7 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/lcm"
 )
 
-func (m *MinIOController)  Delete(harborcluster *goharborv1.HarborCluster) (*lcm.CRStatus, error) {
+func (m *MinIOController) Delete(harborcluster *goharborv1.HarborCluster) (*lcm.CRStatus, error) {
 	minioCR := m.generateMinIOCR()
 	err := m.KubeClient.Delete(minioCR)
 	if err != nil {

@@ -22,11 +22,11 @@ import (
 
 func (m *MinIOController) ProvisionMinIOProperties(minioInstamnce *minio.Tenant) (*lcm.CRStatus, error) {
 	properties := &lcm.Properties{}
-	data,err := m.getMinIOProperties(minioInstamnce)
+	data, err := m.getMinIOProperties(minioInstamnce)
 	if err != nil {
 		return minioNotReadyStatus(getMinIOProperties, err.Error()), err
 	}
-	properties.Add(lcm.InClusterSecretForStorage, data)
+	properties.Add(Storage, data)
 
 	return minioReadyStatus(properties), nil
 }
@@ -91,85 +91,6 @@ func (m *MinIOController) createSecretKeyRef(secretKey []byte, minioInstance *mi
 		},
 	}
 	return s3KeySecret
-}
-
-func (m *MinIOController) generateInClusterSecret(minioInstance *minio.Tenant) (inClusterSecret *corev1.Secret, chartMuseumSecret *corev1.Secret, err error) {
-	labels := m.getLabels()
-	labels[LabelOfStorageType] = inClusterStorage
-	accessKey, secretKey, err := m.getCredsFromSecret()
-	if err != nil {
-		return nil, nil, err
-	}
-
-	var endpoint string
-	if !m.HarborCluster.Spec.ImageChartStorage.Redirect.Disable {
-		_, endpoint, err = GetMinIOHostAndSchema(m.HarborCluster.Spec.ExternalURL)
-		if err != nil {
-			return nil, nil, err
-		}
-	} else {
-		endpoint = fmt.Sprintf("http://%s.%s.svc:%s", m.getServiceName(), m.HarborCluster.Namespace, "9000")
-	}
-
-	data := map[string]string{
-		"accesskey":      string(accessKey),
-		"secretkey":      string(secretKey),
-		"region":         DefaultRegion,
-		"bucket":         DefaultBucket,
-		"regionendpoint": endpoint,
-		"encrypt":        "false",
-		"secure":         "false",
-		"v4auth":         "false",
-	}
-	dataJson, _ := json.Marshal(&data)
-	inClusterSecret = &corev1.Secret{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: "v1",
-			Kind:       "Secret",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        m.getServiceName(),
-			Namespace:   m.HarborCluster.Namespace,
-			Labels:      m.getLabels(),
-			Annotations: m.generateAnnotations(),
-			OwnerReferences: []metav1.OwnerReference{
-				*metav1.NewControllerRef(minioInstance, HarborClusterMinIOGVK),
-			},
-		},
-		Type: corev1.SecretTypeOpaque,
-		Data: map[string][]byte{
-			s3Storage: dataJson,
-		},
-	}
-
-	chartMuseumSecret = &corev1.Secret{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: "v1",
-			Kind:       "Secret",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        m.getChartMuseumSecretName(),
-			Namespace:   m.HarborCluster.Namespace,
-			Labels:      m.getLabels(),
-			Annotations: m.generateAnnotations(),
-			OwnerReferences: []metav1.OwnerReference{
-				*metav1.NewControllerRef(minioInstance, goharborv1.HarborClusterGVK),
-			},
-		},
-		Type: corev1.SecretTypeOpaque,
-		Data: map[string][]byte{
-			"kind":                  []byte("amazon"),
-			"AWS_ACCESS_KEY_ID":     accessKey,
-			"AWS_SECRET_ACCESS_KEY": secretKey,
-			// use same bucket.
-			"AMAZON_BUCKET":   []byte(DefaultBucket),
-			"AMAZON_PREFIX":   []byte(fmt.Sprintf("%s-subfloder", DefaultBucket)),
-			"AMAZON_REGION":   []byte(DefaultRegion),
-			"AMAZON_ENDPOINT": []byte(endpoint),
-		},
-	}
-
-	return inClusterSecret, chartMuseumSecret, nil
 }
 
 func (m *MinIOController) Provision() (*lcm.CRStatus, error) {
