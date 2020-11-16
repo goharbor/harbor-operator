@@ -3,7 +3,7 @@ package database
 import (
 	"fmt"
 
-	"github.com/goharbor/harbor-operator/controllers/goharbor/harborcluster/database/api"
+	"github.com/goharbor/harbor-operator/pkg/cluster/database/api"
 	"github.com/goharbor/harbor-operator/pkg/lcm"
 	"github.com/google/go-cmp/cmp"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

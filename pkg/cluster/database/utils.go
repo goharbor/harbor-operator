@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	"github.com/goharbor/harbor-operator/pkg/cluster/database/api"
 
-	"github.com/goharbor/harbor-operator/controllers/goharbor/harborcluster/database/api"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
