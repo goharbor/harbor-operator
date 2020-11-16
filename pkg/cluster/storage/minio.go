@@ -32,8 +32,6 @@ const (
 	DefaultMinIO  = "minio"
 	DefaultRegion = "us-east-1"
 	DefaultBucket = "harbor"
-
-	LabelOfStorageType = "storageType"
 )
 
 type MinIOController struct {
@@ -59,15 +57,25 @@ var (
 	}
 )
 
-// TODO soulsee
-func NewMinIOController() lcm.Controller {
-	return &MinIOController{}
+func NewMinIOController(ctx context.Context, options ...k8s.Option) lcm.Controller {
+	o := &k8s.CtrlOptions{}
+
+	for _, option := range options {
+		option(o)
+	}
+	return &MinIOController{
+		Ctx :                 ctx,
+		KubeClient: o.Client,
+		Log:     o.Log,
+		Scheme:  o.Scheme,
+	}
 }
 
 // Reconciler implements the reconcile logic of minIO service
 func (m *MinIOController) Apply(harborcluster *goharborv1.HarborCluster) (*lcm.CRStatus, error) {
 	var minioCR minio.Tenant
 
+	m.HarborCluster = harborcluster
 	m.DesiredMinIOCR = m.generateMinIOCR()
 
 	err := m.KubeClient.Get(m.getMinIONamespacedName(), &minioCR)
