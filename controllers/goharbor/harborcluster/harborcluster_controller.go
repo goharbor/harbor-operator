@@ -3,12 +3,12 @@ package harborcluster
 import (
 	"context"
 
-	"github.com/goharbor/harbor-operator/pkg/k8s"
-
 	"github.com/goharbor/harbor-operator/controllers/goharbor/harborcluster/cache"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/harborcluster/database"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/harborcluster/harbor"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/harborcluster/storage"
+	"github.com/goharbor/harbor-operator/pkg/k8s"
+
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
 	"github.com/goharbor/harbor-operator/pkg/lcm"
 	"github.com/ovh/configstore"
@@ -56,7 +56,6 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 func New(ctx context.Context, name string, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
 
 	r := &Reconciler{}
-
 	r.Controller = commonCtrl.NewController(ctx, name, r, configStore)
 
 	return r, nil
