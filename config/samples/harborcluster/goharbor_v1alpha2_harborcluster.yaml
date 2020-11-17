@@ -36,8 +36,6 @@ spec:
     filesystem:
       registryPersistentVolume:
         claimName: sample-harbor-registry
-#  inClusterCache:
-#    kind: redis
   inClusterDatabase:
     kind: PostgresSQL
     postgresSqlSpec:
@@ -54,3 +52,15 @@ spec:
           memory: 250Mi
 #  inClusterStorage:
 #    kind: minIO
+  inClusterCache:
+    kind: Redis
+    redisSpec:
+      server:
+        replicas: 1
+        resources:
+          limits:
+            cpu: 500m
+            memory: 500Mi
+          requests:
+            cpu: 100m
+            memory: 250Mi
