@@ -68,19 +68,8 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return err
 	}
 
-	//getRegistry := func() *string {
-	//	if harborcluster.Spec.ImageSource != nil && harborcluster.Spec.ImageSource.Registry != "" {
-	//		return &harborCluster.Spec.ImageSource.Registry
-	//	}
-	//	return nil
-	//}
-	//var imageGetter image.Getter
-	//if imageGetter, err = image.NewImageGetter(getRegistry(), harborCluster.Spec.Version); err != nil {
-	//	log.Error(err, "error when create Getter.")
-	//	return ReconcileWaitResult, err
-	//}
-	//r.option.ImageGetter = imageGetter
-
+	// in order to set the ComponentToCRStatus, using HarborController instead of lcm.Controller
+	r.HarborCtrl.ComponentToCRStatus = componentToStatus
 	harborStatus, err := r.HarborCtrl.Apply(harborcluster)
 	if err != nil {
 		r.Log.Error(err, "error when reconcile harbor service.")

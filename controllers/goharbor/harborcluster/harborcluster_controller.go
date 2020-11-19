@@ -3,12 +3,12 @@ package harborcluster
 import (
 	"context"
 
-	"github.com/goharbor/harbor-operator/controllers/goharbor/harborcluster/database"
-	"github.com/goharbor/harbor-operator/controllers/goharbor/harborcluster/harbor"
-	"github.com/goharbor/harbor-operator/pkg/cluster/storage"
 	"github.com/goharbor/harbor-operator/pkg/cluster/cache"
-	"github.com/goharbor/harbor-operator/pkg/k8s"
+	"github.com/goharbor/harbor-operator/pkg/cluster/database"
+	"github.com/goharbor/harbor-operator/pkg/cluster/harbor"
+	"github.com/goharbor/harbor-operator/pkg/cluster/storage"
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
+	"github.com/goharbor/harbor-operator/pkg/k8s"
 	"github.com/goharbor/harbor-operator/pkg/lcm"
 	"github.com/ovh/configstore"
 
@@ -23,7 +23,7 @@ type Reconciler struct {
 	CacheCtrl    lcm.Controller
 	DatabaseCtrl lcm.Controller
 	StorageCtrl  lcm.Controller
-	HarborCtrl   lcm.Controller
+	HarborCtrl   *harbor.HarborController
 }
 
 // +kubebuilder:rbac:groups=goharbor.goharbor.io,resources=harborclusters,verbs=get;list;watch;create;update;patch;delete
@@ -42,16 +42,22 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 		k8s.WithLog(r.Log),
 		k8s.WithScheme(mgr.GetScheme()),
 		k8s.WithDClient(k8s.WrapDClient(dClient)),
-		k8s.WithClient(k8s.WrapClient(ctx, mgr.GetClient())),
-	)
+		k8s.WithClient(k8s.WrapClient(ctx, mgr.GetClient())))
 	r.DatabaseCtrl = database.NewDatabaseController(ctx,
 		k8s.WithLog(r.Log),
 		k8s.WithScheme(mgr.GetScheme()),
 		k8s.WithDClient(k8s.WrapDClient(dClient)),
-		k8s.WithClient(k8s.WrapClient(ctx, mgr.GetClient())),
-	)
-	r.StorageCtrl = storage.NewMinIOController()
-	r.HarborCtrl = harbor.NewHarborController()
+		k8s.WithClient(k8s.WrapClient(ctx, mgr.GetClient())))
+	r.StorageCtrl = storage.NewMinIOController(ctx,
+		k8s.WithLog(r.Log),
+		k8s.WithScheme(mgr.GetScheme()),
+		k8s.WithDClient(k8s.WrapDClient(dClient)),
+		k8s.WithClient(k8s.WrapClient(ctx, mgr.GetClient())))
+	r.HarborCtrl = harbor.NewHarborController(ctx,
+		k8s.WithLog(r.Log),
+		k8s.WithScheme(mgr.GetScheme()),
+		k8s.WithDClient(k8s.WrapDClient(dClient)),
+		k8s.WithClient(k8s.WrapClient(ctx, mgr.GetClient())))
 
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&goharborv1alpha2.HarborCluster{}).

@@ -18,10 +18,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-const (
-	CachePropertiesKey = "cache"
-)
-
 // Readiness reconcile will check Redis sentinel cluster if that has available.
 // It does:
 // - create redis connection pool
@@ -52,7 +48,7 @@ func (rc *RedisController) Readiness(cluster *v1alpha2.HarborCluster) (*lcm.CRSt
 		"namespace", cluster.Namespace, "name", cluster.Name)
 
 	properties := lcm.Properties{}
-	properties.Add(CachePropertiesKey, rc.generateRedisSpec())
+	properties.Add(lcm.CachePropertyName, rc.generateRedisSpec())
 	return cacheReadyStatus(&properties), nil
 }
 

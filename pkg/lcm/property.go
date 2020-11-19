@@ -1,29 +1,9 @@
 package lcm
 
 const (
-	CoreURLSecretForCache     string = "coreURLSecret"
-	RegisterSecretForCache    string = "registrySecret"
-	ClairSecretForCache       string = "clairSecret"
-	ChartMuseumSecretForCache string = "chartMuseumSecret"
-	JobServiceSecretForCache  string = "jobServiceSecret"
-)
-
-const (
-	CoreSecretForDatabase         string = "coreSecret"
-	ClairSecretForDatabase        string = "clairSecret"
-	NotaryServerSecretForDatabase string = "notaryServerSecret"
-	NotarySignerSecretForDatabase string = "notarySignerSecret"
-)
-
-const (
-	InClusterSecretForStorage string = "inClusterSecret"
-	AzureSecretForStorage     string = "azureSecret"
-	GcsSecretForStorage       string = "gcsSecret"
-	SwiftSecretForStorage     string = "swiftSecret"
-	S3SecretForStorage        string = "s3Secret"
-	OssSecretForStorage       string = "ossSecret"
-
-	ChartMuseumSecretForStorage string = "chartMuseumSecret"
+	DatabasePropertyName string = "database"
+	StoragePropertyName  string = "storage"
+	CachePropertyName    string = "cache"
 )
 
 //Property is the current property of component.
