@@ -8,15 +8,18 @@ require (
 	github.com/Masterminds/sprig v2.22.0+incompatible
 	github.com/blang/semver v3.5.0+incompatible
 	github.com/go-kit/kit v0.10.0
-	github.com/go-logr/logr v0.1.0
+	github.com/go-logr/logr v0.2.1-0.20200730175230-ee2de8da5be6
+	github.com/goharbor/harbor-cluster-operator v0.5.0
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/goharbor/harbor/src v0.0.0-20200728051037-1d361a89a056
 	github.com/google/go-cmp v0.5.1
+	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/huandu/xstrings v1.3.2 // indirect
 	github.com/imdario/mergo v0.3.10 // indirect
 	github.com/jackc/pgx/v4 v4.8.1
 	github.com/jaegertracing/jaeger-lib v2.2.0+incompatible
 	github.com/jetstack/cert-manager v0.16.1
+	github.com/minio/minio-go/v6 v6.0.57
 	github.com/mitchellh/reflectwalk v1.0.1 // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/onsi/ginkgo v1.14.0
@@ -38,11 +41,13 @@ require (
 	golang.org/x/tools v0.0.0-20200626171337-aa94e735be7f // indirect
 	gomodules.xyz/jsonpatch/v2 v2.1.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
-	k8s.io/api v0.18.5
-	k8s.io/apimachinery v0.18.5
-	k8s.io/client-go v0.18.5
+	k8s.io/api v0.19.0-rc.3
+	k8s.io/apimachinery v0.19.0-rc.3
+	k8s.io/client-go v11.0.0+incompatible
+	sigs.k8s.io/controller-runtime v0.6.1-0.20200804124940-17eebbff0d48
 	k8s.io/utils v0.0.0-20200619165400-6e3d28b6ed19 // indirect
-	sigs.k8s.io/controller-runtime v0.6.1-0.20200528151803-676c350bd1f3
 	sigs.k8s.io/kustomize/kstatus v0.0.2
 	sigs.k8s.io/yaml v1.2.0
 )
+
+replace k8s.io/client-go v11.0.0+incompatible => k8s.io/client-go v0.0.0-20200813012017-e7a1d9ada0d5

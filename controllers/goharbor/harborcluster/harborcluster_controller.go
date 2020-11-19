@@ -5,10 +5,9 @@ import (
 
 	"github.com/goharbor/harbor-operator/controllers/goharbor/harborcluster/database"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/harborcluster/harbor"
-	"github.com/goharbor/harbor-operator/controllers/goharbor/harborcluster/storage"
+	"github.com/goharbor/harbor-operator/pkg/cluster/storage"
 	"github.com/goharbor/harbor-operator/pkg/cluster/cache"
 	"github.com/goharbor/harbor-operator/pkg/k8s"
-
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
 	"github.com/goharbor/harbor-operator/pkg/lcm"
 	"github.com/ovh/configstore"
