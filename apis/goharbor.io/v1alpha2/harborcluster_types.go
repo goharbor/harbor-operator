@@ -35,12 +35,6 @@ type HarborClusterSpec struct {
 	// Storage configuration for in-cluster storage service
 	// +optional
 	InClusterStorage *Storage `json:"inClusterStorage,omitempty"`
-
-	// harbor version to be deployed, this version determines the image tags of harbor service components
-	// +kubebuilder:validation:Required
-	// https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
-	// +kubebuilder:validation:Pattern="^(?P<major>0|[1-9]\\d*)\\.(?P<minor>0|[1-9]\\d*)\\.(?P<patch>0|[1-9]\\d*)(?:-(?P<prerelease>(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
-	Version string `json:"version"`
 }
 
 type Cache struct {
@@ -190,7 +184,6 @@ const (
 )
 
 // +kubebuilder:object:root=true
-// +kubebuilder:printcolumn:name="Version",type=string,JSONPath=`.spec.version`,description="The semver Harbor version",priority=0
 // +kubebuilder:printcolumn:name="Public URL",type=string,JSONPath=`.spec.externalURL`,description="The public URL to the Harbor application",priority=0
 // +kubebuilder:printcolumn:name="Service Ready", type=string,JSONPath=`.status.conditions[?(@.type=="ServiceReady")].status`,description="The current status of the new Harbor spec",priority=10
 // +kubebuilder:printcolumn:name="Cache Ready", type=string,JSONPath=`.status.conditions[?(@.type=="CacheReady")].status`,description="The current status of the new Cache spec",priority=20
