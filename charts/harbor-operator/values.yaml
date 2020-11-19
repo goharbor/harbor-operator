@@ -187,15 +187,3 @@ tolerations: []
 #   }
 # }`
 affinity: {}
-
-certmanager:
-  # certmanager.enabled -- Whether to install cert-manager Helm chart
-  enabled: false
-
-ingress:
-  # ingress.enabled -- Whether to install ingress controller Helm chart
-  enabled: false
-
-prometheusOperator:
-  # prometheusOperator.enabled -- Whether to install prometheus operator Helm chart
-  enabled: false
