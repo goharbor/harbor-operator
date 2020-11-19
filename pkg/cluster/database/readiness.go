@@ -83,7 +83,7 @@ func (p *PostgreSQLController) Readiness() (*lcm.CRStatus, error) {
 
 func addProperties(name string, conn *Connect, properties *lcm.Properties) {
 	db := getHarborDatabaseSpec(name, conn)
-	properties.Add("database", db)
+	properties.Add(lcm.DatabasePropertyName, db)
 }
 
 func getHarborDatabaseSpec(name string, conn *Connect) *goharborv1alpha2.HarborDatabaseSpec {

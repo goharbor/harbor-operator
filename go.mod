@@ -9,11 +9,10 @@ require (
 	github.com/blang/semver v3.5.0+incompatible
 	github.com/go-kit/kit v0.10.0
 	github.com/go-logr/logr v0.2.1-0.20200730175230-ee2de8da5be6
-	github.com/goharbor/harbor-cluster-operator v0.5.0
 	github.com/go-redis/redis v6.15.9+incompatible
+	github.com/goharbor/harbor-cluster-operator v0.5.0
 	github.com/goharbor/harbor/src v0.0.0-20200728051037-1d361a89a056
 	github.com/google/go-cmp v0.5.1
-	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/huandu/xstrings v1.3.2 // indirect
 	github.com/imdario/mergo v0.3.10 // indirect
 	github.com/jackc/pgx/v4 v4.8.1
@@ -45,7 +44,6 @@ require (
 	k8s.io/apimachinery v0.19.0-rc.3
 	k8s.io/client-go v11.0.0+incompatible
 	sigs.k8s.io/controller-runtime v0.6.1-0.20200804124940-17eebbff0d48
-	k8s.io/utils v0.0.0-20200619165400-6e3d28b6ed19 // indirect
 	sigs.k8s.io/kustomize/kstatus v0.0.2
 	sigs.k8s.io/yaml v1.2.0
 )

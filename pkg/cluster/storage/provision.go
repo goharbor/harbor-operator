@@ -26,7 +26,7 @@ func (m *MinIOController) ProvisionMinIOProperties(minioInstamnce *minio.Tenant)
 	if err != nil {
 		return minioNotReadyStatus(getMinIOProperties, err.Error()), err
 	}
-	properties.Add(Storage, data)
+	properties.Add(lcm.StoragePropertyName, data)
 
 	return minioReadyStatus(properties), nil
 }
