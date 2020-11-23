@@ -51,9 +51,9 @@ type RedisController struct {
 }
 
 // Apply creates/updates/scales the resources, like kubernetes apply operation.
-func (rc *RedisController) Apply(cluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
-	rc.Client.WithContext(rc.Ctx)
-	rc.DClient.WithContext(rc.Ctx)
+func (rc *RedisController) Apply(ctx context.Context, cluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
+	rc.Client.WithContext(ctx)
+	rc.DClient.WithContext(ctx)
 
 	crdClient := rc.DClient.WithResource(redisFailoversGVR).WithNamespace(cluster.Namespace)
 
@@ -82,11 +82,11 @@ func (rc *RedisController) Apply(cluster *v1alpha2.HarborCluster) (*lcm.CRStatus
 }
 
 // Delete
-func (rc *RedisController) Delete(*v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
+func (rc *RedisController) Delete(ctx context.Context, cluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
-func (rc *RedisController) Upgrade(*v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
+func (rc *RedisController) Upgrade(ctx context.Context, cluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 

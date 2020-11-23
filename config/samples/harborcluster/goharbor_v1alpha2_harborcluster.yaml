@@ -16,7 +16,6 @@ spec:
     username: postgres
     passwordRef: harbor-database-password
     sslMode: disable
-  version: "1.10.0"
   expose:
     core:
       ingress:

@@ -64,15 +64,15 @@ func NewMinIOController(ctx context.Context, options ...k8s.Option) lcm.Controll
 		option(o)
 	}
 	return &MinIOController{
-		Ctx :                 ctx,
+		Ctx:        ctx,
 		KubeClient: o.Client,
-		Log:     o.Log,
-		Scheme:  o.Scheme,
+		Log:        o.Log,
+		Scheme:     o.Scheme,
 	}
 }
 
 // Reconciler implements the reconcile logic of minIO service
-func (m *MinIOController) Apply(harborcluster *goharborv1.HarborCluster) (*lcm.CRStatus, error) {
+func (m *MinIOController) Apply(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*lcm.CRStatus, error) {
 	var minioCR minio.Tenant
 
 	m.HarborCluster = harborcluster

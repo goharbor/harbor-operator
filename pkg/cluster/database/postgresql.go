@@ -37,10 +37,10 @@ type Connect struct {
 	Database string
 }
 
-func (p *PostgreSQLController) Apply(harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
+func (p *PostgreSQLController) Apply(ctx context.Context, harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
 
-	p.Client.WithContext(p.Ctx)
-	p.DClient.WithContext(p.Ctx)
+	p.Client.WithContext(ctx)
+	p.DClient.WithContext(ctx)
 	p.HarborCluster = harborcluster
 
 	crdClient := p.DClient.WithResource(databaseGVR).WithNamespace(p.HarborCluster.Namespace)
@@ -72,11 +72,11 @@ func (p *PostgreSQLController) Apply(harborcluster *v1alpha2.HarborCluster) (*lc
 	return p.Readiness()
 }
 
-func (p *PostgreSQLController) Delete(harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
+func (p *PostgreSQLController) Delete(ctx context.Context, harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
 	panic("implement me")
 }
 
-func (p *PostgreSQLController) Upgrade(harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
+func (p *PostgreSQLController) Upgrade(ctx context.Context, harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
 	panic("implement me")
 }
 

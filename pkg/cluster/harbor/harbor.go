@@ -3,6 +3,7 @@ package harbor
 import (
 	"context"
 	"fmt"
+
 	"github.com/go-logr/logr"
 	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-operator/pkg/k8s"
@@ -23,7 +24,7 @@ type HarborController struct {
 	ComponentToCRStatus map[v1alpha2.Component]*lcm.CRStatus
 }
 
-func (harbor *HarborController) Apply(harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
+func (harbor *HarborController) Apply(ctx context.Context, harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
 	var harborCR *v1alpha2.Harbor
 	err := harbor.KubeClient.Get(harbor.getHarborCRNamespacedName(harborcluster), harborCR)
 	if err != nil {
@@ -47,11 +48,11 @@ func (harbor *HarborController) Apply(harborcluster *v1alpha2.HarborCluster) (*l
 	return harborClusterCRStatus(harborCR), nil
 }
 
-func (harbor *HarborController) Delete(harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
+func (harbor *HarborController) Delete(ctx context.Context, harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
 	panic("implement me")
 }
 
-func (harbor *HarborController) Upgrade(harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
+func (harbor *HarborController) Upgrade(ctx context.Context, harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
 	panic("implement me")
 }
 
