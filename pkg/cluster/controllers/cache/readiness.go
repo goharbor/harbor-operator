@@ -199,6 +199,8 @@ func (rc *RedisController) GetInClusterRedisInfo(cluster *v1alpha2.HarborCluster
 		}
 		rc.RedisConnect = connect
 		client = connect.NewRedisClient()
+	default:
+		return nil, errors.New("not supported schema")
 	}
 
 	return client, nil
@@ -235,7 +237,7 @@ func (rc *RedisController) GetSentinelServiceUrl(name, namespace string, pods []
 		randomPod := pods[rand.Intn(len(pods))]
 		url = randomPod.Status.PodIP
 	} else {
-		url = fmt.Sprintf("%s-%s.%s.svc", "rfs", name, namespace)
+		url = fmt.Sprintf("%s-%s.%s.svc.cluster.local", "rfs", name, namespace)
 	}
 
 	return url
@@ -249,7 +251,7 @@ func (rc *RedisController) GetRedisServiceUrl(name, namespace string, pods []cor
 	if err != nil {
 		url = randomPod.Status.PodIP
 	} else {
-		url = fmt.Sprintf("%s-%s.%s.svc", "cluster", name, namespace)
+		url = fmt.Sprintf("%s.%s.svc.cluster.local", rc.ResourceManager.GetServiceName(), namespace)
 	}
 
 	return url

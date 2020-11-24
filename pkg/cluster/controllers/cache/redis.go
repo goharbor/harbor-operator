@@ -47,13 +47,14 @@ type RedisController struct {
 	Scheme             *runtime.Scheme
 	RedisConnect       *RedisConnect
 	ResourceManager    ResourceManager
-	expectCR, actualCR *redisOp.RedisFailover
+	expectCR, actualCR runtime.Object
 }
 
 // Apply creates/updates/scales the resources, like kubernetes apply operation.
 func (rc *RedisController) Apply(ctx context.Context, cluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
 	rc.Client.WithContext(ctx)
 	rc.DClient.WithContext(ctx)
+	rc.ResourceManager = &RedisResourceManager{cluster: cluster}
 
 	crdClient := rc.DClient.WithResource(redisFailoversGVR).WithNamespace(cluster.Namespace)
 
@@ -63,6 +64,7 @@ func (rc *RedisController) Apply(ctx context.Context, cluster *v1alpha2.HarborCl
 	} else if err != nil {
 		return cacheNotReadyStatus(ErrorGetRedisClient, err.Error()), err
 	}
+	rc.actualCR = actualCR
 
 	expectCR := rc.ResourceManager.GetCacheCR()
 	if err := controllerutil.SetControllerReference(cluster, expectCR.(metav1.Object), rc.Scheme); err != nil {
@@ -72,7 +74,8 @@ func (rc *RedisController) Apply(ctx context.Context, cluster *v1alpha2.HarborCl
 	if err = runtime.DefaultUnstructuredConverter.FromUnstructured(actualCR.UnstructuredContent(), rc.actualCR); err != nil {
 		return cacheNotReadyStatus(ErrorDefaultUnstructuredConverter, err.Error()), err
 	}
-	rc.expectCR = expectCR.(*redisOp.RedisFailover)
+
+	rc.expectCR = expectCR
 	crStatus, err := rc.Update(cluster)
 	if err != nil {
 		return crStatus, err
