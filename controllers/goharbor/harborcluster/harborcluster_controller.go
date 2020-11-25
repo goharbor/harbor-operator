@@ -3,13 +3,13 @@ package harborcluster
 import (
 	"context"
 
-	"github.com/goharbor/harbor-operator/pkg/cluster/cache"
-	"github.com/goharbor/harbor-operator/pkg/cluster/database"
-	"github.com/goharbor/harbor-operator/pkg/cluster/harbor"
-	"github.com/goharbor/harbor-operator/pkg/cluster/storage"
+	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/cache"
+	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/database"
+	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/harbor"
+	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage"
+	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
 	"github.com/goharbor/harbor-operator/pkg/k8s"
-	"github.com/goharbor/harbor-operator/pkg/lcm"
 	"github.com/ovh/configstore"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"

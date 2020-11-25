@@ -18,6 +18,7 @@ require (
 	github.com/jackc/pgx/v4 v4.8.1
 	github.com/jaegertracing/jaeger-lib v2.2.0+incompatible
 	github.com/jetstack/cert-manager v0.16.1
+	github.com/markbates/pkger v0.15.1
 	github.com/minio/minio-go/v6 v6.0.57
 	github.com/mitchellh/reflectwalk v1.0.1 // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect

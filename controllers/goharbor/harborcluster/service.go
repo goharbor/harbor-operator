@@ -1,7 +1,7 @@
 package harborcluster
 
 import (
-	"github.com/goharbor/harbor-operator/pkg/lcm"
+	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 )
 
 type ServiceGetter interface {
