@@ -3,15 +3,16 @@ package harborcluster
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
-	"github.com/goharbor/harbor-operator/pkg/lcm"
 	"github.com/goharbor/harbor-operator/pkg/resources"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"time"
 )
 
 func (r *Reconciler) NewEmpty(_ context.Context) resources.Resource {
@@ -25,7 +26,7 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 	}
 
 	componentToStatus := r.DefaultComponentStatus()
-	cacheStatus, err := r.CacheCtrl.Apply(harborcluster)
+	cacheStatus, err := r.CacheCtrl.Apply(ctx, harborcluster)
 	componentToStatus[v1alpha2.ComponentCache] = cacheStatus
 	if err != nil {
 		r.Log.Error(err, "error when reconcile cache component.")
@@ -36,7 +37,7 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return err
 	}
 
-	dbStatus, err := r.DatabaseCtrl.Apply(harborcluster)
+	dbStatus, err := r.DatabaseCtrl.Apply(ctx, harborcluster)
 	componentToStatus[v1alpha2.ComponentDatabase] = dbStatus
 	if err != nil {
 		r.Log.Error(err, "error when reconcile database component.")
@@ -47,7 +48,7 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return err
 	}
 
-	storageStatus, err := r.StorageCtrl.Apply(harborcluster)
+	storageStatus, err := r.StorageCtrl.Apply(ctx, harborcluster)
 	componentToStatus[v1alpha2.ComponentStorage] = storageStatus
 	if err != nil {
 		r.Log.Error(err, "error when reconcile storage component.")
@@ -70,7 +71,7 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 
 	// in order to set the ComponentToCRStatus, using HarborController instead of lcm.Controller
 	r.HarborCtrl.ComponentToCRStatus = componentToStatus
-	harborStatus, err := r.HarborCtrl.Apply(harborcluster)
+	harborStatus, err := r.HarborCtrl.Apply(ctx, harborcluster)
 	if err != nil {
 		r.Log.Error(err, "error when reconcile harbor service.")
 		return err
