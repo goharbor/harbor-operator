@@ -49,6 +49,10 @@ type MinIOController struct {
 	MinioClient           Minio
 }
 
+func (m *MinIOController) HealthChecker() lcm.HealthChecker {
+	panic("implement me")
+}
+
 var (
 	HarborClusterMinIOGVK = schema.GroupVersionKind{
 		Group:   minio.SchemeGroupVersion.Group,

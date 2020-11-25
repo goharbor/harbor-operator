@@ -50,6 +50,10 @@ type RedisController struct {
 	expectCR, actualCR *redisOp.RedisFailover
 }
 
+func (rc *RedisController) HealthChecker() lcm.HealthChecker {
+	panic("implement me")
+}
+
 // Apply creates/updates/scales the resources, like kubernetes apply operation.
 func (rc *RedisController) Apply(ctx context.Context, cluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
 	rc.Client.WithContext(ctx)
