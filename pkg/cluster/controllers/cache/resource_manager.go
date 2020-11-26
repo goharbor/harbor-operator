@@ -77,7 +77,7 @@ func (rm *RedisResourceManager) GetCacheCR() runtime.Object {
 					Requests: resource,
 				},
 			},
-			Auth: redisOp.AuthSettings{SecretPath: rm.cluster.Name},
+			Auth: redisOp.AuthSettings{SecretPath: rm.GetSecretName()},
 		},
 	}
 }
@@ -136,6 +136,7 @@ func (rm *RedisResourceManager) GetSecret() *corev1.Secret {
 		},
 		StringData: map[string]string{
 			"redis-password": passStr,
+			"password":       passStr,
 		},
 	}
 }
