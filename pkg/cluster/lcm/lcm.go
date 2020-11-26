@@ -26,6 +26,10 @@ type Controller interface {
 
 	// Upgrade the specified resource to the given version.
 	Upgrade(ctx context.Context, harborcluster *v1alpha2.HarborCluster) (*CRStatus, error)
+
+	// HealthChecker returns a health checker implementation for checking the health status of the service managed
+	// by this controller.
+	HealthChecker() HealthChecker
 }
 
 type CRStatus struct {
