@@ -1,0 +1,30 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Override namespace
+namespace: harbor-operator-ns
+
+# Common annotations
+commonAnnotations:
+  goharbor.io/operator-version: "v1.0.0"
+  goharbor.io/deploy-mode: "cluster"
+  goharbor.io/deploy-engine: "Kustomization"
+
+# All the referred deployment manifests
+resources:
+  - ../../config/default # harbor operator
+  - https://raw.githubusercontent.com/spotahome/redis-operator/master/example/operator/all-redis-operator-resources.yaml # reids operator
+  - github.com/zalando/postgres-operator/manifests # postgresql operator
+  - github.com/minio/operator?ref=60bf757aac607a914b414e554188a77a4760aa0e # minIO storage operator
+
+patchesJson6902:
+  - target:
+      kind: Namespace
+      name: minio-operator
+      version: v1
+    path: patch/namespace.yaml
+
+images:
+  - name: goharbor/harbor-operator
+    newName: goharbor/harbor-operator
+    newTag: latest
