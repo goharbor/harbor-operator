@@ -1,13 +1,13 @@
 package cache
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"math/rand"
 
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 
-	rediscli "github.com/go-redis/redis"
 	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	appsv1 "k8s.io/api/apps/v1"
@@ -23,24 +23,10 @@ import (
 // - create redis connection pool
 // - ping redis server
 // - return redis properties if redis has available
-func (rc *RedisController) Readiness(cluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
-	var (
-		client *rediscli.Client
-		err    error
-	)
-
-	client, err = rc.GetInClusterRedisInfo(cluster)
-	if err != nil {
-		rc.Log.Error(err, "Fail to create redis client.",
-			"namespace", cluster.Namespace, "name", cluster.Name)
-		return cacheNotReadyStatus(ErrorGetRedisClient, err.Error()), err
-	}
-
-	defer client.Close()
-
-	if err := client.Ping().Err(); err != nil {
+func (rc *RedisController) Readiness(ctx context.Context, cluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
+	if checkResp, err := rc.CheckInClusterRedisHealth(ctx, cluster); err != nil {
 		rc.Log.Error(err, "Fail to check Redis.",
-			"namespace", cluster.Namespace, "name", cluster.Name)
+			"namespace", cluster.Namespace, "name", cluster.Name, "checkResp", checkResp)
 		return cacheNotReadyStatus(ErrorCheckRedisHealth, err.Error()), err
 	}
 
@@ -138,11 +124,8 @@ func (rc *RedisController) GetStatefulSetPods(name, namespace string) (*appsv1.S
 	return sts, pod, nil
 }
 
-// GetInClusterRedisInfo returns inCluster redis sentinel pool client
-func (rc *RedisController) GetInClusterRedisInfo(cluster *v1alpha2.HarborCluster) (*rediscli.Client, error) {
-
-	var client *rediscli.Client
-
+// CheckInClusterRedisHealth checks in cluster redis health.
+func (rc *RedisController) CheckInClusterRedisHealth(ctx context.Context, cluster *v1alpha2.HarborCluster) (*lcm.CheckResponse, error) {
 	secret := rc.ResourceManager.GetSecret()
 	password, err := rc.GetRedisPassword(secret.Name, secret.Namespace)
 	if err != nil {
@@ -175,14 +158,17 @@ func (rc *RedisController) GetInClusterRedisInfo(cluster *v1alpha2.HarborCluster
 			return nil, errors.New("need to requeue")
 		}
 		endpoint := rc.GetSentinelServiceUrl(cluster.Name, cluster.Namespace, currentSentinelPods)
-		connect := &RedisConnect{
-			Endpoints: []string{endpoint},
-			Port:      RedisSentinelConnPort,
-			Password:  password,
-			GroupName: RedisSentinelConnGroup,
+		config := &lcm.ServiceConfig{
+			Endpoint: &lcm.Endpoint{
+				Host: endpoint,
+				Port: RedisSentinelConnPort,
+			},
+			Credentials: &lcm.Credentials{
+				AccessSecret: password,
+			},
 		}
-		rc.RedisConnect = connect
-		client = connect.NewRedisPool()
+		return rc.HealthChecker().CheckHealth(ctx, config, lcm.WithSentinel(true))
+
 	case SchemaRedisServer:
 		redisPodArray := redisPodList.Items
 		_, currentRedisPods := rc.GetPodsStatus(redisPodArray)
@@ -190,20 +176,20 @@ func (rc *RedisController) GetInClusterRedisInfo(cluster *v1alpha2.HarborCluster
 			return nil, errors.New("need to requeue")
 		}
 		endpoint := rc.GetRedisServiceUrl(cluster.Name, cluster.Namespace, currentRedisPods)
-		connect := &RedisConnect{
-			Endpoints: []string{endpoint},
-			Port:      RedisRedisConnPort,
-			Password:  password,
-			GroupName: spec.GroupName,
-			Schema:    SchemaRedisServer,
+		config := &lcm.ServiceConfig{
+			Endpoint: &lcm.Endpoint{
+				Host: endpoint,
+				Port: RedisRedisConnPort,
+			},
+			Credentials: &lcm.Credentials{
+				AccessSecret: password,
+			},
 		}
-		rc.RedisConnect = connect
-		client = connect.NewRedisClient()
-	default:
-		return nil, errors.New("not supported schema")
-	}
+		return rc.HealthChecker().CheckHealth(ctx, config)
 
-	return client, nil
+	default:
+		return nil, fmt.Errorf("not supported schema: %s", spec.Schema)
+	}
 }
 
 // GetPodsStatus returns deleting  and current pod list
