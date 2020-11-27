@@ -1,17 +1,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: controller-manager
+  name: harbor-operator
   labels:
-    control-plane: controller-manager
+    control-plane: harbor-operator
 spec:
   selector:
     matchLabels:
-      control-plane: controller-manager
+      control-plane: harbor-operator
   template:
     metadata:
       labels:
-        control-plane: controller-manager
+        control-plane: harbor-operator
     spec:
       containers:
       - command:
