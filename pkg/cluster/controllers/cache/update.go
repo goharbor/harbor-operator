@@ -16,13 +16,16 @@ import (
 // - update RedisFailovers CR resource
 func (rc *RedisController) RollingUpgrades(cluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
 	crdClient := rc.DClient.WithResource(redisFailoversGVR).WithNamespace(cluster.Namespace)
-	if rc.expectCR == nil {
+	if rc.expectCR == nil || rc.actualCR == nil {
 		return cacheUnknownStatus(), nil
 	}
 
-	var (
-		actualCR, expectCR redisOp.RedisFailover
-	)
+	expectCR := rc.expectCR.(*redisOp.RedisFailover)
+	unstructuredActualCR := rc.actualCR.(*unstructured.Unstructured)
+	actualCR := &redisOp.RedisFailover{}
+	if err := runtime.DefaultUnstructuredConverter.FromUnstructured(unstructuredActualCR.UnstructuredContent(), actualCR); err != nil {
+		return cacheNotReadyStatus(ErrorDefaultUnstructuredConverter, err.Error()), err
+	}
 
 	if !IsEqual(actualCR.DeepCopy().Spec, expectCR.DeepCopy().Spec) {
 		//msg := fmt.Sprintf(UpdateMessageRedisCluster, cluster.Name)

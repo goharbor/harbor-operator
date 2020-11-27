@@ -62,7 +62,7 @@ func (rc *RedisController) Apply(ctx context.Context, cluster *v1alpha2.HarborCl
 
 	crdClient := rc.DClient.WithResource(redisFailoversGVR).WithNamespace(cluster.Namespace)
 
-	actualCR, err := crdClient.Get(cluster.Name, metav1.GetOptions{})
+	actualCR, err := crdClient.Get(rc.ResourceManager.GetCacheCRName(), metav1.GetOptions{})
 	if errors.IsNotFound(err) {
 		return rc.Deploy(cluster)
 	} else if err != nil {
@@ -73,10 +73,6 @@ func (rc *RedisController) Apply(ctx context.Context, cluster *v1alpha2.HarborCl
 	expectCR := rc.ResourceManager.GetCacheCR()
 	if err := controllerutil.SetControllerReference(cluster, expectCR.(metav1.Object), rc.Scheme); err != nil {
 		return cacheNotReadyStatus(ErrorSetOwnerReference, err.Error()), err
-	}
-
-	if err = runtime.DefaultUnstructuredConverter.FromUnstructured(actualCR.UnstructuredContent(), rc.actualCR); err != nil {
-		return cacheNotReadyStatus(ErrorDefaultUnstructuredConverter, err.Error()), err
 	}
 
 	rc.expectCR = expectCR
