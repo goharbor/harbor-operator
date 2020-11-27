@@ -24,29 +24,22 @@ const (
 	exitCodeFailure = 1
 )
 
-var exitCode = 0
-
-func SetExitCode(value int) {
-	exitCode = value
-}
-
-func GetExitCode() int {
-	return exitCode
-}
-
 func main() {
-	defer func() { os.Exit(GetExitCode()) }()
-
 	setupLog := ctrl.Log.WithName("setup")
 	ctx := logger.Context(setupLog)
 
-	err := setup.Logger(ctx, name, version)
-	if err != nil {
-		setupLog.Error(err, "unable to create logger")
-		SetExitCode(exitCodeFailure)
-
-		return
+	// Check non-nil error then log and exit with non-zero code
+	fail := func(err error, msg string) {
+		// If err is non-nil, then exit with non-zero code,
+		// otherwise move on
+		if err != nil {
+			setupLog.Error(err, msg)
+			os.Exit(exitCodeFailure)
+		}
 	}
+
+	err := setup.Logger(ctx, name, version)
+	fail(err, "unable to create logger")
 
 	configstore.InitFromEnvironment()
 
@@ -54,45 +47,22 @@ func main() {
 	application.SetVersion(&ctx, version)
 
 	scheme, err := scheme.New(ctx)
-	if err != nil {
-		setupLog.Error(err, "unable to create scheme")
-		SetExitCode(exitCodeFailure)
-
-		return
-	}
+	fail(err, "unable to create scheme")
 
 	mgr, err := manager.New(ctx, scheme)
-	if err != nil {
-		setupLog.Error(err, "unable to create manager")
-		SetExitCode(exitCodeFailure)
-
-		return
-	}
+	fail(err, "unable to create manager")
 
 	traCon, err := tracing.New(ctx)
-	if err != nil {
-		setupLog.Error(err, "unable to create tracer")
-		SetExitCode(exitCodeFailure)
-
-		return
-	}
+	fail(err, "unable to create tracer")
 	defer traCon.Close()
 
-	if err := (setup.WithManager(ctx, mgr)); err != nil {
-		setupLog.Error(err, "unable to setup controllers")
-		SetExitCode(exitCodeFailure)
-
-		return
-	}
+	err = setup.WithManager(ctx, mgr)
+	fail(err, "unable to setup controllers")
 
 	// +kubebuilder:scaffold:builder
 
+	// Log
 	setupLog.Info("starting manager", "version", version, "commit", commit)
-
-	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
-		setupLog.Error(err, "cannot start manager")
-		SetExitCode(exitCodeFailure)
-
-		return
-	}
+	err = mgr.Start(ctrl.SetupSignalHandler())
+	fail(err, "cannot start manager")
 }
