@@ -14374,26 +14374,6 @@ rules:
   - update
   - watch
 - apiGroups:
-  - goharbor.goharbor.io
-  resources:
-  - harborclusters
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - goharbor.goharbor.io
-  resources:
-  - harborclusters/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
   - goharbor.io
   resources:
   - chartmuseums
@@ -14441,6 +14421,26 @@ rules:
   - goharbor.io
   resources:
   - cores/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - goharbor.io
+  resources:
+  - harborclusters
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - goharbor.io
+  resources:
+  - harborclusters/status
   verbs:
   - get
   - patch
