@@ -1,3 +1,44 @@
+# Sample namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cluster-sample-ns
+---
+# A secret of harbor admin password.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: admin-core-secret
+  namespace: cluster-sample-ns
+data:
+  password: SGFyYm9yMTIzNDU=
+type: Opaque
+---
+# Cert issuer
+apiVersion: cert-manager.io/v1alpha2
+kind: Issuer
+metadata:
+  name: selfsigned-issuer
+  namespace: cluster-sample-ns
+spec:
+  selfSigned: {}
+---
+# Certificates of ingress
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: public-certificate
+  namespace: cluster-sample-ns
+spec:
+  secretName: public-certificate
+  dnsNames:
+    - sample.goharbor.io
+    - notary.goharbor.io
+  issuerRef:
+    name: selfsigned-issuer
+    kind: Issuer
+---
+# Full stack Harbor
 apiVersion: goharbor.io/v1alpha2
 kind: HarborCluster
 metadata:
