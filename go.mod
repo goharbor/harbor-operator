@@ -6,6 +6,7 @@ require (
 	cloud.google.com/go v0.58.0 // indirect
 	github.com/Masterminds/semver v1.5.0 // indirect
 	github.com/Masterminds/sprig v2.22.0+incompatible
+	github.com/alicebob/miniredis/v2 v2.14.1
 	github.com/blang/semver v3.5.0+incompatible
 	github.com/go-kit/kit v0.10.0
 	github.com/go-logr/logr v0.2.1-0.20200730175230-ee2de8da5be6
