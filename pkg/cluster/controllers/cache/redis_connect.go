@@ -20,8 +20,8 @@ const (
 	MessageRedisUpScaling       = "Redis upscale from %d to %d"
 	MessageRedisRollingUpgrades = "Redis resource from %s to %s"
 
-	RedisSentinelConnPort  = "26379"
-	RedisRedisConnPort     = "6379"
+	RedisSentinelConnPort  = 26379
+	RedisRedisConnPort     = 6379
 	RedisSentinelConnGroup = "mymaster"
 )
 

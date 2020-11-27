@@ -51,7 +51,7 @@ type RedisController struct {
 }
 
 func (rc *RedisController) HealthChecker() lcm.HealthChecker {
-	panic("implement me")
+	return &RedisHealthChecker{}
 }
 
 // Apply creates/updates/scales the resources, like kubernetes apply operation.
@@ -85,7 +85,7 @@ func (rc *RedisController) Apply(ctx context.Context, cluster *v1alpha2.HarborCl
 		return crStatus, err
 	}
 
-	return rc.Readiness(cluster)
+	return rc.Readiness(ctx, cluster)
 }
 
 // Delete
