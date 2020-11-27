@@ -90,11 +90,11 @@ func (harbor *HarborController) getHarborCR(harborcluster *v1alpha2.HarborCluste
 
 	// use incluster spec in first priority
 	if harborcluster.Spec.InClusterDatabase != nil {
-		harborcluster.Spec.Database = *harbor.getDatabaseSpec()
+		harborcluster.Spec.Database = harbor.getDatabaseSpec()
 	}
 
 	if harborcluster.Spec.InClusterCache != nil {
-		harborcluster.Spec.Redis = *harbor.getCacheSpec()
+		harborcluster.Spec.Redis = harbor.getCacheSpec()
 	}
 
 	if harborcluster.Spec.InClusterStorage != nil {
