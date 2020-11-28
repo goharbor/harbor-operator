@@ -11,7 +11,7 @@ require (
 	github.com/go-kit/kit v0.10.0
 	github.com/go-logr/logr v0.2.1-0.20200730175230-ee2de8da5be6
 	github.com/go-redis/redis v6.15.9+incompatible
-	github.com/goharbor/harbor-cluster-operator v0.5.0
+	github.com/goharbor/harbor-cluster-operator v0.5.0 // indirect
 	github.com/goharbor/harbor/src v0.0.0-20200728051037-1d361a89a056
 	github.com/google/go-cmp v0.5.1
 	github.com/huandu/xstrings v1.3.2 // indirect
