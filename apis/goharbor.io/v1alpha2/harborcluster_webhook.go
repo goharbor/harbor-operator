@@ -62,52 +62,16 @@ func (hc *HarborCluster) validate() error {
 	var allErrs field.ErrorList
 
 	// For database(psql), cache(Redis) and storage, either external services or in-cluster services MUST be configured
-
-	// Storage
-	// External is not configured
-	if err := hc.Spec.ImageChartStorage.Validate(); err != nil {
-		// And in-cluster minIO is not configured
-		if hc.Spec.InClusterStorage == nil {
-			// Invalid and not acceptable
-			allErrs = append(
-				allErrs,
-				field.Invalid(
-					field.NewPath("spec").
-						Child("imageChartStorage", "inClusterStorage"),
-					hc.Spec.ImageChartStorage,
-					"both storage and in-cluster storage are not correctly configured",
-				),
-			)
-		}
+	if err := hc.validateStorage(); err != nil {
+		allErrs = append(allErrs, err)
 	}
 
-	// Database
-	// External is not configured
-	// And also in-cluster psql is not specified
-	if hc.Spec.Database == nil && hc.Spec.InClusterDatabase == nil {
-		// Invalid and not acceptable
-		allErrs = append(
-			allErrs,
-			field.Invalid(
-				field.NewPath("spec").Child("database", "inClusterDatabase"),
-				hc.Spec.Database,
-				"both database or in-cluster database are not correctly configured",
-			),
-		)
+	if err := hc.validateDatabase(); err != nil {
+		allErrs = append(allErrs, err)
 	}
 
-	// Cache
-	// External is not configured
-	if hc.Spec.Redis == nil && hc.Spec.InClusterCache == nil {
-		// Invalid and not acceptable
-		allErrs = append(
-			allErrs,
-			field.Invalid(
-				field.NewPath("spec").Child("redis", "inClusterCache"),
-				hc.Spec.Database,
-				"both redis or in-cluster redis are not correctly configured",
-			),
-		)
+	if err := hc.validateCache(); err != nil {
+		allErrs = append(allErrs, err)
 	}
 
 	if len(allErrs) == 0 {
@@ -115,4 +79,86 @@ func (hc *HarborCluster) validate() error {
 	}
 
 	return apierrors.NewInvalid(schema.GroupKind{Group: GroupVersion.Group, Kind: "HarborCluster"}, hc.Name, allErrs)
+}
+
+func (hc *HarborCluster) validateStorage() *field.Error {
+	// Storage
+	// External is not configured
+	if err := hc.Spec.ImageChartStorage.Validate(); err != nil {
+		clog.Error(err, "validate spec.imageChartStorage")
+
+		// And in-cluster minIO is not configured
+		if hc.Spec.InClusterStorage == nil {
+			// Invalid and not acceptable
+			return field.Invalid(
+				field.NewPath("spec").
+					Child("imageChartStorage", "inClusterStorage"),
+				hc.Spec.ImageChartStorage,
+				"both storage and in-cluster storage are not correctly configured",
+			)
+		}
+	} else {
+		if hc.Spec.InClusterStorage != nil {
+			// Both are configured, conflict
+			return field.Invalid(
+				field.NewPath("spec").
+					Child("imageChartStorage", "inClusterStorage"),
+				hc.Spec.InClusterStorage,
+				"conflicts: both storage and in-cluster storage are configured, only one is required to set",
+			)
+		}
+	}
+
+	return nil
+}
+
+func (hc *HarborCluster) validateDatabase() *field.Error {
+	// Database
+	// External is not configured
+	// And also in-cluster psql is not specified
+	if hc.Spec.Database == nil && hc.Spec.InClusterDatabase == nil {
+		// Invalid and not acceptable
+		return field.Invalid(
+			field.NewPath("spec").Child("database", "inClusterDatabase"),
+			hc.Spec.Database,
+			"both database or in-cluster database are not correctly configured",
+		)
+	}
+
+	// Both are configured then conflict
+	if hc.Spec.Database != nil && hc.Spec.InClusterDatabase != nil {
+		// Conflict and not acceptable
+		return field.Invalid(
+			field.NewPath("spec").Child("database", "inClusterDatabase"),
+			hc.Spec.InClusterDatabase,
+			"conflicts: both database or in-cluster database are configured, only one is required to set",
+		)
+	}
+
+	return nil
+}
+
+func (hc *HarborCluster) validateCache() *field.Error {
+	// Cache
+	// External is not configured
+	if hc.Spec.Redis == nil && hc.Spec.InClusterCache == nil {
+		// Invalid and not acceptable
+		return field.Invalid(
+			field.NewPath("spec").Child("redis", "inClusterCache"),
+			hc.Spec.Redis,
+			"both redis or in-cluster redis are not correctly configured",
+		)
+	}
+
+	// Both are configured and then conflict
+	if hc.Spec.Redis != nil && hc.Spec.InClusterCache != nil {
+		// Conflict and not acceptable
+		return field.Invalid(
+			field.NewPath("spec").Child("redis", "inClusterCache"),
+			hc.Spec.InClusterCache,
+			"conflicts: both redis or in-cluster redis are configured, only one is required to set",
+		)
+	}
+
+	return nil
 }

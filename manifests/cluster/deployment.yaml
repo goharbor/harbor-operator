@@ -14349,6 +14349,28 @@ rules:
   - update
   - watch
 - apiGroups:
+  - acid.zalan.do
+  resources:
+  - operatorconfigurations
+  - postgresqls
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - acid.zalan.do
+  resources:
+  - postgresqls/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - apps
   resources:
   - deployments
@@ -14373,6 +14395,12 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - databases.spotahome.com
+  resources:
+  - redisfailovers
+  verbs:
+  - '*'
 - apiGroups:
   - goharbor.io
   resources:
@@ -14557,6 +14585,12 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - minio.min.io
+  resources:
+  - '*'
+  verbs:
+  - '*'
 - apiGroups:
   - networking.k8s.io
   resources:
