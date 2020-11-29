@@ -38,7 +38,7 @@ type Connect struct {
 }
 
 func (p *PostgreSQLController) HealthChecker() lcm.HealthChecker {
-	panic("implement me")
+	return &PostgreSQLHealthChecker{}
 }
 
 func (p *PostgreSQLController) Apply(ctx context.Context, harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
