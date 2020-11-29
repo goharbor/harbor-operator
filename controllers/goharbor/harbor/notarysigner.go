@@ -2,6 +2,7 @@ package harbor
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
@@ -131,8 +132,7 @@ func (r *Reconciler) GetNotarySignerEncryptionKey(ctx context.Context, harbor *g
 		},
 		Type: harbormetav1.SecretTypeNotarySignerAliases,
 		StringData: map[string]string{
-			harbormetav1.DefaultAliasSecretKey: "defaultalias",
-			"defaultalias":                     secret,
+			strings.ToUpper(harbormetav1.DefaultAliasSecretKey): secret,
 		},
 	}, nil
 }
