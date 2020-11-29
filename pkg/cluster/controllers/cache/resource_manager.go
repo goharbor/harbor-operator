@@ -6,6 +6,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/common"
 	redisOp "github.com/spotahome/redis-operator/api/redisfailover/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -127,7 +128,7 @@ func (rm *RedisResourceManager) GetSecretName() string {
 // GetSecret gets redis secret.
 func (rm *RedisResourceManager) GetSecret() *corev1.Secret {
 	name := rm.GetSecretName()
-	passStr := RandomString(8, "a")
+	passStr := common.RandomString(8, "a")
 	return &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,

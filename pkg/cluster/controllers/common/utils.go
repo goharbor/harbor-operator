@@ -7,16 +7,13 @@ import (
 	"time"
 )
 
-const (
-	UpperStringRandomType = "A"
-	LowerStringRandomType = "a"
-	NumberRandomType      = "0"
-)
-
+// RandomString returns random string.
 func RandomString(randLength int, randType string) (result string) {
-	var num = "0123456789"
-	var lower = "abcdefghijklmnopqrstuvwxyz"
-	var upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	var (
+		num   = "0123456789"
+		lower = "abcdefghijklmnopqrstuvwxyz"
+		upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	)
 
 	b := bytes.Buffer{}
 	if strings.Contains(randType, "0") {

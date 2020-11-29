@@ -1,11 +1,6 @@
 package cache
 
 import (
-	"bytes"
-	"math/rand"
-	"strings"
-	"time"
-
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -60,35 +55,6 @@ func MergeLabels(allLabels ...map[string]string) map[string]string {
 		}
 	}
 	return lb
-}
-
-// RandomString returns random string.
-func RandomString(randLength int, randType string) (result string) {
-	var (
-		num   = "0123456789"
-		lower = "abcdefghijklmnopqrstuvwxyz"
-		upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	)
-
-	b := bytes.Buffer{}
-	if strings.Contains(randType, "0") {
-		b.WriteString(num)
-	} else if strings.Contains(randType, "A") {
-		b.WriteString(upper)
-	} else {
-		b.WriteString(lower)
-	}
-
-	var str = b.String()
-	var strLen = len(str)
-
-	rand.Seed(time.Now().UnixNano())
-	b = bytes.Buffer{}
-	for i := 0; i < randLength; i++ {
-		b.WriteByte(str[rand.Intn(strLen)])
-	}
-	result = b.String()
-	return
 }
 
 // IsEqual check two object is equal.
