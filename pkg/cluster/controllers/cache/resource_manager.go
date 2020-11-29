@@ -6,8 +6,8 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
-	redisOp "github.com/spotahome/redis-operator/api/redisfailover/v1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/common"
+	redisOp "github.com/spotahome/redis-operator/api/redisfailover/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
