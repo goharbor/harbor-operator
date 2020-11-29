@@ -26,10 +26,10 @@ const (
 	DefaultExternalSecretSuffix     = "harbor-cluster-storage"
 	ChartMuseumExternalSecretSuffix = "chart-museum-storage"
 
-	DefaultCredsSecret = "minio-creds"
+	DefaultCredsSecret = "creds"
+	DefaultPrefix = "minio-"
 
 	DefaultZone   = "zone-harbor"
-	DefaultMinIO  = "minio"
 	DefaultRegion = "us-east-1"
 	DefaultBucket = "harbor"
 )
@@ -189,7 +189,7 @@ func (m *MinIOController) getMinIONamespacedName() types.NamespacedName {
 func (m *MinIOController) getMinIOSecretNamespacedName() types.NamespacedName {
 	return types.NamespacedName{
 		Namespace: m.HarborCluster.Namespace,
-		Name:      m.HarborCluster.Name + "-" + DefaultCredsSecret,
+		Name:      DefaultPrefix + m.HarborCluster.Name + "-" + DefaultCredsSecret,
 	}
 }
 
