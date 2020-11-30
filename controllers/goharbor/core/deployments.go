@@ -119,9 +119,16 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 		scheme = "https"
 	}
 
+	host := r.NormalizeName(ctx, core.GetName())
+	if core.Spec.Components.TLS.Enabled() {
+		host += ":443"
+	} else {
+		host += ":80"
+	}
+
 	coreLocalURL := (&url.URL{
 		Scheme: scheme,
-		Host:   r.NormalizeName(ctx, core.GetName()),
+		Host:   host,
 	}).String()
 
 	// Only one host is supported
