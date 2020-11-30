@@ -42,7 +42,7 @@ func (rc *RedisController) generateRedisSpec() *v1alpha2.ExternalRedisSpec {
 	return &v1alpha2.ExternalRedisSpec{
 		RedisHostSpec: harbormetav1.RedisHostSpec{
 			Host: rc.ResourceManager.GetServiceName(),
-			Port: 6379,
+			Port: RedisRedisConnPort,
 		},
 		RedisCredentials: harbormetav1.RedisCredentials{
 			PasswordRef: rc.ResourceManager.GetSecretName(),
@@ -132,13 +132,13 @@ func (rc *RedisController) CheckInClusterRedisHealth(ctx context.Context, cluste
 		return nil, err
 	}
 
-	_, sentinelPodList, err := rc.GetDeploymentPods(cluster.Name, cluster.Namespace)
+	_, sentinelPodList, err := rc.GetDeploymentPods(rc.ResourceManager.GetCacheCRName(), cluster.Namespace)
 	if err != nil {
 		rc.Log.Error(err, "Fail to get deployment pods.")
 		return nil, err
 	}
 
-	_, redisPodList, err := rc.GetStatefulSetPods(cluster.Name, cluster.Namespace)
+	_, redisPodList, err := rc.GetStatefulSetPods(rc.ResourceManager.GetCacheCRName(), cluster.Namespace)
 	if err != nil {
 		rc.Log.Error(err, "Fail to get deployment pods.")
 		return nil, err
@@ -157,7 +157,7 @@ func (rc *RedisController) CheckInClusterRedisHealth(ctx context.Context, cluste
 		if len(currentSentinelPods) == 0 {
 			return nil, errors.New("need to requeue")
 		}
-		endpoint := rc.GetSentinelServiceUrl(cluster.Name, cluster.Namespace, currentSentinelPods)
+		endpoint := rc.GetSentinelServiceUrl(rc.ResourceManager.GetCacheCRName(), cluster.Namespace, currentSentinelPods)
 		config := &lcm.ServiceConfig{
 			Endpoint: &lcm.Endpoint{
 				Host: endpoint,
@@ -175,7 +175,7 @@ func (rc *RedisController) CheckInClusterRedisHealth(ctx context.Context, cluste
 		if len(currentRedisPods) == 0 {
 			return nil, errors.New("need to requeue")
 		}
-		endpoint := rc.GetRedisServiceUrl(cluster.Name, cluster.Namespace, currentRedisPods)
+		endpoint := rc.GetRedisServiceUrl(rc.ResourceManager.GetCacheCRName(), cluster.Namespace, currentRedisPods)
 		config := &lcm.ServiceConfig{
 			Endpoint: &lcm.Endpoint{
 				Host: endpoint,

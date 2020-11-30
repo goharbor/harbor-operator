@@ -21,6 +21,7 @@ type ResourceManager interface {
 // ResourceGetter gets resources.
 type ResourceGetter interface {
 	GetCacheCR() runtime.Object
+	GetCacheCRName() string
 	GetResourceList() corev1.ResourceList
 	GetServiceName() string
 	GetService() *corev1.Service
@@ -30,6 +31,8 @@ type ResourceGetter interface {
 	GetClusterServerReplica() int
 	GetStorageSize() string
 }
+
+var _ ResourceManager = &RedisResourceManager{}
 
 type RedisResourceManager struct {
 	cluster *v1alpha2.HarborCluster
@@ -56,7 +59,7 @@ func (rm *RedisResourceManager) GetCacheCR() runtime.Object {
 			APIVersion: "databases.spotahome.com/v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      rm.cluster.Name,
+			Name:      rm.GetCacheCRName(),
 			Namespace: rm.cluster.Namespace,
 			Labels:    rm.GetLabels(),
 		},
@@ -83,9 +86,14 @@ func (rm *RedisResourceManager) GetCacheCR() runtime.Object {
 	}
 }
 
+// GetCacheCRName gets cache cr name.
+func (rm *RedisResourceManager) GetCacheCRName() string {
+	return fmt.Sprintf("%s-%s", rm.cluster.Name, "redis")
+}
+
 // GetServiceName gets service name.
 func (rm *RedisResourceManager) GetServiceName() string {
-	return fmt.Sprintf("%s-%s", "redis", rm.cluster.Name)
+	return rm.GetCacheCRName()
 }
 
 // GetService gets service.
@@ -122,7 +130,7 @@ func (rm *RedisResourceManager) GetService() *corev1.Service {
 
 // GetSecretName gets secret name.
 func (rm *RedisResourceManager) GetSecretName() string {
-	return fmt.Sprintf("%s-%s", "redis", rm.cluster.Name)
+	return rm.GetCacheCRName()
 }
 
 // GetSecret gets redis secret.
