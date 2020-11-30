@@ -3,27 +3,39 @@ package harborcluster
 import (
 	"context"
 
+	"github.com/go-logr/logr"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/cache"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/database"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/harbor"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
+	"github.com/goharbor/harbor-operator/pkg/factories/application"
 	"github.com/goharbor/harbor-operator/pkg/k8s"
 	"github.com/ovh/configstore"
+	"k8s.io/apimachinery/pkg/runtime"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
-	ctrl "sigs.k8s.io/controller-runtime"
 )
 
+// TODO: Refactor to inherit the common reconciler in future
 // Reconciler reconciles a HarborCluster object
 type Reconciler struct {
-	*commonCtrl.Controller
+	client.Client
+	Log    logr.Logger
+	Scheme *runtime.Scheme
+
+	// In case
+	ConfigStore *configstore.Store
+	Name        string
+	Version     string
 
 	CacheCtrl    lcm.Controller
 	DatabaseCtrl lcm.Controller
 	StorageCtrl  lcm.Controller
-	HarborCtrl   *harbor.HarborController
+	HarborCtrl   *harbor.Controller
 }
 
 // +kubebuilder:rbac:groups=goharbor.io,resources=harborclusters,verbs=get;list;watch;create;update;patch;delete
@@ -36,6 +48,7 @@ type Reconciler struct {
 func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) error {
 	r.Client = mgr.GetClient()
 	r.Scheme = mgr.GetScheme()
+
 	dClient, err := k8s.NewDynamicClient()
 	if err != nil {
 		r.Log.Error(err, "unable to create dynamic client")
@@ -68,10 +81,11 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 		Complete(r)
 }
 
+// New HarborCluster reconciler
 func New(ctx context.Context, name string, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
-
-	r := &Reconciler{}
-	r.Controller = commonCtrl.NewController(ctx, name, r, configStore)
-
-	return r, nil
+	return &Reconciler{
+		Name:    name,
+		Version: application.GetVersion(ctx),
+		Log:     ctrl.Log.WithName(application.GetName(ctx)).WithName("controller").WithValues("controller", name),
+	}, nil
 }

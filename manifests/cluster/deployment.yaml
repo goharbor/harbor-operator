@@ -1848,6 +1848,10 @@ spec:
       jsonPath: .spec.externalURL
       name: Public URL
       type: string
+    - description: The overall status of the Harbor cluster
+      jsonPath: .status.status
+      name: Status
+      type: string
     - description: The current status of the new Harbor spec
       jsonPath: .status.conditions[?(@.type=="ServiceReady")].status
       name: Service Ready
@@ -3175,6 +3179,7 @@ spec:
             description: HarborClusterStatus defines the observed state of HarborCluster
             properties:
               conditions:
+                description: Conditions of each components
                 items:
                   description: HarborClusterCondition contains details for the current condition of this pod.
                   properties:
@@ -3199,6 +3204,16 @@ spec:
                   - type
                   type: object
                 type: array
+              revision:
+                description: Revision of the status Use unix nano
+                format: int64
+                type: integer
+              status:
+                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state of cluster Important: Run "make" to regenerate code after modifying this file Status indicates the overall status of the Harbor cluster Status can be "unknown", "creating", "healthy" and "unhealthy"'
+                type: string
+            required:
+            - revision
+            - status
             type: object
         type: object
     served: true

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	minio "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/api/v1"
 	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -26,6 +27,11 @@ func New(ctx context.Context) (*runtime.Scheme, error) {
 	err = goharborv1alpha2.AddToScheme(scheme)
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to configure Harbor scheme")
+	}
+
+	err = minio.AddToScheme(scheme)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to configure minio scheme")
 	}
 
 	// +kubebuilder:scaffold:scheme

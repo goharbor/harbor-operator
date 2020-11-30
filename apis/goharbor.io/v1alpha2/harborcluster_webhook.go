@@ -85,7 +85,7 @@ func (hc *HarborCluster) validateStorage() *field.Error {
 	// Storage
 	// External is not configured
 	if err := hc.Spec.ImageChartStorage.Validate(); err != nil {
-		clog.Error(err, "validate spec.imageChartStorage")
+		clog.Info("validate spec.imageChartStorage", "cause", err.Error())
 
 		// And in-cluster minIO is not configured
 		if hc.Spec.InClusterStorage == nil {

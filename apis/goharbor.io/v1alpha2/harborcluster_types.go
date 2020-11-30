@@ -133,9 +133,20 @@ type MinIOSpec struct {
 type HarborClusterStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+	// Status indicates the overall status of the Harbor cluster
+	// Status can be "unknown", "creating", "healthy" and "unhealthy"
+	Status ClusterStatus `json:"status"`
 
+	// Revision of the status
+	// Use unix nano
+	Revision int64 `json:"revision"`
+
+	// Conditions of each components
 	Conditions []HarborClusterCondition `json:"conditions,omitempty"`
 }
+
+// ClusterStatus is a type for cluster status
+type ClusterStatus string
 
 // HarborClusterConditionType is a valid value for HarborClusterConditionType.Type
 type HarborClusterConditionType string
@@ -152,6 +163,14 @@ const (
 	StorageReady HarborClusterConditionType = "StorageReady"
 	// ServiceReady means the Service of Harbor is ready.
 	ServiceReady HarborClusterConditionType = "ServiceReady"
+	// StatusUnknown is the status of unknown
+	StatusUnknown ClusterStatus = "unknown"
+	// StatusCreating is the status of creating
+	StatusCreating ClusterStatus = "creating"
+	// StatusHealthy is the status of healthy
+	StatusHealthy ClusterStatus = "healthy"
+	// StatusUnHealthy is the status of unhealthy
+	StatusUnHealthy ClusterStatus = "unhealthy"
 )
 
 // HarborClusterCondition contains details for the current condition of this pod.
@@ -185,6 +204,7 @@ const (
 
 // +kubebuilder:object:root=true
 // +kubebuilder:printcolumn:name="Public URL",type=string,JSONPath=`.spec.externalURL`,description="The public URL to the Harbor application",priority=0
+// +kubebuilder:printcolumn:name="Status", type=string,JSONPath=`.status.status`,description="The overall status of the Harbor cluster",priority=0
 // +kubebuilder:printcolumn:name="Service Ready", type=string,JSONPath=`.status.conditions[?(@.type=="ServiceReady")].status`,description="The current status of the new Harbor spec",priority=10
 // +kubebuilder:printcolumn:name="Cache Ready", type=string,JSONPath=`.status.conditions[?(@.type=="CacheReady")].status`,description="The current status of the new Cache spec",priority=20
 // +kubebuilder:printcolumn:name="Database Ready", type=string,JSONPath=`.status.conditions[?(@.type=="DatabaseReady")].status`,description="The current status of the new Database spec",priority=20
