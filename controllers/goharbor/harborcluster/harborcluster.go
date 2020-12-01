@@ -69,6 +69,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) {
 		cacheStatus, err := r.CacheCtrl.Apply(gtx, harborcluster)
 		if cacheStatus != nil {
 			st.UpdateCache(cacheStatus.Condition)
+		}
+
+		if err == nil {
 			r.HarborCtrl.WithDependency(v1alpha2.ComponentCache, cacheStatus)
 		}
 
@@ -79,6 +82,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) {
 		dbStatus, err := r.DatabaseCtrl.Apply(gtx, harborcluster)
 		if dbStatus != nil {
 			st.UpdateDatabase(dbStatus.Condition)
+		}
+
+		if err == nil {
 			r.HarborCtrl.WithDependency(v1alpha2.ComponentDatabase, dbStatus)
 		}
 
@@ -89,6 +95,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) {
 		storageStatus, err := r.StorageCtrl.Apply(gtx, harborcluster)
 		if storageStatus != nil {
 			st.UpdateStorage(storageStatus.Condition)
+		}
+
+		if err == nil {
 			r.HarborCtrl.WithDependency(v1alpha2.ComponentStorage, storageStatus)
 		}
 

@@ -16,6 +16,7 @@ package v1alpha2
 
 import (
 	"context"
+	"fmt"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -82,6 +83,9 @@ func (hc *HarborCluster) validate() error {
 }
 
 func (hc *HarborCluster) validateStorage() *field.Error {
+	// in cluster storage has high priority
+	fp := field.NewPath("spec").Child("inClusterStorage")
+
 	// Storage
 	// External is not configured
 	if err := hc.Spec.ImageChartStorage.Validate(); err != nil {
@@ -90,22 +94,13 @@ func (hc *HarborCluster) validateStorage() *field.Error {
 		// And in-cluster minIO is not configured
 		if hc.Spec.InClusterStorage == nil {
 			// Invalid and not acceptable
-			return field.Invalid(
-				field.NewPath("spec").
-					Child("imageChartStorage", "inClusterStorage"),
-				hc.Spec.ImageChartStorage,
-				"both storage and in-cluster storage are not correctly configured",
-			)
+			return required(fp)
 		}
 	} else {
 		if hc.Spec.InClusterStorage != nil {
 			// Both are configured, conflict
-			return field.Invalid(
-				field.NewPath("spec").
-					Child("imageChartStorage", "inClusterStorage"),
-				hc.Spec.InClusterStorage,
-				"conflicts: both storage and in-cluster storage are configured, only one is required to set",
-			)
+			p := field.NewPath("spec").Child("imageChartStorage")
+			return forbidden(fp, p)
 		}
 	}
 
@@ -113,52 +108,52 @@ func (hc *HarborCluster) validateStorage() *field.Error {
 }
 
 func (hc *HarborCluster) validateDatabase() *field.Error {
+	// in cluster database has high priority
+	fp := field.NewPath("spec").Child("database", "inClusterDatabase")
+
 	// Database
 	// External is not configured
 	// And also in-cluster psql is not specified
 	if hc.Spec.Database == nil && hc.Spec.InClusterDatabase == nil {
 		// Invalid and not acceptable
-		return field.Invalid(
-			field.NewPath("spec").Child("database", "inClusterDatabase"),
-			hc.Spec.Database,
-			"both database or in-cluster database are not correctly configured",
-		)
+		return required(fp)
 	}
 
 	// Both are configured then conflict
 	if hc.Spec.Database != nil && hc.Spec.InClusterDatabase != nil {
+		p := field.NewPath("spec").Child("database")
 		// Conflict and not acceptable
-		return field.Invalid(
-			field.NewPath("spec").Child("database", "inClusterDatabase"),
-			hc.Spec.InClusterDatabase,
-			"conflicts: both database or in-cluster database are configured, only one is required to set",
-		)
+		return forbidden(fp, p)
 	}
 
 	return nil
 }
 
 func (hc *HarborCluster) validateCache() *field.Error {
+	// in cluster cache has high priority
+	fp := field.NewPath("spec").Child("inClusterCache")
+
 	// Cache
 	// External is not configured
 	if hc.Spec.Redis == nil && hc.Spec.InClusterCache == nil {
 		// Invalid and not acceptable
-		return field.Invalid(
-			field.NewPath("spec").Child("redis", "inClusterCache"),
-			hc.Spec.Redis,
-			"both redis or in-cluster redis are not correctly configured",
-		)
+		return required(fp)
 	}
 
 	// Both are configured and then conflict
 	if hc.Spec.Redis != nil && hc.Spec.InClusterCache != nil {
+		p := field.NewPath("spec").Child("redis")
 		// Conflict and not acceptable
-		return field.Invalid(
-			field.NewPath("spec").Child("redis", "inClusterCache"),
-			hc.Spec.InClusterCache,
-			"conflicts: both redis or in-cluster redis are configured, only one is required to set",
-		)
+		return forbidden(fp, p)
 	}
 
 	return nil
+}
+
+func forbidden(mainPath *field.Path, conflictPath *field.Path) *field.Error {
+	return field.Forbidden(conflictPath, fmt.Sprintf("conflicts: %s should not be configured as %s has been configured already", conflictPath.String(), mainPath.String()))
+}
+
+func required(mainPath *field.Path) *field.Error {
+	return field.Required(mainPath, fmt.Sprintf("%s should be configured", mainPath.String()))
 }
