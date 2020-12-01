@@ -9,6 +9,13 @@ github.com/Masterminds/semver
 # github.com/Masterminds/sprig v2.22.0+incompatible
 ## explicit
 github.com/Masterminds/sprig
+# github.com/alicebob/gopher-json v0.0.0-20200520072559-a9ecdc9d1d3a
+github.com/alicebob/gopher-json
+# github.com/alicebob/miniredis/v2 v2.14.1
+## explicit
+github.com/alicebob/miniredis/v2
+github.com/alicebob/miniredis/v2/geohash
+github.com/alicebob/miniredis/v2/server
 # github.com/beorn7/perks v1.0.1
 github.com/beorn7/perks/quantile
 # github.com/blang/semver v3.5.0+incompatible
@@ -49,9 +56,6 @@ github.com/gobuffalo/here
 # github.com/gogo/protobuf v1.3.1
 github.com/gogo/protobuf/proto
 github.com/gogo/protobuf/sortkeys
-# github.com/goharbor/harbor-cluster-operator v0.5.0
-## explicit
-github.com/goharbor/harbor-cluster-operator/controllers/common
 # github.com/goharbor/harbor/src v0.0.0-20200728051037-1d361a89a056
 ## explicit
 github.com/goharbor/harbor/src/common
@@ -275,6 +279,11 @@ github.com/uber/jaeger-client-go/utils
 ## explicit
 github.com/uber/jaeger-lib/metrics
 github.com/uber/jaeger-lib/metrics/prometheus
+# github.com/yuin/gopher-lua v0.0.0-20191220021717-ab39c6098bdb
+github.com/yuin/gopher-lua
+github.com/yuin/gopher-lua/ast
+github.com/yuin/gopher-lua/parse
+github.com/yuin/gopher-lua/pm
 # go.uber.org/atomic v1.6.0
 go.uber.org/atomic
 # go.uber.org/multierr v1.5.0

@@ -58,22 +58,22 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 	}
 
 	r.CacheCtrl = cache.NewRedisController(ctx,
-		k8s.WithLog(r.Log),
+		k8s.WithLog(r.Log.WithName("cache")),
 		k8s.WithScheme(mgr.GetScheme()),
 		k8s.WithDClient(k8s.WrapDClient(dClient)),
 		k8s.WithClient(k8s.WrapClient(ctx, mgr.GetClient())))
 	r.DatabaseCtrl = database.NewDatabaseController(ctx,
-		k8s.WithLog(r.Log),
+		k8s.WithLog(r.Log.WithName("database")),
 		k8s.WithScheme(mgr.GetScheme()),
 		k8s.WithDClient(k8s.WrapDClient(dClient)),
 		k8s.WithClient(k8s.WrapClient(ctx, mgr.GetClient())))
 	r.StorageCtrl = storage.NewMinIOController(ctx,
-		k8s.WithLog(r.Log),
+		k8s.WithLog(r.Log.WithName("storage")),
 		k8s.WithScheme(mgr.GetScheme()),
 		k8s.WithDClient(k8s.WrapDClient(dClient)),
 		k8s.WithClient(k8s.WrapClient(ctx, mgr.GetClient())))
 	r.HarborCtrl = harbor.NewHarborController(ctx,
-		k8s.WithLog(r.Log),
+		k8s.WithLog(r.Log.WithName("harbor")),
 		k8s.WithScheme(mgr.GetScheme()),
 		k8s.WithDClient(k8s.WrapDClient(dClient)),
 		k8s.WithClient(k8s.WrapClient(ctx, mgr.GetClient())))

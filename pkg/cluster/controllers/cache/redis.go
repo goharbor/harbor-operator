@@ -51,7 +51,7 @@ type RedisController struct {
 }
 
 func (rc *RedisController) HealthChecker() lcm.HealthChecker {
-	panic("implement me")
+	return &RedisHealthChecker{}
 }
 
 // Apply creates/updates/scales the resources, like kubernetes apply operation.
@@ -62,7 +62,7 @@ func (rc *RedisController) Apply(ctx context.Context, cluster *v1alpha2.HarborCl
 
 	crdClient := rc.DClient.WithResource(redisFailoversGVR).WithNamespace(cluster.Namespace)
 
-	actualCR, err := crdClient.Get(cluster.Name, metav1.GetOptions{})
+	actualCR, err := crdClient.Get(rc.ResourceManager.GetCacheCRName(), metav1.GetOptions{})
 	if errors.IsNotFound(err) {
 		return rc.Deploy(cluster)
 	} else if err != nil {
@@ -75,17 +75,13 @@ func (rc *RedisController) Apply(ctx context.Context, cluster *v1alpha2.HarborCl
 		return cacheNotReadyStatus(ErrorSetOwnerReference, err.Error()), err
 	}
 
-	if err = runtime.DefaultUnstructuredConverter.FromUnstructured(actualCR.UnstructuredContent(), rc.actualCR); err != nil {
-		return cacheNotReadyStatus(ErrorDefaultUnstructuredConverter, err.Error()), err
-	}
-
 	rc.expectCR = expectCR
 	crStatus, err := rc.Update(cluster)
 	if err != nil {
 		return crStatus, err
 	}
 
-	return rc.Readiness(cluster)
+	return rc.Readiness(ctx, cluster)
 }
 
 // Delete
