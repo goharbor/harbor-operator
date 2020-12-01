@@ -14,7 +14,7 @@ webhooks:
       path: /validate-goharbor-io-v1alpha2-harbor
       port: {{ .Values.service.port }}
   failurePolicy: Fail
-  name: vharbor.kb.io
+  name: vharbor.{{ include "chart.fullname" . }}
   rules:
   - apiGroups:
     - goharbor.io
@@ -33,7 +33,7 @@ webhooks:
       path: /validate-goharbor-io-v1alpha2-jobservice
       port: {{ .Values.service.port }}
   failurePolicy: Fail
-  name: vjobservice.kb.io
+  name: vjobservice.{{ include "chart.fullname" . }}
   rules:
   - apiGroups:
     - goharbor.io
@@ -49,29 +49,10 @@ webhooks:
     service:
       name: {{ include "chart.fullname" . | quote }}
       namespace: {{ .Release.Namespace | quote }}
-      path: /validate-goharbor-io-v1alpha2-registry
-      port: {{ .Values.service.port }}
-  failurePolicy: Fail
-  name: vregistry.kb.io
-  rules:
-  - apiGroups:
-    - goharbor.io
-    apiVersions:
-    - v1alpha2
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - registries
-- clientConfig:
-    caBundle: Cg==
-    service:
-      name: {{ include "chart.fullname" . | quote }}
-      namespace: {{ .Release.Namespace | quote }}
       path: /validate-goharbor-io-v1alpha2-notaryserver
       port: {{ .Values.service.port }}
   failurePolicy: Fail
-  name: vnotaryserver.kb.io
+  name: vnotaryserver.{{ include "chart.fullname" . }}
   rules:
   - apiGroups:
     - goharbor.io
@@ -90,7 +71,7 @@ webhooks:
       path: /validate-goharbor-io-v1alpha2-notarysigner
       port: {{ .Values.service.port }}
   failurePolicy: Fail
-  name: vnotarysigner.kb.io
+  name: vnotarysigner.{{ include "chart.fullname" . }}
   rules:
   - apiGroups:
     - goharbor.io
@@ -101,3 +82,22 @@ webhooks:
     - UPDATE
     resources:
     - notarysigners
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: {{ include "chart.fullname" . | quote }}
+      namespace: {{ .Release.Namespace | quote }}
+      path: /validate-goharbor-io-v1alpha2-registry
+      port: {{ .Values.service.port }}
+  failurePolicy: Fail
+  name: vregistry.{{ include "chart.fullname" . }}
+  rules:
+  - apiGroups:
+    - goharbor.io
+    apiVersions:
+    - v1alpha2
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - registries

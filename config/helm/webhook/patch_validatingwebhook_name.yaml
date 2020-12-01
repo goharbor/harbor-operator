@@ -1,0 +1,34 @@
+ - op: test
+   path: /webhooks/0/name
+   value: vharbor.kb.io
+ - op: replace
+   path: /webhooks/0/name
+   value: 'vharbor.{{ include "chart.fullname" . }}'
+
+ - op: test
+   path: /webhooks/1/name
+   value: vjobservice.kb.io
+ - op: replace
+   path: /webhooks/1/name
+   value: 'vjobservice.{{ include "chart.fullname" . }}'
+
+ - op: test
+   path: /webhooks/2/name
+   value: vnotaryserver.kb.io
+ - op: replace
+   path: /webhooks/2/name
+   value: 'vnotaryserver.{{ include "chart.fullname" . }}'
+
+ - op: test
+   path: /webhooks/3/name
+   value: vnotarysigner.kb.io
+ - op: replace
+   path: /webhooks/3/name
+   value: 'vnotarysigner.{{ include "chart.fullname" . }}'
+
+ - op: test
+   path: /webhooks/4/name
+   value: vregistry.kb.io
+ - op: replace
+   path: /webhooks/4/name
+   value: 'vregistry.{{ include "chart.fullname" . }}'

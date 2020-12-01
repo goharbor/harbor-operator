@@ -11,8 +11,14 @@ commonAnnotations:
 
 patchesStrategicMerge:
 - validatingwebhook_endpoint_patch.yaml
-# Uncomment this to enable mutating webhook patch
-# - mutatingwebhook_endpoint_patch.yaml
+
+patchesJson6902:
+- target:
+    version: v1beta1
+    group: admissionregistration.k8s.io
+    kind: ValidatingWebhookConfiguration
+    name: validating-webhook-configuration
+  path: patch_validatingwebhook_name.yaml
 
 bases:
 - ../../webhook
