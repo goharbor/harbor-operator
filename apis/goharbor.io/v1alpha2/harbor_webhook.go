@@ -52,16 +52,20 @@ func (h *Harbor) Validate() error {
 
 	err := h.Spec.ImageChartStorage.Validate()
 	if err != nil {
-		allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("persistence").Child("imageChartStorage"), h.Spec.ImageChartStorage, err.Error()))
-	}
-
-	if len(allErrs) == 0 {
-		return nil
+		allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("imageChartStorage"), h.Spec.ImageChartStorage, err.Error()))
 	}
 
 	_, err = url.Parse(h.Spec.ExternalURL)
 	if err != nil {
 		allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("externalURL"), h.Spec.ExternalURL, err.Error()))
+	}
+
+	if h.Spec.Database == nil {
+		allErrs = append(allErrs, required(field.NewPath("spec").Child("database")))
+	}
+
+	if h.Spec.Redis == nil {
+		allErrs = append(allErrs, required(field.NewPath("spec").Child("redis")))
 	}
 
 	if len(allErrs) == 0 {

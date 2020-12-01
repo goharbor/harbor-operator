@@ -1848,6 +1848,10 @@ spec:
       jsonPath: .spec.externalURL
       name: Public URL
       type: string
+    - description: The overall status of the Harbor cluster
+      jsonPath: .status.status
+      name: Status
+      type: string
     - description: The current status of the new Harbor spec
       jsonPath: .status.conditions[?(@.type=="ServiceReady")].status
       name: Service Ready
@@ -2042,6 +2046,7 @@ spec:
                     type: array
                 type: object
               database:
+                description: Skip OpenAPI schema validation Use validating webhook to do verification (field required)
                 properties:
                   hosts:
                     items:
@@ -2170,6 +2175,7 @@ spec:
                 pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
                 type: string
               imageChartStorage:
+                description: Skip OpenAPI schema validation Use validating webhook to do verification (field required)
                 properties:
                   filesystem:
                     description: 'FileSystem is an implementation of the storagedriver.StorageDriver interface which uses the local filesystem. The local filesystem can be a remote volume. See: https://docs.docker.com/registry/storage-drivers/filesystem/'
@@ -2944,6 +2950,7 @@ spec:
                 - url
                 type: object
               redis:
+                description: Skip OpenAPI schema validation Use validating webhook to do verification (field required)
                 properties:
                   certificateRef:
                     description: Secret containing the client certificate to authenticate with.
@@ -3163,18 +3170,16 @@ spec:
                 default: RollingUpdate
                 type: string
             required:
-            - database
             - encryptionKeyRef
             - expose
             - externalURL
             - harborAdminPasswordRef
-            - imageChartStorage
-            - redis
             type: object
           status:
             description: HarborClusterStatus defines the observed state of HarborCluster
             properties:
               conditions:
+                description: Conditions of each components
                 items:
                   description: HarborClusterCondition contains details for the current condition of this pod.
                   properties:
@@ -3199,11 +3204,22 @@ spec:
                   - type
                   type: object
                 type: array
+              revision:
+                description: Revision of the status Use unix nano
+                format: int64
+                type: integer
+              status:
+                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state of cluster Important: Run "make" to regenerate code after modifying this file Status indicates the overall status of the Harbor cluster Status can be "unknown", "creating", "healthy" and "unhealthy"'
+                type: string
+            required:
+            - revision
+            - status
             type: object
         type: object
     served: true
     storage: true
-    subresources: {}
+    subresources:
+      status: {}
 status:
   acceptedNames:
     kind: ""
@@ -3435,6 +3451,7 @@ spec:
                     type: array
                 type: object
               database:
+                description: Skip OpenAPI schema validation Use validating webhook to do verification (field required)
                 properties:
                   hosts:
                     items:
@@ -3563,6 +3580,7 @@ spec:
                 pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
                 type: string
               imageChartStorage:
+                description: Skip OpenAPI schema validation Use validating webhook to do verification (field required)
                 properties:
                   filesystem:
                     description: 'FileSystem is an implementation of the storagedriver.StorageDriver interface which uses the local filesystem. The local filesystem can be a remote volume. See: https://docs.docker.com/registry/storage-drivers/filesystem/'
@@ -4050,6 +4068,7 @@ spec:
                 - url
                 type: object
               redis:
+                description: Skip OpenAPI schema validation Use validating webhook to do verification (field required)
                 properties:
                   certificateRef:
                     description: Secret containing the client certificate to authenticate with.
@@ -4269,13 +4288,10 @@ spec:
                 default: RollingUpdate
                 type: string
             required:
-            - database
             - encryptionKeyRef
             - expose
             - externalURL
             - harborAdminPasswordRef
-            - imageChartStorage
-            - redis
             type: object
           status:
             description: ComponentStatus represents the current status of the resource. https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md#typical-status-properties
@@ -14339,7 +14355,53 @@ rules:
 - apiGroups:
   - ""
   resources:
+  - pods
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
   - services
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - acid.zalan.do
+  resources:
+  - operatorconfigurations
+  - postgresqls
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - acid.zalan.do
+  resources:
+  - postgresqls/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - apps
+  resources:
+  - deployments
   verbs:
   - create
   - delete
@@ -14352,6 +14414,7 @@ rules:
   - apps
   resources:
   - deployments
+  - statefulsets
   verbs:
   - create
   - delete
@@ -14374,25 +14437,11 @@ rules:
   - update
   - watch
 - apiGroups:
-  - goharbor.goharbor.io
+  - databases.spotahome.com
   resources:
-  - harborclusters
+  - redisfailovers
   verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - goharbor.goharbor.io
-  resources:
-  - harborclusters/status
-  verbs:
-  - get
-  - patch
-  - update
+  - '*'
 - apiGroups:
   - goharbor.io
   resources:
@@ -14441,6 +14490,26 @@ rules:
   - goharbor.io
   resources:
   - cores/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - goharbor.io
+  resources:
+  - harborclusters
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - goharbor.io
+  resources:
+  - harborclusters/status
   verbs:
   - get
   - patch
@@ -14557,6 +14626,12 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - minio.min.io
+  resources:
+  - '*'
+  verbs:
+  - '*'
 - apiGroups:
   - networking.k8s.io
   resources:
@@ -15441,7 +15516,7 @@ spec:
   - port: 443
     targetPort: 9443
   selector:
-    control-plane: controller-manager
+    control-plane: harbor-operator
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -15451,13 +15526,13 @@ metadata:
     goharbor.io/deploy-mode: cluster
     goharbor.io/operator-version: v1.0.0
   labels:
-    control-plane: controller-manager
-  name: controller-manager
+    control-plane: harbor-operator
+  name: harbor-operator
   namespace: harbor-operator-ns
 spec:
   selector:
     matchLabels:
-      control-plane: controller-manager
+      control-plane: harbor-operator
   template:
     metadata:
       annotations:
@@ -15465,7 +15540,7 @@ spec:
         goharbor.io/deploy-mode: cluster
         goharbor.io/operator-version: v1.0.0
       labels:
-        control-plane: controller-manager
+        control-plane: harbor-operator
     spec:
       containers:
       - args:
@@ -15708,6 +15783,24 @@ webhooks:
     - UPDATE
     resources:
     - harbors
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: harbor-operator-ns
+      path: /validate-goharbor-io-v1alpha2-harborcluster
+  failurePolicy: Fail
+  name: vharborcluster.kb.io
+  rules:
+  - apiGroups:
+    - goharbor.io
+    apiVersions:
+    - v1alpha2
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - harborclusters
 - clientConfig:
     caBundle: Cg==
     service:

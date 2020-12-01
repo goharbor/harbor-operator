@@ -148,7 +148,7 @@ func setupValidHarbor(ctx context.Context, ns string) (Resource, client.ObjectKe
 						Name: tokenIssuerName,
 					},
 				},
-				Database: goharborv1alpha2.HarborDatabaseSpec{
+				Database: &goharborv1alpha2.HarborDatabaseSpec{
 					PostgresCredentials: database.PostgresCredentials,
 					Hosts:               database.Hosts,
 					SSLMode:             harbormetav1.PostgresSSLMode(database.Parameters[harbormetav1.PostgresSSLModeKey]),
