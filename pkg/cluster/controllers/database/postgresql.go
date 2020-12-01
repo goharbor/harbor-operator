@@ -73,7 +73,7 @@ func (p *PostgreSQLController) Apply(ctx context.Context, harborcluster *v1alpha
 		return databaseNotReadyStatus(CheckDatabaseHealthError, err.Error()), err
 	}
 
-	return p.Readiness()
+	return p.Readiness(ctx)
 }
 
 func (p *PostgreSQLController) Delete(ctx context.Context, harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {

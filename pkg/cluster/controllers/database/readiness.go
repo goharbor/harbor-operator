@@ -1,6 +1,7 @@
 package database
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -41,7 +42,7 @@ const (
 // - create postgre connection pool
 // - ping postgre server
 // - return postgre properties if postgre has available
-func (p *PostgreSQLController) Readiness() (*lcm.CRStatus, error) {
+func (p *PostgreSQLController) Readiness(ctx context.Context) (*lcm.CRStatus, error) {
 	var (
 		conn   *Connect
 		client *pgx.Conn
@@ -50,14 +51,14 @@ func (p *PostgreSQLController) Readiness() (*lcm.CRStatus, error) {
 
 	name := p.HarborCluster.Name
 
-	conn, client, err = p.GetInClusterDatabaseInfo()
+	conn, client, err = p.GetInClusterDatabaseInfo(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	defer client.Close(p.Ctx)
+	defer client.Close(ctx)
 
-	if err := client.Ping(p.Ctx); err != nil {
+	if err := client.Ping(ctx); err != nil {
 		p.Log.Error(err, "Fail to check Database.",
 			"namespace", p.HarborCluster.Namespace,
 			"name", p.HarborCluster.Name)
@@ -136,7 +137,7 @@ func (p *PostgreSQLController) DeployComponentSecret(conn *Connect, secretName s
 }
 
 // GetInClusterDatabaseInfo returns inCluster database connection client
-func (p *PostgreSQLController) GetInClusterDatabaseInfo() (*Connect, *pgx.Conn, error) {
+func (p *PostgreSQLController) GetInClusterDatabaseInfo(ctx context.Context) (*Connect, *pgx.Conn, error) {
 	var (
 		connect *Connect
 		client  *pgx.Conn
@@ -153,8 +154,9 @@ func (p *PostgreSQLController) GetInClusterDatabaseInfo() (*Connect, *pgx.Conn, 
 	}
 
 	url := connect.GenDatabaseUrl()
+	fmt.Println(url)
 
-	client, err = pgx.Connect(p.Ctx, url)
+	client, err = pgx.Connect(ctx, url)
 	if err != nil {
 		p.Log.Error(err, "Unable to connect to database")
 		return connect, client, err
@@ -180,7 +182,7 @@ func (p *PostgreSQLController) GetInClusterDatabaseConn(name, pw string) (*Conne
 }
 
 func GenInClusterPasswordSecretName(teamID, name string) string {
-	return fmt.Sprintf("postgres.%s-%s.credentials", teamID, name)
+	return fmt.Sprintf("postgres.%s-%s.credentials.postgresql.acid.zalan.do", teamID, name)
 }
 
 // GetInClusterHost returns the Database master pod ip or service name
