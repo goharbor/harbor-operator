@@ -172,6 +172,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, notary *goharborv1alpha2
 						Ports: []corev1.ContainerPort{{
 							ContainerPort: apiPort,
 							Name:          harbormetav1.NotaryServerAPIPortName,
+							Protocol:      corev1.ProtocolTCP,
 						}},
 						VolumeMounts: volumeMounts,
 						Env:          migrationEnvs,
