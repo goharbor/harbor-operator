@@ -205,7 +205,7 @@ dist/harbor-operator_linux_amd64/manager:
 # Run go linters
 .PHONY: go-lint
 go-lint: golangci-lint vet go-generate
-	$(GOLANGCI_LINT) run --verbose
+	$(GOLANGCI_LINT) run --verbose --max-same-issues 0 --sort-results -D wrapcheck -D exhaustivestruct -D errorlint -D goerr113 -D gomnd -D nestif -D funlen -D gosec
 
 # Run go fmt against code
 .PHONY: fmt
@@ -536,8 +536,8 @@ endif
 .PHONY: golangci-lint
 golangci-lint:
 ifeq (, $(shell which golangci-lint))
-	# https://github.com/golangci/golangci-lint#install
-	 curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOBIN)/bin v1.33.0
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOBIN) v1.33.0
+GOLANGCI_LINT=$(GOBIN)/golangci-lint
 else
 GOLANGCI_LINT=$(shell which golangci-lint)
 endif
