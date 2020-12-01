@@ -22,13 +22,13 @@ const (
 
 type CoreIngress graph.Resource
 
-func (r *Reconciler) AddCoreIngress(ctx context.Context, harbor *goharborv1alpha2.Harbor, core Core, portal Portal, registry Registry) (CoreIngress, error) {
+func (r *Reconciler) AddCoreIngress(ctx context.Context, harbor *goharborv1alpha2.Harbor, core Core, portal Portal) (CoreIngress, error) {
 	ingress, err := r.GetCoreIngress(ctx, harbor)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot get core ingress")
 	}
 
-	ingressRes, err := r.Controller.AddIngressToManage(ctx, ingress, core, portal, registry)
+	ingressRes, err := r.Controller.AddIngressToManage(ctx, ingress, core, portal)
 
 	return CoreIngress(ingressRes), errors.Wrap(err, "cannot add core ingress")
 }

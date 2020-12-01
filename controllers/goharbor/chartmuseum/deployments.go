@@ -299,9 +299,11 @@ func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1a
 						Ports: []corev1.ContainerPort{{
 							Name:          harbormetav1.ChartMuseumHTTPPortName,
 							ContainerPort: httpPort,
+							Protocol:      corev1.ProtocolTCP,
 						}, {
 							Name:          harbormetav1.ChartMuseumHTTPSPortName,
 							ContainerPort: httpsPort,
+							Protocol:      corev1.ProtocolTCP,
 						}},
 
 						EnvFrom: envFroms,

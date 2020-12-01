@@ -165,9 +165,11 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registryCtl *goharborv1a
 	registryContainer.Ports = []corev1.ContainerPort{{
 		Name:          harbormetav1.RegistryControllerHTTPPortName,
 		ContainerPort: httpPort,
+		Protocol:      corev1.ProtocolTCP,
 	}, {
 		Name:          harbormetav1.RegistryControllerHTTPSPortName,
 		ContainerPort: httpsPort,
+		Protocol:      corev1.ProtocolTCP,
 	}}
 
 	port := harbormetav1.RegistryControllerHTTPPortName

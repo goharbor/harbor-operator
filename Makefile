@@ -434,7 +434,7 @@ INGRESS_NAMESPACE := nginx-ingress
 .PHONY: ingress
 ingress: helm
 	$(MAKE) kube-namespace NAMESPACE=$(INGRESS_NAMESPACE)
-	$(HELM) upgrade --install nginx stable/nginx-ingress \
+	$(HELM) upgrade --install nginx ingress-nginx/ingress-nginx \
 		--namespace $(INGRESS_NAMESPACE) \
 		--set-string controller.config.proxy-body-size=0
 

@@ -129,6 +129,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, notary *goharborv1alpha2
 						Ports: []corev1.ContainerPort{{
 							ContainerPort: goharborv1alpha2.NotarySignerAPIPort,
 							Name:          harbormetav1.NotarySignerAPIPortName,
+							Protocol:      corev1.ProtocolTCP,
 						}},
 						EnvFrom: []corev1.EnvFromSource{{
 							Prefix: "NOTARY_SIGNER_",

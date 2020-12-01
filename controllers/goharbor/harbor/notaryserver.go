@@ -102,6 +102,10 @@ func (r *Reconciler) GetNotaryServerCertificate(ctx context.Context, harbor *goh
 	secretName := r.NormalizeName(ctx, harbor.GetName(), controllers.NotaryServer.String(), "authentication")
 
 	return &certv1.Certificate{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       certv1.CertificateKind,
+			APIVersion: certv1.SchemeGroupVersion.String(),
+		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      r.NormalizeName(ctx, harbor.GetName(), controllers.NotaryServer.String(), "authentication"),
 			Namespace: harbor.GetNamespace(),

@@ -72,21 +72,29 @@ func UpdateCondition(ctx context.Context, conditions []interface{}, conditionTyp
 		}
 
 		if condition["type"] == conditionTypeString {
-			condition["status"] = string(conditionStatus)
+			if condition["status"] != string(conditionStatus) {
+				condition["status"] = string(conditionStatus)
+			}
 
 			if reason == "" {
-				delete(condition, "reason")
+				if r, ok := condition["reason"]; ok && r != "" {
+					delete(condition, "reason")
+				}
 			} else {
-				condition["reason"] = reason
+				if condition["reason"] != reason {
+					condition["reason"] = reason
+				}
 			}
 
 			if message == "" {
-				delete(condition, "message")
+				if m, ok := condition["message"]; ok && m != "" {
+					delete(condition, "message")
+				}
 			} else {
-				condition["message"] = message
+				if condition["message"] != message {
+					condition["message"] = message
+				}
 			}
-
-			// conditions[i] = condition
 
 			return conditions, nil
 		}

@@ -250,9 +250,11 @@ func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1al
 						Ports: []corev1.ContainerPort{{
 							Name:          harbormetav1.JobServiceHTTPPortName,
 							ContainerPort: httpPort,
+							Protocol:      corev1.ProtocolTCP,
 						}, {
 							Name:          harbormetav1.JobServiceHTTPSPortName,
 							ContainerPort: httpsPort,
+							Protocol:      corev1.ProtocolTCP,
 						}},
 
 						// https://github.com/goharbor/harbor/blob/master/make/photon/prepare/templates/jobservice/env.jinja

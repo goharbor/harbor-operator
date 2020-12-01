@@ -13,14 +13,13 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Rcfer to
 // http://onsi.github.io/ginkgo/ to learn more about Ginkgo.
 
 var _ = Describe("Mutate the owner reference", func() {
-	var getOwnerMutation resources.Mutable
+	var ownerMutation resources.Mutable
 	var owner *corev1.Namespace
 	var matcher interface{}
 
@@ -40,7 +39,7 @@ var _ = Describe("Mutate the owner reference", func() {
 		gvk := gvks[0]
 		owner.SetGroupVersionKind(gvk)
 
-		getOwnerMutation = GetOwnerMutation(s, owner)
+		ownerMutation = GetOwnerMutation(s, owner)
 		varTrue := true
 		matcher = gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
 			"APIVersion": BeEquivalentTo(gvk.Version),
@@ -52,17 +51,9 @@ var _ = Describe("Mutate the owner reference", func() {
 
 	Context("With a metav1 object", func() {
 		var resource *corev1.Secret
-		var result *corev1.Secret
-		var mutate controllerutil.MutateFn
 
 		BeforeEach(func() {
 			resource = &corev1.Secret{}
-			result = resource.DeepCopy()
-			mutate = getOwnerMutation(context.TODO(), resource, result)
-		})
-
-		JustBeforeEach(func() {
-			resource.DeepCopyInto(result)
 		})
 
 		Context("Without owner", func() {
@@ -71,10 +62,10 @@ var _ = Describe("Mutate the owner reference", func() {
 			})
 
 			It("Should add the right owner", func() {
-				err := mutate()
+				err := ownerMutation(context.TODO(), resource)
 				Expect(err).ToNot(HaveOccurred())
 
-				Expect(result.GetOwnerReferences()).To(ContainElement(matcher))
+				Expect(resource.GetOwnerReferences()).To(ContainElement(matcher))
 			})
 		})
 
@@ -97,10 +88,10 @@ var _ = Describe("Mutate the owner reference", func() {
 			})
 
 			It("Should add the owner", func() {
-				err := mutate()
+				err := ownerMutation(context.TODO(), resource)
 				Expect(err).ToNot(HaveOccurred())
 
-				ownerReferences := result.GetOwnerReferences()
+				ownerReferences := resource.GetOwnerReferences()
 				Expect(ownerReferences).To(ContainElement(matcher))
 				for _, owner := range initialOwners {
 					Expect(ownerReferences).To(ContainElement(owner))
@@ -124,7 +115,7 @@ var _ = Describe("Mutate the owner reference", func() {
 			})
 
 			It("Should failed", func() {
-				err := mutate()
+				err := ownerMutation(context.TODO(), resource)
 				Expect(err).To(HaveOccurred())
 			})
 		})
@@ -148,10 +139,10 @@ var _ = Describe("Mutate the owner reference", func() {
 			})
 
 			It("Should pass", func() {
-				err := mutate()
+				err := ownerMutation(context.TODO(), resource)
 				Expect(err).ToNot(HaveOccurred())
 
-				ownerReferences := result.GetOwnerReferences()
+				ownerReferences := resource.GetOwnerReferences()
 				Expect(ownerReferences).To(ConsistOf(matcher))
 			})
 		})

@@ -25,6 +25,7 @@ require (
 	github.com/prometheus/client_golang v1.7.0
 	github.com/sethvargo/go-password v0.1.3
 	github.com/sirupsen/logrus v1.6.0
+	github.com/stretchr/testify v1.6.1 // indirect
 	github.com/uber/jaeger-client-go v2.24.0+incompatible
 	github.com/uber/jaeger-lib v2.2.0+incompatible
 	go.uber.org/zap v1.15.0
@@ -36,12 +37,11 @@ require (
 	golang.org/x/tools v0.0.0-20200626171337-aa94e735be7f // indirect
 	gomodules.xyz/jsonpatch/v2 v2.1.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
-	k8s.io/api v0.18.4
-	k8s.io/apiextensions-apiserver v0.18.4 // indirect
-	k8s.io/apimachinery v0.18.4
-	k8s.io/client-go v0.18.4
+	k8s.io/api v0.18.6
+	k8s.io/apimachinery v0.18.6
+	k8s.io/client-go v0.18.6
 	k8s.io/utils v0.0.0-20200619165400-6e3d28b6ed19 // indirect
-	sigs.k8s.io/controller-runtime v0.6.1-0.20200528151803-676c350bd1f3
+	sigs.k8s.io/controller-runtime v0.6.4
 	sigs.k8s.io/kustomize/kstatus v0.0.2
 	sigs.k8s.io/yaml v1.2.0
 )
