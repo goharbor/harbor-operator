@@ -438,8 +438,8 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1alpha2.Harbo
 					CertificateRef: tokenCertificateRef,
 				},
 				NotaryServer: notary,
-				Trivy: trivy,
-				TLS:   tls,
+				Trivy:        trivy,
+				TLS:          tls,
 			},
 			CoreConfig: goharborv1alpha2.CoreConfig{
 				AdminInitialPasswordRef: adminPasswordRef,
