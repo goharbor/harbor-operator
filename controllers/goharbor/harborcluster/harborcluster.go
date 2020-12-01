@@ -6,7 +6,8 @@ import (
 	"time"
 
 	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
-	"golang.org/x/sync/errgroup"
+	"github.com/goharbor/harbor-operator/pkg/cluster/gos"
+
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
@@ -63,9 +64,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) {
 	}()
 
 	// Deploy or check dependent services concurrently and fail earlier
-	g, _ := errgroup.WithContext(ctx)
+	g, gtx := gos.NewGroup(ctx)
 	g.Go(func() error {
-		cacheStatus, err := r.CacheCtrl.Apply(ctx, harborcluster)
+		cacheStatus, err := r.CacheCtrl.Apply(gtx, harborcluster)
 		if cacheStatus != nil {
 			st.UpdateCache(cacheStatus.Condition)
 			r.HarborCtrl.WithDependency(v1alpha2.ComponentCache, cacheStatus)
@@ -75,7 +76,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) {
 	})
 
 	g.Go(func() error {
-		dbStatus, err := r.DatabaseCtrl.Apply(ctx, harborcluster)
+		dbStatus, err := r.DatabaseCtrl.Apply(gtx, harborcluster)
 		if dbStatus != nil {
 			st.UpdateDatabase(dbStatus.Condition)
 			r.HarborCtrl.WithDependency(v1alpha2.ComponentDatabase, dbStatus)
@@ -85,7 +86,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) {
 	})
 
 	g.Go(func() error {
-		storageStatus, err := r.StorageCtrl.Apply(ctx, harborcluster)
+		storageStatus, err := r.StorageCtrl.Apply(gtx, harborcluster)
 		if storageStatus != nil {
 			st.UpdateStorage(storageStatus.Condition)
 			r.HarborCtrl.WithDependency(v1alpha2.ComponentStorage, storageStatus)

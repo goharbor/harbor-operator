@@ -90,8 +90,6 @@ func (s *status) Update() error {
 	s.data.Status = s.overallStatus()
 	s.cr.Status = *s.data
 
-	s.log.Info("update status of harbor cluster", "meta", s.cr.ObjectMeta, "status", s.cr.Status)
-
 	if err := s.Client.Status().Update(s.context, s.cr); err != nil {
 		if apierrors.IsConflict(err) {
 			s.log.Error(err, "failed to update status of harbor cluster")
