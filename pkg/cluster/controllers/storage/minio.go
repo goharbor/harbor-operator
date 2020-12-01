@@ -27,7 +27,7 @@ const (
 	ChartMuseumExternalSecretSuffix = "chart-museum-storage"
 
 	DefaultCredsSecret = "creds"
-	DefaultPrefix = "minio-"
+	DefaultPrefix      = "minio-"
 
 	DefaultZone   = "zone-harbor"
 	DefaultRegion = "us-east-1"
