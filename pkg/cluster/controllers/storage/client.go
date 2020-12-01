@@ -1,8 +1,9 @@
 package storage
 
 import (
-	minv6 "github.com/minio/minio-go/v6"
 	"log"
+
+	minv6 "github.com/minio/minio-go/v6"
 )
 
 type Minio interface {
@@ -16,11 +17,11 @@ type MinioClient struct {
 }
 
 func GetMinioClient(endpoint, accessKeyID, secretAccessKey, location string, useSSL bool) (*MinioClient, error) {
-	minioClient := &MinioClient{}
 	client, err := minv6.New(endpoint, accessKeyID, secretAccessKey, useSSL)
 	if err != nil {
 		log.Fatalln(err)
-		return minioClient, err
+
+		return nil, err
 	}
 
 	return &MinioClient{
@@ -33,8 +34,10 @@ func (m MinioClient) IsBucketExists(bucket string) (bool, error) {
 	exists, err := m.Client.BucketExists(bucket)
 	if err != nil {
 		log.Fatalln(err)
+
 		return exists, err
 	}
+
 	return exists, nil
 }
 
@@ -42,7 +45,9 @@ func (m MinioClient) CreateBucket(bucket string) error {
 	err := m.Client.MakeBucket(bucket, m.Location)
 	if err != nil {
 		log.Fatalln(err)
+
 		return err
 	}
+
 	return nil
 }

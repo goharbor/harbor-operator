@@ -17,9 +17,8 @@ import (
 // It does not:
 // - perform any postgresqls downscale (left for downscale phase)
 // - perform any postgresqls upscale (left for upscale phase)
-// - perform any pod upgrade (left for rolling upgrade phase)
+// - perform any pod upgrade (left for rolling upgrade phase).
 func (p *PostgreSQLController) Deploy() (*lcm.CRStatus, error) {
-
 	var expectCR *unstructured.Unstructured
 
 	name := fmt.Sprintf("%s-%s", p.HarborCluster.Namespace, p.HarborCluster.Name)
@@ -36,11 +35,13 @@ func (p *PostgreSQLController) Deploy() (*lcm.CRStatus, error) {
 	}
 
 	p.Log.Info("Creating Database.", "namespace", p.HarborCluster.Namespace, "name", name)
+
 	_, err = crdClient.Create(expectCR, metav1.CreateOptions{})
 	if err != nil {
 		return databaseNotReadyStatus(CreateDatabaseCrError, err.Error()), err
 	}
 
 	p.Log.Info("Database create complete.", "namespace", p.HarborCluster.Namespace, "name", name)
+
 	return databaseUnknownStatus(), nil
 }

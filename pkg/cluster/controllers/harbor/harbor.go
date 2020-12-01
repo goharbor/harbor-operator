@@ -27,10 +27,12 @@ type Controller struct {
 
 func (harbor *Controller) Apply(ctx context.Context, harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
 	var harborCR *v1alpha2.Harbor
+
 	err := harbor.KubeClient.Get(harbor.getHarborCRNamespacedName(harborcluster), harborCR)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			harborCR = harbor.getHarborCR(harborcluster)
+
 			err = harbor.KubeClient.Create(harborCR)
 			if err != nil {
 				return harborClusterCRNotReadyStatus(CreateHarborCRError, err.Error()), err
@@ -57,7 +59,7 @@ func (harbor *Controller) Upgrade(ctx context.Context, harborcluster *v1alpha2.H
 	panic("implement me")
 }
 
-// WithDependency appends the related dependent service for deploying Harbor later
+// WithDependency appends the related dependent service for deploying Harbor later.
 func (harbor *Controller) WithDependency(component v1alpha2.Component, svcCR *lcm.CRStatus) {
 	harbor.ComponentToCRStatus.Store(component, svcCR)
 }
@@ -68,6 +70,7 @@ func NewHarborController(ctx context.Context, options ...k8s.Option) *Controller
 	for _, option := range options {
 		option(o)
 	}
+
 	return &Controller{
 		Ctx:        ctx,
 		KubeClient: o.Client,
@@ -76,7 +79,7 @@ func NewHarborController(ctx context.Context, options ...k8s.Option) *Controller
 	}
 }
 
-// getHarborCR will get a Harbor CR from the harborcluster definition
+// getHarborCR will get a Harbor CR from the harborcluster definition.
 func (harbor *Controller) getHarborCR(harborcluster *v1alpha2.HarborCluster) *v1alpha2.Harbor {
 	namespacedName := harbor.getHarborCRNamespacedName(harborcluster)
 
@@ -118,13 +121,14 @@ func harborClusterCRUnknownStatus(reason, message string) *lcm.CRStatus {
 	return lcm.New(v1alpha2.ServiceReady).WithStatus(corev1.ConditionUnknown).WithReason(reason).WithMessage(message)
 }
 
-// harborClusterCRStatus will assembly the harbor cluster status according the v1alpha1.Harbor status
+// harborClusterCRStatus will assembly the harbor cluster status according the v1alpha1.Harbor status.
 func harborClusterCRStatus(harbor *v1alpha2.Harbor) *lcm.CRStatus {
 	for _, condition := range harbor.Status.Conditions {
 		if condition.Type == status.ConditionInProgress {
 			return lcm.New(v1alpha2.ServiceReady).WithStatus(condition.Status).WithMessage(condition.Message).WithReason(condition.Reason)
 		}
 	}
+
 	return harborClusterCRUnknownStatus(EmptyHarborCRStatusError, "The ready condition of harbor.goharbor.io is empty. Please wait for minutes.")
 }
 
@@ -135,21 +139,23 @@ func (harbor *Controller) getHarborCRNamespacedName(harborcluster *v1alpha2.Harb
 	}
 }
 
-// getCacheSpec will get a name of k8s secret which stores cache info
+// getCacheSpec will get a name of k8s secret which stores cache info.
 func (harbor *Controller) getCacheSpec() *v1alpha2.ExternalRedisSpec {
 	p := harbor.getProperty(v1alpha2.ComponentCache, lcm.CachePropertyName)
 	if p != nil {
 		return p.Value.(*v1alpha2.ExternalRedisSpec)
 	}
+
 	return nil
 }
 
-// getDatabaseSecret will get a name of k8s secret which stores database info
+// getDatabaseSecret will get a name of k8s secret which stores database info.
 func (harbor *Controller) getDatabaseSpec() *v1alpha2.HarborDatabaseSpec {
 	p := harbor.getProperty(v1alpha2.ComponentDatabase, lcm.DatabasePropertyName)
 	if p != nil {
 		return p.Value.(*v1alpha2.HarborDatabaseSpec)
 	}
+
 	return nil
 }
 
@@ -159,6 +165,7 @@ func (harbor *Controller) getStorageSpec() *v1alpha2.HarborStorageImageChartStor
 	if p != nil {
 		return p.Value.(*v1alpha2.HarborStorageImageChartStorageSpec)
 	}
+
 	return nil
 }
 

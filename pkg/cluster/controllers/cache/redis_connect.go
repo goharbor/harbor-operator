@@ -33,21 +33,18 @@ type RedisConnect struct {
 	GroupName string
 }
 
-// NewRedisPool returns redis sentinel client
+// NewRedisPool returns redis sentinel client.
 func (c *RedisConnect) NewRedisPool() *rediscli.Client {
-
 	return BuildRedisPool(c.Endpoints, c.Port, c.Password, c.GroupName, 0)
 }
 
-// NewRedisClient returns redis client
+// NewRedisClient returns redis client.
 func (c *RedisConnect) NewRedisClient() *rediscli.Client {
-
 	return BuildRedisClient(c.Endpoints, c.Port, c.Password, 0)
 }
 
-// BuildRedisPool returns redis connection pool client
+// BuildRedisPool returns redis connection pool client.
 func BuildRedisPool(redisSentinelIP []string, redisSentinelPort, redisSentinelPassword, redisGroupName string, redisIndex int) *rediscli.Client {
-
 	sentinelsInfo := GenHostInfo(redisSentinelIP, redisSentinelPort)
 
 	options := &rediscli.FailoverOptions{
@@ -67,14 +64,13 @@ func BuildRedisPool(redisSentinelIP []string, redisSentinelPort, redisSentinelPa
 	client := rediscli.NewFailoverClient(options)
 
 	return client
-
 }
 
-// BuildRedisClient returns redis connection client
+// BuildRedisClient returns redis connection client.
 func BuildRedisClient(host []string, port, password string, index int) *rediscli.Client {
 	hostInfo := GenHostInfo(host, port)
 	options := &rediscli.Options{
-		Addr:     strings.Join(hostInfo[:], ","),
+		Addr:     strings.Join(hostInfo, ","),
 		Password: password,
 		DB:       index,
 	}
@@ -83,9 +79,10 @@ func BuildRedisClient(host []string, port, password string, index int) *rediscli
 	return client
 }
 
-// GenHostInfo splice host and port
+// GenHostInfo splice host and port.
 func GenHostInfo(endpoint []string, port string) []string {
-	var hostInfo []string
+	hostInfo := make([]string, 0, len(endpoint))
+
 	for _, s := range endpoint {
 		sp := s + ":" + port
 		hostInfo = append(hostInfo, sp)

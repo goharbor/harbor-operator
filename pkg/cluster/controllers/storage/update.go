@@ -6,6 +6,7 @@ import (
 
 func (m *MinIOController) Update() (*lcm.CRStatus, error) {
 	m.CurrentMinIOCR.Spec = m.DesiredMinIOCR.Spec
+
 	err := m.KubeClient.Update(m.CurrentMinIOCR)
 	if err != nil {
 		return minioNotReadyStatus(UpdateMinIOError, err.Error()), err

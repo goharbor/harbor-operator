@@ -27,10 +27,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 )
 
-// Log used this webhook
+// Log used this webhook.
 var clog = logf.Log.WithName("harborcluster-resource")
 
-// SetupWebhookWithManager sets up validating webhook of HarborCluster
+// SetupWebhookWithManager sets up validating webhook of HarborCluster.
 func (hc *HarborCluster) SetupWebhookWithManager(ctx context.Context, mgr ctrl.Manager) error {
 	return ctrl.NewWebhookManagedBy(mgr).
 		For(hc).
@@ -96,12 +96,11 @@ func (hc *HarborCluster) validateStorage() *field.Error {
 			// Invalid and not acceptable
 			return required(fp)
 		}
-	} else {
-		if hc.Spec.InClusterStorage != nil {
-			// Both are configured, conflict
-			p := field.NewPath("spec").Child("imageChartStorage")
-			return forbidden(fp, p)
-		}
+	} else if hc.Spec.InClusterStorage != nil {
+		// Both are configured, conflict
+		p := field.NewPath("spec").Child("imageChartStorage")
+
+		return forbidden(fp, p)
 	}
 
 	return nil
@@ -150,7 +149,7 @@ func (hc *HarborCluster) validateCache() *field.Error {
 	return nil
 }
 
-func forbidden(mainPath *field.Path, conflictPath *field.Path) *field.Error {
+func forbidden(mainPath fmt.Stringer, conflictPath *field.Path) *field.Error {
 	return field.Forbidden(conflictPath, fmt.Sprintf("conflicts: %s should not be configured as %s has been configured already", conflictPath.String(), mainPath.String()))
 }
 

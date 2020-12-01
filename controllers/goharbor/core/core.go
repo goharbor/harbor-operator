@@ -92,9 +92,8 @@ func New(ctx context.Context, name string, configStore *configstore.Store) (comm
 		configTemplatePath = DefaultConfigTemplatePath
 	}
 
-	r := &Reconciler{
-		configError: config.ErrNotReady,
-	}
+	r := &Reconciler{}
+	r.configError = config.ErrNotReady
 
 	configStore.FileCustomRefresh(configTemplatePath, func(data []byte) ([]configstore.Item, error) {
 		r.configError = nil

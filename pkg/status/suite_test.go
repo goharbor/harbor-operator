@@ -14,6 +14,7 @@ import (
 // http://onsi.github.io/ginkgo/ to learn more about Ginkgo.
 
 func TestSuite(t *testing.T) {
+	t.Parallel()
 	RegisterFailHandler(Fail)
 
 	RunSpecsWithDefaultAndCustomReporters(t, "Controller", []Reporter{printer.NewlineReporter{}})

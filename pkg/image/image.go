@@ -6,7 +6,7 @@ import (
 	"github.com/blang/semver"
 )
 
-// Getter will proxy the Locator
+// Getter will proxy the Locator.
 type Getter interface {
 	Locator
 }
@@ -37,13 +37,14 @@ func NewImageGetter(registry *string, harborVersion string) (Getter, error) {
 
 	var locator Getter
 
-	if hv.Compare(vM1m10p0) == 0 {
-		locator = &harborV1_10_0_ImageLocator{}
-	} else if versionRange(hv) {
+	switch {
+	case hv.Compare(vM1m10p0) == 0:
+		locator = &harborV1_10_0ImageLocator{}
+	case versionRange(hv):
 		locator = &harborVM1m10pxImageLocator{
 			HarborVersion: harborVersion,
 		}
-	} else {
+	default:
 		return nil, fmt.Errorf("failed to get relate images with harbor version %s, only support '1.10.x'", harborVersion)
 	}
 
@@ -120,6 +121,7 @@ func GetImage(registry *string, image string) string {
 	} else {
 		imageAddr = fmt.Sprintf("%s/%s", *registry, image)
 	}
+
 	return imageAddr
 }
 

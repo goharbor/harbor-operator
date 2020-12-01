@@ -7,7 +7,6 @@ import (
 
 	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-operator/pkg/cluster/gos"
-
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
@@ -16,7 +15,7 @@ const (
 	defaultWaitCycle = 10 * time.Second
 )
 
-// Reconcile logic of the HarborCluster
+// Reconcile logic of the HarborCluster.
 func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) {
 	ctx := context.TODO()
 	log := r.Log.WithValues("resource", req.NamespacedName)
@@ -36,11 +35,12 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) {
 	// Check if it is being deleted
 	if !harborcluster.ObjectMeta.DeletionTimestamp.IsZero() {
 		log.Info("harbor cluster is being deleted", "name", req.NamespacedName)
+
 		return ctrl.Result{}, nil
 	}
 
 	// For tracking status
-	st := NewStatus(harborcluster).
+	st := newStatus(harborcluster).
 		WithContext(ctx).
 		WithClient(r.Client).
 		WithLog(log)
@@ -55,6 +55,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) {
 			}
 
 			er = fmt.Errorf("defer: update status error: %s", er)
+
 			if err != nil {
 				err = fmt.Errorf("%s, upstreaming error: %w", er.Error(), err)
 			} else {
@@ -110,6 +111,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) {
 
 	if !st.DependsReady() {
 		r.Log.Info("not all the dependent services are ready")
+
 		return ctrl.Result{
 			RequeueAfter: defaultWaitCycle,
 		}, nil
@@ -117,14 +119,16 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) {
 
 	// Create Harbor instance now
 	harborStatus, err := r.HarborCtrl.Apply(ctx, harborcluster)
-	if harborStatus != nil {
-		st.UpdateHarbor(harborStatus.Condition)
-	}
 	if err != nil {
 		return ctrl.Result{}, fmt.Errorf("reconcile harbor service error: %w", err)
 	}
 
+	if harborStatus != nil {
+		st.UpdateHarbor(harborStatus.Condition)
+	}
+
 	// Reconcile done
 	r.Log.Info("reconcile is completed")
+
 	return ctrl.Result{}, nil
 }

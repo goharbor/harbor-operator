@@ -5,23 +5,21 @@ import (
 
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/database/api"
-
-	"k8s.io/apimachinery/pkg/runtime/schema"
-
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 var (
 	SchemeGroupVersion = schema.GroupVersion{Group: GroupName, Version: APIVersion}
 	databaseGVR        = SchemeGroupVersion.WithResource(PostgresCRDResourcePlural)
 	databaseKind       = "postgresql"
-	databaseApi        = "acid.zalan.do/v1"
+	databaseAPI        = "acid.zalan.do/v1"
 )
 
-// GetPostgresCR returns PostgreSqls CRs
+// GetPostgresCR returns PostgreSqls CRs.
 func (p *PostgreSQLController) GetPostgresCR() (*unstructured.Unstructured, error) {
 	resource := p.GetPostgreResource()
 	replica := p.GetPostgreReplica()
@@ -33,7 +31,7 @@ func (p *PostgreSQLController) GetPostgresCR() (*unstructured.Unstructured, erro
 	conf := &api.Postgresql{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       databaseKind,
-			APIVersion: databaseApi,
+			APIVersion: databaseAPI,
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
@@ -67,7 +65,7 @@ func (p *PostgreSQLController) GetPostgresCR() (*unstructured.Unstructured, erro
 
 func GetPatron() api.Patroni {
 	return api.Patroni{
-		InitDB: GetInitDb(),
+		InitDB: GetInitDB(),
 		PgHba:  GetPgHba(),
 	}
 }
@@ -79,7 +77,7 @@ func GetPgHba() []string {
 	}
 }
 
-func GetInitDb() map[string]string {
+func GetInitDB() map[string]string {
 	return map[string]string{
 		"encoding":       "UTF8",
 		"locale":         "en_US.UTF-8",
@@ -97,7 +95,7 @@ func GetUsers() map[string]api.UserFlags {
 	}
 }
 
-//GetDatabaseSecret returns database connection secret
+// GetDatabaseSecret returns database connection secret.
 func (p *PostgreSQLController) GetDatabaseSecret(conn *Connect, secretName string) *corev1.Secret {
 	secret := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{

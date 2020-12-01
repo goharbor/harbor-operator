@@ -37,7 +37,7 @@ type CRStatus struct {
 	Properties Properties                      `json:"properties"`
 }
 
-// New returns new CRStatus
+// New returns new CRStatus.
 func New(conditionType v1alpha2.HarborClusterConditionType) *CRStatus {
 	return &CRStatus{
 		Condition: v1alpha2.HarborClusterCondition{
@@ -47,26 +47,30 @@ func New(conditionType v1alpha2.HarborClusterConditionType) *CRStatus {
 	}
 }
 
-// WithStatus returns CRStatus with Condition status
+// WithStatus returns CRStatus with Condition status.
 func (cs *CRStatus) WithStatus(status corev1.ConditionStatus) *CRStatus {
 	cs.Condition.Status = status
+
 	return cs
 }
 
-// WithReason returns CRStatus with Condition reason
+// WithReason returns CRStatus with Condition reason.
 func (cs *CRStatus) WithReason(reason string) *CRStatus {
 	cs.Condition.Reason = reason
+
 	return cs
 }
 
-// WithMessage returns CRStatus with Condition message
+// WithMessage returns CRStatus with Condition message.
 func (cs *CRStatus) WithMessage(message string) *CRStatus {
 	cs.Condition.Message = message
+
 	return cs
 }
 
-// WithProperties returns CRStatus with Properties
+// WithProperties returns CRStatus with Properties.
 func (cs *CRStatus) WithProperties(properties Properties) *CRStatus {
 	cs.Properties = properties
+
 	return cs
 }
