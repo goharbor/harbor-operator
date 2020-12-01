@@ -61,11 +61,11 @@ func (h *Harbor) Validate() error {
 	}
 
 	if h.Spec.Database == nil {
-		allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("database"), h.Spec.Database, "field is required"))
+		allErrs = append(allErrs, required(field.NewPath("spec").Child("database")))
 	}
 
 	if h.Spec.Redis == nil {
-		allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("redis"), h.Spec.Redis, "field is required"))
+		allErrs = append(allErrs, required(field.NewPath("spec").Child("redis")))
 	}
 
 	if len(allErrs) == 0 {
