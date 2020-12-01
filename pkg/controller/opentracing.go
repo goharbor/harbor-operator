@@ -13,13 +13,16 @@ func (c *Controller) AddGVKToSpan(ctx context.Context, span opentracing.Span, re
 	gvks, _, err := c.Scheme.ObjectKinds(resource)
 	if err != nil {
 		logger.Get(ctx).Error(err, "cannot get object kind", "resource", resource)
-
-		span.
-			SetTag("resource.kind", gvk.Kind).
-			SetTag("resource.version", gvk.GroupVersion)
-	} else {
-		gvk = gvks[0]
+		return
 	}
+
+	gvk = gvks[0]
+
+	span.
+		SetTag("resource.kind", gvk.Kind).
+		SetTag("resource.version", gvk.GroupVersion)
+
+	resource.GetObjectKind().SetGroupVersionKind(gvk)
 
 	return
 }

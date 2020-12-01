@@ -248,9 +248,11 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 						Ports: []corev1.ContainerPort{{
 							ContainerPort: apiPort,
 							Name:          harbormetav1.RegistryAPIPortName,
+							Protocol:      corev1.ProtocolTCP,
 						}, {
 							ContainerPort: metricsPort,
 							Name:          harbormetav1.RegistryMetricsPortName,
+							Protocol:      corev1.ProtocolTCP,
 						}},
 						LivenessProbe: &corev1.Probe{
 							Handler: corev1.Handler{

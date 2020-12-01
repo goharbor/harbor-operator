@@ -24,10 +24,12 @@ func (r *Reconciler) GetService(ctx context.Context, registry *goharborv1alpha2.
 				Name:       harbormetav1.RegistryAPIPortName,
 				Port:       registry.Spec.HTTP.TLS.GetInternalPort(),
 				TargetPort: intstr.FromString(harbormetav1.RegistryAPIPortName),
+				Protocol:   corev1.ProtocolTCP,
 			}, {
 				Name:       harbormetav1.RegistryMetricsPortName,
 				Port:       registry.Spec.HTTP.TLS.GetInternalPort() + 1,
 				TargetPort: intstr.FromString(harbormetav1.RegistryMetricsPortName),
+				Protocol:   corev1.ProtocolTCP,
 			}},
 			Selector: map[string]string{
 				r.Label("name"):      name,

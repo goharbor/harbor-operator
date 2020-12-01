@@ -28,6 +28,7 @@ func (r *Reconciler) GetService(ctx context.Context, notary *goharborv1alpha2.No
 				Name:       harbormetav1.NotaryServerAPIPortName,
 				Port:       notary.Spec.TLS.GetInternalPort(),
 				TargetPort: intstr.FromString(harbormetav1.NotaryServerAPIPortName),
+				Protocol:   corev1.ProtocolTCP,
 			}},
 			Selector: map[string]string{
 				r.Label("name"):      name,
