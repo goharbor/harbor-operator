@@ -9,7 +9,6 @@ import (
 
 	"github.com/goharbor/harbor-operator/pkg/resources"
 	corev1 "k8s.io/api/core/v1"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Rcfer to
@@ -27,17 +26,9 @@ var _ = Describe("Mutate 1 annotation", func() {
 
 	Context("With a metav1 object", func() {
 		var resource *corev1.Secret
-		var result *corev1.Secret
-		var mutate controllerutil.MutateFn
 
 		BeforeEach(func() {
 			resource = &corev1.Secret{}
-			result = resource.DeepCopy()
-			mutate = getAnnotationMutation(context.TODO(), resource, result)
-		})
-
-		JustBeforeEach(func() {
-			resource.DeepCopyInto(result)
 		})
 
 		Context("Without annotations", func() {
@@ -46,10 +37,10 @@ var _ = Describe("Mutate 1 annotation", func() {
 			})
 
 			It("Should add the right annotation", func() {
-				err := mutate()
+				err := getAnnotationMutation(context.TODO(), resource)
 				Expect(err).ToNot(HaveOccurred())
 
-				annotations := result.GetAnnotations()
+				annotations := resource.GetAnnotations()
 				Expect(annotations).To(HaveKeyWithValue(annotationName, annotationValue))
 			})
 		})
@@ -69,10 +60,10 @@ var _ = Describe("Mutate 1 annotation", func() {
 				expectedAnnotations := initialAnnotations
 				expectedAnnotations[annotationName] = annotationValue
 
-				err := mutate()
+				err := getAnnotationMutation(context.TODO(), resource)
 				Expect(err).ToNot(HaveOccurred())
 
-				annotations := result.GetAnnotations()
+				annotations := resource.GetAnnotations()
 				Expect(annotations).To(BeEquivalentTo(expectedAnnotations))
 			})
 		})
@@ -91,10 +82,10 @@ var _ = Describe("Mutate 1 annotation", func() {
 				expectedAnnotations := initialAnnotations
 				expectedAnnotations[annotationName] = annotationValue
 
-				err := mutate()
+				err := getAnnotationMutation(context.TODO(), resource)
 				Expect(err).ToNot(HaveOccurred())
 
-				annotations := result.GetAnnotations()
+				annotations := resource.GetAnnotations()
 				Expect(annotations).To(BeEquivalentTo(expectedAnnotations))
 			})
 		})
@@ -116,17 +107,9 @@ var _ = Describe("Mutate multiples annotation", func() {
 
 	Context("With a metav1 object", func() {
 		var resource *corev1.Secret
-		var result *corev1.Secret
-		var mutate controllerutil.MutateFn
 
 		BeforeEach(func() {
 			resource = &corev1.Secret{}
-			result = resource.DeepCopy()
-			mutate = getAnnotationMutation(context.TODO(), resource, result)
-		})
-
-		JustBeforeEach(func() {
-			resource.DeepCopyInto(result)
 		})
 
 		Context("Without annotations", func() {
@@ -135,10 +118,10 @@ var _ = Describe("Mutate multiples annotation", func() {
 			})
 
 			It("Should add the right annotations", func() {
-				err := mutate()
+				err := getAnnotationMutation(context.TODO(), resource)
 				Expect(err).ToNot(HaveOccurred())
 
-				annotations := result.GetAnnotations()
+				annotations := resource.GetAnnotations()
 				Expect(annotations).To(HaveKeyWithValue(annotationName1, annotationValue1))
 				Expect(annotations).To(HaveKeyWithValue(annotationName2, annotationValue2))
 			})
@@ -160,10 +143,10 @@ var _ = Describe("Mutate multiples annotation", func() {
 				expectedAnnotations[annotationName1] = annotationValue1
 				expectedAnnotations[annotationName2] = annotationValue2
 
-				err := mutate()
+				err := getAnnotationMutation(context.TODO(), resource)
 				Expect(err).ToNot(HaveOccurred())
 
-				annotations := result.GetAnnotations()
+				annotations := resource.GetAnnotations()
 				Expect(annotations).To(BeEquivalentTo(expectedAnnotations))
 			})
 		})
@@ -184,10 +167,10 @@ var _ = Describe("Mutate multiples annotation", func() {
 				expectedAnnotations[annotationName1] = annotationValue1
 				expectedAnnotations[annotationName2] = annotationValue2
 
-				err := mutate()
+				err := getAnnotationMutation(context.TODO(), resource)
 				Expect(err).ToNot(HaveOccurred())
 
-				annotations := result.GetAnnotations()
+				annotations := resource.GetAnnotations()
 				Expect(annotations).To(BeEquivalentTo(expectedAnnotations))
 			})
 		})

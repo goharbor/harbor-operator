@@ -29,28 +29,33 @@ func New(scheme *runtime.Scheme) *Dependencies {
 	}
 }
 
-func (d *Dependencies) Add(ctx context.Context, resource Dependency, withStatus bool) {
+func (d *Dependencies) Add(ctx context.Context, resource Dependency, onlySpec bool) {
 	d.lock.Lock()
 	defer d.lock.Unlock()
 
-	d.objects[resource] = withStatus
+	d.objects[resource] = onlySpec
 }
 
 func (d *Dependencies) GetID(resource Dependency) string {
-	gvks, _, err := d.scheme.ObjectKinds(resource)
-	if err != nil {
-		return fmt.Sprintf("%s.unknown.checksum.goharbor.io/%s", resource.GetNamespace(), resource.GetName())
+	namespace := resource.GetNamespace()
+	if namespace == "" {
+		namespace = "unknown"
 	}
 
-	return fmt.Sprintf("%s.%s.checksum.goharbor.io/%s", resource.GetNamespace(), strings.ToLower(gvks[0].Kind), resource.GetName())
+	gvks, _, err := d.scheme.ObjectKinds(resource)
+	if err != nil {
+		return fmt.Sprintf("%s.unknown.checksum.goharbor.io/%s", namespace, resource.GetName())
+	}
+
+	return fmt.Sprintf("%s.%s.checksum.goharbor.io/%s", namespace, strings.ToLower(gvks[0].Kind), resource.GetName())
 }
 
 func GetStaticID(name string) string {
 	return fmt.Sprintf("static.checksum.goharbor.io/%s", name)
 }
 
-func (d *Dependencies) ComputeChecksum(resource metav1.Object, withStatus bool) string {
-	if withStatus {
+func (d *Dependencies) ComputeChecksum(resource metav1.Object, onlySpec bool) string {
+	if !onlySpec {
 		return resource.GetResourceVersion()
 	}
 
@@ -66,17 +71,17 @@ func (d *Dependencies) ChangedFor(ctx context.Context, resource Dependency) bool
 		annotations = map[string]string{}
 	}
 
-	for object, withStatus := range d.objects {
+	for object, onlySpec := range d.objects {
 		previous, ok := annotations[d.GetID(object)]
 		if !ok {
-			logger.Get(ctx).V(1).Info("dependencies changed (no annotation)", "dependency", object)
+			logger.Get(ctx).V(1).Info("dependencies changed (no annotation)", "dependency.kind", object.GetObjectKind(), "dependency", object)
 
 			return true
 		}
 
-		current := d.ComputeChecksum(object, withStatus)
+		current := d.ComputeChecksum(object, onlySpec)
 		if previous != current {
-			logger.Get(ctx).V(1).Info(fmt.Sprintf("dependencies changed (expected %s, got %s)", previous, current), "dependency", object)
+			logger.Get(ctx).V(1).Info(fmt.Sprintf("dependencies changed (expected %s, got %s)", previous, current), "dependency.kind", object.GetObjectKind(), "dependency", object)
 
 			return true
 		}
@@ -91,18 +96,20 @@ func (d *Dependencies) AddAnnotations(object metav1.Object) {
 		annotations = map[string]string{}
 	}
 
-	for object, withStatus := range d.objects {
-		annotations[d.GetID(object)] = d.ComputeChecksum(object, withStatus)
+	for object, onlySpec := range d.objects {
+		annotations[d.GetID(object)] = d.ComputeChecksum(object, onlySpec)
 	}
 
 	object.SetAnnotations(annotations)
 }
 
-func CopyMarkers(from, to metav1.Object) {
+func CopyVersion(from, to metav1.Object) {
 	to.SetUID(from.GetUID())
 	to.SetGeneration(from.GetGeneration())
 	to.SetResourceVersion(from.GetResourceVersion())
+}
 
+func CopyMarkers(from, to metav1.Object) {
 	toAnnotations := to.GetAnnotations()
 	if toAnnotations == nil {
 		toAnnotations = map[string]string{}

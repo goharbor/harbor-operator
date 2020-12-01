@@ -434,7 +434,8 @@ INGRESS_NAMESPACE := nginx-ingress
 .PHONY: ingress
 ingress: helm
 	$(MAKE) kube-namespace NAMESPACE=$(INGRESS_NAMESPACE)
-	$(HELM) upgrade --install nginx stable/nginx-ingress \
+	$(HELM) repo add ingress-nginx https://kubernetes.github.io/ingress-nginx # https://github.com/kubernetes/ingress-nginx/tree/master/charts/ingress-nginx#get-repo-info
+	$(HELM) upgrade --install nginx ingress-nginx/ingress-nginx \
 		--namespace $(INGRESS_NAMESPACE) \
 		--set-string controller.config.proxy-body-size=0
 
@@ -443,6 +444,7 @@ CERTMANAGER_NAMESPACE := cert-manager
 .PHONY: certmanager
 certmanager: helm jetstack
 	$(MAKE) kube-namespace NAMESPACE=$(CERTMANAGER_NAMESPACE)
+	$(HELM) repo add jetstack https://charts.jetstack.io # https://cert-manager.io/docs/installation/kubernetes/
 	$(HELM) upgrade --install certmanager jetstack/cert-manager \
 		--namespace $(CERTMANAGER_NAMESPACE) \
 		--version v0.15.1 \

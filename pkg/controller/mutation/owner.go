@@ -3,7 +3,6 @@ package mutation
 import (
 	"context"
 
-	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	"github.com/goharbor/harbor-operator/pkg/resources"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -12,18 +11,14 @@ import (
 )
 
 func GetOwnerMutation(scheme *runtime.Scheme, owner metav1.Object) resources.Mutable {
-	return func(ctx context.Context, _, result runtime.Object) controllerutil.MutateFn {
+	return func(ctx context.Context, result runtime.Object) error {
 		resourceMeta, ok := result.(metav1.Object)
 		if !ok {
-			logger.Get(ctx).Info("Cannot mutate owner: unexpected resource type")
-
-			return func() error { return nil }
+			return ErrorResourceType
 		}
 
-		return func() error {
-			err := controllerutil.SetControllerReference(owner, resourceMeta, scheme)
+		err := controllerutil.SetControllerReference(owner, resourceMeta, scheme)
 
-			return errors.Wrapf(err, "cannot set controller reference for %+v", result)
-		}
+		return errors.Wrapf(err, "cannot set controller reference for %+v", result)
 	}
 }
