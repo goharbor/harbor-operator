@@ -7,12 +7,11 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/pkg/errors"
-
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/common"
 	minio "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/api/v1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
+	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1beta1"
 	k8serror "k8s.io/apimachinery/pkg/api/errors"
@@ -23,10 +22,12 @@ import (
 
 func (m *MinIOController) ProvisionMinIOProperties(minioInstamnce *minio.Tenant) (*lcm.CRStatus, error) {
 	properties := &lcm.Properties{}
+
 	data, err := m.getMinIOProperties(minioInstamnce)
 	if err != nil {
 		return minioNotReadyStatus(getMinIOProperties, err.Error()), err
 	}
+
 	properties.Add(lcm.StoragePropertyName, data)
 
 	return minioReadyStatus(properties), nil
@@ -37,11 +38,14 @@ func (m *MinIOController) getMinIOProperties(minioInstance *minio.Tenant) (*goha
 	if err != nil {
 		return nil, err
 	}
+
 	secretKeyRef := m.createSecretKeyRef(secretKey, minioInstance)
+
 	err = m.KubeClient.Create(secretKeyRef)
 	if err != nil && !k8serror.IsAlreadyExists(err) {
 		return nil, err
 	}
+
 	var endpoint string
 	if !m.HarborCluster.Spec.ImageChartStorage.Redirect.Disable {
 		_, endpoint, err = GetMinIOHostAndSchema(m.HarborCluster.Spec.ExternalURL)
@@ -71,7 +75,7 @@ func (m *MinIOController) createSecretKeyRef(secretKey []byte, minioInstance *mi
 	data := map[string]string{
 		"secretkey": string(secretKey),
 	}
-	dataJson, _ := json.Marshal(&data)
+	dataJSON, _ := json.Marshal(&data)
 	s3KeySecret := &corev1.Secret{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "v1",
@@ -88,14 +92,16 @@ func (m *MinIOController) createSecretKeyRef(secretKey []byte, minioInstance *mi
 		},
 		Type: corev1.SecretTypeOpaque,
 		Data: map[string][]byte{
-			s3Storage: dataJson,
+			s3Storage: dataJSON,
 		},
 	}
+
 	return s3KeySecret
 }
 
 func (m *MinIOController) Provision() (*lcm.CRStatus, error) {
 	credsSecret := m.generateCredsSecret()
+
 	err := m.KubeClient.Create(credsSecret)
 	if err != nil && !k8serror.IsAlreadyExists(err) {
 		return minioNotReadyStatus(CreateMinIOSecretError, err.Error()), err
@@ -107,12 +113,14 @@ func (m *MinIOController) Provision() (*lcm.CRStatus, error) {
 	}
 
 	var minioCR minio.Tenant
+
 	err = m.KubeClient.Get(m.getMinIONamespacedName(), &minioCR)
 	if err != nil {
 		return minioNotReadyStatus(CreateMinIOError, err.Error()), err
 	}
 
 	service := m.generateService()
+
 	err = m.KubeClient.Create(service)
 	if err != nil && !k8serror.IsAlreadyExists(err) {
 		return minioNotReadyStatus(CreateMinIOServiceError, err.Error()), err
@@ -121,13 +129,16 @@ func (m *MinIOController) Provision() (*lcm.CRStatus, error) {
 	// if disable redirect docker registry, we will expose minIO access endpoint by ingress.
 	if !m.HarborCluster.Spec.ImageChartStorage.Redirect.Disable {
 		ingress := m.generateIngress()
+
 		err = m.KubeClient.Create(ingress)
 		if err != nil && !k8serror.IsAlreadyExists(err) {
 			return minioNotReadyStatus(CreateMinIOIngressError, err.Error()), err
 		}
+
 		ingress.OwnerReferences = []metav1.OwnerReference{
 			*metav1.NewControllerRef(&minioCR, HarborClusterMinIOGVK),
 		}
+
 		err = m.KubeClient.Update(ingress)
 		if err != nil {
 			return minioNotReadyStatus(CreateMinIOServiceError, err.Error()), err
@@ -137,6 +148,7 @@ func (m *MinIOController) Provision() (*lcm.CRStatus, error) {
 	service.OwnerReferences = []metav1.OwnerReference{
 		*metav1.NewControllerRef(&minioCR, HarborClusterMinIOGVK),
 	}
+
 	err = m.KubeClient.Update(service)
 	if err != nil {
 		return minioNotReadyStatus(CreateMinIOServiceError, err.Error()), err
@@ -252,7 +264,7 @@ func (m *MinIOController) generateMinIOCR() *minio.Tenant {
 				DNSNames:         []string{},
 			},
 			Env: []corev1.EnvVar{
-				corev1.EnvVar{
+				{
 					Name:  "MINIO_BROWSER",
 					Value: "on",
 				},
@@ -278,6 +290,7 @@ func (m *MinIOController) getResourceRequirements() *corev1.ResourceRequirements
 	if !isEmpty {
 		return &m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Resources
 	}
+
 	limits := map[corev1.ResourceName]resource.Quantity{
 		corev1.ResourceCPU:    resource.MustParse("250m"),
 		corev1.ResourceMemory: resource.MustParse("512Mi"),
@@ -286,6 +299,7 @@ func (m *MinIOController) getResourceRequirements() *corev1.ResourceRequirements
 		corev1.ResourceCPU:    resource.MustParse("250m"),
 		corev1.ResourceMemory: resource.MustParse("512Mi"),
 	}
+
 	return &corev1.ResourceRequirements{
 		Limits:   limits,
 		Requests: requests,
@@ -297,7 +311,9 @@ func (m *MinIOController) getVolumeClaimTemplate() *corev1.PersistentVolumeClaim
 	if !isEmpty {
 		return &m.HarborCluster.Spec.InClusterStorage.MinIOSpec.VolumeClaimTemplate
 	}
+
 	defaultStorageClass := "default"
+
 	return &corev1.PersistentVolumeClaim{
 		Spec: corev1.PersistentVolumeClaimSpec{
 			StorageClassName: &defaultStorageClass,
@@ -365,13 +381,16 @@ func (m *MinIOController) generateCredsSecret() *corev1.Secret {
 		Type: corev1.SecretTypeOpaque,
 		Data: map[string][]byte{
 			"accesskey": []byte(credsAccesskey),
-			"secretkey": []byte(credsSecretkey)},
+			"secretkey": []byte(credsSecretkey),
+		},
 	}
 }
 
 func (m *MinIOController) getCredsFromSecret() ([]byte, []byte, error) {
 	var minIOSecret corev1.Secret
+
 	namespaced := m.getMinIOSecretNamespacedName()
 	err := m.KubeClient.Get(namespaced, &minIOSecret)
+
 	return minIOSecret.Data["accesskey"], minIOSecret.Data["secretkey"], err
 }

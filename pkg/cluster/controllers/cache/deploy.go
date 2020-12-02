@@ -20,7 +20,7 @@ import (
 // It does not:
 // - perform any RedisFailovers downscale (left for downscale phase)
 // - perform any RedisFailovers upscale (left for upscale phase)
-// - perform any pod upgrade (left for rolling upgrade phase)
+// - perform any pod upgrade (left for rolling upgrade phase).
 func (rc *RedisController) Deploy(cluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
 	crdClient := rc.DClient.WithResource(redisFailoversGVR).WithNamespace(cluster.Namespace)
 	expectCR := rc.ResourceManager.GetCacheCR()
@@ -39,21 +39,25 @@ func (rc *RedisController) Deploy(cluster *v1alpha2.HarborCluster) (*lcm.CRStatu
 	}
 
 	rc.Log.Info("Creating Redis.", "namespace", cluster.Namespace, "name", cluster.Name)
+
 	unstructuredData, err := runtime.DefaultUnstructuredConverter.ToUnstructured(expectCR)
 	if err != nil {
 		return cacheNotReadyStatus(ErrorDefaultUnstructuredConverter, err.Error()), err
 	}
+
 	_, err = crdClient.Create(&unstructured.Unstructured{Object: unstructuredData}, metav1.CreateOptions{})
 	if err != nil {
 		return cacheNotReadyStatus(ErrorCreateRedisCr, err.Error()), err
 	}
 
 	rc.Log.Info("Redis has been created.", "namespace", cluster.Namespace, "name", cluster.Name)
+
 	return cacheUnknownStatus(), nil
 }
 
 func (rc *RedisController) DeployService(cluster *v1alpha2.HarborCluster) error {
 	service := &corev1.Service{}
+
 	svc := rc.ResourceManager.GetService()
 	if err := controllerutil.SetControllerReference(cluster, svc, rc.Scheme); err != nil {
 		return err
@@ -62,13 +66,16 @@ func (rc *RedisController) DeployService(cluster *v1alpha2.HarborCluster) error 
 	err := rc.Client.Get(types.NamespacedName{Name: svc.Name, Namespace: svc.Namespace}, service)
 	if err != nil && errors.IsNotFound(err) {
 		rc.Log.Info("Creating Redis server service", "namespace", cluster.Namespace, "name", svc.Name)
+
 		return rc.Client.Create(svc)
 	}
+
 	return err
 }
 
 func (rc *RedisController) DeploySecret(cluster *v1alpha2.HarborCluster) error {
 	secret := &corev1.Secret{}
+
 	sec := rc.ResourceManager.GetSecret()
 	if err := controllerutil.SetControllerReference(cluster, sec, rc.Scheme); err != nil {
 		return err
@@ -77,7 +84,9 @@ func (rc *RedisController) DeploySecret(cluster *v1alpha2.HarborCluster) error {
 	err := rc.Client.Get(types.NamespacedName{Name: sec.Name, Namespace: sec.Namespace}, secret)
 	if err != nil && errors.IsNotFound(err) {
 		rc.Log.Info("Creating Redis Password Secret", "namespace", sec.Namespace, "name", sec.Name)
+
 		return rc.Client.Create(sec)
 	}
+
 	return err
 }

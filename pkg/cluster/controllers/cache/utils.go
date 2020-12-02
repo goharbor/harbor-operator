@@ -22,6 +22,7 @@ func GenerateResourceList(cpu, memory string) (resources corev1.ResourceList, er
 			return resources, err
 		}
 	}
+
 	return resources, nil
 }
 
@@ -49,11 +50,13 @@ func GenerateStoragePVC(name, size string, labels map[string]string) (*corev1.Pe
 // MergeLabels merges all labels together and returns a new label.
 func MergeLabels(allLabels ...map[string]string) map[string]string {
 	lb := make(map[string]string)
+
 	for _, label := range allLabels {
 		for k, v := range label {
 			lb[k] = v
 		}
 	}
+
 	return lb
 }
 

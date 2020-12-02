@@ -54,6 +54,7 @@ func main() {
 
 	traCon, err := tracing.New(ctx)
 	fail(err, "unable to create tracer")
+
 	defer traCon.Close()
 
 	err = setup.WithManager(ctx, mgr)
@@ -63,6 +64,7 @@ func main() {
 
 	// Log
 	setupLog.Info("starting manager", "version", version, "commit", commit)
+
 	err = mgr.Start(ctrl.SetupSignalHandler())
 	fail(err, "cannot start manager")
 }

@@ -32,11 +32,11 @@ const (
 	notarySignerRepo = "notary-signer-photon"
 	clairRepo        = "clair-photon"
 	clairAdapterRepo = "clair-adapter-photon"
-	// A special image for handling notary data migration
+	// A special image for handling notary data migration.
 	migratorRepo = "jmonsinjon/notary-db-migrator:v0.6.1"
 )
 
-// harborVM1m10pxImageLocator supports version > 1.10.1
+// harborVM1m10pxImageLocator supports version > 1.10.1 .
 type harborVM1m10pxImageLocator struct {
 	// Version of Harbor
 	HarborVersion string

@@ -3,14 +3,13 @@ package cache
 import (
 	"fmt"
 
-	"k8s.io/apimachinery/pkg/util/intstr"
-
 	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/common"
 	redisOp "github.com/spotahome/redis-operator/api/redisfailover/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 // ResourceManager defines the common interface of resources.
@@ -53,6 +52,7 @@ const (
 func (rm *RedisResourceManager) GetCacheCR() runtime.Object {
 	resource := rm.GetResourceList()
 	pvc, _ := GenerateStoragePVC(rm.cluster.Name, rm.GetStorageSize(), rm.GetLabels())
+
 	return &redisOp.RedisFailover{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       redisOp.RFKind,
@@ -99,6 +99,7 @@ func (rm *RedisResourceManager) GetServiceName() string {
 // GetService gets service.
 func (rm *RedisResourceManager) GetService() *corev1.Service {
 	name := rm.GetServiceName()
+
 	return &corev1.Service{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "v1",
@@ -137,6 +138,7 @@ func (rm *RedisResourceManager) GetSecretName() string {
 func (rm *RedisResourceManager) GetSecret() *corev1.Secret {
 	name := rm.GetSecretName()
 	passStr := common.RandomString(8, "a")
+
 	return &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
@@ -157,6 +159,7 @@ func (rm *RedisResourceManager) GetLabels() map[string]string {
 		"app.kubernetes.io/instance": rm.cluster.Namespace,
 		labelApp:                     rm.cluster.Name,
 	}
+
 	return MergeLabels(dynLabels, rm.cluster.Labels)
 }
 
@@ -165,6 +168,7 @@ func (rm *RedisResourceManager) GetResourceList() corev1.ResourceList {
 	resources := corev1.ResourceList{}
 	if rm.cluster.Spec.InClusterCache.RedisSpec.Server == nil {
 		resources, _ = GenerateResourceList(defaultResourceCPU, defaultResourceMemory)
+
 		return resources
 	}
 	// assemble cpu
@@ -175,6 +179,7 @@ func (rm *RedisResourceManager) GetResourceList() corev1.ResourceList {
 	if mem := rm.cluster.Spec.InClusterCache.RedisSpec.Server.Resources.Requests.Memory(); mem != nil {
 		resources[corev1.ResourceMemory] = *mem
 	}
+
 	return resources
 }
 
@@ -183,6 +188,7 @@ func (rm *RedisResourceManager) GetServerReplica() int {
 	if rm.cluster.Spec.InClusterCache.RedisSpec.Server == nil || rm.cluster.Spec.InClusterCache.RedisSpec.Server.Replicas == 0 {
 		return defaultResourceReplica
 	}
+
 	return rm.cluster.Spec.InClusterCache.RedisSpec.Server.Replicas
 }
 
@@ -191,6 +197,7 @@ func (rm *RedisResourceManager) GetClusterServerReplica() int {
 	if rm.cluster.Spec.InClusterCache.RedisSpec.Sentinel == nil || rm.cluster.Spec.InClusterCache.RedisSpec.Sentinel.Replicas == 0 {
 		return defaultResourceReplica
 	}
+
 	return rm.cluster.Spec.InClusterCache.RedisSpec.Sentinel.Replicas
 }
 
@@ -199,5 +206,6 @@ func (rm *RedisResourceManager) GetStorageSize() string {
 	if rm.cluster.Spec.InClusterCache.RedisSpec.Server == nil || rm.cluster.Spec.InClusterCache.RedisSpec.Server.Storage == "" {
 		return defaultStorageSize
 	}
+
 	return rm.cluster.Spec.InClusterCache.RedisSpec.Server.Storage
 }

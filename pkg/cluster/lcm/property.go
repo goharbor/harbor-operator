@@ -6,46 +6,48 @@ const (
 	CachePropertyName    string = "cache"
 )
 
-//Property is the current property of component.
+// Property is the current property of component.
 type Property struct {
-	//Property name, e.p: Connection,Port.
+	// Name, e.p: Connection,Port.
 	Name string
-	//Property value, e.p: "rfs-harborcluster-sample.svc"
+	// Value, e.p: "rfs-harborcluster-sample.svc"
 	Value interface{}
 }
 
 type Properties []*Property
 
-//Add append a new property to properties
-func (ps *Properties) Add(Name string, Value interface{}) {
+// Add append a new property to properties.
+func (ps *Properties) Add(name string, value interface{}) {
 	p := &Property{
-		Name:  Name,
-		Value: Value,
+		Name:  name,
+		Value: value,
 	}
 	*ps = append(*ps, p)
 }
 
-//Update updates properties according to the given arguments
-func (ps *Properties) Update(Name string, Value interface{}) {
+// Update updates properties according to the given arguments.
+func (ps *Properties) Update(name string, value interface{}) {
 	for _, p := range *ps {
-		if p.Name == Name {
-			p.Value = Value
+		if p.Name == name {
+			p.Value = value
+
 			return
 		}
 	}
 }
 
-//Get retrieves properties according to the given name
-func (ps *Properties) Get(Name string) *Property {
+// Get retrieves properties according to the given name.
+func (ps *Properties) Get(name string) *Property {
 	for _, p := range *ps {
-		if p.Name == Name {
+		if p.Name == name {
 			return p
 		}
 	}
+
 	return nil
 }
 
-//ToInt parse properties value to int type
+// ToInt parse properties value to int type.
 func (p *Property) ToInt() int {
 	if p.Value != nil {
 		if v, ok := p.Value.(int); ok {
@@ -56,7 +58,7 @@ func (p *Property) ToInt() int {
 	return 0
 }
 
-//ToString parse properties value to string type
+// ToString parse properties value to string type.
 func (p *Property) ToString() string {
 	if p.Value != nil {
 		if v, ok := p.Value.(string); ok {
@@ -67,7 +69,7 @@ func (p *Property) ToString() string {
 	return ""
 }
 
-//ToFloat64 parse properties value to float64 type
+// ToFloat64 parse properties value to float64 type.
 func (p *Property) ToFloat64() float64 {
 	if p.Value != nil {
 		if v, ok := p.Value.(float64); ok {

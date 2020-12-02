@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/go-logr/logr"
+	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/cache"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/database"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/harbor"
@@ -16,12 +17,10 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 )
 
 // TODO: Refactor to inherit the common reconciler in future
-// Reconciler reconciles a HarborCluster object
+// Reconciler reconciles a HarborCluster object.
 type Reconciler struct {
 	client.Client
 	Log    logr.Logger
@@ -54,6 +53,7 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 	dClient, err := k8s.NewDynamicClient()
 	if err != nil {
 		r.Log.Error(err, "unable to create dynamic client")
+
 		return err
 	}
 
@@ -83,7 +83,7 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 		Complete(r)
 }
 
-// New HarborCluster reconciler
+// New HarborCluster reconciler.
 func New(ctx context.Context, name string, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
 	return &Reconciler{
 		Name:    name,

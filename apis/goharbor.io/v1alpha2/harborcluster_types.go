@@ -9,15 +9,13 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-var (
-	HarborClusterGVK = schema.GroupVersionKind{
-		Group:   GroupVersion.Group,
-		Version: GroupVersion.Version,
-		Kind:    "HarborCluster",
-	}
-)
+var HarborClusterGVK = schema.GroupVersionKind{
+	Group:   GroupVersion.Group,
+	Version: GroupVersion.Version,
+	Kind:    "HarborCluster",
+}
 
-// HarborClusterSpec defines the desired state of HarborCluster
+// HarborClusterSpec defines the desired state of HarborCluster.
 type HarborClusterSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
@@ -56,7 +54,7 @@ type RedisSpec struct {
 
 	// TLS Config to use. When set TLS will be negotiated.
 	// set the secret which type of Opaque, and contains "tls.key","tls.crt","ca.crt".
-	TlsConfig string `json:"tlsConfig,omitempty"`
+	TLSConfig string `json:"tlsConfig,omitempty"`
 
 	GroupName string `json:"groupName,omitempty"`
 
@@ -117,10 +115,10 @@ type MinIOSpec struct {
 	// Note that the operator does not support upgrading from standalone to distributed mode.
 	// +kubebuilder:validation:Required
 	Replicas int32 `json:"replicas"`
-	// Version defines the MinIO Client (mc) Docker image version.
-	Version string `json:"version,omitempty"`
 	// Number of persistent volumes that will be attached per server
 	VolumesPerServer int32 `json:"volumesPerServer"`
+	// Version defines the MinIO Client (mc) Docker image version.
+	Version string `json:"version,omitempty"`
 	// VolumeClaimTemplate allows a user to specify how volumes inside a MinIOInstance
 	// +optional
 	VolumeClaimTemplate corev1.PersistentVolumeClaim `json:"volumeClaimTemplate,omitempty"`
@@ -129,7 +127,7 @@ type MinIOSpec struct {
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 }
 
-// HarborClusterStatus defines the observed state of HarborCluster
+// HarborClusterStatus defines the observed state of HarborCluster.
 type HarborClusterStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
@@ -145,10 +143,10 @@ type HarborClusterStatus struct {
 	Conditions []HarborClusterCondition `json:"conditions,omitempty"`
 }
 
-// ClusterStatus is a type for cluster status
+// ClusterStatus is a type for cluster status.
 type ClusterStatus string
 
-// HarborClusterConditionType is a valid value for HarborClusterConditionType.Type
+// HarborClusterConditionType is a valid value for HarborClusterConditionType.Type.
 type HarborClusterConditionType string
 
 // These are valid conditions of a HarborCluster.
@@ -163,13 +161,13 @@ const (
 	StorageReady HarborClusterConditionType = "StorageReady"
 	// ServiceReady means the Service of Harbor is ready.
 	ServiceReady HarborClusterConditionType = "ServiceReady"
-	// StatusUnknown is the status of unknown
+	// StatusUnknown is the status of unknown.
 	StatusUnknown ClusterStatus = "unknown"
-	// StatusCreating is the status of creating
+	// StatusCreating is the status of creating.
 	StatusCreating ClusterStatus = "creating"
-	// StatusHealthy is the status of healthy
+	// StatusHealthy is the status of healthy.
 	StatusHealthy ClusterStatus = "healthy"
-	// StatusUnHealthy is the status of unhealthy
+	// StatusUnHealthy is the status of unhealthy.
 	StatusUnHealthy ClusterStatus = "unhealthy"
 )
 
@@ -211,7 +209,7 @@ const (
 // +kubebuilder:printcolumn:name="Database Ready", type=string,JSONPath=`.status.conditions[?(@.type=="DatabaseReady")].status`,description="The current status of the new Database spec",priority=20
 // +kubebuilder:printcolumn:name="Storage Ready", type=string,JSONPath=`.status.conditions[?(@.type=="StorageReady")].status`,description="The current status of the new Storage spec",priority=20
 
-// HarborCluster is the Schema for the harborclusters API
+// HarborCluster is the Schema for the harborclusters API.
 type HarborCluster struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -222,7 +220,7 @@ type HarborCluster struct {
 
 // +kubebuilder:object:root=true
 
-// HarborClusterList contains a list of HarborCluster
+// HarborClusterList contains a list of HarborCluster.
 type HarborClusterList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`

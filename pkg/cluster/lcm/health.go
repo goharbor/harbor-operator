@@ -24,7 +24,7 @@ const (
 
 type HealthStatus string
 
-// HealthChecker defines health check methods to check the health status of the related services
+// HealthChecker defines health check methods to check the health status of the related services.
 type HealthChecker interface {
 	// CheckHealth checks the health of the specified service, including:
 	// database postgresql /
@@ -33,7 +33,7 @@ type HealthChecker interface {
 	CheckHealth(ctx context.Context, svc *ServiceConfig, options ...Option) (*CheckResponse, error)
 }
 
-// ServiceConfig contains the relevant service configurations that can be used to do health check
+// ServiceConfig contains the relevant service configurations that can be used to do health check.
 type ServiceConfig struct {
 	// Endpoint of the service
 	// Required
@@ -42,13 +42,13 @@ type ServiceConfig struct {
 	Credentials *Credentials
 }
 
-// Endpoint of the service
+// Endpoint of the service.
 type Endpoint struct {
 	Host string
 	Port uint
 }
 
-// Credentials for connecting to the services
+// Credentials for connecting to the services.
 type Credentials struct {
 	// Access key or username
 	// Optional
@@ -57,7 +57,7 @@ type Credentials struct {
 	AccessSecret string
 }
 
-// CheckResponse represents the response returned by the health check method
+// CheckResponse represents the response returned by the health check method.
 type CheckResponse struct {
 	Status HealthStatus
 
@@ -66,7 +66,7 @@ type CheckResponse struct {
 	Message string
 }
 
-// CheckOptions keep options for doing health checking
+// CheckOptions keep options for doing health checking.
 type CheckOptions struct {
 	// Enable SSL mode
 	// Applicable for Postgresql
@@ -81,24 +81,24 @@ type CheckOptions struct {
 	StorageDriver string
 }
 
-// Option with function way
+// Option with function way.
 type Option func(options *CheckOptions)
 
-// WithSSL sets ssl mode option
+// WithSSL sets ssl mode option.
 func WithSSL(sslMode bool) Option {
 	return func(options *CheckOptions) {
 		options.SSLMode = sslMode
 	}
 }
 
-// WithSentinel sets sentinel mode
+// WithSentinel sets sentinel mode.
 func WithSentinel(sentinel bool) Option {
 	return func(options *CheckOptions) {
 		options.Sentinel = sentinel
 	}
 }
 
-// WithStorage sets the storage driver
+// WithStorage sets the storage driver.
 func WithStorage(driver string) Option {
 	return func(options *CheckOptions) {
 		options.StorageDriver = driver

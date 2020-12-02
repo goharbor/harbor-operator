@@ -48,6 +48,7 @@ type ClusterClient struct {
 // subsequent requests, instead of one created from the preconfigured timeout.
 func (w *ClusterClient) WithContext(ctx context.Context) Client {
 	w.ctx = ctx
+
 	return w
 }
 
@@ -76,7 +77,7 @@ func (w *ClusterClient) Delete(obj runtime.Object, opts ...client.DeleteOption) 
 	return w.crClient.Delete(w.ctx, obj, opts...)
 }
 
-//NewClient returns the client interface.
+// NewClient returns the client interface.
 func NewClient(scheme *runtime.Scheme) (client.Client, error) {
 	var (
 		config *rest.Config
