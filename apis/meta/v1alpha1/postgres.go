@@ -74,7 +74,7 @@ type PostgresConnection struct {
 	Database string `json:"database,omitempty"`
 }
 
-const PostgresScheme = "postgresql"
+const PostgresScheme = "postgres"
 
 func (c *PostgresConnection) GetDSNNoCredentials() *url.URL {
 	if c == nil {

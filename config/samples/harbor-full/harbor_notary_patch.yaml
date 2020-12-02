@@ -9,3 +9,5 @@ spec:
     notary:
       ingress:
         host: notary.harbor.domain
+      tls:
+        certificateRef: sample-public-certificate

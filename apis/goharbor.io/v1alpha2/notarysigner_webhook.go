@@ -3,10 +3,7 @@ package v1alpha2 // nolint:dupl
 import (
 	"context"
 
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/util/validation/field"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
@@ -47,16 +44,5 @@ func (n *NotarySigner) ValidateDelete() error {
 }
 
 func (n *NotarySigner) Validate() error {
-	var allErrs field.ErrorList
-
-	err := n.Spec.Migration.Validate()
-	if err != nil {
-		allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("migration"), n.Spec.Migration, err.Error()))
-	}
-
-	if len(allErrs) == 0 {
-		return nil
-	}
-
-	return apierrors.NewInvalid(schema.GroupKind{Group: GroupVersion.Group, Kind: "NotarySigner"}, n.Name, allErrs)
+	return nil
 }

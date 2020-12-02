@@ -108,6 +108,18 @@ rules:
   - cert-manager.io
   resources:
   - certificates
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - cert-manager.io
+  resources:
+  - certificates
   - issuers
   verbs:
   - create
@@ -303,6 +315,22 @@ rules:
   - goharbor.io
   resources:
   - registrycontrollers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - goharbor.io
+  resources:
+  - trivies
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - goharbor.io
+  resources:
+  - trivies/status
   verbs:
   - get
   - patch
