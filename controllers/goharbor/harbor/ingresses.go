@@ -10,9 +10,8 @@ import (
 	"github.com/goharbor/harbor-operator/controllers/goharbor/notaryserver"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 	"github.com/pkg/errors"
-	netv1 "k8s.io/api/networking/v1beta1"
+	netv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 const (
@@ -65,24 +64,23 @@ func (r *Reconciler) GetCoreIngress(ctx context.Context, harbor *goharborv1alpha
 }
 
 func (r *Reconciler) GetCoreIngressRules(ctx context.Context, harbor *goharborv1alpha2.Harbor) ([]netv1.IngressRule, error) {
-	corePort, err := harbor.Spec.InternalTLS.GetInternalPort(harbormetav1.CoreTLS)
-	if err != nil {
-		return nil, errors.Wrapf(err, "%s internal port", harbormetav1.CoreTLS)
-	}
-
 	coreBackend := netv1.IngressBackend{
-		ServiceName: r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String()),
-		ServicePort: intstr.FromInt(int(corePort)),
-	}
-
-	portalPort, err := harbor.Spec.InternalTLS.GetInternalPort(harbormetav1.PortalTLS)
-	if err != nil {
-		return nil, errors.Wrapf(err, "%s internal port", harbormetav1.PortalTLS)
+		Service: &netv1.IngressServiceBackend{
+			Name: r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String()),
+			Port: netv1.ServiceBackendPort{
+				Number: harbor.Spec.InternalTLS.GetInternalPort(harbormetav1.PortalTLS),
+			},
+		},
+		Resource: nil,
 	}
 
 	portalBackend := netv1.IngressBackend{
-		ServiceName: r.NormalizeName(ctx, harbor.GetName(), "portal"),
-		ServicePort: intstr.FromInt(int(portalPort)),
+		Service: &netv1.IngressServiceBackend{
+			Name: r.NormalizeName(ctx, harbor.GetName(), "portal"),
+			Port: netv1.ServiceBackendPort{
+				Number: harbor.Spec.InternalTLS.GetInternalPort(harbormetav1.PortalTLS),
+			},
+		},
 	}
 
 	ruleValue, err := r.GetCoreIngressRuleValue(ctx, harbor, coreBackend, portalBackend)
@@ -141,8 +139,12 @@ func (r *Reconciler) GetNotaryServerIngresse(ctx context.Context, harbor *goharb
 						Paths: []netv1.HTTPIngressPath{{
 							Path: "/",
 							Backend: netv1.IngressBackend{
-								ServiceName: r.NormalizeName(ctx, harbor.GetName(), controllers.NotaryServer.String()),
-								ServicePort: intstr.FromInt(notaryserver.PublicPort),
+								Service: &netv1.IngressServiceBackend{
+									Name: r.NormalizeName(ctx, harbor.GetName(), controllers.NotaryServer.String()),
+									Port: netv1.ServiceBackendPort{
+										Number: notaryserver.PublicPort,
+									},
+								},
 							},
 						}},
 					},

@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/goharbor/harbor-operator/pkg/resources"
-	netv1 "k8s.io/api/networking/v1beta1"
+	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )

@@ -13,7 +13,7 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
-	netv1 "k8s.io/api/networking/v1beta1"
+	netv1 "k8s.io/api/networking/v1"
 	k8serror "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -208,8 +208,12 @@ func (m *MinIOController) generateIngress() *netv1.Ingress {
 								{
 									Path: "/",
 									Backend: netv1.IngressBackend{
-										ServiceName: "minio",
-										ServicePort: intstr.FromInt(9000),
+										Service: &netv1.IngressServiceBackend{
+											Name: "minio",
+											Port: netv1.ServiceBackendPort{
+												Number: 9000,
+											},
+										},
 									},
 								},
 							},
