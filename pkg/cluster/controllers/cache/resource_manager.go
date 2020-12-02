@@ -128,7 +128,7 @@ func (rm *redisResourceManager) GetService() *corev1.Service {
 			Type: corev1.ServiceTypeClusterIP,
 			Selector: map[string]string{
 				"app.kubernetes.io/component": "redis",
-				"app.kubernetes.io/name":      rm.cluster.Name,
+				"app.kubernetes.io/name":      rm.GetCacheCRName(),
 				"app.kubernetes.io/part-of":   "redis-failover",
 			},
 			Ports: []corev1.ServicePort{
