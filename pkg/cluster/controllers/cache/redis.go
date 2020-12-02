@@ -28,19 +28,20 @@ func NewRedisController(ctx context.Context, opts ...k8s.Option) lcm.Controller 
 	}
 
 	return &RedisController{
-		Ctx:     ctx,
-		Client:  ctrlOpts.Client,
-		DClient: ctrlOpts.DClient,
-		Log:     ctrlOpts.Log,
-		Scheme:  ctrlOpts.Scheme,
+		Ctx:             ctx,
+		DClient:         ctrlOpts.DClient,
+		Client:          ctrlOpts.Client,
+		Log:             ctrlOpts.Log,
+		Scheme:          ctrlOpts.Scheme,
+		ResourceManager: NewResourceManager(),
 	}
 }
 
 // RedisController implements lcm.Controller interface.
 type RedisController struct {
 	Ctx                context.Context
-	Client             k8s.Client
 	DClient            k8s.DClient
+	Client             k8s.Client
 	Recorder           record.EventRecorder
 	Log                logr.Logger
 	Scheme             *runtime.Scheme
@@ -55,9 +56,10 @@ func (rc *RedisController) HealthChecker() lcm.HealthChecker {
 
 // Apply creates/updates/scales the resources, like kubernetes apply operation.
 func (rc *RedisController) Apply(ctx context.Context, cluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
-	rc.Client.WithContext(ctx)
 	rc.DClient.WithContext(ctx)
-	rc.ResourceManager = &RedisResourceManager{cluster: cluster}
+	rc.Client.WithContext(ctx)
+
+	rc.ResourceManager.WithCluster(cluster)
 
 	crdClient := rc.DClient.WithResource(redisFailoversGVR).WithNamespace(cluster.Namespace)
 

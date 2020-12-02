@@ -15,6 +15,8 @@ import (
 // ResourceManager defines the common interface of resources.
 type ResourceManager interface {
 	ResourceGetter
+	// With the specified cluster
+	WithCluster(cluster *v1alpha2.HarborCluster) ResourceManager
 }
 
 // ResourceGetter gets resources.
@@ -31,9 +33,9 @@ type ResourceGetter interface {
 	GetStorageSize() string
 }
 
-var _ ResourceManager = &RedisResourceManager{}
+var _ ResourceManager = &redisResourceManager{}
 
-type RedisResourceManager struct {
+type redisResourceManager struct {
 	cluster *v1alpha2.HarborCluster
 }
 
@@ -48,8 +50,20 @@ const (
 	labelApp = "goharbor.io/harbor-cluster"
 )
 
+// NewResourceManager constructs a new cache resource manager.
+func NewResourceManager() ResourceManager {
+	return &redisResourceManager{}
+}
+
+// WithCluster get resources based on the specified cluster spec.
+func (rm *redisResourceManager) WithCluster(cluster *v1alpha2.HarborCluster) ResourceManager {
+	rm.cluster = cluster
+
+	return rm
+}
+
 // GetCacheCR gets cache cr instance.
-func (rm *RedisResourceManager) GetCacheCR() runtime.Object {
+func (rm *redisResourceManager) GetCacheCR() runtime.Object {
 	resource := rm.GetResourceList()
 	pvc, _ := GenerateStoragePVC(rm.cluster.Name, rm.GetStorageSize(), rm.GetLabels())
 
@@ -87,17 +101,17 @@ func (rm *RedisResourceManager) GetCacheCR() runtime.Object {
 }
 
 // GetCacheCRName gets cache cr name.
-func (rm *RedisResourceManager) GetCacheCRName() string {
+func (rm *redisResourceManager) GetCacheCRName() string {
 	return fmt.Sprintf("%s-%s", rm.cluster.Name, "redis")
 }
 
 // GetServiceName gets service name.
-func (rm *RedisResourceManager) GetServiceName() string {
+func (rm *redisResourceManager) GetServiceName() string {
 	return rm.GetCacheCRName()
 }
 
 // GetService gets service.
-func (rm *RedisResourceManager) GetService() *corev1.Service {
+func (rm *redisResourceManager) GetService() *corev1.Service {
 	name := rm.GetServiceName()
 
 	return &corev1.Service{
@@ -130,12 +144,12 @@ func (rm *RedisResourceManager) GetService() *corev1.Service {
 }
 
 // GetSecretName gets secret name.
-func (rm *RedisResourceManager) GetSecretName() string {
+func (rm *redisResourceManager) GetSecretName() string {
 	return rm.GetCacheCRName()
 }
 
 // GetSecret gets redis secret.
-func (rm *RedisResourceManager) GetSecret() *corev1.Secret {
+func (rm *redisResourceManager) GetSecret() *corev1.Secret {
 	name := rm.GetSecretName()
 	passStr := common.RandomString(8, "a")
 
@@ -153,7 +167,7 @@ func (rm *RedisResourceManager) GetSecret() *corev1.Secret {
 }
 
 // GetLabels gets labels merged from cluster labels.
-func (rm *RedisResourceManager) GetLabels() map[string]string {
+func (rm *redisResourceManager) GetLabels() map[string]string {
 	dynLabels := map[string]string{
 		"app.kubernetes.io/name":     "cache",
 		"app.kubernetes.io/instance": rm.cluster.Namespace,
@@ -164,7 +178,7 @@ func (rm *RedisResourceManager) GetLabels() map[string]string {
 }
 
 // GetResourceList gets redis resources.
-func (rm *RedisResourceManager) GetResourceList() corev1.ResourceList {
+func (rm *redisResourceManager) GetResourceList() corev1.ResourceList {
 	resources := corev1.ResourceList{}
 	if rm.cluster.Spec.InClusterCache.RedisSpec.Server == nil {
 		resources, _ = GenerateResourceList(defaultResourceCPU, defaultResourceMemory)
@@ -184,7 +198,7 @@ func (rm *RedisResourceManager) GetResourceList() corev1.ResourceList {
 }
 
 // GetServerReplica gets deployment replica.
-func (rm *RedisResourceManager) GetServerReplica() int {
+func (rm *redisResourceManager) GetServerReplica() int {
 	if rm.cluster.Spec.InClusterCache.RedisSpec.Server == nil || rm.cluster.Spec.InClusterCache.RedisSpec.Server.Replicas == 0 {
 		return defaultResourceReplica
 	}
@@ -193,7 +207,7 @@ func (rm *RedisResourceManager) GetServerReplica() int {
 }
 
 // GetClusterServerReplica gets deployment replica of sentinel mode.
-func (rm *RedisResourceManager) GetClusterServerReplica() int {
+func (rm *redisResourceManager) GetClusterServerReplica() int {
 	if rm.cluster.Spec.InClusterCache.RedisSpec.Sentinel == nil || rm.cluster.Spec.InClusterCache.RedisSpec.Sentinel.Replicas == 0 {
 		return defaultResourceReplica
 	}
@@ -202,7 +216,7 @@ func (rm *RedisResourceManager) GetClusterServerReplica() int {
 }
 
 // GetStorageSize gets storage size.
-func (rm *RedisResourceManager) GetStorageSize() string {
+func (rm *redisResourceManager) GetStorageSize() string {
 	if rm.cluster.Spec.InClusterCache.RedisSpec.Server == nil || rm.cluster.Spec.InClusterCache.RedisSpec.Server.Storage == "" {
 		return defaultStorageSize
 	}

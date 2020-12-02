@@ -18,9 +18,9 @@ import (
 type PostgreSQLController struct {
 	HarborCluster *goharborv1alpha2.HarborCluster
 	Ctx           context.Context
-	Client        k8s.Client
 	Log           logr.Logger
 	DClient       k8s.DClient
+	Client        k8s.Client
 	Scheme        *runtime.Scheme
 	ExpectCR      *unstructured.Unstructured
 	ActualCR      *unstructured.Unstructured
@@ -39,8 +39,8 @@ func (p *PostgreSQLController) HealthChecker() lcm.HealthChecker {
 }
 
 func (p *PostgreSQLController) Apply(ctx context.Context, harborcluster *goharborv1alpha2.HarborCluster) (*lcm.CRStatus, error) {
-	p.Client.WithContext(ctx)
 	p.DClient.WithContext(ctx)
+	p.Client.WithContext(ctx)
 	p.HarborCluster = harborcluster
 
 	crdClient := p.DClient.WithResource(databaseGVR).WithNamespace(p.HarborCluster.Namespace)
@@ -89,9 +89,9 @@ func NewDatabaseController(ctx context.Context, options ...k8s.Option) lcm.Contr
 
 	return &PostgreSQLController{
 		Ctx:     ctx,
-		Client:  o.Client,
 		Log:     o.Log,
 		DClient: o.DClient,
+		Client:  o.Client,
 		Scheme:  o.Scheme,
 	}
 }
