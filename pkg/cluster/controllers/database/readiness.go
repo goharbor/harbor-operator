@@ -39,7 +39,7 @@ const (
 // It does:
 // - create postgre connection pool
 // - ping postgre server
-// - return postgre properties if postgre has available
+// - return postgre properties if postgre has available.
 func (p *PostgreSQLController) Readiness(ctx context.Context) (*lcm.CRStatus, error) {
 	var (
 		conn   *Connect
@@ -133,7 +133,7 @@ func (p *PostgreSQLController) DeployComponentSecret(conn *Connect, secretName s
 	return nil
 }
 
-// GetInClusterDatabaseInfo returns inCluster database connection client
+// GetInClusterDatabaseInfo returns inCluster database connection client.
 func (p *PostgreSQLController) GetInClusterDatabaseInfo(ctx context.Context) (*Connect, *pgx.Conn, error) {
 	var (
 		connect *Connect
