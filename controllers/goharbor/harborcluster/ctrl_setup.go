@@ -70,12 +70,10 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 	r.StorageCtrl = storage.NewMinIOController(ctx,
 		k8s.WithLog(r.Log.WithName("storage")),
 		k8s.WithScheme(mgr.GetScheme()),
-		k8s.WithDClient(k8s.WrapDClient(dClient)),
 		k8s.WithClient(k8s.WrapClient(ctx, mgr.GetClient())))
 	r.HarborCtrl = harbor.NewHarborController(ctx,
 		k8s.WithLog(r.Log.WithName("harbor")),
 		k8s.WithScheme(mgr.GetScheme()),
-		k8s.WithDClient(k8s.WrapDClient(dClient)),
 		k8s.WithClient(k8s.WrapClient(ctx, mgr.GetClient())))
 
 	return ctrl.NewControllerManagedBy(mgr).

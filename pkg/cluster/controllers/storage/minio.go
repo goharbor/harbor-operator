@@ -77,6 +77,9 @@ func NewMinIOController(ctx context.Context, options ...k8s.Option) lcm.Controll
 func (m *MinIOController) Apply(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*lcm.CRStatus, error) {
 	var minioCR minio.Tenant
 
+	// Use the ctx from the parameter
+	m.KubeClient.WithContext(ctx)
+
 	m.HarborCluster = harborcluster
 	m.DesiredMinIOCR = m.generateMinIOCR()
 
