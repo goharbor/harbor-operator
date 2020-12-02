@@ -21,7 +21,7 @@ import (
 	"sync"
 )
 
-// Group for running goroutines
+// Group for running goroutines.
 type Group struct {
 	wait   sync.WaitGroup
 	cancel context.CancelFunc
@@ -31,7 +31,7 @@ type Group struct {
 	locker *sync.Mutex
 }
 
-// NewGroup creates a new group
+// NewGroup creates a new group.
 func NewGroup(ctx context.Context) (*Group, context.Context) {
 	gtx, cancel := context.WithCancel(ctx)
 
@@ -42,7 +42,7 @@ func NewGroup(ctx context.Context) (*Group, context.Context) {
 	}, gtx
 }
 
-// Go to run a func
+// Go to run a func.
 func (g *Group) Go(f func() error) {
 	g.wait.Add(1)
 
@@ -60,7 +60,7 @@ func (g *Group) Go(f func() error) {
 }
 
 // Wait until all the go functions are returned
-// If errors occurred, they'll be combined with ":" and returned
+// If errors occurred, they'll be combined with ":" and returned.
 func (g *Group) Wait() error {
 	g.wait.Wait()
 

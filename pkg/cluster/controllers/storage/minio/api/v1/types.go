@@ -6,7 +6,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// Tenant is a specification for a MinIO resource
+// Tenant is a specification for a MinIO resource.
 type Tenant struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -23,7 +23,7 @@ type TenantScheduler struct {
 	Name string `json:"name"`
 }
 
-// TenantSpec is the spec for a Tenant resource
+// TenantSpec is the spec for a Tenant resource.
 type TenantSpec struct {
 	// Definition for Cluster in given MinIO cluster
 	Zones []Zone `json:"zones"`
@@ -97,7 +97,7 @@ type TenantSpec struct {
 	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy,omitempty"`
 }
 
-// Zone defines the spec for a MinIO Zone
+// Zone defines the spec for a MinIO Zone.
 type Zone struct {
 	// Name of the zone
 	// +optional
@@ -124,27 +124,27 @@ type Zone struct {
 	Tolerations []corev1.Toleration `json:"tolerations,omitempty"`
 }
 
-// LocalCertificateReference defines the spec for a local certificate
+// LocalCertificateReference defines the spec for a local certificate.
 type LocalCertificateReference struct {
 	Name string `json:"name"`
 	Type string `json:"type,omitempty"`
 }
 
-// Liveness specifies the spec for liveness probe
+// Liveness specifies the spec for liveness probe.
 type Liveness struct {
 	InitialDelaySeconds int32 `json:"initialDelaySeconds"`
 	PeriodSeconds       int32 `json:"periodSeconds"`
 	TimeoutSeconds      int32 `json:"timeoutSeconds"`
 }
 
-// CertificateConfig is a specification for certificate contents
+// CertificateConfig is a specification for certificate contents.
 type CertificateConfig struct {
 	CommonName       string   `json:"commonName,omitempty"`
 	OrganizationName []string `json:"organizationName,omitempty"`
 	DNSNames         []string `json:"dnsNames,omitempty"`
 }
 
-// ConsoleConfiguration defines the specifications for Console Deployment
+// ConsoleConfiguration defines the specifications for Console Deployment.
 type ConsoleConfiguration struct {
 	// Replicas defines number of pods for KES StatefulSet.
 	// +optional
@@ -172,7 +172,7 @@ type ConsoleConfiguration struct {
 	ExternalCertSecret *LocalCertificateReference `json:"externalCertSecret,omitempty"`
 }
 
-// KESConfig defines the specifications for KES StatefulSet
+// KESConfig defines the specifications for KES StatefulSet.
 type KESConfig struct {
 	// Replicas defines number of pods for KES StatefulSet.
 	// +optional
@@ -197,13 +197,13 @@ type KESConfig struct {
 	ClientCertSecret *LocalCertificateReference `json:"clientCertSecret,omitempty"`
 }
 
-// TenantStatus is the status for a Tenant resource
+// TenantStatus is the status for a Tenant resource.
 type TenantStatus struct {
 	CurrentState      string `json:"currentState"`
 	AvailableReplicas int32  `json:"availableReplicas"`
 }
 
-// TenantList is a list of Tenant resources
+// TenantList is a list of Tenant resources.
 type TenantList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata"`

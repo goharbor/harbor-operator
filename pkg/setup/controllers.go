@@ -3,12 +3,12 @@ package setup
 import (
 	"context"
 	"fmt"
-	"github.com/goharbor/harbor-operator/controllers/goharbor/harborcluster"
 
 	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/chartmuseum"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/core"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/harbor"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/harborcluster"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/jobservice"
 	notaryserver "github.com/goharbor/harbor-operator/controllers/goharbor/notaryserver"
 	notarysigner "github.com/goharbor/harbor-operator/controllers/goharbor/notarysigner"

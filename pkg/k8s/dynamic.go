@@ -2,6 +2,9 @@ package k8s
 
 import (
 	"context"
+	"os"
+	"path/filepath"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -10,8 +13,6 @@ import (
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"os"
-	"path/filepath"
 )
 
 // WrapDClient returns a Dynamic Client.
@@ -43,18 +44,21 @@ type ClusterDynamicClient struct {
 // WithResource returns a client with resource.
 func (w *ClusterDynamicClient) WithResource(resource schema.GroupVersionResource) DClient {
 	w.resource = resource
+
 	return w
 }
 
 // WithNamespace returns a client with namespace.
 func (w *ClusterDynamicClient) WithNamespace(namespace string) DClient {
 	w.namespace = namespace
+
 	return w
 }
 
 // WithContext returns a client with context.
 func (w *ClusterDynamicClient) WithContext(ctx context.Context) DClient {
 	w.ctx = ctx
+
 	return w
 }
 
@@ -103,9 +107,10 @@ func (w *ClusterDynamicClient) Patch(name string, pt types.PatchType, data []byt
 	return w.dClient.Resource(w.resource).Namespace(w.namespace).Patch(w.ctx, name, pt, data, options, subresources...)
 }
 
-//NewDynamicClient returns the dynamic interface.
+// NewDynamicClient returns the dynamic interface.
 func NewDynamicClient() (dynamic.Interface, error) {
 	var config *rest.Config
+
 	var err error
 
 	config, err = rest.InClusterConfig()
@@ -120,14 +125,16 @@ func NewDynamicClient() (dynamic.Interface, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return dynamicClient, nil
 }
 
-//HomeDir returns home dir
+// HomeDir returns home dir.
 func HomeDir() string {
 	if h := os.Getenv("HOME"); h != "" {
 		return h
 	}
+
 	return os.Getenv("USERPROFILE")
 }
 
@@ -136,9 +143,11 @@ func HomeDir() string {
 func ExternalConfig() (*rest.Config, error) {
 	home := HomeDir()
 	kubeConfig := filepath.Join(home, ".kube", "config")
+
 	config, err := clientcmd.BuildConfigFromFlags("", kubeConfig)
 	if err != nil {
 		return nil, err
 	}
+
 	return config, nil
 }

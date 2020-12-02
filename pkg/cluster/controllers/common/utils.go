@@ -16,22 +16,26 @@ func RandomString(randLength int, randType string) (result string) {
 	)
 
 	b := bytes.Buffer{}
-	if strings.Contains(randType, "0") {
+
+	switch {
+	case strings.Contains(randType, "0"):
 		b.WriteString(num)
-	} else if strings.Contains(randType, "A") {
+	case strings.Contains(randType, "A"):
 		b.WriteString(upper)
-	} else {
+	default:
 		b.WriteString(lower)
 	}
 
-	var str = b.String()
-	var strLen = len(str)
+	str := b.String()
+	strLen := len(str)
 
 	rand.Seed(time.Now().UnixNano())
+
 	b = bytes.Buffer{}
+
 	for i := 0; i < randLength; i++ {
 		b.WriteByte(str[rand.Intn(strLen)])
 	}
-	result = b.String()
-	return
+
+	return b.String()
 }

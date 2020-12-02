@@ -5,10 +5,8 @@ import (
 	"errors"
 	"fmt"
 
-	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
-
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
-
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	"github.com/jackc/pgx/v4"
 	corev1 "k8s.io/api/core/v1"
@@ -62,16 +60,20 @@ func (p *PostgreSQLController) Readiness(ctx context.Context) (*lcm.CRStatus, er
 		p.Log.Error(err, "Fail to check Database.",
 			"namespace", p.HarborCluster.Namespace,
 			"name", p.HarborCluster.Name)
+
 		return nil, err
 	}
+
 	p.Log.Info("Database already ready.",
 		"namespace", p.HarborCluster.Namespace,
 		"name", p.HarborCluster.Name)
 
 	properties := &lcm.Properties{}
+
 	if err := p.DeployComponentSecret(conn, getDatabasePasswordRefName(name)); err != nil {
 		return nil, err
 	}
+
 	addProperties(name, conn, properties)
 
 	crStatus := lcm.New(goharborv1alpha2.DatabaseReady).
@@ -79,6 +81,7 @@ func (p *PostgreSQLController) Readiness(ctx context.Context) (*lcm.CRStatus, er
 		WithReason("database already ready").
 		WithMessage("harbor component database secrets are already create.").
 		WithProperties(*properties)
+
 	return crStatus, nil
 }
 
@@ -107,32 +110,26 @@ func getDatabasePasswordRefName(name string) string {
 	return fmt.Sprintf("%s-%s-%s", name, "database", "password")
 }
 
-func getPropertyName(key string) string {
-	return fmt.Sprintf("%sSecret", key)
-}
-
-func getComponentSecretName(component string) string {
-	return fmt.Sprintf("%s-database", component)
-}
-
-// DeployComponentSecret deploy harbor component database secret
+// DeployComponentSecret deploy harbor component database secret.
 func (p *PostgreSQLController) DeployComponentSecret(conn *Connect, secretName string) error {
-
 	secret := &corev1.Secret{}
 	sc := p.GetDatabaseSecret(conn, secretName)
 
 	if err := controllerutil.SetControllerReference(p.HarborCluster, sc, p.Scheme); err != nil {
 		return err
 	}
+
 	err := p.Client.Get(types.NamespacedName{Name: secretName, Namespace: p.HarborCluster.Namespace}, secret)
 	if kerr.IsNotFound(err) {
 		p.Log.Info("Creating Harbor Component Secret",
 			"namespace", p.HarborCluster.Namespace,
 			"name", secretName)
+
 		return p.Client.Create(sc)
 	} else if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -153,24 +150,25 @@ func (p *PostgreSQLController) GetInClusterDatabaseInfo(ctx context.Context) (*C
 		return connect, client, err
 	}
 
-	url := connect.GenDatabaseUrl()
-	fmt.Println(url)
+	url := connect.GenDatabaseURL()
 
 	client, err = pgx.Connect(ctx, url)
 	if err != nil {
 		p.Log.Error(err, "Unable to connect to database")
+
 		return connect, client, err
 	}
 
 	return connect, client, nil
 }
 
-// GetInClusterDatabaseConn returns inCluster database connection info
+// GetInClusterDatabaseConn returns inCluster database connection info.
 func (p *PostgreSQLController) GetInClusterDatabaseConn(name, pw string) (*Connect, error) {
 	host, err := p.GetInClusterHost(name)
 	if err != nil {
 		return nil, err
 	}
+
 	conn := &Connect{
 		Host:     host,
 		Port:     InClusterDatabasePort,
@@ -178,6 +176,7 @@ func (p *PostgreSQLController) GetInClusterDatabaseConn(name, pw string) (*Conne
 		Username: InClusterDatabaseUserName,
 		Database: InClusterDatabaseName,
 	}
+
 	return conn, nil
 }
 
@@ -185,12 +184,13 @@ func GenInClusterPasswordSecretName(teamID, name string) string {
 	return fmt.Sprintf("postgres.%s-%s.credentials.postgresql.acid.zalan.do", teamID, name)
 }
 
-// GetInClusterHost returns the Database master pod ip or service name
+// GetInClusterHost returns the Database master pod ip or service name.
 func (p *PostgreSQLController) GetInClusterHost(name string) (string, error) {
 	var (
 		url string
 		err error
 	)
+
 	_, err = rest.InClusterConfig()
 	if err != nil {
 		url, err = p.GetMasterPodsIP()
@@ -208,11 +208,12 @@ func (p *PostgreSQLController) GetDatabaseName() string {
 	return fmt.Sprintf("%s-%s", p.HarborCluster.Namespace, p.HarborCluster.Name)
 }
 
-// GetInClusterDatabasePassword is get inCluster postgresql password
+// GetInClusterDatabasePassword is get inCluster postgresql password.
 func (p *PostgreSQLController) GetInClusterDatabasePassword() (string, error) {
 	var pw string
 
 	secretName := GenInClusterPasswordSecretName(p.HarborCluster.Namespace, p.HarborCluster.Name)
+
 	secret, err := p.GetSecret(secretName)
 	if err != nil {
 		return pw, err
@@ -221,13 +222,15 @@ func (p *PostgreSQLController) GetInClusterDatabasePassword() (string, error) {
 	for k, v := range secret {
 		if k == InClusterDatabasePasswordKey {
 			pw = string(v)
+
 			return pw, nil
 		}
 	}
+
 	return pw, nil
 }
 
-// GetStatefulSetPods returns the postgresql master pod
+// GetStatefulSetPods returns the postgresql master pod.
 func (p *PostgreSQLController) GetStatefulSetPods() (*corev1.PodList, error) {
 	name := p.GetDatabaseName()
 	label := map[string]string{
@@ -244,26 +247,33 @@ func (p *PostgreSQLController) GetStatefulSetPods() (*corev1.PodList, error) {
 	if err := p.Client.List(opts, pod); err != nil {
 		p.Log.Error(err, "fail to get pod.",
 			"namespace", p.HarborCluster.Namespace, "name", name)
+
 		return nil, err
 	}
+
 	return pod, nil
 }
 
-// GetMasterPodsIP returns postgresql master node ip
+// GetMasterPodsIP returns postgresql master node ip.
 func (p *PostgreSQLController) GetMasterPodsIP() (string, error) {
 	var masterIP string
+
 	podList, err := p.GetStatefulSetPods()
 	if err != nil {
 		return masterIP, err
 	}
+
 	if len(podList.Items) > 1 {
 		return masterIP, errors.New("the number of master node copies cannot exceed 1")
 	}
+
 	for _, p := range podList.Items {
 		if p.DeletionTimestamp != nil {
 			continue
 		}
+
 		masterIP = p.Status.PodIP
 	}
+
 	return masterIP, nil
 }

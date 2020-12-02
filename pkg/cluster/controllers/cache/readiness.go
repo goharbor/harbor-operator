@@ -6,9 +6,8 @@ import (
 	"fmt"
 	"math/rand"
 
-	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
-
 	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -22,11 +21,12 @@ import (
 // It does:
 // - create redis connection pool
 // - ping redis server
-// - return redis properties if redis has available
+// - return redis properties if redis has available.
 func (rc *RedisController) Readiness(ctx context.Context, cluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
 	if checkResp, err := rc.CheckInClusterRedisHealth(ctx, cluster); err != nil {
 		rc.Log.Error(err, "Fail to check Redis.",
 			"namespace", cluster.Namespace, "name", cluster.Name, "checkResp", checkResp)
+
 		return cacheNotReadyStatus(ErrorCheckRedisHealth, err.Error()), err
 	}
 
@@ -35,6 +35,7 @@ func (rc *RedisController) Readiness(ctx context.Context, cluster *v1alpha2.Harb
 
 	properties := lcm.Properties{}
 	properties.Add(lcm.CachePropertyName, rc.generateRedisSpec())
+
 	return cacheReadyStatus(&properties), nil
 }
 
@@ -50,23 +51,27 @@ func (rc *RedisController) generateRedisSpec() *v1alpha2.ExternalRedisSpec {
 	}
 }
 
-// GetRedisPassword is get redis password
+// GetRedisPassword is get redis password.
 func (rc *RedisController) GetRedisPassword(secretName, namespace string) (string, error) {
 	var redisPassWord string
+
 	redisPassMap, err := rc.GetRedisSecret(secretName, namespace)
 	if err != nil {
 		return "", err
 	}
+
 	for k, v := range redisPassMap {
 		if k == "redis-password" {
 			redisPassWord = string(v)
+
 			return redisPassWord, nil
 		}
 	}
+
 	return redisPassWord, nil
 }
 
-// GetRedisSecret returns the Redis Password Secret
+// GetRedisSecret returns the Redis Password Secret.
 func (rc *RedisController) GetRedisSecret(secretName, namespace string) (map[string][]byte, error) {
 	secret := &corev1.Secret{}
 
@@ -74,11 +79,13 @@ func (rc *RedisController) GetRedisSecret(secretName, namespace string) (map[str
 	if err != nil {
 		return nil, err
 	}
+
 	redisPw := secret.Data
+
 	return redisPw, nil
 }
 
-// GetDeploymentPods returns the Redis Sentinel pod list
+// GetDeploymentPods returns the Redis Sentinel pod list.
 func (rc *RedisController) GetDeploymentPods(name, namespace string) (*appsv1.Deployment, *corev1.PodList, error) {
 	deploy := &appsv1.Deployment{}
 	deployName := fmt.Sprintf("%s-%s", "rfs", name)
@@ -93,15 +100,18 @@ func (rc *RedisController) GetDeploymentPods(name, namespace string) (*appsv1.De
 	opts.LabelSelector = set
 
 	pod := &corev1.PodList{}
+
 	err = rc.Client.List(opts, pod)
 	if err != nil {
 		rc.Log.Error(err, "fail to get pod.", "namespace", namespace, "name", deployName)
+
 		return nil, nil, err
 	}
+
 	return deploy, pod, nil
 }
 
-// GetStatefulSetPods returns the Redis Server pod list
+// GetStatefulSetPods returns the Redis Server pod list.
 func (rc *RedisController) GetStatefulSetPods(name, namespace string) (*appsv1.StatefulSet, *corev1.PodList, error) {
 	sts := &appsv1.StatefulSet{}
 	stsName := fmt.Sprintf("%s-%s", "rfr", name)
@@ -116,17 +126,21 @@ func (rc *RedisController) GetStatefulSetPods(name, namespace string) (*appsv1.S
 	opts.LabelSelector = set
 
 	pod := &corev1.PodList{}
+
 	err = rc.Client.List(opts, pod)
 	if err != nil {
 		rc.Log.Error(err, "fail to get pod.", "namespace", namespace, "name", stsName)
+
 		return nil, nil, err
 	}
+
 	return sts, pod, nil
 }
 
 // CheckInClusterRedisHealth checks in cluster redis health.
 func (rc *RedisController) CheckInClusterRedisHealth(ctx context.Context, cluster *v1alpha2.HarborCluster) (*lcm.CheckResponse, error) {
 	secret := rc.ResourceManager.GetSecret()
+
 	password, err := rc.GetRedisPassword(secret.Name, secret.Namespace)
 	if err != nil {
 		return nil, err
@@ -135,17 +149,20 @@ func (rc *RedisController) CheckInClusterRedisHealth(ctx context.Context, cluste
 	_, sentinelPodList, err := rc.GetDeploymentPods(rc.ResourceManager.GetCacheCRName(), cluster.Namespace)
 	if err != nil {
 		rc.Log.Error(err, "Fail to get deployment pods.")
+
 		return nil, err
 	}
 
 	_, redisPodList, err := rc.GetStatefulSetPods(rc.ResourceManager.GetCacheCRName(), cluster.Namespace)
 	if err != nil {
 		rc.Log.Error(err, "Fail to get deployment pods.")
+
 		return nil, err
 	}
 
 	if len(sentinelPodList.Items) == 0 || len(redisPodList.Items) == 0 {
 		rc.Log.Info("pod list is empty，pls wait.")
+
 		return nil, errors.New("pod list is empty，pls wait")
 	}
 
@@ -154,10 +171,12 @@ func (rc *RedisController) CheckInClusterRedisHealth(ctx context.Context, cluste
 	case SchemaRedisSentinel:
 		sentinelPodArray := sentinelPodList.Items
 		_, currentSentinelPods := rc.GetPodsStatus(sentinelPodArray)
+
 		if len(currentSentinelPods) == 0 {
 			return nil, errors.New("need to requeue")
 		}
-		endpoint := rc.GetSentinelServiceUrl(rc.ResourceManager.GetCacheCRName(), cluster.Namespace, currentSentinelPods)
+
+		endpoint := rc.GetSentinelServiceURL(rc.ResourceManager.GetCacheCRName(), cluster.Namespace, currentSentinelPods)
 		config := &lcm.ServiceConfig{
 			Endpoint: &lcm.Endpoint{
 				Host: endpoint,
@@ -167,15 +186,17 @@ func (rc *RedisController) CheckInClusterRedisHealth(ctx context.Context, cluste
 				AccessSecret: password,
 			},
 		}
-		return rc.HealthChecker().CheckHealth(ctx, config, lcm.WithSentinel(true))
 
+		return rc.HealthChecker().CheckHealth(ctx, config, lcm.WithSentinel(true))
 	case SchemaRedisServer:
 		redisPodArray := redisPodList.Items
 		_, currentRedisPods := rc.GetPodsStatus(redisPodArray)
+
 		if len(currentRedisPods) == 0 {
 			return nil, errors.New("need to requeue")
 		}
-		endpoint := rc.GetRedisServiceUrl(rc.ResourceManager.GetCacheCRName(), cluster.Namespace, currentRedisPods)
+
+		endpoint := rc.GetRedisServiceURL(rc.ResourceManager.GetCacheCRName(), cluster.Namespace, currentRedisPods)
 		config := &lcm.ServiceConfig{
 			Endpoint: &lcm.Endpoint{
 				Host: endpoint,
@@ -185,14 +206,14 @@ func (rc *RedisController) CheckInClusterRedisHealth(ctx context.Context, cluste
 				AccessSecret: password,
 			},
 		}
-		return rc.HealthChecker().CheckHealth(ctx, config)
 
+		return rc.HealthChecker().CheckHealth(ctx, config)
 	default:
 		return nil, fmt.Errorf("not supported schema: %s", spec.Schema)
 	}
 }
 
-// GetPodsStatus returns deleting  and current pod list
+// GetPodsStatus returns deleting  and current pod list.
 func (rc *RedisController) GetPodsStatus(podArray []corev1.Pod) ([]corev1.Pod, []corev1.Pod) {
 	deletingPods := make([]corev1.Pod, 0)
 	currentPods := make([]corev1.Pod, 0, len(podArray))
@@ -201,23 +222,29 @@ func (rc *RedisController) GetPodsStatus(podArray []corev1.Pod) ([]corev1.Pod, [
 	for _, p := range podArray {
 		if p.DeletionTimestamp != nil {
 			deletingPods = append(deletingPods, p)
+
 			continue
 		}
+
 		currentPods = append(currentPods, p)
+
 		podsInPhase, ok := currentPodsByPhase[p.Status.Phase]
 		if !ok {
 			podsInPhase = []corev1.Pod{p}
 		} else {
 			podsInPhase = append(podsInPhase, p)
 		}
+
 		currentPodsByPhase[p.Status.Phase] = podsInPhase
 	}
+
 	return deletingPods, currentPods
 }
 
-// GetServiceUrl returns the Redis Sentinel pod ip or service name
-func (rc *RedisController) GetSentinelServiceUrl(name, namespace string, pods []corev1.Pod) string {
+// GetSentinelServiceURL returns the Redis Sentinel pod ip or service name.
+func (rc *RedisController) GetSentinelServiceURL(name, namespace string, pods []corev1.Pod) string {
 	var url string
+
 	_, err := rest.InClusterConfig()
 	if err != nil {
 		randomPod := pods[rand.Intn(len(pods))]
@@ -229,10 +256,12 @@ func (rc *RedisController) GetSentinelServiceUrl(name, namespace string, pods []
 	return url
 }
 
-// GetRedisServiceUrl returns the Redis server pod ip or service name
-func (rc *RedisController) GetRedisServiceUrl(name, namespace string, pods []corev1.Pod) string {
+// GetRedisServiceURL returns the Redis server pod ip or service name.
+func (rc *RedisController) GetRedisServiceURL(name, namespace string, pods []corev1.Pod) string {
 	var url string
+
 	randomPod := pods[rand.Intn(len(pods))]
+
 	_, err := rest.InClusterConfig()
 	if err != nil {
 		url = randomPod.Status.PodIP

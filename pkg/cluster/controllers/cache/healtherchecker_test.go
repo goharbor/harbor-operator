@@ -1,4 +1,4 @@
-package cache
+package cache_test
 
 import (
 	"context"
@@ -8,12 +8,15 @@ import (
 	"testing"
 
 	"github.com/alicebob/miniredis/v2"
+	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/cache"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
 func TestRedisHealthChecker(t *testing.T) {
+	t.Parallel()
+
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "HealthChecker")
 }
@@ -26,12 +29,11 @@ var _ = Describe("Test HealthChecker", func() {
 	)
 
 	BeforeSuite(func() {
-		checker = &RedisHealthChecker{}
+		checker = &cache.RedisHealthChecker{}
 		server, err = miniredis.Run()
 		if err != nil {
-			Fail(fmt.Errorf("mock redis server error: %s", err.Error()).Error())
+			Fail(fmt.Errorf("mock redis server error: %w", err).Error())
 		}
-
 	})
 
 	AfterSuite(func() {

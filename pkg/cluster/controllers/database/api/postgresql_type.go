@@ -26,13 +26,13 @@ type PostgresSpec struct {
 	Patroni         `json:"patroni,omitempty"`
 	Resources       `json:"resources,omitempty"`
 
-	EnableConnectionPooler *bool             `json:"enableConnectionPooler,omitempty"`
-	ConnectionPooler       *ConnectionPooler `json:"connectionPooler,omitempty"`
+	ConnectionPooler *ConnectionPooler `json:"connectionPooler,omitempty"`
 
 	TeamID      string `json:"teamId"`
 	DockerImage string `json:"dockerImage,omitempty"`
 
-	SpiloFSGroup *int64 `json:"spiloFSGroup,omitempty"`
+	SpiloFSGroup           *int64 `json:"spiloFSGroup,omitempty"`
+	EnableConnectionPooler *bool  `json:"enableConnectionPooler,omitempty"`
 
 	// vars that enable load balancers are pointers because it is important to know if any of them is omitted from the Postgres manifest
 	// in that case the var evaluates to nil and the value is taken from the operator config
@@ -47,10 +47,11 @@ type PostgresSpec struct {
 	// load balancers' source ranges are the same for master and replica services
 	AllowedSourceRanges []string `json:"allowedSourceRanges"`
 
-	NumberOfInstances  int32                `json:"numberOfInstances"`
-	Users              map[string]UserFlags `json:"users"`
-	MaintenanceWindows []MaintenanceWindow  `json:"maintenanceWindows,omitempty"`
-	//Clone                 CloneDescription            `json:"clone"`
+	ShmVolume             *bool                       `json:"enableShmVolume,omitempty"`
+	EnableLogicalBackup   bool                        `json:"enableLogicalBackup,omitempty"`
+	NumberOfInstances     int32                       `json:"numberOfInstances"`
+	Users                 map[string]UserFlags        `json:"users"`
+	MaintenanceWindows    []MaintenanceWindow         `json:"maintenanceWindows,omitempty"`
 	ClusterName           string                      `json:"-"`
 	Databases             map[string]string           `json:"databases,omitempty"`
 	PreparedDatabases     map[string]PreparedDatabase `json:"preparedDatabases,omitempty"`
@@ -58,14 +59,8 @@ type PostgresSpec struct {
 	Sidecars              []Sidecar                   `json:"sidecars,omitempty"`
 	InitContainers        []v1.Container              `json:"initContainers,omitempty"`
 	PodPriorityClassName  string                      `json:"podPriorityClassName,omitempty"`
-	ShmVolume             *bool                       `json:"enableShmVolume,omitempty"`
-	EnableLogicalBackup   bool                        `json:"enableLogicalBackup,omitempty"`
 	LogicalBackupSchedule string                      `json:"logicalBackupSchedule,omitempty"`
-	//StandbyCluster        *StandbyDescription         `json:"standby"`
-	//PodAnnotations        map[string]string           `json:"podAnnotations"`
-	//ServiceAnnotations    map[string]string           `json:"serviceAnnotations"`
-	//TLS                   *TLSDescription             `json:"tls"`
-	AdditionalVolumes []AdditionalVolume `json:"additionalVolumes,omitempty"`
+	AdditionalVolumes     []AdditionalVolume          `json:"additionalVolumes,omitempty"`
 
 	// deprecated json tags
 	InitContainersOld       []v1.Container `json:"init_containers,omitempty"`
@@ -80,14 +75,14 @@ type PostgresqlList struct {
 	Items []Postgresql `json:"items"`
 }
 
-// PreparedDatabase describes elements to be bootstrapped
+// PreparedDatabase describes elements to be bootstrapped.
 type PreparedDatabase struct {
 	PreparedSchemas map[string]PreparedSchema `json:"schemas,omitempty"`
 	DefaultUsers    bool                      `json:"defaultUsers,omitempty" defaults:"false"`
 	Extensions      map[string]string         `json:"extensions,omitempty"`
 }
 
-// PreparedSchema describes elements to be bootstrapped per schema
+// PreparedSchema describes elements to be bootstrapped per schema.
 type PreparedSchema struct {
 	DefaultRoles *bool `json:"defaultRoles,omitempty" defaults:"true"`
 	DefaultUsers bool  `json:"defaultUsers,omitempty" defaults:"false"`
@@ -119,7 +114,6 @@ type AdditionalVolume struct {
 // PostgresqlParam describes PostgreSQL version and pairs of configuration parameter name - values.
 type PostgresqlParam struct {
 	PgVersion string `json:"version"`
-	//Parameters map[string]string `json:"parameters"`
 }
 
 // ResourceDescription describes CPU and memory resources defined for a cluster.
@@ -134,20 +128,13 @@ type Resources struct {
 	ResourceLimits   ResourceDescription `json:"limits,omitempty"`
 }
 
-// Patroni contains Patroni-specific configuration
+// Patroni contains Patroni-specific configuration.
 type Patroni struct {
 	InitDB map[string]string `json:"initdb"`
 	PgHba  []string          `json:"pg_hba"`
-	//TTL                   uint32                       `json:"ttl"`
-	//LoopWait              uint32                       `json:"loop_wait"`
-	//RetryTimeout          uint32                       `json:"retry_timeout"`
-	//MaximumLagOnFailover  float32                      `json:"maximum_lag_on_failover"` // float32 because https://github.com/kubernetes/kubernetes/issues/30213
-	//Slots                 map[string]map[string]string `json:"slots"`
-	//SynchronousMode       bool                         `json:"synchronous_mode"`
-	//SynchronousModeStrict bool                         `json:"synchronous_mode_strict"`
 }
 
-//StandbyCluster
+// StandbyDescription...
 type StandbyDescription struct {
 	S3WalPath string `json:"s3_wal_path,omitempty"`
 }
@@ -160,14 +147,14 @@ type TLSDescription struct {
 	CASecretName    string `json:"caSecretName,omitempty"`
 }
 
-// CloneDescription describes which cluster the new should clone and up to which point in time
+// CloneDescription describes which cluster the new should clone and up to which point in time.
 type CloneDescription struct {
 	ClusterName       string `json:"cluster,omitempty"`
 	UID               string `json:"uid,omitempty"`
 	EndTimestamp      string `json:"timestamp,omitempty"`
 	S3WalPath         string `json:"s3_wal_path,omitempty"`
 	S3Endpoint        string `json:"s3_endpoint,omitempty"`
-	S3AccessKeyId     string `json:"s3_access_key_id,omitempty"`
+	S3AccessKeyID     string `json:"s3_access_key_id,omitempty"`
 	S3SecretAccessKey string `json:"s3_secret_access_key,omitempty"`
 	S3ForcePathStyle  *bool  `json:"s3_force_path_style,omitempty" defaults:"false"`
 }
@@ -181,7 +168,7 @@ type Sidecar struct {
 	Env         []v1.EnvVar        `json:"env,omitempty"`
 }
 
-// UserFlags defines flags (such as superuser, nologin) that could be assigned to individual users
+// UserFlags defines flags (such as superuser, nologin) that could be assigned to individual users.
 type UserFlags []string
 
 // PostgresStatus contains status of the PostgreSQL cluster (running, creation failed etc.)

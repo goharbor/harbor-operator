@@ -13,16 +13,15 @@ import (
 
 // Update reconcile will update PostgreSQL CR.
 func (p *PostgreSQLController) Update() (*lcm.CRStatus, error) {
-
 	name := fmt.Sprintf("%s-%s", p.HarborCluster.Namespace, p.HarborCluster.Name)
 
 	crdClient := p.DClient.WithResource(databaseGVR).WithNamespace(p.HarborCluster.Namespace)
+
 	if p.ExpectCR == nil {
 		return databaseUnknownStatus(), nil
 	}
 
-	var actualCR api.Postgresql
-	var expectCR api.Postgresql
+	var actualCR, expectCR api.Postgresql
 
 	if err := runtime.DefaultUnstructuredConverter.
 		FromUnstructured(p.ActualCR.UnstructuredContent(), &actualCR); err != nil {
@@ -35,7 +34,6 @@ func (p *PostgreSQLController) Update() (*lcm.CRStatus, error) {
 	}
 
 	if !IsEqual(expectCR, actualCR) {
-
 		p.Log.Info(
 			"Update Database resource",
 			"namespace", p.HarborCluster.Namespace, "name", name,
@@ -53,6 +51,7 @@ func (p *PostgreSQLController) Update() (*lcm.CRStatus, error) {
 			return databaseNotReadyStatus(UpdateDatabaseCrError, err.Error()), err
 		}
 	}
+
 	return databaseUnknownStatus(), nil
 }
 

@@ -17,13 +17,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
-var (
-	redisFailoversGVR = redisOp.SchemeGroupVersion.WithResource(redisOp.RFNamePlural)
-)
+var redisFailoversGVR = redisOp.SchemeGroupVersion.WithResource(redisOp.RFNamePlural)
 
 // NewRedisController is constructor for redis controller.
 func NewRedisController(ctx context.Context, opts ...k8s.Option) lcm.Controller {
 	ctrlOpts := &k8s.CtrlOptions{}
+
 	for _, o := range opts {
 		o(ctrlOpts)
 	}
@@ -68,6 +67,7 @@ func (rc *RedisController) Apply(ctx context.Context, cluster *v1alpha2.HarborCl
 	} else if err != nil {
 		return cacheNotReadyStatus(ErrorGetRedisClient, err.Error()), err
 	}
+
 	rc.actualCR = actualCR
 
 	expectCR := rc.ResourceManager.GetCacheCR()
@@ -76,6 +76,7 @@ func (rc *RedisController) Apply(ctx context.Context, cluster *v1alpha2.HarborCl
 	}
 
 	rc.expectCR = expectCR
+
 	crStatus, err := rc.Update(cluster)
 	if err != nil {
 		return crStatus, err
@@ -84,7 +85,7 @@ func (rc *RedisController) Apply(ctx context.Context, cluster *v1alpha2.HarborCl
 	return rc.Readiness(ctx, cluster)
 }
 
-// Delete
+// Delete...
 func (rc *RedisController) Delete(ctx context.Context, cluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
 	return nil, fmt.Errorf("not implemented")
 }

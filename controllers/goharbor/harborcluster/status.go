@@ -27,7 +27,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// status is designed to track the status and conditions of the deploying Harbor cluster
+// status is designed to track the status and conditions of the deploying Harbor cluster.
 type status struct {
 	client.Client
 	log     logr.Logger
@@ -40,8 +40,8 @@ type status struct {
 	locker *sync.Mutex
 }
 
-// NewStatus constructs a new status
-func NewStatus(source *goharborv1.HarborCluster) *status {
+// NewStatus constructs a new status.
+func newStatus(source *goharborv1.HarborCluster) *status {
 	// New with default status and conditions
 	s := &status{
 		cr:     source,
@@ -57,17 +57,14 @@ func NewStatus(source *goharborv1.HarborCluster) *status {
 	if source != nil && len(source.Status.Status) > 0 {
 		s.data.Status = source.Status.Status
 		s.data.Revision = source.Status.Revision
-		for _, c := range source.Status.Conditions {
-			s.data.Conditions = append(s.data.Conditions, c)
-		}
-
+		s.data.Conditions = append(s.data.Conditions, source.Status.Conditions...)
 		s.sourceRevision = source.Status.Revision // for comparison later
 	}
 
 	return s
 }
 
-// Update the status
+// Update the status.
 func (s *status) Update() error {
 	// In case
 	s.locker.Lock()
@@ -93,6 +90,7 @@ func (s *status) Update() error {
 	if err := s.Client.Status().Update(s.context, s.cr); err != nil {
 		if apierrors.IsConflict(err) {
 			s.log.Error(err, "failed to update status of harbor cluster")
+
 			return nil
 		}
 
@@ -102,7 +100,7 @@ func (s *status) Update() error {
 	return nil
 }
 
-// DependsReady judges if all the dependent services are ready
+// DependsReady judges if all the dependent services are ready.
 func (s *status) DependsReady() bool {
 	// In case
 	s.locker.Lock()
@@ -123,56 +121,56 @@ func (s *status) DependsReady() bool {
 	return ready == 3
 }
 
-// For the harbor cluster CR
+// For the harbor cluster CR.
 func (s *status) For(resource *goharborv1.HarborCluster) *status {
 	s.cr = resource
 
 	return s
 }
 
-// WithClient set client
+// WithClient set client.
 func (s *status) WithClient(c client.Client) *status {
 	s.Client = c
 
 	return s
 }
 
-// WithContext set context
+// WithContext set context.
 func (s *status) WithContext(ctx context.Context) *status {
 	s.context = ctx
 
 	return s
 }
 
-// WithLog set logger
+// WithLog set logger.
 func (s *status) WithLog(logger logr.Logger) *status {
 	s.log = logger
 
 	return s
 }
 
-// UpdateCache updates cache status
+// UpdateCache updates cache status.
 func (s *status) UpdateCache(c goharborv1.HarborClusterCondition) *status {
 	s.updateCondition(goharborv1.CacheReady, c)
 
 	return s
 }
 
-// UpdateDatabase updates database status
+// UpdateDatabase updates database status.
 func (s *status) UpdateDatabase(c goharborv1.HarborClusterCondition) *status {
 	s.updateCondition(goharborv1.DatabaseReady, c)
 
 	return s
 }
 
-// UpdateStorage updates storage status
+// UpdateStorage updates storage status.
 func (s *status) UpdateStorage(c goharborv1.HarborClusterCondition) *status {
 	s.updateCondition(goharborv1.StorageReady, c)
 
 	return s
 }
 
-// UpdateHarbor updates Harbor status
+// UpdateHarbor updates Harbor status.
 func (s *status) UpdateHarbor(c goharborv1.HarborClusterCondition) *status {
 	s.updateCondition(goharborv1.ServiceReady, c)
 
@@ -209,7 +207,7 @@ func (s *status) updateCondition(ct goharborv1.HarborClusterConditionType, c goh
 }
 
 func (s *status) overallStatus() goharborv1.ClusterStatus {
-	var ready, unready = 0, 0
+	var ready, unready int
 
 	for _, c := range s.data.Conditions {
 		switch c.Status {
@@ -217,6 +215,7 @@ func (s *status) overallStatus() goharborv1.ClusterStatus {
 			ready++
 		case corev1.ConditionFalse:
 			unready++
+		case corev1.ConditionUnknown:
 		default:
 		}
 	}

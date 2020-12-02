@@ -50,6 +50,8 @@ var (
 )
 
 func TestAPIs(t *testing.T) {
+	t.Parallel()
+
 	RegisterFailHandler(Fail)
 
 	RunSpecsWithDefaultAndCustomReporters(t,

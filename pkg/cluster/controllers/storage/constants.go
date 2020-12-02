@@ -1,6 +1,6 @@
 package storage
 
-// Define error message
+// Define error message.
 const (
 	GetMinIOError            = "Get minIO error"
 	UpdateMinIOError         = "Update minIO error"
