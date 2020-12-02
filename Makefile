@@ -564,7 +564,7 @@ kustomize:
 ifeq (, $(shell which kustomize))
 	$(MAKE) $(GOBIN)
 	# https://github.com/kubernetes-sigs/kustomize/blob/master/docs/INSTALL.md
-	curl -s https://raw.githubusercontent.com/kubernetes-sigs/kustomize/7eca29daeee6b583f5394a45d8edfd41c15dbe6d/hack/install_kustomize.sh | bash
+	curl -s https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh | bash
 	mv ./kustomize $(GOBIN)
 	chmod u+x $(GOBIN)/kustomize
 KUSTOMIZE=$(GOBIN)/kustomize

@@ -51,7 +51,7 @@ type NotarySignerSpec struct {
 	Storage NotarySignerStorageSpec `json:"storage"`
 
 	// +kubebuilder:validation:Optional
-	Migration *NotaryMigrationSpec `json:"migration,omitempty"`
+	MigrationEnabled *bool `json:"migrationEnabled,omitempty"`
 }
 
 type NotarySignerAuthenticationSpec struct {

@@ -10,9 +10,10 @@ kind: Certificate
 metadata:
   name: sample-public-certificate
 spec:
-  isCA: false
+  isCA: true
   issuerRef:
     name: sample-public-certificate
   secretName: sample-public-certificate
   dnsNames:
   - core.harbor.domain
+  - notary.harbor.domain

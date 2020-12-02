@@ -66,27 +66,10 @@ webhooks:
 - clientConfig:
     caBundle: Cg==
     service:
-      name: '{{ include "chart.fullname" . }}-webhook-service'
-      namespace: {{ .Release.Namespace | quote }}
-      path: /validate-goharbor-io-v1alpha2-harborcluster
-  failurePolicy: Fail
-  name: vharborcluster.kb.io
-  rules:
-  - apiGroups:
-    - goharbor.io
-    apiVersions:
-    - v1alpha2
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - harborclusters
-- clientConfig:
-    caBundle: Cg==
-    service:
-      name: '{{ include "chart.fullname" . }}-webhook-service'
+      name: {{ include "chart.fullname" . | quote }}
       namespace: {{ .Release.Namespace | quote }}
       path: /validate-goharbor-io-v1alpha2-notaryserver
+      port: {{ .Values.service.port }}
   failurePolicy: Fail
   name: vnotaryserver.kb.io
   rules:
@@ -102,9 +85,10 @@ webhooks:
 - clientConfig:
     caBundle: Cg==
     service:
-      name: '{{ include "chart.fullname" . }}-webhook-service'
+      name: {{ include "chart.fullname" . | quote }}
       namespace: {{ .Release.Namespace | quote }}
       path: /validate-goharbor-io-v1alpha2-notarysigner
+      port: {{ .Values.service.port }}
   failurePolicy: Fail
   name: vnotarysigner.kb.io
   rules:
@@ -117,3 +101,21 @@ webhooks:
     - UPDATE
     resources:
     - notarysigners
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: '{{ include "chart.fullname" . }}-webhook-service'
+      namespace: {{ .Release.Namespace | quote }}
+      path: /validate-goharbor-io-v1alpha2-harborcluster
+  failurePolicy: Fail
+  name: vharborcluster.kb.io
+  rules:
+  - apiGroups:
+    - goharbor.io
+    apiVersions:
+    - v1alpha2
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - harborclusters

@@ -18,25 +18,3 @@ appVersion: 0.0.0-dev
 
 home: https://github.com/goharbor/harbor-operator
 icon: https://branding.cncf.io/img/projects/harbor/icon/color/harbor-icon-color.svg
-
-dependencies:
-- name: cert-manager
-  repository: https://charts.jetstack.io
-  version: 0.16.0
-  condition: certmanager.enabled, global.certmanager.enabled
-  tags:
-  - certmanager
-
-- name: nginx-ingress
-  repository: https://kubernetes-charts.storage.googleapis.com
-  version:  1.41.2
-  condition: ingress.enabled, global.ingress.enabled
-  tags:
-  - ingress
-
-- name: prometheus-operator
-  repository: https://kubernetes-charts.storage.googleapis.com
-  version:  9.3.1
-  condition: prometheusOperator.enabled, global.prometheusOperator.enabled
-  tags:
-  - prometheusOperator

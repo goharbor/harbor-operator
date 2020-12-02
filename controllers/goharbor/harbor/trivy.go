@@ -8,6 +8,7 @@ import (
 	"github.com/goharbor/harbor-operator/controllers"
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	"github.com/goharbor/harbor-operator/pkg/graph"
+	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -75,7 +76,11 @@ func (r *Reconciler) GetTrivyUpdateSecret(ctx context.Context, harbor *goharborv
 
 	token, err := r.GetGithubToken(TrivyGithubCredentialsConfigKey)
 	if err != nil {
-		return nil, serrors.UnrecoverrableError(err, serrors.OperatorReason, "cannot get default github credentials")
+		if _, ok := err.(configstore.ErrItemNotFound); ok {
+			return nil, nil
+		}
+
+		return nil, serrors.UnrecoverrableError(err, serrors.OperatorReason, "cannot get github credentials")
 	}
 
 	return &corev1.Secret{

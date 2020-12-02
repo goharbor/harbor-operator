@@ -359,6 +359,18 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1alpha2.Harbo
 		}
 	}
 
+	var notary *goharborv1alpha2.CoreComponentsNotaryServerSpec
+
+	if harbor.Spec.Notary != nil {
+		notaryURL := (&url.URL{
+			Scheme: harbor.Spec.InternalTLS.GetScheme(),
+			Host:   r.NormalizeName(ctx, harbor.GetName(), controllers.NotaryServer.String()),
+		}).String()
+		notary = &goharborv1alpha2.CoreComponentsNotaryServerSpec{
+			URL: notaryURL,
+		}
+	}
+
 	adminPasswordRef := harbor.Spec.HarborAdminPasswordRef
 	if len(adminPasswordRef) == 0 {
 		adminPasswordRef = r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String(), "admin-password")
@@ -425,8 +437,9 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1alpha2.Harbo
 					URL:            tokenServiceURL,
 					CertificateRef: tokenCertificateRef,
 				},
-				Trivy: trivy,
-				TLS:   tls,
+				NotaryServer: notary,
+				Trivy:        trivy,
+				TLS:          tls,
 			},
 			CoreConfig: goharborv1alpha2.CoreConfig{
 				AdminInitialPasswordRef: adminPasswordRef,
