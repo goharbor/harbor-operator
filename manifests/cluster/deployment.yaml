@@ -1875,7 +1875,7 @@ spec:
     name: v1alpha2
     schema:
       openAPIV3Schema:
-        description: HarborCluster is the Schema for the harborclusters API
+        description: HarborCluster is the Schema for the harborclusters API.
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
@@ -1886,7 +1886,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: HarborClusterSpec defines the desired state of HarborCluster
+            description: HarborClusterSpec defines the desired state of HarborCluster.
             properties:
               chartmuseum:
                 properties:
@@ -3176,7 +3176,7 @@ spec:
             - harborAdminPasswordRef
             type: object
           status:
-            description: HarborClusterStatus defines the observed state of HarborCluster
+            description: HarborClusterStatus defines the observed state of HarborCluster.
             properties:
               conditions:
                 description: Conditions of each components
@@ -14752,14 +14752,6 @@ rules:
   - update
   - watch
 - apiGroups:
-  - acid.zalan.do
-  resources:
-  - postgresteams
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
   - apiextensions.k8s.io
   resources:
   - customresourcedefinitions
@@ -14823,8 +14815,6 @@ rules:
   - delete
   - get
   - list
-  - patch
-  - update
 - apiGroups:
   - ""
   resources:
@@ -15419,14 +15409,13 @@ data:
   cluster_history_entries: "1000"
   cluster_labels: application:spilo
   cluster_name_label: cluster-name
-  connection_pooler_image: registry.opensource.zalan.do/acid/pgbouncer:master-11
+  connection_pooler_image: registry.opensource.zalan.do/acid/pgbouncer:master-7
   db_hosted_zone: db.example.com
   debug_logging: "true"
-  docker_image: registry.opensource.zalan.do/acid/spilo-12:1.6-p5
+  docker_image: registry.opensource.zalan.do/acid/spilo-12:1.6-p3
   enable_master_load_balancer: "false"
   enable_replica_load_balancer: "false"
   enable_teams_api: "false"
-  external_traffic_policy: Cluster
   logical_backup_docker_image: registry.opensource.zalan.do/acid/logical-backup
   logical_backup_s3_bucket: my-bucket-url
   logical_backup_s3_sse: AES256
@@ -15450,10 +15439,9 @@ data:
   ring_log_lines: "100"
   secret_name_template: '{username}.{cluster}.credentials'
   spilo_privileged: "false"
-  storage_resize_mode: pvc
   super_username: postgres
   watched_namespace: '*'
-  workers: "8"
+  workers: "4"
 kind: ConfigMap
 metadata:
   annotations:
@@ -15522,9 +15510,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
-    goharbor.io/deploy-engine: Kustomization
-    goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    cache.goharbor.io/version: v1.0.0
+    database.goharbor.io/version: v1.5.0
+    storage.goharbor.io/version: v3.0.13
   labels:
     control-plane: harbor-operator
   name: harbor-operator
@@ -15640,8 +15628,6 @@ metadata:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
     goharbor.io/operator-version: v1.0.0
-  labels:
-    application: postgres-operator
   name: postgres-operator
   namespace: harbor-operator-ns
 spec:
@@ -15649,8 +15635,6 @@ spec:
   selector:
     matchLabels:
       name: postgres-operator
-  strategy:
-    type: Recreate
   template:
     metadata:
       annotations:
@@ -15708,7 +15692,7 @@ spec:
         app: redisoperator
     spec:
       containers:
-      - image: quay.io/spotahome/redis-operator:latest
+      - image: quay.io/spotahome/redis-operator:v1.0.0
         imagePullPolicy: IfNotPresent
         name: app
         resources:
