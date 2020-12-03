@@ -181,7 +181,7 @@ func (p *PostgreSQLController) GetInClusterDatabaseConn(name, pw string) (*Conne
 }
 
 func GenInClusterPasswordSecretName(teamID, name string) string {
-	return fmt.Sprintf("postgres.%s-%s.credentials.postgresql.acid.zalan.do", teamID, name)
+	return fmt.Sprintf("postgres.%s-%s.credentials", teamID, name)
 }
 
 // GetInClusterHost returns the Database master pod ip or service name.
