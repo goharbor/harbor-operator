@@ -19,19 +19,19 @@ patchesJson6902:
     version: v1
     group: apps
     kind: Deployment
-    name: controller-manager
+    name: harbor-operator
   path: patch_deployment_metadata.yaml
 - target:
     version: v1
     group: apps
     kind: Deployment
-    name: controller-manager
+    name: harbor-operator
   path: patch_deployment_resources.yaml
 - target:
     version: v1
     group: apps
     kind: Deployment
-    name: controller-manager
+    name: harbor-operator
   path: patch_deployment_security.yaml
 
 bases:
