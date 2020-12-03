@@ -22,9 +22,6 @@ const (
 	Storage   = "storage"
 	s3Storage = "s3"
 
-	DefaultExternalSecretSuffix     = "harbor-cluster-storage"
-	ChartMuseumExternalSecretSuffix = "chart-museum-storage"
-
 	DefaultCredsSecret = "creds"
 	DefaultPrefix      = "minio-"
 
@@ -85,6 +82,8 @@ func (m *MinIOController) Apply(ctx context.Context, harborcluster *goharborv1.H
 
 	err := m.KubeClient.Get(m.getMinIONamespacedName(), &minioCR)
 	if k8serror.IsNotFound(err) {
+		m.Log.Info("create minio service")
+
 		return m.Provision()
 	} else if err != nil {
 		return minioNotReadyStatus(GetMinIOError, err.Error()), err
@@ -111,19 +110,25 @@ func (m *MinIOController) Apply(ctx context.Context, harborcluster *goharborv1.H
 		return minioNotReadyStatus(GetMinIOError, err.Error()), err
 	}
 
-	if isReady {
-		err := m.minioInit()
-		if err != nil {
-			return minioNotReadyStatus(CreateDefaultBucketError, err.Error()), err
-		}
-
-		return m.ProvisionMinIOProperties(&minioCR)
+	if !isReady {
+		return minioUnknownStatus(), nil
 	}
 
-	return minioUnknownStatus(), nil
+	if err := m.minioInit(ctx); err != nil {
+		return minioNotReadyStatus(CreateDefaultBucketError, err.Error()), err
+	}
+
+	crs, err := m.ProvisionMinIOProperties(&minioCR)
+	if err != nil {
+		return crs, err
+	}
+
+	m.Log.Info("minio is ready")
+
+	return crs, nil
 }
 
-func (m *MinIOController) minioInit() error {
+func (m *MinIOController) minioInit(ctx context.Context) error {
 	accessKey, secretKey, err := m.getCredsFromSecret()
 	if err != nil {
 		return err
@@ -131,19 +136,24 @@ func (m *MinIOController) minioInit() error {
 
 	endpoint := m.getServiceName() + "." + m.HarborCluster.Namespace + ":9000"
 
-	m.MinioClient, err = GetMinioClient(endpoint, string(accessKey), string(secretKey), DefaultRegion, false)
+	edp := &MinioEndpoint{
+		Endpoint:        endpoint,
+		AccessKeyID:     string(accessKey),
+		SecretAccessKey: string(secretKey),
+		Location:        DefaultRegion,
+	}
+
+	m.MinioClient, err = NewMinioClient(edp)
 	if err != nil {
 		return err
 	}
 
-	exists, err := m.MinioClient.IsBucketExists(DefaultBucket)
+	exists, err := m.MinioClient.IsBucketExists(ctx, DefaultBucket)
 	if err != nil || exists {
 		return err
 	}
 
-	err = m.MinioClient.CreateBucket(DefaultBucket)
-
-	return err
+	return m.MinioClient.CreateBucket(ctx, DefaultBucket)
 }
 
 func (m *MinIOController) checkMinIOUpdate() bool {

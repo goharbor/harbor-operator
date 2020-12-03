@@ -1,53 +1,58 @@
 package storage
 
 import (
-	"log"
+	"context"
+	"fmt"
 
 	minv6 "github.com/minio/minio-go/v6"
 )
 
+// Minio defines related operations of minio.
 type Minio interface {
-	IsBucketExists(bucket string) (bool, error)
-	CreateBucket(bucket string) error
+	IsBucketExists(ctx context.Context, bucket string) (bool, error)
+	CreateBucket(ctx context.Context, bucket string) error
 }
 
-type MinioClient struct {
-	Client   *minv6.Client
+// MinioEndpoint contains the related access info of a minio server.
+type MinioEndpoint struct {
+	Endpoint        string
+	AccessKeyID     string
+	SecretAccessKey string
+	// Optional
 	Location string
+	UseSSL   bool
 }
 
-func GetMinioClient(endpoint, accessKeyID, secretAccessKey, location string, useSSL bool) (*MinioClient, error) {
-	client, err := minv6.New(endpoint, accessKeyID, secretAccessKey, useSSL)
-	if err != nil {
-		log.Fatalln(err)
+// MinioClient is an implementation of Minio.
+type MinioClient struct {
+	client   *minv6.Client
+	location string
+}
 
-		return nil, err
+// NewMinioClient constructs a new minio client.
+func NewMinioClient(endpoint *MinioEndpoint) (Minio, error) {
+	client, err := minv6.New(
+		endpoint.Endpoint,
+		endpoint.AccessKeyID,
+		endpoint.SecretAccessKey,
+		endpoint.UseSSL,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("create minv6 client error: %w", err)
 	}
 
 	return &MinioClient{
-		Client:   client,
-		Location: location,
+		client:   client,
+		location: endpoint.Location,
 	}, nil
 }
 
-func (m MinioClient) IsBucketExists(bucket string) (bool, error) {
-	exists, err := m.Client.BucketExists(bucket)
-	if err != nil {
-		log.Fatalln(err)
-
-		return exists, err
-	}
-
-	return exists, nil
+// IsBucketExists checks if the bucket existing.
+func (m MinioClient) IsBucketExists(ctx context.Context, bucket string) (bool, error) {
+	return m.client.BucketExistsWithContext(ctx, bucket)
 }
 
-func (m MinioClient) CreateBucket(bucket string) error {
-	err := m.Client.MakeBucket(bucket, m.Location)
-	if err != nil {
-		log.Fatalln(err)
-
-		return err
-	}
-
-	return nil
+// CreateBucket creates a bucket.
+func (m MinioClient) CreateBucket(ctx context.Context, bucket string) error {
+	return m.client.MakeBucketWithContext(ctx, bucket, m.location)
 }
