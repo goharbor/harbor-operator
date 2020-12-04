@@ -104,9 +104,10 @@ webhooks:
 - clientConfig:
     caBundle: Cg==
     service:
-      name: '{{ include "chart.fullname" . }}-webhook-service'
+      name: {{ include "chart.fullname" . | quote }}
       namespace: {{ .Release.Namespace | quote }}
       path: /validate-goharbor-io-v1alpha2-harborcluster
+      port: {{ .Values.service.port }}
   failurePolicy: Fail
   name: vharborcluster.kb.io
   rules:

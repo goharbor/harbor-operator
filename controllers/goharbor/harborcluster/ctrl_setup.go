@@ -37,7 +37,7 @@ type Reconciler struct {
 	HarborCtrl   *harbor.Controller
 }
 
-// +kubebuilder:rbac:groups=goharbor.io,resources=harborclusters,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=goharbor.io,resources=harborclusters,verbs=get;list;watch
 // +kubebuilder:rbac:groups=goharbor.io,resources=harborclusters/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=acid.zalan.do,resources=postgresqls;operatorconfigurations,verbs=get;list;watch;create;update;patch;delete;deletecollection
 // +kubebuilder:rbac:groups=acid.zalan.do,resources=postgresqls/status,verbs=get;update;patch
@@ -45,6 +45,7 @@ type Reconciler struct {
 // +kubebuilder:rbac:groups=minio.min.io,resources=*,verbs=*
 // +kubebuilder:rbac:groups="",resources=pods,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=apps,resources=statefulsets;deployments,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=goharbor.io,resources=harbors,verbs=get;list;watch;create;update;patch;delete
 
 func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) error {
 	r.Client = mgr.GetClient()

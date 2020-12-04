@@ -33,7 +33,7 @@ func (m *MinIOController) ProvisionMinIOProperties(minioInstamnce *minio.Tenant)
 	return minioReadyStatus(properties), nil
 }
 
-func (m *MinIOController) getMinIOProperties(minioInstance *minio.Tenant) (*goharborv1.RegistryStorageDriverS3Spec, error) {
+func (m *MinIOController) getMinIOProperties(minioInstance *minio.Tenant) (*goharborv1.HarborStorageImageChartStorageSpec, error) {
 	accessKey, secretKey, err := m.getCredsFromSecret()
 	if err != nil {
 		return nil, err
@@ -47,7 +47,7 @@ func (m *MinIOController) getMinIOProperties(minioInstance *minio.Tenant) (*goha
 	}
 
 	var endpoint string
-	if !m.HarborCluster.Spec.ImageChartStorage.Redirect.Disable {
+	if !m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Redirect.Disable {
 		_, endpoint, err = GetMinIOHostAndSchema(m.HarborCluster.Spec.ExternalURL)
 		if err != nil {
 			return nil, err
@@ -58,17 +58,22 @@ func (m *MinIOController) getMinIOProperties(minioInstance *minio.Tenant) (*goha
 
 	secure := false
 	v4Auth := false
-	s3 := &goharborv1.RegistryStorageDriverS3Spec{
-		AccessKey:      string(accessKey),
-		SecretKeyRef:   secretKeyRef.Name,
-		Region:         DefaultRegion,
-		RegionEndpoint: endpoint,
-		Bucket:         DefaultBucket,
-		Secure:         &secure,
-		V4Auth:         &v4Auth,
+
+	storageSpec := &goharborv1.HarborStorageImageChartStorageSpec{
+		S3: &goharborv1.HarborStorageImageChartStorageS3Spec{
+			RegistryStorageDriverS3Spec: goharborv1.RegistryStorageDriverS3Spec{
+				AccessKey:      string(accessKey),
+				SecretKeyRef:   secretKeyRef.Name,
+				Region:         DefaultRegion,
+				RegionEndpoint: endpoint,
+				Bucket:         DefaultBucket,
+				Secure:         &secure,
+				V4Auth:         &v4Auth,
+			},
+		},
 	}
 
-	return s3, nil
+	return storageSpec, nil
 }
 
 func (m *MinIOController) createSecretKeyRef(secretKey []byte, minioInstance *minio.Tenant) *corev1.Secret {

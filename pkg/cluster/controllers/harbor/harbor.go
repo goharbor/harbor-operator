@@ -22,19 +22,23 @@ type Controller struct {
 	Ctx                 context.Context
 	Log                 logr.Logger
 	Scheme              *runtime.Scheme
-	ComponentToCRStatus sync.Map
+	ComponentToCRStatus *sync.Map
 }
 
 func (harbor *Controller) Apply(ctx context.Context, harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
-	var harborCR *v1alpha2.Harbor
+	harborCR := &v1alpha2.Harbor{}
 
 	// Use the ctx from the parameter
 	harbor.KubeClient.WithContext(ctx)
 
-	err := harbor.KubeClient.Get(harbor.getHarborCRNamespacedName(harborcluster), harborCR)
+	nsdName := harbor.getHarborCRNamespacedName(harborcluster)
+
+	err := harbor.KubeClient.Get(nsdName, harborCR)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			harborCR = harbor.getHarborCR(harborcluster)
+
+			harbor.Log.Info("create harbor service", "name", nsdName)
 
 			err = harbor.KubeClient.Create(harborCR)
 			if err != nil {
@@ -45,11 +49,17 @@ func (harbor *Controller) Apply(ctx context.Context, harborcluster *v1alpha2.Har
 		}
 	} else {
 		harborCR = harbor.getHarborCR(harborcluster)
+
+		// TODO: maybe we still need to do actual and desired status here to determine if we need to do update
+		harbor.Log.Info("update harbor service", "name", nsdName)
+
 		err = harbor.KubeClient.Update(harborCR)
 		if err != nil {
 			return harborClusterCRNotReadyStatus(UpdateHarborCRError, err.Error()), err
 		}
 	}
+
+	harbor.Log.Info("harbor service is ready", "name", nsdName)
 
 	return harborClusterCRStatus(harborCR), nil
 }
@@ -75,10 +85,11 @@ func NewHarborController(ctx context.Context, options ...k8s.Option) *Controller
 	}
 
 	return &Controller{
-		Ctx:        ctx,
-		KubeClient: o.Client,
-		Log:        o.Log,
-		Scheme:     o.Scheme,
+		Ctx:                 ctx,
+		KubeClient:          o.Client,
+		Log:                 o.Log,
+		Scheme:              o.Scheme,
+		ComponentToCRStatus: &sync.Map{},
 	}
 }
 
@@ -100,17 +111,21 @@ func (harbor *Controller) getHarborCR(harborcluster *v1alpha2.HarborCluster) *v1
 		Spec: harborcluster.Spec.HarborSpec,
 	}
 
-	// use incluster spec in first priority
-	if harborcluster.Spec.InClusterDatabase != nil {
-		harborcluster.Spec.Database = harbor.getDatabaseSpec()
+	// Use incluster spec in first priority.
+	// Check based on the case that if the related dependent services are created
+	if db := harbor.getDatabaseSpec(); db != nil {
+		harbor.Log.Info("use incluster database", "database", db.Hosts)
+		harborCR.Spec.Database = db
 	}
 
-	if harborcluster.Spec.InClusterCache != nil {
-		harborcluster.Spec.Redis = harbor.getCacheSpec()
+	if cache := harbor.getCacheSpec(); cache != nil {
+		harbor.Log.Info("use incluster cache", "cache", cache.Host)
+		harborCR.Spec.Redis = cache
 	}
 
-	if harborcluster.Spec.InClusterStorage != nil {
-		harborcluster.Spec.ImageChartStorage = *harbor.getStorageSpec()
+	if storage := harbor.getStorageSpec(); storage != nil {
+		harbor.Log.Info("use incluster storage", "storage", storage.S3.RegionEndpoint)
+		harborCR.Spec.ImageChartStorage = storage
 	}
 
 	return harborCR

@@ -64,7 +64,8 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) {
 		}
 	}()
 
-	// Deploy or check dependent services concurrently and fail earlier
+	// Deploy or check dependent services concurrently and fail earlier.
+	// Only need to do check if they're configured.
 	g, gtx := gos.NewGroup(ctx)
 	g.Go(func() error {
 		cacheStatus, err := r.CacheCtrl.Apply(gtx, harborcluster)
