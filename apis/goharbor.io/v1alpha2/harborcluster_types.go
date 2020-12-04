@@ -106,24 +106,37 @@ type Storage struct {
 	Kind string `json:"kind"`
 
 	// inCLuster options.
+	// +kubebuilder:validation:Required
 	MinIOSpec *MinIOSpec `json:"minIOSpec,omitempty"`
 }
 
+// StorageRedirectSpec defines if the redirection is disabled.
+type StorageRedirectSpec struct {
+	// Disable the redirect.
+	// Default is false
+	// +optional
+	Disable bool `json:"disable"`
+}
+
 type MinIOSpec struct {
+	// Determine if the redirection of minio storage is disabled.
+	// +kubebuilder:validation:Optional
+	Redirect StorageRedirectSpec `json:"redirect"`
 	// Supply number of replicas.
 	// For standalone mode, supply 1. For distributed mode, supply 4 to 16 drives (should be even).
 	// Note that the operator does not support upgrading from standalone to distributed mode.
-	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Minimum:=1
 	Replicas int32 `json:"replicas"`
 	// Number of persistent volumes that will be attached per server
+	// +kubebuilder:validation:Minimum:=1
 	VolumesPerServer int32 `json:"volumesPerServer"`
 	// Version defines the MinIO Client (mc) Docker image version.
 	Version string `json:"version,omitempty"`
 	// VolumeClaimTemplate allows a user to specify how volumes inside a MinIOInstance
-	// +optional
+	// +kubebuilder:validation:Optional
 	VolumeClaimTemplate corev1.PersistentVolumeClaim `json:"volumeClaimTemplate,omitempty"`
 	// If provided, use these requests and limit for cpu/memory resource allocation
-	// +optional
+	// +kubebuilder:validation:Optional
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 }
 
