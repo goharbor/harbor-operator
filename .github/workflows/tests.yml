@@ -152,7 +152,7 @@ jobs:
             echo describe $n
             kubectl describe pod $n
             echo show log $n
-            kubectl log $n || true
+            kubectl logs --tail 100 $n || true
           done
           exit 1
         else
