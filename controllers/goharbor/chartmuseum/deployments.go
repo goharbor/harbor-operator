@@ -128,6 +128,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1a
 						LocalObjectReference: corev1.LocalObjectReference{
 							Name: chartMuseum.Spec.Chart.Storage.Amazon.AccessSecretRef,
 						},
+						Key: harbormetav1.SharedSecretKey,
 					},
 				},
 			})
@@ -148,6 +149,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1a
 					LocalObjectReference: corev1.LocalObjectReference{
 						Name: chartMuseum.Spec.Chart.Storage.OpenStack.PasswordRef,
 					},
+					Key: harbormetav1.SharedSecretKey,
 				},
 			},
 		}, corev1.EnvVar{
