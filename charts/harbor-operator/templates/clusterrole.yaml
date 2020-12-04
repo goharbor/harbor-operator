@@ -192,12 +192,8 @@ rules:
   resources:
   - harborclusters
   verbs:
-  - create
-  - delete
   - get
   - list
-  - patch
-  - update
   - watch
 - apiGroups:
   - goharbor.io
@@ -212,8 +208,12 @@ rules:
   resources:
   - harbors
   verbs:
+  - create
+  - delete
   - get
   - list
+  - patch
+  - update
   - watch
 - apiGroups:
   - goharbor.io
