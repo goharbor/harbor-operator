@@ -26,7 +26,7 @@ const (
 	DefaultConfigTemplatePath = "/etc/harbor-operator/core-config.conf.tmpl"
 	ConfigTemplateKey         = "template-content"
 	ConfigImageKey            = "docker-image"
-	DefaultImage              = "goharbor/harbor-core:v2.0.0"
+	DefaultImage              = config.DefaultRegistry + "goharbor/harbor-core:v2.0.0"
 )
 
 // Reconciler reconciles a Core object.

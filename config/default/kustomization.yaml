@@ -2,6 +2,8 @@
 #commonLabels:
 #  someName: someValue
 
+namespace: harbor-operator-ns
+
 bases:
 - ../crd
 - ../manager

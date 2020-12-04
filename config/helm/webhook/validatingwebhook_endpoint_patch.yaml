@@ -22,3 +22,15 @@ webhooks:
       name: '{{ include "chart.fullname" . | quote }}'
       namespace: '{{ .Release.Namespace | quote }}'
       port: '{{ .Values.service.port }}'
+- name: vnotaryserver.kb.io
+  clientConfig:
+    service:
+      name: '{{ include "chart.fullname" . | quote }}'
+      namespace: '{{ .Release.Namespace | quote }}'
+      port: '{{ .Values.service.port }}'
+- name: vnotarysigner.kb.io
+  clientConfig:
+    service:
+      name: '{{ include "chart.fullname" . | quote }}'
+      namespace: '{{ .Release.Namespace | quote }}'
+      port: '{{ .Values.service.port }}'

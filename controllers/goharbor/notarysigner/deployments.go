@@ -11,7 +11,6 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 const (
@@ -60,17 +59,41 @@ func (r *Reconciler) GetDeployment(ctx context.Context, notary *goharborv1alpha2
 
 	initContainers := []corev1.Container{}
 
-	if notary.Spec.Migration.Enabled() {
-		migrationContainer, migrationVolumes, err := notary.Spec.Migration.GetMigrationContainer(ctx, &notary.Spec.Storage.NotaryStorageSpec)
-		if err != nil {
-			return nil, errors.Wrap(err, "migrationContainer")
+	migrateCmd := ""
+	migrationEnvs := []corev1.EnvVar{}
+
+	if notary.Spec.MigrationEnabled == nil || *notary.Spec.MigrationEnabled {
+		secretDatabaseVariable := ""
+
+		if notary.Spec.Storage.Postgres.PasswordRef != "" {
+			migrationEnvs = append(migrationEnvs, corev1.EnvVar{
+				Name: "secretDatabase",
+				ValueFrom: &corev1.EnvVarSource{
+					SecretKeyRef: &corev1.SecretKeySelector{
+						LocalObjectReference: corev1.LocalObjectReference{
+							Name: notary.Spec.Storage.Postgres.PasswordRef,
+						},
+						Key: harbormetav1.PostgresqlPasswordKey,
+					},
+				},
+			})
+
+			secretDatabaseVariable = "$(secretDatabase)"
 		}
 
-		if migrationContainer != nil {
-			initContainers = append(initContainers, *migrationContainer)
-		}
+		migrationDatabaseURL := notary.Spec.Storage.Postgres.GetDSNStringWithRawPassword(secretDatabaseVariable)
+		migrateCmd = "migrate-patch -database=" + migrationDatabaseURL + " && /migrations/migrate.sh && "
 
-		volumes = append(volumes, migrationVolumes...)
+		migrationEnvs = append(migrationEnvs, corev1.EnvVar{
+			Name:  "DB_URL",
+			Value: migrationDatabaseURL,
+		}, corev1.EnvVar{
+			Name:  "MIGRATIONS_PATH",
+			Value: "/migrations/signer/postgresql",
+		}, corev1.EnvVar{
+			Name:  "SERVICE_NAME",
+			Value: "notary_signer",
+		})
 	}
 
 	deploy := &appsv1.Deployment{
@@ -100,26 +123,13 @@ func (r *Reconciler) GetDeployment(ctx context.Context, notary *goharborv1alpha2
 					Containers: []corev1.Container{{
 						Name:         controllers.NotarySigner.String(),
 						Image:        image,
-						Args:         []string{"notary-signer", "-config", path.Join(ConfigPath, ConfigName)},
+						Command:      []string{"/bin/sh"},
+						Args:         []string{"-c", migrateCmd + "notary-signer -config " + path.Join(ConfigPath, ConfigName)},
 						VolumeMounts: volumeMounts,
 						Ports: []corev1.ContainerPort{{
 							ContainerPort: goharborv1alpha2.NotarySignerAPIPort,
 							Name:          harbormetav1.NotarySignerAPIPortName,
 						}},
-						ReadinessProbe: &corev1.Probe{
-							Handler: corev1.Handler{
-								TCPSocket: &corev1.TCPSocketAction{
-									Port: intstr.FromString(harbormetav1.NotarySignerAPIPortName),
-								},
-							},
-						},
-						LivenessProbe: &corev1.Probe{
-							Handler: corev1.Handler{
-								TCPSocket: &corev1.TCPSocketAction{
-									Port: intstr.FromString(harbormetav1.NotarySignerAPIPortName),
-								},
-							},
-						},
 						EnvFrom: []corev1.EnvFromSource{{
 							Prefix: "NOTARY_SIGNER_",
 							SecretRef: &corev1.SecretEnvSource{
@@ -129,6 +139,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, notary *goharborv1alpha2
 								Optional: &varFalse,
 							},
 						}},
+						Env: migrationEnvs,
 					}},
 				},
 			},

@@ -19,13 +19,19 @@ import (
 const (
 	DefaultRequeueWait = 2 * time.Second
 	ConfigImageKey     = "docker-image"
-	DefaultImage       = "goharbor/trivy-adapter-photon:v2.0.1"
+	DefaultImage       = config.DefaultRegistry + "goharbor/trivy-adapter-photon:v2.0.1"
 )
 
 // Reconciler reconciles a Trivy object.
 type Reconciler struct {
 	*commonCtrl.Controller
 }
+
+// +kubebuilder:rbac:groups=goharbor.io,resources=trivies,verbs=get;list;watch
+// +kubebuilder:rbac:groups=goharbor.io,resources=trivies/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups="",resources=configmaps;services;secrets,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=cert-manager.io,resources=certificates,verbs=get;list;watch;create;update;patch;delete
 
 func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) error {
 	err := r.Controller.SetupWithManager(ctx, mgr)

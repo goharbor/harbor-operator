@@ -166,6 +166,10 @@ const (
 )
 
 func (r *Reconciler) GetCoreAdminPassword(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*corev1.Secret, error) {
+	if len(harbor.Spec.HarborAdminPasswordRef) > 0 {
+		return nil, nil
+	}
+
 	name := r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String(), "admin-password")
 	namespace := harbor.GetNamespace()
 
@@ -355,7 +359,23 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1alpha2.Harbo
 		}
 	}
 
-	adminPasswordRef := r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String(), "admin-password")
+	var notary *goharborv1alpha2.CoreComponentsNotaryServerSpec
+
+	if harbor.Spec.Notary != nil {
+		notaryURL := (&url.URL{
+			Scheme: harbor.Spec.InternalTLS.GetScheme(),
+			Host:   r.NormalizeName(ctx, harbor.GetName(), controllers.NotaryServer.String()),
+		}).String()
+		notary = &goharborv1alpha2.CoreComponentsNotaryServerSpec{
+			URL: notaryURL,
+		}
+	}
+
+	adminPasswordRef := harbor.Spec.HarborAdminPasswordRef
+	if len(adminPasswordRef) == 0 {
+		adminPasswordRef = r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String(), "admin-password")
+	}
+
 	coreSecretRef := r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String(), "secret")
 	encryptionKeyRef := r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String(), "encryptionkey")
 	csrfRef := r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String(), "csrf")
@@ -417,8 +437,9 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1alpha2.Harbo
 					URL:            tokenServiceURL,
 					CertificateRef: tokenCertificateRef,
 				},
-				Trivy: trivy,
-				TLS:   tls,
+				NotaryServer: notary,
+				Trivy:        trivy,
+				TLS:          tls,
 			},
 			CoreConfig: goharborv1alpha2.CoreConfig{
 				AdminInitialPasswordRef: adminPasswordRef,

@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	PublicPort = 80
+	PublicPort = 443
 )
 
 func (r *Reconciler) GetService(ctx context.Context, notary *goharborv1alpha2.NotaryServer) (*corev1.Service, error) {

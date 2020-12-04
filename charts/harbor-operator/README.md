@@ -16,7 +16,6 @@ Deploy Harbor Operator
 | autoscaling.minReplicas | int | `1` | Minimum conroller replicas |
 | autoscaling.targetCPUUtilizationPercentage | int | `80` | CPU usage target for autoscaling |
 | autoscaling.targetMemoryUtilizationPercentage | int | No target | Memory usage target for autoscaling |
-| certmanager.enabled | bool | `true` | Whether to install cert-manager Helm chart |
 | deploymentAnnotations | object | `{}` | Additional annotations to add to the controller Deployment |
 | extraEnv | list | `[{"name":"HARBOR_CONTROLLER_MAX_RECONCILE","value":"1"},{"name":"HARBOR_CONTROLLER_WATCH_CHILDREN","value":"true"}]` | Environment variables to inject in controller |
 | fullnameOverride | string | `""` |  |
@@ -25,7 +24,6 @@ Deploy Harbor Operator
 | image.repository | string | `"goharbor/harbor-operator"` | The image repository whose default is the chart appVersion. |
 | image.tag | string | `"dev"` | The image tag whose default is the chart appVersion. |
 | imagePullSecrets | list | `[]` | Reference to one or more secrets to be used when pulling images <https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/> For example: `[   {"name":"image-pull-secret"} ]` |
-| ingress.enabled | bool | `false` | Whether to install ingress controller Helm chart |
 | leaderElection.namespace | string | `"kube-system"` | The namespace used to store the ConfigMap for leader election |
 | logLevel | int | `4` | Set the verbosity of controller. Range of 0 - 6 with 6 being the most verbose. Info level is 4. |
 | nameOverride | string | `""` |  |
@@ -34,7 +32,6 @@ Deploy Harbor Operator
 | podLabels | object | `{}` | Additional labels to add to the controller Pods |
 | podSecurityContext | object | `{}` | Expects input structure as per specification <https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#podsecuritycontext-v1-core> For example: `{   "fsGroup": 2000,   "runAsUser": 1000,   "runAsNonRoot": true }` |
 | priorityClassName | string | `""` | priority class to be used for the harbor-operator pods |
-| prometheusOperator.enabled | bool | `false` | Whether to install prometheus operator Helm chart |
 | rbac.create | bool | `true` | Whether to install Role Based Access Control |
 | replicaCount | int | `1` | Number of replicas for the controller |
 | resources | object | `{"limits":{"cpu":"500m","memory":"300Mi"},"requests":{"cpu":"300m","memory":"200Mi"}}` | Expects input structure as per specification <https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#resourcerequirements-v1-core> |

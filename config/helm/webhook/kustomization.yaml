@@ -7,7 +7,7 @@ generatorOptions:
 
 commonAnnotations:
   # Trick so kustomize does not split the annotation value
-  cert-manager.io/cluster-issuer: '{{.Release.Namespace}}/{{. | include "chart.fullname"}}'
+  cert-manager.io/inject-ca-from: '{{.Release.Namespace}}/{{. | include "chart.fullname"}}-serving-cert'
 
 patchesStrategicMerge:
 - validatingwebhook_endpoint_patch.yaml
