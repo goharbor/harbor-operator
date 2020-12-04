@@ -2460,9 +2460,17 @@ spec:
                   minIOSpec:
                     description: inCLuster options.
                     properties:
+                      redirect:
+                        description: Determine if the redirection of minio storage is disabled.
+                        properties:
+                          disable:
+                            description: Disable the redirect. Default is false
+                            type: boolean
+                        type: object
                       replicas:
                         description: Supply number of replicas. For standalone mode, supply 1. For distributed mode, supply 4 to 16 drives (should be even). Note that the operator does not support upgrading from standalone to distributed mode.
                         format: int32
+                        minimum: 1
                         type: integer
                       resources:
                         description: If provided, use these requests and limit for cpu/memory resource allocation
@@ -2621,6 +2629,7 @@ spec:
                       volumesPerServer:
                         description: Number of persistent volumes that will be attached per server
                         format: int32
+                        minimum: 1
                         type: integer
                     required:
                     - replicas
@@ -13766,14 +13775,14 @@ spec:
             port: ready
         name: manager
         ports:
-        - containerPort: 5000
-          name: ready
-          protocol: TCP
         - containerPort: 9443
           name: webhook-server
           protocol: TCP
         - containerPort: 8080
           name: metrics
+          protocol: TCP
+        - containerPort: 5000
+          name: ready
           protocol: TCP
         readinessProbe:
           httpGet:
@@ -13787,21 +13796,21 @@ spec:
             cpu: 300m
             memory: 200Mi
         volumeMounts:
-        - mountPath: /etc/harbor-operator
-          name: configuration-templates
-          readOnly: true
         - mountPath: /tmp/k8s-webhook-server/serving-certs
           name: cert
           readOnly: true
+        - mountPath: /etc/harbor-operator
+          name: configuration-templates
+          readOnly: true
       terminationGracePeriodSeconds: 10
       volumes:
-      - configMap:
-          name: config-template
-        name: configuration-templates
       - name: cert
         secret:
           defaultMode: 420
           secretName: webhook-server-cert
+      - configMap:
+          name: config-template
+        name: configuration-templates
 ---
 apiVersion: apps/v1
 kind: Deployment
