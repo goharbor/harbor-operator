@@ -26,7 +26,7 @@ type Controller struct {
 }
 
 func (harbor *Controller) Apply(ctx context.Context, harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
-	var harborCR *v1alpha2.Harbor
+	harborCR := &v1alpha2.Harbor{}
 
 	// Use the ctx from the parameter
 	harbor.KubeClient.WithContext(ctx)
