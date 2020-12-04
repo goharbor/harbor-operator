@@ -1223,7 +1223,11 @@ func (in *HarborSpec) DeepCopyInto(out *HarborSpec) {
 	in.HarborComponentsSpec.DeepCopyInto(&out.HarborComponentsSpec)
 	in.Expose.DeepCopyInto(&out.Expose)
 	out.InternalTLS = in.InternalTLS
-	in.ImageChartStorage.DeepCopyInto(&out.ImageChartStorage)
+	if in.ImageChartStorage != nil {
+		in, out := &in.ImageChartStorage, &out.ImageChartStorage
+		*out = new(HarborStorageImageChartStorageSpec)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.Proxy != nil {
 		in, out := &in.Proxy, &out.Proxy
 		*out = new(CoreProxySpec)

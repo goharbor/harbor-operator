@@ -59,7 +59,7 @@ type HarborSpec struct {
 	// Skip OpenAPI schema validation
 	// Use validating webhook to do verification (field required)
 	// +kubebuilder:validation:Optional
-	ImageChartStorage HarborStorageImageChartStorageSpec `json:"imageChartStorage"`
+	ImageChartStorage *HarborStorageImageChartStorageSpec `json:"imageChartStorage"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default="info"

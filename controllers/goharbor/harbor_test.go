@@ -131,7 +131,7 @@ func setupValidHarbor(ctx context.Context, ns string) (Resource, client.ObjectKe
 			ExternalURL:            publicURL.String(),
 			HarborAdminPasswordRef: adminSecretName,
 			EncryptionKeyRef:       "encryption-key",
-			ImageChartStorage: goharborv1alpha2.HarborStorageImageChartStorageSpec{
+			ImageChartStorage: &goharborv1alpha2.HarborStorageImageChartStorageSpec{
 				FileSystem: &goharborv1alpha2.HarborStorageImageChartStorageFileSystemSpec{
 					RegistryPersistentVolume: goharborv1alpha2.HarborStorageRegistryPersistentVolumeSpec{
 						HarborStoragePersistentVolumeSpec: goharborv1alpha2.HarborStoragePersistentVolumeSpec{
