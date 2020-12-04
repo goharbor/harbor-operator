@@ -156,7 +156,7 @@ config/webhook: controller-gen $(GO4CONTROLLERGEN_SOURCES)
 	touch "$@"
 
 config/rbac: controller-gen $(GO4CONTROLLERGEN_SOURCES)
-	$(CONTROLLER_GEN) rbac:roleName="manager-role" output:artifacts:config="$@" paths="./..."
+	$(CONTROLLER_GEN) rbac:roleName="harbor-operator-role" output:artifacts:config="$@" paths="./..."
 	touch "$@"
 
 config/crd/bases: controller-gen $(GO4CONTROLLERGEN_SOURCES)
