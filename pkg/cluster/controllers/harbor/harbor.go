@@ -9,12 +9,11 @@ import (
 	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	"github.com/goharbor/harbor-operator/pkg/k8s"
-	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	"sigs.k8s.io/kustomize/kstatus/status"
 )
 
 type Controller struct {
@@ -38,30 +37,38 @@ func (harbor *Controller) Apply(ctx context.Context, harborcluster *v1alpha2.Har
 		if errors.IsNotFound(err) {
 			harborCR = harbor.getHarborCR(harborcluster)
 
-			harbor.Log.Info("create harbor service", "name", nsdName)
-
+			// Create a new one
 			err = harbor.KubeClient.Create(harborCR)
 			if err != nil {
-				return harborClusterCRNotReadyStatus(CreateHarborCRError, err.Error()), err
+				return harborNotReadyStatus(CreateHarborCRError, err.Error()), err
 			}
-		} else {
-			return harborClusterCRNotReadyStatus(GetHarborCRError, err.Error()), err
+
+			harbor.Log.Info("harbor service is created", "name", nsdName)
+
+			return harborReadyStatus, nil
 		}
-	} else {
-		harborCR = harbor.getHarborCR(harborcluster)
 
-		// TODO: maybe we still need to do actual and desired status here to determine if we need to do update
+		// We don't know why none 404 error is returned, return unknown status
+		return harborUnknownStatus(GetHarborCRError, err.Error()), err
+	}
+
+	// Found the existing one and check whether it needs to be updated
+	desiredCR := harbor.getHarborCR(harborcluster)
+
+	same := equality.Semantic.DeepDerivative(desiredCR.Spec, harborCR.Spec)
+	if !same {
+		// Spec is changed, do update now
 		harbor.Log.Info("update harbor service", "name", nsdName)
+		harborCR.Spec = desiredCR.Spec
 
-		err = harbor.KubeClient.Update(harborCR)
-		if err != nil {
-			return harborClusterCRNotReadyStatus(UpdateHarborCRError, err.Error()), err
+		if err := harbor.KubeClient.Update(harborCR); err != nil {
+			return harborNotReadyStatus(UpdateHarborCRError, err.Error()), err
 		}
 	}
 
-	harbor.Log.Info("harbor service is ready", "name", nsdName)
+	harbor.Log.Info("harbor service is ready", "name", nsdName, "updated", !same)
 
-	return harborClusterCRStatus(harborCR), nil
+	return harborReadyStatus, nil
 }
 
 func (harbor *Controller) Delete(ctx context.Context, harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
@@ -129,25 +136,6 @@ func (harbor *Controller) getHarborCR(harborcluster *v1alpha2.HarborCluster) *v1
 	}
 
 	return harborCR
-}
-
-func harborClusterCRNotReadyStatus(reason, message string) *lcm.CRStatus {
-	return lcm.New(v1alpha2.ServiceReady).WithStatus(corev1.ConditionFalse).WithReason(reason).WithMessage(message)
-}
-
-func harborClusterCRUnknownStatus(reason, message string) *lcm.CRStatus {
-	return lcm.New(v1alpha2.ServiceReady).WithStatus(corev1.ConditionUnknown).WithReason(reason).WithMessage(message)
-}
-
-// harborClusterCRStatus will assembly the harbor cluster status according the v1alpha1.Harbor status.
-func harborClusterCRStatus(harbor *v1alpha2.Harbor) *lcm.CRStatus {
-	for _, condition := range harbor.Status.Conditions {
-		if condition.Type == status.ConditionInProgress {
-			return lcm.New(v1alpha2.ServiceReady).WithStatus(condition.Status).WithMessage(condition.Message).WithReason(condition.Reason)
-		}
-	}
-
-	return harborClusterCRUnknownStatus(EmptyHarborCRStatusError, "The ready condition of harbor.goharbor.io is empty. Please wait for minutes.")
 }
 
 func (harbor *Controller) getHarborCRNamespacedName(harborcluster *v1alpha2.HarborCluster) types.NamespacedName {
