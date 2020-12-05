@@ -17,6 +17,7 @@ var (
 	databaseGVR        = SchemeGroupVersion.WithResource(PostgresCRDResourcePlural)
 	databaseKind       = "postgresql"
 	databaseAPI        = "acid.zalan.do/v1"
+	databasePrefix     = "psql"
 )
 
 // GetPostgresCR returns PostgreSqls CRs.
@@ -26,7 +27,8 @@ func (p *PostgreSQLController) GetPostgresCR() (*unstructured.Unstructured, erro
 	storageSize := p.GetPostgreStorageSize()
 	version := p.GetPostgreVersion()
 	databases := p.GetDatabases()
-	name := fmt.Sprintf("%s-%s", p.HarborCluster.Namespace, p.HarborCluster.Name)
+	name := fmt.Sprintf("%s-%s-%s", databasePrefix, p.HarborCluster.Namespace, p.HarborCluster.Name)
+	team := fmt.Sprintf("%s-%s", databasePrefix, p.HarborCluster.Namespace)
 
 	conf := &api.Postgresql{
 		TypeMeta: metav1.TypeMeta{
@@ -41,7 +43,7 @@ func (p *PostgreSQLController) GetPostgresCR() (*unstructured.Unstructured, erro
 			Volume: api.Volume{
 				Size: storageSize,
 			},
-			TeamID:            p.HarborCluster.Namespace,
+			TeamID:            team,
 			NumberOfInstances: replica,
 			Users:             GetUsers(),
 			Patroni:           GetPatron(),
