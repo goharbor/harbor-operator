@@ -11,8 +11,9 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
-const (
-	defaultWaitCycle = 10 * time.Second
+var (
+	defaultWaitCycle = ctrl.Result{RequeueAfter: 10 * time.Second}
+	errorWaitCycle   = ctrl.Result{RequeueAfter: 5 * time.Second}
 )
 
 // Reconcile logic of the HarborCluster.
@@ -68,64 +69,59 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) {
 	// Only need to do check if they're configured.
 	g, gtx := gos.NewGroup(ctx)
 	g.Go(func() error {
-		cacheStatus, err := r.CacheCtrl.Apply(gtx, harborcluster)
-		if cacheStatus != nil {
-			st.UpdateCache(cacheStatus.Condition)
-		}
+		mgr := NewServiceManager(v1alpha2.ComponentCache)
 
-		if err == nil {
-			r.HarborCtrl.WithDependency(v1alpha2.ComponentCache, cacheStatus)
-		}
-
-		return err
+		return mgr.WithContext(gtx).
+			WithConfig(cacheConfigGetter).
+			TrackedBy(st).
+			From(harborcluster).
+			Use(r.CacheCtrl).
+			For(r.HarborCtrl).
+			Apply()
 	})
 
 	g.Go(func() error {
-		dbStatus, err := r.DatabaseCtrl.Apply(gtx, harborcluster)
-		if dbStatus != nil {
-			st.UpdateDatabase(dbStatus.Condition)
-		}
+		mgr := NewServiceManager(v1alpha2.ComponentDatabase)
 
-		if err == nil {
-			r.HarborCtrl.WithDependency(v1alpha2.ComponentDatabase, dbStatus)
-		}
-
-		return err
+		return mgr.WithContext(gtx).
+			WithConfig(dbConfigGetter).
+			TrackedBy(st).
+			From(harborcluster).
+			Use(r.DatabaseCtrl).
+			For(r.HarborCtrl).
+			Apply()
 	})
 
 	g.Go(func() error {
-		storageStatus, err := r.StorageCtrl.Apply(gtx, harborcluster)
-		if storageStatus != nil {
-			st.UpdateStorage(storageStatus.Condition)
-		}
+		mgr := NewServiceManager(v1alpha2.ComponentStorage)
 
-		if err == nil {
-			r.HarborCtrl.WithDependency(v1alpha2.ComponentStorage, storageStatus)
-		}
-
-		return err
+		return mgr.WithContext(gtx).
+			WithConfig(storageConfigGetter).
+			TrackedBy(st).
+			From(harborcluster).
+			Use(r.StorageCtrl).
+			For(r.HarborCtrl).
+			Apply()
 	})
 
 	if err := g.Wait(); err != nil {
-		return ctrl.Result{}, fmt.Errorf("reconcile dependent services error: %w", err)
+		return errorWaitCycle, fmt.Errorf("reconcile dependent services error: %w", err)
 	}
 
 	if !st.DependsReady() {
 		r.Log.Info("not all the dependent services are ready")
 
-		return ctrl.Result{
-			RequeueAfter: defaultWaitCycle,
-		}, nil
+		return defaultWaitCycle, nil
 	}
 
 	// Create Harbor instance now
 	harborStatus, err := r.HarborCtrl.Apply(ctx, harborcluster)
-	if err != nil {
-		return ctrl.Result{}, fmt.Errorf("reconcile harbor service error: %w", err)
+	if harborStatus != nil {
+		st.UpdateCondition(v1alpha2.ServiceReady, harborStatus.Condition)
 	}
 
-	if harborStatus != nil {
-		st.UpdateHarbor(harborStatus.Condition)
+	if err != nil {
+		return errorWaitCycle, fmt.Errorf("reconcile harbor service error: %w", err)
 	}
 
 	// Reconcile done
