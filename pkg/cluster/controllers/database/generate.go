@@ -17,7 +17,7 @@ var (
 	databaseGVR        = SchemeGroupVersion.WithResource(PostgresCRDResourcePlural)
 	databaseKind       = "postgresql"
 	databaseAPI        = "acid.zalan.do/v1"
-	databasePrefix     = "psql"
+	databasePrefix     = "postgresql"
 )
 
 // GetPostgresCR returns PostgreSqls CRs.
@@ -27,7 +27,6 @@ func (p *PostgreSQLController) GetPostgresCR() (*unstructured.Unstructured, erro
 	storageSize := p.GetPostgreStorageSize()
 	version := p.GetPostgreVersion()
 	databases := p.GetDatabases()
-	name := fmt.Sprintf("%s-%s-%s", databasePrefix, p.HarborCluster.Namespace, p.HarborCluster.Name)
 	team := fmt.Sprintf("%s-%s", databasePrefix, p.HarborCluster.Namespace)
 
 	conf := &api.Postgresql{
@@ -36,7 +35,7 @@ func (p *PostgreSQLController) GetPostgresCR() (*unstructured.Unstructured, erro
 			APIVersion: databaseAPI,
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
+			Name:      p.resourceName(),
 			Namespace: p.HarborCluster.Namespace,
 		},
 		Spec: api.PostgresSpec{
@@ -110,4 +109,9 @@ func (p *PostgreSQLController) GetDatabaseSecret(conn *Connect, secretName strin
 	}
 
 	return secret
+}
+
+// resourceName return the formatted name of the managed psql resource.
+func (p *PostgreSQLController) resourceName() string {
+	return fmt.Sprintf("%s-%s", databasePrefix, p.HarborCluster.Name)
 }
