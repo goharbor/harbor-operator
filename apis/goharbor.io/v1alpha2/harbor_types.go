@@ -305,6 +305,10 @@ func (r *HarborStorageImageChartStorageSpec) ProviderName() string {
 }
 
 func (r *HarborStorageImageChartStorageSpec) Validate() error {
+	if r == nil {
+		return ErrNoStorageConfiguration
+	}
+
 	found := 0
 
 	if r.FileSystem != nil {

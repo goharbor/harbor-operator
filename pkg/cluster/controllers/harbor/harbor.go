@@ -24,6 +24,7 @@ type Controller struct {
 	ComponentToCRStatus *sync.Map
 }
 
+// Apply Harbor instance.
 func (harbor *Controller) Apply(ctx context.Context, harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
 	harborCR := &v1alpha2.Harbor{}
 
@@ -59,8 +60,8 @@ func (harbor *Controller) Apply(ctx context.Context, harborcluster *v1alpha2.Har
 	if !same {
 		// Spec is changed, do update now
 		harbor.Log.Info("update harbor service", "name", nsdName)
-		harborCR.Spec = desiredCR.Spec
 
+		harborCR.Spec = desiredCR.Spec
 		if err := harbor.KubeClient.Update(harborCR); err != nil {
 			return harborNotReadyStatus(UpdateHarborCRError, err.Error()), err
 		}

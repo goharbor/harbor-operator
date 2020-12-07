@@ -149,35 +149,8 @@ func (s *status) WithLog(logger logr.Logger) *status {
 	return s
 }
 
-// UpdateCache updates cache status.
-func (s *status) UpdateCache(c goharborv1.HarborClusterCondition) *status {
-	s.updateCondition(goharborv1.CacheReady, c)
-
-	return s
-}
-
-// UpdateDatabase updates database status.
-func (s *status) UpdateDatabase(c goharborv1.HarborClusterCondition) *status {
-	s.updateCondition(goharborv1.DatabaseReady, c)
-
-	return s
-}
-
-// UpdateStorage updates storage status.
-func (s *status) UpdateStorage(c goharborv1.HarborClusterCondition) *status {
-	s.updateCondition(goharborv1.StorageReady, c)
-
-	return s
-}
-
-// UpdateHarbor updates Harbor status.
-func (s *status) UpdateHarbor(c goharborv1.HarborClusterCondition) *status {
-	s.updateCondition(goharborv1.ServiceReady, c)
-
-	return s
-}
-
-func (s *status) updateCondition(ct goharborv1.HarborClusterConditionType, c goharborv1.HarborClusterCondition) {
+// UpdateCondition adds condition update of the specified service to the status object.
+func (s *status) UpdateCondition(ct goharborv1.HarborClusterConditionType, c goharborv1.HarborClusterCondition) {
 	s.locker.Lock()
 	defer s.locker.Unlock()
 
