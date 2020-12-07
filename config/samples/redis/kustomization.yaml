@@ -10,3 +10,4 @@ secretGenerator:
 - name: harbor-redis
   literals:
   - redis-password=the-redis-password
+  type: "goharbor.io/redis"
