@@ -305,6 +305,7 @@ func (r *Reconciler) ApplyS3StorageEnvs(ctx context.Context, registry *goharborv
 		Name: "REGISTRY_STORAGE_S3_SECRETKEY",
 		ValueFrom: &corev1.EnvVarSource{
 			SecretKeyRef: &corev1.SecretKeySelector{
+				Key: harbormetav1.SharedSecretKey,
 				LocalObjectReference: corev1.LocalObjectReference{
 					Name: registry.Spec.Storage.Driver.S3.SecretKeyRef,
 				},
@@ -322,6 +323,7 @@ func (r *Reconciler) ApplySwiftStorageEnvs(ctx context.Context, registry *goharb
 		Name: "REGISTRY_STORAGE_SWIFT_PASSWORD",
 		ValueFrom: &corev1.EnvVarSource{
 			SecretKeyRef: &corev1.SecretKeySelector{
+				Key: harbormetav1.SharedSecretKey,
 				LocalObjectReference: corev1.LocalObjectReference{
 					Name: registry.Spec.Storage.Driver.Swift.PasswordRef,
 				},
@@ -331,6 +333,7 @@ func (r *Reconciler) ApplySwiftStorageEnvs(ctx context.Context, registry *goharb
 		Name: "REGISTRY_STORAGE_SWIFT_SECRETKEY",
 		ValueFrom: &corev1.EnvVarSource{
 			SecretKeyRef: &corev1.SecretKeySelector{
+				Key: harbormetav1.SharedSecretKey,
 				LocalObjectReference: corev1.LocalObjectReference{
 					Name: registry.Spec.Storage.Driver.Swift.SecretKeyRef,
 				},
