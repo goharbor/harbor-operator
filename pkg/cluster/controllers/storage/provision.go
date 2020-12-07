@@ -283,7 +283,7 @@ func (m *MinIOController) generateMinIOCR() *minio.Tenant {
 }
 
 func (m *MinIOController) getServiceName() string {
-	return DefaultPrefix + "-" + m.HarborCluster.Name
+	return DefaultPrefix + m.HarborCluster.Name
 }
 
 func (m *MinIOController) getServicePort() int32 {
