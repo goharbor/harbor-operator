@@ -27,7 +27,6 @@ func (p *PostgreSQLController) GetPostgresCR() (*unstructured.Unstructured, erro
 	storageSize := p.GetPostgreStorageSize()
 	version := p.GetPostgreVersion()
 	databases := p.GetDatabases()
-	team := fmt.Sprintf("%s-%s", databasePrefix, p.HarborCluster.Namespace)
 
 	conf := &api.Postgresql{
 		TypeMeta: metav1.TypeMeta{
@@ -42,7 +41,7 @@ func (p *PostgreSQLController) GetPostgresCR() (*unstructured.Unstructured, erro
 			Volume: api.Volume{
 				Size: storageSize,
 			},
-			TeamID:            team,
+			TeamID:            p.teamID(),
 			NumberOfInstances: replica,
 			Users:             GetUsers(),
 			Patroni:           GetPatron(),
@@ -113,5 +112,10 @@ func (p *PostgreSQLController) GetDatabaseSecret(conn *Connect, secretName strin
 
 // resourceName return the formatted name of the managed psql resource.
 func (p *PostgreSQLController) resourceName() string {
-	return fmt.Sprintf("%s-%s", databasePrefix, p.HarborCluster.Name)
+	return fmt.Sprintf("%s-%s", p.teamID(), p.HarborCluster.Name)
+}
+
+// teamID return the team ID of the managed psql service.
+func (p *PostgreSQLController) teamID() string {
+	return fmt.Sprintf("%s-%s", databasePrefix, p.HarborCluster.Namespace)
 }
