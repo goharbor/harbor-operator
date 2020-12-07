@@ -97,7 +97,7 @@ func (m *MinIOController) createSecretKeyRef(secretKey []byte, minioInstance *mi
 		},
 		Type: corev1.SecretTypeOpaque,
 		Data: map[string][]byte{
-			s3Storage: dataJSON,
+			goharborv1.S3DriverName: dataJSON,
 		},
 	}
 
