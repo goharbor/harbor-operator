@@ -23,16 +23,18 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/harbor"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	v1 "k8s.io/api/core/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // ServiceManager is designed to maintain the dependent services of the cluster.
 type ServiceManager struct {
+	client          client.Client
 	ctx             context.Context
 	cluster         *v1alpha2.HarborCluster
 	component       v1alpha2.Component
 	st              *status
 	ctrl            lcm.Controller
-	svcConfigGetter svcConfigGetter
+	svcConfigGetter lcm.SvcConfigGetter
 	harborCtrl      *harbor.Controller
 }
 
@@ -41,6 +43,13 @@ func NewServiceManager(component v1alpha2.Component) *ServiceManager {
 	return &ServiceManager{
 		component: component,
 	}
+}
+
+// UseClient bind a client.
+func (s *ServiceManager) UseClient(client client.Client) *ServiceManager {
+	s.client = client
+
+	return s
 }
 
 // WithContext bind a context.
@@ -79,7 +88,7 @@ func (s *ServiceManager) Use(ctrl lcm.Controller) *ServiceManager {
 }
 
 // WithConfig bind service configuration getter func.
-func (s *ServiceManager) WithConfig(svcCfgGetter svcConfigGetter) *ServiceManager {
+func (s *ServiceManager) WithConfig(svcCfgGetter lcm.SvcConfigGetter) *ServiceManager {
 	s.svcConfigGetter = svcCfgGetter
 
 	return s
@@ -153,7 +162,7 @@ func (s *ServiceManager) Apply() error {
 		}
 
 		// Use external
-		svcCfg, options, err := s.svcConfigGetter(s.ctx, s.cluster)
+		svcCfg, options, err := s.svcConfigGetter.WithCtx(s.ctx).UseClient(s.client).FromCluster(s.cluster).GetConfig()
 		if err != nil {
 			status.WithStatus(v1.ConditionFalse).
 				WithMessage("failed to get service configuration").

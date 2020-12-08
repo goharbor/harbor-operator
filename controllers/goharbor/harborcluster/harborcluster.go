@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/cache"
 	"github.com/goharbor/harbor-operator/pkg/cluster/gos"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -72,7 +73,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) {
 		mgr := NewServiceManager(v1alpha2.ComponentCache)
 
 		return mgr.WithContext(gtx).
-			WithConfig(cacheConfigGetter).
+			WithConfig(cache.NewRedisConfigGetter()).
 			TrackedBy(st).
 			From(harborcluster).
 			Use(r.CacheCtrl).
@@ -84,7 +85,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) {
 		mgr := NewServiceManager(v1alpha2.ComponentDatabase)
 
 		return mgr.WithContext(gtx).
-			WithConfig(dbConfigGetter).
+			WithConfig(nil).
 			TrackedBy(st).
 			From(harborcluster).
 			Use(r.DatabaseCtrl).
@@ -96,7 +97,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) {
 		mgr := NewServiceManager(v1alpha2.ComponentStorage)
 
 		return mgr.WithContext(gtx).
-			WithConfig(storageConfigGetter).
+			WithConfig(nil).
 			TrackedBy(st).
 			From(harborcluster).
 			Use(r.StorageCtrl).
