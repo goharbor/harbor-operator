@@ -276,27 +276,13 @@ func (c *Controller) AddSecretToManage(ctx context.Context, resource *corev1.Sec
 		return nil, nil
 	}
 
-	res := &Resource{
-		mutable:   mutation.NewSecret(c.GlobalMutateFn(ctx), true, false),
-		checkable: statuscheck.True,
-		resource:  resource,
-	}
-
-	g := sgraph.Get(ctx)
-	if g == nil {
-		return nil, errors.Errorf("no graph in current context")
-	}
-
-	return res, g.AddResource(ctx, res, dependencies, c.ProcessFunc(ctx, resource, dependencies...))
-}
-
-func (c *Controller) AddImmutableSecretToManage(ctx context.Context, resource *corev1.Secret, dependencies ...graph.Resource) (graph.Resource, error) {
-	if resource == nil {
-		return nil, nil
+	override := true
+	if resource.Immutable != nil && *resource.Immutable {
+		override = false
 	}
 
 	res := &Resource{
-		mutable:   mutation.NewSecret(c.GlobalMutateFn(ctx), false, false),
+		mutable:   mutation.NewSecret(c.GlobalMutateFn(ctx), override, false),
 		checkable: statuscheck.True,
 		resource:  resource,
 	}

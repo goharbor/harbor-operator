@@ -102,7 +102,7 @@ func (r *Reconciler) AddNotarySignerEncryptionKey(ctx context.Context, harbor *g
 		return nil, errors.Wrap(err, "get")
 	}
 
-	secretRes, err := r.Controller.AddImmutableSecretToManage(ctx, secret)
+	secretRes, err := r.Controller.AddSecretToManage(ctx, secret)
 	if err != nil {
 		return nil, errors.Wrap(err, "add")
 	}
