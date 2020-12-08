@@ -153,7 +153,7 @@ func (s *ServiceManager) Apply() error {
 		}
 
 		// Use external
-		svcCfg, options, err := s.svcConfigGetter(s.ctx, s.cluster)
+		svcCfg, options, err := s.svcConfigGetter(s.ctx, s.harborCtrl.KubeClient, s.cluster)
 		if err != nil {
 			status.WithStatus(v1.ConditionFalse).
 				WithMessage("failed to get service configuration").
