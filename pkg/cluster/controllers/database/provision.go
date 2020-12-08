@@ -1,8 +1,6 @@
 package database
 
 import (
-	"fmt"
-
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -21,8 +19,6 @@ import (
 func (p *PostgreSQLController) Deploy() (*lcm.CRStatus, error) {
 	var expectCR *unstructured.Unstructured
 
-	name := fmt.Sprintf("%s-%s", p.HarborCluster.Namespace, p.HarborCluster.Name)
-
 	crdClient := p.DClient.WithResource(databaseGVR).WithNamespace(p.HarborCluster.Namespace)
 
 	expectCR, err := p.GetPostgresCR()
@@ -34,14 +30,14 @@ func (p *PostgreSQLController) Deploy() (*lcm.CRStatus, error) {
 		return databaseNotReadyStatus(SetOwnerReferenceError, err.Error()), err
 	}
 
-	p.Log.Info("Creating Database.", "namespace", p.HarborCluster.Namespace, "name", name)
+	p.Log.Info("Creating Database.", "namespace", p.HarborCluster.Namespace, "name", p.resourceName())
 
 	_, err = crdClient.Create(expectCR, metav1.CreateOptions{})
 	if err != nil {
 		return databaseNotReadyStatus(CreateDatabaseCrError, err.Error()), err
 	}
 
-	p.Log.Info("Database create complete.", "namespace", p.HarborCluster.Namespace, "name", name)
+	p.Log.Info("Database create complete.", "namespace", p.HarborCluster.Namespace, "name", p.resourceName())
 
 	return databaseUnknownStatus(), nil
 }

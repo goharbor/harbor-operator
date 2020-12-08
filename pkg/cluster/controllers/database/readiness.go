@@ -146,7 +146,7 @@ func (p *PostgreSQLController) GetInClusterDatabaseInfo(ctx context.Context) (*C
 		return connect, client, err
 	}
 
-	if connect, err = p.GetInClusterDatabaseConn(p.GetDatabaseName(), pw); err != nil {
+	if connect, err = p.GetInClusterDatabaseConn(p.resourceName(), pw); err != nil {
 		return connect, client, err
 	}
 
@@ -180,8 +180,8 @@ func (p *PostgreSQLController) GetInClusterDatabaseConn(name, pw string) (*Conne
 	return conn, nil
 }
 
-func GenInClusterPasswordSecretName(teamID, name string) string {
-	return fmt.Sprintf("postgres.%s-%s.credentials", teamID, name)
+func GenInClusterPasswordSecretName(crName string) string {
+	return fmt.Sprintf("postgres.%s.credentials", crName)
 }
 
 // GetInClusterHost returns the Database master pod ip or service name.
@@ -204,15 +204,11 @@ func (p *PostgreSQLController) GetInClusterHost(name string) (string, error) {
 	return url, nil
 }
 
-func (p *PostgreSQLController) GetDatabaseName() string {
-	return fmt.Sprintf("%s-%s", p.HarborCluster.Namespace, p.HarborCluster.Name)
-}
-
 // GetInClusterDatabasePassword is get inCluster postgresql password.
 func (p *PostgreSQLController) GetInClusterDatabasePassword() (string, error) {
 	var pw string
 
-	secretName := GenInClusterPasswordSecretName(p.HarborCluster.Namespace, p.HarborCluster.Name)
+	secretName := GenInClusterPasswordSecretName(p.resourceName())
 
 	secret, err := p.GetSecret(secretName)
 	if err != nil {
@@ -232,10 +228,9 @@ func (p *PostgreSQLController) GetInClusterDatabasePassword() (string, error) {
 
 // GetStatefulSetPods returns the postgresql master pod.
 func (p *PostgreSQLController) GetStatefulSetPods() (*corev1.PodList, error) {
-	name := p.GetDatabaseName()
 	label := map[string]string{
 		"application":  "spilo",
-		"cluster-name": name,
+		"cluster-name": p.resourceName(),
 		"spilo-role":   "master",
 	}
 
@@ -246,7 +241,7 @@ func (p *PostgreSQLController) GetStatefulSetPods() (*corev1.PodList, error) {
 
 	if err := p.Client.List(opts, pod); err != nil {
 		p.Log.Error(err, "fail to get pod.",
-			"namespace", p.HarborCluster.Namespace, "name", name)
+			"namespace", p.HarborCluster.Namespace, "name", p.resourceName())
 
 		return nil, err
 	}

@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/go-logr/logr"
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
@@ -44,9 +43,8 @@ func (p *PostgreSQLController) Apply(ctx context.Context, harborcluster *goharbo
 	p.HarborCluster = harborcluster
 
 	crdClient := p.DClient.WithResource(databaseGVR).WithNamespace(p.HarborCluster.Namespace)
-	name := fmt.Sprintf("%s-%s", p.HarborCluster.Namespace, p.HarborCluster.Name)
 
-	actualCR, err := crdClient.Get(name, metav1.GetOptions{})
+	actualCR, err := crdClient.Get(p.resourceName(), metav1.GetOptions{})
 	if errors.IsNotFound(err) {
 		return p.Deploy()
 	} else if err != nil {
