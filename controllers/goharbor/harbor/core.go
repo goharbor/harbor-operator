@@ -72,7 +72,7 @@ func (r *Reconciler) AddCoreAdminPassword(ctx context.Context, harbor *goharborv
 		return nil, errors.Wrap(err, "get")
 	}
 
-	adminPasswordRes, err := r.AddImmutableSecretToManage(ctx, adminPassword)
+	adminPasswordRes, err := r.AddSecretToManage(ctx, adminPassword)
 	if err != nil {
 		return nil, errors.Wrap(err, "add")
 	}
