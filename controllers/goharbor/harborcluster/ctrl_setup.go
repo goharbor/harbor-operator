@@ -14,9 +14,12 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/factories/application"
 	"github.com/goharbor/harbor-operator/pkg/k8s"
 	"github.com/ovh/configstore"
+	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/event"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 )
 
 // TODO: Refactor to inherit the common reconciler in future
@@ -79,6 +82,7 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&goharborv1alpha2.HarborCluster{}).
+		WithEventFilter(harborClusterPredicateFuncs).
 		Complete(r)
 }
 
@@ -89,4 +93,26 @@ func New(ctx context.Context, name string, configStore *configstore.Store) (comm
 		Version: application.GetVersion(ctx),
 		Log:     ctrl.Log.WithName(application.GetName(ctx)).WithName("controller").WithValues("controller", name),
 	}, nil
+}
+
+// harborClusterPredicateFuncs do filter for events.
+var harborClusterPredicateFuncs = predicate.Funcs{
+	// we do not care other events
+	UpdateFunc: func(event event.UpdateEvent) bool {
+		old, ok := event.ObjectOld.(*goharborv1alpha2.HarborCluster)
+		if !ok {
+			return true
+		}
+
+		new, ok := event.ObjectNew.(*goharborv1alpha2.HarborCluster)
+		if !ok {
+			return true
+		}
+		// when status was not changed and spec was not changed, not need reconcile
+		if equality.Semantic.DeepDerivative(old.Spec, new.Spec) && old.Status.Status == new.Status.Status {
+			return false
+		}
+
+		return true
+	},
 }
