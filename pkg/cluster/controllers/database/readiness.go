@@ -93,7 +93,7 @@ func addProperties(name string, conn *Connect, properties *lcm.Properties) {
 func getHarborDatabaseSpec(name string, conn *Connect) *goharborv1alpha2.HarborDatabaseSpec {
 	return &goharborv1alpha2.HarborDatabaseSpec{
 		PostgresCredentials: harbormetav1.PostgresCredentials{
-			Username:    "zalando",
+			Username:    "postgres",
 			PasswordRef: getDatabasePasswordRefName(name),
 		},
 		Hosts: []harbormetav1.PostgresHostSpec{
