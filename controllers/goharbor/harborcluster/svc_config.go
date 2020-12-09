@@ -17,6 +17,7 @@ package harborcluster
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
@@ -31,7 +32,35 @@ type svcConfigGetter func(ctx context.Context, kubeClient k8s.Client, cluster *v
 
 // cacheConfigGetter is for getting configurations of cache service.
 func cacheConfigGetter(ctx context.Context, kubeClient k8s.Client, cluster *v1alpha2.HarborCluster) (*lcm.ServiceConfig, []lcm.Option, error) {
-	return nil, nil, nil
+	if cluster == nil {
+		return nil, nil, fmt.Errorf("cluster can not be nil")
+	}
+
+	spec := cluster.Spec.HarborComponentsSpec.Redis
+	if spec == nil {
+		return nil, nil, fmt.Errorf("cluster redis spec can not be nil")
+	}
+	// get out-cluster redis svc config
+	svcConfig := &lcm.ServiceConfig{
+		Endpoint: &lcm.Endpoint{
+			Host: spec.Host,
+			Port: uint(spec.Port),
+		},
+	}
+
+	if spec.PasswordRef != "" {
+		secretName := spec.PasswordRef
+		secretNamespace := cluster.Namespace
+
+		accessSecret, err := getAccessSecret(kubeClient, secretName, secretNamespace)
+		if err != nil {
+			return nil, nil, fmt.Errorf("get secret %s/%s failed, error: %w", secretNamespace, secretName, err)
+		}
+		// add Credentials
+		svcConfig.Credentials = &lcm.Credentials{AccessSecret: accessSecret}
+	}
+
+	return svcConfig, nil, nil
 }
 
 // dbConfigGetter is for getting configurations of database service.
