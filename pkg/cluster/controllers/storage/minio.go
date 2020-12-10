@@ -47,7 +47,7 @@ type MinIOController struct {
 }
 
 func (m *MinIOController) HealthChecker() lcm.HealthChecker {
-	panic("implement me")
+	return &HealthChecker{}
 }
 
 var HarborClusterMinIOGVK = schema.GroupVersionKind{
