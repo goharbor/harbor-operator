@@ -132,7 +132,7 @@ func (m *MinIOController) Provision() (*lcm.CRStatus, error) {
 	}
 
 	// if disable redirect docker registry, we will expose minIO access endpoint by ingress.
-	if !m.HarborCluster.Spec.ImageChartStorage.Redirect.Disable {
+	if !m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Redirect.Disable {
 		ingress := m.generateIngress()
 
 		err = m.KubeClient.Create(ingress)
@@ -283,7 +283,7 @@ func (m *MinIOController) generateMinIOCR() *minio.Tenant {
 }
 
 func (m *MinIOController) getServiceName() string {
-	return DefaultPrefix + "-" + m.HarborCluster.Name
+	return DefaultPrefix + m.HarborCluster.Name
 }
 
 func (m *MinIOController) getServicePort() int32 {

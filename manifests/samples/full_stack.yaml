@@ -11,7 +11,7 @@ metadata:
   name: admin-core-secret
   namespace: cluster-sample-ns
 data:
-  password: SGFyYm9yMTIzNDU=
+  secret: SGFyYm9yMTIzNDU=
 type: Opaque
 ---
 # Cert issuer
@@ -52,7 +52,7 @@ spec:
       ingress:
         host: sample.harbor.domain
       tls:
-        certificateRef: sample-public-certificate
+        certificateRef: public-certificate
   encryptionKeyRef: core-database-encryption
   internalTLS:
     enabled: true
@@ -60,7 +60,7 @@ spec:
   registry: {}
   core:
     tokenIssuer:
-      name: service-token
+      name: selfsigned-issuer
       kind: Issuer
   inClusterDatabase:
     kind: PostgresSQL
