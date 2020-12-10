@@ -19,14 +19,13 @@ import (
 	"fmt"
 	"net/http"
 	"time"
-
-	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
-	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
-
+	
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 )
 
 // HealthChecker for doing health checking for storage.
