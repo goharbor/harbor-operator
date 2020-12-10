@@ -11,7 +11,7 @@ import (
 // Controller is designed to handle the lifecycle of the related incluster deployed services like psql, redis and minio.
 type Controller interface {
 	// Apply the changes to the cluster including:
-	// - creat new if the designed resource is not existing
+	// - create new if the designed resource is not existing
 	// - update the resource if the related spec has been changed
 	// - scale the resources if the replica is changed
 	//

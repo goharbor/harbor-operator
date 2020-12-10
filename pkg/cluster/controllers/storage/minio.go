@@ -6,7 +6,6 @@ import (
 
 	"github.com/go-logr/logr"
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
-	"github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	minio "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/api/v1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	"github.com/goharbor/harbor-operator/pkg/k8s"
@@ -20,8 +19,7 @@ import (
 )
 
 const (
-	Storage   = "storage"
-	s3Storage = v1alpha1.SharedSecretKey
+	Storage = "storage"
 
 	DefaultCredsSecret = "creds"
 	DefaultPrefix      = "minio-"

@@ -79,6 +79,10 @@ type CheckOptions struct {
 	// Name of the storage driver
 	// Applicable for minIO
 	StorageDriver string
+
+	// For s3 options
+	S3Region   string
+	BucketName string
 }
 
 // Option with function way.

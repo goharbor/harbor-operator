@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	"github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/common"
 	minio "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/api/v1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
@@ -97,7 +98,7 @@ func (m *MinIOController) createSecretKeyRef(secretKey []byte, minioInstance *mi
 		},
 		Type: corev1.SecretTypeOpaque,
 		Data: map[string][]byte{
-			s3Storage: dataJSON,
+			v1alpha1.SharedSecretKey: dataJSON,
 		},
 	}
 

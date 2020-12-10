@@ -422,7 +422,7 @@ func (r *HarborInternalTLSSpec) GetScheme() string {
 type ErrUnsupportedComponent harbormetav1.ComponentWithTLS
 
 func (err ErrUnsupportedComponent) Error() string {
-	return fmt.Sprintf("%s is not supported", string(err))
+	return fmt.Sprintf("%s is not supported", string(rune(err)))
 }
 
 func (r *HarborInternalTLSSpec) GetInternalPort(component harbormetav1.ComponentWithTLS) (int32, error) {

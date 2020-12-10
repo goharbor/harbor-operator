@@ -171,7 +171,7 @@ type Sidecar struct {
 // UserFlags defines flags (such as superuser, nologin) that could be assigned to individual users.
 type UserFlags []string
 
-// PostgresStatus contains status of the PostgreSQL cluster (running, creation failed etc.)
+// PostgresStatus contains status of the PostgreSQL cluster (running, creation failed etc.).
 type PostgresStatus struct {
 	PostgresClusterStatus string `json:"PostgresClusterStatus"`
 }
