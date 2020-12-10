@@ -28,6 +28,7 @@ const (
 	ClairDatabase        = "clair"
 	NotaryServerDatabase = "notaryserver"
 	NotarySignerDatabase = "notarysigner"
+	DefaultDatabaseName  = "postgres"
 
 	CoreSecretName         = "core"
 	ClairSecretName        = "clair"
@@ -93,7 +94,7 @@ func addProperties(name string, conn *Connect, properties *lcm.Properties) {
 func getHarborDatabaseSpec(name string, conn *Connect) *goharborv1alpha2.HarborDatabaseSpec {
 	return &goharborv1alpha2.HarborDatabaseSpec{
 		PostgresCredentials: harbormetav1.PostgresCredentials{
-			Username:    "postgres",
+			Username:    DefaultDatabaseName,
 			PasswordRef: getDatabasePasswordRefName(name),
 		},
 		Hosts: []harbormetav1.PostgresHostSpec{
