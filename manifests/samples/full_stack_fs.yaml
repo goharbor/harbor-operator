@@ -38,6 +38,19 @@ spec:
     name: selfsigned-issuer
     kind: Issuer
 ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: sample-harbor-registry
+  namespace: cluster-sample-ns
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 5Gi
+---
 # Full stack Harbor
 apiVersion: goharbor.io/v1alpha2
 kind: HarborCluster
@@ -62,6 +75,10 @@ spec:
     tokenIssuer:
       name: selfsigned-issuer
       kind: Issuer
+  imageChartStorage:
+    filesystem:
+      registryPersistentVolume:
+        claimName: sample-harbor-registry
   inClusterDatabase:
     kind: PostgresSQL
     postgresSqlSpec:
@@ -76,27 +93,6 @@ spec:
         requests:
           cpu: 100m
           memory: 250Mi
-  inClusterStorage:
-    kind: MinIO
-    minIOSpec:
-      replicas: 2
-      volumesPerServer: 2
-      version: RELEASE.2020-08-13T02-39-50Z
-      volumeClaimTemplate:
-        spec:
-          storageClassName: standard
-          accessModes:
-            - ReadWriteOnce
-          resources:
-            requests:
-              storage: 10Gi
-      resources:
-        requests:
-          memory: 1Gi
-          cpu: 500m
-        limits:
-          memory: 1Gi
-          cpu: 1000m
   inClusterCache:
     kind: Redis
     redisSpec:
