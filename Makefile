@@ -187,6 +187,7 @@ docker-build: dist/harbor-operator_linux_amd64/manager
 docker-push:
 	docker push "$(IMG)"
 
+.PHONY: dist/harbor-operator_linux_amd64/manager
 dist/harbor-operator_linux_amd64/manager:
 	mkdir -p dist/harbor-operator_linux_amd64
 	CGO_ENABLED=0 \
