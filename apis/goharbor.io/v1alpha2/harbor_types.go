@@ -335,7 +335,7 @@ func (r *HarborStorageImageChartStorageSpec) Validate() error {
 
 type HarborStorageImageChartStorageFileSystemSpec struct {
 	// +kubebuilder:validation:Optional
-	ChartPersistentVolume *HarborStoragePersistentVolumeSpec `json:"chartPersistentVolume"`
+	ChartPersistentVolume *HarborStoragePersistentVolumeSpec `json:"chartPersistentVolume,omitempty"`
 
 	// +kubebuilder:validation:Required
 	RegistryPersistentVolume HarborStorageRegistryPersistentVolumeSpec `json:"registryPersistentVolume"`
