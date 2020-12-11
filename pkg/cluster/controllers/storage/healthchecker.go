@@ -17,15 +17,14 @@ package storage
 import (
 	"context"
 	"fmt"
-	"net/http"
-	"time"
-	
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
+	"net/http"
+	"time"
 )
 
 // HealthChecker for doing health checking for storage.
@@ -58,15 +57,15 @@ func (c *HealthChecker) CheckHealth(ctx context.Context, svc *lcm.ServiceConfig,
 
 func S3StorageHealthCheck(ctx context.Context, svc *lcm.ServiceConfig, options *lcm.CheckOptions) (*lcm.CheckResponse, error) {
 	checkRes := &lcm.CheckResponse{}
-	edp := svc.Endpoint.Host + string(rune(svc.Endpoint.Port))
 	bucket := &s3.HeadBucketInput{
 		Bucket: aws.String(options.BucketName),
 	}
 
-	// Configure to use s3 Server, also can used for MinIO server
+	// Configure to use s3 Server, also can used for MinIO server.
+	// For s3 the Host contains the Port already.
 	s3Config := &aws.Config{
 		Region:           aws.String(options.S3Region),
-		Endpoint:         aws.String(edp),
+		Endpoint:         aws.String(svc.Endpoint.Host),
 		Credentials:      credentials.NewStaticCredentials(svc.Credentials.AccessKey, svc.Credentials.AccessSecret, ""),
 		DisableSSL:       aws.Bool(options.SSLMode),
 		S3ForcePathStyle: aws.Bool(true),
