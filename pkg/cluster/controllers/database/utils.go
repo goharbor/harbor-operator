@@ -16,12 +16,12 @@ const (
 
 func (p *PostgreSQLController) GetDatabases() map[string]string {
 	databases := map[string]string{
-		CoreDatabase: DefaultDatabaseName,
+		CoreDatabase: DefaultDatabaseUser,
 	}
 
 	if p.HarborCluster.Spec.Notary != nil {
-		databases[NotaryServerDatabase] = DefaultDatabaseName
-		databases[NotarySignerDatabase] = DefaultDatabaseName
+		databases[NotaryServerDatabase] = DefaultDatabaseUser
+		databases[NotarySignerDatabase] = DefaultDatabaseUser
 	}
 
 	return databases

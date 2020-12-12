@@ -28,7 +28,7 @@ const (
 	ClairDatabase        = "clair"
 	NotaryServerDatabase = "notaryserver"
 	NotarySignerDatabase = "notarysigner"
-	DefaultDatabaseName  = "postgres"
+	DefaultDatabaseUser  = "harbor"
 
 	CoreSecretName         = "core"
 	ClairSecretName        = "clair"
@@ -94,7 +94,7 @@ func addProperties(name string, conn *Connect, properties *lcm.Properties) {
 func getHarborDatabaseSpec(name string, conn *Connect) *goharborv1alpha2.HarborDatabaseSpec {
 	return &goharborv1alpha2.HarborDatabaseSpec{
 		PostgresCredentials: harbormetav1.PostgresCredentials{
-			Username:    DefaultDatabaseName,
+			Username:    DefaultDatabaseUser,
 			PasswordRef: getDatabasePasswordRefName(name),
 		},
 		Hosts: []harbormetav1.PostgresHostSpec{
@@ -174,15 +174,15 @@ func (p *PostgreSQLController) GetInClusterDatabaseConn(name, pw string) (*Conne
 		Host:     host,
 		Port:     InClusterDatabasePort,
 		Password: pw,
-		Username: InClusterDatabaseUserName,
-		Database: InClusterDatabaseName,
+		Username: DefaultDatabaseUser,
+		Database: CoreDatabase,
 	}
 
 	return conn, nil
 }
 
-func GenInClusterPasswordSecretName(crName string) string {
-	return fmt.Sprintf("postgres.%s.credentials", crName)
+func GenInClusterPasswordSecretName(user, crName string) string {
+	return fmt.Sprintf("%s.%s.credentials", user, crName)
 }
 
 // GetInClusterHost returns the Database master pod ip or service name.
@@ -209,7 +209,7 @@ func (p *PostgreSQLController) GetInClusterHost(name string) (string, error) {
 func (p *PostgreSQLController) GetInClusterDatabasePassword() (string, error) {
 	var pw string
 
-	secretName := GenInClusterPasswordSecretName(p.resourceName())
+	secretName := GenInClusterPasswordSecretName(DefaultDatabaseUser, p.resourceName())
 
 	secret, err := p.GetSecret(secretName)
 	if err != nil {

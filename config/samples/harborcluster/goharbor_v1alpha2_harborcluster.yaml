@@ -42,7 +42,6 @@ spec:
       storage: 1Gi
       replicas: 2
       version: "12"
-      storageClassName: default
       resources:
         limits:
           cpu: 500m
@@ -58,7 +57,6 @@ spec:
       version: RELEASE.2020-08-13T02-39-50Z
       volumeClaimTemplate:
         spec:
-          storageClassName: standard
           accessModes:
             - ReadWriteOnce
           resources:
