@@ -3,7 +3,6 @@ package database
 import (
 	"fmt"
 
-	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/database/api"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -17,12 +16,12 @@ const (
 
 func (p *PostgreSQLController) GetDatabases() map[string]string {
 	databases := map[string]string{
-		CoreDatabase: harbormetav1.CoreDatabase,
+		CoreDatabase: DefaultDatabaseUser,
 	}
 
 	if p.HarborCluster.Spec.Notary != nil {
-		databases[NotaryServerDatabase] = harbormetav1.NotaryServerDatabase
-		databases[NotarySignerDatabase] = harbormetav1.NotarySignerDatabase
+		databases[NotaryServerDatabase] = DefaultDatabaseUser
+		databases[NotarySignerDatabase] = DefaultDatabaseUser
 	}
 
 	return databases

@@ -87,11 +87,10 @@ func GetInitDB() map[string]string {
 
 func GetUsers() map[string]api.UserFlags {
 	return map[string]api.UserFlags{
-		"zalando": {
+		DefaultDatabaseUser: {
 			"superuser",
 			"createdb",
 		},
-		"foo_user": {},
 	}
 }
 
