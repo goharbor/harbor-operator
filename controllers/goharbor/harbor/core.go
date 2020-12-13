@@ -257,16 +257,16 @@ func (r *Reconciler) GetCoreTokenCertificate(ctx context.Context, harbor *goharb
 }
 
 const (
-	EncryptionKeyLength      = 128
-	EncryptionKeyNumDigits   = 16
-	EncryptionKeyNumSpecials = 48
+	EncryptionKeyLength      = 16
+	EncryptionKeyNumDigits   = 8
+	EncryptionKeyNumSpecials = 2
 )
 
 func (r *Reconciler) GetCoreEncryptionKey(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*corev1.Secret, error) {
 	name := r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String(), "encryptionkey")
 	namespace := harbor.GetNamespace()
 
-	key, err := password.Generate(CoreSecretPasswordLength, CoreSecretPasswordNumDigits, CoreSecretPasswordNumSpecials, false, true)
+	key, err := password.Generate(EncryptionKeyLength, EncryptionKeyNumDigits, EncryptionKeyNumSpecials, false, true)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot generate key")
 	}
