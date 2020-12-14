@@ -20,7 +20,6 @@ import (
 	"fmt"
 
 	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
-	"github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	"github.com/goharbor/harbor-operator/pkg/k8s"
@@ -122,6 +121,7 @@ func storageConfigGetter(ctx context.Context, kubeClient k8s.Client, cluster *v1
 		if err != nil {
 			return nil, nil, err
 		}
+
 		svcConfig := &lcm.ServiceConfig{
 			Endpoint: &lcm.Endpoint{
 				Host: cluster.Spec.ImageChartStorage.S3.RegionEndpoint,
@@ -148,6 +148,7 @@ func storageConfigGetter(ctx context.Context, kubeClient k8s.Client, cluster *v1
 	if cluster.Spec.ImageChartStorage.Swift != nil {
 		return nil, nil, nil
 	}
+
 	return nil, nil, nil
 }
 
@@ -166,7 +167,7 @@ func getAccessSecret(kubeClient k8s.Client, name, ns string) (string, error) {
 			accessSecret = string(v)
 		case harbormetav1.RedisPasswordKey:
 			accessSecret = string(v)
-		case v1alpha1.SharedSecretKey:
+		case harbormetav1.SharedSecretKey:
 			accessSecret = string(v)
 		}
 	}
