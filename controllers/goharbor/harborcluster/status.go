@@ -24,6 +24,7 @@ import (
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -159,15 +160,16 @@ func (s *status) UpdateCondition(ct goharborv1.HarborClusterConditionType, c goh
 
 		if cp.Type == ct {
 			if cp.Status != c.Status ||
-				cp.LastTransitionTime != c.LastTransitionTime ||
 				cp.Reason != c.Reason ||
 				cp.Message != c.Message {
 				// Override
 				cp.Status = c.Status
-				cp.LastTransitionTime = c.LastTransitionTime
 				cp.Message = c.Message
 				cp.Reason = c.Reason
+				// Update timestamp
+				cp.LastTransitionTime = v1.Now()
 
+				// Update revision for identifying the changes
 				s.data.Revision = time.Now().UnixNano()
 			}
 
@@ -175,7 +177,9 @@ func (s *status) UpdateCondition(ct goharborv1.HarborClusterConditionType, c goh
 		}
 	}
 	// Append if not existing yet
-	s.data.Conditions = append(s.data.Conditions, c)
+	cc := c.DeepCopy()
+	cc.LastTransitionTime = v1.Now()
+	s.data.Conditions = append(s.data.Conditions, *cc)
 	s.data.Revision = time.Now().UnixNano()
 }
 
