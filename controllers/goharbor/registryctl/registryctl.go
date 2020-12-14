@@ -26,7 +26,7 @@ const (
 	DefaultConfigTemplatePath = "/etc/harbor-operator/registryctl-config.yaml.tmpl"
 	ConfigTemplateKey         = "template-content"
 	ConfigImageKey            = "docker-image"
-	DefaultImage              = config.DefaultRegistry + "goharbor/harbor-registryctl:v2.0.0"
+	DefaultImage              = config.DefaultRegistry + "goharbor/harbor-registryctl:" + config.DefaultHarborVersion
 )
 
 // Reconciler reconciles a RegistryController object.
