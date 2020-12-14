@@ -116,6 +116,39 @@ func dbConfigGetter(ctx context.Context, kubeClient k8s.Client, cluster *v1alpha
 
 // storageConfigGetter is for getting configurations of storage service.
 func storageConfigGetter(ctx context.Context, kubeClient k8s.Client, cluster *v1alpha2.HarborCluster) (*lcm.ServiceConfig, []lcm.Option, error) {
+	if cluster.Spec.ImageChartStorage.S3 != nil {
+		accessSecret, err := getAccessSecret(kubeClient, cluster.Spec.ImageChartStorage.S3.SecretKeyRef, cluster.Namespace)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		svcConfig := &lcm.ServiceConfig{
+			Endpoint: &lcm.Endpoint{
+				Host: cluster.Spec.ImageChartStorage.S3.RegionEndpoint,
+			},
+			Credentials: &lcm.Credentials{
+				AccessKey:    cluster.Spec.ImageChartStorage.S3.AccessKey,
+				AccessSecret: accessSecret,
+			},
+		}
+
+		var opts []lcm.Option
+		opts = append(opts, func(options *lcm.CheckOptions) {
+			options.S3Region = cluster.Spec.ImageChartStorage.S3.Region
+			options.BucketName = cluster.Spec.ImageChartStorage.S3.Bucket
+		})
+
+		return svcConfig, opts, nil
+	}
+
+	if cluster.Spec.ImageChartStorage.FileSystem != nil {
+		return nil, nil, nil
+	}
+
+	if cluster.Spec.ImageChartStorage.Swift != nil {
+		return nil, nil, nil
+	}
+
 	return nil, nil, nil
 }
 
@@ -133,6 +166,8 @@ func getAccessSecret(kubeClient k8s.Client, name, ns string) (string, error) {
 		case harbormetav1.PostgresqlPasswordKey:
 			accessSecret = string(v)
 		case harbormetav1.RedisPasswordKey:
+			accessSecret = string(v)
+		case harbormetav1.SharedSecretKey:
 			accessSecret = string(v)
 		}
 	}
