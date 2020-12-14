@@ -123,12 +123,10 @@ jobs:
     - name: install harbor-operator
       run: |
         set -ex
-        kubectl create ns harbor-operator-ns
-        cd config/default
+        cd manifests/cluster
         kustomize edit set image goharbor/harbor-operator=harbor-operator:dev_test
+        git diff
         kustomize build | kubectl apply -f -
-
-        # make helm-install IMG=harbor-operator:dev_test
 
         if ! time kubectl -n harbor-operator-ns wait --for=condition=Available deployment --all --timeout 300s; then
           kubectl get all -n harbor-operator-ns
@@ -139,25 +137,25 @@ jobs:
       run: |
         export GITHUB_TOKEN=xxx
         set -ex
-        make sample
+        kubectl apply -f manifests/samples/full_stack_fs.yaml
         for i in $(seq 1 6);do
           sleep 30
           echo $i
-          kubectl get all
+          kubectl -n cluster-sample-ns get all
         done
-        if ! time kubectl wait --for=condition=Ready pod --all --timeout 600s ;then
+        if ! time kubectl -n cluster-sample-ns wait --for=condition=Ready pod --all --timeout 600s ;then
           echo install harbor failed
-          kubectl get all
+          kubectl get all -n cluster-sample-ns
 
-          for n in $(kubectl get po |grep -v Running|grep -v NAME|awk '{print $1}');do
+          for n in $(kubectl -n cluster-sample-ns get po |grep -v Running|grep -v NAME|awk '{print $1}');do
             echo describe $n
-            kubectl describe pod $n
+            kubectl -n cluster-sample-ns describe pod $n
             echo show log $n
-            kubectl logs --tail 100 $n || true
+            kubectl -n cluster-sample-ns logs --tail 100 $n || true
           done
           exit 1
         else
-          kubectl get all
+          kubectl -n cluster-sample-ns get all
         fi
         free -h
 
@@ -169,12 +167,12 @@ jobs:
         sleep 10
         echo 127.0.0.1 core.harbor.domain | sudo tee -a /etc/hosts
         curl https://core.harbor.domain/api/v2.0/systeminfo -i -k
-        sudo mkdir -p /etc/docker/certs.d/core.harbor.domain
-        kubectl get secret sample-public-certificate -o jsonpath='{.data.ca\.crt}' \
+        mkdir -p ~/.docker/tls/core.harbor.domain
+        kubectl -n cluster-sample-ns get secret sample-public-certificate -o jsonpath='{.data.ca\.crt}' \
           | base64 --decode \
-          | sudo tee "/etc/docker/certs.d/core.harbor.domain/ca.crt"
+          | sudo tee ~/.docker/tls/core.harbor.domain/ca.crt
         # docker login, create image, docker push, docker pull
-        docker login core.harbor.domain -u admin -p Harbor12345
+        docker login core.harbor.domain -u admin -p Harbor12345 || (kubectl -n cluster-sample-ns get po;kubectl -n cluster-sample-ns logs -l goharbor.io/operator-controller=core;exit 1)
         docker run busybox dd if=/dev/urandom of=test count=10 bs=1MB
         DOCKERID=`docker ps -l -q`
         docker commit $DOCKERID core.harbor.domain/library/busybox:test
@@ -233,19 +231,8 @@ jobs:
       matrix:
         # https://github.com/jetstack/cert-manager/tags
         path:
-        - samples/chartmuseum
-        - samples/core
-        - samples/database
         - samples/harbor
         - samples/harbor-full
-        - samples/jobservice
-        - samples/notary
-        - samples/notary-server
-        - samples/notary-signer
-        - samples/portal
-        - samples/registry
-        - samples/registryctl
-
     steps: 
     - uses: actions/checkout@v2
     - uses: azure/k8s-bake@v1
@@ -261,23 +248,3 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - run: make md-lint
-
-#  # Go Releaser
-#  release:
-#    runs-on: ubuntu-latest
-#    name: 'release: snapshot'
-#    steps:
-#    - uses: actions/setup-go@v2
-#      with:
-#        go-version: 1.14
-#    - uses: actions/checkout@v2
-#    - name: Import GPG key
-#      id: import_gpg
-#      uses: crazy-max/ghaction-import-gpg@v3
-#      with:
-#        gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
-#        passphrase: ${{ secrets.GPG_PASSPHRASE }}
-#    - run: make release-test
-#      env:
-#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
