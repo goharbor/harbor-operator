@@ -106,9 +106,16 @@ func (r *Reconciler) GetJobService(ctx context.Context, harbor *goharborv1alpha2
 	name := r.NormalizeName(ctx, harbor.GetName())
 	namespace := harbor.GetNamespace()
 
+	host := r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String())
+	if harbor.Spec.InternalTLS.IsEnabled() {
+		host += ":443"
+	} else {
+		host += ":80"
+	}
+
 	coreURL := (&url.URL{
 		Scheme: harbor.Spec.InternalTLS.GetScheme(),
-		Host:   r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String()),
+		Host:   host,
 	}).String()
 	coreSecretRef := r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String(), "secret")
 	registryAuthRef := r.NormalizeName(ctx, harbor.GetName(), controllers.Registry.String(), "basicauth")
