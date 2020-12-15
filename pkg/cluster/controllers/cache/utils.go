@@ -27,10 +27,15 @@ func GenerateResourceList(cpu, memory string) (resources corev1.ResourceList, er
 }
 
 // GeneratePVC generates pvc by name and size.
-func GenerateStoragePVC(name, size string, labels map[string]string) (*corev1.PersistentVolumeClaim, error) {
+func GenerateStoragePVC(storageClass, name, size string, labels map[string]string) (*corev1.PersistentVolumeClaim, error) {
 	storage, err := resource.ParseQuantity(size)
 	if err != nil {
 		return nil, err
+	}
+
+	var sc *string
+	if storageClass != "" {
+		sc = &storageClass
 	}
 
 	return &corev1.PersistentVolumeClaim{
@@ -39,7 +44,8 @@ func GenerateStoragePVC(name, size string, labels map[string]string) (*corev1.Pe
 			Labels: labels,
 		},
 		Spec: corev1.PersistentVolumeClaimSpec{
-			AccessModes: []corev1.PersistentVolumeAccessMode{corev1.ReadWriteOnce},
+			StorageClassName: sc,
+			AccessModes:      []corev1.PersistentVolumeAccessMode{corev1.ReadWriteOnce},
 			Resources: corev1.ResourceRequirements{
 				Requests: corev1.ResourceList{"storage": storage},
 			},

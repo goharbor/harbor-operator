@@ -27,6 +27,7 @@ func (p *PostgreSQLController) GetPostgresCR() (*unstructured.Unstructured, erro
 	storageSize := p.GetPostgreStorageSize()
 	version := p.GetPostgreVersion()
 	databases := p.GetDatabases()
+	storageClass := p.GetStorageClass()
 
 	conf := &api.Postgresql{
 		TypeMeta: metav1.TypeMeta{
@@ -39,7 +40,8 @@ func (p *PostgreSQLController) GetPostgresCR() (*unstructured.Unstructured, erro
 		},
 		Spec: api.PostgresSpec{
 			Volume: api.Volume{
-				Size: storageSize,
+				StorageClass: storageClass,
+				Size:         storageSize,
 			},
 			TeamID:            p.teamID(),
 			NumberOfInstances: replica,

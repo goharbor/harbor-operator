@@ -85,7 +85,6 @@ spec:
       storage: 1Gi
       replicas: 2
       version: "12"
-      storageClassName: default
       resources:
         limits:
           cpu: 500m

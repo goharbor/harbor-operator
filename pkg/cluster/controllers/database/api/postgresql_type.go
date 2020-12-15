@@ -99,7 +99,7 @@ type MaintenanceWindow struct {
 // Volume describes a single volume in the manifest.
 type Volume struct {
 	Size         string `json:"size"`
-	StorageClass string `json:"storageClass"`
+	StorageClass string `json:"storageClass,omitempty"`
 	SubPath      string `json:"subPath,omitempty"`
 }
 
