@@ -116,7 +116,8 @@ func dbConfigGetter(ctx context.Context, kubeClient k8s.Client, cluster *v1alpha
 
 // storageConfigGetter is for getting configurations of storage service.
 func storageConfigGetter(ctx context.Context, kubeClient k8s.Client, cluster *v1alpha2.HarborCluster) (*lcm.ServiceConfig, []lcm.Option, error) {
-	if cluster.Spec.ImageChartStorage.S3 != nil {
+	switch {
+	case cluster.Spec.ImageChartStorage.S3 != nil:
 		accessSecret, err := getAccessSecret(kubeClient, cluster.Spec.ImageChartStorage.S3.SecretKeyRef, cluster.Namespace)
 		if err != nil {
 			return nil, nil, err
@@ -133,23 +134,23 @@ func storageConfigGetter(ctx context.Context, kubeClient k8s.Client, cluster *v1
 		}
 
 		var opts []lcm.Option
-		opts = append(opts, func(options *lcm.CheckOptions) {
-			options.S3Region = cluster.Spec.ImageChartStorage.S3.Region
-			options.BucketName = cluster.Spec.ImageChartStorage.S3.Bucket
-		})
+		opts = append(opts,
+			func(options *lcm.CheckOptions) {
+				options.S3Region = cluster.Spec.ImageChartStorage.S3.Region
+				options.BucketName = cluster.Spec.ImageChartStorage.S3.Bucket
+			},
+			lcm.WithStorage(v1alpha2.S3DriverName),
+		)
 
 		return svcConfig, opts, nil
+	case cluster.Spec.ImageChartStorage.FileSystem != nil:
+		return &lcm.ServiceConfig{}, []lcm.Option{lcm.WithStorage(v1alpha2.FileSystemDriverName)}, nil
+	case cluster.Spec.ImageChartStorage.Swift != nil:
+		// TODO: Implement me
+		panic("implement me")
+	default:
+		return nil, nil, errors.New("invalid storage configurations")
 	}
-
-	if cluster.Spec.ImageChartStorage.FileSystem != nil {
-		return nil, nil, nil
-	}
-
-	if cluster.Spec.ImageChartStorage.Swift != nil {
-		return nil, nil, nil
-	}
-
-	return nil, nil, nil
 }
 
 // getAccessSecret is for getting component connection password.
