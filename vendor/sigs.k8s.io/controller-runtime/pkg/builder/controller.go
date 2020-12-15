@@ -20,7 +20,10 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/go-logr/logr"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -35,6 +38,17 @@ import (
 var newController = controller.New
 var getGvk = apiutil.GVKForObject
 
+// project represents other forms that the we can use to
+// send/receive a given resource (metadata-only, unstructured, etc)
+type objectProjection int
+
+const (
+	// projectAsNormal doesn't change the object from the form given
+	projectAsNormal objectProjection = iota
+	// projectAsMetadata turns this into an metadata-only watch
+	projectAsMetadata
+)
+
 // Builder builds a Controller.
 type Builder struct {
 	forInput         ForInput
@@ -45,6 +59,7 @@ type Builder struct {
 	config           *rest.Config
 	ctrl             controller.Controller
 	ctrlOptions      controller.Options
+	log              logr.Logger
 	name             string
 }
 
@@ -65,8 +80,9 @@ func (blder *Builder) ForType(apiType runtime.Object) *Builder {
 
 // ForInput represents the information set by For method.
 type ForInput struct {
-	object     runtime.Object
-	predicates []predicate.Predicate
+	object           runtime.Object
+	predicates       []predicate.Predicate
+	objectProjection objectProjection
 }
 
 // For defines the type of Object being *reconciled*, and configures the ControllerManagedBy to respond to create / delete /
@@ -85,8 +101,9 @@ func (blder *Builder) For(object runtime.Object, opts ...ForOption) *Builder {
 
 // OwnsInput represents the information set by Owns method.
 type OwnsInput struct {
-	object     runtime.Object
-	predicates []predicate.Predicate
+	object           runtime.Object
+	predicates       []predicate.Predicate
+	objectProjection objectProjection
 }
 
 // Owns defines types of Objects being *generated* by the ControllerManagedBy, and configures the ControllerManagedBy to respond to
@@ -104,9 +121,10 @@ func (blder *Builder) Owns(object runtime.Object, opts ...OwnsOption) *Builder {
 
 // WatchesInput represents the information set by Watches method.
 type WatchesInput struct {
-	src          source.Source
-	eventhandler handler.EventHandler
-	predicates   []predicate.Predicate
+	src              source.Source
+	eventhandler     handler.EventHandler
+	predicates       []predicate.Predicate
+	objectProjection objectProjection
 }
 
 // Watches exposes the lower-level ControllerManagedBy Watches functions through the builder.  Consider using
@@ -155,6 +173,12 @@ func (blder *Builder) Named(name string) *Builder {
 	return blder
 }
 
+// WithLogger overrides the controller options's logger used.
+func (blder *Builder) WithLogger(log logr.Logger) *Builder {
+	blder.log = log
+	return blder
+}
+
 // Complete builds the Application ControllerManagedBy.
 func (blder *Builder) Complete(r reconcile.Reconciler) error {
 	_, err := blder.Build(r)
@@ -186,19 +210,43 @@ func (blder *Builder) Build(r reconcile.Reconciler) (controller.Controller, erro
 	return blder.ctrl, nil
 }
 
+func (blder *Builder) project(obj runtime.Object, proj objectProjection) (runtime.Object, error) {
+	switch proj {
+	case projectAsNormal:
+		return obj, nil
+	case projectAsMetadata:
+		metaObj := &metav1.PartialObjectMetadata{}
+		gvk, err := getGvk(obj, blder.mgr.GetScheme())
+		if err != nil {
+			return nil, fmt.Errorf("unable to determine GVK of %T for a metadata-only watch: %w", obj, err)
+		}
+		metaObj.SetGroupVersionKind(gvk)
+		return metaObj, nil
+	default:
+		panic(fmt.Sprintf("unexpected projection type %v on type %T, should not be possible since this is an internal field", proj, obj))
+	}
+}
+
 func (blder *Builder) doWatch() error {
 	// Reconcile type
-	src := &source.Kind{Type: blder.forInput.object}
+	typeForSrc, err := blder.project(blder.forInput.object, blder.forInput.objectProjection)
+	if err != nil {
+		return err
+	}
+	src := &source.Kind{Type: typeForSrc}
 	hdler := &handler.EnqueueRequestForObject{}
 	allPredicates := append(blder.globalPredicates, blder.forInput.predicates...)
-	err := blder.ctrl.Watch(src, hdler, allPredicates...)
-	if err != nil {
+	if err := blder.ctrl.Watch(src, hdler, allPredicates...); err != nil {
 		return err
 	}
 
 	// Watches the managed types
 	for _, own := range blder.ownsInput {
-		src := &source.Kind{Type: own.object}
+		typeForSrc, err := blder.project(own.object, own.objectProjection)
+		if err != nil {
+			return err
+		}
+		src := &source.Kind{Type: typeForSrc}
 		hdler := &handler.EnqueueRequestForOwner{
 			OwnerType:    blder.forInput.object,
 			IsController: true,
@@ -214,10 +262,19 @@ func (blder *Builder) doWatch() error {
 	for _, w := range blder.watchesInput {
 		allPredicates := append([]predicate.Predicate(nil), blder.globalPredicates...)
 		allPredicates = append(allPredicates, w.predicates...)
+
+		// If the source of this watch is of type *source.Kind, project it.
+		if srckind, ok := w.src.(*source.Kind); ok {
+			typeForSrc, err := blder.project(srckind.Type, w.objectProjection)
+			if err != nil {
+				return err
+			}
+			srckind.Type = typeForSrc
+		}
+
 		if err := blder.ctrl.Watch(w.src, w.eventhandler, allPredicates...); err != nil {
 			return err
 		}
-
 	}
 	return nil
 }
@@ -228,24 +285,33 @@ func (blder *Builder) loadRestConfig() {
 	}
 }
 
-func (blder *Builder) getControllerName() (string, error) {
+func (blder *Builder) getControllerName(gvk schema.GroupVersionKind) string {
 	if blder.name != "" {
-		return blder.name, nil
+		return blder.name
 	}
-	gvk, err := getGvk(blder.forInput.object, blder.mgr.GetScheme())
-	if err != nil {
-		return "", err
-	}
-	return strings.ToLower(gvk.Kind), nil
+	return strings.ToLower(gvk.Kind)
 }
 
 func (blder *Builder) doController(r reconcile.Reconciler) error {
-	name, err := blder.getControllerName()
+	ctrlOptions := blder.ctrlOptions
+	if ctrlOptions.Reconciler == nil {
+		ctrlOptions.Reconciler = r
+	}
+
+	// Retrieve the GVK from the object we're reconciling
+	// to prepopulate logger information, and to optionally generate a default name.
+	gvk, err := getGvk(blder.forInput.object, blder.mgr.GetScheme())
 	if err != nil {
 		return err
 	}
-	ctrlOptions := blder.ctrlOptions
-	ctrlOptions.Reconciler = r
-	blder.ctrl, err = newController(name, blder.mgr, ctrlOptions)
+
+	// Setup the logger.
+	if ctrlOptions.Log == nil {
+		ctrlOptions.Log = blder.mgr.GetLogger()
+	}
+	ctrlOptions.Log = ctrlOptions.Log.WithValues("reconcilerGroup", gvk.Group, "reconcilerKind", gvk.Kind)
+
+	// Build the controller and return.
+	blder.ctrl, err = newController(blder.getControllerName(gvk), blder.mgr, ctrlOptions)
 	return err
 }
