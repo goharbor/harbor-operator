@@ -8,6 +8,7 @@ import (
 	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	"github.com/goharbor/harbor-operator/pkg/k8s"
+	"github.com/ovh/configstore"
 	redisOp "github.com/spotahome/redis-operator/api/redisfailover/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -33,7 +34,8 @@ func NewRedisController(ctx context.Context, opts ...k8s.Option) lcm.Controller 
 		Client:          ctrlOpts.Client,
 		Log:             ctrlOpts.Log,
 		Scheme:          ctrlOpts.Scheme,
-		ResourceManager: NewResourceManager(),
+		ResourceManager: NewResourceManager(ctrlOpts.ConfigStore, ctrlOpts.Log),
+		ConfigStore:     ctrlOpts.ConfigStore,
 	}
 }
 
@@ -47,6 +49,7 @@ type RedisController struct {
 	Scheme             *runtime.Scheme
 	RedisConnect       *RedisConnect
 	ResourceManager    ResourceManager
+	ConfigStore        *configstore.Store
 	expectCR, actualCR runtime.Object
 }
 

@@ -7,6 +7,7 @@ import (
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	"github.com/goharbor/harbor-operator/pkg/k8s"
+	"github.com/ovh/configstore"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -23,6 +24,7 @@ type PostgreSQLController struct {
 	Scheme        *runtime.Scheme
 	ExpectCR      *unstructured.Unstructured
 	ActualCR      *unstructured.Unstructured
+	ConfigStore   *configstore.Store
 }
 
 type Connect struct {
@@ -86,10 +88,11 @@ func NewDatabaseController(ctx context.Context, options ...k8s.Option) lcm.Contr
 	}
 
 	return &PostgreSQLController{
-		Ctx:     ctx,
-		Log:     o.Log,
-		DClient: o.DClient,
-		Client:  o.Client,
-		Scheme:  o.Scheme,
+		Ctx:         ctx,
+		Log:         o.Log,
+		DClient:     o.DClient,
+		Client:      o.Client,
+		Scheme:      o.Scheme,
+		ConfigStore: o.ConfigStore,
 	}
 }

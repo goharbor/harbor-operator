@@ -51,7 +51,8 @@ func (p *PostgreSQLController) GetPostgresCR() (*unstructured.Unstructured, erro
 			PostgresqlParam: api.PostgresqlParam{
 				PgVersion: version,
 			},
-			Resources: resource,
+			Resources:   resource,
+			DockerImage: p.GetImage(),
 		},
 	}
 

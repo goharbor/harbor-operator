@@ -4,15 +4,17 @@ import (
 	"context"
 
 	"github.com/go-logr/logr"
+	"github.com/ovh/configstore"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
 type CtrlOptions struct {
-	CTX     context.Context
-	Client  Client
-	Log     logr.Logger
-	DClient DClient
-	Scheme  *runtime.Scheme
+	CTX         context.Context
+	Client      Client
+	Log         logr.Logger
+	DClient     DClient
+	Scheme      *runtime.Scheme
+	ConfigStore *configstore.Store
 }
 
 type Option func(ops *CtrlOptions)
@@ -38,5 +40,11 @@ func WithScheme(scheme *runtime.Scheme) Option {
 func WithLog(log logr.Logger) Option {
 	return func(ops *CtrlOptions) {
 		ops.Log = log
+	}
+}
+
+func WithConfigStore(store *configstore.Store) Option {
+	return func(ops *CtrlOptions) {
+		ops.ConfigStore = store
 	}
 }

@@ -2460,9 +2460,17 @@ spec:
                   minIOSpec:
                     description: inCLuster options.
                     properties:
+                      redirect:
+                        description: Determine if the redirection of minio storage is disabled.
+                        properties:
+                          disable:
+                            description: Disable the redirect. Default is false
+                            type: boolean
+                        type: object
                       replicas:
                         description: Supply number of replicas. For standalone mode, supply 1. For distributed mode, supply 4 to 16 drives (should be even). Note that the operator does not support upgrading from standalone to distributed mode.
                         format: int32
+                        minimum: 1
                         type: integer
                       resources:
                         description: If provided, use these requests and limit for cpu/memory resource allocation
@@ -2621,6 +2629,7 @@ spec:
                       volumesPerServer:
                         description: Number of persistent volumes that will be attached per server
                         format: int32
+                        minimum: 1
                         type: integer
                     required:
                     - replicas
@@ -11603,12 +11612,8 @@ rules:
   resources:
   - harborclusters
   verbs:
-  - create
-  - delete
   - get
   - list
-  - patch
-  - update
   - watch
 - apiGroups:
   - goharbor.io
@@ -11623,8 +11628,12 @@ rules:
   resources:
   - harbors
   verbs:
+  - create
+  - delete
   - get
   - list
+  - patch
+  - update
   - watch
 - apiGroups:
   - goharbor.io
@@ -12155,6 +12164,28 @@ spec:
         command:
         - /manager
         env:
+        - name: CORE_DOCKER_IMAGE
+          value: quay.io/goharbor/harbor-core:v2.1.2
+        - name: JOBSERVICE_DOCKER_IMAGE
+          value: quay.io/goharbor/harbor-jobservice:v2.1.2
+        - name: PORTAL_DOCKER_IMAGE
+          value: quay.io/goharbor/harbor-portal:v2.1.2
+        - name: REGISTRYCTL_DOCKER_IMAGE
+          value: quay.io/goharbor/harbor-registryctl:v2.1.2
+        - name: REGISTRY_DOCKER_IMAGE
+          value: quay.io/goharbor/registry-photon:v2.1.2
+        - name: CHARTMUSEUM_DOCKER_IMAGE
+          value: quay.io/goharbor/chartmuseum-photon:v2.1.2
+        - name: NOTARYSERVER_DOCKER_IMAGE
+          value: quay.io/goharbor/notary-server-photon:v2.1.2
+        - name: NOTARYSIGNER_DOCKER_IMAGE
+          value: quay.io/goharbor/notary-signer-photon:v2.1.2
+        - name: TRIVY_DOCKER_IMAGE
+          value: quay.io/goharbor/trivy-adapter-photon:v2.1.2
+        - name: HARBORCLUSTER_STORAGE_IMAGE
+          value: quay.io/goharbor/minio:RELEASE.2020-08-13T02-39-50Z
+        - name: HARBORCLUSTER_CACHE_IMAGE
+          value: quay.io/goharbor/redis:5.0-alpine
         - name: NAMESPACE
           valueFrom:
             fieldRef:
@@ -12166,14 +12197,14 @@ spec:
             port: ready
         name: manager
         ports:
-        - containerPort: 5000
-          name: ready
-          protocol: TCP
         - containerPort: 9443
           name: webhook-server
           protocol: TCP
         - containerPort: 8080
           name: metrics
+          protocol: TCP
+        - containerPort: 5000
+          name: ready
           protocol: TCP
         readinessProbe:
           httpGet:
@@ -12187,21 +12218,21 @@ spec:
             cpu: 300m
             memory: 200Mi
         volumeMounts:
-        - mountPath: /etc/harbor-operator
-          name: configuration-templates
-          readOnly: true
         - mountPath: /tmp/k8s-webhook-server/serving-certs
           name: cert
           readOnly: true
+        - mountPath: /etc/harbor-operator
+          name: configuration-templates
+          readOnly: true
       terminationGracePeriodSeconds: 10
       volumes:
-      - configMap:
-          name: config-template
-        name: configuration-templates
       - name: cert
         secret:
           defaultMode: 420
           secretName: webhook-server-cert
+      - configMap:
+          name: config-template
+        name: configuration-templates
 ---
 apiVersion: cert-manager.io/v1alpha2
 kind: Certificate
