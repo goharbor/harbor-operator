@@ -65,7 +65,7 @@ func (rm *redisResourceManager) WithCluster(cluster *v1alpha2.HarborCluster) Res
 // GetCacheCR gets cache cr instance.
 func (rm *redisResourceManager) GetCacheCR() runtime.Object {
 	resource := rm.GetResourceList()
-	pvc, _ := GenerateStoragePVC(rm.cluster.Name, rm.GetStorageSize(), rm.GetLabels())
+	pvc, _ := GenerateStoragePVC(rm.GetStorageClass(), rm.cluster.Name, rm.GetStorageSize(), rm.GetLabels())
 
 	return &redisOp.RedisFailover{
 		TypeMeta: metav1.TypeMeta{
@@ -222,4 +222,13 @@ func (rm *redisResourceManager) GetStorageSize() string {
 	}
 
 	return rm.cluster.Spec.InClusterCache.RedisSpec.Server.Storage
+}
+
+// GetStorageClass gets the storage class name.
+func (rm *redisResourceManager) GetStorageClass() string {
+	if rm.cluster.Spec.InClusterCache.RedisSpec != nil && rm.cluster.Spec.InClusterCache.RedisSpec.Server != nil {
+		return rm.cluster.Spec.InClusterCache.RedisSpec.Server.StorageClassName
+	}
+
+	return ""
 }

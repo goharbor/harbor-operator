@@ -45,6 +45,15 @@ func (p *PostgreSQLController) GetDatabaseConn(secretName string) (*Connect, err
 	return conn, nil
 }
 
+// GetStorageClass returns the storage class name.
+func (p *PostgreSQLController) GetStorageClass() string {
+	if p.HarborCluster.Spec.InClusterDatabase != nil && p.HarborCluster.Spec.InClusterDatabase.PostgresSQLSpec != nil {
+		return p.HarborCluster.Spec.InClusterDatabase.PostgresSQLSpec.StorageClassName
+	}
+
+	return ""
+}
+
 // GetSecret returns the database connection Secret.
 func (p *PostgreSQLController) GetSecret(secretName string) (map[string][]byte, error) {
 	secret := &corev1.Secret{}
