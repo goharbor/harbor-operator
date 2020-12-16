@@ -3,8 +3,10 @@ package cache
 import (
 	"fmt"
 
+	"github.com/go-logr/logr"
 	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/common"
+	"github.com/ovh/configstore"
 	redisOp "github.com/spotahome/redis-operator/api/redisfailover/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -36,7 +38,9 @@ type ResourceGetter interface {
 var _ ResourceManager = &redisResourceManager{}
 
 type redisResourceManager struct {
-	cluster *v1alpha2.HarborCluster
+	cluster     *v1alpha2.HarborCluster
+	configStore *configstore.Store
+	logger      logr.Logger
 }
 
 const (
@@ -51,8 +55,11 @@ const (
 )
 
 // NewResourceManager constructs a new cache resource manager.
-func NewResourceManager() ResourceManager {
-	return &redisResourceManager{}
+func NewResourceManager(store *configstore.Store, logger logr.Logger) ResourceManager {
+	return &redisResourceManager{
+		configStore: store,
+		logger:      logger,
+	}
 }
 
 // WithCluster get resources based on the specified cluster spec.
@@ -87,6 +94,7 @@ func (rm *redisResourceManager) GetCacheCR() runtime.Object {
 				Storage: redisOp.RedisStorage{
 					PersistentVolumeClaim: pvc,
 				},
+				Image: rm.GetImage(),
 			},
 			Sentinel: redisOp.SentinelSettings{
 				Replicas: int32(rm.GetClusterServerReplica()),
@@ -94,6 +102,7 @@ func (rm *redisResourceManager) GetCacheCR() runtime.Object {
 					Limits:   resource,
 					Requests: resource,
 				},
+				Image: rm.GetImage(),
 			},
 			Auth: redisOp.AuthSettings{SecretPath: rm.GetSecretName()},
 		},

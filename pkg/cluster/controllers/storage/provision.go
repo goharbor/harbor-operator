@@ -253,7 +253,7 @@ func (m *MinIOController) generateMinIOCR() *minio.Tenant {
 				Annotations: m.generateAnnotations(),
 			},
 			ServiceName: m.getServiceName(),
-			Image:       "minio/minio:" + m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Version,
+			Image:       m.GetImage(),
 			Zones: []minio.Zone{
 				{
 					Name:                DefaultZone,

@@ -65,16 +65,22 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 		k8s.WithLog(r.Log.WithName("cache")),
 		k8s.WithScheme(mgr.GetScheme()),
 		k8s.WithDClient(k8s.WrapDClient(dClient)),
-		k8s.WithClient(k8s.WrapClient(ctx, mgr.GetClient())))
+		k8s.WithClient(k8s.WrapClient(ctx, mgr.GetClient())),
+		k8s.WithConfigStore(r.ConfigStore),
+	)
 	r.DatabaseCtrl = database.NewDatabaseController(ctx,
 		k8s.WithLog(r.Log.WithName("database")),
 		k8s.WithScheme(mgr.GetScheme()),
 		k8s.WithDClient(k8s.WrapDClient(dClient)),
-		k8s.WithClient(k8s.WrapClient(ctx, mgr.GetClient())))
+		k8s.WithClient(k8s.WrapClient(ctx, mgr.GetClient())),
+		k8s.WithConfigStore(r.ConfigStore),
+	)
 	r.StorageCtrl = storage.NewMinIOController(ctx,
 		k8s.WithLog(r.Log.WithName("storage")),
 		k8s.WithScheme(mgr.GetScheme()),
-		k8s.WithClient(k8s.WrapClient(ctx, mgr.GetClient())))
+		k8s.WithClient(k8s.WrapClient(ctx, mgr.GetClient())),
+		k8s.WithConfigStore(r.ConfigStore),
+	)
 	r.HarborCtrl = harbor.NewHarborController(ctx,
 		k8s.WithLog(r.Log.WithName("harbor")),
 		k8s.WithScheme(mgr.GetScheme()),
@@ -89,9 +95,10 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 // New HarborCluster reconciler.
 func New(ctx context.Context, name string, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
 	return &Reconciler{
-		Name:    name,
-		Version: application.GetVersion(ctx),
-		Log:     ctrl.Log.WithName(application.GetName(ctx)).WithName("controller").WithValues("controller", name),
+		Name:        name,
+		Version:     application.GetVersion(ctx),
+		ConfigStore: configStore,
+		Log:         ctrl.Log.WithName(application.GetName(ctx)).WithName("controller").WithValues("controller", name),
 	}, nil
 }
 

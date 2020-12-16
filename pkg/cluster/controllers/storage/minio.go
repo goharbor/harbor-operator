@@ -9,6 +9,7 @@ import (
 	minio "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/api/v1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	"github.com/goharbor/harbor-operator/pkg/k8s"
+	"github.com/ovh/configstore"
 	corev1 "k8s.io/api/core/v1"
 	k8serror "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -42,6 +43,7 @@ type MinIOController struct {
 	CurrentExternalSecret *corev1.Secret
 	DesiredExternalSecret *corev1.Secret
 	MinioClient           Minio
+	ConfigStore           *configstore.Store
 }
 
 func (m *MinIOController) HealthChecker() lcm.HealthChecker {
@@ -62,10 +64,11 @@ func NewMinIOController(ctx context.Context, options ...k8s.Option) lcm.Controll
 	}
 
 	return &MinIOController{
-		Ctx:        ctx,
-		KubeClient: o.Client,
-		Log:        o.Log,
-		Scheme:     o.Scheme,
+		Ctx:         ctx,
+		KubeClient:  o.Client,
+		Log:         o.Log,
+		Scheme:      o.Scheme,
+		ConfigStore: o.ConfigStore,
 	}
 }
 
