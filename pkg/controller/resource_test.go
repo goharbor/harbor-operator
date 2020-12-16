@@ -4,10 +4,12 @@ import (
 	"context"
 
 	. "github.com/goharbor/harbor-operator/pkg/controller"
+	"github.com/goharbor/harbor-operator/pkg/scheme"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	"github.com/goharbor/harbor-operator/pkg/factories/application"
+	"github.com/goharbor/harbor-operator/pkg/factories/owner"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 	"github.com/goharbor/harbor-operator/pkg/resources"
 	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
@@ -54,6 +56,11 @@ var _ = Context("Adding", func() {
 		application.SetVersion(&setupCtx, "test")
 
 		c = NewController(setupCtx, "test", nil, nil)
+		scheme, err := scheme.New(setupCtx)
+		Expect(err).ToNot(HaveOccurred())
+
+		c.Scheme = scheme
+
 		ctx = c.NewContext(controllerruntime.Request{
 			NamespacedName: types.NamespacedName{
 				Name:      "resource-name",
@@ -61,6 +68,7 @@ var _ = Context("Adding", func() {
 			},
 		})
 
+		owner.Set(&ctx, &appsv1.Deployment{})
 		application.SetName(&ctx, "test-app")
 		application.SetVersion(&ctx, "test")
 	})
@@ -86,12 +94,21 @@ var _ = Context("Adding", func() {
 				Describe("An unknown resource", func() {
 					BeforeEach(func() {
 						c := NewController(ctx, "test", nil, nil)
-						d, err := c.AddConfigMapToManage(c.NewContext(controllerruntime.Request{
+						scheme, err := scheme.New(ctx)
+						Expect(err).ToNot(HaveOccurred())
+
+						c.Scheme = scheme
+
+						context := c.NewContext(controllerruntime.Request{
 							NamespacedName: types.NamespacedName{
 								Name:      "resource-name",
 								Namespace: "namespace",
 							},
-						}), &corev1.ConfigMap{})
+						})
+
+						owner.Set(&context, &appsv1.Deployment{})
+
+						d, err := c.AddConfigMapToManage(context, &corev1.ConfigMap{})
 						Expect(err).ToNot(HaveOccurred())
 
 						dependency = d
