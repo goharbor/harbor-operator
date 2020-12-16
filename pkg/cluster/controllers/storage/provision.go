@@ -1,7 +1,6 @@
 package storage
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/url"
 	"reflect"
@@ -47,18 +46,27 @@ func (m *MinIOController) getMinIOProperties(minioInstance *minio.Tenant) (*goha
 		return nil, err
 	}
 
-	var endpoint string
+	var (
+		endpoint string
+		scheme   string
+
+		secure     = false
+		v4Auth     = false
+		skipVerify = false
+	)
+
 	if !m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Redirect.Disable {
-		_, endpoint, err = GetMinIOHostAndSchema(m.HarborCluster.Spec.ExternalURL)
+		scheme, endpoint, err = GetMinIOHostAndSchema(m.HarborCluster.Spec.ExternalURL)
 		if err != nil {
 			return nil, err
 		}
+		// if access minio use ingress, secure and skipVerify should be true
+		secure = true
+		skipVerify = true
+		endpoint = fmt.Sprintf("%s://%s", scheme, endpoint)
 	} else {
 		endpoint = fmt.Sprintf("http://%s.%s.svc:%s", m.getServiceName(), m.HarborCluster.Namespace, "9000")
 	}
-
-	secure := false
-	v4Auth := false
 
 	storageSpec := &goharborv1.HarborStorageImageChartStorageSpec{
 		S3: &goharborv1.HarborStorageImageChartStorageS3Spec{
@@ -70,6 +78,7 @@ func (m *MinIOController) getMinIOProperties(minioInstance *minio.Tenant) (*goha
 				Bucket:         DefaultBucket,
 				Secure:         &secure,
 				V4Auth:         &v4Auth,
+				SkipVerify:     skipVerify,
 			},
 		},
 	}
@@ -78,10 +87,6 @@ func (m *MinIOController) getMinIOProperties(minioInstance *minio.Tenant) (*goha
 }
 
 func (m *MinIOController) createSecretKeyRef(secretKey []byte, minioInstance *minio.Tenant) *corev1.Secret {
-	data := map[string]string{
-		"secretkey": string(secretKey),
-	}
-	dataJSON, _ := json.Marshal(&data)
 	s3KeySecret := &corev1.Secret{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "v1",
@@ -98,7 +103,7 @@ func (m *MinIOController) createSecretKeyRef(secretKey []byte, minioInstance *mi
 		},
 		Type: corev1.SecretTypeOpaque,
 		Data: map[string][]byte{
-			v1alpha1.SharedSecretKey: dataJSON,
+			v1alpha1.SharedSecretKey: secretKey,
 		},
 	}
 
