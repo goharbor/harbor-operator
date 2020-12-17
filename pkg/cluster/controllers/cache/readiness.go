@@ -42,8 +42,9 @@ func (rc *RedisController) Readiness(ctx context.Context, cluster *v1alpha2.Harb
 func (rc *RedisController) generateRedisSpec() *v1alpha2.ExternalRedisSpec {
 	return &v1alpha2.ExternalRedisSpec{
 		RedisHostSpec: harbormetav1.RedisHostSpec{
-			Host: rc.ResourceManager.GetServiceName(),
-			Port: RedisRedisConnPort,
+			Host:              fmt.Sprintf("rfs-%s", rc.ResourceManager.GetServiceName()),
+			Port:              RedisSentinelConnPort,
+			SentinelMasterSet: RedisSentinelConnGroup,
 		},
 		RedisCredentials: harbormetav1.RedisCredentials{
 			PasswordRef: rc.ResourceManager.GetSecretName(),

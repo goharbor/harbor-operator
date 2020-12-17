@@ -206,6 +206,9 @@ middleware:
 {{- end }}
 {{- if .Spec.Redis }}
 redis:
+  {{- if .Spec.Redis.SentinelMasterSet }}
+  sentinelMasterSet: {{ .Spec.Redis.SentinelMasterSet | quote }}
+  {{- end }}
   {{- if .Spec.Redis.Port }}
   addr: {{ printf "%s:%d" .Spec.Redis.Host .Spec.Redis.Port | quote }}
   {{- else }}
