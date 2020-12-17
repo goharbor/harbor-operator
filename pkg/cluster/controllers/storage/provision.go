@@ -51,7 +51,7 @@ func (m *MinIOController) getMinIOProperties(minioInstance *minio.Tenant) (*goha
 		scheme   string
 
 		secure     = false
-		v4Auth     = false
+		v4Auth     = true
 		skipVerify = false
 	)
 
