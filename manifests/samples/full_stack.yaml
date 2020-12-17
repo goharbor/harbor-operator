@@ -34,6 +34,7 @@ spec:
   dnsNames:
     - core.harbor.domain
     - notary.harbor.domain
+    - minio.core.harbor.domain
   issuerRef:
     name: selfsigned-issuer
     kind: Issuer
