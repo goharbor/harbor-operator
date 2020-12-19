@@ -105,3 +105,5 @@ spec:
           requests:
             cpu: 100m
             memory: 250Mi
+      sentinel:
+        replicas: 1

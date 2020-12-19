@@ -29,6 +29,10 @@ type RedisHostSpec struct {
 	// +kubebuilder:validation:ExclusiveMinimum=true
 	// Server port.
 	Port int32 `json:"port,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// for Sentinel MasterSet.
+	SentinelMasterSet string `json:"sentinelMasterSet,omitempty"`
 }
 
 type RedisCredentials struct {
@@ -55,7 +59,10 @@ type RedisConnection struct {
 	Database int32 `json:"database,omitempty"`
 }
 
-const RedisScheme = "redis"
+const (
+	RedisScheme         = "redis"
+	RedisSentinelScheme = "redis+sentinel"
+)
 
 func (c *RedisConnection) GetDSNNoCredentials() *url.URL {
 	if c == nil {
@@ -63,9 +70,14 @@ func (c *RedisConnection) GetDSNNoCredentials() *url.URL {
 	}
 
 	u := &url.URL{
-		Scheme: RedisScheme,
-		Host:   c.Host,
-		Path:   strconv.Itoa(int(c.Database)),
+		Host: fmt.Sprintf("%s:%d", c.Host, c.Port),
+		Path: strconv.Itoa(int(c.Database)),
+	}
+	if c.SentinelMasterSet == "" {
+		u.Scheme = RedisScheme
+	} else {
+		u.Scheme = RedisSentinelScheme
+		u.Path = c.SentinelMasterSet + "/" + u.Path
 	}
 
 	return u
@@ -102,8 +114,8 @@ func (c *RedisConnection) GetDSNStringWithRawPassword(password string) string {
 
 const (
 	coreRedisDatabaseIndex        = 0
-	jobServiceRedisDatabaseIndex  = 1
-	registryRedisDatabaseIndex    = 2
+	registryRedisDatabaseIndex    = 1
+	jobServiceRedisDatabaseIndex  = 2
 	chartMuseumRedisDatabaseIndex = 3
 	clairRedisDatabaseIndex       = 4
 	trivyRedisDatabaseIndex       = 5

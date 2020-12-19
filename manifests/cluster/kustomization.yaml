@@ -42,4 +42,4 @@ images:
     newTag: v1.0.0
   - name: goharbor/harbor-operator
     newName: goharbor/harbor-operator
-    newTag: latest
+    newTag: dev_develop

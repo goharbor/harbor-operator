@@ -127,7 +127,7 @@ func (harbor *Controller) getHarborCR(harborcluster *v1alpha2.HarborCluster) *v1
 	}
 
 	if cache := harbor.getCacheSpec(); cache != nil {
-		harbor.Log.Info("use incluster cache", "cache", cache.Host)
+		harbor.Log.Info("use incluster cache", "cache", cache.Host, "port", cache.Port, "sentinelMasterSet", cache.SentinelMasterSet)
 		harborCR.Spec.Redis = cache
 	}
 

@@ -193,7 +193,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 			},
 		},
 	}, {
-		Name: "_REDIS_URL",
+		Name: RedisDSNKey,
 		ValueFrom: &corev1.EnvVarSource{
 			SecretKeyRef: &corev1.SecretKeySelector{
 				LocalObjectReference: corev1.LocalObjectReference{
@@ -297,7 +297,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 
 	if core.Spec.Components.Registry.Redis != nil {
 		envs = append(envs, corev1.EnvVar{
-			Name: "_REDIS_URL_REG",
+			Name: RegistryRedisDSNKey,
 			ValueFrom: &corev1.EnvVarSource{
 				SecretKeyRef: &corev1.SecretKeySelector{
 					Key:      RegistryRedisDSNKey,
