@@ -21,6 +21,7 @@ require (
 	github.com/markbates/pkger v0.15.1
 	github.com/minio/minio-go/v6 v6.0.57
 	github.com/mitchellh/reflectwalk v1.0.1 // indirect
+	github.com/ncw/swift v1.0.49
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/onsi/ginkgo v1.14.0
 	github.com/onsi/gomega v1.10.1

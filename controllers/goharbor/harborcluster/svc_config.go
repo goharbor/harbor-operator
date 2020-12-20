@@ -136,8 +136,40 @@ func storageConfigGetter(ctx context.Context, kubeClient k8s.Client, cluster *v1
 		var opts []lcm.Option
 		opts = append(opts,
 			func(options *lcm.CheckOptions) {
-				options.S3Region = cluster.Spec.ImageChartStorage.S3.Region
-				options.BucketName = cluster.Spec.ImageChartStorage.S3.Bucket
+				options.S3Options.S3Region = cluster.Spec.ImageChartStorage.S3.Region
+				options.S3Options.BucketName = cluster.Spec.ImageChartStorage.S3.Bucket
+			},
+			lcm.WithStorage(v1alpha2.S3DriverName),
+		)
+
+		return svcConfig, opts, nil
+	case cluster.Spec.ImageChartStorage.Swift != nil:
+		// TODO soulseen: Implement temporary URLs
+		accessSecret, err := getAccessSecret(kubeClient, cluster.Spec.ImageChartStorage.Swift.PasswordRef, cluster.Namespace)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		svcConfig := &lcm.ServiceConfig{
+			Endpoint: &lcm.Endpoint{
+				Host: cluster.Spec.ImageChartStorage.Swift.AuthURL,
+			},
+			Credentials: &lcm.Credentials{
+				AccessKey:    cluster.Spec.ImageChartStorage.Swift.Username,
+				AccessSecret: accessSecret,
+			},
+		}
+
+		var opts []lcm.Option
+		opts = append(opts,
+			func(options *lcm.CheckOptions) {
+				options.SwiftOptions.AuthURL = cluster.Spec.ImageChartStorage.Swift.Region
+				options.SwiftOptions.Tenant = cluster.Spec.ImageChartStorage.Swift.Tenant
+				options.SwiftOptions.TenantID = cluster.Spec.ImageChartStorage.Swift.TenantID
+				options.SwiftOptions.Domain = cluster.Spec.ImageChartStorage.Swift.Domain
+				options.SwiftOptions.DomainID = cluster.Spec.ImageChartStorage.Swift.DomainID
+				options.SwiftOptions.Region = cluster.Spec.ImageChartStorage.Swift.Region
+				options.SwiftOptions.Container = cluster.Spec.ImageChartStorage.Swift.Container
 			},
 			lcm.WithStorage(v1alpha2.S3DriverName),
 		)
@@ -145,9 +177,6 @@ func storageConfigGetter(ctx context.Context, kubeClient k8s.Client, cluster *v1
 		return svcConfig, opts, nil
 	case cluster.Spec.ImageChartStorage.FileSystem != nil:
 		return &lcm.ServiceConfig{}, []lcm.Option{lcm.WithStorage(v1alpha2.FileSystemDriverName)}, nil
-	case cluster.Spec.ImageChartStorage.Swift != nil:
-		// TODO: Implement me
-		panic("implement me")
 	default:
 		return nil, nil, errors.New("invalid storage configurations")
 	}
