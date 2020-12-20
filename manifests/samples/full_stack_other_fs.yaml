@@ -1,0 +1,173 @@
+# Sample namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cluster-sample-ns
+---
+# A secret of harbor admin password.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: admin-core-secret
+  namespace: cluster-sample-ns
+data:
+  secret: SGFyYm9yMTIzNDU=
+type: Opaque
+---
+# A secret of harbor admin password.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: github-credentials
+  namespace: cluster-sample-ns
+data:
+  github-token: eHh4
+type: goharbor.io/github
+---
+# Cert issuer
+apiVersion: cert-manager.io/v1alpha2
+kind: Issuer
+metadata:
+  name: selfsigned-issuer
+  namespace: cluster-sample-ns
+spec:
+  selfSigned: {}
+---
+# Certificates of ingress
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: sample-public-certificate
+  namespace: cluster-sample-ns
+spec:
+  secretName: sample-public-certificate
+  dnsNames:
+    - core.harbor.domain
+    - notary.harbor.domain
+  issuerRef:
+    name: selfsigned-issuer
+    kind: Issuer
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: sample-harbor-registry
+  namespace: cluster-sample-ns
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: sample-harbor-trivy-reports
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: sample-harbor-trivy-cache
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: sample-harbor-chart
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 5Gi
+---
+# Full stack Harbor
+apiVersion: goharbor.io/v1alpha2
+kind: HarborCluster
+metadata:
+  name: harborcluster-sample
+  namespace: cluster-sample-ns
+spec:
+  harborAdminPasswordRef: admin-core-secret
+  externalURL: https://core.harbor.domain
+  expose:
+    core:
+      ingress:
+        host: core.harbor.domain
+      tls:
+        certificateRef: sample-public-certificate
+    notary:
+      ingress:
+        host: notary.harbor.domain
+      tls:
+        certificateRef: sample-public-certificate
+  trivy:
+    skipUpdate: false
+    githubTokenRef: github-credentials
+    storage:
+      reportsPersistentVolume:
+        claimName: sample-harbor-trivy-reports
+      cachePersistentVolume:
+        claimName: sample-harbor-trivy-cache
+  encryptionKeyRef: core-database-encryption
+  internalTLS:
+    enabled: true
+  portal: {}
+  registry: {}
+  core:
+    tokenIssuer:
+      name: selfsigned-issuer
+      kind: Issuer
+  chartmuseum: {}
+  notary:
+    migrationEnabled: true
+  imageChartStorage:
+    filesystem:
+      registryPersistentVolume:
+        claimName: sample-harbor-registry
+      chartPersistentVolume:
+        claimName: sample-harbor-chart
+  inClusterDatabase:
+    kind: PostgresSQL
+    postgresSqlSpec:
+      storage: 1Gi
+      replicas: 2
+      version: "12"
+      resources:
+        limits:
+          cpu: 500m
+          memory: 500Mi
+        requests:
+          cpu: 100m
+          memory: 250Mi
+  inClusterCache:
+    kind: Redis
+    redisSpec:
+      schema: redis
+      server:
+        replicas: 1
+        resources:
+          limits:
+            cpu: 500m
+            memory: 500Mi
+          requests:
+            cpu: 100m
+            memory: 250Mi
+      sentinel:
+        replicas: 1
