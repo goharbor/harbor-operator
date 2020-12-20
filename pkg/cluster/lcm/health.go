@@ -79,10 +79,25 @@ type CheckOptions struct {
 	// Name of the storage driver
 	// Applicable for minIO
 	StorageDriver string
+	S3Options
+	SwiftOptions
+}
 
-	// For s3 options
+// For s3 options.
+type S3Options struct {
 	S3Region   string
 	BucketName string
+}
+
+// For Swift storage options.
+type SwiftOptions struct {
+	AuthURL   string
+	Tenant    string
+	TenantID  string
+	Domain    string
+	DomainID  string
+	Region    string
+	Container string
 }
 
 // Option with function way.

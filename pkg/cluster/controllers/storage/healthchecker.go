@@ -26,6 +26,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
+	"github.com/ncw/swift"
 )
 
 // HealthChecker for doing health checking for storage.
@@ -59,13 +60,13 @@ func (c *HealthChecker) CheckHealth(ctx context.Context, svc *lcm.ServiceConfig,
 func S3StorageHealthCheck(ctx context.Context, svc *lcm.ServiceConfig, options *lcm.CheckOptions) (*lcm.CheckResponse, error) {
 	checkRes := &lcm.CheckResponse{}
 	bucket := &s3.HeadBucketInput{
-		Bucket: aws.String(options.BucketName),
+		Bucket: aws.String(options.S3Options.BucketName),
 	}
 
 	// Configure to use s3 Server, also can used for MinIO server.
 	// For s3 the Host contains the Port already.
 	s3Config := &aws.Config{
-		Region:           aws.String(options.S3Region),
+		Region:           aws.String(options.S3Options.S3Region),
 		Endpoint:         aws.String(svc.Endpoint.Host),
 		Credentials:      credentials.NewStaticCredentials(svc.Credentials.AccessKey, svc.Credentials.AccessSecret, ""),
 		DisableSSL:       aws.Bool(options.SSLMode),
@@ -93,11 +94,34 @@ func S3StorageHealthCheck(ctx context.Context, svc *lcm.ServiceConfig, options *
 	return checkRes, nil
 }
 
-// TODO soulseen: Implement me.
 func SwiftStorageHealthCheck(ctx context.Context, svc *lcm.ServiceConfig, options *lcm.CheckOptions) (*lcm.CheckResponse, error) {
-	resp := &lcm.CheckResponse{
-		Status: lcm.Healthy,
+	checkRes := &lcm.CheckResponse{}
+
+	// Create a connection
+	c := swift.Connection{
+		UserName: svc.Credentials.AccessKey,
+		ApiKey:   svc.Credentials.AccessSecret,
+		AuthUrl:  options.AuthURL,
+		Domain:   options.Domain, // Name of the domain (v3 auth only)
+		DomainId: options.DomainID,
+		Tenant:   options.Tenant, // Name of the tenant (v2 auth only)
+		TenantId: options.TenantID,
+		Region:   options.Region,
 	}
 
-	return resp, nil
+	// Authenticate
+	err := c.Authenticate()
+	if err != nil {
+		return nil, err
+	}
+
+	containerInfo, _, err := c.Container(options.Container)
+	if err != nil {
+		return nil, err
+	}
+
+	checkRes.Status = lcm.Healthy
+	checkRes.Message = fmt.Sprintf("Check container %s successful", containerInfo.Name)
+
+	return checkRes, nil
 }

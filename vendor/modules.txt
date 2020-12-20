@@ -210,6 +210,9 @@ github.com/mitchellh/reflectwalk
 github.com/modern-go/concurrent
 # github.com/modern-go/reflect2 v1.0.1
 github.com/modern-go/reflect2
+# github.com/ncw/swift v1.0.49
+## explicit
+github.com/ncw/swift
 # github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e
 ## explicit
 # github.com/nxadm/tail v1.4.4
