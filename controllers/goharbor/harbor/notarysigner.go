@@ -70,13 +70,13 @@ func (r *Reconciler) GetNotarySignerCertificateAuthority(ctx context.Context, ha
 
 	return &certv1.Certificate{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      r.NormalizeName(ctx, harbor.GetName(), controllers.NotarySigner.String(), "authentication", "authority"),
+			Name:      r.NormalizeName(ctx, harbor.GetName(), controllers.NotarySigner.String(), "authority"),
 			Namespace: harbor.GetNamespace(),
 		},
 		Spec: certv1.CertificateSpec{
-			SecretName: r.NormalizeName(ctx, harbor.GetName(), controllers.NotarySigner.String(), "authentication", "authority"),
+			SecretName: r.NormalizeName(ctx, harbor.GetName(), controllers.NotarySigner.String(), "authority"),
 			IssuerRef: v1.ObjectReference{
-				Name: r.NormalizeName(ctx, harbor.GetName(), controllers.NotarySigner.String(), "authentication", "authority"),
+				Name: r.NormalizeName(ctx, harbor.GetName(), controllers.NotarySigner.String(), "authority"),
 			},
 			Duration: &metav1.Duration{
 				Duration: duration,
@@ -156,7 +156,7 @@ func (r *Reconciler) AddNotarySignerCertificateAuthorityIssuer(ctx context.Conte
 func (r *Reconciler) GetNotarySignerCertificateAuthorityIssuer(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*certv1.Issuer, error) {
 	return &certv1.Issuer{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      r.NormalizeName(ctx, harbor.GetName(), controllers.NotarySigner.String(), "authentication", "authority"),
+			Name:      r.NormalizeName(ctx, harbor.GetName(), controllers.NotarySigner.String(), "authority"),
 			Namespace: harbor.GetNamespace(),
 		},
 		Spec: certv1.IssuerSpec{
@@ -208,7 +208,7 @@ func (r *Reconciler) GetNotarySignerCertificateIssuer(ctx context.Context, harbo
 		Spec: certv1.IssuerSpec{
 			IssuerConfig: certv1.IssuerConfig{
 				CA: &certv1.CAIssuer{
-					SecretName: r.NormalizeName(ctx, harbor.GetName(), controllers.NotarySigner.String(), "authentication", "authority"),
+					SecretName: r.NormalizeName(ctx, harbor.GetName(), controllers.NotarySigner.String(), "authority"),
 				},
 			},
 		},
