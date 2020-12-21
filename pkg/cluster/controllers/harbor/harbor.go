@@ -209,11 +209,11 @@ func harborClusterCRStatus(harbor *v1alpha2.Harbor) *lcm.CRStatus {
 		harborUnknownStatus(EmptyHarborCRStatusError, "The ready condition of harbor.goharbor.io is empty. Please wait for minutes.")
 	}
 
-	if failedCondition != nil && failedCondition.Status == corev1.ConditionTrue {
+	if failedCondition != nil && failedCondition.Status != corev1.ConditionFalse {
 		return harborNotReadyStatus(failedCondition.Reason, failedCondition.Message)
 	}
 
-	if inProgressCondition != nil && inProgressCondition.Status == corev1.ConditionTrue {
+	if inProgressCondition != nil && inProgressCondition.Status != corev1.ConditionFalse {
 		return harborNotReadyStatus(inProgressCondition.Reason, inProgressCondition.Message)
 	}
 
