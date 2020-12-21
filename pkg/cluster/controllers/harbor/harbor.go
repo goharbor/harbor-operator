@@ -3,6 +3,7 @@ package harbor
 import (
 	"context"
 	"fmt"
+	"github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/kustomize/kstatus/status"
 	"sync"
@@ -195,13 +196,27 @@ func (harbor *Controller) getProperty(component v1alpha2.Component, name string)
 }
 
 func harborClusterCRStatus(harbor *v1alpha2.Harbor) *lcm.CRStatus {
+	var failedCondition, inProgressCondition *v1alpha1.Condition
 	for _, condition := range harbor.Status.Conditions {
-		if condition.Type == status.ConditionFailed && condition.Status == corev1.ConditionTrue {
-			return lcm.New(v1alpha2.ServiceReady).WithStatus(corev1.ConditionFalse).WithMessage(condition.Message).WithReason(condition.Reason)
+		if condition.Type == status.ConditionFailed {
+			failedCondition = &condition
 		}
-		if condition.Type == status.ConditionInProgress && condition.Status == corev1.ConditionTrue {
-			return lcm.New(v1alpha2.ServiceReady).WithStatus(corev1.ConditionFalse).WithMessage(condition.Message).WithReason(condition.Reason)
+		if condition.Type == status.ConditionInProgress {
+			inProgressCondition = &condition
 		}
 	}
-	return harborUnknownStatus(EmptyHarborCRStatusError, "The ready condition of harbor.goharbor.io is empty. Please wait for minutes.")
+	if failedCondition == nil && inProgressCondition == nil {
+		harborUnknownStatus(EmptyHarborCRStatusError, "The ready condition of harbor.goharbor.io is empty. Please wait for minutes.")
+	}
+
+	if failedCondition != nil && failedCondition.Status == corev1.ConditionTrue {
+		return harborNotReadyStatus(failedCondition.Reason, failedCondition.Message)
+	}
+
+	if inProgressCondition != nil && inProgressCondition.Status == corev1.ConditionTrue {
+		return harborNotReadyStatus(inProgressCondition.Reason, inProgressCondition.Message)
+	}
+
+	return harborReadyStatus
+
 }
