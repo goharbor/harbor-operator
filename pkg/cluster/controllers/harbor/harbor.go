@@ -3,6 +3,8 @@ package harbor
 import (
 	"context"
 	"fmt"
+	corev1 "k8s.io/api/core/v1"
+	"sigs.k8s.io/kustomize/kstatus/status"
 	"sync"
 
 	"github.com/go-logr/logr"
@@ -46,7 +48,7 @@ func (harbor *Controller) Apply(ctx context.Context, harborcluster *v1alpha2.Har
 
 			harbor.Log.Info("harbor service is created", "name", nsdName)
 
-			return harborReadyStatus, nil
+			return harborClusterCRStatus(harborCR), nil
 		}
 
 		// We don't know why none 404 error is returned, return unknown status
@@ -67,9 +69,7 @@ func (harbor *Controller) Apply(ctx context.Context, harborcluster *v1alpha2.Har
 		}
 	}
 
-	harbor.Log.Info("harbor service is ready", "name", nsdName, "updated", !same)
-
-	return harborReadyStatus, nil
+	return harborClusterCRStatus(harborCR), nil
 }
 
 func (harbor *Controller) Delete(ctx context.Context, harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
@@ -192,4 +192,16 @@ func (harbor *Controller) getProperty(component v1alpha2.Component, name string)
 	}
 
 	return nil
+}
+
+func harborClusterCRStatus(harbor *v1alpha2.Harbor) *lcm.CRStatus {
+	for _, condition := range harbor.Status.Conditions {
+		if condition.Type == status.ConditionFailed && condition.Status == corev1.ConditionTrue {
+			return lcm.New(v1alpha2.ServiceReady).WithStatus(corev1.ConditionFalse).WithMessage(condition.Message).WithReason(condition.Reason)
+		}
+		if condition.Type == status.ConditionInProgress && condition.Status == corev1.ConditionTrue {
+			return lcm.New(v1alpha2.ServiceReady).WithStatus(corev1.ConditionFalse).WithMessage(condition.Message).WithReason(condition.Reason)
+		}
+	}
+	return harborUnknownStatus(EmptyHarborCRStatusError, "The ready condition of harbor.goharbor.io is empty. Please wait for minutes.")
 }
