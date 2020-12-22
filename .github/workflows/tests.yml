@@ -137,7 +137,7 @@ jobs:
       run: |
         export GITHUB_TOKEN=xxx
         set -ex
-        kubectl apply -f manifests/samples/full_stack_fs.yaml
+        kubectl apply -f manifests/samples/full_stack_other_fs.yaml
         for i in $(seq 1 6);do
           sleep 30
           echo $i
@@ -166,7 +166,7 @@ jobs:
         sudo kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 443:443 80:80 --address=0.0.0.0 &
         sleep 10
         echo 127.0.0.1 core.harbor.domain | sudo tee -a /etc/hosts
-        curl https://core.harbor.domain/api/v2.0/systeminfo -i -k
+        curl https://core.harbor.domain/api/v2.0/systeminfo -i -k -f
         mkdir -p ~/.docker/tls/core.harbor.domain
         kubectl -n cluster-sample-ns get secret sample-public-certificate -o jsonpath='{.data.ca\.crt}' \
           | base64 --decode \

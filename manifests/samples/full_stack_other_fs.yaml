@@ -65,6 +65,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: sample-harbor-trivy-reports
+  namespace: cluster-sample-ns
 spec:
   accessModes:
     - ReadWriteOnce
@@ -77,6 +78,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: sample-harbor-trivy-cache
+  namespace: cluster-sample-ns
 spec:
   accessModes:
     - ReadWriteOnce
@@ -89,6 +91,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: sample-harbor-chart
+  namespace: cluster-sample-ns
 spec:
   accessModes:
     - ReadWriteOnce
