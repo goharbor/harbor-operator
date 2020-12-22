@@ -3,10 +3,11 @@ package harbor
 import (
 	"context"
 	"fmt"
+	"sync"
+
 	"github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/kustomize/kstatus/status"
-	"sync"
 
 	"github.com/go-logr/logr"
 	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
@@ -221,5 +222,4 @@ func harborClusterCRStatus(harbor *v1alpha2.Harbor) *lcm.CRStatus {
 	}
 
 	return harborReadyStatus
-
 }
