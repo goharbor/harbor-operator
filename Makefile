@@ -60,7 +60,7 @@ test: go-test go-dependencies-test
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 .PHONY: run
-run: go-generate vendor certmanager $(TMPDIR)k8s-webhook-server/serving-certs/tls.crt
+run: go-generate certmanager $(TMPDIR)k8s-webhook-server/serving-certs/tls.crt
 	go run *.go
 
 # Run linters against all files
@@ -89,7 +89,6 @@ dev-tools: \
 .PHONY: go-dependencies-test
 go-dependencies-test: fmt
 	go mod tidy
-	$(MAKE) vendor
 	$(MAKE) diff
 
 .PHONY: generated-diff-test
@@ -128,9 +127,8 @@ helm-install: helm helm-generate
 
 # Build manager binary
 .PHONY: manager
-manager: go-generate vendor
+manager: go-generate
 	go build \
-		-mod vendor \
 		-o bin/manager \
 		-ldflags "-X $$(go list -m).OperatorVersion=$(RELEASE_VERSION)" \
 		*.go
@@ -161,9 +159,6 @@ config/crd/bases: controller-gen $(GO4CONTROLLERGEN_SOURCES)
 .PHONY: generate
 generate: go-generate helm-generate
 
-vendor: go.mod go.sum
-	go mod vendor
-
 go.mod: $(GONOGENERATED_SOURCES)
 	go mod tidy
 
@@ -188,7 +183,6 @@ dist/harbor-operator_linux_amd64/manager:
     GOOS="linux" \
     GOARCH="amd64" \
 	go build \
-		-mod vendor \
 		-o dist/harbor-operator_linux_amd64/manager \
 		-ldflags "-X $$(go list -m).OperatorVersion=$(RELEASE_VERSION)" \
 		*.go
@@ -217,7 +211,6 @@ vet: go-generate
 md-lint: markdownlint $(CHART_HARBOR_OPERATOR)/README.md
 	$(MARKDOWNLINT) \
 		-c "$(CURDIR)/.markdownlint.json" \
-		--ignore "$(CURDIR)/vendor" \
 		--ignore "$(CURDIR)/node_modules" \
 		"$(CURDIR)"
 
@@ -496,10 +489,8 @@ $(CONTROLLER_GEN):
 	$(MAKE) $(BIN)
 	# https://github.com/kubernetes-sigs/controller-tools/tree/master/cmd/controller-gen
 	go get 'sigs.k8s.io/controller-tools/cmd/controller-gen@v$(CONTROLLER_GEN_VERSION)'
-	go mod vendor
 	go build -mod=readonly -o $(CONTROLLER_GEN) sigs.k8s.io/controller-tools/cmd/controller-gen
 	go mod tidy
-	go mod vendor
 
 # find or download markdownlint
 # download markdownlint if necessary
@@ -619,10 +610,8 @@ $(STRINGER):
 	$(MAKE) $(BIN)
 	# https://pkg.go.dev/golang.org/x/tools/cmd/stringer
 	go get 'golang.org/x/tools/cmd/stringer@$(STRINGER_VERSION)'
-	go mod vendor
 	go build -mod=readonly -o $(STRINGER) golang.org/x/tools/cmd/stringer
 	go mod tidy
-	go mod vendor
 
 # find or download hadolint
 # download hadolint if necessary
