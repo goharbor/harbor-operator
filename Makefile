@@ -38,9 +38,9 @@ define gosourcetemplate
 {{- end -}}
 endef
 
-GO_SOURCES                  := $(sort $(subst $(CURDIR)/,,$(shell go list -f '$(gosourcetemplate)' ./...)))
+GO_SOURCES                  := $(sort $(subst $(CURDIR)/,,$(shell go list -mod=readonly -f '$(gosourcetemplate)' ./...)))
 GONOGENERATED_SOURCES       := $(sort $(shell grep -L 'DO NOT EDIT.' -- $(GO_SOURCES)))
-GOWITHTESTS_SOURCES         := $(sort $(subst $(CURDIR)/,,$(shell go list -test -f '$(gosourcetemplate)' ./...)))
+GOWITHTESTS_SOURCES         := $(sort $(subst $(CURDIR)/,,$(shell go list -mod=readonly -test -f '$(gosourcetemplate)' ./...)))
 GO4CONTROLLERGEN_SOURCES    := $(sort $(shell grep -l '// +' -- $(GONOGENERATED_SOURCES)))
 
 .SUFFIXES:       # Delete the default suffixes
@@ -99,13 +99,12 @@ generated-diff-test: fmt generate
 .PHONY: diff
 diff:
 	git status
-	git diff
-	test -z "$$(git diff-index --diff-filter=d --name-only HEAD)"
+	git diff --stat --diff-filter=d --exit-code HEAD
 
 .PHONY: go-test
 go-test: go-generate
 ifeq (, $(USE_EXISTING_CLUSTER))
-	echo "Warning: USE_EXISTING_CLUSTER variable is not defined" >&2
+	$(warning USE_EXISTING_CLUSTER variable is not defined)
 endif
 	go test -vet=off ./... \
 		-coverprofile cover.out
@@ -119,9 +118,9 @@ CHART_HARBOR_CLASS ?=
 
 helm-install: helm helm-generate
 	$(HELM) upgrade --install $(CHART_RELEASE_NAME) $(CHARTS_DIRECTORY)/harbor-operator-$(RELEASE_VERSION).tgz \
-		--set-string image.repository="$(shell echo $(IMG) | sed 's/:.*//')" \
-		--set-string image.tag="$(shell echo $(IMG) | sed 's/.*://')" \
-		--set-string harborClass='${CHART_HARBOR_CLASS}'
+		--set-string image.repository="$$(echo $(IMG) | sed 's/:.*//')" \
+		--set-string image.tag="$$(echo $(IMG) | sed 's/.*://')" \
+		--set-string harborClass='$(CHART_HARBOR_CLASS)'
 
 #####################
 #     Packaging     #
@@ -464,7 +463,7 @@ $(TMPDIR)k8s-webhook-server/serving-certs/tls.crt:
 		-days 365 \
 		-nodes \
 		-x509 \
-		-subj "/C=FR/O=Dev/OU=$(shell whoami)/CN=example.com" \
+		-subj "/C=FR/O=Dev/OU=$$(whoami)/CN=example.com" \
 		-keyout "$(TMPDIR)k8s-webhook-server/serving-certs/tls.key" \
 		-out "$(TMPDIR)k8s-webhook-server/serving-certs/tls.crt"
 
@@ -479,7 +478,7 @@ $(BIN):
 
 .PHONY:clean
 clean:
-	rm -rf $(BIN) node_modules
+	rm -rf $(BIN) node_modules dist
 
 # find or download controller-gen
 # download controller-gen if necessary
@@ -553,9 +552,9 @@ kubebuilder:
 $(KUBEBUILDER):
 	$(MAKE) $(BIN)
 	# https://kubebuilder.io/quick-start.html#installation
-	curl -sSL "https://go.kubebuilder.io/dl/$(KUBEBUIDER_VERSION)/$(shell go env GOOS)/$(shell go env GOARCH)" \
+	curl -sSL "https://go.kubebuilder.io/dl/$(KUBEBUIDER_VERSION)/$$(go env GOOS)/$$(go env GOARCH)" \
 		| tar -xz -C /tmp
-	mv /tmp/kubebuilder_$(KUBEBUIDER_VERSION)_$(shell go env GOOS)_$(shell go env GOARCH)/bin/kubebuilder $(KUBEBUILDER)
+	mv /tmp/kubebuilder_$(KUBEBUIDER_VERSION)_$$(go env GOOS)_$$(go env GOARCH)/bin/kubebuilder $(KUBEBUILDER)
 
 # find or download kustomize
 # download kustomize if necessary
@@ -572,15 +571,14 @@ kustomize:
 $(KUSTOMIZE):
 	$(MAKE) $(BIN)
 	# https://kubectl.docs.kubernetes.io/installation/kustomize/binaries/
-	curl -sSL 'https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v$(KUSTOMIZE_VERSION)/kustomize_v$(KUSTOMIZE_VERSION)_$(shell go env GOOS)_$(shell go env GOARCH).tar.gz' \
+	curl -sSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v$(KUSTOMIZE_VERSION)/kustomize_v$(KUSTOMIZE_VERSION)_$$(go env GOOS)_$$(go env GOARCH).tar.gz" \
 		| tar -xzC '$(BIN)' kustomize
 
 # find helm or raise an error
 .PHONY: helm
 helm:
 ifeq (, $(shell which helm))
-	echo "Helm not found. Please install it: https://helm.sh/docs/intro/install/#from-script" >&2 \
-		&& false
+	$(error Helm not found. Please install it: https://helm.sh/docs/intro/install/#from-script)
 HELM=helm-not-found
 else
 HELM=$(shell which helm)
@@ -611,7 +609,7 @@ STRINGER := $(BIN)/stringer
 
 .PHONY: stringer
 stringer:
-	# stringer command has no `version` command
+	$(warning stringer command has no `version` command)
 	#@$(STRINGER) version 2>&1 \
 	#	| grep '$(STRINGER_VERSION)' > /dev/null \
 	#|| rm -f $(STRINGER)
@@ -641,7 +639,7 @@ hadolint:
 $(HADOLINT):
 	$(MAKE) $(BIN)
 	# https://github.com/hadolint/hadolint/releases/
-	curl -sL https://github.com/hadolint/hadolint/releases/download/v$(HADOLINT_VERSION)/hadolint-$(shell uname -s)-x86_64 \
+	curl -sL "https://github.com/hadolint/hadolint/releases/download/v$(HADOLINT_VERSION)/hadolint-$$(uname -s)-x86_64" \
 		> $(HADOLINT)
 	chmod u+x $(HADOLINT)
 
@@ -660,5 +658,5 @@ helm-docs:
 $(HELM_DOCS):
 	$(MAKE) $(BIN)
 	# https://github.com/norwoodj/helm-docs/tree/master#installation
-	curl -sL 'https://github.com/norwoodj/helm-docs/releases/download/v$(HELM_DOCS_VERSION)/helm-docs_$(HELM_DOCS_VERSION)_$(shell go env GOOS)_x86_64.tar.gz' \
+	curl -sL "https://github.com/norwoodj/helm-docs/releases/download/v$(HELM_DOCS_VERSION)/helm-docs_$(HELM_DOCS_VERSION)_$$(uname -s)_x86_64.tar.gz" \
 		| tar -xzC '$(BIN)' helm-docs
