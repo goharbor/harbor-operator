@@ -13,7 +13,7 @@ linters:
   - godox
 
 service:
-  golangci-lint-version: 1.22.x
+  golangci-lint-version: 1.33.x
   prepare:
   - make generate
 
