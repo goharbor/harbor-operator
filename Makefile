@@ -69,7 +69,6 @@ lint: \
 	go-lint \
 	helm-lint \
 	docker-lint \
-	make-lint \
 	md-lint
 
 # Install all dev dependencies
@@ -226,9 +225,6 @@ md-lint: markdownlint $(CHART_HARBOR_OPERATOR)/README.md
 docker-lint: hadolint
 	$(HADOLINT) Dockerfile
 
-make-lint: checkmake
-	$(CHECKMAKE) Makefile
-
 helm-lint: helm helm-generate
 	$(HELM) lint $(CHART_HARBOR_OPERATOR)
 
@@ -370,6 +366,7 @@ uninstall: go-generate kustomize
 	kubectl delete -f config/crd/bases
 
 go-generate: controller-gen stringer
+	export PATH="$(BIN):$${PATH}" ; \
 	go generate ./...
 
 # Deploy RBAC in the configured Kubernetes cluster in ~/.kube/config
@@ -475,100 +472,108 @@ $(TMPDIR)k8s-webhook-server/serving-certs/tls.crt:
 #     Dev Tools     #
 #####################
 
-# Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
-ifeq (,$(shell go env GOBIN))
-GOBIN=$(shell go env GOPATH)/bin
-else
-GOBIN=$(shell go env GOBIN)
-endif
+BIN ?= $(CURDIR)/bin
 
-$(GOBIN):
-	mkdir -p "$(GOBIN)"
+$(BIN):
+	mkdir -p "$(BIN)"
 
-# Get the npm install path
-NPMOPTS=#--global
-
-NPMBIN=$(shell npm $(NPMOPTS) bin)
-
-$(NPMBIN):
-	mkdir -p "$(NPMBIN)"
-
-.PHONY: go-binary
-go-binary: $(GOBIN)
-	@{ \
-		set -uex ; \
-		export CONTROLLER_GEN_TMP_DIR="$$(mktemp -d)" ; \
-		cd "$$CONTROLLER_GEN_TMP_DIR" ; \
-		go mod init tmp ; \
-		go get "$${GO_DEPENDENCY}" ; \
-		rm -rf "$${CONTROLLER_GEN_TMP_DIR}" ; \
-	}
+.PHONY:clean
+clean:
+	rm -rf $(BIN) node_modules
 
 # find or download controller-gen
 # download controller-gen if necessary
+CONTROLLER_GEN_VERSION := 0.2.1
+CONTROLLER_GEN := $(BIN)/controller-gen
+
 .PHONY: controller-gen
 controller-gen:
-ifeq (, $(shell which controller-gen))
-	GO_DEPENDENCY='sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.4' $(MAKE) go-binary
-CONTROLLER_GEN=$(GOBIN)/controller-gen
-else
-CONTROLLER_GEN=$(shell which controller-gen)
-endif
+	@$(CONTROLLER_GEN) --version 2>&1 \
+		| grep 'v$(CONTROLLER_GEN_VERSION)' > /dev/null \
+	|| rm -f $(CONTROLLER_GEN)
+	@$(MAKE) $(CONTROLLER_GEN)
+
+$(CONTROLLER_GEN):
+	$(MAKE) $(BIN)
+	# https://github.com/kubernetes-sigs/controller-tools/tree/master/cmd/controller-gen
+	go get 'sigs.k8s.io/controller-tools/cmd/controller-gen@v$(CONTROLLER_GEN_VERSION)'
+	go mod vendor
+	go build -mod=readonly -o $(CONTROLLER_GEN) sigs.k8s.io/controller-tools/cmd/controller-gen
+	go mod tidy
+	go mod vendor
 
 # find or download markdownlint
 # download markdownlint if necessary
+MARKDOWNLINT_VERSION := 0.16.0
+MARKDOWNLINT := $(BIN)/markdownlint
+
 .PHONY: markdownlint
 markdownlint:
-ifeq (, $(shell which markdownlint))
-	$(MAKE) $(NPMBIN)
+	@$(MARKDOWNLINT) version 2>&1 \
+		| grep '$(MARKDOWNLINT_VERSION)' > /dev/null \
+	|| rm -f $(MARKDOWNLINT)
+	@$(MAKE) $(MARKDOWNLINT)
+
+$(MARKDOWNLINT):
+	$(MAKE) $(BIN)
 	# https://github.com/igorshubovych/markdownlint-cli#installation
-	npm install $(NPMOPTS) markdownlint-cli@0.16.0 --no-save
-MARKDOWNLINT=$(NPMBIN)/markdownlint
-else
-MARKDOWNLINT=$(shell which markdownlint)
-endif
+	npm install markdownlint-cli@$(MARKDOWNLINT_VERSION) --no-save
+	ln -s "$$(npm bin)/markdownlint" $(MARKDOWNLINT)
 
 # find or download golangci-lint
 # download golangci-lint if necessary
+GOLANGCI_LINT := $(BIN)/golangci-lint
+GOLANGCI_LINT_VERSION := 1.33.0
+
 .PHONY: golangci-lint
 golangci-lint:
-ifeq (, $(shell which golangci-lint))
-	# https://github.com/golangci/golangci-lint#install
-	GO_DEPENDENCY='github.com/golangci/golangci-lint/cmd/golangci-lint@e2d717b873ff02afab1903f34889cb8b621d7723' $(MAKE) go-binary
-GOLANGCI_LINT=$(GOBIN)/golangci-lint
-else
-GOLANGCI_LINT=$(shell which golangci-lint)
-endif
+	@$(GOLANGCI_LINT) version --format short 2>&1 \
+		| grep '$(GOLANGCI_LINT_VERSION)' > /dev/null \
+	|| rm -f $(GOLANGCI_LINT)
+	@$(MAKE) $(GOLANGCI_LINT)
+
+$(GOLANGCI_LINT):
+	$(MAKE) $(BIN)
+	# https://golangci-lint.run/usage/install/#linux-and-windows
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh \
+		| sh -s -- -b $(BIN) 'v$(GOLANGCI_LINT_VERSION)'
 
 # find or download kubebuilder
 # download kubebuilder if necessary
+KUBEBUIDER_VERSION := 2.0.1
+KUBEBUILDER=$(BIN)/kubebuilder
+
 .PHONY: kubebuilder
 kubebuilder:
-ifeq (, $(shell which kubebuilder))
-	$(MAKE) $(GOBIN)
+	@$(KUBEBUILDER) version 2>&1 \
+		| grep 'KubeBuilderVersion:"$(KUBEBUIDER_VERSION)"' > /dev/null \
+	|| rm -f $(KUBEBUILDER)
+	@$(MAKE) $(KUBEBUILDER)
+
+$(KUBEBUILDER):
+	$(MAKE) $(BIN)
 	# https://kubebuilder.io/quick-start.html#installation
-	curl -sSL "https://go.kubebuilder.io/dl/2.0.1/$(shell go env GOOS)/$(shell go env GOARCH)" \
-		| tar -xz -C /tmp/
-	mv /tmp/kubebuilder_2.0.1_$(shell go env GOOS)_$(shell go env GOARCH)/bin/* $(GOBIN)
-KUBEBUILDER=$(GOBIN)/kubebuilder
-else
-KUBEBUILDER=$(shell which kubebuilder)
-endif
+	curl -sSL "https://go.kubebuilder.io/dl/$(KUBEBUIDER_VERSION)/$(shell go env GOOS)/$(shell go env GOARCH)" \
+		| tar -xz -C /tmp
+	mv /tmp/kubebuilder_$(KUBEBUIDER_VERSION)_$(shell go env GOOS)_$(shell go env GOARCH)/bin/kubebuilder $(KUBEBUILDER)
 
 # find or download kustomize
 # download kustomize if necessary
+KUSTOMIZE_VERSION := 3.8.8
+KUSTOMIZE := $(BIN)/kustomize
+
 .PHONY: kustomize
 kustomize:
-ifeq (, $(shell which kustomize))
-	$(MAKE) $(GOBIN)
-	# https://github.com/kubernetes-sigs/kustomize/blob/master/docs/INSTALL.md
-	curl -s https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh | bash
-	mv ./kustomize $(GOBIN)
-	chmod u+x $(GOBIN)/kustomize
-KUSTOMIZE=$(GOBIN)/kustomize
-else
-KUSTOMIZE=$(shell which kustomize)
-endif
+	@$(KUSTOMIZE) version --short 2>&1 \
+		| grep 'kustomize/v$(KUSTOMIZE_VERSION)' > /dev/null \
+	|| rm -f $(KUSTOMIZE)
+	@$(MAKE) $(KUSTOMIZE)
+
+$(KUSTOMIZE):
+	$(MAKE) $(BIN)
+	# https://kubectl.docs.kubernetes.io/installation/kustomize/binaries/
+	curl -sSL 'https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v$(KUSTOMIZE_VERSION)/kustomize_v$(KUSTOMIZE_VERSION)_$(shell go env GOOS)_$(shell go env GOARCH).tar.gz' \
+		| tar -xzC '$(BIN)' kustomize
 
 # find helm or raise an error
 .PHONY: helm
@@ -582,66 +587,78 @@ HELM=$(shell which helm)
 endif
 
 # find or download goreleaser
+GORELEASER_VERSION := 0.129.0
+GORELEASER := $(BIN)/goreleaser
+
 .PHONY: goreleaser
 goreleaser:
-ifeq (, $(shell which goreleaser))
-	$(MAKE) $(GOBIN)
+	@$(GORELEASER) --version 2>&1 \
+		| grep 'version: $(GORELEASER_VERSION)' > /dev/null \
+	|| rm -f $(GORELEASER)
+	@$(MAKE) $(GORELEASER)
+
+$(GORELEASER):
+	$(MAKE) $(BIN)
+	# https://goreleaser.com/install/
+	export BINDIR='$(BIN)' ; \
 	curl -sfL https://install.goreleaser.com/github.com/goreleaser/goreleaser.sh \
-		| sh -s v0.129.0
-	mv ./bin/goreleaser $(GOBIN)
-GORELEASER=$(GOBIN)/goreleaser
-else
-GORELEASER=$(shell which goreleaser)
-endif
+		| bash -s 'v$(GORELEASER_VERSION)'
 
 # find or download stringer
 # download stringer if necessary
+STRINGER_VERSION := v0.0.0-20201223010750-3fa0e8f87c1a
+STRINGER := $(BIN)/stringer
+
 .PHONY: stringer
 stringer:
-ifeq (, $(shell which stringer))
+	# stringer command has no `version` command
+	#@$(STRINGER) version 2>&1 \
+	#	| grep '$(STRINGER_VERSION)' > /dev/null \
+	#|| rm -f $(STRINGER)
+	@$(MAKE) $(STRINGER)
+
+$(STRINGER):
+	$(MAKE) $(BIN)
 	# https://pkg.go.dev/golang.org/x/tools/cmd/stringer
-	GO_DEPENDENCY='golang.org/x/tools/cmd/stringer@v0.0.0-20200626171337-aa94e735be7f' $(MAKE) go-binary
-STRINGER=$(GOBIN)/stringer
-else
-STRINGER=$(shell which stringer)
-endif
+	go get 'golang.org/x/tools/cmd/stringer@$(STRINGER_VERSION)'
+	go mod vendor
+	go build -mod=readonly -o $(STRINGER) golang.org/x/tools/cmd/stringer
+	go mod tidy
+	go mod vendor
 
 # find or download hadolint
 # download hadolint if necessary
+HADOLINT_VERSION := 1.18.0
+HADOLINT := $(BIN)/hadolint
+
 .PHONY: hadolint
 hadolint:
-ifeq (, $(shell which hadolint))
-	$(MAKE) $(GOBIN)
+	@$(HADOLINT) --version 2>&1 \
+		| grep '$(HADOLINT_VERSION)' > /dev/null \
+	|| rm -f $(HADOLINT)
+	@$(MAKE) $(HADOLINT)
+
+$(HADOLINT):
+	$(MAKE) $(BIN)
 	# https://github.com/hadolint/hadolint/releases/
-	curl -sL https://github.com/hadolint/hadolint/releases/download/v1.18.0/hadolint-$(shell uname -s)-x86_64 \
-		> $(GOBIN)/hadolint
-	chmod u+x $(GOBIN)/hadolint
-HADOLINT=$(GOBIN)/hadolint
-else
-HADOLINT=$(shell which hadolint)
-endif
-
-
-# find or download checkmake
-# download checkmake if necessary
-.PHONY: checkmake
-checkmake:
-ifeq (, $(shell which checkmake))
-	# https://github.com/mrtazz/checkmake#installation
-	GO_DEPENDENCY='github.com/mrtazz/checkmake/cmd/checkmake@0.1.0' $(MAKE) go-binary
-CHECKMAKE=$(GOBIN)/checkmake
-else
-CHECKMAKE=$(shell which checkmake)
-endif
+	curl -sL https://github.com/hadolint/hadolint/releases/download/v$(HADOLINT_VERSION)/hadolint-$(shell uname -s)-x86_64 \
+		> $(HADOLINT)
+	chmod u+x $(HADOLINT)
 
 # find or download helm-docs
 # download helm-docs if necessary
+HELM_DOCS_VERSION := 1.4.0
+HELM_DOCS := $(BIN)/helm-docs
+
 .PHONY: helm-docs
 helm-docs:
-ifeq (, $(shell which helm-docs))
+	@$(HELM_DOCS) --version 2>&1 \
+		| grep '$(HELM_DOCS_VERSION)' > /dev/null \
+	|| rm -f $(HELM_DOCS)
+	@$(MAKE) $(HELM_DOCS)
+
+$(HELM_DOCS):
+	$(MAKE) $(BIN)
 	# https://github.com/norwoodj/helm-docs/tree/master#installation
-	GO_DEPENDENCY='github.com/norwoodj/helm-docs/cmd/helm-docs@v0.15.0' $(MAKE) go-binary
-HELM_DOCS=$(GOBIN)/helm-docs
-else
-HELM_DOCS=$(shell which helm-docs)
-endif
+	curl -sL 'https://github.com/norwoodj/helm-docs/releases/download/v$(HELM_DOCS_VERSION)/helm-docs_$(HELM_DOCS_VERSION)_$(shell go env GOOS)_x86_64.tar.gz' \
+		| tar -xzC '$(BIN)' helm-docs
