@@ -10,9 +10,9 @@ import (
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/registry"
+	"github.com/goharbor/harbor-operator/pkg/config"
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
-	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -92,7 +92,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registryCtl *goharborv1a
 
 	affinityWeight, err := r.ConfigStore.GetItemValueInt(AffinityWeightConfigKey)
 	if err != nil {
-		if _, ok := err.(configstore.ErrItemNotFound); !ok {
+		if !config.IsNotFound(err, AffinityWeightConfigKey) {
 			return nil, errors.Wrap(err, "cannot get affinity weight")
 		}
 

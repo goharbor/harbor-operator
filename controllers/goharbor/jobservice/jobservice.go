@@ -85,7 +85,7 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 func New(ctx context.Context, name string, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
 	configTemplatePath, err := configStore.GetItemValue(ConfigTemplatePathKey)
 	if err != nil {
-		if _, ok := err.(configstore.ErrItemNotFound); !ok {
+		if !config.IsNotFound(err, ConfigTemplatePathKey) {
 			return nil, errors.Wrap(err, "cannot get config template path")
 		}
 

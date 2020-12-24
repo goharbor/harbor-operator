@@ -282,8 +282,9 @@ func (c *Controller) SetErrorConditions(ctx context.Context, data map[string]int
 			break
 		}
 
-		cause, ok := errLoop.(causer)
-		if !ok {
+		var cause causer
+
+		if !errors.As(errLoop, &cause) {
 			break
 		}
 
@@ -307,13 +308,17 @@ func (c *Controller) getStatusResult(rootError, localErr error) (stop bool, cond
 	stop = false
 	resultError = rootError
 
-	if err, ok := localErr.(serrors.Resulter); ok {
-		_, resultError = err.Result()
+	var resultErr serrors.Resulter
+
+	if errors.As(localErr, &resultErr) {
+		_, resultError = resultErr.Result()
 		stop = true
 	}
 
-	if err, ok := localErr.(serrors.Status); ok {
-		conditions = err.Status()
+	var statusErr serrors.Status
+
+	if errors.As(localErr, &statusErr) {
+		conditions = statusErr.Status()
 		stop = true
 	}
 

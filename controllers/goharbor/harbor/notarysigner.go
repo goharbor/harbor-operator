@@ -8,10 +8,10 @@ import (
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers"
+	"github.com/goharbor/harbor-operator/pkg/config"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	v1 "github.com/jetstack/cert-manager/pkg/apis/meta/v1"
-	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
 	"github.com/sethvargo/go-password/password"
 	corev1 "k8s.io/api/core/v1"
@@ -58,7 +58,7 @@ func (r *Reconciler) GetNotarySignerCertificateAuthority(ctx context.Context, ha
 
 	durationValue, err := r.ConfigStore.GetItemValue(NotarySignerCertificateAuthorityDurationConfigKey)
 	if err != nil {
-		if _, ok := err.(configstore.ErrItemNotFound); !ok {
+		if !config.IsNotFound(err, NotarySignerCertificateAuthorityDurationConfigKey) {
 			return nil, err
 		}
 	} else {
@@ -239,7 +239,7 @@ const (
 func (r *Reconciler) getNotarySignerCertificateDuration() (time.Duration, error) {
 	durationValue, err := r.ConfigStore.GetItemValue(NotarySignerCertificateDurationConfigKey)
 	if err != nil {
-		if _, ok := err.(configstore.ErrItemNotFound); ok {
+		if config.IsNotFound(err, NotarySignerCertificateDurationConfigKey) {
 			return NotarySignerCertificateDurationDefaultConfig, nil
 		}
 
@@ -257,7 +257,7 @@ const (
 func (r *Reconciler) getNotarySignerCertificateAlgorithm() (certv1.KeyAlgorithm, error) {
 	algorithm, err := r.ConfigStore.GetItemValue(NotarySignerCertificateAlgorithmConfigKey)
 	if err != nil {
-		if _, ok := err.(configstore.ErrItemNotFound); ok {
+		if config.IsNotFound(err, NotarySignerCertificateAlgorithmConfigKey) {
 			return NotarySignerCertificateAlgorithmDefaultConfig, nil
 		}
 
