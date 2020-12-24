@@ -24,6 +24,12 @@ export CHARTMUSEUM_TEMPLATE_PATH
 export NOTARYSERVER_TEMPLATE_PATH
 export NOTARYSIGNER_TEMPLATE_PATH
 
+ifeq (,$(shell which kubens))
+NAMESPACE ?= $$(kubectl config get-contexts "$$(kubectl config current-context)" --no-headers | awk -F " " '{ if ($$5=="") print "default" ; else print $$5; }')
+else
+NAMESPACE ?= $$(kubens -c)
+endif
+
 CHARTS_DIRECTORY      := charts
 CHART_HARBOR_OPERATOR := $(CHARTS_DIRECTORY)/harbor-operator
 
@@ -116,7 +122,8 @@ CHART_RELEASE_NAME ?= harbor-operator
 CHART_HARBOR_CLASS ?=
 
 helm-install: helm helm-generate
-	$(HELM) upgrade --install $(CHART_RELEASE_NAME) $(CHARTS_DIRECTORY)/harbor-operator-$(RELEASE_VERSION).tgz \
+	$(MAKE) kube-namespace
+	$(HELM) upgrade --namespace "$(NAMESPACE)" --install $(CHART_RELEASE_NAME) $(CHARTS_DIRECTORY)/harbor-operator-$(RELEASE_VERSION).tgz \
 		--set-string image.repository="$$(echo $(IMG) | sed 's/:.*//')" \
 		--set-string image.tag="$$(echo $(IMG) | sed 's/.*://')" \
 		--set-string harborClass='$(CHART_HARBOR_CLASS)'
@@ -416,7 +423,8 @@ postgresql: helm sample-database
 
 .PHONY: kube-namespace
 kube-namespace:
-	kubectl get namespace $(NAMESPACE) 2>&1 > /dev/null || kubectl create namespace $(NAMESPACE)
+	kubectl get namespace "$(NAMESPACE)" 2>&1 > /dev/null \
+	|| kubectl create namespace "$(NAMESPACE)"
 
 INGRESS_NAMESPACE := nginx-ingress
 

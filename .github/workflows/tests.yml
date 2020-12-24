@@ -65,13 +65,14 @@ jobs:
     name: K8S v${{ matrix.k8sVersion }} (CM v${{ matrix.certManager }})
     env:
       USE_EXISTING_CLUSTER: true
+      operatorNamespace: goharbor-operator-test
+      dockerImage: harbor-operator:dev_test
 
     strategy:
       fail-fast: false
       matrix:
         # https://github.com/jetstack/cert-manager/tags
         certManager:
-        - "0.15.2"
         - "0.16.1"
         - "1.0.3"
 
@@ -80,6 +81,9 @@ jobs:
         - "1.17"
         - "1.18"
         - "1.19"
+
+        ingress:
+        - "0.35.0"
 
     steps:
     - uses: actions/setup-go@v2
@@ -100,15 +104,13 @@ jobs:
 
     - name: Install CertManager v${{ matrix.certManager }}
       run: |
-        # Try the recet way to install crd or fallback to the old one
-        version='${{ matrix.certManager }}'
-        kubectl apply -f "https://github.com/jetstack/cert-manager/releases/download/v${version}/cert-manager.yaml"
+        kubectl apply -f "https://github.com/jetstack/cert-manager/releases/download/v${{ matrix.certManager }}/cert-manager.yaml"
         sleep 5
         time kubectl -n cert-manager wait --for=condition=Available deployment --all --timeout 300s
 
     - name: Install Ingress
       run: |
-        kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.35.0/deploy/static/provider/baremetal/deploy.yaml
+        kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v${{ matrix.ingress }}/deploy/static/provider/baremetal/deploy.yaml
         sleep 5
         time kubectl -n ingress-nginx wait --for=condition=Available deployment --all --timeout 300s
 
@@ -119,23 +121,14 @@ jobs:
 
     - name: build harbor-operator
       run: |
-        make docker-build IMG=harbor-operator:dev_test
-        kind load docker-image harbor-operator:dev_test --name harbor
+        make docker-build IMG=${dockerImage}
+        kind load docker-image ${dockerImage} --name harbor
 
     - name: install harbor-operator
       run: |
         set -ex
-        kubectl create ns harbor-operator-ns
-        cd config/default
-        kustomize edit set image goharbor/harbor-operator=harbor-operator:dev_test
-        kustomize build | kubectl apply -f -
-
-        # make helm-install IMG=harbor-operator:dev_test
-
-        if ! time kubectl -n harbor-operator-ns wait --for=condition=Available deployment --all --timeout 300s; then
-          kubectl get all -n harbor-operator-ns
-          exit 1
-        fi
+        make helm-install NAMESPACE="${operatorNamespace}" IMG=${dockerImage}
+        kubectl -n "${operatorNamespace}" wait --for=condition=Available deployment --all --timeout 300s
 
     - name: install harbor
       run: |
@@ -183,6 +176,12 @@ jobs:
         docker push core.harbor.domain/library/busybox:test
         docker pull core.harbor.domain/library/busybox:test
 
+    - name: Get logs for debug
+      if: ${{ failure() }}
+      run: |
+        set -x
+        kubectl get all -n "${operatorNamespace}" -o wide
+        kubectl logs -n "${operatorNamespace}" -l 'app.kubernetes.io/name=harbor-operator' --all-containers --tail=-1
 
   # Kubernetes
   crd-kubernetes-resources:
