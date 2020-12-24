@@ -140,7 +140,7 @@ func generateCertificate() map[string][]byte {
 	}
 }
 
-// setupPostgresql deploy a servicea deployment and a secret to run a postgresql instance
+// setupPostgresql deploy a servicea deployment and a secret to run a postgresql instance.
 // Based on https://hub.docker.com/_/postgres
 func setupPostgresql(ctx context.Context, ns string) harbormetav1.PostgresConnectionWithParameters {
 	pgName := newName("pg")

@@ -75,12 +75,14 @@ func (c *controller) WithManager(ctx context.Context, mgr manager.Manager) error
 }
 
 func (c *controller) IsEnabled(ctx context.Context) (bool, error) {
-	disabled, err := configstore.GetItemValueBool(fmt.Sprintf("%s-%s", c.Name, ControllerDisabledSuffixConfigKey))
+	configKey := fmt.Sprintf("%s-%s", c.Name, ControllerDisabledSuffixConfigKey)
+
+	disabled, err := configstore.GetItemValueBool(configKey)
 	if err == nil {
 		return !disabled, nil
 	}
 
-	if _, ok := err.(configstore.ErrItemNotFound); ok {
+	if config.IsNotFound(err, configKey) {
 		return true, nil
 	}
 

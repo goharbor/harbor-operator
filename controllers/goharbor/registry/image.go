@@ -3,13 +3,13 @@ package registry
 import (
 	"context"
 
-	"github.com/ovh/configstore"
+	"github.com/goharbor/harbor-operator/pkg/config"
 )
 
 func (r *Reconciler) GetImage(ctx context.Context) (string, error) {
 	image, err := r.ConfigStore.GetItemValue(ConfigImageKey)
 	if err != nil {
-		if _, ok := err.(configstore.ErrItemNotFound); !ok {
+		if !config.IsNotFound(err, ConfigImageKey) {
 			return "", err
 		}
 

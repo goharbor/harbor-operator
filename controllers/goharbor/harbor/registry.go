@@ -7,9 +7,9 @@ import (
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers"
+	"github.com/goharbor/harbor-operator/pkg/config"
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	"github.com/goharbor/harbor-operator/pkg/graph"
-	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
 	"github.com/sethvargo/go-password/password"
 	"golang.org/x/crypto/bcrypt"
@@ -134,7 +134,7 @@ func (r *Reconciler) GetRegistryAuthenticationSecret(ctx context.Context, harbor
 
 	cost, err := r.ConfigStore.GetItemValueInt(ConfigRegistryEncryptionCostKey)
 	if err != nil {
-		if _, ok := err.(configstore.ErrItemNotFound); !ok {
+		if !config.IsNotFound(err, ConfigRegistryEncryptionCostKey) {
 			return nil, errors.Wrap(err, "cannot get encryption cost")
 		}
 

@@ -1,6 +1,7 @@
 package harbor
 
 import (
+	"github.com/goharbor/harbor-operator/pkg/config"
 	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
 )
@@ -33,7 +34,7 @@ func (r *Reconciler) GetDefaultNotaryMigrationSource() (*GithubSource, error) {
 		}).
 		GetFirstItem()
 	if err != nil {
-		if _, ok := err.(configstore.ErrItemNotFound); ok {
+		if config.IsNotFound(err, NotaryMigrationGithubSourceConfigKey) {
 			return &defaultSource, nil
 		}
 

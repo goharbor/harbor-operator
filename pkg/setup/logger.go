@@ -3,6 +3,7 @@ package setup
 import (
 	"context"
 
+	"github.com/goharbor/harbor-operator/pkg/config"
 	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -29,7 +30,7 @@ func Logger(ctx context.Context, name, version string) error {
 
 	development, err := store.GetItemValueBool(DevModeConfigKey)
 	if err != nil {
-		if _, ok := err.(configstore.ErrItemNotFound); !ok {
+		if !config.IsNotFound(err, DevModeConfigKey) {
 			return errors.Wrap(err, "development mode")
 		}
 
@@ -43,7 +44,7 @@ func Logger(ctx context.Context, name, version string) error {
 
 	levelValue, err := store.GetItemValueInt(LogLevelConfigKey)
 	if err != nil {
-		if _, ok := err.(configstore.ErrItemNotFound); !ok {
+		if !config.IsNotFound(err, LogLevelConfigKey) {
 			return errors.Wrap(err, "level")
 		}
 	} else {
