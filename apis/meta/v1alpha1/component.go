@@ -62,6 +62,10 @@ type ComponentSpec struct {
 	ServiceAccountName string `json:"serviceAccountName,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// Image name for the component.
+	Image string `json:"image,omitempty"`
+
+	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Enum={"Always","Never","IfNotPresent"}
 	// Image pull policy.
 	// More info: https://kubernetes.io/docs/concepts/containers/images#updating-images

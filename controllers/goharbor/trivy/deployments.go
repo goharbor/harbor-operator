@@ -10,6 +10,7 @@ import (
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/graph"
+	"github.com/goharbor/harbor-operator/pkg/image"
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -61,7 +62,12 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.
 	name := r.NormalizeName(ctx, trivy.GetName())
 	namespace := trivy.GetNamespace()
 
-	image, err := r.GetImage(ctx)
+	getImageOptions := []image.Option{
+		image.WithConfigstore(r.ConfigStore),
+		image.WithImageFromSpec(trivy.Spec.Image),
+	}
+
+	image, err := image.GetImage(ctx, harbormetav1.TrivyComponent.String(), getImageOptions...)
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot get image for deploy: %s", name)
 	}

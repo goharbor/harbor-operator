@@ -106,6 +106,10 @@ func NewHarborController(ctx context.Context, options ...k8s.Option) *Controller
 func (harbor *Controller) getHarborCR(harborcluster *v1alpha2.HarborCluster) *v1alpha2.Harbor {
 	namespacedName := harbor.getHarborCRNamespacedName(harborcluster)
 
+	var spec v1alpha2.HarborSpec
+
+	harborcluster.Spec.HarborSpec.DeepCopyInto(&spec)
+
 	harborCR := &v1alpha2.Harbor{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      namespacedName.Name,
@@ -117,7 +121,7 @@ func (harbor *Controller) getHarborCR(harborcluster *v1alpha2.HarborCluster) *v1
 				*metav1.NewControllerRef(harborcluster, v1alpha2.HarborClusterGVK),
 			},
 		},
-		Spec: harborcluster.Spec.HarborSpec,
+		Spec: spec,
 	}
 
 	// Use incluster spec in first priority.

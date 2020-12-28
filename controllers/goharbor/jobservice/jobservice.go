@@ -25,8 +25,6 @@ const (
 	ConfigTemplatePathKey     = "template-path"
 	DefaultConfigTemplatePath = "/etc/harbor-operator/jobservice-config.yaml.tmpl"
 	ConfigTemplateKey         = "template-content"
-	ConfigImageKey            = "docker-image"
-	DefaultImage              = config.DefaultRegistry + "goharbor/harbor-jobservice:" + config.DefaultHarborVersion
 )
 
 // Reconciler reconciles a JobService object.
