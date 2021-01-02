@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2020, MinIO, Inc.
+ *
+ * This code is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License, version 3,
+ * as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License, version 3,
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>
+ *
+ */
+
 package v1
 
 import (
@@ -6,7 +23,15 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// Tenant is a specification for a MinIO resource.
+// +genclient
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +k8s:defaulter-gen=true
+// +kubebuilder:subresource:status
+// +kubebuilder:resource:scope=Namespaced,shortName=tenant,singular=tenant
+// +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.currentState"
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
+
+// Tenant is a specification for a MinIO resource
 type Tenant struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -18,30 +43,32 @@ type Tenant struct {
 	Status TenantStatus `json:"status"`
 }
 
+// TenantScheduler is the spec for a Tenant scheduler
 type TenantScheduler struct {
 	// SchedulerName defines the name of scheduler to be used to schedule Tenant pods
 	Name string `json:"name"`
 }
 
-// TenantSpec is the spec for a Tenant resource.
+// S3Features list of S3 features to enable/disable.
+// Currently only supports BucketDNS
+type S3Features struct {
+	// BucketDNS if 'true' means Buckets can be accessed using `<bucket>.minio.default.svc.cluster.local`
+	BucketDNS bool `json:"bucketDNS"`
+}
+
+// TenantSpec is the spec for a Tenant resource
 type TenantSpec struct {
 	// Definition for Cluster in given MinIO cluster
 	Zones []Zone `json:"zones"`
 	// Image defines the Tenant Docker image.
 	// +optional
 	Image string `json:"image,omitempty"`
-	// ServiceName defines name of the Service that will be created for this instance, if none is specified,
-	// it will default to the instance name
-	// +optional
-	ServiceName string `json:"serviceName,omitempty"`
 	// ImagePullSecret defines the secret to be used for pull image from a private Docker image.
 	// +optional
 	ImagePullSecret corev1.LocalObjectReference `json:"imagePullSecret,omitempty"`
 	// Pod Management Policy for pod created by StatefulSet
 	// +optional
 	PodManagementPolicy appsv1.PodManagementPolicyType `json:"podManagementPolicy,omitempty"`
-	// Metadata defines the object metadata passed to each pod that is a part of this Tenant
-	Metadata *metav1.ObjectMeta `json:"metadata,omitempty"`
 	// If provided, use this secret as the credentials for Tenant resource
 	// Otherwise MinIO server creates dynamic credentials printed on MinIO server startup banner
 	// +optional
@@ -49,10 +76,10 @@ type TenantSpec struct {
 	// If provided, use these environment variables for Tenant resource
 	// +optional
 	Env []corev1.EnvVar `json:"env,omitempty"`
-	// ExternalCertSecret allows a user to specify custom CA certificate, and private key. This is
-	// used for enabling TLS support on MinIO Pods.
+	// ExternalCertSecret allows a user to specify one or more custom TLS certificates, and private keys. This is
+	// used for enabling TLS with SNI support on MinIO Pods.
 	// +optional
-	ExternalCertSecret *LocalCertificateReference `json:"externalCertSecret,omitempty"`
+	ExternalCertSecret []*LocalCertificateReference `json:"externalCertSecret,omitempty"`
 	// ExternalClientCertSecret allows a user to specify custom CA client certificate, and private key. This is
 	// used for adding client certificates on MinIO Pods --> used for KES authentication.
 	// +optional
@@ -63,13 +90,13 @@ type TenantSpec struct {
 	// Subpath inside mount path. This is the directory where MinIO stores data. Default to "" (empty)
 	// +optional
 	Subpath string `json:"subPath,omitempty"`
-	// Liveness Probe for container liveness. Container will be restarted if the probe fails.
-	// +optional
-	Liveness *Liveness `json:"liveness,omitempty"`
 	// RequestAutoCert allows user to enable Kubernetes based TLS cert generation and signing as explained here:
 	// https://kubernetes.io/docs/tasks/tls/managing-tls-in-a-cluster/
 	// +optional
-	RequestAutoCert bool `json:"requestAutoCert,omitempty"`
+	RequestAutoCert *bool `json:"requestAutoCert,omitempty"`
+	// S3 related features can be disabled or enabled such as `bucketDNS` etc.
+	S3 *S3Features `json:"s3,omitempty"`
+	// +optional
 	// CertConfig allows users to set entries like CommonName, Organization, etc for the certificate
 	// +optional
 	CertConfig *CertificateConfig `json:"certConfig,omitempty"`
@@ -97,7 +124,26 @@ type TenantSpec struct {
 	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy,omitempty"`
 }
 
-// Zone defines the spec for a MinIO Zone.
+// TenantStatus is the status for a Tenant resource
+type TenantStatus struct {
+	CurrentState      string `json:"currentState"`
+	AvailableReplicas int32  `json:"availableReplicas"`
+}
+
+// CertificateConfig is a specification for certificate contents
+type CertificateConfig struct {
+	CommonName       string   `json:"commonName,omitempty"`
+	OrganizationName []string `json:"organizationName,omitempty"`
+	DNSNames         []string `json:"dnsNames,omitempty"`
+}
+
+// LocalCertificateReference defines the spec for a local certificate
+type LocalCertificateReference struct {
+	Name string `json:"name"`
+	Type string `json:"type,omitempty"`
+}
+
+// Zone defines the spec for a MinIO Zone
 type Zone struct {
 	// Name of the zone
 	// +optional
@@ -124,27 +170,7 @@ type Zone struct {
 	Tolerations []corev1.Toleration `json:"tolerations,omitempty"`
 }
 
-// LocalCertificateReference defines the spec for a local certificate.
-type LocalCertificateReference struct {
-	Name string `json:"name"`
-	Type string `json:"type,omitempty"`
-}
-
-// Liveness specifies the spec for liveness probe.
-type Liveness struct {
-	InitialDelaySeconds int32 `json:"initialDelaySeconds"`
-	PeriodSeconds       int32 `json:"periodSeconds"`
-	TimeoutSeconds      int32 `json:"timeoutSeconds"`
-}
-
-// CertificateConfig is a specification for certificate contents.
-type CertificateConfig struct {
-	CommonName       string   `json:"commonName,omitempty"`
-	OrganizationName []string `json:"organizationName,omitempty"`
-	DNSNames         []string `json:"dnsNames,omitempty"`
-}
-
-// ConsoleConfiguration defines the specifications for Console Deployment.
+// ConsoleConfiguration defines the specifications for Console Deployment
 type ConsoleConfiguration struct {
 	// Replicas defines number of pods for KES StatefulSet.
 	// +optional
@@ -159,7 +185,10 @@ type ConsoleConfiguration struct {
 	// This secret provides all environment variables for KES
 	// This is a mandatory field
 	ConsoleSecret *corev1.LocalObjectReference `json:"consoleSecret"`
-	Metadata      *metav1.ObjectMeta           `json:"metadata,omitempty"`
+	// ServiceAccountName is the name of the ServiceAccount to use to run pods of all Console
+	// Pods created as a part of this Tenant.
+	// +optional
+	ServiceAccountName string `json:"serviceAccountName,omitempty"`
 	// If provided, use these environment variables for Console resource
 	// +optional
 	Env []corev1.EnvVar `json:"env,omitempty"`
@@ -170,9 +199,23 @@ type ConsoleConfiguration struct {
 	// used for enabling TLS support on Console Pods.
 	// +optional
 	ExternalCertSecret *LocalCertificateReference `json:"externalCertSecret,omitempty"`
+	// If provided, use these annotations for Console Object Meta annotations
+	// +optional
+	Annotations map[string]string `json:"annotations,omitempty"`
+	// If provided, use these labels for Console Object Meta labels
+	// +optional
+	Labels map[string]string `json:"labels,omitempty"`
+	// If provided, use these nodeSelector for Console Object Meta nodeSelector
+	// +optional
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 }
 
-// KESConfig defines the specifications for KES StatefulSet.
+// EqualImage returns true if config image and current input image are same
+func (c ConsoleConfiguration) EqualImage(currentImage string) bool {
+	return c.Image == currentImage
+}
+
+// KESConfig defines the specifications for KES StatefulSet
 type KESConfig struct {
 	// Replicas defines number of pods for KES StatefulSet.
 	// +optional
@@ -184,10 +227,13 @@ type KESConfig struct {
 	// This is applied to KES pods only.
 	// Refer Kubernetes documentation for details https://kubernetes.io/docs/concepts/containers/images#updating-images
 	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy,omitempty"`
+	// ServiceAccountName is the name of the ServiceAccount to use to run pods of all KES
+	// Pods created as a part of this Tenant.
+	// +optional
+	ServiceAccountName string `json:"serviceAccountName,omitempty"`
 	// This kesSecret serves as the configuration for KES
 	// This is a mandatory field
 	Configuration *corev1.LocalObjectReference `json:"kesSecret"`
-	Metadata      *metav1.ObjectMeta           `json:"metadata,omitempty"`
 	// ExternalCertSecret allows a user to specify custom CA certificate, and private key for group replication SSL.
 	// +optional
 	ExternalCertSecret *LocalCertificateReference `json:"externalCertSecret,omitempty"`
@@ -195,15 +241,20 @@ type KESConfig struct {
 	// used for adding client certificates on KES --> used for KES authentication against Vault or other KMS that supports mTLS.
 	// +optional
 	ClientCertSecret *LocalCertificateReference `json:"clientCertSecret,omitempty"`
+	// If provided, use these annotations for KES Object Meta annotations
+	// +optional
+	Annotations map[string]string `json:"annotations,omitempty"`
+	// If provided, use these labels for KES Object Meta labels
+	// +optional
+	Labels map[string]string `json:"labels,omitempty"`
+	// If provided, use these nodeSelector for KES Object Meta nodeSelector
+	// +optional
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 }
 
-// TenantStatus is the status for a Tenant resource.
-type TenantStatus struct {
-	CurrentState      string `json:"currentState"`
-	AvailableReplicas int32  `json:"availableReplicas"`
-}
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// TenantList is a list of Tenant resources.
+// TenantList is a list of Tenant resources
 type TenantList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata"`

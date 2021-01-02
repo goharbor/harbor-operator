@@ -248,11 +248,6 @@ func (m *MinIOController) generateMinIOCR() *minio.Tenant {
 			},
 		},
 		Spec: minio.TenantSpec{
-			Metadata: &metav1.ObjectMeta{
-				Labels:      m.getLabels(),
-				Annotations: m.generateAnnotations(),
-			},
-			ServiceName: m.getServiceName(),
 			Image:       m.GetImage(),
 			Zones: []minio.Zone{
 				{
@@ -268,21 +263,12 @@ func (m *MinIOController) generateMinIOCR() *minio.Tenant {
 				Name: m.getMinIOSecretNamespacedName().Name,
 			},
 			PodManagementPolicy: "Parallel",
-			RequestAutoCert:     false,
-			CertConfig: &minio.CertificateConfig{
-				CommonName:       "",
-				OrganizationName: []string{},
-				DNSNames:         []string{},
-			},
+			RequestAutoCert:     common.Bools(false),
 			Env: []corev1.EnvVar{
 				{
 					Name:  "MINIO_BROWSER",
 					Value: "on",
 				},
-			},
-			Liveness: &minio.Liveness{
-				InitialDelaySeconds: 120,
-				PeriodSeconds:       60,
 			},
 		},
 	}

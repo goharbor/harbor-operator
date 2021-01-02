@@ -7,6 +7,10 @@ import (
 	"time"
 )
 
+func Bools(b bool) *bool {
+	return &b
+}
+
 // RandomString returns random string.
 func RandomString(randLength int, randType string) (result string) {
 	var (
