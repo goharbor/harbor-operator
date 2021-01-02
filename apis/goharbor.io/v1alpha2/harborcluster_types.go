@@ -1,6 +1,7 @@
 package v1alpha2
 
 import (
+	minio "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/api/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -130,6 +131,12 @@ type MinIOSpec struct {
 	// Number of persistent volumes that will be attached per server
 	// +kubebuilder:validation:Minimum:=1
 	VolumesPerServer int32 `json:"volumesPerServer"`
+	// ExternalCertSecret allows a user to specify custom CA certificate, and private key. This is
+	// used for enabling TLS support on MinIO Pods.
+	// +kubebuilder:validation:Optional
+	ExternalCertSecret *minio.LocalCertificateReference `json:"externalCertSecret,omitempty"`
+	// +kubebuilder:validation:Optional
+	Host string `json:"host,omitempty"`
 	// Version defines the MinIO Client (mc) Docker image version.
 	Version string `json:"version,omitempty"`
 	// VolumeClaimTemplate allows a user to specify how volumes inside a MinIOInstance

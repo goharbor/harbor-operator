@@ -6,6 +6,7 @@ package v1alpha2
 
 import (
 	"github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	apiv1 "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/api/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -1666,6 +1667,11 @@ func (in *JobServiceTokenSpec) DeepCopy() *JobServiceTokenSpec {
 func (in *MinIOSpec) DeepCopyInto(out *MinIOSpec) {
 	*out = *in
 	out.Redirect = in.Redirect
+	if in.ExternalCertSecret != nil {
+		in, out := &in.ExternalCertSecret, &out.ExternalCertSecret
+		*out = new(apiv1.LocalCertificateReference)
+		**out = **in
+	}
 	in.VolumeClaimTemplate.DeepCopyInto(&out.VolumeClaimTemplate)
 	in.Resources.DeepCopyInto(&out.Resources)
 }

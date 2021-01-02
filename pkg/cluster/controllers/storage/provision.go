@@ -47,23 +47,28 @@ func (m *MinIOController) getMinIOProperties(minioInstance *minio.Tenant) (*goha
 	}
 
 	var (
-		endpoint string
-		scheme   string
+		minioHost string
+		endpoint  string
+		scheme    string
 
 		secure     = false
 		v4Auth     = true
-		skipVerify = false
+		skipVerify = true
 	)
 
 	if !m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Redirect.Disable {
-		scheme, endpoint, err = GetMinIOHostAndSchema(m.HarborCluster.Spec.ExternalURL)
-		if err != nil {
-			return nil, err
+		scheme = "https"
+		if minioHost = m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Host; minioHost == "" {
+			scheme, minioHost, err = GetMinIOHostAndSchema(m.HarborCluster.Spec.ExternalURL)
+			if err != nil {
+				return nil, err
+			}
 		}
-		// if access minio use ingress, secure and skipVerify should be true
+
+		// if access minio use ingress, secure and skipVerify should be false
 		secure = true
-		skipVerify = true
-		endpoint = fmt.Sprintf("%s://%s", scheme, endpoint)
+		skipVerify = false
+		endpoint = fmt.Sprintf("%s://%s", scheme, minioHost)
 	} else {
 		endpoint = fmt.Sprintf("http://%s.%s.svc:%s", m.getServiceName(), m.HarborCluster.Namespace, "9000")
 	}
@@ -181,16 +186,16 @@ func GetMinIOHostAndSchema(accessURL string) (scheme string, host string, err er
 }
 
 func (m *MinIOController) generateIngress() *netv1.Ingress {
-	_, minioHost, err := GetMinIOHostAndSchema(m.HarborCluster.Spec.ExternalURL)
-	if err != nil {
-		panic(err)
+	minioHost := m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Host
+	if minioHost == "" {
+		_, minioHost, _ = GetMinIOHostAndSchema(m.HarborCluster.Spec.ExternalURL)
 	}
 
 	var tls []netv1.IngressTLS
 
-	if m.HarborCluster.Spec.Expose.Core.TLS.Enabled() {
+	if m.HarborCluster.Spec.InClusterStorage.MinIOSpec.ExternalCertSecret != nil {
 		tls = []netv1.IngressTLS{{
-			SecretName: m.HarborCluster.Spec.Expose.Core.TLS.CertificateRef,
+			SecretName: m.HarborCluster.Spec.InClusterStorage.MinIOSpec.ExternalCertSecret.Name,
 		}}
 	}
 
@@ -252,8 +257,9 @@ func (m *MinIOController) generateMinIOCR() *minio.Tenant {
 				Labels:      m.getLabels(),
 				Annotations: m.generateAnnotations(),
 			},
-			ServiceName: m.getServiceName(),
-			Image:       m.GetImage(),
+			ExternalCertSecret: m.HarborCluster.Spec.InClusterStorage.MinIOSpec.ExternalCertSecret,
+			ServiceName:        m.getServiceName(),
+			Image:              m.GetImage(),
 			Zones: []minio.Zone{
 				{
 					Name:                DefaultZone,

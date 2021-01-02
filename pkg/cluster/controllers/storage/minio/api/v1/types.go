@@ -125,6 +125,7 @@ type Zone struct {
 }
 
 // LocalCertificateReference defines the spec for a local certificate.
+// The Type support "kubernetes.io/tls", "cert-manager.io/v1alpha2" or others.
 type LocalCertificateReference struct {
 	Name string `json:"name"`
 	Type string `json:"type,omitempty"`
