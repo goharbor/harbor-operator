@@ -188,7 +188,7 @@ func (r *Reconciler) GetNotaryIngressRules(ctx context.Context, harbor *goharbor
 			},
 		}
 	default:
-		return nil, ErrInvalidIngressController{harbor.Spec.Expose.Core.Ingress.Controller}
+		return nil, ErrInvalidIngressController{Controller: harbor.Spec.Expose.Core.Ingress.Controller}
 	}
 
 	return []netv1.IngressRule{

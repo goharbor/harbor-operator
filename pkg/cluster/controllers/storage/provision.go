@@ -139,7 +139,10 @@ func (m *MinIOController) Provision() (*lcm.CRStatus, error) {
 
 	// if disable redirect docker registry, we will expose minIO access endpoint by ingress.
 	if !m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Redirect.Disable {
-		ingress := m.generateIngress()
+		ingress, err := m.generateIngress()
+		if err != nil {
+			return minioNotReadyStatus(CreateMinIOIngressError, err.Error()), err
+		}
 
 		err = m.KubeClient.Create(ingress)
 		if err != nil && !k8serror.IsAlreadyExists(err) {
@@ -180,7 +183,7 @@ func GetMinIOHostAndSchema(accessURL string) (scheme string, host string, err er
 	return u.Scheme, minioHost, nil
 }
 
-func (m *MinIOController) generateIngress() *netv1.Ingress {
+func (m *MinIOController) generateIngress() (*netv1.Ingress, error) {
 	_, minioHost, err := GetMinIOHostAndSchema(m.HarborCluster.Spec.ExternalURL)
 	if err != nil {
 		panic(err)
@@ -196,6 +199,14 @@ func (m *MinIOController) generateIngress() *netv1.Ingress {
 
 	annotations := make(map[string]string)
 	annotations["nginx.ingress.kubernetes.io/proxy-body-size"] = "0"
+	annotations["nginx.ingress.kubernetes.io/backend-protocol"] = "HTTPS"
+
+	if m.HarborCluster.Spec.Expose.Core.Ingress.Controller == v1alpha1.IngressControllerNCP {
+		annotations["ncp/use-regex"] = "true"
+		annotations["ncp/http-redirect"] = "true"
+	}
+
+	ingressPath, err := common.GetIngressPath(m.HarborCluster.Spec.Expose.Core.Ingress.Controller)
 
 	return &netv1.Ingress{
 		TypeMeta: metav1.TypeMeta{
@@ -217,7 +228,7 @@ func (m *MinIOController) generateIngress() *netv1.Ingress {
 						HTTP: &netv1.HTTPIngressRuleValue{
 							Paths: []netv1.HTTPIngressPath{
 								{
-									Path: "/",
+									Path: ingressPath,
 									Backend: netv1.IngressBackend{
 										ServiceName: m.getServiceName(),
 										ServicePort: intstr.FromInt(9000),
@@ -229,7 +240,7 @@ func (m *MinIOController) generateIngress() *netv1.Ingress {
 				},
 			},
 		},
-	}
+	}, err
 }
 
 func (m *MinIOController) generateMinIOCR() *minio.Tenant {
