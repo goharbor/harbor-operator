@@ -5,9 +5,11 @@ import (
 	"time"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/config"
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
 	"github.com/goharbor/harbor-operator/pkg/event-filter/class"
+	"github.com/goharbor/harbor-operator/pkg/image"
 	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
@@ -77,4 +79,51 @@ func New(ctx context.Context, name string, configStore *configstore.Store) (comm
 	r.Controller = commonCtrl.NewController(ctx, name, r, configStore)
 
 	return r, nil
+}
+
+func (r *Reconciler) getComponentSpec(ctx context.Context, harbor *goharborv1alpha2.Harbor, component harbormetav1.Component) harbormetav1.ComponentSpec {
+	var spec harbormetav1.ComponentSpec
+
+	//nolint:golint,exhaustive
+	switch component {
+	case harbormetav1.ChartMuseumComponent:
+		harbor.Spec.ChartMuseum.ComponentSpec.DeepCopyInto(&spec)
+	case harbormetav1.CoreComponent:
+		harbor.Spec.Core.ComponentSpec.DeepCopyInto(&spec)
+	case harbormetav1.JobServiceComponent:
+		harbor.Spec.JobService.ComponentSpec.DeepCopyInto(&spec)
+	case harbormetav1.NotaryServerComponent:
+		harbor.Spec.Notary.Server.DeepCopyInto(&spec)
+	case harbormetav1.NotarySignerComponent:
+		harbor.Spec.Notary.Signer.DeepCopyInto(&spec)
+	case harbormetav1.PortalComponent:
+		harbor.Spec.Portal.DeepCopyInto(&spec)
+	case harbormetav1.RegistryComponent, harbormetav1.RegistryControllerComponent:
+		harbor.Spec.Registry.ComponentSpec.DeepCopyInto(&spec)
+	case harbormetav1.TrivyComponent:
+		harbor.Spec.Trivy.ComponentSpec.DeepCopyInto(&spec)
+	}
+
+	imageSource := harbor.Spec.ImageSource
+	if imageSource == nil {
+		return spec
+	}
+
+	if spec.Image == "" && (imageSource.Repository != "" || imageSource.Tag != "") {
+		spec.Image, _ = image.GetImage(ctx, component.String(), image.WithRepository(imageSource.Repository), image.WithTag(imageSource.Tag))
+	}
+
+	if spec.ImagePullPolicy == nil && imageSource.ImagePullPolicy != nil {
+		in, out := &imageSource.ImagePullPolicy, &spec.ImagePullPolicy
+		*out = new(corev1.PullPolicy)
+		**out = **in
+	}
+
+	if len(spec.ImagePullSecrets) == 0 && len(imageSource.ImagePullSecrets) != 0 {
+		in, out := &imageSource.ImagePullSecrets, &spec.ImagePullSecrets
+		*out = make([]corev1.LocalObjectReference, len(*in))
+		copy(*out, *in)
+	}
+
+	return spec
 }

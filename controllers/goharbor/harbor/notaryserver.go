@@ -198,7 +198,7 @@ func (r *Reconciler) GetNotaryServer(ctx context.Context, harbor *goharborv1alph
 			Namespace: namespace,
 		},
 		Spec: goharborv1alpha2.NotaryServerSpec{
-			ComponentSpec: harbor.Spec.Notary.Server,
+			ComponentSpec: r.getComponentSpec(ctx, harbor, harbormetav1.NotaryServerComponent),
 			TLS:           tls,
 			Authentication: &goharborv1alpha2.NotaryServerAuthSpec{
 				Token: goharborv1alpha2.NotaryServerAuthTokenSpec{

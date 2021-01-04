@@ -132,7 +132,7 @@ func (r *Reconciler) GetTrivy(ctx context.Context, harbor *goharborv1alpha2.Harb
 			Namespace: namespace,
 		},
 		Spec: goharborv1alpha2.TrivySpec{
-			ComponentSpec: harbor.Spec.Trivy.ComponentSpec,
+			ComponentSpec: r.getComponentSpec(ctx, harbor, harbormetav1.TrivyComponent),
 			Redis: goharborv1alpha2.TrivyRedisSpec{
 				RedisConnection: redis,
 			},

@@ -210,7 +210,7 @@ func (r *Reconciler) GetRegistry(ctx context.Context, harbor *goharborv1alpha2.H
 			Namespace: namespace,
 		},
 		Spec: goharborv1alpha2.RegistrySpec{
-			ComponentSpec: harbor.Spec.Registry.ComponentSpec,
+			ComponentSpec: r.getComponentSpec(ctx, harbor, harbormetav1.RegistryComponent),
 			RegistryConfig01: goharborv1alpha2.RegistryConfig01{
 				Log: goharborv1alpha2.RegistryLogSpec{
 					AccessLog: goharborv1alpha2.RegistryAccessLogSpec{

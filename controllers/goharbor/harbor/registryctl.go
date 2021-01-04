@@ -65,7 +65,7 @@ func (r *Reconciler) GetRegistryCtl(ctx context.Context, harbor *goharborv1alpha
 			Namespace: namespace,
 		},
 		Spec: goharborv1alpha2.RegistryControllerSpec{
-			ComponentSpec: harbor.Spec.Registry.ComponentSpec,
+			ComponentSpec: r.getComponentSpec(ctx, harbor, harbormetav1.RegistryControllerComponent),
 			RegistryRef:   registryName,
 			Log: goharborv1alpha2.RegistryControllerLogSpec{
 				Level: harbor.Spec.LogLevel.RegistryCtl(),
