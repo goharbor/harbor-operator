@@ -2412,11 +2412,6 @@ spec:
                       poolSize:
                         description: Maximum number of socket connections. Default is 10 connections per every CPU as reported by runtime.NumCPU.
                         type: integer
-                      schema:
-                        enum:
-                        - sentinel
-                        - redis
-                        type: string
                       sentinel:
                         properties:
                           replicas:
@@ -3246,6 +3241,7 @@ spec:
                 default: RollingUpdate
                 type: string
               version:
+                description: The version of the harbor, eg 2.1.2
                 type: string
             required:
             - encryptionKeyRef
@@ -4418,6 +4414,7 @@ spec:
                 default: RollingUpdate
                 type: string
               version:
+                description: The version of the harbor, eg 2.1.2
                 type: string
             required:
             - encryptionKeyRef

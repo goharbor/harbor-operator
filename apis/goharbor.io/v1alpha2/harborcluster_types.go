@@ -58,9 +58,6 @@ type RedisSpec struct {
 
 	GroupName string `json:"groupName,omitempty"`
 
-	// +kubebuilder:validation:Enum=sentinel;redis
-	Schema string `json:"schema,omitempty"`
-
 	Hosts []RedisHosts `json:"hosts,omitempty"`
 }
 

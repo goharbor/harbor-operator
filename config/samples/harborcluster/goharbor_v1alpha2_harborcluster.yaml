@@ -72,7 +72,6 @@ spec:
   inClusterCache:
     kind: Redis
     redisSpec:
-      schema: redis
       server:
         replicas: 1
         resources:
