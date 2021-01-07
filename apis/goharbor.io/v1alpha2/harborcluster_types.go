@@ -23,15 +23,15 @@ type HarborClusterSpec struct {
 	HarborSpec `json:",inline"`
 
 	// Cache configuration for in-cluster cache services
-	// +optional
+	// +kubebuilder:validation:Optional
 	InClusterCache *Cache `json:"inClusterCache,omitempty"`
 
 	// Database configuration for in-cluster database service
-	// +optional
+	// +kubebuilder:validation:Optional
 	InClusterDatabase *Database `json:"inClusterDatabase,omitempty"`
 
 	// Storage configuration for in-cluster storage service
-	// +optional
+	// +kubebuilder:validation:Optional
 	InClusterStorage *Storage `json:"inClusterStorage,omitempty"`
 }
 

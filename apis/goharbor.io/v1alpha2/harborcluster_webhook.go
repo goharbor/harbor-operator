@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/goharbor/harbor-operator/pkg/version"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -37,6 +38,19 @@ func (hc *HarborCluster) SetupWebhookWithManager(ctx context.Context, mgr ctrl.M
 		Complete()
 }
 
+// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
+
+// +kubebuilder:webhook:path=/mutate-goharbor-io-v1alpha2-harborcluster,mutating=true,failurePolicy=fail,groups=goharbor.io,resources=harborclusters,verbs=create;update,versions=v1alpha2,name=mharborcluster.kb.io
+
+var _ webhook.Defaulter = &HarborCluster{}
+
+// Default implements webhook.Defaulter so a webhook will be registered for the type.
+func (hc *HarborCluster) Default() {
+	if hc.Spec.Version == "" {
+		hc.Spec.Version = version.Default()
+	}
+}
+
 // +kubebuilder:webhook:verbs=create;update,path=/validate-goharbor-io-v1alpha2-harborcluster,mutating=false,failurePolicy=fail,groups=goharbor.io,resources=harborclusters,versions=v1alpha2,name=vharborcluster.kb.io
 
 var _ webhook.Validator = &HarborCluster{}
@@ -44,13 +58,18 @@ var _ webhook.Validator = &HarborCluster{}
 func (hc *HarborCluster) ValidateCreate() error {
 	clog.Info("validate creation", "name", hc.Name, "namespace", hc.Namespace)
 
-	return hc.validate()
+	return hc.validate(nil)
 }
 
 func (hc *HarborCluster) ValidateUpdate(old runtime.Object) error {
 	clog.Info("validate updating", "name", hc.Name, "namespace", hc.Namespace)
 
-	return hc.validate()
+	obj, ok := old.(*HarborCluster)
+	if !ok {
+		return fmt.Errorf("failed type assertion on kind: %s", old.GetObjectKind().GroupVersionKind().String())
+	}
+
+	return hc.validate(obj)
 }
 
 func (hc *HarborCluster) ValidateDelete() error {
@@ -59,7 +78,7 @@ func (hc *HarborCluster) ValidateDelete() error {
 	return nil
 }
 
-func (hc *HarborCluster) validate() error {
+func (hc *HarborCluster) validate(old *HarborCluster) error {
 	var allErrs field.ErrorList
 
 	// For database(psql), cache(Redis) and storage, either external services or in-cluster services MUST be configured
@@ -73,6 +92,16 @@ func (hc *HarborCluster) validate() error {
 
 	if err := hc.validateCache(); err != nil {
 		allErrs = append(allErrs, err)
+	}
+
+	if old == nil { // create harbor resource
+		if err := version.Validate(hc.Spec.Version); err != nil {
+			allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("version"), hc.Spec.Version, err.Error()))
+		}
+	} else {
+		if err := version.UpgradeAllowed(old.Spec.Version, hc.Spec.Version); err != nil {
+			allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("version"), hc.Spec.Version, err.Error()))
+		}
 	}
 
 	if len(allErrs) == 0 {

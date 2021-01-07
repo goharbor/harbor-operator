@@ -4,10 +4,11 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
-	"github.com/goharbor/harbor-operator/pkg/config"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	. "github.com/goharbor/harbor-operator/pkg/image"
+	"github.com/goharbor/harbor-operator/pkg/version"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/ovh/configstore"
@@ -32,7 +33,7 @@ var _ = Describe("Get image", func() {
 		It("Should pass", func() {
 			image, err := GetImage(ctx, "core")
 			Expect(err).ToNot(HaveOccurred())
-			Expect(image).To(Equal(fmt.Sprintf("goharbor/harbor-core:%s", config.DefaultHarborVersion)))
+			Expect(image).To(Equal(fmt.Sprintf("goharbor/harbor-core:v%s", version.Default())))
 		})
 	})
 
@@ -48,34 +49,47 @@ var _ = Describe("Get image", func() {
 		It("Should pass", func() {
 			image, err := GetImage(ctx, "core", WithRepository("quay.io/goharbor/"))
 			Expect(err).ToNot(HaveOccurred())
-			Expect(image).To(Equal(fmt.Sprintf("quay.io/goharbor/harbor-core:%s", config.DefaultHarborVersion)))
+			Expect(image).To(Equal(fmt.Sprintf("quay.io/goharbor/harbor-core:v%s", version.Default())))
 		})
 	})
 
-	Describe("Get image with tag", func() {
+	Describe("Get image with tag suffix", func() {
 		It("Should pass", func() {
-			image, err := GetImage(ctx, "core", WithTag(config.DefaultHarborVersion+"-suffix"))
+			image, err := GetImage(ctx, "core", WithTagSuffix("-suffix"))
 			Expect(err).ToNot(HaveOccurred())
-			Expect(image).To(Equal(fmt.Sprintf("goharbor/harbor-core:%s-suffix", config.DefaultHarborVersion)))
+			Expect(image).To(Equal(fmt.Sprintf("goharbor/harbor-core:v%s-suffix", version.Default())))
 		})
 	})
 
-	Describe("Get image with repository and tag", func() {
+	Describe("Get image with repository and tag suffix", func() {
 		It("Should pass", func() {
-			image, err := GetImage(ctx, "core", WithRepository("quay.io/goharbor/"), WithTag(config.DefaultHarborVersion+"-suffix"))
+			image, err := GetImage(ctx, "core", WithRepository("quay.io/goharbor/"), WithTagSuffix("-suffix"))
 			Expect(err).ToNot(HaveOccurred())
-			Expect(image).To(Equal(fmt.Sprintf("quay.io/goharbor/harbor-core:%s-suffix", config.DefaultHarborVersion)))
+			Expect(image).To(Equal(fmt.Sprintf("quay.io/goharbor/harbor-core:v%s-suffix", version.Default())))
 		})
 	})
 
 	Describe("Get image from config store", func() {
 		It("Should pass", func() {
 			os.Setenv(configstore.ConfigEnvVar, "env")
-			os.Setenv(ConfigImageKey, "goharbor/harbor-core:latest")
+			os.Setenv(ConfigImageKeyPrefix+"_"+strings.ReplaceAll(version.Default(), ".", "_"), "goharbor/harbor-core:latest")
 			configStore := configstore.NewStore()
 			configStore.InitFromEnvironment()
 
 			image, err := GetImage(ctx, "core", WithConfigstore(configStore))
+			Expect(err).ToNot(HaveOccurred())
+			Expect(image).To(Equal("goharbor/harbor-core:latest"))
+		})
+	})
+
+	Describe("Get image from config store with image key", func() {
+		It("Should pass", func() {
+			os.Setenv(configstore.ConfigEnvVar, "env")
+			os.Setenv("key", "goharbor/harbor-core:latest")
+			configStore := configstore.NewStore()
+			configStore.InitFromEnvironment()
+
+			image, err := GetImage(ctx, "core", WithConfigstore(configStore), WithConfigImageKey("key"))
 			Expect(err).ToNot(HaveOccurred())
 			Expect(image).To(Equal("goharbor/harbor-core:latest"))
 		})
@@ -87,7 +101,19 @@ var _ = Describe("Get image", func() {
 
 			image, err := GetImage(ctx, "core", WithConfigstore(configStore))
 			Expect(err).ToNot(HaveOccurred())
-			Expect(image).To(Equal(fmt.Sprintf("goharbor/harbor-core:%s", config.DefaultHarborVersion)))
+			Expect(image).To(Equal(fmt.Sprintf("goharbor/harbor-core:v%s", version.Default())))
+		})
+	})
+
+	Describe("Get image from config store but failed", func() {
+		It("Should pass", func() {
+			configStore := configstore.NewStore()
+			configStore.RegisterProvider("foo", func() (configstore.ItemList, error) {
+				return configstore.ItemList{}, fmt.Errorf("failed")
+			})
+
+			_, err := GetImage(ctx, "core", WithConfigstore(configStore))
+			Expect(err).To(HaveOccurred())
 		})
 	})
 

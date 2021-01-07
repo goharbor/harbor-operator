@@ -109,8 +109,13 @@ func (r *Reconciler) getComponentSpec(ctx context.Context, harbor *goharborv1alp
 		return spec
 	}
 
-	if spec.Image == "" && (imageSource.Repository != "" || imageSource.Tag != "") {
-		spec.Image, _ = image.GetImage(ctx, component.String(), image.WithRepository(imageSource.Repository), image.WithTag(imageSource.Tag))
+	if spec.Image == "" && (imageSource.Repository != "" || imageSource.TagSuffix != "") {
+		getImageOptions := []image.Option{
+			image.WithRepository(imageSource.Repository),
+			image.WithTagSuffix(imageSource.TagSuffix),
+			image.WithHarborVersion(harbor.Spec.Version),
+		}
+		spec.Image, _ = image.GetImage(ctx, component.String(), getImageOptions...)
 	}
 
 	if spec.ImagePullPolicy == nil && imageSource.ImagePullPolicy != nil {

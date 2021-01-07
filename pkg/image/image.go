@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/goharbor/harbor-operator/pkg/config"
+	"github.com/goharbor/harbor-operator/pkg/version"
 	"github.com/ovh/configstore"
 )
 
 const (
-	ConfigImageKey = "docker-image"
+	ConfigImageKeyPrefix = "docker-image"
 )
 
 var componentImageNames = map[string]string{
@@ -22,7 +22,7 @@ var componentImageNames = map[string]string{
 	"portal":       "harbor-portal",
 	"registry":     "registry-photon",
 	"registryctl":  "harbor-registryctl",
-	"trivy":        "goharbor/trivy-adapter-photon",
+	"trivy":        "trivy-adapter-photon",
 }
 
 type Options struct {
@@ -30,7 +30,7 @@ type Options struct {
 	configStore    *configstore.Store
 	configImageKey string
 	repository     string
-	tag            string
+	tagSuffix      string
 	harborVersion  string
 }
 
@@ -60,9 +60,9 @@ func WithRepository(repository string) Option {
 	}
 }
 
-func WithTag(tag string) Option {
+func WithTagSuffix(tagSuffix string) Option {
 	return func(opts *Options) {
-		opts.tag = tag
+		opts.tagSuffix = tagSuffix
 	}
 }
 
@@ -73,15 +73,26 @@ func WithHarborVersion(version string) Option {
 }
 
 func GetImage(ctx context.Context, component string, options ...Option) (string, error) {
-	opts := &Options{
-		repository:     config.DefaultRegistry + "/goharbor",
-		configImageKey: ConfigImageKey,
-	}
+	opts := &Options{}
 
 	for _, o := range options {
 		o(opts)
 	}
 
+	if opts.repository == "" {
+		opts.repository = "goharbor"
+	}
+
+	if opts.harborVersion == "" {
+		opts.harborVersion = version.Default()
+	}
+
+	if opts.configImageKey == "" {
+		// config image key with version, eg docker-image-2-1-0
+		opts.configImageKey = ConfigImageKeyPrefix + "-" + strings.ReplaceAll(opts.harborVersion, ".", "-")
+	}
+
+	// imageFromSpec is the image from the spec of the component
 	if opts.imageFromSpec != "" {
 		return opts.imageFromSpec, nil
 	}
@@ -102,13 +113,7 @@ func GetImage(ctx context.Context, component string, options ...Option) (string,
 		return "", fmt.Errorf("unknow component %s", component)
 	}
 
-	repository := strings.Trim(opts.repository, "/")
+	repository := strings.TrimSuffix(opts.repository, "/")
 
-	if opts.tag != "" {
-		return fmt.Sprintf("%s/%s:%s", repository, imageName, opts.tag), nil
-	} else if opts.harborVersion != "" {
-		return fmt.Sprintf("%s/%s:v%s", repository, imageName, opts.harborVersion), nil
-	}
-
-	return fmt.Sprintf("%s/%s:%s", repository, imageName, config.DefaultHarborVersion), nil
+	return fmt.Sprintf("%s/%s:v%s%s", repository, imageName, opts.harborVersion, opts.tagSuffix), nil
 }

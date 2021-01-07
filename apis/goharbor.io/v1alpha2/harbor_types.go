@@ -61,7 +61,7 @@ type HarborSpec struct {
 	// Skip OpenAPI schema validation
 	// Use validating webhook to do verification (field required)
 	// +kubebuilder:validation:Optional
-	ImageChartStorage *HarborStorageImageChartStorageSpec `json:"imageChartStorage"`
+	ImageChartStorage *HarborStorageImageChartStorageSpec `json:"imageChartStorage,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default="info"
@@ -82,6 +82,10 @@ type HarborSpec struct {
 
 	// +kubebuilder:validation:Optional
 	Proxy *CoreProxySpec `json:"proxy,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// The version of the harbor, eg 2.1.2
+	Version string `json:"version,omitempty"`
 }
 
 type HarborComponentsSpec struct {
@@ -109,12 +113,12 @@ type HarborComponentsSpec struct {
 	// Skip OpenAPI schema validation
 	// Use validating webhook to do verification (field required)
 	// +kubebuilder:validation:Optional
-	Redis *ExternalRedisSpec `json:"redis"`
+	Redis *ExternalRedisSpec `json:"redis,omitempty"`
 
 	// Skip OpenAPI schema validation
 	// Use validating webhook to do verification (field required)
 	// +kubebuilder:validation:Optional
-	Database *HarborDatabaseSpec `json:"database"`
+	Database *HarborDatabaseSpec `json:"database,omitempty"`
 }
 
 type HarborDatabaseSpec struct {
@@ -451,8 +455,8 @@ type ImageSourceSpec struct {
 	Repository string `json:"repository,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// The tag for the images of the images of the components. eg v2.1.2
-	Tag string `json:"tag,omitempty"`
+	// The tag suffix for the images of the images of the components. eg '-patch1'
+	TagSuffix string `json:"tagSuffix,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Enum={"Always","Never","IfNotPresent"}

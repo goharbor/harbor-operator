@@ -7,8 +7,13 @@ import (
 	"sync"
 
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
+	"github.com/goharbor/harbor-operator/pkg/version"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+)
+
+const (
+	versionAnnotationChecksumKey = "harbor.checksum.goharbor.io/version"
 )
 
 type Dependencies struct {
@@ -82,6 +87,21 @@ func (d *Dependencies) ChangedFor(ctx context.Context, resource Dependency) bool
 		}
 	}
 
+	if current := version.GetVersion(annotations); current != "" {
+		previous, ok := annotations[versionAnnotationChecksumKey]
+		if !ok {
+			logger.Get(ctx).V(1).Info("version changed (no annotation)")
+
+			return true
+		}
+
+		if previous != current {
+			logger.Get(ctx).V(1).Info("version changed (expected %s, got %s)", previous, current)
+
+			return true
+		}
+	}
+
 	return false
 }
 
@@ -93,6 +113,10 @@ func (d *Dependencies) AddAnnotations(object metav1.Object) {
 
 	for object, withStatus := range d.objects {
 		annotations[d.GetID(object)] = d.ComputeChecksum(object, withStatus)
+	}
+
+	if ver := version.GetVersion(annotations); ver != "" {
+		annotations[versionAnnotationChecksumKey] = ver
 	}
 
 	object.SetAnnotations(annotations)

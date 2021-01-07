@@ -13,6 +13,7 @@ import (
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	"github.com/goharbor/harbor-operator/pkg/image"
+	"github.com/goharbor/harbor-operator/pkg/version"
 	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
@@ -47,6 +48,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registryCtl *goharborv1a
 	getImageOptions := []image.Option{
 		image.WithConfigstore(r.ConfigStore),
 		image.WithImageFromSpec(registryCtl.Spec.Image),
+		image.WithHarborVersion(version.GetVersion(registryCtl.Annotations)),
 	}
 
 	image, err := image.GetImage(ctx, harbormetav1.RegistryControllerComponent.String(), getImageOptions...)
@@ -68,8 +70,9 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registryCtl *goharborv1a
 	}
 
 	deploy.ObjectMeta = metav1.ObjectMeta{
-		Name:      name,
-		Namespace: namespace,
+		Name:        name,
+		Namespace:   namespace,
+		Annotations: version.NewVersionAnnotations(registryCtl.Annotations),
 	}
 	deploy.Spec.Selector = &metav1.LabelSelector{
 		MatchLabels: map[string]string{
