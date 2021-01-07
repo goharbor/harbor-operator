@@ -46,6 +46,8 @@ metadata:
   name: harborcluster-sample
   namespace: cluster-sample-ns
 spec:
+  imageSource:
+    repository: quay.io/goharbor
   harborAdminPasswordRef: admin-core-secret
   externalURL: https://core.harbor.domain
   expose:

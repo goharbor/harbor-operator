@@ -17,8 +17,6 @@ const (
 
 	DefaultConcurrentReconcile = 1
 	DefaultHarborClass         = ""
-	DefaultRegistry            = ""
-	DefaultHarborVersion       = "v2.1.2"
 )
 
 var ErrNotReady = errors.New("configuration not ready")

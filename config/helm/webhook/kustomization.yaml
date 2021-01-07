@@ -11,8 +11,7 @@ commonAnnotations:
 
 patchesStrategicMerge:
 - validatingwebhook_endpoint_patch.yaml
-# Uncomment this to enable mutating webhook patch
-# - mutatingwebhook_endpoint_patch.yaml
+- mutatingwebhook_endpoint_patch.yaml
 
 bases:
 - ../../webhook
