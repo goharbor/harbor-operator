@@ -153,7 +153,7 @@ func (r *Reconciler) GetJobService(ctx context.Context, harbor *goharborv1alpha2
 			Annotations: version.SetVersion(nil, harbor.Spec.Version),
 		},
 		Spec: goharborv1alpha2.JobServiceSpec{
-			ComponentSpec: harbor.Spec.Registry.ComponentSpec,
+			ComponentSpec: r.getComponentSpec(ctx, harbor, harbormetav1.JobServiceComponent),
 			Core: goharborv1alpha2.JobServiceCoreSpec{
 				SecretRef: coreSecretRef,
 				URL:       coreURL,

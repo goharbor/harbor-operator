@@ -1,0 +1,12 @@
+apiVersion: goharbor.io/v1alpha2
+kind: Harbor
+metadata:
+  name: example
+  namespace: default
+spec:
+  imageSource:
+    repository: example.goharbor.io/goharbor
+    tagSuffix: -patch1
+  redis:
+    host: 127.0.0.1
+    port: 3306
