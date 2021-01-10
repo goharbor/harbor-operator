@@ -147,7 +147,10 @@ func (m *MinIOController) Provision() (*lcm.CRStatus, error) {
 
 	// expose minIO access endpoint by ingress.
 	if m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Redirect.Disable {
-		ingress := m.generateIngress()
+		ingress, err := m.generateIngress()
+		if err != nil {
+			return minioNotReadyStatus(CreateMinIOIngressError, err.Error()), err
+		}
 
 		err = m.KubeClient.Create(ingress)
 		if err != nil && !k8serror.IsAlreadyExists(err) {
@@ -167,7 +170,7 @@ func (m *MinIOController) Provision() (*lcm.CRStatus, error) {
 	return minioUnknownStatus(), nil
 }
 
-func (m *MinIOController) generateIngress() *netv1.Ingress {
+func (m *MinIOController) generateIngress() (*netv1.Ingress, error) {
 	var tls []netv1.IngressTLS
 
 	if m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Redirect.TLS.Enabled() {

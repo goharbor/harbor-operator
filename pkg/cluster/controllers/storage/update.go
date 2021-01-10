@@ -29,31 +29,34 @@ func (m *MinIOController) checkRedirectUpdate() (bool, error) {
 		return false, err
 	}
 
-	desiredingress := m.generateIngress()
+	desiredingress, err := m.generateIngress()
 
 	if currntIngress.Spec.Rules[0].Host != desiredingress.Spec.Rules[0].Host {
-		return true, nil
+		return true, err
 	}
 
 	if currntIngress.Spec.Rules[0].IngressRuleValue.HTTP.Paths[0] != desiredingress.Spec.Rules[0].IngressRuleValue.HTTP.Paths[0] {
-		return true, nil
+		return true, err
 	}
 
 	if currntIngress.Spec.TLS[0].Hosts[0] != desiredingress.Spec.TLS[0].Hosts[0] {
-		return true, nil
+		return true, err
 	}
 
 	if currntIngress.Spec.TLS[0].SecretName != desiredingress.Spec.TLS[0].SecretName {
-		return true, nil
+		return true, err
 	}
 
-	return false, nil
+	return false, err
 }
 
 func (m *MinIOController) updateMinioIngress() error {
-	desiredingress := m.generateIngress()
+	desiredingress, err := m.generateIngress()
+	if err != nil {
+		return err
+	}
 
-	err := m.KubeClient.Update(desiredingress)
+	err = m.KubeClient.Update(desiredingress)
 	if err != nil {
 		return err
 	}
