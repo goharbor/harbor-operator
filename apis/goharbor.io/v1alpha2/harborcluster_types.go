@@ -1,7 +1,7 @@
 package v1alpha2
 
 import (
-	minio "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/api/v1"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -117,11 +117,18 @@ type StorageRedirectSpec struct {
 	// Default is false
 	// +optional
 	Disable bool `json:"disable"`
+	// TLS allows a user to specify custom CA certificate, and private key. This is
+	// used for enabling TLS support on MinIO Pods.
+	// +kubebuilder:validation:Optional
+	TLS *harbormetav1.ComponentsTLSSpec `json:"tls,omitempty"`
+	// Host should be required when it needs to be exposed.
+	// +kubebuilder:validation:Required
+	Host string `json:"host,omitempty"`
 }
 
 type MinIOSpec struct {
 	// Determine if the redirection of minio storage is disabled.
-	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Required
 	Redirect StorageRedirectSpec `json:"redirect"`
 	// Supply number of replicas.
 	// For standalone mode, supply 1. For distributed mode, supply 4 to 16 drives (should be even).
@@ -131,12 +138,6 @@ type MinIOSpec struct {
 	// Number of persistent volumes that will be attached per server
 	// +kubebuilder:validation:Minimum:=1
 	VolumesPerServer int32 `json:"volumesPerServer"`
-	// ExternalCertSecret allows a user to specify custom CA certificate, and private key. This is
-	// used for enabling TLS support on MinIO Pods.
-	// +kubebuilder:validation:Optional
-	ExternalCertSecret *minio.LocalCertificateReference `json:"externalCertSecret,omitempty"`
-	// +kubebuilder:validation:Optional
-	Host string `json:"host,omitempty"`
 	// Version defines the MinIO Client (mc) Docker image version.
 	Version string `json:"version,omitempty"`
 	// VolumeClaimTemplate allows a user to specify how volumes inside a MinIOInstance
