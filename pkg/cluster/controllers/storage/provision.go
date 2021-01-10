@@ -52,14 +52,20 @@ func (m *MinIOController) getMinIOProperties(minioInstance *minio.Tenant) (*goha
 		skipVerify = true
 	)
 
-	scheme = m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Redirect.TLS.GetScheme()
-	// if access minio use ingress, secure and skipVerify should be false
-	if m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Redirect.TLS.Enabled() {
-		secure = true
-		skipVerify = false
-	}
+	if m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Redirect.Disable {
+		tls := m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Redirect.TLS
+		if tls.Enabled() {
+			secure = true
+			skipVerify = false
+			scheme = tls.GetScheme()
+		}
 
-	endpoint = fmt.Sprintf("%s://%s:%d", scheme, m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Redirect.Host, m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Redirect.TLS.GetInternalPort())
+		port := tls.GetInternalPort()
+
+		endpoint = fmt.Sprintf("%s://%s:%d", scheme, m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Redirect.Host, port)
+	} else {
+		endpoint = fmt.Sprintf("http://%s.%s.svc:%s", m.getServiceName(), m.HarborCluster.Namespace, "9000")
+	}
 
 	storageSpec := &goharborv1.HarborStorageImageChartStorageSpec{
 		S3: &goharborv1.HarborStorageImageChartStorageS3Spec{
@@ -130,23 +136,6 @@ func (m *MinIOController) Provision() (*lcm.CRStatus, error) {
 		return minioNotReadyStatus(CreateMinIOServiceError, err.Error()), err
 	}
 
-	// expose minIO access endpoint by ingress.
-	ingress := m.generateIngress()
-
-	err = m.KubeClient.Create(ingress)
-	if err != nil && !k8serror.IsAlreadyExists(err) {
-		return minioNotReadyStatus(CreateMinIOIngressError, err.Error()), err
-	}
-
-	ingress.OwnerReferences = []metav1.OwnerReference{
-		*metav1.NewControllerRef(&minioCR, HarborClusterMinIOGVK),
-	}
-
-	err = m.KubeClient.Update(ingress)
-	if err != nil {
-		return minioNotReadyStatus(CreateMinIOServiceError, err.Error()), err
-	}
-
 	service.OwnerReferences = []metav1.OwnerReference{
 		*metav1.NewControllerRef(&minioCR, HarborClusterMinIOGVK),
 	}
@@ -154,6 +143,25 @@ func (m *MinIOController) Provision() (*lcm.CRStatus, error) {
 	err = m.KubeClient.Update(service)
 	if err != nil {
 		return minioNotReadyStatus(CreateMinIOServiceError, err.Error()), err
+	}
+
+	// expose minIO access endpoint by ingress.
+	if m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Redirect.Disable {
+		ingress := m.generateIngress()
+
+		err = m.KubeClient.Create(ingress)
+		if err != nil && !k8serror.IsAlreadyExists(err) {
+			return minioNotReadyStatus(CreateMinIOIngressError, err.Error()), err
+		}
+
+		ingress.OwnerReferences = []metav1.OwnerReference{
+			*metav1.NewControllerRef(&minioCR, HarborClusterMinIOGVK),
+		}
+
+		err = m.KubeClient.Update(ingress)
+		if err != nil {
+			return minioNotReadyStatus(CreateMinIOServiceError, err.Error()), err
+		}
 	}
 
 	return minioUnknownStatus(), nil
@@ -165,6 +173,7 @@ func (m *MinIOController) generateIngress() *netv1.Ingress {
 	if m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Redirect.TLS.Enabled() {
 		tls = []netv1.IngressTLS{{
 			SecretName: m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Redirect.TLS.CertificateRef,
+			Hosts:      []string{m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Redirect.Host},
 		}}
 	}
 

@@ -80,7 +80,8 @@ func (m *MinIOController) Apply(ctx context.Context, harborcluster *goharborv1.H
 	m.KubeClient.WithContext(ctx)
 
 	m.HarborCluster = harborcluster
-	m.DesiredMinIOCR = m.generateMinIOCR()
+	desiredMinIOCR := m.generateMinIOCR()
+	m.DesiredMinIOCR = desiredMinIOCR
 
 	err := m.KubeClient.Get(m.getMinIONamespacedName(), &minioCR)
 	if k8serror.IsNotFound(err) {
@@ -103,8 +104,21 @@ func (m *MinIOController) Apply(ctx context.Context, harborcluster *goharborv1.H
 		return m.Scale()
 	}
 
-	if m.checkMinIOUpdate() {
+	// if minio image update
+	if m.checkMinIOImageUpdate() {
 		return m.Update()
+	}
+
+	// if Redirect update
+	isChange, err := m.checkRedirectUpdate()
+	if err != nil {
+		return minioNotReadyStatus(GetMinIOError, err.Error()), err
+	}
+
+	if isChange {
+		if err = m.updateMinioIngress(); err != nil {
+			return minioNotReadyStatus(updateIngressError, err.Error()), err
+		}
 	}
 
 	isReady, err := m.checkMinIOReady()
@@ -158,7 +172,7 @@ func (m *MinIOController) minioInit(ctx context.Context) error {
 	return m.MinioClient.CreateBucket(ctx, DefaultBucket)
 }
 
-func (m *MinIOController) checkMinIOUpdate() bool {
+func (m *MinIOController) checkMinIOImageUpdate() bool {
 	return m.DesiredMinIOCR.Spec.Image != m.CurrentMinIOCR.Spec.Image
 }
 

@@ -122,7 +122,7 @@ type StorageRedirectSpec struct {
 	// +kubebuilder:validation:Optional
 	TLS *harbormetav1.ComponentsTLSSpec `json:"tls,omitempty"`
 	// Host should be required when it needs to be exposed.
-	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Optional
 	Host string `json:"host,omitempty"`
 }
 
