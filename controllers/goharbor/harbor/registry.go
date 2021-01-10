@@ -9,6 +9,7 @@ import (
 	"github.com/goharbor/harbor-operator/controllers"
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	"github.com/goharbor/harbor-operator/pkg/graph"
+	"github.com/goharbor/harbor-operator/pkg/version"
 	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
 	"github.com/sethvargo/go-password/password"
@@ -206,11 +207,12 @@ func (r *Reconciler) GetRegistry(ctx context.Context, harbor *goharborv1alpha2.H
 
 	return &goharborv1alpha2.Registry{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
+			Name:        name,
+			Namespace:   namespace,
+			Annotations: version.SetVersion(nil, harbor.Spec.Version),
 		},
 		Spec: goharborv1alpha2.RegistrySpec{
-			ComponentSpec: harbor.Spec.Registry.ComponentSpec,
+			ComponentSpec: r.getComponentSpec(ctx, harbor, harbormetav1.RegistryComponent),
 			RegistryConfig01: goharborv1alpha2.RegistryConfig01{
 				Log: goharborv1alpha2.RegistryLogSpec{
 					AccessLog: goharborv1alpha2.RegistryAccessLogSpec{

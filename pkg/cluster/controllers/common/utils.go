@@ -5,7 +5,23 @@ import (
 	"math/rand"
 	"strings"
 	"time"
+
+	"github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/harbor"
 )
+
+func GetIngressPath(ingress v1alpha1.IngressController) (string, error) {
+	switch ingress {
+	case v1alpha1.IngressControllerDefault:
+		return "/", nil
+	case v1alpha1.IngressControllerGCE:
+		return "/*", nil
+	case v1alpha1.IngressControllerNCP:
+		return "/.*", nil
+	default:
+		return "", harbor.ErrInvalidIngressController{Controller: ingress}
+	}
+}
 
 // RandomString returns random string.
 func RandomString(randLength int, randType string) (result string) {

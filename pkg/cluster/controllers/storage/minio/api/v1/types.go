@@ -1,3 +1,4 @@
+// +kubebuilder:skip
 package v1
 
 import (

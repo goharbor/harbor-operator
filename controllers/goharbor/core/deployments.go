@@ -14,6 +14,8 @@ import (
 	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/pkg/config/harbor"
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
+	"github.com/goharbor/harbor-operator/pkg/image"
+	"github.com/goharbor/harbor-operator/pkg/version"
 	"github.com/goharbor/harbor/src/common"
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
@@ -48,7 +50,13 @@ const (
 )
 
 func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.Core) (*appsv1.Deployment, error) { // nolint:funlen
-	image, err := r.GetImage(ctx)
+	getImageOptions := []image.Option{
+		image.WithConfigstore(r.ConfigStore),
+		image.WithImageFromSpec(core.Spec.Image),
+		image.WithHarborVersion(version.GetVersion(core.Annotations)),
+	}
+
+	image, err := image.GetImage(ctx, harbormetav1.CoreComponent.String(), getImageOptions...)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot get image")
 	}
@@ -421,8 +429,9 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 
 	deploy := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
+			Name:        name,
+			Namespace:   namespace,
+			Annotations: version.NewVersionAnnotations(core.Annotations),
 		},
 		Spec: appsv1.DeploymentSpec{
 			Selector: &metav1.LabelSelector{

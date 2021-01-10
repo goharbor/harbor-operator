@@ -42,7 +42,7 @@ func (rc *RedisController) Readiness(ctx context.Context, cluster *v1alpha2.Harb
 func (rc *RedisController) generateRedisSpec() *v1alpha2.ExternalRedisSpec {
 	return &v1alpha2.ExternalRedisSpec{
 		RedisHostSpec: harbormetav1.RedisHostSpec{
-			Host:              fmt.Sprintf("rfs-%s", rc.ResourceManager.GetServiceName()),
+			Host:              fmt.Sprintf("rfs-%s", rc.ResourceManager.GetCacheCRName()),
 			Port:              RedisSentinelConnPort,
 			SentinelMasterSet: RedisSentinelConnGroup,
 		},
@@ -167,51 +167,25 @@ func (rc *RedisController) CheckInClusterRedisHealth(ctx context.Context, cluste
 		return nil, errors.New("pod list is empty，pls wait")
 	}
 
-	spec := cluster.Spec.InClusterCache.RedisSpec
-	switch spec.Schema {
-	case SchemaRedisSentinel:
-		sentinelPodArray := sentinelPodList.Items
-		_, currentSentinelPods := rc.GetPodsStatus(sentinelPodArray)
+	sentinelPodArray := sentinelPodList.Items
+	_, currentSentinelPods := rc.GetPodsStatus(sentinelPodArray)
 
-		if len(currentSentinelPods) == 0 {
-			return nil, errors.New("need to requeue")
-		}
-
-		endpoint := rc.GetSentinelServiceURL(rc.ResourceManager.GetCacheCRName(), cluster.Namespace, currentSentinelPods)
-		config := &lcm.ServiceConfig{
-			Endpoint: &lcm.Endpoint{
-				Host: endpoint,
-				Port: RedisSentinelConnPort,
-			},
-			Credentials: &lcm.Credentials{
-				AccessSecret: password,
-			},
-		}
-
-		return rc.HealthChecker().CheckHealth(ctx, config, lcm.WithSentinel(true))
-	case SchemaRedisServer:
-		redisPodArray := redisPodList.Items
-		_, currentRedisPods := rc.GetPodsStatus(redisPodArray)
-
-		if len(currentRedisPods) == 0 {
-			return nil, errors.New("need to requeue")
-		}
-
-		endpoint := rc.GetRedisServiceURL(rc.ResourceManager.GetCacheCRName(), cluster.Namespace, currentRedisPods)
-		config := &lcm.ServiceConfig{
-			Endpoint: &lcm.Endpoint{
-				Host: endpoint,
-				Port: RedisRedisConnPort,
-			},
-			Credentials: &lcm.Credentials{
-				AccessSecret: password,
-			},
-		}
-
-		return rc.HealthChecker().CheckHealth(ctx, config)
-	default:
-		return nil, fmt.Errorf("not supported schema: %s", spec.Schema)
+	if len(currentSentinelPods) == 0 {
+		return nil, errors.New("need to requeue")
 	}
+
+	endpoint := rc.GetSentinelServiceURL(rc.ResourceManager.GetCacheCRName(), cluster.Namespace, currentSentinelPods)
+	config := &lcm.ServiceConfig{
+		Endpoint: &lcm.Endpoint{
+			Host: endpoint,
+			Port: RedisSentinelConnPort,
+		},
+		Credentials: &lcm.Credentials{
+			AccessSecret: password,
+		},
+	}
+
+	return rc.HealthChecker().CheckHealth(ctx, config, lcm.WithSentinel(true))
 }
 
 // GetPodsStatus returns deleting  and current pod list.
@@ -252,22 +226,6 @@ func (rc *RedisController) GetSentinelServiceURL(name, namespace string, pods []
 		url = randomPod.Status.PodIP
 	} else {
 		url = fmt.Sprintf("%s-%s.%s.svc.cluster.local", "rfs", name, namespace)
-	}
-
-	return url
-}
-
-// GetRedisServiceURL returns the Redis server pod ip or service name.
-func (rc *RedisController) GetRedisServiceURL(name, namespace string, pods []corev1.Pod) string {
-	var url string
-
-	randomPod := pods[rand.Intn(len(pods))]
-
-	_, err := rest.InClusterConfig()
-	if err != nil {
-		url = randomPod.Status.PodIP
-	} else {
-		url = fmt.Sprintf("%s.%s.svc.cluster.local", rc.ResourceManager.GetServiceName(), namespace)
 	}
 
 	return url

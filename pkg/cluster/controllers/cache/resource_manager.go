@@ -11,7 +11,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 // ResourceManager defines the common interface of resources.
@@ -26,8 +25,6 @@ type ResourceGetter interface {
 	GetCacheCR() runtime.Object
 	GetCacheCRName() string
 	GetResourceList() corev1.ResourceList
-	GetServiceName() string
-	GetService() *corev1.Service
 	GetSecretName() string
 	GetSecret() *corev1.Secret
 	GetServerReplica() int
@@ -112,44 +109,6 @@ func (rm *redisResourceManager) GetCacheCR() runtime.Object {
 // GetCacheCRName gets cache cr name.
 func (rm *redisResourceManager) GetCacheCRName() string {
 	return fmt.Sprintf("%s-%s", rm.cluster.Name, "redis")
-}
-
-// GetServiceName gets service name.
-func (rm *redisResourceManager) GetServiceName() string {
-	return rm.GetCacheCRName()
-}
-
-// GetService gets service.
-func (rm *redisResourceManager) GetService() *corev1.Service {
-	name := rm.GetServiceName()
-
-	return &corev1.Service{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: "v1",
-			Kind:       "Service",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: rm.cluster.Namespace,
-			Labels:    rm.GetLabels(),
-		},
-		Spec: corev1.ServiceSpec{
-			Type: corev1.ServiceTypeClusterIP,
-			Selector: map[string]string{
-				"app.kubernetes.io/component": "redis",
-				"app.kubernetes.io/name":      rm.GetCacheCRName(),
-				"app.kubernetes.io/part-of":   "redis-failover",
-			},
-			Ports: []corev1.ServicePort{
-				{
-					Port:       6379,
-					TargetPort: intstr.FromInt(6379),
-					Protocol:   corev1.ProtocolTCP,
-					Name:       "redis",
-				},
-			},
-		},
-	}
 }
 
 // GetSecretName gets secret name.

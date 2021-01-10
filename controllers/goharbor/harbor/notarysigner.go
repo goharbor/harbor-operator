@@ -9,6 +9,7 @@ import (
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/pkg/graph"
+	"github.com/goharbor/harbor-operator/pkg/version"
 	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	v1 "github.com/jetstack/cert-manager/pkg/apis/meta/v1"
 	"github.com/ovh/configstore"
@@ -339,11 +340,12 @@ func (r *Reconciler) GetNotarySigner(ctx context.Context, harbor *goharborv1alph
 
 	return &goharborv1alpha2.NotarySigner{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
+			Name:        name,
+			Namespace:   namespace,
+			Annotations: version.SetVersion(nil, harbor.Spec.Version),
 		},
 		Spec: goharborv1alpha2.NotarySignerSpec{
-			ComponentSpec: harbor.Spec.Notary.Signer,
+			ComponentSpec: r.getComponentSpec(ctx, harbor, harbormetav1.NotarySignerComponent),
 			Authentication: goharborv1alpha2.NotarySignerAuthenticationSpec{
 				CertificateRef: certificateRef,
 			},

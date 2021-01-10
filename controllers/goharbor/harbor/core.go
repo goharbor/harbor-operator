@@ -9,6 +9,7 @@ import (
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/pkg/graph"
+	"github.com/goharbor/harbor-operator/pkg/version"
 	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	"github.com/pkg/errors"
 	"github.com/sethvargo/go-password/password"
@@ -410,11 +411,12 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1alpha2.Harbo
 
 	return &goharborv1alpha2.Core{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
+			Name:        name,
+			Namespace:   namespace,
+			Annotations: version.SetVersion(nil, harbor.Spec.Version),
 		},
 		Spec: goharborv1alpha2.CoreSpec{
-			ComponentSpec: harbor.Spec.Registry.ComponentSpec,
+			ComponentSpec: r.getComponentSpec(ctx, harbor, harbormetav1.CoreComponent),
 			Components: goharborv1alpha2.CoreComponentsSpec{
 				Registry: goharborv1alpha2.CoreComponentsRegistrySpec{
 					RegistryControllerConnectionSpec: goharborv1alpha2.RegistryControllerConnectionSpec{

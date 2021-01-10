@@ -24,15 +24,15 @@ type HarborClusterSpec struct {
 	HarborSpec `json:",inline"`
 
 	// Cache configuration for in-cluster cache services
-	// +optional
+	// +kubebuilder:validation:Optional
 	InClusterCache *Cache `json:"inClusterCache,omitempty"`
 
 	// Database configuration for in-cluster database service
-	// +optional
+	// +kubebuilder:validation:Optional
 	InClusterDatabase *Database `json:"inClusterDatabase,omitempty"`
 
 	// Storage configuration for in-cluster storage service
-	// +optional
+	// +kubebuilder:validation:Optional
 	InClusterStorage *Storage `json:"inClusterStorage,omitempty"`
 }
 
@@ -58,9 +58,6 @@ type RedisSpec struct {
 	TLSConfig string `json:"tlsConfig,omitempty"`
 
 	GroupName string `json:"groupName,omitempty"`
-
-	// +kubebuilder:validation:Enum=sentinel;redis
-	Schema string `json:"schema,omitempty"`
 
 	Hosts []RedisHosts `json:"hosts,omitempty"`
 }
@@ -222,14 +219,16 @@ const (
 )
 
 // +kubebuilder:object:root=true
+// +kubebuilder:storageversion
+// +k8s:openapi-gen=true
+// +resource:path=harborcluster
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Public URL",type=string,JSONPath=`.spec.externalURL`,description="The public URL to the Harbor application",priority=0
-// +kubebuilder:printcolumn:name="Status", type=string,JSONPath=`.status.status`,description="The overall status of the Harbor cluster",priority=0
-// +kubebuilder:printcolumn:name="Service Ready", type=string,JSONPath=`.status.conditions[?(@.type=="ServiceReady")].status`,description="The current status of the new Harbor spec",priority=10
-// +kubebuilder:printcolumn:name="Cache Ready", type=string,JSONPath=`.status.conditions[?(@.type=="CacheReady")].status`,description="The current status of the new Cache spec",priority=20
-// +kubebuilder:printcolumn:name="Database Ready", type=string,JSONPath=`.status.conditions[?(@.type=="DatabaseReady")].status`,description="The current status of the new Database spec",priority=20
-// +kubebuilder:printcolumn:name="Storage Ready", type=string,JSONPath=`.status.conditions[?(@.type=="StorageReady")].status`,description="The current status of the new Storage spec",priority=20
-
+// +kubebuilder:printcolumn:name="Status",type=string,JSONPath=`.status.status`,description="The overall status of the Harbor cluster",priority=0
+// +kubebuilder:printcolumn:name="Service Ready",type=string,JSONPath=`.status.conditions[?(@.type=="ServiceReady")].status`,description="The current status of the new Harbor spec",priority=10
+// +kubebuilder:printcolumn:name="Cache Ready",type=string,JSONPath=`.status.conditions[?(@.type=="CacheReady")].status`,description="The current status of the new Cache spec",priority=20
+// +kubebuilder:printcolumn:name="Database Ready",type=string,JSONPath=`.status.conditions[?(@.type=="DatabaseReady")].status`,description="The current status of the new Database spec",priority=20
+// +kubebuilder:printcolumn:name="Storage Ready",type=string,JSONPath=`.status.conditions[?(@.type=="StorageReady")].status`,description="The current status of the new Storage spec",priority=20
 // HarborCluster is the Schema for the harborclusters API.
 type HarborCluster struct {
 	metav1.TypeMeta   `json:",inline"`
@@ -240,7 +239,6 @@ type HarborCluster struct {
 }
 
 // +kubebuilder:object:root=true
-
 // HarborClusterList contains a list of HarborCluster.
 type HarborClusterList struct {
 	metav1.TypeMeta `json:",inline"`

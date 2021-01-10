@@ -1,3 +1,4 @@
+// +kubebuilder:skip
 package api
 
 // Postgres CRD definition, please use CamelCase for field names.

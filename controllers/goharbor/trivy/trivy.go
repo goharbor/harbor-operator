@@ -18,8 +18,6 @@ import (
 
 const (
 	DefaultRequeueWait = 2 * time.Second
-	ConfigImageKey     = "docker-image"
-	DefaultImage       = config.DefaultRegistry + "goharbor/trivy-adapter-photon:" + config.DefaultHarborVersion
 )
 
 // Reconciler reconciles a Trivy object.

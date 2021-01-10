@@ -18,8 +18,3 @@ const (
 	ErrorUpdateRedisCr                = "Update redis cr error"
 	ErrorDefaultUnstructuredConverter = "Default unstructured converter error"
 )
-
-const (
-	SchemaRedisSentinel = "sentinel"
-	SchemaRedisServer   = "redis"
-)

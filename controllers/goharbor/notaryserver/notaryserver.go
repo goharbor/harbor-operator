@@ -25,8 +25,6 @@ const (
 	ConfigTemplatePathKey     = "template-path"
 	DefaultConfigTemplatePath = "/etc/harbor-operator/notaryserver-config.json.tmpl"
 	ConfigTemplateKey         = "template-content"
-	ConfigImageKey            = "docker-image"
-	DefaultImage              = config.DefaultRegistry + "goharbor/notary-server-photon:" + config.DefaultHarborVersion
 )
 
 // Reconciler reconciles a NotaryServer object.

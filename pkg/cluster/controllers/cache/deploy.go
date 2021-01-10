@@ -34,10 +34,6 @@ func (rc *RedisController) Deploy(cluster *v1alpha2.HarborCluster) (*lcm.CRStatu
 		return cacheNotReadyStatus(ErrorCreateRedisSecret, err.Error()), err
 	}
 
-	if err = rc.DeployService(cluster); err != nil {
-		return cacheNotReadyStatus(ErrorCreateRedisServerService, err.Error()), err
-	}
-
 	rc.Log.Info("Creating Redis.", "namespace", cluster.Namespace, "name", cluster.Name)
 
 	unstructuredData, err := runtime.DefaultUnstructuredConverter.ToUnstructured(expectCR)
@@ -53,24 +49,6 @@ func (rc *RedisController) Deploy(cluster *v1alpha2.HarborCluster) (*lcm.CRStatu
 	rc.Log.Info("Redis has been created.", "namespace", cluster.Namespace, "name", cluster.Name)
 
 	return cacheUnknownStatus(), nil
-}
-
-func (rc *RedisController) DeployService(cluster *v1alpha2.HarborCluster) error {
-	service := &corev1.Service{}
-
-	svc := rc.ResourceManager.GetService()
-	if err := controllerutil.SetControllerReference(cluster, svc, rc.Scheme); err != nil {
-		return err
-	}
-
-	err := rc.Client.Get(types.NamespacedName{Name: svc.Name, Namespace: svc.Namespace}, service)
-	if err != nil && errors.IsNotFound(err) {
-		rc.Log.Info("Creating Redis server service", "namespace", cluster.Namespace, "name", svc.Name)
-
-		return rc.Client.Create(svc)
-	}
-
-	return err
 }
 
 func (rc *RedisController) DeploySecret(cluster *v1alpha2.HarborCluster) error {

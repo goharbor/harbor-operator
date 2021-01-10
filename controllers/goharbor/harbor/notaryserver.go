@@ -10,6 +10,7 @@ import (
 	"github.com/goharbor/harbor-operator/controllers"
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	"github.com/goharbor/harbor-operator/pkg/graph"
+	"github.com/goharbor/harbor-operator/pkg/version"
 	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	v1 "github.com/jetstack/cert-manager/pkg/apis/meta/v1"
 	"github.com/ovh/configstore"
@@ -103,8 +104,9 @@ func (r *Reconciler) GetNotaryServerCertificate(ctx context.Context, harbor *goh
 
 	return &certv1.Certificate{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      r.NormalizeName(ctx, harbor.GetName(), controllers.NotaryServer.String(), "authentication"),
-			Namespace: harbor.GetNamespace(),
+			Name:        r.NormalizeName(ctx, harbor.GetName(), controllers.NotaryServer.String(), "authentication"),
+			Namespace:   harbor.GetNamespace(),
+			Annotations: version.SetVersion(nil, harbor.Spec.Version),
 		},
 		Spec: certv1.CertificateSpec{
 			SecretName: secretName,
@@ -198,7 +200,7 @@ func (r *Reconciler) GetNotaryServer(ctx context.Context, harbor *goharborv1alph
 			Namespace: namespace,
 		},
 		Spec: goharborv1alpha2.NotaryServerSpec{
-			ComponentSpec: harbor.Spec.Notary.Server,
+			ComponentSpec: r.getComponentSpec(ctx, harbor, harbormetav1.NotaryServerComponent),
 			TLS:           tls,
 			Authentication: &goharborv1alpha2.NotaryServerAuthSpec{
 				Token: goharborv1alpha2.NotaryServerAuthTokenSpec{
