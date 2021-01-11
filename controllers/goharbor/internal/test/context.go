@@ -2,7 +2,6 @@ package test
 
 import (
 	"context"
-	"path/filepath"
 
 	"github.com/goharbor/harbor-operator/pkg/factories/application"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
@@ -68,7 +67,7 @@ func WithRestConfig(ctx context.Context, cfg *rest.Config) context.Context {
 	return context.WithValue(ctx, &restConfigKey, cfg)
 }
 
-func NewContext(pathToModule string) context.Context {
+func NewContext() context.Context {
 	log := zap.LoggerTo(ginkgo.GinkgoWriter, true)
 	logf.SetLogger(log)
 
@@ -82,9 +81,7 @@ func NewContext(pathToModule string) context.Context {
 
 	ctx = WithScheme(ctx, s)
 
-	testEnv := &envtest.Environment{
-		CRDDirectoryPaths: []string{filepath.Join(pathToModule, "config", "crd", "bases")},
-	}
+	testEnv := &envtest.Environment{}
 
 	ctx = WithEnvironment(ctx, testEnv)
 

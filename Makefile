@@ -107,7 +107,7 @@ diff:
 	git diff --stat --diff-filter=d --exit-code HEAD
 
 .PHONY: go-test
-go-test: go-generate
+go-test: install certmanager
 ifeq (, $(USE_EXISTING_CLUSTER))
 	$(warning USE_EXISTING_CLUSTER variable is not defined)
 endif
@@ -356,12 +356,12 @@ $(CHART_HARBOR_OPERATOR)/README.md: helm-docs $(CHART_HARBOR_OPERATOR)/README.md
 
 # Install CRDs into a cluster
 .PHONY: install
-install: go-generate kustomize
+install: go-generate
 	kubectl apply -f config/crd/bases
 
 # Uninstall CRDs from a cluster
 .PHONY: uninstall
-uninstall: go-generate kustomize
+uninstall: go-generate
 	kubectl delete -f config/crd/bases
 
 go-generate: controller-gen stringer
@@ -456,7 +456,7 @@ jetstack:
 .PHONY: dev-certificate
 dev-certificate:
 	$(RM) -r "$(TMPDIR)k8s-webhook-server/serving-certs"
-	$(TMPDIR)k8s-webhook-server/serving-certs/tls.crt
+	$(MAKE) $(TMPDIR)k8s-webhook-server/serving-certs/tls.crt
 
 $(TMPDIR)k8s-webhook-server/serving-certs/tls.crt:
 	mkdir -p "$(TMPDIR)k8s-webhook-server/serving-certs"

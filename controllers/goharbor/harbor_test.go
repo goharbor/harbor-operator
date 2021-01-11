@@ -30,9 +30,12 @@ import (
 	cmmeta "github.com/jetstack/cert-manager/pkg/apis/meta/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
+
+const storageRequest = "10Mi"
 
 var _ = Context("Harbor reconciler", func() {
 	var ctx context.Context
@@ -68,7 +71,7 @@ func newHarborController() controllerTest {
 	}
 }
 
-func setupHarborResourceDependencies(ctx context.Context, ns string) (string, string, string) {
+func setupHarborResourceDependencies(ctx context.Context, ns string) (string, string, string, string) {
 	adminSecretName := newName("admin-secret")
 
 	err := k8sClient.Create(ctx, &corev1.Secret{
@@ -98,23 +101,50 @@ func setupHarborResourceDependencies(ctx context.Context, ns string) (string, st
 	})
 	Expect(err).ToNot(HaveOccurred())
 
-	pvcName := newName("pvc")
+	registryPvcName := newName("registry-pvc")
 
 	err = k8sClient.Create(ctx, &corev1.PersistentVolumeClaim{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      pvcName,
+			Name:      registryPvcName,
 			Namespace: ns,
+		},
+		Spec: corev1.PersistentVolumeClaimSpec{
+			AccessModes: []corev1.PersistentVolumeAccessMode{corev1.ReadWriteOnce},
+			Resources: corev1.ResourceRequirements{
+				Requests: corev1.ResourceList{
+					corev1.ResourceStorage: resource.MustParse(storageRequest),
+				},
+			},
 		},
 	})
 	Expect(err).ToNot(HaveOccurred())
 
-	return pvcName, adminSecretName, tokenIssuerName
+	chartPvcName := newName("chart-pvc")
+
+	err = k8sClient.Create(ctx, &corev1.PersistentVolumeClaim{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      chartPvcName,
+			Namespace: ns,
+		},
+		Spec: corev1.PersistentVolumeClaimSpec{
+			AccessModes: []corev1.PersistentVolumeAccessMode{corev1.ReadWriteOnce},
+			Resources: corev1.ResourceRequirements{
+				Requests: corev1.ResourceList{
+					corev1.ResourceStorage: resource.MustParse(storageRequest),
+				},
+			},
+		},
+	})
+	Expect(err).ToNot(HaveOccurred())
+
+	return registryPvcName, chartPvcName, adminSecretName, tokenIssuerName
 }
 
 func setupValidHarbor(ctx context.Context, ns string) (Resource, client.ObjectKey) {
-	pvcName, adminSecretName, tokenIssuerName := setupHarborResourceDependencies(ctx, ns)
+	registryPvcName, chartPvcName, adminSecretName, tokenIssuerName := setupHarborResourceDependencies(ctx, ns)
 
-	database := setupPostgresql(ctx, ns)
+	database := setupPostgresql(ctx, ns, "core")
+	redis := setupRedis(ctx, ns)
 
 	name := newName("harbor")
 	publicURL := url.URL{
@@ -136,8 +166,13 @@ func setupValidHarbor(ctx context.Context, ns string) (Resource, client.ObjectKe
 					RegistryPersistentVolume: goharborv1alpha2.HarborStorageRegistryPersistentVolumeSpec{
 						HarborStoragePersistentVolumeSpec: goharborv1alpha2.HarborStoragePersistentVolumeSpec{
 							PersistentVolumeClaimVolumeSource: corev1.PersistentVolumeClaimVolumeSource{
-								ClaimName: pvcName,
+								ClaimName: registryPvcName,
 							},
+						},
+					},
+					ChartPersistentVolume: &goharborv1alpha2.HarborStoragePersistentVolumeSpec{
+						PersistentVolumeClaimVolumeSource: corev1.PersistentVolumeClaimVolumeSource{
+							ClaimName: chartPvcName,
 						},
 					},
 				},
@@ -152,6 +187,10 @@ func setupValidHarbor(ctx context.Context, ns string) (Resource, client.ObjectKe
 					PostgresCredentials: database.PostgresCredentials,
 					Hosts:               database.Hosts,
 					SSLMode:             harbormetav1.PostgresSSLMode(database.Parameters[harbormetav1.PostgresSSLModeKey]),
+				},
+				Redis: goharborv1alpha2.ExternalRedisSpec{
+					RedisHostSpec:    redis.RedisHostSpec,
+					RedisCredentials: redis.RedisCredentials,
 				},
 			},
 		},

@@ -22,6 +22,7 @@ func Logs(ctx context.Context, deployment types.NamespacedName) map[string][]byt
 	gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 	var deploymentResource appsv1.Deployment
+
 	gomega.Expect(
 		client.Get().
 			Resource("deployments").
@@ -33,7 +34,7 @@ func Logs(ctx context.Context, deployment types.NamespacedName) map[string][]byt
 
 	gomega.Expect(deploymentResource.Spec.Selector.MatchLabels).ToNot(gomega.HaveLen(0))
 
-	var labelSelectors []string
+	labelSelectors := make([]string, 0, len(deploymentResource.Spec.Selector.MatchLabels))
 	for label, value := range deploymentResource.Spec.Selector.MatchLabels {
 		labelSelectors = append(labelSelectors, fmt.Sprintf("%s=%s", label, value))
 	}
@@ -42,6 +43,7 @@ func Logs(ctx context.Context, deployment types.NamespacedName) map[string][]byt
 	gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 	var pods corev1.PodList
+
 	gomega.Expect(
 		client.Get().
 			Resource("pods").

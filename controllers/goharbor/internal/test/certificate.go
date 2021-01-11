@@ -1,136 +1,114 @@
-/*
-Copyright 2019 The Kubernetes Authors.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 package test
 
 import (
+	"bytes"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
-	"io"
-	"io/ioutil"
 	"math/big"
 	"time"
 
-	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
+
 	corev1 "k8s.io/api/core/v1"
 )
 
-func GenerateCertificate() map[string][]byte {
-	caKey, err := rsa.GenerateKey(rand.Reader, 2048)
+func bytesToPEM(certBytes []byte, certPrivKey *rsa.PrivateKey) (*bytes.Buffer, *bytes.Buffer) {
+	certPEM := new(bytes.Buffer)
+	err := pem.Encode(certPEM, &pem.Block{
+		Type:  "CERTIFICATE",
+		Bytes: certBytes,
+	})
 	gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
-	//	x509.KeyUsageDigitalSignature
-	var ca *x509.Certificate
+	certPrivKeyPEM := new(bytes.Buffer)
+	err = pem.Encode(certPrivKeyPEM, &pem.Block{
+		Type:  "RSA PRIVATE KEY",
+		Bytes: x509.MarshalPKCS1PrivateKey(certPrivKey),
+	})
+	gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
-	reader, writer := io.Pipe()
+	return certPEM, certPrivKeyPEM
+}
 
-	go func() {
-		defer ginkgo.GinkgoRecover()
+func verifyCertificate(caPEM *bytes.Buffer, certPEM *bytes.Buffer, dnsNames ...string) {
+	roots := x509.NewCertPool()
+	gomega.Expect(roots.AppendCertsFromPEM(caPEM.Bytes())).To(gomega.BeTrue())
 
-		now := time.Now()
-		template := x509.Certificate{
-			SerialNumber: new(big.Int).Lsh(big.NewInt(1), 128),
-			Subject: pkix.Name{
-				Organization: []string{"goharbor.io"},
-			},
-			NotBefore:             now,
-			NotAfter:              now.Add(time.Minute * 30),
-			KeyUsage:              x509.KeyUsageCertSign,
-			BasicConstraintsValid: true,
-			IsCA:                  true,
-		}
+	block, _ := pem.Decode(certPEM.Bytes())
+	gomega.Expect(block).ToNot(gomega.BeNil())
 
-		certBytes, err := x509.CreateCertificate(rand.Reader, &template, &template, &caKey.PublicKey, caKey)
+	cert, err := x509.ParseCertificate(block.Bytes)
+	gomega.Expect(err).ToNot(gomega.HaveOccurred())
+
+	_, err = cert.Verify(x509.VerifyOptions{
+		KeyUsages: []x509.ExtKeyUsage{
+			x509.ExtKeyUsageClientAuth,
+		},
+		Roots:                     roots,
+		CurrentTime:               time.Now(),
+		MaxConstraintComparisions: 0,
+	})
+	gomega.Expect(err).ToNot(gomega.HaveOccurred())
+
+	for _, dnsName := range dnsNames {
+		_, err = cert.Verify(x509.VerifyOptions{
+			Roots:   roots,
+			DNSName: dnsName,
+		})
 		gomega.Expect(err).ToNot(gomega.HaveOccurred())
+	}
+}
 
-		ca, err = x509.ParseCertificate(certBytes)
-		gomega.Expect(err).ToNot(gomega.HaveOccurred())
+func GenerateCertificate(dnsNames ...string) map[string][]byte {
+	ca := &x509.Certificate{
+		SerialNumber: big.NewInt(2019),
+		Subject: pkix.Name{
+			Organization: []string{"goharbor.io"},
+		},
+		NotBefore:             time.Now(),
+		NotAfter:              time.Now().Add(time.Minute * 30),
+		IsCA:                  true,
+		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
+		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign,
+		BasicConstraintsValid: true,
+	}
 
-		gomega.Expect(pem.Encode(writer, &pem.Block{Type: "CERTIFICATE", Bytes: certBytes})).
-			To(gomega.Succeed())
-
-		gomega.Expect(writer.Close()).To(gomega.Succeed())
-	}()
-
-	caPublicBytes, err := ioutil.ReadAll(reader)
+	caPrivKey, err := rsa.GenerateKey(rand.Reader, 4096)
 	gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
-	gomega.Expect(reader.Close()).To(gomega.Succeed())
-
-	priv, err := rsa.GenerateKey(rand.Reader, 2048)
+	caBytes, err := x509.CreateCertificate(rand.Reader, ca, ca, &caPrivKey.PublicKey, caPrivKey)
 	gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
-	reader, writer = io.Pipe()
+	caPEM, _ := bytesToPEM(caBytes, caPrivKey)
 
-	go func() {
-		defer ginkgo.GinkgoRecover()
+	cert := &x509.Certificate{
+		SerialNumber: big.NewInt(1658),
+		Subject: pkix.Name{
+			Organization: []string{"goharbor.io"},
+		},
+		DNSNames:     dnsNames,
+		NotBefore:    time.Now(),
+		NotAfter:     time.Now().Add(time.Minute * 30),
+		SubjectKeyId: []byte{1, 2, 3, 4, 6},
+		ExtKeyUsage:  []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
+		KeyUsage:     x509.KeyUsageDigitalSignature,
+	}
 
-		privBytes, err := x509.MarshalPKCS8PrivateKey(priv)
-		gomega.Expect(err).ToNot(gomega.HaveOccurred())
-
-		gomega.Expect(pem.Encode(writer, &pem.Block{Type: "PRIVATE KEY", Bytes: privBytes})).
-			To(gomega.Succeed())
-
-		gomega.Expect(writer.Close()).To(gomega.Succeed())
-	}()
-
-	privBytes, err := ioutil.ReadAll(reader)
+	certPrivKey, err := rsa.GenerateKey(rand.Reader, 4096)
 	gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
-	gomega.Expect(reader.Close()).To(gomega.Succeed())
-
-	reader, writer = io.Pipe()
-
-	go func() {
-		defer ginkgo.GinkgoRecover()
-
-		now := time.Now()
-		template := x509.Certificate{
-			SerialNumber: new(big.Int).Lsh(big.NewInt(1), 128),
-			Subject: pkix.Name{
-				Organization: []string{"goharbor.io"},
-			},
-			NotBefore:             now,
-			NotAfter:              now.Add(time.Minute * 30),
-			KeyUsage:              x509.KeyUsageCertSign,
-			BasicConstraintsValid: true,
-			IsCA:                  true,
-		}
-
-		certBytes, err := x509.CreateCertificate(rand.Reader, &template, ca, &priv.PublicKey, priv)
-		gomega.Expect(err).ToNot(gomega.HaveOccurred())
-
-		gomega.Expect(pem.Encode(writer, &pem.Block{Type: "CERTIFICATE", Bytes: certBytes})).
-			To(gomega.Succeed())
-
-		gomega.Expect(writer.Close()).To(gomega.Succeed())
-	}()
-
-	publicBytes, err := ioutil.ReadAll(reader)
+	certBytes, err := x509.CreateCertificate(rand.Reader, cert, ca, &certPrivKey.PublicKey, caPrivKey)
 	gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
-	gomega.Expect(reader.Close()).To(gomega.Succeed())
+	certPEM, certPrivKeyPEM := bytesToPEM(certBytes, certPrivKey)
+	verifyCertificate(caPEM, certPEM, dnsNames...)
 
 	return map[string][]byte{
-		corev1.TLSPrivateKeyKey:        privBytes,
-		corev1.TLSCertKey:              publicBytes,
-		corev1.ServiceAccountRootCAKey: caPublicBytes,
+		corev1.TLSPrivateKeyKey:        certPrivKeyPEM.Bytes(),
+		corev1.TLSCertKey:              certPEM.Bytes(),
+		corev1.ServiceAccountRootCAKey: caPEM.Bytes(),
 	}
 }

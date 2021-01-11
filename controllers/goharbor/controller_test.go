@@ -103,11 +103,11 @@ var _ = DescribeTable(
 	Entry("Registry", newRegistryController(), time.Minute, 5*time.Second),
 	Entry("RegistryCtl", newRegistryCtlController(), 2*time.Minute, 5*time.Second),
 	Entry("ChartMuseum", newChartMuseumController(), time.Minute, 5*time.Second),
-	Entry("Trivy", newTrivyController(), time.Minute, 5*time.Second),
+	Entry("Trivy", newTrivyController(), 3*time.Minute, 5*time.Second),
 	Entry("NotaryServer", newNotaryServerController(), time.Minute, 5*time.Second),
 	Entry("NotarySigner", newNotarySignerController(), time.Minute, 5*time.Second),
 	Entry("Core", newCoreController(), time.Minute, 5*time.Second),
 	Entry("JobService", newJobServiceController(), time.Minute, 5*time.Second),
 	// Following tests require redis
-	PEntry("Harbor", newHarborController(), 5*time.Minute, 10*time.Second),
+	Entry("Harbor", newHarborController(), 5*time.Minute, 10*time.Second),
 )
