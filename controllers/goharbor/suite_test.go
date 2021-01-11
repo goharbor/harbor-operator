@@ -16,7 +16,6 @@ package goharbor_test
 import (
 	"fmt"
 	"math/rand"
-	"path/filepath"
 	"testing"
 
 	. "github.com/onsi/ginkgo"
@@ -70,9 +69,7 @@ var _ = BeforeSuite(func(done Done) {
 	application.SetVersion(&ctx, version)
 
 	By("bootstrapping test environment")
-	testEnv = &envtest.Environment{
-		CRDDirectoryPaths: []string{filepath.Join("..", "..", "config", "crd", "bases")},
-	}
+	testEnv = &envtest.Environment{}
 
 	var err error
 	cfg, err = testEnv.Start()
@@ -147,7 +144,7 @@ var letterRunes = []rune("abcdefghijklmnopqrstuvwxyz1234567890")
 func randStringRunes(n int) string {
 	b := make([]rune, n)
 	for i := range b {
-		b[i] = letterRunes[rand.Intn(len(letterRunes))] // nolint:gosec
+		b[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}
 
 	return string(b)

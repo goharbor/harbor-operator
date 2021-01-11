@@ -36,7 +36,7 @@ func newCoreController() controllerTest {
 	}
 }
 
-func setupCoreResourceDependencies(ctx context.Context, ns string) (string, string, string, string, string, string, string, string) {
+func setupCoreResourceDependencies(ctx context.Context, ns string) (string, string, string, string, string, string, string) {
 	encryption := newName("encryption")
 	csrf := newName("csrf")
 	registryCtl := newName("registryctl")
@@ -44,7 +44,7 @@ func setupCoreResourceDependencies(ctx context.Context, ns string) (string, stri
 	core := newName("core-secret")
 	jobservice := newName("jobservice-secret")
 	tokenCert := newName("token-certificate")
-	redis := newName("redis")
+	//redis := newName("redis")
 
 	Expect(k8sClient.Create(ctx, &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
@@ -121,7 +121,7 @@ func setupCoreResourceDependencies(ctx context.Context, ns string) (string, stri
 		Type: harbormetav1.SecretTypeSingle,
 	})).To(Succeed())
 
-	Expect(k8sClient.Create(ctx, &corev1.Secret{
+	/*Expect(k8sClient.Create(ctx, &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      redis,
 			Namespace: ns,
@@ -130,15 +130,16 @@ func setupCoreResourceDependencies(ctx context.Context, ns string) (string, stri
 			harbormetav1.RedisPasswordKey: "the-redis-password",
 		},
 		Type: harbormetav1.SecretTypeRedis,
-	})).To(Succeed())
+	})).To(Succeed())*/
 
-	return encryption, csrf, registryCtl, admin, core, jobservice, tokenCert, redis
+	return encryption, csrf, registryCtl, admin, core, jobservice, tokenCert
 }
 
 func setupValidCore(ctx context.Context, ns string) (Resource, client.ObjectKey) {
-	encryptionKeyName, csrfKey, registryCtlPassword, adminPassword, coreSecret, jobserviceSecret, tokenCertificate, redisPassword := setupCoreResourceDependencies(ctx, ns)
+	encryptionKeyName, csrfKey, registryCtlPassword, adminPassword, coreSecret, jobserviceSecret, tokenCertificate := setupCoreResourceDependencies(ctx, ns)
 
 	database := setupPostgresql(ctx, ns)
+	redis := setupRedis(ctx, ns)
 
 	name := newName("core")
 	core := &goharborv1alpha2.Core{
@@ -175,9 +176,6 @@ func setupValidCore(ctx context.Context, ns string) (Resource, client.ObjectKey)
 						RedisHostSpec: harbormetav1.RedisHostSpec{
 							Host: "registry-redis",
 						},
-						RedisCredentials: harbormetav1.RedisCredentials{
-							PasswordRef: redisPassword,
-						},
 						Database: 2,
 					},
 				},
@@ -190,15 +188,7 @@ func setupValidCore(ctx context.Context, ns string) (Resource, client.ObjectKey)
 				},
 			},
 			Redis: goharborv1alpha2.CoreRedisSpec{
-				RedisConnection: harbormetav1.RedisConnection{
-					RedisHostSpec: harbormetav1.RedisHostSpec{
-						Host: "the.redis.url",
-					},
-					RedisCredentials: harbormetav1.RedisCredentials{
-						PasswordRef: redisPassword,
-					},
-					Database: harbormetav1.CoreRedis.Index(),
-				},
+				RedisConnection: redis,
 			},
 		},
 	}

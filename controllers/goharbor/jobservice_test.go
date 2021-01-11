@@ -37,11 +37,11 @@ func newJobServiceController() controllerTest {
 	}
 }
 
-func setupJobServiceResourceDependencies(ctx context.Context, ns string) (string, string) {
-	redisSecret := newName("redis")
+func setupJobServiceResourceDependencies(ctx context.Context, ns string) string {
+	//redisSecret := newName("redis")
 	registrySecret := newName("registry")
 
-	Expect(k8sClient.Create(ctx, &corev1.Secret{
+	/*Expect(k8sClient.Create(ctx, &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      redisSecret,
 			Namespace: ns,
@@ -50,7 +50,7 @@ func setupJobServiceResourceDependencies(ctx context.Context, ns string) (string
 			harbormetav1.RedisPasswordKey: "redis-password",
 		},
 		Type: harbormetav1.SecretTypeRedis,
-	})).To(Succeed())
+	})).To(Succeed())*/
 
 	Expect(k8sClient.Create(ctx, &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
@@ -63,13 +63,14 @@ func setupJobServiceResourceDependencies(ctx context.Context, ns string) (string
 		Type: harbormetav1.SecretTypeSingle,
 	})).To(Succeed())
 
-	return redisSecret, registrySecret
+	return registrySecret
 }
 
 func setupValidJobService(ctx context.Context, ns string) (Resource, client.ObjectKey) {
-	redisSecret, registrySecret := setupJobServiceResourceDependencies(ctx, ns)
+	registrySecret := setupJobServiceResourceDependencies(ctx, ns)
 
 	coreResource, _ := setupValidCore(ctx, ns)
+	redis := setupRedis(ctx, ns)
 
 	core := coreResource.(*goharborv1alpha2.Core)
 
@@ -81,20 +82,12 @@ func setupValidJobService(ctx context.Context, ns string) (Resource, client.Obje
 		},
 		Spec: goharborv1alpha2.JobServiceSpec{
 			Core: goharborv1alpha2.JobServiceCoreSpec{
-				URL:       fmt.Sprintf("http://%s", core.GetName()),
+				URL:       fmt.Sprintf("http://%s-core", core.GetName()),
 				SecretRef: core.Spec.SecretRef,
 			},
 			WorkerPool: goharborv1alpha2.JobServicePoolSpec{
 				Redis: goharborv1alpha2.JobServicePoolRedisSpec{
-					RedisConnection: harbormetav1.RedisConnection{
-						RedisCredentials: harbormetav1.RedisCredentials{
-							PasswordRef: redisSecret,
-						},
-						RedisHostSpec: harbormetav1.RedisHostSpec{
-							Host: "the.redis.url",
-						},
-						Database: harbormetav1.JobServiceRedis.Index(),
-					},
+					RedisConnection: redis,
 				},
 			},
 			SecretRef: core.Spec.Components.JobService.SecretRef,

@@ -18,11 +18,13 @@ package goharbor_test
 
 import (
 	"context"
-
-	. "github.com/onsi/gomega"
+	"fmt"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	"github.com/goharbor/harbor-operator/controllers"
+	. "github.com/onsi/gomega"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -35,10 +37,42 @@ func newTrivyController() controllerTest {
 	}
 }
 
+func setupTrivyResourceDependencies(ctx context.Context, ns string, name string) (string, string) {
+	trivyCertName := newName("trivy-certificate")
+	trivyCertCommonName := fmt.Sprintf("%s-%s", name, controllers.Trivy.String())
+	trivyGithubTokenName := newName("trivy-github-token")
+
+	Expect(k8sClient.Create(ctx, &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      trivyCertName,
+			Namespace: ns,
+		},
+		Data: generateCertificate(trivyCertCommonName),
+		Type: corev1.SecretTypeTLS,
+	})).ToNot(HaveOccurred())
+
+	Expect(k8sClient.Create(ctx, &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      trivyGithubTokenName,
+			Namespace: ns,
+		},
+		StringData: map[string]string{
+			harbormetav1.GithubTokenKey: "github-token",
+		},
+		Type: harbormetav1.SecretTypeGithubToken,
+	})).To(Succeed())
+
+	return trivyCertName, trivyGithubTokenName
+}
+
 func setupValidTrivy(ctx context.Context, ns string) (Resource, client.ObjectKey) {
 	var replicas int32 = 1
 
 	name := newName("trivy")
+
+	redis := setupRedis(ctx, ns)
+	trivyCertName, trivyGithubTokenName := setupTrivyResourceDependencies(ctx, ns, name)
+
 	trivy := &goharborv1alpha2.Trivy{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
@@ -49,15 +83,17 @@ func setupValidTrivy(ctx context.Context, ns string) (Resource, client.ObjectKey
 			ComponentSpec: harbormetav1.ComponentSpec{
 				Replicas: &replicas,
 			},
-
 			Redis: goharborv1alpha2.TrivyRedisSpec{
-				RedisConnection: harbormetav1.RedisConnection{
-					RedisHostSpec: harbormetav1.RedisHostSpec{
-						Host: "10.2.1.14",
-						Port: 6379,
-					},
-					Database: 5,
+				RedisConnection: redis,
+			},
+			Server: goharborv1alpha2.TrivyServerSpec{
+				TLS: &harbormetav1.ComponentsTLSSpec{
+					CertificateRef: trivyCertName,
 				},
+			},
+			Update: goharborv1alpha2.TrivyUpdateSpec{
+				GithubTokenRef: trivyGithubTokenName,
+				Skip:           false,
 			},
 		},
 	}
