@@ -9,7 +9,6 @@ require (
 	github.com/go-kit/kit v0.10.0
 	github.com/go-logr/logr v0.1.0
 	github.com/goharbor/harbor/src v0.0.0-20200728051037-1d361a89a056
-	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/huandu/xstrings v1.3.2 // indirect
 	github.com/imdario/mergo v0.3.10 // indirect
 	github.com/jaegertracing/jaeger-lib v2.2.0+incompatible
@@ -30,7 +29,7 @@ require (
 	github.com/uber/jaeger-lib v2.2.0+incompatible
 	go.uber.org/zap v1.15.0
 	golang.org/x/crypto v0.0.0-20200728195943-123391ffb6de
-	golang.org/x/net v0.0.0-20200602114024-627f9648deb9
+	golang.org/x/net v0.0.0-20200602114024-627f9648deb9 // indirect
 	golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a
 	golang.org/x/sys v0.0.0-20200620081246-981b61492c35 // indirect
 	golang.org/x/time v0.0.0-20200416051211-89c76fbcd5d1 // indirect
@@ -40,6 +39,7 @@ require (
 	k8s.io/api v0.18.6
 	k8s.io/apimachinery v0.18.6
 	k8s.io/client-go v0.18.6
+	k8s.io/klog v1.0.0
 	k8s.io/utils v0.0.0-20200619165400-6e3d28b6ed19 // indirect
 	sigs.k8s.io/controller-runtime v0.6.4
 	sigs.k8s.io/kustomize/kstatus v0.0.2
