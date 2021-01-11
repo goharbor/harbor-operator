@@ -73,6 +73,9 @@ type CoreSpec struct {
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	CSRFKeyRef string `json:"csrfKeyRef"`
+
+	// +kubebuilder:validation:Optional
+	LoadBalancer *HarborExposeLBSpec `json:"loadbalancer,omitempty"`
 }
 
 type CoreRedisSpec struct {

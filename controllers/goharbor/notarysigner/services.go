@@ -2,6 +2,7 @@ package notarysigner
 
 import (
 	"context"
+	"fmt"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
@@ -35,4 +36,11 @@ func (r *Reconciler) GetService(ctx context.Context, notary *goharborv1alpha2.No
 			},
 		},
 	}, nil
+}
+
+func GetLBService(svc *corev1.Service) *corev1.Service {
+	svc.Spec.Type = corev1.ServiceTypeLoadBalancer
+	svc.Name = fmt.Sprintf("%s-lb", svc.Name)
+
+	return svc
 }

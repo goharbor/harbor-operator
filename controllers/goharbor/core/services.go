@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"fmt"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
@@ -35,4 +36,12 @@ func (r *Reconciler) GetService(ctx context.Context, core *goharborv1alpha2.Core
 			},
 		},
 	}, nil
+}
+
+func GetLBService(svc *corev1.Service) *corev1.Service {
+	new := svc.DeepCopy()
+	new.Spec.Type = corev1.ServiceTypeLoadBalancer
+	new.Name = fmt.Sprintf("%s-lb", svc.Name)
+
+	return new
 }

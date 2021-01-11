@@ -486,6 +486,9 @@ type HarborExposeComponentSpec struct {
 	Ingress *HarborExposeIngressSpec `json:"ingress,omitempty"`
 
 	// TODO Add supports to ClusterIP, LoadBalancer and NodePort by deploying the nginx component
+
+	// +kubebuilder:validation:Optional
+	LoadBalancer *HarborExposeLBSpec `json:"loadbalancer,omitempty"`
 }
 
 type HarborExposeIngressSpec struct {
@@ -501,6 +504,11 @@ type HarborExposeIngressSpec struct {
 
 	// +kubebuilder:validation:Optional
 	Annotations map[string]string `json:"annotations,omitempty"`
+}
+
+type HarborExposeLBSpec struct {
+	// +kubebuilder:validation:Optional
+	Enable bool `json:"enable,omitempty"`
 }
 
 func init() { // nolint:gochecknoinits

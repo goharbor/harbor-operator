@@ -57,6 +57,9 @@ type NotaryServerSpec struct {
 
 	// +kubebuilder:validation:Optional
 	MigrationEnabled *bool `json:"migrationEnabled,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	LoadBalancer *HarborExposeLBSpec `json:"loadbalancer,omitempty"`
 }
 
 const (

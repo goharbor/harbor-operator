@@ -56,6 +56,8 @@ spec:
         host: core.harbor.domain
       tls:
         certificateRef: sample-public-certificate
+      loadbalancer:
+        enable: true
   encryptionKeyRef: core-database-encryption
   internalTLS:
     enabled: true
@@ -81,6 +83,8 @@ spec:
   inClusterStorage:
     kind: MinIO
     minIOSpec:
+      redirect:
+        disable: true
       replicas: 2
       volumesPerServer: 2
       version: RELEASE.2020-08-13T02-39-50Z
