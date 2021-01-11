@@ -14,6 +14,7 @@ func (m *Mutable) AppendMutation(mutate Mutable) {
 		if err := old(ctx, resource); err != nil {
 			return err
 		}
+
 		return mutate(ctx, resource)
 	}
 }
@@ -24,6 +25,7 @@ func (m *Mutable) PrependMutation(mutate Mutable) {
 		if err := mutate(ctx, resource); err != nil {
 			return err
 		}
+
 		return old(ctx, resource)
 	}
 }

@@ -133,9 +133,6 @@ func IntegTest(ctx context.Context, chartMuseum *goharborv1alpha2.ChartMuseum) {
 		Namespace: chartMuseum.GetNamespace(),
 	}
 
-	// Make sure chart museum is up and running
-	//time.Sleep(60 * time.Second)
-
 	proxyReq := client.Get().
 		Resource("services").
 		Namespace(namespacedName.Namespace).

@@ -89,6 +89,7 @@ func InitNamespace(ctxFactory func() context.Context) *corev1.Namespace {
 	ginkgo.AfterEach(func() {
 		if ginkgo.CurrentGinkgoTestDescription().Failed && keepNamespaceOnFailure {
 			fmt.Fprintf(ginkgo.GinkgoWriter, "keeping namespace %s\n", ns.GetName())
+
 			return
 		}
 
