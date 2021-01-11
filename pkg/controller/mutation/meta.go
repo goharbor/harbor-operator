@@ -63,6 +63,5 @@ func GetTemplateMetaMutation(getter MetaGetter, setter MetaSetter, key, value st
 		setter(&resultDeployment.Spec.Template, data)
 
 		return nil
-
 	}
 }

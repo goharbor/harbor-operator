@@ -44,7 +44,6 @@ func setupCoreResourceDependencies(ctx context.Context, ns string) (string, stri
 	core := newName("core-secret")
 	jobservice := newName("jobservice-secret")
 	tokenCert := newName("token-certificate")
-	//redis := newName("redis")
 
 	Expect(k8sClient.Create(ctx, &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
@@ -120,17 +119,6 @@ func setupCoreResourceDependencies(ctx context.Context, ns string) (string, stri
 		Data: generateCertificate(),
 		Type: harbormetav1.SecretTypeSingle,
 	})).To(Succeed())
-
-	/*Expect(k8sClient.Create(ctx, &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      redis,
-			Namespace: ns,
-		},
-		StringData: map[string]string{
-			harbormetav1.RedisPasswordKey: "the-redis-password",
-		},
-		Type: harbormetav1.SecretTypeRedis,
-	})).To(Succeed())*/
 
 	return encryption, csrf, registryCtl, admin, core, jobservice, tokenCert
 }

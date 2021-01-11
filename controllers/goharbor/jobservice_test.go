@@ -38,19 +38,7 @@ func newJobServiceController() controllerTest {
 }
 
 func setupJobServiceResourceDependencies(ctx context.Context, ns string) string {
-	//redisSecret := newName("redis")
 	registrySecret := newName("registry")
-
-	/*Expect(k8sClient.Create(ctx, &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      redisSecret,
-			Namespace: ns,
-		},
-		StringData: map[string]string{
-			harbormetav1.RedisPasswordKey: "redis-password",
-		},
-		Type: harbormetav1.SecretTypeRedis,
-	})).To(Succeed())*/
 
 	Expect(k8sClient.Create(ctx, &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{

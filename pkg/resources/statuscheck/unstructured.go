@@ -42,6 +42,7 @@ func UnstructuredCheck(ctx context.Context, object runtime.Object) (bool, error)
 			if cond["status"].(string) == string(corev1.ConditionTrue) && cond["reason"] != nil && cond["reason"].(string) == "NewReplicaSetAvailable" {
 				continue
 			}
+
 			inProgress = inProgress || cond["status"].(string) != string(corev1.ConditionFalse)
 		case status.ConditionInProgress.String():
 			inProgress = inProgress || cond["status"].(string) != string(corev1.ConditionFalse)

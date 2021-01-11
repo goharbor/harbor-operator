@@ -64,9 +64,9 @@ func Logs(ctx context.Context, deployment types.NamespacedName) map[string][]byt
 			SubResource("log").
 			Param("pretty", "true").
 			DoRaw(ctx)
-		//gomega.Expect(err).ToNot(gomega.HaveOccurred())
 		if err != nil {
 			results[pod.GetName()] = []byte(fmt.Sprintf("%v: status %s", err, pod.Status.Phase))
+
 			continue
 		}
 
