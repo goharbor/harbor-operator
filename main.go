@@ -1,10 +1,14 @@
 package main
 
 import (
+	"context"
+
+	"github.com/go-logr/logr"
 	"github.com/goharbor/harbor-operator/pkg/exit"
 	"github.com/goharbor/harbor-operator/pkg/factories/application"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	"github.com/goharbor/harbor-operator/pkg/manager"
+	"github.com/goharbor/harbor-operator/pkg/scheme"
 	"github.com/goharbor/harbor-operator/pkg/setup"
 	"github.com/goharbor/harbor-operator/pkg/tracing"
 	"github.com/ovh/configstore"
@@ -21,18 +25,31 @@ const (
 const (
 	LoggerExitCode int = iota + 1
 	ManagerExitCode
+	SchemeExitCode
 	TracingExitCode
 	ControllersExitCode
 	RunExitCode
 )
 
-func main() {
-	defer exit.Exit()
-
+func setupContextAndLogger() (context.Context, logr.Logger, error) {
 	setupLog := ctrl.Log.WithName("setup")
 	ctx := logger.Context(setupLog)
 
 	err := setup.Logger(ctx, name, version)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	application.SetName(&ctx, name)
+	application.SetVersion(&ctx, version)
+
+	return ctx, setupLog, nil
+}
+
+func main() {
+	defer exit.Exit()
+
+	ctx, setupLog, err := setupContextAndLogger()
 	if err != nil {
 		setupLog.Error(err, "unable to create logger")
 		exit.SetCode(LoggerExitCode)
@@ -42,10 +59,15 @@ func main() {
 
 	configstore.InitFromEnvironment()
 
-	application.SetName(&ctx, name)
-	application.SetVersion(&ctx, version)
+	scheme, err := scheme.New(ctx)
+	if err != nil {
+		setupLog.Error(err, "unable to create scheme")
+		exit.SetCode(SchemeExitCode)
 
-	mgr, err := manager.New(ctx)
+		return
+	}
+
+	mgr, err := manager.New(ctx, scheme)
 	if err != nil {
 		setupLog.Error(err, "unable to create manager")
 		exit.SetCode(ManagerExitCode)

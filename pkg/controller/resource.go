@@ -39,38 +39,34 @@ func (c *Controller) Changed(ctx context.Context, depManager *checksum.Dependenc
 	result := resource.DeepCopyObject()
 
 	if result, ok := result.(resources.Resource); ok {
-		changed := false
-
 		err = c.Client.Get(ctx, objectKey, result)
 		if err != nil {
 			if !apierrors.IsNotFound(err) {
 				return false, errors.Wrap(err, "cannot get resource")
 			}
+
 			return true, nil
 		}
 
 		checksum.CopyVersion(result.(metav1.Object), resource)
 
 		resultAnnotations := result.GetAnnotations()
+
 		for key, value := range resource.GetAnnotations() {
-			if checksum.IsStaticAnnotation(key) {
-				if resultValue, ok := resultAnnotations[key]; !ok || resultValue != value {
-					return true, nil
-				}
+			if resultValue, ok := resultAnnotations[key]; checksum.IsStaticAnnotation(key) && (!ok || resultValue != value) {
+				return true, nil
 			}
 		}
 
-		if !changed {
-			checksum.CopyMarkers(result.(metav1.Object), resource)
-			changed = depManager.ChangedFor(ctx, resource)
-		}
+		checksum.CopyMarkers(result.(metav1.Object), resource)
 
+		return depManager.ChangedFor(ctx, resource), nil
 	}
 
 	return false, nil
 }
 
-func (c *Controller) ProcessFunc(ctx context.Context, resource resources.Resource, dependencies ...graph.Resource) func(context.Context, graph.Resource) error { // nolint:funlen
+func (c *Controller) ProcessFunc(ctx context.Context, resource runtime.Object, dependencies ...graph.Resource) func(context.Context, graph.Resource) error { // nolint:funlen
 	depManager := checksum.New(c.Scheme)
 
 	depManager.Add(ctx, owner.Get(ctx), true)
@@ -243,8 +239,7 @@ func (c *Controller) AddExternalTypedSecret(ctx context.Context, secret *corev1.
 
 	check := statuscheck.True
 
-	switch secretType {
-	case corev1.SecretTypeTLS:
+	if secretType == corev1.SecretTypeTLS {
 		check = statuscheck.TLSSecretCheck
 	}
 
