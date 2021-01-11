@@ -60,7 +60,9 @@ var _ = Describe("Check the status", func() {
 
 		JustAfterEach(func() {
 			if resource != nil {
-				runtime.DefaultUnstructuredConverter.FromUnstructured(resource.UnstructuredContent(), data)
+				err := runtime.DefaultUnstructuredConverter.FromUnstructured(resource.UnstructuredContent(), data)
+				Expect(err).ToNot(HaveOccurred())
+
 				resource = nil
 			}
 		})
@@ -149,7 +151,9 @@ var _ = Describe("Check the status", func() {
 
 		JustAfterEach(func() {
 			if resource != nil {
-				runtime.DefaultUnstructuredConverter.FromUnstructured(resource.UnstructuredContent(), data)
+				err := runtime.DefaultUnstructuredConverter.FromUnstructured(resource.UnstructuredContent(), data)
+				Expect(err).ToNot(HaveOccurred())
+
 				resource = nil
 			}
 		})

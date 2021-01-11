@@ -18,6 +18,8 @@ import (
 )
 
 func InitSuite() context.Context {
+	initFlag()
+
 	ginkgo.By("Configuring seed", func() {
 		rand.Seed(ginkgo.GinkgoRandomSeed())
 	})
@@ -29,7 +31,7 @@ func InitSuite() context.Context {
 	var ctx context.Context
 
 	ginkgo.By("bootstrapping test environment", func() {
-		ctx = NewContext(path.Join("..", "..", ".."))
+		ctx = NewContext()
 
 		var err error
 		cfg, err := GetEnvironment(ctx).Start()
@@ -67,7 +69,7 @@ func AfterSuite(ctx context.Context) {
 
 var keepNamespaceOnFailure bool
 
-func init() {
+func initFlag() {
 	flag.BoolVar(&keepNamespaceOnFailure, "keepNamespaceOnFailure", false, "set to true to keep namespaces after tests")
 }
 

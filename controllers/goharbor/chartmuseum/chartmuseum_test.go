@@ -46,9 +46,11 @@ var _ = Describe("ChartMuseum", func() {
 		chartMuseum.ObjectMeta = metav1.ObjectMeta{
 			Name:      test.NewName("chartmuseum"),
 			Namespace: ns.GetName(),
+			/* TODO: Enable this when HarborClass is fixed
 			Annotations: map[string]string{
 				goharborv1alpha2.HarborClassAnnotation: harborClass,
 			},
+			*/
 		}
 	})
 
@@ -72,7 +74,7 @@ var _ = Describe("ChartMuseum", func() {
 							},
 						},
 					},
-					URL: "https://the.chartserver.url",
+					URL: "http://the.chartserver.url",
 				},
 			}
 		})
@@ -132,7 +134,7 @@ func IntegTest(ctx context.Context, chartMuseum *goharborv1alpha2.ChartMuseum) {
 	}
 
 	// Make sure chart museum is up and running
-	time.Sleep(60 * time.Second)
+	//time.Sleep(60 * time.Second)
 
 	proxyReq := client.Get().
 		Resource("services").
