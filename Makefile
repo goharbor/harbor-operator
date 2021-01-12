@@ -107,7 +107,7 @@ diff:
 	git diff --stat --diff-filter=d --exit-code HEAD
 
 .PHONY: go-test
-go-test: install certmanager
+go-test: install
 ifeq (, $(USE_EXISTING_CLUSTER))
 	$(warning USE_EXISTING_CLUSTER variable is not defined)
 endif
