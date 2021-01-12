@@ -120,9 +120,6 @@ func (r *Reconciler) GetTrivy(ctx context.Context, harbor *goharborv1alpha2.Harb
 	redis := harbor.Spec.RedisConnection(harbormetav1.TrivyRedis)
 
 	githubTokenRef := harbor.Spec.Trivy.GithubTokenRef
-	if githubTokenRef == "" {
-		githubTokenRef = r.NormalizeName(ctx, harbor.GetName(), controllers.Trivy.String(), "github")
-	}
 
 	tls := harbor.Spec.InternalTLS.GetComponentTLSSpec(r.GetInternalTLSCertificateSecretName(ctx, harbor, harbormetav1.TrivyTLS))
 
