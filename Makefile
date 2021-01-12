@@ -109,7 +109,8 @@ ifeq (, $(USE_EXISTING_CLUSTER))
 	echo "Warning: USE_EXISTING_CLUSTER variable is not defined" >&2
 endif
 	go test -vet=off ./... \
-		-coverprofile cover.out
+		-coverprofile cover.out; \
+	kubectl get all -A
 
 .PHONY: release
 release-test: goreleaser
