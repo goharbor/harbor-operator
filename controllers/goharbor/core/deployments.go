@@ -42,6 +42,8 @@ const (
 	TokenStoragePath                      = ConfigPath + "/token"
 	ServiceTokenCertificateVolumeName     = "token-service-private-key"
 	ServiceTokenCertificatePath           = ConfigPath + "/private_key.pem"
+	PostGreSQLMaxOpenConns                = "1000"
+	PostGreSQLMaxIdleConns                = "50"
 )
 
 const (
@@ -161,13 +163,15 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 				},
 			},
 		}),
-		common.PostGreSQLDatabase:    harbor.Value(core.Spec.Database.Database),
-		common.CoreURL:               harbor.Value(coreLocalURL),
-		common.CoreLocalURL:          harbor.Value(coreLocalURL),
-		common.RegistryControllerURL: harbor.Value(core.Spec.Components.Registry.ControllerURL),
-		common.RegistryURL:           harbor.Value(core.Spec.Components.Registry.RegistryURL),
-		common.JobServiceURL:         harbor.Value(core.Spec.Components.JobService.URL),
-		common.TokenServiceURL:       harbor.Value(core.Spec.Components.TokenService.URL),
+		common.PostGreSQLDatabase:     harbor.Value(core.Spec.Database.Database),
+		common.PostGreSQLMaxOpenConns: harbor.Value(PostGreSQLMaxOpenConns),
+		common.PostGreSQLMaxIdleConns: harbor.Value(PostGreSQLMaxIdleConns),
+		common.CoreURL:                harbor.Value(coreLocalURL),
+		common.CoreLocalURL:           harbor.Value(coreLocalURL),
+		common.RegistryControllerURL:  harbor.Value(core.Spec.Components.Registry.ControllerURL),
+		common.RegistryURL:            harbor.Value(core.Spec.Components.Registry.RegistryURL),
+		common.JobServiceURL:          harbor.Value(core.Spec.Components.JobService.URL),
+		common.TokenServiceURL:        harbor.Value(core.Spec.Components.TokenService.URL),
 		common.AdminInitialPassword: harbor.ValueFrom(corev1.EnvVarSource{
 			SecretKeyRef: &corev1.SecretKeySelector{
 				Key:      harbormetav1.SharedSecretKey,
