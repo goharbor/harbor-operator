@@ -2,16 +2,20 @@ package database
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/database/api"
+	"github.com/ovh/configstore"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
 
 const (
-	DefaultDatabaseReplica = 3
-	DefaultDatabaseMemory  = "1Gi"
-	DefaultDatabaseVersion = "12"
+	ConfigMaxConnectionsKey       = "max-connections"
+	DefaultDatabaseReplica        = 3
+	DefaultDatabaseMemory         = "1Gi"
+	DefaultDatabaseVersion        = "12"
+	DefaultDatabaseMaxConnections = "1024"
 )
 
 func (p *PostgreSQLController) GetDatabases() map[string]string {
@@ -139,6 +143,32 @@ func (p *PostgreSQLController) GetPostgreVersion() string {
 	}
 
 	return p.HarborCluster.Spec.InClusterDatabase.PostgresSQLSpec.Version
+}
+
+func (p *PostgreSQLController) GetPostgreParameters() map[string]string {
+	return map[string]string{
+		"max_connections": p.GetPosgresMaxConnections(),
+	}
+}
+
+func (p *PostgreSQLController) GetPosgresMaxConnections() string {
+	maxConnections, err := p.ConfigStore.GetItemValue(ConfigMaxConnectionsKey)
+	if err != nil {
+		if _, ok := err.(configstore.ErrItemNotFound); !ok {
+			// Just logged
+			p.Log.V(5).Error(err, "failed to get database max connections")
+		}
+
+		maxConnections = DefaultDatabaseMaxConnections
+	}
+
+	if _, err := strconv.ParseInt(maxConnections, 10, 64); err != nil {
+		p.Log.V(5).Error(err, "%s is not a valid number for postgres max connections", maxConnections)
+
+		maxConnections = DefaultDatabaseMaxConnections
+	}
+
+	return maxConnections
 }
 
 // GenDatabaseURL returns database connection url.
