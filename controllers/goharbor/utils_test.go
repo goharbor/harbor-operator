@@ -28,7 +28,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// setupPostgresql deploy a servicea deployment and a secret to run a postgresql instance
+// setupPostgresql deploy a servicea deployment and a secret to run a postgresql instance.
 // Based on https://hub.docker.com/_/postgres
 func setupPostgresql(ctx context.Context, ns string, databases ...string) harbormetav1.PostgresConnectionWithParameters {
 	pgName := newName("pg")
@@ -166,7 +166,7 @@ func setupPostgresql(ctx context.Context, ns string, databases ...string) harbor
 	}
 }
 
-// setupRedis deploy a service, a deployment and a secret to run a redis instance
+// setupRedis deploy a service, a deployment and a secret to run a redis instance.
 // Based on https://hub.docker.com/_/redis
 func setupRedis(ctx context.Context, ns string) harbormetav1.RedisConnection {
 	redisName := newName("redis")

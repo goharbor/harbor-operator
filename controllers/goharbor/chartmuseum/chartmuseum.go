@@ -48,7 +48,7 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 
 	configItem, err := configstore.Filter().Store(r.ConfigStore).Slice(config.HarborClassKey).GetFirstItem()
 	if err != nil {
-		if _, ok := err.(configstore.ErrItemNotFound); !ok {
+		if !config.IsNotFound(err, config.HarborClassKey) {
 			return errors.Wrap(err, "cannot get config template path")
 		}
 	} else {

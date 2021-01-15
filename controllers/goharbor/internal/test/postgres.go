@@ -26,7 +26,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// SetupPostgresql deploy a servicea deployment and a secret to run a postgresql instance
+// SetupPostgresql deploy a servicea deployment and a secret to run a postgresql instance.
 // Based on https://hub.docker.com/_/postgres
 func SetupPostgresql(ctx context.Context, ns string) harbormetav1.PostgresConnectionWithParameters {
 	k8sClient := GetClient(ctx)
