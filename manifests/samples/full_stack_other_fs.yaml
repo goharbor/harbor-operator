@@ -114,7 +114,6 @@ spec:
         certificateRef: sample-public-certificate
   trivy:
     skipUpdate: false
-    githubTokenRef: github-credentials
     storage:
       reportsPersistentVolume:
         claimName: sample-harbor-trivy-reports
@@ -142,7 +141,7 @@ spec:
     kind: PostgresSQL
     postgresSqlSpec:
       storage: 1Gi
-      replicas: 2
+      replicas: 1
       version: "12"
       resources:
         limits:
