@@ -30,14 +30,14 @@ require (
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.16.0
 	golang.org/x/crypto v0.0.0-20200728195943-123391ffb6de
-	golang.org/x/net v0.0.0-20200822124328-c89045814202
-	golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a
-	golang.org/x/tools v0.0.0-20200626171337-aa94e735be7f // indirect
+	golang.org/x/sync v0.0.0-20201020160332-67f06af15bc9
+	golang.org/x/tools v0.0.0-20201223010750-3fa0e8f87c1a // indirect
 	gomodules.xyz/jsonpatch/v2 v2.1.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	k8s.io/api v0.19.0
 	k8s.io/apimachinery v0.19.0
 	k8s.io/client-go v0.19.0
+	k8s.io/klog v1.0.0
 	sigs.k8s.io/controller-runtime v0.6.2
 	sigs.k8s.io/kustomize/kstatus v0.0.2
 	sigs.k8s.io/yaml v1.2.0
