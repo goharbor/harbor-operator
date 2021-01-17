@@ -1,7 +1,6 @@
 package v1alpha2
 
 import (
-	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -111,16 +110,11 @@ type Storage struct {
 // StorageRedirectSpec defines if the redirection is disabled.
 type StorageRedirectSpec struct {
 	// Disable the redirect.
-	// Default is false
-	// +optional
-	Disable bool `json:"disable"`
-	// TLS allows a user to specify custom CA certificate, and private key. This is
-	// used for enabling TLS support on MinIO Pods.
+	// Default is true
+	// +kubebuilder:default:=true
+	Enable bool `json:"enable,omitempty"`
 	// +kubebuilder:validation:Optional
-	TLS *harbormetav1.ComponentsTLSSpec `json:"tls,omitempty"`
-	// Host should be required when it needs to be exposed.
-	// +kubebuilder:validation:Optional
-	Host string `json:"host,omitempty"`
+	Expose *HarborExposeComponentSpec `json:"expose,omitempty"`
 }
 
 type MinIOSpec struct {
