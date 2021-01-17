@@ -44,8 +44,9 @@ func (m *MinIOController) getMinIOProperties(minioInstance *minio.Tenant) (*goha
 	}
 
 	var (
-		endpoint string
-		scheme   corev1.URIScheme
+		endpoint       string
+		certificateRef string
+		scheme         corev1.URIScheme
 
 		secure     = false
 		v4Auth     = true
@@ -58,6 +59,7 @@ func (m *MinIOController) getMinIOProperties(minioInstance *minio.Tenant) (*goha
 			secure = true
 			skipVerify = false
 			scheme = tls.GetScheme()
+			certificateRef = tls.CertificateRef
 		}
 
 		port := tls.GetInternalPort()
@@ -78,6 +80,7 @@ func (m *MinIOController) getMinIOProperties(minioInstance *minio.Tenant) (*goha
 				Secure:         &secure,
 				V4Auth:         &v4Auth,
 				SkipVerify:     skipVerify,
+				CertificateRef: certificateRef,
 			},
 		},
 	}

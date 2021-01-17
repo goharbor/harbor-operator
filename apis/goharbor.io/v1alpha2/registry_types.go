@@ -708,6 +708,10 @@ type RegistryStorageDriverS3Spec struct {
 	// Skips TLS verification when the value is set to true.
 	SkipVerify bool `json:"skipverify"`
 
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
+	CertificateRef string `json:"certificateRef"`
+
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
 	Secure *bool `json:"secure,omitempty"`
