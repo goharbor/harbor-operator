@@ -167,7 +167,6 @@ jobs:
 
     - name: install harbor
       run: |
-        export GITHUB_TOKEN=xxx
         set -ex
         kubectl apply -f manifests/samples/full_stack_other_fs.yaml
         for i in $(seq 1 7);do
