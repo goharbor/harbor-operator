@@ -42,8 +42,6 @@ const (
 	TokenStoragePath                      = ConfigPath + "/token"
 	ServiceTokenCertificateVolumeName     = "token-service-private-key"
 	ServiceTokenCertificatePath           = ConfigPath + "/private_key.pem"
-	PostGreSQLMaxOpenConns                = "1000"
-	PostGreSQLMaxIdleConns                = "50"
 )
 
 const (
@@ -163,15 +161,13 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 				},
 			},
 		}),
-		common.PostGreSQLDatabase:     harbor.Value(core.Spec.Database.Database),
-		common.PostGreSQLMaxOpenConns: harbor.Value(PostGreSQLMaxOpenConns),
-		common.PostGreSQLMaxIdleConns: harbor.Value(PostGreSQLMaxIdleConns),
-		common.CoreURL:                harbor.Value(coreLocalURL),
-		common.CoreLocalURL:           harbor.Value(coreLocalURL),
-		common.RegistryControllerURL:  harbor.Value(core.Spec.Components.Registry.ControllerURL),
-		common.RegistryURL:            harbor.Value(core.Spec.Components.Registry.RegistryURL),
-		common.JobServiceURL:          harbor.Value(core.Spec.Components.JobService.URL),
-		common.TokenServiceURL:        harbor.Value(core.Spec.Components.TokenService.URL),
+		common.PostGreSQLDatabase:    harbor.Value(core.Spec.Database.Database),
+		common.CoreURL:               harbor.Value(coreLocalURL),
+		common.CoreLocalURL:          harbor.Value(coreLocalURL),
+		common.RegistryControllerURL: harbor.Value(core.Spec.Components.Registry.ControllerURL),
+		common.RegistryURL:           harbor.Value(core.Spec.Components.Registry.RegistryURL),
+		common.JobServiceURL:         harbor.Value(core.Spec.Components.JobService.URL),
+		common.TokenServiceURL:       harbor.Value(core.Spec.Components.TokenService.URL),
 		common.AdminInitialPassword: harbor.ValueFrom(corev1.EnvVarSource{
 			SecretKeyRef: &corev1.SecretKeySelector{
 				Key:      harbormetav1.SharedSecretKey,
@@ -359,15 +355,6 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 		envs = append(envs, adapterURL)
 	}
 
-	if core.Spec.Components.Trivy != nil {
-		adapterURLConfig, err := harbor.EnvVar(common.TrivyAdapterURL, harbor.Value(core.Spec.Components.Trivy.AdapterURL))
-		if err != nil {
-			return nil, errors.Wrap(err, "cannot configure trivy")
-		}
-
-		envs = append(envs, adapterURLConfig)
-	}
-
 	if core.Spec.Components.NotaryServer != nil {
 		envs = append(envs, corev1.EnvVar{
 			Name:  "NOTARY_URL",
@@ -461,9 +448,11 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 						Ports: []corev1.ContainerPort{{
 							Name:          harbormetav1.CoreHTTPPortName,
 							ContainerPort: httpPort,
+							Protocol:      corev1.ProtocolTCP,
 						}, {
 							Name:          harbormetav1.CoreHTTPSPortName,
 							ContainerPort: httpsPort,
+							Protocol:      corev1.ProtocolTCP,
 						}},
 
 						// https://github.com/goharbor/harbor/blob/master/make/photon/prepare/templates/core/env.jinja

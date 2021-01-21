@@ -34,3 +34,4 @@ charts/*.tgz
 
 ## goreleaser
 dist/
+vendor/

@@ -1,6 +1,7 @@
 package harbor
 
 import (
+	"github.com/goharbor/harbor-operator/pkg/config"
 	"github.com/ovh/configstore"
 )
 
@@ -18,7 +19,7 @@ func (r *Reconciler) GetDefaultGithubToken() (string, error) {
 func (r *Reconciler) GetGithubToken(configKey string) (string, error) {
 	token, err := configstore.Filter().GetItemValue(configKey)
 	if err != nil {
-		if _, ok := err.(configstore.ErrItemNotFound); ok {
+		if config.IsNotFound(err, configKey) {
 			return r.GetDefaultGithubToken()
 		}
 

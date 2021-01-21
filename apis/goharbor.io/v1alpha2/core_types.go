@@ -140,7 +140,7 @@ type CoreDatabaseSpec struct {
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=0
-	// +kubebuilder:default=100
+	// +kubebuilder:default=1000
 	MaxOpenConnections *int32 `json:"maxOpenConnections,omitempty"`
 
 	// +kubebuilder:validation:Required

@@ -72,7 +72,7 @@ func (r *Reconciler) GetJobServiceSecret(ctx context.Context, harbor *goharborv1
 
 type JobService graph.Resource
 
-func (r *Reconciler) AddJobService(ctx context.Context, harbor *goharborv1alpha2.Harbor, certificate JobServiceInternalCertificate, core Core, coreSecret CoreSecret, jobServiceSecret JobServiceSecret) (JobService, error) {
+func (r *Reconciler) AddJobService(ctx context.Context, harbor *goharborv1alpha2.Harbor, core Core, certificate JobServiceInternalCertificate, coreSecret CoreSecret, jobServiceSecret JobServiceSecret) (JobService, error) {
 	jobservice, err := r.GetJobService(ctx, harbor)
 	if err != nil {
 		return nil, errors.Wrap(err, "get")

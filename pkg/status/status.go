@@ -86,8 +86,6 @@ func UpdateCondition(ctx context.Context, conditions []interface{}, conditionTyp
 				condition["message"] = message
 			}
 
-			// conditions[i] = condition
-
 			return conditions, nil
 		}
 	}

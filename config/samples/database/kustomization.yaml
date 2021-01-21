@@ -15,3 +15,4 @@ secretGenerator:
 - name: harbor-database-password
   literals:
   - postgresql-password=the-database-password
+  type: "goharbor.io/postgresql"

@@ -51,7 +51,7 @@ func (c *Controller) GetTemplatedConfig(ctx context.Context, templateConfig stri
 	configContent, err := ioutil.ReadAll(reader)
 
 	if errTemplate != nil {
-		if _, ok := errTemplate.(*template.ExecError); ok {
+		if errors.As(err, &template.ExecError{}) {
 			return nil, serrors.UnrecoverrableError(errTemplate, "operatorCompatibility", fmt.Sprintf("cannot process config template: %v", errTemplate))
 		}
 

@@ -116,9 +116,11 @@ func (c *Controller) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	owner.Set(&ctx, object)
 
-	err = c.Run(ctx, object)
+	if err := c.Run(ctx, object); err != nil {
+		return c.HandleError(ctx, object, err)
+	}
 
-	return c.HandleError(ctx, object, err)
+	return ctrl.Result{}, c.SetSuccessStatus(ctx, object)
 }
 
 func (c *Controller) applyAndCheck(ctx context.Context, node graph.Resource) error {
@@ -135,7 +137,7 @@ func (c *Controller) applyAndCheck(ctx context.Context, node graph.Resource) err
 		return errors.Wrap(err, "apply")
 	}
 
-	err = c.ensureResourceReady(ctx, res)
+	err = c.EnsureReady(ctx, res)
 
 	return errors.Wrap(err, "check")
 }
@@ -146,13 +148,11 @@ func (c *Controller) Run(ctx context.Context, owner resources.Resource) error {
 
 	logger.Get(ctx).V(1).Info("Reconciling object")
 
-	err := c.rm.AddResources(ctx, owner)
-	if err != nil {
+	if err := c.rm.AddResources(ctx, owner); err != nil {
 		return errors.Wrap(err, "cannot add resources")
 	}
 
-	err = c.prepareStatus(ctx, owner)
-	if err != nil {
+	if err := c.prepareStatus(ctx, owner); err != nil {
 		return errors.Wrap(err, "cannot prepare owner status")
 	}
 

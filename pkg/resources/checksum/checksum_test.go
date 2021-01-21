@@ -93,7 +93,7 @@ var _ = Describe("Checksum", func() {
 
 			depManager.AddAnnotations(resource)
 
-			owner.SetResourceVersion("v1")
+			owner.SetGeneration(100)
 
 			changed := depManager.ChangedFor(ctx, resource)
 			Expect(changed).To(Equal(true))

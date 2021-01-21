@@ -6,10 +6,10 @@ import (
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers"
+	"github.com/goharbor/harbor-operator/pkg/config"
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 	"github.com/goharbor/harbor-operator/pkg/version"
-	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -77,7 +77,11 @@ func (r *Reconciler) GetTrivyUpdateSecret(ctx context.Context, harbor *goharborv
 
 	token, err := r.GetGithubToken(TrivyGithubCredentialsConfigKey)
 	if err != nil {
-		if _, ok := err.(configstore.ErrItemNotFound); ok {
+		if config.IsNotFound(err, TrivyGithubCredentialsConfigKey) {
+			return nil, nil
+		}
+
+		if config.IsNotFound(err, GithubCredentialsConfigKey) {
 			return nil, nil
 		}
 
