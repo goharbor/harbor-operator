@@ -2,30 +2,17 @@ package harbor_test
 
 import (
 	"context"
-	"io/ioutil"
 	"strings"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
-	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/harbor"
-	"github.com/goharbor/harbor-operator/pkg/config"
-	"github.com/goharbor/harbor-operator/pkg/factories/application"
-	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/yaml"
 )
-
-func fileString(filePath string) string {
-	content, err := ioutil.ReadFile(filePath)
-	Expect(err).NotTo(HaveOccurred())
-
-	return strings.TrimSpace(string(content))
-}
 
 var _ = Describe("Harbor", func() {
 	var (
@@ -39,18 +26,9 @@ var _ = Describe("Harbor", func() {
 	)
 
 	BeforeEach(func() {
-		ctx = logger.Context(zap.LoggerTo(GinkgoWriter, true))
-		application.SetName(&ctx, "operator")
-		application.SetVersion(&ctx, "dev")
+		ctx = makeContext()
 
-		name := controllers.Harbor.String()
-
-		configStore := config.NewConfigWithDefaults()
-		configStore.Env(name)
-
-		i, err := harbor.New(ctx, name, configStore)
-		Expect(err).NotTo(HaveOccurred())
-		r = i.(*harbor.Reconciler)
+		r = makeReconciler(ctx)
 
 		sch := runtime.NewScheme()
 		_ = goharborv1alpha2.AddToScheme(sch)
@@ -106,6 +84,40 @@ var _ = Describe("Harbor", func() {
 
 				It("Should pass", func() {
 					expected := fileString("./manifests/jobservice/" + filename + "-expected.yaml")
+					Expect(output).To(BeEquivalentTo(expected))
+				})
+			})
+		}
+	})
+
+	Context("GetTrivy", func() {
+		BeforeEach(func() {
+			getComponent = func(h *goharborv1alpha2.Harbor) runtime.Object {
+				t, err := r.GetTrivy(ctx, h, false)
+				Expect(err).NotTo(HaveOccurred())
+
+				t.SetGroupVersionKind(schema.FromAPIVersionAndKind("goharbor.io/v1alpha2", "Trivy"))
+
+				return t
+			}
+		})
+
+		for _, text := range []string{
+			"Default",
+			"Expose core with tls",
+			"Github token",
+		} {
+			text := text
+
+			filename := strings.Join(strings.Split(strings.ToLower(text), " "), "-")
+
+			Context(text, func() {
+				BeforeEach(func() {
+					input = fileString("./manifests/trivy/" + filename + ".yaml")
+				})
+
+				It("Should pass", func() {
+					expected := fileString("./manifests/trivy/" + filename + "-expected.yaml")
 					Expect(output).To(BeEquivalentTo(expected))
 				})
 			})

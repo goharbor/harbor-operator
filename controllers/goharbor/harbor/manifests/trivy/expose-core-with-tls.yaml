@@ -1,0 +1,14 @@
+apiVersion: goharbor.io/v1alpha2
+kind: Harbor
+metadata:
+  name: example
+  namespace: default
+spec:
+  expose:
+    core:
+      tls:
+        certificateRef: harbor-tls
+  trivy: {}
+  redis:
+    host: 127.0.0.1
+    port: 3306

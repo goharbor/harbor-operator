@@ -99,30 +99,38 @@ func (r *Reconciler) GetTrivyUpdateSecret(ctx context.Context, harbor *goharborv
 
 type Trivy graph.Resource
 
-func (r *Reconciler) AddTrivy(ctx context.Context, harbor *goharborv1alpha2.Harbor, certificate TrivyInternalCertificate, seretUpdate TrivyUpdateSecret) (Trivy, error) {
+func (r *Reconciler) AddTrivy(ctx context.Context, harbor *goharborv1alpha2.Harbor, certificate TrivyInternalCertificate, secretUpdate TrivyUpdateSecret) (Trivy, error) {
 	if harbor.Spec.Trivy == nil {
 		return nil, nil
 	}
 
-	trivy, err := r.GetTrivy(ctx, harbor)
+	trivy, err := r.GetTrivy(ctx, harbor, secretUpdate != nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "get")
 	}
 
-	trivyRes, err := r.AddBasicResource(ctx, trivy, certificate, seretUpdate)
+	trivyRes, err := r.AddBasicResource(ctx, trivy, certificate, secretUpdate)
 
 	return Trivy(trivyRes), errors.Wrap(err, "add")
 }
 
-func (r *Reconciler) GetTrivy(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*goharborv1alpha2.Trivy, error) {
+func (r *Reconciler) GetTrivy(ctx context.Context, harbor *goharborv1alpha2.Harbor, hasUpdateSecret bool) (*goharborv1alpha2.Trivy, error) {
 	name := r.NormalizeName(ctx, harbor.GetName())
 	namespace := harbor.GetNamespace()
 
 	redis := harbor.Spec.RedisConnection(harbormetav1.TrivyRedis)
 
 	githubTokenRef := harbor.Spec.Trivy.GithubTokenRef
+	if githubTokenRef == "" && hasUpdateSecret {
+		githubTokenRef = r.NormalizeName(ctx, harbor.GetName(), controllers.Trivy.String(), "github")
+	}
 
 	tls := harbor.Spec.InternalTLS.GetComponentTLSSpec(r.GetInternalTLSCertificateSecretName(ctx, harbor, harbormetav1.TrivyTLS))
+
+	var tokenServiceCertificateAuthorityRefs []string
+	if harbor.Spec.Expose.Core.TLS != nil {
+		tokenServiceCertificateAuthorityRefs = append(tokenServiceCertificateAuthorityRefs, harbor.Spec.Expose.Core.TLS.CertificateRef)
+	}
 
 	return &goharborv1alpha2.Trivy{
 		ObjectMeta: metav1.ObjectMeta{
@@ -141,7 +149,7 @@ func (r *Reconciler) GetTrivy(ctx context.Context, harbor *goharborv1alpha2.Harb
 			},
 			Server: goharborv1alpha2.TrivyServerSpec{
 				TLS:                                  tls,
-				TokenServiceCertificateAuthorityRefs: []string{harbor.Spec.Expose.Core.TLS.CertificateRef},
+				TokenServiceCertificateAuthorityRefs: tokenServiceCertificateAuthorityRefs,
 			},
 			Update: goharborv1alpha2.TrivyUpdateSpec{
 				Skip:           harbor.Spec.Trivy.SkipUpdate,
