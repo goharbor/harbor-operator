@@ -86,7 +86,6 @@ spec:
     postgresSqlSpec:
       storage: 1Gi
       replicas: 2
-      version: "12"
       resources:
         limits:
           cpu: 500m

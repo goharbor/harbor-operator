@@ -5,6 +5,7 @@ import (
 	"errors"
 	"math"
 
+	"github.com/goharbor/harbor-operator/pkg/config"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/kustomize/kstatus/status"
@@ -48,19 +49,7 @@ func GetLargestComponentNameSize() int {
 	return max
 }
 
-type ComponentSpec struct {
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Minimum=0
-	// Replicas is the number of desired replicas.
-	// This is a pointer to distinguish between explicit zero and unspecified.
-	// More info: https://kubernetes.io/docs/concepts/workloads/controllers/replicationcontroller#what-is-a-replicationcontroller
-	Replicas *int32 `json:"replicas,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	// ServiceAccountName is the name of the ServiceAccount to use to run this component.
-	// More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
-	ServiceAccountName string `json:"serviceAccountName,omitempty"`
-
+type ImageSpec struct {
 	// +kubebuilder:validation:Optional
 	// Image name for the component.
 	Image string `json:"image,omitempty"`
@@ -75,6 +64,22 @@ type ComponentSpec struct {
 	// +listType:map
 	// +listMapKey:name
 	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets,omitempty" patchStrategy:"merge" patchMergeKey:"name"`
+}
+
+type ComponentSpec struct {
+	ImageSpec `json:",inline"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Minimum=0
+	// Replicas is the number of desired replicas.
+	// This is a pointer to distinguish between explicit zero and unspecified.
+	// More info: https://kubernetes.io/docs/concepts/workloads/controllers/replicationcontroller#what-is-a-replicationcontroller
+	Replicas *int32 `json:"replicas,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// ServiceAccountName is the name of the ServiceAccount to use to run this component.
+	// More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+	ServiceAccountName string `json:"serviceAccountName,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// NodeSelector is a selector which must be true for the component to fit on a node.
@@ -100,6 +105,8 @@ func (c *ComponentSpec) ApplyToDeployment(deploy *appsv1.Deployment) {
 	for i := range deploy.Spec.Template.Spec.Containers {
 		if c.ImagePullPolicy != nil {
 			deploy.Spec.Template.Spec.Containers[i].ImagePullPolicy = *c.ImagePullPolicy
+		} else {
+			deploy.Spec.Template.Spec.Containers[i].ImagePullPolicy = config.DefaultImagePullPolicy
 		}
 
 		deploy.Spec.Template.Spec.Containers[i].Resources = c.Resources

@@ -14,20 +14,41 @@
 
 package cache
 
+import (
+	"context"
+
+	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	"github.com/goharbor/harbor-operator/pkg/image"
+)
+
 const (
-	DefaultCacheImage = "redis:5.0-alpine"
-	ConfigImageKey    = "cache-image"
+	ComponentName  = "cluster-redis"
+	ConfigImageKey = "redis-docker-image"
 )
 
 // GetImage returns the configured image via configstore or default one.
-func (rm *redisResourceManager) GetImage() string {
-	image, err := rm.configStore.GetItemValue(ConfigImageKey)
-	if err != nil {
-		// Just logged
-		rm.logger.V(5).Error(err, "get cache image error", "image-key", ConfigImageKey)
-
-		image = DefaultCacheImage
+func (rm *redisResourceManager) GetImage(ctx context.Context, harborcluster *goharborv1alpha2.HarborCluster) (string, error) {
+	if harborcluster.Spec.InClusterCache.RedisSpec.Image != "" {
+		return harborcluster.Spec.InClusterCache.RedisSpec.Image, nil
 	}
 
-	return image
+	options := []image.Option{image.WithHarborVersion(harborcluster.Spec.Version)}
+	if harborcluster.Spec.ImageSource != nil && (harborcluster.Spec.ImageSource.Repository != "" || harborcluster.Spec.ImageSource.TagSuffix != "") {
+		options = append(options,
+			image.WithRepository(harborcluster.Spec.ImageSource.Repository),
+			image.WithTagSuffix(harborcluster.Spec.ImageSource.TagSuffix),
+		)
+	} else {
+		options = append(options,
+			image.WithConfigstore(rm.configStore),
+			image.WithConfigImageKey(ConfigImageKey),
+		)
+	}
+
+	image, err := image.GetImage(ctx, ComponentName, options...)
+	if err != nil {
+		return "", err
+	}
+
+	return image, nil
 }
