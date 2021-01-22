@@ -30,6 +30,10 @@ type Resource struct {
 	resource  resources.Resource
 }
 
+func (res *Resource) GetResource() resources.Resource {
+	return res.resource
+}
+
 func (c *Controller) Changed(ctx context.Context, depManager *checksum.Dependencies, resource resources.Resource) (bool, error) {
 	objectKey, err := client.ObjectKeyFromObject(resource)
 	if err != nil {
