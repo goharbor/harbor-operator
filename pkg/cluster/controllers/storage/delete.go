@@ -8,10 +8,12 @@ import (
 )
 
 func (m *MinIOController) Delete(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*lcm.CRStatus, error) {
-	minioCR := m.generateMinIOCR()
-
-	err := m.KubeClient.Delete(minioCR)
+	minioCR, err := m.generateMinIOCR(ctx, harborcluster)
 	if err != nil {
+		return minioNotReadyStatus(GenerateMinIOCrError, err.Error()), err
+	}
+
+	if err := m.KubeClient.Delete(minioCR); err != nil {
 		return minioUnknownStatus(), err
 	}
 

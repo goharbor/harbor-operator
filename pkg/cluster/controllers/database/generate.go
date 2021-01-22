@@ -1,10 +1,13 @@
 package database
 
 import (
+	"context"
 	"fmt"
 
+	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/database/api"
+	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -21,13 +24,22 @@ var (
 )
 
 // GetPostgresCR returns PostgreSqls CRs.
-func (p *PostgreSQLController) GetPostgresCR() (*unstructured.Unstructured, error) {
+func (p *PostgreSQLController) GetPostgresCR(ctx context.Context, harborcluster *goharborv1alpha2.HarborCluster) (*unstructured.Unstructured, error) {
 	resource := p.GetPostgreResource()
 	replica := p.GetPostgreReplica()
 	storageSize := p.GetPostgreStorageSize()
-	version := p.GetPostgreVersion()
 	databases := p.GetDatabases()
 	storageClass := p.GetStorageClass()
+
+	image, err := p.GetImage(ctx, harborcluster)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot get image")
+	}
+
+	version, err := p.GetPostgreVersion(harborcluster)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot get postgresql version")
+	}
 
 	conf := &api.Postgresql{
 		TypeMeta: metav1.TypeMeta{
@@ -53,7 +65,7 @@ func (p *PostgreSQLController) GetPostgresCR() (*unstructured.Unstructured, erro
 				Parameters: p.GetPostgreParameters(),
 			},
 			Resources:   resource,
-			DockerImage: p.GetImage(),
+			DockerImage: image,
 		},
 	}
 

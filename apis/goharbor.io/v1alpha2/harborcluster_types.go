@@ -1,6 +1,7 @@
 package v1alpha2
 
 import (
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -45,6 +46,8 @@ type Cache struct {
 }
 
 type RedisSpec struct {
+	harbormetav1.ImageSpec `json:",inline"`
+
 	Server   *RedisServer   `json:"server,omitempty"`
 	Sentinel *RedisSentinel `json:"sentinel,omitempty"`
 
@@ -88,9 +91,10 @@ type Database struct {
 }
 
 type PostgresSQLSpec struct {
+	harbormetav1.ImageSpec `json:",inline"`
+
 	Storage          string                      `json:"storage,omitempty"`
 	Replicas         int                         `json:"replicas,omitempty"`
-	Version          string                      `json:"version,omitempty"`
 	StorageClassName string                      `json:"storageClassName,omitempty"`
 	Resources        corev1.ResourceRequirements `json:"resources,omitempty"`
 	SslConfig        string                      `json:"sslConfig,omitempty"`
@@ -116,6 +120,8 @@ type StorageRedirectSpec struct {
 }
 
 type MinIOSpec struct {
+	harbormetav1.ImageSpec `json:",inline"`
+
 	// Determine if the redirection of minio storage is disabled.
 	// +kubebuilder:validation:Optional
 	Redirect StorageRedirectSpec `json:"redirect"`
@@ -127,8 +133,6 @@ type MinIOSpec struct {
 	// Number of persistent volumes that will be attached per server
 	// +kubebuilder:validation:Minimum:=1
 	VolumesPerServer int32 `json:"volumesPerServer"`
-	// Version defines the MinIO Client (mc) Docker image version.
-	Version string `json:"version,omitempty"`
 	// VolumeClaimTemplate allows a user to specify how volumes inside a MinIOInstance
 	// +kubebuilder:validation:Optional
 	VolumeClaimTemplate corev1.PersistentVolumeClaim `json:"volumeClaimTemplate,omitempty"`
