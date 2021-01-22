@@ -23,7 +23,7 @@ jobs:
   docker-lint:
     runs-on: ubuntu-latest
     name: 'dockerfile: lint'
-    steps: 
+    steps:
     - uses: actions/checkout@v2
     - run: make docker-lint
 
@@ -64,21 +64,18 @@ jobs:
     env:
       USE_EXISTING_CLUSTER: true
     steps:
+      - uses: actions/checkout@v2
+
       - uses: actions/setup-go@v2
         with:
           go-version: 1.14
 
       - name: Install Kubernetes
-        run: |
-          which kind || (curl -Lo ./kind https://github.com/kubernetes-sigs/kind/releases/download/v0.9.0/kind-$(uname)-amd64; sudo install kind /usr/local/bin/)
-          cat <<EOF | kind create cluster --name harbor --config=-
-          kind: Cluster
-          apiVersion: kind.x-k8s.io/v1alpha4
-          nodes:
-          - role: control-plane
-          - role: worker
-          - role: worker
-          EOF
+        uses: helm/kind-action@v1.1.0
+        with:
+          version: v0.9.0
+          cluster_name: harbor
+          config: .github/kind.yaml
 
       - name: Install CertManager
         run: |
@@ -86,8 +83,6 @@ jobs:
           kubectl apply -f "https://github.com/jetstack/cert-manager/releases/download/v0.16.1/cert-manager.yaml"
           sleep 5
           time kubectl -n cert-manager wait --for=condition=Available deployment --all --timeout 300s
-
-      - uses: actions/checkout@v2
 
       - name: go tests
         run: |
@@ -114,20 +109,19 @@ jobs:
         - "1.19.1"
 
     steps:
+    - uses: actions/checkout@v2
+
     - uses: actions/setup-go@v2
       with:
         go-version: 1.14
 
     - name: Install Kubernetes v${{ matrix.k8sVersion }}
-      run: |
-        which kind || (curl -Lo ./kind https://github.com/kubernetes-sigs/kind/releases/download/v0.9.0/kind-$(uname)-amd64; sudo install kind /usr/local/bin/)
-        cat <<EOF | kind create cluster --name harbor --image=kindest/node:v${{ matrix.k8sVersion }} --config=-
-        kind: Cluster
-        apiVersion: kind.x-k8s.io/v1alpha4
-        nodes:
-        - role: control-plane
-        - role: worker
-        EOF
+      uses: helm/kind-action@v1.1.0
+      with:
+        version: v0.9.0
+        node_image: kindest/node:v${{ matrix.k8sVersion }}
+        cluster_name: harbor
+        config: .github/kind.yaml
 
     - name: Install CertManager v${{ matrix.certManager }}
       run: |
@@ -139,11 +133,8 @@ jobs:
 
     - name: Install Ingress
       run: |
-        kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.35.0/deploy/static/provider/baremetal/deploy.yaml
-        sleep 5
-        time kubectl -n ingress-nginx wait --for=condition=Available deployment --all --timeout 300s
-
-    - uses: actions/checkout@v2
+        kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.35.0/deploy/static/provider/kind/deploy.yaml
+        time kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=300s
 
     - name: build harbor-operator
       run: |
@@ -152,10 +143,10 @@ jobs:
 
     - name: install harbor-operator
       run: |
-        set -ex
         cd manifests/cluster
+        kustomize edit add secret github-token --disableNameSuffixHash --from-literal=GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+        kustomize edit add patch --path patch/github-token.yaml
         kustomize edit set image goharbor/harbor-operator=harbor-operator:dev_test
-        git diff
         kustomize build | kubectl apply -f -
 
         if ! time kubectl -n harbor-operator-ns wait --for=condition=Available deployment --all --timeout 300s; then
@@ -201,9 +192,6 @@ jobs:
     - name: test harbor
       run: |
         set -ex
-        sudo kubectl get -n ingress-nginx service/ingress-nginx-controller
-        sudo kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 443:443 80:80 --address=0.0.0.0 &
-        sleep 10
         curl https://$CORE_HOST/api/v2.0/systeminfo -i -k -f
         sudo mkdir -p /etc/docker/certs.d/$CORE_HOST
         kubectl -n cluster-sample-ns get secret sample-public-certificate -o jsonpath='{.data.ca\.crt}' \
@@ -247,7 +235,7 @@ jobs:
   operator-kubernetes-resources:
     runs-on: ubuntu-latest
     name: 'kubernetes_resources: ./config/rbac'
-    steps: 
+    steps:
     - uses: actions/setup-go@v2
       with:
         go-version: 1.14
@@ -262,7 +250,7 @@ jobs:
   samples-kubernetes-resources:
     runs-on: ubuntu-latest
     name: 'kubernetes_resources: ./config/samples'
-    steps: 
+    steps:
     - uses: actions/checkout@v2
     - uses: azure/k8s-bake@v1
       with:
@@ -281,7 +269,7 @@ jobs:
         path:
         - samples/harbor
         - samples/harbor-full
-    steps: 
+    steps:
     - uses: actions/checkout@v2
     - uses: azure/k8s-bake@v1
       with:

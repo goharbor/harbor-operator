@@ -32,6 +32,10 @@ type Resource struct {
 	resource  resources.Resource
 }
 
+func (res *Resource) GetResource() resources.Resource {
+	return res.resource
+}
+
 func (c *Controller) ProcessFunc(ctx context.Context, resource metav1.Object, dependencies ...graph.Resource) func(context.Context, graph.Resource) error { // nolint:funlen
 	depManager := checksum.New(c.Scheme)
 
