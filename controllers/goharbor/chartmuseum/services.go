@@ -24,10 +24,12 @@ func (r *Reconciler) GetService(ctx context.Context, chartMuseum *goharborv1alph
 				Name:       harbormetav1.ChartMuseumHTTPPortName,
 				Port:       harbormetav1.HTTPPort,
 				TargetPort: intstr.FromString(harbormetav1.ChartMuseumHTTPPortName),
+				Protocol:   corev1.ProtocolTCP,
 			}, {
 				Name:       harbormetav1.ChartMuseumHTTPSPortName,
 				Port:       harbormetav1.HTTPSPort,
 				TargetPort: intstr.FromString(harbormetav1.ChartMuseumHTTPSPortName),
+				Protocol:   corev1.ProtocolTCP,
 			}},
 			Selector: map[string]string{
 				r.Label("name"):      name,

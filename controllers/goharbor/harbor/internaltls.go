@@ -6,6 +6,7 @@ import (
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	"github.com/goharbor/harbor-operator/pkg/config"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	v1 "github.com/jetstack/cert-manager/pkg/apis/meta/v1"
@@ -83,7 +84,7 @@ func (r *Reconciler) GetInternalTLSCertificateAuthority(ctx context.Context, har
 
 	durationValue, err := configstore.GetItemValue(InternalTLSCertificateAuthorityDurationConfigKey)
 	if err != nil {
-		if _, ok := err.(configstore.ErrItemNotFound); !ok {
+		if !config.IsNotFound(err, InternalTLSCertificateAuthorityDurationConfigKey) {
 			return nil, err
 		}
 	} else {
@@ -174,7 +175,7 @@ func (r *Reconciler) GetInternalTLSCertificate(ctx context.Context, harbor *goha
 
 	durationValue, err := configstore.GetItemValue(InternalTLSDurationConfigKey)
 	if err != nil {
-		if _, ok := err.(configstore.ErrItemNotFound); !ok {
+		if !config.IsNotFound(err, InternalTLSDurationConfigKey) {
 			return nil, err
 		}
 	} else {

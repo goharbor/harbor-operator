@@ -21,7 +21,7 @@ func (js *JobService) SetupWebhookWithManager(ctx context.Context, mgr ctrl.Mana
 		Complete()
 }
 
-// +kubebuilder:webhook:verbs=create;update,path=/validate-goharbor-io-v1alpha2-jobservice,mutating=false,failurePolicy=fail,groups=goharbor.io,resources=jobservices,versions=v1alpha2,name=vjobservice.kb.io
+// +kubebuilder:webhook:verbs=create;update,path=/validate-goharbor-io-v1alpha2-jobservice,mutating=false,failurePolicy=fail,groups=goharbor.io,resources=jobservices,versions=v1alpha2,name=vjobservice.kb.io,admissionReviewVersions={"v1beta1"},sideEffects=None
 
 var _ webhook.Validator = &JobService{}
 

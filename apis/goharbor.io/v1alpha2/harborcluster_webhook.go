@@ -40,7 +40,7 @@ func (hc *HarborCluster) SetupWebhookWithManager(ctx context.Context, mgr ctrl.M
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 
-// +kubebuilder:webhook:path=/mutate-goharbor-io-v1alpha2-harborcluster,mutating=true,failurePolicy=fail,groups=goharbor.io,resources=harborclusters,verbs=create;update,versions=v1alpha2,name=mharborcluster.kb.io
+// +kubebuilder:webhook:path=/mutate-goharbor-io-v1alpha2-harborcluster,mutating=true,failurePolicy=fail,groups=goharbor.io,resources=harborclusters,verbs=create;update,versions=v1alpha2,name=mharborcluster.kb.io,admissionReviewVersions={"v1beta1"},sideEffects=None
 
 var _ webhook.Defaulter = &HarborCluster{}
 
@@ -51,7 +51,7 @@ func (hc *HarborCluster) Default() {
 	}
 }
 
-// +kubebuilder:webhook:verbs=create;update,path=/validate-goharbor-io-v1alpha2-harborcluster,mutating=false,failurePolicy=fail,groups=goharbor.io,resources=harborclusters,versions=v1alpha2,name=vharborcluster.kb.io
+// +kubebuilder:webhook:verbs=create;update,path=/validate-goharbor-io-v1alpha2-harborcluster,mutating=false,failurePolicy=fail,groups=goharbor.io,resources=harborclusters,versions=v1alpha2,name=vharborcluster.kb.io,admissionReviewVersions={"v1beta1"},sideEffects=None
 
 var _ webhook.Validator = &HarborCluster{}
 

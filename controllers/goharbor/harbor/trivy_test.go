@@ -6,12 +6,11 @@ import (
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-operator/pkg/controller"
+	"github.com/goharbor/harbor-operator/pkg/factories/owner"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/ovh/configstore"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -19,14 +18,10 @@ func trivyFromResource(r graph.Resource) *goharborv1alpha2.Trivy {
 	res, ok := r.(*controller.Resource)
 	Expect(ok).To(BeTrue())
 
-	u, ok := res.GetResource().(*unstructured.Unstructured)
-	Expect(ok).To(BeTrue())
+	trivy, ok := res.GetResource().(*goharborv1alpha2.Trivy)
+	Expect(ok).To(BeTrue(), "resource is not trivy")
 
-	var trivy goharborv1alpha2.Trivy
-	err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &trivy)
-	Expect(err).NotTo(HaveOccurred())
-
-	return &trivy
+	return trivy
 }
 
 var _ = Describe("Trivy", func() {
@@ -45,7 +40,10 @@ var _ = Describe("Trivy", func() {
 
 				h := getSpec("./manifests/trivy/default.yaml")
 
-				_, trivyUpdateSecret, err := r.AddTrivyConfigurations(r.NewContext(ctrl.Request{}), h, nil)
+				c := r.NewContext(ctrl.Request{}) // this ctx has resource manager
+				owner.Set(&c, h)
+
+				_, trivyUpdateSecret, err := r.AddTrivyConfigurations(c, h, nil)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(trivyUpdateSecret).To(BeNil())
 			})
@@ -61,7 +59,10 @@ var _ = Describe("Trivy", func() {
 
 				h := getSpec("./manifests/trivy/default.yaml")
 
-				_, trivyUpdateSecret, err := r.AddTrivyConfigurations(r.NewContext(ctrl.Request{}), h, nil)
+				c := r.NewContext(ctrl.Request{}) // this ctx has resource manager
+				owner.Set(&c, h)
+
+				_, trivyUpdateSecret, err := r.AddTrivyConfigurations(c, h, nil)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(trivyUpdateSecret).NotTo(BeNil())
 
@@ -80,7 +81,10 @@ var _ = Describe("Trivy", func() {
 
 					h := getSpec("./manifests/trivy/default.yaml")
 
-					trivy, err := r.AddTrivy(r.NewContext(ctrl.Request{}), h, nil, nil)
+					c := r.NewContext(ctrl.Request{}) // this ctx has resource manager
+					owner.Set(&c, h)
+
+					trivy, err := r.AddTrivy(c, h, nil, nil)
 					Expect(err).NotTo(HaveOccurred())
 					Expect(trivy).NotTo(BeNil())
 
@@ -100,6 +104,7 @@ var _ = Describe("Trivy", func() {
 					h := getSpec("./manifests/trivy/default.yaml")
 
 					c := r.NewContext(ctrl.Request{}) // this ctx has resource manager
+					owner.Set(&c, h)
 
 					trivyUpdateSecret, err := r.AddTrivyUpdateSecret(c, h)
 					Expect(err).NotTo(HaveOccurred())
@@ -124,7 +129,10 @@ var _ = Describe("Trivy", func() {
 
 				h := getSpec("./manifests/trivy/github-token.yaml")
 
-				trivy, err := r.AddTrivy(r.NewContext(ctrl.Request{}), h, nil, nil)
+				c := r.NewContext(ctrl.Request{}) // this ctx has resource manager
+				owner.Set(&c, h)
+
+				trivy, err := r.AddTrivy(c, h, nil, nil)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(trivy).NotTo(BeNil())
 

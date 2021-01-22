@@ -1,26 +1,97 @@
 run:
   deadline: 10m
-  modules-download-mode: vendor
+  modules-download-mode: readonly
   skip-files:
   - pkged.go
   - ".*/zz_generated.*\\.go"
+  skip-dirs:
+  - bin
+  - dist
 
 linters:
-  enable-all: true
+  enable:
+  - asciicheck
+  - bodyclose
+  - deadcode
+  - depguard
+  - dogsled
+  - dupl
+  - errcheck
+  - exhaustive
+  - exportloopref
+  - gci
+  - gochecknoinits
+  - gocognit
+  - goconst
+  - gocritic
+  - gocyclo
+  - godot
+  - gofmt
+  - gofumpt
+  - goheader
+  - goimports
+  - golint
+  - gomodguard
+  - goprintffuncname
+  - gosimple
+  - govet
+  - ineffassign
+  - interfacer
+  - maligned
+  - misspell
+  - nakedret
+  - nlreturn
+  - noctx
+  - nolintlint
+  - prealloc
+  - rowserrcheck
+  - scopelint
+  - sqlclosecheck
+  - staticcheck
+  - structcheck
+  - stylecheck
+  - testpackage
+  - tparallel
+  - typecheck
+  - unconvert
+  - unparam
+  - unused
+  - varcheck
+  - whitespace
+  - wsl
   disable:
+  - exhaustivestruct
   - lll
   - gochecknoglobals
   - godox
+  - paralleltest
+  - wrapcheck
+  - errorlint
+  - goerr113
+  - gomnd
+  - nestif
+  - funlen
+  - gosec
 
 service:
-  golangci-lint-version: 1.22.x
+  golangci-lint-version: 1.33.x
   prepare:
   - make generate
 
 issues:
+  max-same-issues: 0
+  max-issues-per-linter: 0
+
   exclude-rules:
   # Exclude some linters from running on tests files.
   - path: _test\.go
+    linters:
+    - dupl
+    - funlen
+    - gci
+    - goerr113
+    - gomnd
+  - path: controllers/goharbor/internal/test
     linters:
     - dupl
     - funlen

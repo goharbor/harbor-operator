@@ -143,9 +143,11 @@ func (r *Reconciler) GetDeployment(ctx context.Context, portal *goharborv1alpha2
 							Ports: []corev1.ContainerPort{{
 								Name:          harbormetav1.JobServiceHTTPPortName,
 								ContainerPort: httpPort,
+								Protocol:      corev1.ProtocolTCP,
 							}, {
 								Name:          harbormetav1.JobServiceHTTPSPortName,
 								ContainerPort: httpsPort,
+								Protocol:      corev1.ProtocolTCP,
 							}},
 							Env:          envs,
 							VolumeMounts: volumeMounts,

@@ -122,7 +122,7 @@ type ComponentStatus struct {
 	// Current number of pods.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=0
-	Replicas *int32 `json:"replicas"`
+	Replicas *int32 `json:"replicas,omitempty"`
 
 	// Conditions list of extracted conditions from Resource
 	// +listType:map
@@ -132,12 +132,14 @@ type ComponentStatus struct {
 
 func (s ComponentStatus) MarshalJSON() ([]byte, error) {
 	var data struct {
-		ObservedGeneration int64         `json:"observedGeneration,omitempty"`
-		Status             status.Status `json:"status"`
-		Message            string        `json:"message"`
-		Conditions         []Condition   `json:"conditions"`
+		ObservedGeneration int64          `json:"observedGeneration,omitempty"`
+		Operator           OperatorStatus `json:"operator,omitempty"`
+		Replicas           *int32         `json:"replicas,omitempty"`
+		Conditions         []Condition    `json:"conditions"`
 	}
 
+	data.Operator = s.Operator
+	data.Replicas = s.Replicas
 	data.ObservedGeneration = s.ObservedGeneration
 
 	if s.Conditions == nil {

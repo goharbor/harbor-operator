@@ -34,6 +34,5 @@ spec:
       port: 3306
 status:
   conditions: []
-  message: ""
-  status: ""
+  operator: {}
 

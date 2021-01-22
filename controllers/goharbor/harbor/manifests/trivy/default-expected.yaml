@@ -27,5 +27,4 @@ spec:
     skip: false
 status:
   conditions: []
-  message: ""
-  status: ""
+  operator: {}

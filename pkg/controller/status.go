@@ -2,7 +2,6 @@ package controller
 
 import (
 	"context"
-	"fmt"
 
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
@@ -28,19 +27,11 @@ func (c *Controller) prepareStatus(ctx context.Context, owner resources.Resource
 	u := &unstructured.Unstructured{}
 	u.SetUnstructuredContent(data)
 
-	stop, err := c.preUpdateData(ctx, u)
-	if err != nil {
+	if err := c.preUpdateData(ctx, u); err != nil {
 		return errors.Wrap(err, "cannot update observedGeneration")
 	}
 
-	if stop {
-		logger.Get(ctx).Info("nothing to do")
-
-		return nil
-	}
-
-	err = c.Client.Status().Update(ctx, u)
-	if err != nil {
+	if err := c.Client.Status().Update(ctx, u); err != nil {
 		return errors.Wrap(err, "cannot update status")
 	}
 
@@ -55,21 +46,18 @@ func (c *Controller) SetSuccessStatus(ctx context.Context, resource runtime.Obje
 		return errors.Wrap(err, "cannot convert resource to unstuctured")
 	}
 
-	err = c.SetControllerStatus(ctx, data)
-	if err != nil {
+	if err := c.SetControllerStatus(ctx, data); err != nil {
 		return errors.Wrap(err, "cannot set controller status")
 	}
 
-	err = c.SetSuccessConditions(ctx, data)
-	if err != nil {
+	if err := c.SetSuccessConditions(ctx, data); err != nil {
 		return errors.Wrap(err, "cannot set conditions to success")
 	}
 
 	u := &unstructured.Unstructured{}
 	u.SetUnstructuredContent(data)
 
-	err = c.Client.Status().Update(ctx, u)
-	if err != nil {
+	if err := c.Client.Status().Update(ctx, u); err != nil {
 		return errors.Wrap(err, "cannot update status")
 	}
 
@@ -99,43 +87,39 @@ func (c *Controller) SetSuccessConditions(ctx context.Context, data map[string]i
 	return errors.Wrap(err, "cannot update conditions")
 }
 
-func (c *Controller) preUpdateData(ctx context.Context, u *unstructured.Unstructured) (bool, error) {
-	err := status.Augment(u)
-	if err != nil {
-		return false, serrors.UnrecoverrableError(err, serrors.OperatorReason, "unable to augment resource status")
+func (c *Controller) preUpdateData(ctx context.Context, u *unstructured.Unstructured) error {
+	if err := status.Augment(u); err != nil {
+		return serrors.UnrecoverrableError(err, serrors.OperatorReason, "unable to augment resource status")
 	}
 
 	data := u.UnstructuredContent()
 
-	stopByControllerVersion, err := c.preUpdateControllerStatus(ctx, data)
-	if err != nil {
-		return false, err
+	if err := c.preUpdateControllerStatus(ctx, data); err != nil {
+		return err
 	}
 
-	stopByGeneration, err := c.preUpdateObservedGeneration(ctx, data)
-	if err != nil {
-		return false, err
+	if err := c.preUpdateObservedGeneration(ctx, data); err != nil {
+		return err
 	}
 
 	u.SetUnstructuredContent(data)
 
-	return stopByControllerVersion && stopByGeneration, nil
+	return nil
 }
 
-func (c *Controller) preUpdateControllerStatus(ctx context.Context, data map[string]interface{}) (bool, error) {
-	observedVersion, foundVersion, err := unstructured.NestedString(data, "status", "operator", "controllerVersion")
+func (c *Controller) preUpdateControllerStatus(ctx context.Context, data map[string]interface{}) error {
+	observedVersion, _, err := unstructured.NestedString(data, "status", "operator", "controllerVersion")
 	if err != nil {
-		return false, serrors.UnrecoverrableError(err, serrors.OperatorReason, "unable to get controller version")
+		return serrors.UnrecoverrableError(err, serrors.OperatorReason, "unable to get controller version")
 	}
 
-	observedName, foundName, err := unstructured.NestedString(data, "status", "operator", "controllerName")
+	observedName, _, err := unstructured.NestedString(data, "status", "operator", "controllerName")
 	if err != nil {
-		return false, serrors.UnrecoverrableError(err, serrors.OperatorReason, "unable to get controller name")
+		return serrors.UnrecoverrableError(err, serrors.OperatorReason, "unable to get controller name")
 	}
 
-	err = c.SetControllerStatus(ctx, data)
-	if err != nil {
-		return false, errors.Wrap(err, "cannot set controller status")
+	if err := c.SetControllerStatus(ctx, data); err != nil {
+		return errors.Wrap(err, "cannot set controller status")
 	}
 
 	version, name := c.GetVersion(), c.GetName()
@@ -148,7 +132,7 @@ func (c *Controller) preUpdateControllerStatus(ctx context.Context, data map[str
 		"newName", name,
 	)
 
-	return foundVersion && foundName && version == observedVersion && name == observedName, nil
+	return nil
 }
 
 func (c *Controller) SetControllerStatus(ctx context.Context, data map[string]interface{}) error {
@@ -167,47 +151,31 @@ func (c *Controller) SetControllerStatus(ctx context.Context, data map[string]in
 
 var errNoGeneration = errors.New("no $.metadata.generation found")
 
-func (c *Controller) preUpdateObservedGeneration(ctx context.Context, data map[string]interface{}) (bool, error) {
+func (c *Controller) preUpdateObservedGeneration(ctx context.Context, data map[string]interface{}) error {
 	generation, found, err := unstructured.NestedInt64(data, "metadata", "generation")
 	if err != nil {
-		return false, serrors.UnrecoverrableError(err, serrors.OperatorReason, "unable to get generation")
+		return serrors.UnrecoverrableError(err, serrors.OperatorReason, "unable to get generation")
 	}
 
 	if !found {
-		return false, serrors.UnrecoverrableError(errNoGeneration, serrors.OperatorReason, "unable to get generation")
+		return serrors.UnrecoverrableError(errNoGeneration, serrors.OperatorReason, "unable to get generation")
 	}
 
 	observedGeneration, found, err := unstructured.NestedInt64(data, "status", "observedGeneration")
 	if err != nil {
-		return false, serrors.UnrecoverrableError(err, serrors.OperatorReason, "unable to get observed generation")
+		return serrors.UnrecoverrableError(err, serrors.OperatorReason, "unable to get observed generation")
 	}
 
 	err = unstructured.SetNestedField(data, generation, "status", "observedGeneration")
 	if err != nil {
-		return false, serrors.UnrecoverrableError(err, serrors.OperatorReason, "unable to set observed generation")
+		return serrors.UnrecoverrableError(err, serrors.OperatorReason, "unable to set observed generation")
 	}
 
-	// Already observed
-	if found && generation == observedGeneration {
-		conditions, _, err := unstructured.NestedSlice(data, "status", "conditions")
-		if err != nil {
-			return false, serrors.UnrecoverrableError(err, serrors.OperatorReason, "unable to get conditions")
-		}
-
-		failedStatus, err := sstatus.GetConditionStatus(ctx, conditions, status.ConditionFailed)
-		if err != nil {
-			return false, serrors.UnrecoverrableError(err, serrors.OperatorReason, fmt.Sprintf("unable to check %s condition", status.ConditionFailed))
-		}
-
-		inProgressStatus, err := sstatus.GetConditionStatus(ctx, conditions, status.ConditionInProgress)
-		if err != nil {
-			return false, serrors.UnrecoverrableError(err, serrors.OperatorReason, fmt.Sprintf("unable to check %s condition", status.ConditionInProgress))
-		}
-
-		return inProgressStatus == corev1.ConditionFalse && failedStatus == corev1.ConditionFalse, nil
+	if !found || generation != observedGeneration {
+		return c.preUpdateConditions(ctx, data)
 	}
 
-	return false, c.preUpdateConditions(ctx, data)
+	return nil
 }
 
 func (c *Controller) preUpdateConditions(ctx context.Context, data map[string]interface{}) error {
@@ -282,8 +250,9 @@ func (c *Controller) SetErrorConditions(ctx context.Context, data map[string]int
 			break
 		}
 
-		cause, ok := errLoop.(causer)
-		if !ok {
+		var cause causer
+
+		if !errors.As(errLoop, &cause) {
 			break
 		}
 
@@ -307,13 +276,17 @@ func (c *Controller) getStatusResult(rootError, localErr error) (stop bool, cond
 	stop = false
 	resultError = rootError
 
-	if err, ok := localErr.(serrors.Resulter); ok {
-		_, resultError = err.Result()
+	var resultErr serrors.Resulter
+
+	if errors.As(localErr, &resultErr) {
+		_, resultError = resultErr.Result()
 		stop = true
 	}
 
-	if err, ok := localErr.(serrors.Status); ok {
-		conditions = err.Status()
+	var statusErr serrors.Status
+
+	if errors.As(localErr, &statusErr) {
+		conditions = statusErr.Status()
 		stop = true
 	}
 
