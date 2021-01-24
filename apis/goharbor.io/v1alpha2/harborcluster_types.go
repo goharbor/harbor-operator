@@ -113,17 +113,18 @@ type Storage struct {
 
 // StorageRedirectSpec defines if the redirection is disabled.
 type StorageRedirectSpec struct {
-	// Disable the redirect.
-	// Default is false
-	// +optional
-	Disable bool `json:"disable"`
+	// Default is true
+	// +kubebuilder:default:=true
+	Enable bool `json:"enable,omitempty"`
+	// +kubebuilder:validation:Optional
+	Expose *HarborExposeComponentSpec `json:"expose,omitempty"`
 }
 
 type MinIOSpec struct {
 	harbormetav1.ImageSpec `json:",inline"`
 
 	// Determine if the redirection of minio storage is disabled.
-	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Required
 	Redirect StorageRedirectSpec `json:"redirect"`
 	// Supply number of replicas.
 	// For standalone mode, supply 1. For distributed mode, supply 4 to 16 drives (should be even).

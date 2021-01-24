@@ -139,7 +139,7 @@ func (harbor *Controller) getHarborCR(harborcluster *v1alpha2.HarborCluster) *v1
 	if storage := harbor.getStorageSpec(); storage != nil {
 		harbor.Log.Info("use incluster storage", "storage", storage.S3.RegionEndpoint)
 		harborCR.Spec.ImageChartStorage = storage
-		harborCR.Spec.ImageChartStorage.Redirect.Disable = harborcluster.Spec.InClusterStorage.MinIOSpec.Redirect.Disable
+		harborCR.Spec.ImageChartStorage.Redirect.Disable = harborcluster.Spec.InClusterStorage.MinIOSpec.Redirect.Enable
 	}
 
 	return harborCR
