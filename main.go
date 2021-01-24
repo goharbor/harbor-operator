@@ -1,8 +1,10 @@
 package main
 
 import (
-	"os"
+	"context"
 
+	"github.com/go-logr/logr"
+	"github.com/goharbor/harbor-operator/pkg/exit"
 	"github.com/goharbor/harbor-operator/pkg/factories/application"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	"github.com/goharbor/harbor-operator/pkg/manager"
@@ -21,50 +23,85 @@ const (
 )
 
 const (
-	exitCodeFailure = 1
+	LoggerExitCode int = iota + 1
+	ManagerExitCode
+	SchemeExitCode
+	TracingExitCode
+	ControllersExitCode
+	RunExitCode
 )
 
-func main() {
+func setupContextAndLogger() (context.Context, logr.Logger, error) {
 	setupLog := ctrl.Log.WithName("setup")
 	ctx := logger.Context(setupLog)
 
-	// Check non-nil error then log and exit with non-zero code
-	fail := func(err error, msg string) {
-		// If err is non-nil, then exit with non-zero code,
-		// otherwise move on
-		if err != nil {
-			setupLog.Error(err, msg)
-			os.Exit(exitCodeFailure)
-		}
-	}
-
 	err := setup.Logger(ctx, name, version)
-	fail(err, "unable to create logger")
-
-	configstore.InitFromEnvironment()
+	if err != nil {
+		return nil, nil, err
+	}
 
 	application.SetName(&ctx, name)
 	application.SetVersion(&ctx, version)
 
+	return ctx, setupLog, nil
+}
+
+func main() {
+	defer exit.Exit()
+
+	ctx, setupLog, err := setupContextAndLogger()
+	if err != nil {
+		setupLog.Error(err, "unable to create logger")
+		exit.SetCode(LoggerExitCode)
+
+		return
+	}
+
+	configstore.InitFromEnvironment()
+
 	scheme, err := scheme.New(ctx)
-	fail(err, "unable to create scheme")
+	if err != nil {
+		setupLog.Error(err, "unable to create scheme")
+		exit.SetCode(SchemeExitCode)
+
+		return
+	}
 
 	mgr, err := manager.New(ctx, scheme)
-	fail(err, "unable to create manager")
+	if err != nil {
+		setupLog.Error(err, "unable to create manager")
+		exit.SetCode(ManagerExitCode)
+
+		return
+	}
 
 	traCon, err := tracing.New(ctx)
-	fail(err, "unable to create tracer")
+	if err != nil {
+		setupLog.Error(err, "unable to create tracer")
+		exit.SetCode(TracingExitCode)
 
+		return
+	}
 	defer traCon.Close()
 
-	err = setup.WithManager(ctx, mgr)
-	fail(err, "unable to setup controllers")
+	if err := (setup.WithManager(ctx, mgr)); err != nil {
+		setupLog.Error(err, "unable to setup controllers")
+		exit.SetCode(ControllersExitCode)
+
+		return
+	}
 
 	// +kubebuilder:scaffold:builder
 
-	// Log
 	setupLog.Info("starting manager", "version", version, "commit", commit)
 
-	err = mgr.Start(ctrl.SetupSignalHandler())
-	fail(err, "cannot start manager")
+	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
+		setupLog.Error(err, "cannot start manager")
+
+		if exit.GetCode() == exit.SuccessExitCode {
+			exit.SetCode(RunExitCode)
+		}
+
+		return
+	}
 }

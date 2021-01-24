@@ -1,0 +1,38 @@
+apiVersion: goharbor.io/v1alpha2
+kind: JobService
+metadata:
+  annotations:
+    harbor.goharbor.io/version: ""
+  creationTimestamp: null
+  name: example-harbor
+  namespace: default
+spec:
+  core:
+    secretRef: example-harbor-core-secret
+    url: http://example-harbor-core:80
+  image: example.goharbor.io/goharbor/harbor-jobservice:v2.1.2
+  jobLoggers:
+    files:
+    - level: INFO
+      sweeper: 14h0m0s
+  loggers:
+    stdout:
+      level: INFO
+  registry:
+    controllerURL: http://example-harbor-registryctl:80
+    credentials:
+      passwordRef: example-harbor-registry-basicauth
+      username: harbor_registry_user
+    url: http://example-harbor-registry
+  resources: {}
+  secretRef: example-harbor-jobservice-secret
+  tokenService:
+    url: http://example-harbor-core/service/token
+  workerPool:
+    redisPool:
+      database: 2
+      host: 127.0.0.1
+      port: 3306
+status:
+  conditions: []
+  operator: {}

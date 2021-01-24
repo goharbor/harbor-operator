@@ -48,12 +48,12 @@ func (p *PostgreSQLController) Apply(ctx context.Context, harborcluster *goharbo
 
 	actualCR, err := crdClient.Get(p.resourceName(), metav1.GetOptions{})
 	if errors.IsNotFound(err) {
-		return p.Deploy()
+		return p.Deploy(ctx, harborcluster)
 	} else if err != nil {
 		return databaseNotReadyStatus(GetDatabaseCrError, err.Error()), err
 	}
 
-	expectCR, err := p.GetPostgresCR()
+	expectCR, err := p.GetPostgresCR(ctx, harborcluster)
 	if err != nil {
 		return databaseNotReadyStatus(GenerateDatabaseCrError, err.Error()), err
 	}

@@ -213,9 +213,11 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.
 						Ports: []corev1.ContainerPort{{
 							Name:          harbormetav1.TrivyHTTPPortName,
 							ContainerPort: httpPort,
+							Protocol:      corev1.ProtocolTCP,
 						}, {
 							Name:          harbormetav1.TrivyHTTPSPortName,
 							ContainerPort: httpsPort,
+							Protocol:      corev1.ProtocolTCP,
 						}},
 
 						Env:          envs,

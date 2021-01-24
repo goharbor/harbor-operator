@@ -3,6 +3,7 @@ package storage
 // Define error message.
 const (
 	GetMinIOError            = "Get minIO error"
+	GenerateMinIOCrError     = "Generate minIO cr error"
 	UpdateMinIOError         = "Update minIO error"
 	CreateMinIOSecretError   = "Create minIO secret error"
 	CreateMinIOServiceError  = "Create service of minIO error"

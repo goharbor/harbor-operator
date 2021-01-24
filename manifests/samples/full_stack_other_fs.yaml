@@ -14,16 +14,6 @@ data:
   secret: SGFyYm9yMTIzNDU=
 type: Opaque
 ---
-# A secret of harbor admin password.
-apiVersion: v1
-kind: Secret
-metadata:
-  name: github-credentials
-  namespace: cluster-sample-ns
-data:
-  github-token: eHh4
-type: goharbor.io/github
----
 # Cert issuer
 apiVersion: cert-manager.io/v1alpha2
 kind: Issuer
@@ -124,7 +114,6 @@ spec:
         certificateRef: sample-public-certificate
   trivy:
     skipUpdate: false
-    githubTokenRef: github-credentials
     storage:
       reportsPersistentVolume:
         claimName: sample-harbor-trivy-reports
@@ -152,8 +141,7 @@ spec:
     kind: PostgresSQL
     postgresSqlSpec:
       storage: 1Gi
-      replicas: 2
-      version: "12"
+      replicas: 1
       resources:
         limits:
           cpu: 500m

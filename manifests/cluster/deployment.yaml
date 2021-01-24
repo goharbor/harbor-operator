@@ -2409,6 +2409,25 @@ spec:
                               type: string
                           type: object
                         type: array
+                      image:
+                        description: Image name for the component.
+                        type: string
+                      imagePullPolicy:
+                        description: 'Image pull policy. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images'
+                        enum:
+                        - Always
+                        - Never
+                        - IfNotPresent
+                        type: string
+                      imagePullSecrets:
+                        items:
+                          description: LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.
+                          properties:
+                            name:
+                              description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                              type: string
+                          type: object
+                        type: array
                       poolSize:
                         description: Maximum number of socket connections. Default is 10 connections per every CPU as reported by runtime.NumCPU.
                         type: integer
@@ -2461,6 +2480,25 @@ spec:
                     properties:
                       connectTimeout:
                         type: integer
+                      image:
+                        description: Image name for the component.
+                        type: string
+                      imagePullPolicy:
+                        description: 'Image pull policy. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images'
+                        enum:
+                        - Always
+                        - Never
+                        - IfNotPresent
+                        type: string
+                      imagePullSecrets:
+                        items:
+                          description: LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.
+                          properties:
+                            name:
+                              description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                              type: string
+                          type: object
+                        type: array
                       replicas:
                         type: integer
                       resources:
@@ -2483,8 +2521,6 @@ spec:
                         type: string
                       storageClassName:
                         type: string
-                      version:
-                        type: string
                     type: object
                 required:
                 - kind
@@ -2501,6 +2537,25 @@ spec:
                   minIOSpec:
                     description: inCLuster options.
                     properties:
+                      image:
+                        description: Image name for the component.
+                        type: string
+                      imagePullPolicy:
+                        description: 'Image pull policy. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images'
+                        enum:
+                        - Always
+                        - Never
+                        - IfNotPresent
+                        type: string
+                      imagePullSecrets:
+                        items:
+                          description: LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.
+                          properties:
+                            name:
+                              description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                              type: string
+                          type: object
+                        type: array
                       redirect:
                         description: Determine if the redirection of minio storage is disabled.
                         properties:
@@ -2527,9 +2582,6 @@ spec:
                             description: 'Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                             type: object
                         type: object
-                      version:
-                        description: Version defines the MinIO Client (mc) Docker image version.
-                        type: string
                       volumeClaimTemplate:
                         description: VolumeClaimTemplate allows a user to specify how volumes inside a MinIOInstance
                         properties:
@@ -13923,28 +13975,6 @@ spec:
         command:
         - /manager
         env:
-        - name: CORE_DOCKER_IMAGE_2_1_2
-          value: quay.io/goharbor/harbor-core:v2.1.2
-        - name: JOBSERVICE_DOCKER_IMAGE
-          value: quay.io/goharbor/harbor-jobservice:v2.1.2
-        - name: PORTAL_DOCKER_IMAGE_2_1_2
-          value: quay.io/goharbor/harbor-portal:v2.1.2
-        - name: REGISTRYCTL_DOCKER_IMAGE_2_1_2
-          value: quay.io/goharbor/harbor-registryctl:v2.1.2
-        - name: REGISTRY_DOCKER_IMAGE_2_1_2
-          value: quay.io/goharbor/registry-photon:v2.1.2
-        - name: CHARTMUSEUM_DOCKER_IMAGE_2_1_2
-          value: quay.io/goharbor/chartmuseum-photon:v2.1.2
-        - name: NOTARYSERVER_DOCKER_IMAGE_2_1_2
-          value: quay.io/goharbor/notary-server-photon:v2.1.2
-        - name: NOTARYSIGNER_DOCKER_IMAGE_2_1_2
-          value: quay.io/goharbor/notary-signer-photon:v2.1.2
-        - name: TRIVY_DOCKER_IMAGE_2_1_2
-          value: quay.io/goharbor/trivy-adapter-photon:v2.1.2
-        - name: HARBORCLUSTER_STORAGE_IMAGE
-          value: quay.io/goharbor/minio:RELEASE.2020-08-13T02-39-50Z
-        - name: HARBORCLUSTER_CACHE_IMAGE
-          value: quay.io/goharbor/redis:5.0-alpine
         - name: NAMESPACE
           valueFrom:
             fieldRef:

@@ -1,14 +1,16 @@
 package storage
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 
-	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/common"
 	minio "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/api/v1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
+	"github.com/goharbor/harbor-operator/pkg/config"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1beta1"
 	k8serror "k8s.io/apimachinery/pkg/api/errors"
@@ -30,7 +32,7 @@ func (m *MinIOController) ProvisionMinIOProperties(minioInstamnce *minio.Tenant)
 	return minioReadyStatus(properties), nil
 }
 
-func (m *MinIOController) getMinIOProperties(minioInstance *minio.Tenant) (*goharborv1.HarborStorageImageChartStorageSpec, error) {
+func (m *MinIOController) getMinIOProperties(minioInstance *minio.Tenant) (*goharborv1alpha2.HarborStorageImageChartStorageSpec, error) {
 	accessKey, secretKey, err := m.getCredsFromSecret()
 	if err != nil {
 		return nil, err
@@ -69,9 +71,9 @@ func (m *MinIOController) getMinIOProperties(minioInstance *minio.Tenant) (*goha
 		endpoint = fmt.Sprintf("http://%s.%s.svc:%s", m.getServiceName(), m.HarborCluster.Namespace, "9000")
 	}
 
-	storageSpec := &goharborv1.HarborStorageImageChartStorageSpec{
-		S3: &goharborv1.HarborStorageImageChartStorageS3Spec{
-			RegistryStorageDriverS3Spec: goharborv1.RegistryStorageDriverS3Spec{
+	storageSpec := &goharborv1alpha2.HarborStorageImageChartStorageSpec{
+		S3: &goharborv1alpha2.HarborStorageImageChartStorageS3Spec{
+			RegistryStorageDriverS3Spec: goharborv1alpha2.RegistryStorageDriverS3Spec{
 				AccessKey:      string(accessKey),
 				SecretKeyRef:   secretKeyRef.Name,
 				Region:         DefaultRegion,
@@ -229,7 +231,12 @@ func (m *MinIOController) generateIngress() (*netv1.Ingress, error) {
 	}, err
 }
 
-func (m *MinIOController) generateMinIOCR() *minio.Tenant {
+func (m *MinIOController) generateMinIOCR(ctx context.Context, harborcluster *goharborv1alpha2.HarborCluster) (*minio.Tenant, error) {
+	image, err := m.GetImage(ctx, harborcluster)
+	if err != nil {
+		return nil, err
+	}
+
 	return &minio.Tenant{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       minio.MinIOCRDResourceKind,
@@ -241,7 +248,7 @@ func (m *MinIOController) generateMinIOCR() *minio.Tenant {
 			Labels:      m.getLabels(),
 			Annotations: m.generateAnnotations(),
 			OwnerReferences: []metav1.OwnerReference{
-				*metav1.NewControllerRef(m.HarborCluster, goharborv1.HarborClusterGVK),
+				*metav1.NewControllerRef(m.HarborCluster, goharborv1alpha2.HarborClusterGVK),
 			},
 		},
 		Spec: minio.TenantSpec{
@@ -286,7 +293,7 @@ func (m *MinIOController) generateMinIOCR() *minio.Tenant {
 				PeriodSeconds:       60,
 			},
 		},
-	}
+	}, nil
 }
 
 func (m *MinIOController) getServiceName() string {
@@ -405,4 +412,28 @@ func (m *MinIOController) getCredsFromSecret() ([]byte, []byte, error) {
 	err := m.KubeClient.Get(namespaced, &minIOSecret)
 
 	return minIOSecret.Data["accesskey"], minIOSecret.Data["secretkey"], err
+}
+
+func (m *MinIOController) getImagePullPolicy(_ context.Context, harborcluster *goharborv1alpha2.HarborCluster) corev1.PullPolicy {
+	if harborcluster.Spec.InClusterStorage.MinIOSpec.ImagePullPolicy != nil {
+		return *harborcluster.Spec.InClusterStorage.MinIOSpec.ImagePullPolicy
+	}
+
+	if harborcluster.Spec.ImageSource != nil && harborcluster.Spec.ImageSource.ImagePullPolicy != nil {
+		return *harborcluster.Spec.ImageSource.ImagePullPolicy
+	}
+
+	return config.DefaultImagePullPolicy
+}
+
+func (m *MinIOController) getImagePullSecret(_ context.Context, harborcluster *goharborv1alpha2.HarborCluster) corev1.LocalObjectReference {
+	if len(harborcluster.Spec.InClusterStorage.MinIOSpec.ImagePullSecrets) > 0 {
+		return harborcluster.Spec.InClusterStorage.MinIOSpec.ImagePullSecrets[0]
+	}
+
+	if harborcluster.Spec.ImageSource != nil && len(harborcluster.Spec.ImageSource.ImagePullSecrets) > 0 {
+		return harborcluster.Spec.ImageSource.ImagePullSecrets[0]
+	}
+
+	return corev1.LocalObjectReference{Name: ""} // empty name means not using pull secret in minio
 }

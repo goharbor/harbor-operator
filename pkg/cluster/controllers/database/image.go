@@ -14,20 +14,41 @@
 
 package database
 
+import (
+	"context"
+
+	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	"github.com/goharbor/harbor-operator/pkg/image"
+)
+
 const (
-	DefaultCacheImage = "registry.opensource.zalan.do/acid/spilo-12:1.6-p3"
-	ConfigImageKey    = "database-image"
+	ComponentName  = "cluster-postgresql"
+	ConfigImageKey = "postgresql-docker-image"
 )
 
 // GetImage returns the configured image via configstore or default one.
-func (p *PostgreSQLController) GetImage() string {
-	image, err := p.ConfigStore.GetItemValue(ConfigImageKey)
-	if err != nil {
-		// Just logged
-		p.Log.V(5).Error(err, "get database image error", "image-key", ConfigImageKey)
-
-		image = DefaultCacheImage
+func (p *PostgreSQLController) GetImage(ctx context.Context, harborcluster *goharborv1alpha2.HarborCluster) (string, error) {
+	if harborcluster.Spec.InClusterDatabase.PostgresSQLSpec.Image != "" {
+		return harborcluster.Spec.InClusterDatabase.PostgresSQLSpec.Image, nil
 	}
 
-	return image
+	options := []image.Option{image.WithHarborVersion(harborcluster.Spec.Version)}
+	if harborcluster.Spec.ImageSource != nil && (harborcluster.Spec.ImageSource.Repository != "" || harborcluster.Spec.ImageSource.TagSuffix != "") {
+		options = append(options,
+			image.WithRepository(harborcluster.Spec.ImageSource.Repository),
+			image.WithTagSuffix(harborcluster.Spec.ImageSource.TagSuffix),
+		)
+	} else {
+		options = append(options,
+			image.WithConfigstore(p.ConfigStore),
+			image.WithConfigImageKey(ConfigImageKey),
+		)
+	}
+
+	image, err := image.GetImage(ctx, ComponentName, options...)
+	if err != nil {
+		return "", err
+	}
+
+	return image, nil
 }

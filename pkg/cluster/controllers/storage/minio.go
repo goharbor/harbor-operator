@@ -83,7 +83,14 @@ func (m *MinIOController) Apply(ctx context.Context, harborcluster *goharborv1.H
 	desiredMinIOCR := m.generateMinIOCR()
 	m.DesiredMinIOCR = desiredMinIOCR
 
-	err := m.KubeClient.Get(m.getMinIONamespacedName(), &minioCR)
+	desiredMinIOCR, err := m.generateMinIOCR(ctx, harborcluster)
+	if err != nil {
+		return minioNotReadyStatus(GenerateMinIOCrError, err.Error()), err
+	}
+
+	m.DesiredMinIOCR = desiredMinIOCR
+
+	err = m.KubeClient.Get(m.getMinIONamespacedName(), &minioCR)
 	if k8serror.IsNotFound(err) {
 		m.Log.Info("create minio service")
 

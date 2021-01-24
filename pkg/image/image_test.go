@@ -72,7 +72,7 @@ var _ = Describe("Get image", func() {
 	Describe("Get image from config store", func() {
 		It("Should pass", func() {
 			os.Setenv(configstore.ConfigEnvVar, "env")
-			os.Setenv(ConfigImageKeyPrefix+"_"+strings.ReplaceAll(version.Default(), ".", "_"), "goharbor/harbor-core:latest")
+			os.Setenv(ConfigImageKey+"_"+strings.ReplaceAll(version.Default(), ".", "_"), "goharbor/harbor-core:latest")
 			configStore := configstore.NewStore()
 			configStore.InitFromEnvironment()
 
@@ -85,7 +85,7 @@ var _ = Describe("Get image", func() {
 	Describe("Get image from config store with image key", func() {
 		It("Should pass", func() {
 			os.Setenv(configstore.ConfigEnvVar, "env")
-			os.Setenv("key", "goharbor/harbor-core:latest")
+			os.Setenv("key"+"_"+strings.ReplaceAll(version.Default(), ".", "_"), "goharbor/harbor-core:latest")
 			configStore := configstore.NewStore()
 			configStore.InitFromEnvironment()
 

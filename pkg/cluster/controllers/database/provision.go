@@ -1,6 +1,9 @@
 package database
 
 import (
+	"context"
+
+	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -16,12 +19,12 @@ import (
 // - perform any postgresqls downscale (left for downscale phase)
 // - perform any postgresqls upscale (left for upscale phase)
 // - perform any pod upgrade (left for rolling upgrade phase).
-func (p *PostgreSQLController) Deploy() (*lcm.CRStatus, error) {
+func (p *PostgreSQLController) Deploy(ctx context.Context, harborcluster *goharborv1alpha2.HarborCluster) (*lcm.CRStatus, error) {
 	var expectCR *unstructured.Unstructured
 
 	crdClient := p.DClient.WithResource(databaseGVR).WithNamespace(p.HarborCluster.Namespace)
 
-	expectCR, err := p.GetPostgresCR()
+	expectCR, err := p.GetPostgresCR(ctx, harborcluster)
 	if err != nil {
 		return databaseNotReadyStatus(GenerateDatabaseCrError, err.Error()), err
 	}

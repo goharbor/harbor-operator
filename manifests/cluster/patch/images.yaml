@@ -10,7 +10,7 @@ spec:
         env:
           - name: CORE_DOCKER_IMAGE_2_1_2
             value: quay.io/goharbor/harbor-core:v2.1.2
-          - name: JOBSERVICE_DOCKER_IMAGE
+          - name: JOBSERVICE_DOCKER_IMAGE_2_1_2
             value: quay.io/goharbor/harbor-jobservice:v2.1.2
           - name: PORTAL_DOCKER_IMAGE_2_1_2
             value: quay.io/goharbor/harbor-portal:v2.1.2
@@ -26,7 +26,9 @@ spec:
             value: quay.io/goharbor/notary-signer-photon:v2.1.2
           - name: TRIVY_DOCKER_IMAGE_2_1_2
             value: quay.io/goharbor/trivy-adapter-photon:v2.1.2
-          - name: HARBORCLUSTER_STORAGE_IMAGE
+          - name: HARBORCLUSTER_MINIO_DOCKER_IMAGE_2_1_2
             value: quay.io/goharbor/minio:RELEASE.2020-08-13T02-39-50Z
-          - name: HARBORCLUSTER_CACHE_IMAGE
+          - name: HARBORCLUSTER_REDIS_DOCKER_IMAGE_2_1_2
             value: quay.io/goharbor/redis:5.0-alpine
+          - name: HARBORCLUSTER_POSTGRESQL_DOCKER_IMAGE_2_1_2
+            value: quay.io/goharbor/spilo-12:1.6-p3

@@ -2,17 +2,25 @@ package database
 
 import (
 	"fmt"
+	"strconv"
 
+	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/database/api"
+	"github.com/goharbor/harbor-operator/pkg/config"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
 
 const (
-	DefaultDatabaseReplica = 3
-	DefaultDatabaseMemory  = "1Gi"
-	DefaultDatabaseVersion = "12"
+	ConfigMaxConnectionsKey       = "postgresql-max-connections"
+	DefaultDatabaseReplica        = 3
+	DefaultDatabaseMemory         = "1Gi"
+	DefaultDatabaseMaxConnections = "1024"
 )
+
+var postgresqlVersions = map[string]string{
+	"*": "12", // TODO: change to postgres 9.6
+}
 
 func (p *PostgreSQLController) GetDatabases() map[string]string {
 	databases := map[string]string{
@@ -129,16 +137,40 @@ func (p *PostgreSQLController) GetPostgreStorageSize() string {
 	return p.HarborCluster.Spec.InClusterDatabase.PostgresSQLSpec.Storage
 }
 
-func (p *PostgreSQLController) GetPostgreVersion() string {
-	if p.HarborCluster.Spec.InClusterDatabase.PostgresSQLSpec == nil {
-		return DefaultDatabaseVersion
+func (p *PostgreSQLController) GetPostgreVersion(harborcluster *goharborv1alpha2.HarborCluster) (string, error) {
+	for _, harborVersion := range []string{harborcluster.Spec.Version, "*"} {
+		if version, ok := postgresqlVersions[harborVersion]; ok {
+			return version, nil
+		}
 	}
 
-	if p.HarborCluster.Spec.InClusterDatabase.PostgresSQLSpec.Version == "" {
-		return DefaultDatabaseVersion
+	return "", fmt.Errorf("postgresql version not found for harbor %s", harborcluster.Spec.Version)
+}
+
+func (p *PostgreSQLController) GetPostgreParameters() map[string]string {
+	return map[string]string{
+		"max_connections": p.GetPosgresMaxConnections(),
+	}
+}
+
+func (p *PostgreSQLController) GetPosgresMaxConnections() string {
+	maxConnections, err := p.ConfigStore.GetItemValue(ConfigMaxConnectionsKey)
+	if err != nil {
+		if !config.IsNotFound(err, ConfigMaxConnectionsKey) {
+			// Just logged
+			p.Log.V(5).Error(err, "failed to get database max connections")
+		}
+
+		maxConnections = DefaultDatabaseMaxConnections
 	}
 
-	return p.HarborCluster.Spec.InClusterDatabase.PostgresSQLSpec.Version
+	if _, err := strconv.ParseInt(maxConnections, 10, 64); err != nil {
+		p.Log.V(5).Error(err, "%s is not a valid number for postgres max connections", maxConnections)
+
+		maxConnections = DefaultDatabaseMaxConnections
+	}
+
+	return maxConnections
 }
 
 // GenDatabaseURL returns database connection url.

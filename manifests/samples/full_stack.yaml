@@ -61,6 +61,8 @@ spec:
     enabled: true
   portal: {}
   registry: {}
+  trivy:
+    storage: {}
   core:
     tokenIssuer:
       name: selfsigned-issuer
@@ -70,7 +72,6 @@ spec:
     postgresSqlSpec:
       storage: 1Gi
       replicas: 2
-      version: "12"
       resources:
         limits:
           cpu: 500m
@@ -83,7 +84,6 @@ spec:
     minIOSpec:
       replicas: 2
       volumesPerServer: 2
-      version: RELEASE.2020-08-13T02-39-50Z
       volumeClaimTemplate:
         spec:
           storageClassName: standard

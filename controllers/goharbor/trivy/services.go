@@ -39,10 +39,12 @@ func (r *Reconciler) GetService(ctx context.Context, trivy *goharborv1alpha2.Tri
 				Name:       harbormetav1.TrivyHTTPPortName,
 				Port:       harbormetav1.HTTPPort,
 				TargetPort: intstr.FromString(harbormetav1.TrivyHTTPPortName),
+				Protocol:   corev1.ProtocolTCP,
 			}, {
 				Name:       harbormetav1.TrivyHTTPSPortName,
 				Port:       harbormetav1.HTTPSPort,
 				TargetPort: intstr.FromString(harbormetav1.TrivyHTTPSPortName),
+				Protocol:   corev1.ProtocolTCP,
 			}},
 			Selector: map[string]string{
 				r.Label("name"):      name,

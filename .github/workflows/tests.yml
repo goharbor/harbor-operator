@@ -17,13 +17,16 @@ jobs:
     name: Build docker image
 
     steps:
+    - uses: actions/setup-go@v2
+      with:
+        go-version: 1.14
     - uses: actions/checkout@v2
     - run: make docker-build
 
   docker-lint:
     runs-on: ubuntu-latest
     name: 'dockerfile: lint'
-    steps: 
+    steps:
     - uses: actions/checkout@v2
     - run: make docker-lint
 
@@ -63,22 +66,20 @@ jobs:
     name: Go tests
     env:
       USE_EXISTING_CLUSTER: true
+      dockerImage: harbor-operator:dev_test
     steps:
+      - uses: actions/checkout@v2
+
       - uses: actions/setup-go@v2
         with:
           go-version: 1.14
 
       - name: Install Kubernetes
-        run: |
-          which kind || (curl -Lo ./kind https://github.com/kubernetes-sigs/kind/releases/download/v0.9.0/kind-$(uname)-amd64; sudo install kind /usr/local/bin/)
-          cat <<EOF | kind create cluster --name harbor --config=-
-          kind: Cluster
-          apiVersion: kind.x-k8s.io/v1alpha4
-          nodes:
-          - role: control-plane
-          - role: worker
-          - role: worker
-          EOF
+        uses: helm/kind-action@v1.1.0
+        with:
+          version: v0.9.0
+          cluster_name: harbor
+          config: .github/kind.yaml
 
       - name: Install CertManager
         run: |
@@ -86,8 +87,6 @@ jobs:
           kubectl apply -f "https://github.com/jetstack/cert-manager/releases/download/v0.16.1/cert-manager.yaml"
           sleep 5
           time kubectl -n cert-manager wait --for=condition=Available deployment --all --timeout 300s
-
-      - uses: actions/checkout@v2
 
       - name: go tests
         run: |
@@ -98,6 +97,8 @@ jobs:
     name: K8S v${{ matrix.k8sVersion }} (CM v${{ matrix.certManager }})
     env:
       USE_EXISTING_CLUSTER: true
+      operatorNamespace: harbor-operator-ns
+      dockerImage: harbor-operator:dev_test
 
     strategy:
       fail-fast: false
@@ -105,70 +106,75 @@ jobs:
         # https://github.com/jetstack/cert-manager/tags
         certManager:
         - "0.16.1"
-        - "1.0.4"
         - "1.1.0"
 
         # https://snapcraft.io/microk8s
         k8sVersion:
-        - "1.17.11"
         - "1.18.8"
         - "1.19.1"
+        - "1.20.2"
+
+        ingress:
+        - "0.35.0"
 
     steps:
+    - uses: actions/checkout@v2
+
     - uses: actions/setup-go@v2
       with:
         go-version: 1.14
 
     - name: Install Kubernetes v${{ matrix.k8sVersion }}
-      run: |
-        which kind || (curl -Lo ./kind https://github.com/kubernetes-sigs/kind/releases/download/v0.9.0/kind-$(uname)-amd64; sudo install kind /usr/local/bin/)
-        cat <<EOF | kind create cluster --name harbor --image=kindest/node:v${{ matrix.k8sVersion }} --config=-
-        kind: Cluster
-        apiVersion: kind.x-k8s.io/v1alpha4
-        nodes:
-        - role: control-plane
-        - role: worker
-        - role: worker
-        EOF
+      uses: helm/kind-action@v1.1.0
+      with:
+        version: v0.9.0
+        node_image: kindest/node:v${{ matrix.k8sVersion }}
+        cluster_name: harbor
+        config: .github/kind.yaml
 
     - name: Install CertManager v${{ matrix.certManager }}
       run: |
-        # Try the recet way to install crd or fallback to the old one
-        version='${{ matrix.certManager }}'
-        kubectl apply -f "https://github.com/jetstack/cert-manager/releases/download/v${version}/cert-manager.yaml"
+        kubectl apply -f "https://github.com/jetstack/cert-manager/releases/download/v${{ matrix.certManager }}/cert-manager.yaml"
         sleep 5
         time kubectl -n cert-manager wait --for=condition=Available deployment --all --timeout 300s
 
     - name: Install Ingress
       run: |
-        kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.35.0/deploy/static/provider/baremetal/deploy.yaml
-        sleep 5
-        time kubectl -n ingress-nginx wait --for=condition=Available deployment --all --timeout 300s
-
-    - uses: actions/checkout@v2
+        kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v${{ matrix.ingress }}/deploy/static/provider/kind/deploy.yaml
+        time kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=300s
 
     - name: build harbor-operator
       run: |
-        make go-generate docker-build IMG=harbor-operator:dev_test
-        kind load docker-image harbor-operator:dev_test --name harbor
+        make manifests docker-build IMG=${dockerImage}
+        kind load docker-image ${dockerImage} --name harbor
 
     - name: install harbor-operator
       run: |
-        set -ex
         cd manifests/cluster
-        kustomize edit set image goharbor/harbor-operator=harbor-operator:dev_test
-        git diff
+        kustomize edit add secret github-token --disableNameSuffixHash --from-literal=GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+        kustomize edit add patch --path patch/github-token.yaml
+        kustomize edit set image goharbor/harbor-operator=${dockerImage}
         kustomize build | kubectl apply -f -
 
-        if ! time kubectl -n harbor-operator-ns wait --for=condition=Available deployment --all --timeout 300s; then
-          kubectl get all -n harbor-operator-ns
+        # make helm-install IMG=${dockerImage}
+
+        if ! time kubectl -n ${operatorNamespace} wait --for=condition=Available deployment --all --timeout 300s; then
+          kubectl get all -n ${operatorNamespace}
           exit 1
         fi
 
     - name: install harbor
       run: |
-        export GITHUB_TOKEN=xxx
         set -ex
+        IP=`hostname -I | awk '{print $1}'`
+        echo "IP=$IP" >> $GITHUB_ENV
+        CORE_HOST=core.$IP.nip.io
+        NOTARY_HOST=notary.$IP.nip.io
+        echo "CORE_HOST=$CORE_HOST" >> $GITHUB_ENV
+        echo "NOTARY_HOST=$NOTARY_HOST" >> $GITHUB_ENV
+        sed -i "s/core.harbor.domain/$CORE_HOST/g" manifests/samples/full_stack_other_fs.yaml
+        sed -i "s/notary.harbor.domain/$NOTARY_HOST/g" manifests/samples/full_stack_other_fs.yaml
+
         kubectl apply -f manifests/samples/full_stack_other_fs.yaml
         for i in $(seq 1 7);do
           sleep 30
@@ -185,33 +191,59 @@ jobs:
             echo show log $n
             kubectl -n cluster-sample-ns logs --tail 100 $n || true
           done
-          kubectl logs -l control-plane=harbor-operator -n harbor-operator-ns --tail 100
+          kubectl logs -l control-plane=harbor-operator -n ${operatorNamespace} --tail 100
           exit 1
         else
           kubectl -n cluster-sample-ns get all
+          kubectl get harbor -n cluster-sample-ns -o wide
+          kubectl get harborcluster -n cluster-sample-ns -o wide
         fi
         free -h
 
     - name: test harbor
       run: |
         set -ex
-        sudo kubectl get -n ingress-nginx service/ingress-nginx-controller
-        sudo kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 443:443 80:80 --address=0.0.0.0 &
-        sleep 10
-        echo 127.0.0.1 core.harbor.domain | sudo tee -a /etc/hosts
-        curl https://core.harbor.domain/api/v2.0/systeminfo -i -k -f
-        mkdir -p ~/.docker/tls/core.harbor.domain
+        curl https://$CORE_HOST/api/v2.0/systeminfo -i -k -f
+        sudo mkdir -p /etc/docker/certs.d/$CORE_HOST
         kubectl -n cluster-sample-ns get secret sample-public-certificate -o jsonpath='{.data.ca\.crt}' \
           | base64 --decode \
-          | sudo tee ~/.docker/tls/core.harbor.domain/ca.crt
+          | sudo tee /etc/docker/certs.d/$CORE_HOST/harbor_ca.crt
         # docker login, create image, docker push, docker pull
-        docker login core.harbor.domain -u admin -p Harbor12345 || (kubectl -n cluster-sample-ns get po;kubectl -n cluster-sample-ns logs -l goharbor.io/operator-controller=core;exit 1)
+        docker login $CORE_HOST -u admin -p Harbor12345 || (kubectl -n cluster-sample-ns get po;kubectl -n cluster-sample-ns logs -l goharbor.io/operator-controller=core;exit 1)
         docker run busybox dd if=/dev/urandom of=test count=10 bs=1MB
         DOCKERID=`docker ps -l -q`
-        docker commit $DOCKERID core.harbor.domain/library/busybox:test
-        docker push core.harbor.domain/library/busybox:test
-        docker pull core.harbor.domain/library/busybox:test
+        docker commit $DOCKERID $CORE_HOST/library/busybox:test
+        docker push $CORE_HOST/library/busybox:test
+        docker pull $CORE_HOST/library/busybox:test
 
+    - name: apidb test
+      run: |
+        git clone https://github.com/goharbor/harbor -b v2.1.2
+        kubectl -n cluster-sample-ns patch deploy harborcluster-sample-harbor-harbor-core -p '{"spec":{"template":{"spec":{"containers":[{"name":"core","env":[{"name":"GC_TIME_WINDOW_HOURS","value":"0"}]}]}}}}'
+        sleep 5
+        kubectl -n cluster-sample-ns wait --for=condition=Ready pod --all --timeout 600s
+        docker run --rm -t --privileged -v `pwd`/harbor:/drone -v /etc/docker/certs.d/$CORE_HOST/:/ca -v /etc/docker/certs.d/$CORE_HOST/:/root/.docker/tls/$NOTARY_HOST/ -e NOTARY_URL=https://$NOTARY_HOST -w /drone goharbor/harbor-e2e-engine:2.6 \
+          python -u -m robot --exclude gc --exclude proxy_cache -v DOCKER_USER:${{ secrets.DOCKER_USER }} -v DOCKER_PWD:${{ secrets.DOCKER_TOKEN }} -v ip:$CORE_HOST -v ip1: -v HARBOR_PASSWORD:Harbor12345 -X \
+          /drone/tests/robot-cases/Group1-Nightly/Setup.robot /drone/tests/robot-cases/Group0-BAT/API_DB.robot
+
+    - name: fetch logs
+      if: ${{ failure() }}
+      run: |
+        mkdir  -p /tmp/logs
+        kind export logs --name harbor /tmp/logs
+
+    - uses: actions/upload-artifact@v2
+      if: ${{ failure() }}
+      with:
+        name: kind
+        path: /tmp/logs
+
+    - name: Get logs for debug
+      if: ${{ failure() }}
+      run: |
+        set -x
+        kubectl get all -n "${operatorNamespace}" -o wide
+        kubectl logs -n "${operatorNamespace}" -l 'control-plane=harbor-operator' --all-containers --tail=1000
 
   # Kubernetes
   crd-kubernetes-resources:
@@ -232,7 +264,7 @@ jobs:
   operator-kubernetes-resources:
     runs-on: ubuntu-latest
     name: 'kubernetes_resources: ./config/rbac'
-    steps: 
+    steps:
     - uses: actions/setup-go@v2
       with:
         go-version: 1.14
@@ -247,7 +279,7 @@ jobs:
   samples-kubernetes-resources:
     runs-on: ubuntu-latest
     name: 'kubernetes_resources: ./config/samples'
-    steps: 
+    steps:
     - uses: actions/checkout@v2
     - uses: azure/k8s-bake@v1
       with:
@@ -266,7 +298,7 @@ jobs:
         path:
         - samples/harbor
         - samples/harbor-full
-    steps: 
+    steps:
     - uses: actions/checkout@v2
     - uses: azure/k8s-bake@v1
       with:
