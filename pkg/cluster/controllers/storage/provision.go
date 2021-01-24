@@ -260,8 +260,10 @@ func (m *MinIOController) generateMinIOCR(ctx context.Context, harborcluster *go
 				Name: m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Redirect.Expose.TLS.CertificateRef,
 				Type: "kubernetes.io/tls",
 			},
-			ServiceName: m.getServiceName(),
-			Image:       m.GetImage(),
+			ServiceName:     m.getServiceName(),
+			Image:           image,
+			ImagePullPolicy: m.getImagePullPolicy(ctx, harborcluster),
+			ImagePullSecret: m.getImagePullSecret(ctx, harborcluster),
 			Zones: []minio.Zone{
 				{
 					Name:                DefaultZone,

@@ -80,8 +80,6 @@ func (m *MinIOController) Apply(ctx context.Context, harborcluster *goharborv1.H
 	m.KubeClient.WithContext(ctx)
 
 	m.HarborCluster = harborcluster
-	desiredMinIOCR := m.generateMinIOCR()
-	m.DesiredMinIOCR = desiredMinIOCR
 
 	desiredMinIOCR, err := m.generateMinIOCR(ctx, harborcluster)
 	if err != nil {
