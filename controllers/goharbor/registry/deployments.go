@@ -186,7 +186,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 		})
 	}
 
-	if registry.Spec.Storage.Driver.S3.CertificateRef != "" {
+	if registry.Spec.Storage.Driver.S3 != nil && registry.Spec.Storage.Driver.S3.CertificateRef != "" {
 		volumes = append(volumes, corev1.Volume{
 			Name: StorageServiceCAName,
 			VolumeSource: corev1.VolumeSource{
