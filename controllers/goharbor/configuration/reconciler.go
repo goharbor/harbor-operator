@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/go-logr/logr"
 	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
@@ -36,6 +37,10 @@ func New(ctx context.Context, name string, configStore *configstore.Store) (comm
 const (
 	// ConfigurationLabelKey is the key label for configuration.
 	ConfigurationLabelKey = "goharbor.io/configuration"
+	// ConfigurationApplyError is the reason of condition.
+	ConfigurationApplyError = "ConfigurationApplyError"
+	// ConfigurationApplySuccess is the reason of condition.
+	ConfigurationApplySuccess = "ConfigurationApplySuccess"
 )
 
 // Reconciler reconciles a configuration configmap.
@@ -117,6 +122,10 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) {
 
 	log.V(5).Info("Get configmap and harbor cluster cr successfully", "configmap", cm, "harborcluster", cluster)
 
+	defer func() {
+		log.Info("Reconcile end", "result", res, "error", err, "updateStatusErr", r.UpdateStatus(ctx, err, cluster))
+	}()
+
 	harborClient, err := r.getHarborClient(ctx, cluster)
 	if err != nil {
 		return ctrl.Result{}, fmt.Errorf("get harbor client error: %w", err)
@@ -127,6 +136,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) {
 		return ctrl.Result{}, fmt.Errorf("assemble configuration error: %w", err)
 	}
 
+	// apply configuration
 	if err = harborClient.ApplyConfiguration(ctx, jsonPayload); err != nil {
 		return ctrl.Result{}, fmt.Errorf("apply harbor configuration error: %w", err)
 	}
@@ -203,4 +213,46 @@ func (r *Reconciler) getHarborClient(ctx context.Context, cluster *v1alpha2.Harb
 	}
 
 	return harbor.NewClient(url, opts...), nil
+}
+
+// UpdateStatus updates harbor cluster status.
+func (r *Reconciler) UpdateStatus(ctx context.Context, err error, cluster *v1alpha2.HarborCluster) error {
+	cond := v1alpha2.HarborClusterCondition{
+		Type:               v1alpha2.ConfigurationReady,
+		LastTransitionTime: metav1.Now(),
+	}
+
+	if err != nil {
+		cond.Status = corev1.ConditionFalse
+		cond.Reason = ConfigurationApplyError
+		cond.Message = err.Error()
+	} else {
+		cond.Status = corev1.ConditionTrue
+		cond.Reason = ConfigurationApplySuccess
+		cond.Message = "harbor configuraion has been applied successfully."
+	}
+
+	var found bool
+
+	for i, c := range cluster.Status.Conditions {
+		if c.Type == cond.Type {
+			found = true
+
+			if c.Status != cond.Status ||
+				c.Reason != cond.Reason ||
+				c.Message != cond.Message {
+				cluster.Status.Conditions[i] = cond
+			}
+
+			break
+		}
+	}
+
+	if !found {
+		cluster.Status.Conditions = append(cluster.Status.Conditions, cond)
+	}
+	// update rivision
+	cluster.Status.Revision = time.Now().UnixNano()
+
+	return r.Client.Status().Update(ctx, cluster)
 }

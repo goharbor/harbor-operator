@@ -175,6 +175,8 @@ const (
 	StorageReady HarborClusterConditionType = "StorageReady"
 	// ServiceReady means the Service of Harbor is ready.
 	ServiceReady HarborClusterConditionType = "ServiceReady"
+	// ConfigurationReady means the configuration is applied to harbor.
+	ConfigurationReady HarborClusterConditionType = "ConfigurationReady"
 	// StatusUnknown is the status of unknown.
 	StatusUnknown ClusterStatus = "unknown"
 	// StatusCreating is the status of creating.
