@@ -27,11 +27,14 @@ var _ = Describe("ChartMuseum", func() {
 	)
 
 	BeforeEach(func() {
+		className, err := reconciler.GetClassName(ctx)
+		Expect(err).ToNot(HaveOccurred())
+
 		chartMuseum.ObjectMeta = metav1.ObjectMeta{
 			Name:      test.NewName("chartmuseum"),
 			Namespace: ns.GetName(),
 			Annotations: map[string]string{
-				goharborv1alpha2.HarborClassAnnotation: harborClass,
+				goharborv1alpha2.HarborClassAnnotation: className,
 			},
 		}
 	})

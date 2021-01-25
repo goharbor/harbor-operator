@@ -7,7 +7,8 @@ import (
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers"
-	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/certificate"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/redis"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -32,7 +33,7 @@ func setupTrivyResourceDependencies(ctx context.Context, ns string, name string)
 			Name:      trivyCertName,
 			Namespace: ns,
 		},
-		Data: test.GenerateCertificate(trivyCertCommonName),
+		Data: certificate.New(trivyCertCommonName),
 		Type: corev1.SecretTypeTLS,
 	})).ToNot(HaveOccurred())
 
@@ -54,7 +55,7 @@ func setupValidTrivy(ctx context.Context, ns string) (Resource, client.ObjectKey
 	var replicas int32 = 1
 
 	name := newName("trivy")
-	redis := setupRedis(ctx, ns)
+	redis := redis.New(ctx, ns)
 	trivyCertName, trivyGithubTokenName := setupTrivyResourceDependencies(ctx, ns, name)
 
 	trivy := &goharborv1alpha2.Trivy{
