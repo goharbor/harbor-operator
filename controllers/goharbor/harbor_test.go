@@ -9,6 +9,8 @@ import (
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/postgresql"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/redis"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	cmmeta "github.com/jetstack/cert-manager/pkg/apis/meta/v1"
@@ -127,8 +129,8 @@ func setupHarborResourceDependencies(ctx context.Context, ns string) (string, st
 func setupValidHarbor(ctx context.Context, ns string) (Resource, client.ObjectKey) {
 	registryPvcName, chartPvcName, adminSecretName, tokenIssuerName := setupHarborResourceDependencies(ctx, ns)
 
-	database := setupPostgresql(ctx, ns, "core")
-	redis := setupRedis(ctx, ns)
+	database := postgresql.New(ctx, ns, "core")
+	redis := redis.New(ctx, ns)
 
 	name := newName("harbor")
 	publicURL := url.URL{

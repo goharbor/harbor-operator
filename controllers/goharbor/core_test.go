@@ -5,7 +5,9 @@ import (
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
-	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/certificate"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/postgresql"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/redis"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -100,7 +102,7 @@ func setupCoreResourceDependencies(ctx context.Context, ns string) (string, stri
 			Name:      tokenCert,
 			Namespace: ns,
 		},
-		Data: test.GenerateCertificate(),
+		Data: certificate.New(),
 		Type: harbormetav1.SecretTypeSingle,
 	})).To(Succeed())
 
@@ -110,8 +112,8 @@ func setupCoreResourceDependencies(ctx context.Context, ns string) (string, stri
 func setupValidCore(ctx context.Context, ns string) (Resource, client.ObjectKey) {
 	encryptionKeyName, csrfKey, registryCtlPassword, adminPassword, coreSecret, jobserviceSecret, tokenCertificate := setupCoreResourceDependencies(ctx, ns)
 
-	database := setupPostgresql(ctx, ns)
-	redis := setupRedis(ctx, ns)
+	database := postgresql.New(ctx, ns)
+	redis := redis.New(ctx, ns)
 
 	name := newName("core")
 	core := &goharborv1alpha2.Core{

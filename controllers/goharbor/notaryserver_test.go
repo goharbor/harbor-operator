@@ -7,6 +7,7 @@ import (
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/postgresql"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -20,7 +21,7 @@ func newNotaryServerController() controllerTest {
 }
 
 func setupValidNotaryServer(ctx context.Context, ns string) (Resource, client.ObjectKey) {
-	database := setupPostgresql(ctx, ns)
+	database := postgresql.New(ctx, ns)
 
 	name := newName("notary-server")
 	notaryServer := &goharborv1alpha2.NotaryServer{

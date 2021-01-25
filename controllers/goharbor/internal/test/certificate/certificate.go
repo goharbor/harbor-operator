@@ -1,4 +1,4 @@
-package test
+package certificate
 
 import (
 	"bytes"
@@ -62,7 +62,7 @@ func verifyCertificate(caPEM *bytes.Buffer, certPEM *bytes.Buffer, dnsNames ...s
 	}
 }
 
-func GenerateCertificate(dnsNames ...string) map[string][]byte {
+func New(dnsNames ...string) map[string][]byte {
 	ca := &x509.Certificate{
 		SerialNumber: big.NewInt(2019),
 		Subject: pkix.Name{

@@ -7,7 +7,8 @@ import (
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
-	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/certificate"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/postgresql"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -41,7 +42,7 @@ func setupNotarySignerResourceDependencies(ctx context.Context, ns string) (stri
 			Name:      authCertName,
 			Namespace: ns,
 		},
-		Data: test.GenerateCertificate(),
+		Data: certificate.New(),
 		Type: corev1.SecretTypeTLS,
 	})).ToNot(HaveOccurred())
 
@@ -49,7 +50,7 @@ func setupNotarySignerResourceDependencies(ctx context.Context, ns string) (stri
 }
 
 func setupValidNotarySigner(ctx context.Context, ns string) (Resource, client.ObjectKey) {
-	database := setupPostgresql(ctx, ns)
+	database := postgresql.New(ctx, ns)
 	authCertName, aliasesName := setupNotarySignerResourceDependencies(ctx, ns)
 
 	name := newName("notary-signer")

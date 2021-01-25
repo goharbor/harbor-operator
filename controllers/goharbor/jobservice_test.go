@@ -8,6 +8,7 @@ import (
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/redis"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -42,7 +43,7 @@ func setupValidJobService(ctx context.Context, ns string) (Resource, client.Obje
 	registrySecret := setupJobServiceResourceDependencies(ctx, ns)
 
 	coreResource, _ := setupValidCore(ctx, ns)
-	redis := setupRedis(ctx, ns)
+	redis := redis.New(ctx, ns)
 
 	core := coreResource.(*goharborv1alpha2.Core)
 
