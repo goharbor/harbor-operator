@@ -42,7 +42,7 @@ func setupNotarySignerResourceDependencies(ctx context.Context, ns string) (stri
 			Name:      authCertName,
 			Namespace: ns,
 		},
-		Data: certificate.New(),
+		Data: certificate.NewCA().NewCert().ToMap(),
 		Type: corev1.SecretTypeTLS,
 	})).ToNot(HaveOccurred())
 

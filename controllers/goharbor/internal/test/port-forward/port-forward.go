@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/pods"
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/types"
@@ -65,10 +66,8 @@ func New(ctx context.Context, namespacedName types.NamespacedName, remotePort in
 	client, err := rest.UnversionedRESTClientFor(config)
 	gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
-	pods := test.GetPods(ctx, namespacedName)
-	gomega.Expect(pods).ToNot(gomega.BeEmpty())
-
-	pod := pods[0]
+	pod := pods.Latest(ctx, namespacedName)
+	gomega.Expect(pod).ToNot(gomega.BeNil())
 
 	portForwardURL := client.Post().
 		Resource("pods").
