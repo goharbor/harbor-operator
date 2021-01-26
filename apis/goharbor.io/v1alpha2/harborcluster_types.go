@@ -113,7 +113,6 @@ type Storage struct {
 
 // StorageRedirectSpec defines if the redirection is disabled.
 type StorageRedirectSpec struct {
-	// Disable the redirect.
 	// Default is true
 	// +kubebuilder:default:=true
 	Enable bool `json:"enable,omitempty"`
