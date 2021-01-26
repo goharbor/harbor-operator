@@ -2,9 +2,6 @@ package harborcluster
 
 import (
 	"context"
-	minio "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/api/v1"
-	redisOp "github.com/spotahome/redis-operator/api/redisfailover/v1"
-	postgresv1 "github.com/zalando/postgres-operator/pkg/apis/acid.zalan.do/v1"
 
 	"github.com/go-logr/logr"
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
@@ -12,11 +9,14 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/database"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/harbor"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage"
+	minio "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/api/v1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
 	"github.com/goharbor/harbor-operator/pkg/factories/application"
 	"github.com/goharbor/harbor-operator/pkg/k8s"
 	"github.com/ovh/configstore"
+	redisOp "github.com/spotahome/redis-operator/api/redisfailover/v1"
+	postgresv1 "github.com/zalando/postgres-operator/pkg/apis/acid.zalan.do/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
