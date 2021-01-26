@@ -2,6 +2,8 @@ package scheme
 
 import (
 	"context"
+	redisfailoverv1 "github.com/spotahome/redis-operator/api/redisfailover/v1"
+	postgresv1 "github.com/zalando/postgres-operator/pkg/apis/acid.zalan.do/v1"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	minio "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/api/v1"
@@ -39,6 +41,16 @@ func New(ctx context.Context) (*runtime.Scheme, error) {
 	err = goharborv1alpha2.AddToScheme(scheme)
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to configure Harbor scheme")
+	}
+
+	err = redisfailoverv1.AddToScheme(scheme)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to configure minio scheme")
+	}
+
+	err = postgresv1.AddToScheme(scheme)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to configure minio scheme")
 	}
 
 	err = minio.AddToScheme(scheme)

@@ -2,6 +2,9 @@ package harborcluster
 
 import (
 	"context"
+	minio "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/api/v1"
+	redisOp "github.com/spotahome/redis-operator/api/redisfailover/v1"
+	postgresv1 "github.com/zalando/postgres-operator/pkg/apis/acid.zalan.do/v1"
 
 	"github.com/go-logr/logr"
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
@@ -88,6 +91,10 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&goharborv1alpha2.HarborCluster{}).
+		Owns(&goharborv1alpha2.Harbor{}).
+		Owns(&redisOp.RedisFailover{}).
+		Owns(&postgresv1.Postgresql{}).
+		Owns(&minio.Tenant{}).
 		WithEventFilter(harborClusterPredicateFuncs).
 		Complete(r)
 }
