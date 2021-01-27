@@ -28,8 +28,8 @@ const (
 
 // GetImage returns the configured image via configstore or default one.
 func (m *MinIOController) GetImage(ctx context.Context, harborcluster *goharborv1alpha2.HarborCluster) (string, error) {
-	if harborcluster.Spec.InClusterCache.RedisSpec.Image != "" {
-		return harborcluster.Spec.InClusterCache.RedisSpec.Image, nil
+	if harborcluster.Spec.InClusterStorage.MinIOSpec.Image != "" {
+		return harborcluster.Spec.InClusterStorage.MinIOSpec.Image, nil
 	}
 
 	options := []image.Option{image.WithHarborVersion(harborcluster.Spec.Version)}
