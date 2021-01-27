@@ -97,6 +97,7 @@ metadata:
   name: harborcluster-sample
   namespace: cluster-sample-ns
 spec:
+  logLevel: info
   imageSource:
     repository: quay.io/goharbor
   harborAdminPasswordRef: admin-core-secret
