@@ -33,6 +33,7 @@ const (
 	InternalCertificatesVolumeName        = "internal-certificates"
 	InternalCertificateAuthorityDirectory = "/harbor_cust_cert"
 	InternalCertificatesPath              = ConfigPath + "/ssl"
+	PermittedRegistryTypesForProxyCache   = "docker-hub,harbor"
 	PublicCertificateVolumeName           = "ca-download"
 	PublicCertificatePath                 = ConfigPath + "/ca"
 	EncryptionKeyVolumeName               = "encryption"
@@ -274,6 +275,9 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 	}, {
 		Name:  "INTERNAL_TLS_ENABLED",
 		Value: strconv.FormatBool(core.Spec.Components.TLS.Enabled()),
+	}, {
+		Name:  "PERMITTED_REGISTRY_TYPES_FOR_PROXY_CACHE",
+		Value: PermittedRegistryTypesForProxyCache,
 	}}...)
 
 	if core.Spec.Database.MaxIdleConnections != nil {

@@ -174,6 +174,7 @@ jobs:
         echo "NOTARY_HOST=$NOTARY_HOST" >> $GITHUB_ENV
         sed -i "s/core.harbor.domain/$CORE_HOST/g" manifests/samples/full_stack_other_fs.yaml
         sed -i "s/notary.harbor.domain/$NOTARY_HOST/g" manifests/samples/full_stack_other_fs.yaml
+        sed -i "s/logLevel: info/logLevel: debug/g" manifests/samples/full_stack_other_fs.yaml
 
         kubectl apply -f manifests/samples/full_stack_other_fs.yaml
         for i in $(seq 1 7);do
@@ -223,8 +224,24 @@ jobs:
         sleep 5
         kubectl -n cluster-sample-ns wait --for=condition=Ready pod --all --timeout 600s
         docker run --rm -t --privileged -v `pwd`/harbor:/drone -v /etc/docker/certs.d/$CORE_HOST/:/ca -v /etc/docker/certs.d/$CORE_HOST/:/root/.docker/tls/$NOTARY_HOST/ -e NOTARY_URL=https://$NOTARY_HOST -w /drone goharbor/harbor-e2e-engine:2.6 \
-          python -u -m robot --exclude gc --exclude proxy_cache -v DOCKER_USER:${{ secrets.DOCKER_USER }} -v DOCKER_PWD:${{ secrets.DOCKER_TOKEN }} -v ip:$CORE_HOST -v ip1: -v HARBOR_PASSWORD:Harbor12345 -X \
+          python -u -m robot --exclude gc -v DOCKER_USER:${{ secrets.DOCKER_USER }} -v DOCKER_PWD:${{ secrets.DOCKER_TOKEN }} -v ip:$CORE_HOST -v ip1: -v HARBOR_PASSWORD:Harbor12345 -X \
           /drone/tests/robot-cases/Group1-Nightly/Setup.robot /drone/tests/robot-cases/Group0-BAT/API_DB.robot
+
+    - name: fetch harbor logs
+      if: ${{ failure() }}
+      run: |
+        mkdir -p /tmp/harbor
+        for name in core jobservice registry registryctl trivy chartmuseum notaryserver notarysigner portal; do \
+          kubectl -n cluster-sample-ns logs -l "goharbor.io/operator-controller=$name" --all-containers > /tmp/harbor/$name.log ; \
+        done
+        kubectl -n cluster-sample-ns logs -l "application=spilo" --all-containers > /tmp/harbor/db.log
+        kubectl -n cluster-sample-ns logs -l "app.kubernetes.io/component=redis" > /tmp/harbor/redis.log
+
+    - uses: actions/upload-artifact@v2
+      if: ${{ failure() }}
+      with:
+        name: harbor
+        path: /tmp/harbor
 
     - name: fetch logs
       if: ${{ failure() }}
