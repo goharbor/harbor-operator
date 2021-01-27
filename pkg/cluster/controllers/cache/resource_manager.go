@@ -72,6 +72,8 @@ func (rm *redisResourceManager) WithCluster(cluster *goharborv1alpha2.HarborClus
 func (rm *redisResourceManager) GetCacheCR(ctx context.Context, harborcluster *goharborv1alpha2.HarborCluster) (runtime.Object, error) {
 	resource := rm.GetResourceList()
 	pvc, _ := GenerateStoragePVC(rm.GetStorageClass(), rm.cluster.Name, rm.GetStorageSize(), rm.GetLabels())
+	// keep pvc after cr deleted.
+	keepPVCAfterDeletion := true
 
 	image, err := rm.GetImage(ctx, harborcluster)
 	if err != nil {
@@ -97,6 +99,7 @@ func (rm *redisResourceManager) GetCacheCR(ctx context.Context, harborcluster *g
 				},
 				Storage: redisOp.RedisStorage{
 					PersistentVolumeClaim: pvc,
+					KeepAfterDeletion:     keepPVCAfterDeletion,
 				},
 				Image:            image,
 				ImagePullPolicy:  rm.getImagePullPolicy(ctx, harborcluster),
