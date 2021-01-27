@@ -124,4 +124,12 @@ var _ = Describe("Get image", func() {
 			Expect(image).To(Equal("goharbor/harbor-core:v2.0.0"))
 		})
 	})
+
+	Describe("Get image for in cluster redis", func() {
+		It("Should pass", func() {
+			image, err := GetImage(ctx, "cluster-redis")
+			Expect(err).ToNot(HaveOccurred())
+			Expect(image).To(Equal("redis:5.0-alpine"))
+		})
+	})
 })
