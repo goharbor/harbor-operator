@@ -263,7 +263,10 @@ func GetImage(ctx context.Context, component string, options ...Option) (string,
 		return "", fmt.Errorf("unknow component %s", component)
 	}
 
-	repository := strings.TrimSuffix(opts.repository, "/")
+	repository := opts.repository
+	if repository != "" && !strings.HasSuffix(repository, "/") {
+		repository += "/"
+	}
 
-	return fmt.Sprintf("%s/%s:%s%s", repository, imageName, knowCompoents.GetTag(component, opts.harborVersion), opts.tagSuffix), nil
+	return fmt.Sprintf("%s%s:%s%s", repository, imageName, knowCompoents.GetTag(component, opts.harborVersion), opts.tagSuffix), nil
 }
