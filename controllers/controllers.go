@@ -6,16 +6,17 @@ package controllers
 type Controller int
 
 const (
-	Core               Controller = iota // core
-	JobService                           // jobservice
-	Portal                               // portal
-	Registry                             // registry
-	RegistryController                   // registryctl
-	ChartMuseum                          // chartmuseum
-	NotaryServer                         // notaryserver
-	NotarySigner                         // notarysigner
-	Clair                                // clair
-	Trivy                                // trivy
-	Harbor                               // harbor
-	HarborCluster                        // harborcluster
+	Core                Controller = iota // core
+	JobService                            // jobservice
+	Portal                                // portal
+	Registry                              // registry
+	RegistryController                    // registryctl
+	ChartMuseum                           // chartmuseum
+	NotaryServer                          // notaryserver
+	NotarySigner                          // notarysigner
+	Clair                                 // clair
+	Trivy                                 // trivy
+	Harbor                                // harbor
+	HarborCluster                         // harborcluster
+	HarborConfiguration                   // harborconfiguration
 )

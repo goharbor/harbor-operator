@@ -72,7 +72,7 @@ var _ = Describe("Get image", func() {
 	Describe("Get image from config store", func() {
 		It("Should pass", func() {
 			os.Setenv(configstore.ConfigEnvVar, "env")
-			os.Setenv(ConfigImageKeyPrefix+"_"+strings.ReplaceAll(version.Default(), ".", "_"), "goharbor/harbor-core:latest")
+			os.Setenv(ConfigImageKey+"_"+strings.ReplaceAll(version.Default(), ".", "_"), "goharbor/harbor-core:latest")
 			configStore := configstore.NewStore()
 			configStore.InitFromEnvironment()
 
@@ -85,7 +85,7 @@ var _ = Describe("Get image", func() {
 	Describe("Get image from config store with image key", func() {
 		It("Should pass", func() {
 			os.Setenv(configstore.ConfigEnvVar, "env")
-			os.Setenv("key", "goharbor/harbor-core:latest")
+			os.Setenv("key"+"_"+strings.ReplaceAll(version.Default(), ".", "_"), "goharbor/harbor-core:latest")
 			configStore := configstore.NewStore()
 			configStore.InitFromEnvironment()
 
@@ -122,6 +122,14 @@ var _ = Describe("Get image", func() {
 			image, err := GetImage(ctx, "core", WithHarborVersion("2.0.0"))
 			Expect(err).ToNot(HaveOccurred())
 			Expect(image).To(Equal("goharbor/harbor-core:v2.0.0"))
+		})
+	})
+
+	Describe("Get image for in cluster redis", func() {
+		It("Should pass", func() {
+			image, err := GetImage(ctx, "cluster-redis")
+			Expect(err).ToNot(HaveOccurred())
+			Expect(image).To(Equal("redis:5.0-alpine"))
 		})
 	})
 })

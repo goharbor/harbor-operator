@@ -8,12 +8,12 @@ import (
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers"
+	"github.com/goharbor/harbor-operator/pkg/config"
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 	"github.com/goharbor/harbor-operator/pkg/version"
 	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	v1 "github.com/jetstack/cert-manager/pkg/apis/meta/v1"
-	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -58,13 +58,13 @@ const (
 )
 
 func (r *Reconciler) getNotaryServerCertificateDuration() (time.Duration, error) {
-	durationValue, err := r.ConfigStore.GetItemValue(NotarySignerCertificateDurationConfigKey)
+	durationValue, err := r.ConfigStore.GetItemValue(NotaryServerCertificateDurationConfigKey)
 	if err != nil {
-		if _, ok := err.(configstore.ErrItemNotFound); ok {
+		if config.IsNotFound(err, NotaryServerCertificateDurationConfigKey) {
 			return NotarySignerCertificateDurationDefaultConfig, nil
 		}
 
-		return NotarySignerCertificateDurationDefaultConfig, err
+		return NotaryServerCertificateDurationDefaultConfig, err
 	}
 
 	return time.ParseDuration(durationValue)
@@ -78,7 +78,7 @@ const (
 func (r *Reconciler) getNotaryServerCertificateAlgorithm() (certv1.KeyAlgorithm, error) {
 	algorithm, err := r.ConfigStore.GetItemValue(NotaryServerCertificateAlgorithmConfigKey)
 	if err != nil {
-		if _, ok := err.(configstore.ErrItemNotFound); ok {
+		if config.IsNotFound(err, NotaryServerCertificateAlgorithmConfigKey) {
 			return NotaryServerCertificateAlgorithmDefaultConfig, nil
 		}
 

@@ -31,6 +31,8 @@ const (
 	StorageName                           = "storage"
 	StoragePath                           = "/var/lib/registry"
 	HealthPath                            = "/"
+	StorageServiceCAName                  = "storage-service-ca"
+	StorageServiceCAMountPath             = "/harbor_cust_cert/custom-ca-bundle.crt"
 )
 
 var (
@@ -184,6 +186,24 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 		})
 	}
 
+	if registry.Spec.Storage.Driver.S3 != nil && registry.Spec.Storage.Driver.S3.CertificateRef != "" {
+		volumes = append(volumes, corev1.Volume{
+			Name: StorageServiceCAName,
+			VolumeSource: corev1.VolumeSource{
+				Secret: &corev1.SecretVolumeSource{
+					SecretName: registry.Spec.Storage.Driver.S3.CertificateRef,
+				},
+			},
+		})
+
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{
+			Name:      StorageServiceCAName,
+			MountPath: StorageServiceCAMountPath,
+			ReadOnly:  true,
+			SubPath:   corev1.ServiceAccountRootCAKey,
+		})
+	}
+
 	if registry.Spec.HTTP.TLS.Enabled() {
 		volumeMounts = append(volumeMounts, corev1.VolumeMount{
 			Name:      InternalCertificatesVolumeName,
@@ -257,9 +277,11 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 						Ports: []corev1.ContainerPort{{
 							ContainerPort: apiPort,
 							Name:          harbormetav1.RegistryAPIPortName,
+							Protocol:      corev1.ProtocolTCP,
 						}, {
 							ContainerPort: metricsPort,
 							Name:          harbormetav1.RegistryMetricsPortName,
+							Protocol:      corev1.ProtocolTCP,
 						}},
 						LivenessProbe: &corev1.Probe{
 							Handler: corev1.Handler{

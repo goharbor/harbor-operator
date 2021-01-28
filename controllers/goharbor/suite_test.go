@@ -16,7 +16,6 @@ package goharbor_test
 import (
 	"fmt"
 	"math/rand"
-	"path/filepath"
 	"testing"
 
 	. "github.com/onsi/ginkgo"
@@ -72,9 +71,7 @@ var _ = BeforeSuite(func(done Done) {
 	application.SetVersion(&ctx, version)
 
 	By("bootstrapping test environment")
-	testEnv = &envtest.Environment{
-		CRDDirectoryPaths: []string{filepath.Join("..", "..", "config", "crd", "bases")},
-	}
+	testEnv = &envtest.Environment{}
 
 	var err error
 	cfg, err = testEnv.Start()

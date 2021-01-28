@@ -24,10 +24,12 @@ func (r *Reconciler) GetService(ctx context.Context, jobservice *goharborv1alpha
 				Name:       harbormetav1.JobServiceHTTPPortName,
 				Port:       harbormetav1.HTTPPort,
 				TargetPort: intstr.FromString(harbormetav1.JobServiceHTTPPortName),
+				Protocol:   corev1.ProtocolTCP,
 			}, {
 				Name:       harbormetav1.JobServiceHTTPSPortName,
 				Port:       harbormetav1.HTTPSPort,
 				TargetPort: intstr.FromString(harbormetav1.JobServiceHTTPSPortName),
+				Protocol:   corev1.ProtocolTCP,
 			}},
 			Selector: map[string]string{
 				r.Label("name"):      name,

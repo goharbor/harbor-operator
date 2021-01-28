@@ -4,6 +4,7 @@ import (
 	"context"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 	"github.com/goharbor/harbor-operator/pkg/resources"
@@ -42,12 +43,12 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 	var storageSecret graph.Resource
 
 	if notary.Spec.Storage.Postgres.PasswordRef != "" {
-		storageSecret, err = r.AddExternalResource(ctx, &corev1.Secret{
+		storageSecret, err = r.AddExternalTypedSecret(ctx, &corev1.Secret{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      notary.Spec.Storage.Postgres.PasswordRef,
 				Namespace: notary.GetNamespace(),
 			},
-		})
+		}, harbormetav1.SecretTypePostgresql)
 		if err != nil {
 			return errors.Wrap(err, "cannot add migration secret")
 		}

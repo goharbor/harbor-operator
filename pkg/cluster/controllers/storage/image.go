@@ -14,26 +14,41 @@
 
 package storage
 
-import "fmt"
+import (
+	"context"
+
+	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	"github.com/goharbor/harbor-operator/pkg/image"
+)
 
 const (
-	DefaultCacheImage = "minio/minio:RELEASE.2020-08-13T02-39-50Z"
-	ConfigImageKey    = "storage-image"
+	ComponentName  = "cluster-minio"
+	ConfigImageKey = "minio-docker-image"
 )
 
 // GetImage returns the configured image via configstore or default one.
-func (m *MinIOController) GetImage() string {
-	if m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Version != "" {
-		return fmt.Sprintf("minio/minio:%s", m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Version)
+func (m *MinIOController) GetImage(ctx context.Context, harborcluster *goharborv1alpha2.HarborCluster) (string, error) {
+	if harborcluster.Spec.InClusterStorage.MinIOSpec.Image != "" {
+		return harborcluster.Spec.InClusterStorage.MinIOSpec.Image, nil
 	}
 
-	image, err := m.ConfigStore.GetItemValue(ConfigImageKey)
+	options := []image.Option{image.WithHarborVersion(harborcluster.Spec.Version)}
+	if harborcluster.Spec.ImageSource != nil && (harborcluster.Spec.ImageSource.Repository != "" || harborcluster.Spec.ImageSource.TagSuffix != "") {
+		options = append(options,
+			image.WithRepository(harborcluster.Spec.ImageSource.Repository),
+			image.WithTagSuffix(harborcluster.Spec.ImageSource.TagSuffix),
+		)
+	} else {
+		options = append(options,
+			image.WithConfigstore(m.ConfigStore),
+			image.WithConfigImageKey(ConfigImageKey),
+		)
+	}
+
+	image, err := image.GetImage(ctx, ComponentName, options...)
 	if err != nil {
-		// Just logged
-		m.Log.V(5).Error(err, "get storage image error", "image-key", ConfigImageKey)
-
-		image = DefaultCacheImage
+		return "", err
 	}
 
-	return image
+	return image, nil
 }

@@ -1,6 +1,8 @@
 package cache
 
 import (
+	"context"
+
 	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	corev1 "k8s.io/api/core/v1"
@@ -21,16 +23,19 @@ import (
 // - perform any RedisFailovers downscale (left for downscale phase)
 // - perform any RedisFailovers upscale (left for upscale phase)
 // - perform any pod upgrade (left for rolling upgrade phase).
-func (rc *RedisController) Deploy(cluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
+func (rc *RedisController) Deploy(ctx context.Context, cluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
 	crdClient := rc.DClient.WithResource(redisFailoversGVR).WithNamespace(cluster.Namespace)
-	expectCR := rc.ResourceManager.GetCacheCR()
 
-	var err error
-	if err = controllerutil.SetControllerReference(cluster, expectCR.(metav1.Object), rc.Scheme); err != nil {
+	expectCR, err := rc.ResourceManager.GetCacheCR(ctx, cluster)
+	if err != nil {
+		return cacheNotReadyStatus(ErrorGenerateRedisCr, err.Error()), err
+	}
+
+	if err := controllerutil.SetControllerReference(cluster, expectCR.(metav1.Object), rc.Scheme); err != nil {
 		return cacheNotReadyStatus(ErrorSetOwnerReference, err.Error()), err
 	}
 
-	if err = rc.DeploySecret(cluster); err != nil {
+	if err := rc.DeploySecret(cluster); err != nil {
 		return cacheNotReadyStatus(ErrorCreateRedisSecret, err.Error()), err
 	}
 
@@ -41,8 +46,7 @@ func (rc *RedisController) Deploy(cluster *v1alpha2.HarborCluster) (*lcm.CRStatu
 		return cacheNotReadyStatus(ErrorDefaultUnstructuredConverter, err.Error()), err
 	}
 
-	_, err = crdClient.Create(&unstructured.Unstructured{Object: unstructuredData}, metav1.CreateOptions{})
-	if err != nil {
+	if _, err = crdClient.Create(&unstructured.Unstructured{Object: unstructuredData}, metav1.CreateOptions{}); err != nil {
 		return cacheNotReadyStatus(ErrorCreateRedisCr, err.Error()), err
 	}
 

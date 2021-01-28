@@ -9,35 +9,26 @@ import (
 
 	"github.com/goharbor/harbor-operator/pkg/resources"
 	corev1 "k8s.io/api/core/v1"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Rcfer to
 // http://onsi.github.io/ginkgo/ to learn more about Ginkgo.
 
 var _ = Describe("Mutate 1 label", func() {
-	var getLabelMutation resources.Mutable
+	var labelMutation resources.Mutable
 	var labelName string
 	var labelValue string
 
 	BeforeEach(func() {
 		labelName, labelValue = "the-label", "the-value"
-		getLabelMutation = GetLabelsMutation(labelName, labelValue)
+		labelMutation = GetLabelsMutation(labelName, labelValue)
 	})
 
 	Context("With a metav1 object", func() {
 		var resource *corev1.Secret
-		var result *corev1.Secret
-		var mutate controllerutil.MutateFn
 
 		BeforeEach(func() {
 			resource = &corev1.Secret{}
-			result = resource.DeepCopy()
-			mutate = getLabelMutation(context.TODO(), resource, result)
-		})
-
-		JustBeforeEach(func() {
-			resource.DeepCopyInto(result)
 		})
 
 		Context("Without labels", func() {
@@ -46,10 +37,10 @@ var _ = Describe("Mutate 1 label", func() {
 			})
 
 			It("Should add the right label", func() {
-				err := mutate()
+				err := labelMutation(context.TODO(), resource)
 				Expect(err).ToNot(HaveOccurred())
 
-				labels := result.GetLabels()
+				labels := resource.GetLabels()
 				Expect(labels).To(HaveKeyWithValue(labelName, labelValue))
 			})
 		})
@@ -69,10 +60,10 @@ var _ = Describe("Mutate 1 label", func() {
 				expectedLabels := initialLabels
 				expectedLabels[labelName] = labelValue
 
-				err := mutate()
+				err := labelMutation(context.TODO(), resource)
 				Expect(err).ToNot(HaveOccurred())
 
-				labels := result.GetLabels()
+				labels := resource.GetLabels()
 				Expect(labels).To(BeEquivalentTo(expectedLabels))
 			})
 		})
@@ -91,10 +82,10 @@ var _ = Describe("Mutate 1 label", func() {
 				expectedLabels := initialLabels
 				expectedLabels[labelName] = labelValue
 
-				err := mutate()
+				err := labelMutation(context.TODO(), resource)
 				Expect(err).ToNot(HaveOccurred())
 
-				labels := result.GetLabels()
+				labels := resource.GetLabels()
 				Expect(labels).To(BeEquivalentTo(expectedLabels))
 			})
 		})
@@ -116,17 +107,9 @@ var _ = Describe("Mutate multiples label", func() {
 
 	Context("With a metav1 object", func() {
 		var resource *corev1.Secret
-		var result *corev1.Secret
-		var mutate controllerutil.MutateFn
 
 		BeforeEach(func() {
 			resource = &corev1.Secret{}
-			result = resource.DeepCopy()
-			mutate = getLabelMutation(context.TODO(), resource, result)
-		})
-
-		JustBeforeEach(func() {
-			resource.DeepCopyInto(result)
 		})
 
 		Context("Without labels", func() {
@@ -135,10 +118,10 @@ var _ = Describe("Mutate multiples label", func() {
 			})
 
 			It("Should add the right labels", func() {
-				err := mutate()
+				err := getLabelMutation(context.TODO(), resource)
 				Expect(err).ToNot(HaveOccurred())
 
-				labels := result.GetLabels()
+				labels := resource.GetLabels()
 				Expect(labels).To(HaveKeyWithValue(labelName1, labelValue1))
 				Expect(labels).To(HaveKeyWithValue(labelName2, labelValue2))
 			})
@@ -160,10 +143,10 @@ var _ = Describe("Mutate multiples label", func() {
 				expectedLabels[labelName1] = labelValue1
 				expectedLabels[labelName2] = labelValue2
 
-				err := mutate()
+				err := getLabelMutation(context.TODO(), resource)
 				Expect(err).ToNot(HaveOccurred())
 
-				labels := result.GetLabels()
+				labels := resource.GetLabels()
 				Expect(labels).To(BeEquivalentTo(expectedLabels))
 			})
 		})
@@ -184,10 +167,10 @@ var _ = Describe("Mutate multiples label", func() {
 				expectedLabels[labelName1] = labelValue1
 				expectedLabels[labelName2] = labelValue2
 
-				err := mutate()
+				err := getLabelMutation(context.TODO(), resource)
 				Expect(err).ToNot(HaveOccurred())
 
-				labels := result.GetLabels()
+				labels := resource.GetLabels()
 				Expect(labels).To(BeEquivalentTo(expectedLabels))
 			})
 		})

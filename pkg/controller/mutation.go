@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	cmutation "github.com/goharbor/harbor-operator/pkg/controller/mutation"
+	"github.com/goharbor/harbor-operator/pkg/controller/mutation"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	"github.com/goharbor/harbor-operator/pkg/factories/owner"
 	"github.com/goharbor/harbor-operator/pkg/graph"
@@ -13,8 +13,9 @@ import (
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
+
+var ErrorOwnerNotFound = errors.New("owner not found")
 
 const (
 	WarningAnnotation = "goharbor.io/warning"
@@ -26,27 +27,20 @@ const (
 	OperatorVersionLabel = "goharbor.io/operator-version"
 )
 
-func (c *Controller) GlobalMutateFn(ctx context.Context) resources.Mutable {
-	var mutation resources.Mutable = cmutation.NoOp
+func (c *Controller) GlobalMutateFn(ctx context.Context) (resources.Mutable, error) {
+	var mutate resources.Mutable = mutation.NoOp
 
-	mutation.AppendMutation(cmutation.GetAnnotationsMutation(WarningAnnotation, fmt.Sprintf(WarningValueTmpl, c.GetName())))
-	mutation.AppendMutation(cmutation.GetLabelsMutation(OperatorNameLabel, c.GetName(), OperatorVersionLabel, c.GetVersion()))
+	mutate.AppendMutation(mutation.GetAnnotationsMutation(WarningAnnotation, fmt.Sprintf(WarningValueTmpl, c.GetName())))
+	mutate.AppendMutation(mutation.GetLabelsMutation(OperatorNameLabel, c.GetName(), OperatorVersionLabel, c.GetVersion()))
 
-	return func(ctx context.Context, resource, result runtime.Object) controllerutil.MutateFn {
-		// Get owner from this context, otherwise it is probably absent
-		owner := owner.Get(ctx)
-		if owner == nil {
-			logger.Get(ctx).Info("Cannot add owner mutation: owner not found")
-		} else {
-			mutation.AppendMutation(cmutation.GetOwnerMutation(c.Scheme, owner))
-		}
-
-		mutation := mutation(ctx, resource, result)
-
-		return func() (err error) {
-			return mutation()
-		}
+	o := owner.Get(ctx)
+	if o == nil {
+		return nil, ErrorOwnerNotFound
 	}
+
+	mutate.AppendMutation(mutation.GetOwnerMutation(c.Scheme, o))
+
+	return mutate, nil
 }
 
 func (c *Controller) GetFQDN() string {
@@ -70,18 +64,19 @@ func (c *Controller) LabelWithPrefix(prefix string, suffix ...string) string {
 	return fmt.Sprintf("%s%s%s", prefix, c.GetFQDN(), suffixString)
 }
 
-func (c *Controller) DeploymentMutateFn(ctx context.Context, dependencies ...graph.Resource) resources.Mutable {
-	var mutation resources.Mutable = c.GlobalMutateFn(ctx)
+func (c *Controller) DeploymentMutateFn(ctx context.Context, dependencies ...graph.Resource) (resources.Mutable, error) {
+	mutate, err := c.GlobalMutateFn(ctx)
+	if err != nil {
+		return nil, err
+	}
 
-	mutation.AppendMutation(cmutation.GetTemplateAnnotationsMutation(WarningAnnotation, fmt.Sprintf(WarningValueTmpl, c.GetName())))
-	mutation.AppendMutation(cmutation.GetTemplateLabelsMutation(OperatorNameLabel, c.GetName(), OperatorVersionLabel, c.GetVersion()))
+	mutate.AppendMutation(mutation.GetTemplateAnnotationsMutation(WarningAnnotation, fmt.Sprintf(WarningValueTmpl, c.GetName())))
+	mutate.AppendMutation(mutation.GetTemplateLabelsMutation(OperatorNameLabel, c.GetName(), OperatorVersionLabel, c.GetVersion()))
 
 	fqdn := c.GetFQDN()
 
-	mutation.AppendMutation(func(ctx context.Context, expected, result runtime.Object) controllerutil.MutateFn {
-		var mutation resources.Mutable = c.GlobalMutateFn(ctx)
-
-		for _, dep := range dependencies {
+	mutate.AppendMutation(func(ctx context.Context, obj runtime.Object) error {
+		for i, dep := range dependencies {
 			res, ok := dep.(*Resource)
 			if !ok {
 				logger.Get(ctx).Info("Cannot add dependency checksum", "resource", dep)
@@ -104,19 +99,22 @@ func (c *Controller) DeploymentMutateFn(ctx context.Context, dependencies ...gra
 				Namespace: namespace,
 			}, depRemote)
 			if err != nil {
-				return func() error { return errors.Wrap(err, "cannot get dependency") }
+				return errors.Wrapf(err, "%d: cannot get dependency", i)
 			}
 
 			kind := strings.ToLower(depRemote.GetObjectKind().GroupVersionKind().Kind)
 
-			mutation.AppendMutation(cmutation.GetTemplateAnnotationsMutation(
+			err = mutation.GetTemplateAnnotationsMutation(
 				fmt.Sprintf("%s.%s.%s.%s/uuid", name, namespace, kind, fqdn), string(depRemote.GetUID()),
 				fmt.Sprintf("%s.%s.%s.%s/version", name, namespace, kind, fqdn), depRemote.GetResourceVersion(),
-			))
+			)(ctx, obj)
+			if err != nil {
+				return errors.Wrapf(err, "%d: annotation mutation", i)
+			}
 		}
 
-		return mutation(ctx, expected, result)
+		return nil
 	})
 
-	return mutation
+	return mutate, nil
 }

@@ -33,6 +33,7 @@ const (
 	InternalCertificatesVolumeName        = "internal-certificates"
 	InternalCertificateAuthorityDirectory = "/harbor_cust_cert"
 	InternalCertificatesPath              = ConfigPath + "/ssl"
+	PermittedRegistryTypesForProxyCache   = "docker-hub,harbor"
 	PublicCertificateVolumeName           = "ca-download"
 	PublicCertificatePath                 = ConfigPath + "/ca"
 	EncryptionKeyVolumeName               = "encryption"
@@ -274,6 +275,9 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 	}, {
 		Name:  "INTERNAL_TLS_ENABLED",
 		Value: strconv.FormatBool(core.Spec.Components.TLS.Enabled()),
+	}, {
+		Name:  "PERMITTED_REGISTRY_TYPES_FOR_PROXY_CACHE",
+		Value: PermittedRegistryTypesForProxyCache,
 	}}...)
 
 	if core.Spec.Database.MaxIdleConnections != nil {
@@ -353,15 +357,6 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 		}
 
 		envs = append(envs, adapterURL)
-	}
-
-	if core.Spec.Components.Trivy != nil {
-		adapterURLConfig, err := harbor.EnvVar(common.TrivyAdapterURL, harbor.Value(core.Spec.Components.Trivy.AdapterURL))
-		if err != nil {
-			return nil, errors.Wrap(err, "cannot configure trivy")
-		}
-
-		envs = append(envs, adapterURLConfig)
 	}
 
 	if core.Spec.Components.NotaryServer != nil {
@@ -457,9 +452,11 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 						Ports: []corev1.ContainerPort{{
 							Name:          harbormetav1.CoreHTTPPortName,
 							ContainerPort: httpPort,
+							Protocol:      corev1.ProtocolTCP,
 						}, {
 							Name:          harbormetav1.CoreHTTPSPortName,
 							ContainerPort: httpsPort,
+							Protocol:      corev1.ProtocolTCP,
 						}},
 
 						// https://github.com/goharbor/harbor/blob/master/make/photon/prepare/templates/core/env.jinja

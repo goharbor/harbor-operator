@@ -1,11 +1,13 @@
 package cache
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/go-logr/logr"
-	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/common"
+	"github.com/goharbor/harbor-operator/pkg/config"
 	"github.com/ovh/configstore"
 	redisOp "github.com/spotahome/redis-operator/api/redisfailover/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -17,12 +19,12 @@ import (
 type ResourceManager interface {
 	ResourceGetter
 	// With the specified cluster
-	WithCluster(cluster *v1alpha2.HarborCluster) ResourceManager
+	WithCluster(cluster *goharborv1alpha2.HarborCluster) ResourceManager
 }
 
 // ResourceGetter gets resources.
 type ResourceGetter interface {
-	GetCacheCR() runtime.Object
+	GetCacheCR(ctx context.Context, harborcluster *goharborv1alpha2.HarborCluster) (runtime.Object, error)
 	GetCacheCRName() string
 	GetResourceList() corev1.ResourceList
 	GetSecretName() string
@@ -35,7 +37,7 @@ type ResourceGetter interface {
 var _ ResourceManager = &redisResourceManager{}
 
 type redisResourceManager struct {
-	cluster     *v1alpha2.HarborCluster
+	cluster     *goharborv1alpha2.HarborCluster
 	configStore *configstore.Store
 	logger      logr.Logger
 }
@@ -60,16 +62,23 @@ func NewResourceManager(store *configstore.Store, logger logr.Logger) ResourceMa
 }
 
 // WithCluster get resources based on the specified cluster spec.
-func (rm *redisResourceManager) WithCluster(cluster *v1alpha2.HarborCluster) ResourceManager {
+func (rm *redisResourceManager) WithCluster(cluster *goharborv1alpha2.HarborCluster) ResourceManager {
 	rm.cluster = cluster
 
 	return rm
 }
 
 // GetCacheCR gets cache cr instance.
-func (rm *redisResourceManager) GetCacheCR() runtime.Object {
+func (rm *redisResourceManager) GetCacheCR(ctx context.Context, harborcluster *goharborv1alpha2.HarborCluster) (runtime.Object, error) {
 	resource := rm.GetResourceList()
 	pvc, _ := GenerateStoragePVC(rm.GetStorageClass(), rm.cluster.Name, rm.GetStorageSize(), rm.GetLabels())
+	// keep pvc after cr deleted.
+	keepPVCAfterDeletion := true
+
+	image, err := rm.GetImage(ctx, harborcluster)
+	if err != nil {
+		return nil, err
+	}
 
 	return &redisOp.RedisFailover{
 		TypeMeta: metav1.TypeMeta{
@@ -90,8 +99,11 @@ func (rm *redisResourceManager) GetCacheCR() runtime.Object {
 				},
 				Storage: redisOp.RedisStorage{
 					PersistentVolumeClaim: pvc,
+					KeepAfterDeletion:     keepPVCAfterDeletion,
 				},
-				Image: rm.GetImage(),
+				Image:            image,
+				ImagePullPolicy:  rm.getImagePullPolicy(ctx, harborcluster),
+				ImagePullSecrets: rm.getImagePullSecrets(ctx, harborcluster),
 			},
 			Sentinel: redisOp.SentinelSettings{
 				Replicas: int32(rm.GetClusterServerReplica()),
@@ -99,11 +111,13 @@ func (rm *redisResourceManager) GetCacheCR() runtime.Object {
 					Limits:   resource,
 					Requests: resource,
 				},
-				Image: rm.GetImage(),
+				Image:            image,
+				ImagePullPolicy:  rm.getImagePullPolicy(ctx, harborcluster),
+				ImagePullSecrets: rm.getImagePullSecrets(ctx, harborcluster),
 			},
 			Auth: redisOp.AuthSettings{SecretPath: rm.GetSecretName()},
 		},
-	}
+	}, nil
 }
 
 // GetCacheCRName gets cache cr name.
@@ -199,4 +213,28 @@ func (rm *redisResourceManager) GetStorageClass() string {
 	}
 
 	return ""
+}
+
+func (rm *redisResourceManager) getImagePullPolicy(_ context.Context, harborcluster *goharborv1alpha2.HarborCluster) corev1.PullPolicy {
+	if harborcluster.Spec.InClusterCache.RedisSpec.ImagePullPolicy != nil {
+		return *harborcluster.Spec.InClusterCache.RedisSpec.ImagePullPolicy
+	}
+
+	if harborcluster.Spec.ImageSource != nil && harborcluster.Spec.ImageSource.ImagePullPolicy != nil {
+		return *harborcluster.Spec.ImageSource.ImagePullPolicy
+	}
+
+	return config.DefaultImagePullPolicy
+}
+
+func (rm *redisResourceManager) getImagePullSecrets(_ context.Context, harborcluster *goharborv1alpha2.HarborCluster) []corev1.LocalObjectReference {
+	if len(harborcluster.Spec.InClusterCache.RedisSpec.ImagePullSecrets) > 0 {
+		return harborcluster.Spec.InClusterCache.RedisSpec.ImagePullSecrets
+	}
+
+	if harborcluster.Spec.ImageSource != nil {
+		return harborcluster.Spec.ImageSource.ImagePullSecrets
+	}
+
+	return nil
 }

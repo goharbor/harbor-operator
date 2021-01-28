@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/goharbor/harbor-operator/pkg/config"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	nettracing "github.com/opentracing-contrib/go-stdlib/nethttp"
 	"github.com/ovh/configstore"
@@ -42,7 +43,7 @@ func New(ctx context.Context, scheme *runtime.Scheme) (manager.Manager, error) {
 		}).
 		GetFirstItem()
 	if err != nil {
-		if _, ok := err.(configstore.ErrItemNotFound); !ok {
+		if !config.IsNotFound(err, ManagerConfigKey) {
 			return nil, errors.Wrap(err, "cannot get configuration")
 		}
 	} else {

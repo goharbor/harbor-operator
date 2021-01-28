@@ -2,6 +2,7 @@ package statuscheck_test
 
 import (
 	"context"
+	"fmt"
 
 	. "github.com/goharbor/harbor-operator/pkg/resources/statuscheck"
 	. "github.com/onsi/ginkgo"
@@ -38,11 +39,32 @@ var _ = Describe("Check the status", func() {
 			resource = &unstructured.Unstructured{}
 		})
 
+		AfterEach(func() {
+			if !CurrentGinkgoTestDescription().Failed {
+				return
+			}
+
+			if data == nil {
+				return
+			}
+
+			fmt.Fprintf(GinkgoWriter, "%+v", data.Status)
+		})
+
 		JustBeforeEach(func() {
 			data, err := runtime.DefaultUnstructuredConverter.ToUnstructured(data)
 			Expect(err).ToNot(HaveOccurred())
 
 			resource.SetUnstructuredContent(data)
+		})
+
+		JustAfterEach(func() {
+			if resource != nil {
+				err := runtime.DefaultUnstructuredConverter.FromUnstructured(resource.UnstructuredContent(), data)
+				Expect(err).ToNot(HaveOccurred())
+
+				resource = nil
+			}
 		})
 
 		Context("With empty status", func() {
@@ -60,12 +82,10 @@ var _ = Describe("Check the status", func() {
 		Context("With podReady condition", func() {
 			Context("To False", func() {
 				BeforeEach(func() {
-					data.Status.Conditions = []corev1.PodCondition{
-						{
-							Type:   corev1.PodReady,
-							Status: corev1.ConditionFalse,
-						},
-					}
+					data.Status.Conditions = []corev1.PodCondition{{
+						Type:   corev1.PodReady,
+						Status: corev1.ConditionFalse,
+					}}
 				})
 
 				It("Should not be ready", func() {
@@ -74,14 +94,13 @@ var _ = Describe("Check the status", func() {
 					Expect(ok).To(BeFalse())
 				})
 			})
+
 			Context("To True", func() {
 				BeforeEach(func() {
-					data.Status.Conditions = []corev1.PodCondition{
-						{
-							Type:   corev1.PodReady,
-							Status: corev1.ConditionTrue,
-						},
-					}
+					data.Status.Conditions = []corev1.PodCondition{{
+						Type:   corev1.PodReady,
+						Status: corev1.ConditionTrue,
+					}}
 				})
 
 				It("Should be ready", func() {
@@ -111,6 +130,18 @@ var _ = Describe("Check the status", func() {
 			resource = &unstructured.Unstructured{}
 		})
 
+		AfterEach(func() {
+			if !CurrentGinkgoTestDescription().Failed {
+				return
+			}
+
+			if data == nil {
+				return
+			}
+
+			fmt.Fprintf(GinkgoWriter, "%+v", data.Status)
+		})
+
 		JustBeforeEach(func() {
 			data, err := runtime.DefaultUnstructuredConverter.ToUnstructured(data)
 			Expect(err).ToNot(HaveOccurred())
@@ -118,15 +149,24 @@ var _ = Describe("Check the status", func() {
 			resource.SetUnstructuredContent(data)
 		})
 
+		JustAfterEach(func() {
+			if resource != nil {
+				err := runtime.DefaultUnstructuredConverter.FromUnstructured(resource.UnstructuredContent(), data)
+				Expect(err).ToNot(HaveOccurred())
+
+				resource = nil
+			}
+		})
+
 		Context("With empty status", func() {
 			BeforeEach(func() {
 				data.Status = harbormetav1.ComponentStatus{}
 			})
 
-			It("Should be ready", func() {
+			It("Should not be ready", func() {
 				ok, err := UnstructuredCheck(context.TODO(), resource)
 				Expect(err).ToNot(HaveOccurred())
-				Expect(ok).To(BeTrue())
+				Expect(ok).To(BeFalse())
 			})
 		})
 
@@ -143,38 +183,40 @@ var _ = Describe("Check the status", func() {
 			})
 		})
 
-		Context("With basic inprogress status", func() {
-			Context("To True", func() {
-				BeforeEach(func() {
-					data.Status.Conditions = []harbormetav1.Condition{
-						{
-							Type:   status.ConditionInProgress,
-							Status: corev1.ConditionTrue,
-						},
-					}
-				})
-
-				It("Should not be ready", func() {
-					ok, err := UnstructuredCheck(context.TODO(), resource)
-					Expect(err).ToNot(HaveOccurred())
-					Expect(ok).To(BeFalse())
-				})
+		Context("With Observed Generation up to date", func() {
+			JustBeforeEach(func() {
+				data.Status.ObservedGeneration = data.GetGeneration()
 			})
 
-			Context("To False", func() {
-				BeforeEach(func() {
-					data.Status.Conditions = []harbormetav1.Condition{
-						{
+			Context("With basic inprogress status", func() {
+				Context("To True", func() {
+					BeforeEach(func() {
+						data.Status.Conditions = []harbormetav1.Condition{{
 							Type:   status.ConditionInProgress,
-							Status: corev1.ConditionFalse,
-						},
-					}
+							Status: corev1.ConditionTrue,
+						}}
+					})
+
+					It("Should not be ready", func() {
+						ok, err := UnstructuredCheck(context.TODO(), resource)
+						Expect(err).ToNot(HaveOccurred())
+						Expect(ok).To(BeFalse())
+					})
 				})
 
-				It("Should be ready", func() {
-					ok, err := UnstructuredCheck(context.TODO(), resource)
-					Expect(err).ToNot(HaveOccurred())
-					Expect(ok).To(BeTrue())
+				Context("To False", func() {
+					BeforeEach(func() {
+						data.Status.Conditions = []harbormetav1.Condition{{
+							Type:   status.ConditionInProgress,
+							Status: corev1.ConditionFalse,
+						}}
+					})
+
+					It("Should be ready", func() {
+						ok, err := UnstructuredCheck(context.TODO(), resource)
+						Expect(err).ToNot(HaveOccurred())
+						Expect(ok).To(BeTrue())
+					})
 				})
 			})
 		})

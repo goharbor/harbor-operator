@@ -1,6 +1,7 @@
 package v1alpha2
 
 import (
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -45,6 +46,8 @@ type Cache struct {
 }
 
 type RedisSpec struct {
+	harbormetav1.ImageSpec `json:",inline"`
+
 	Server   *RedisServer   `json:"server,omitempty"`
 	Sentinel *RedisSentinel `json:"sentinel,omitempty"`
 
@@ -88,9 +91,10 @@ type Database struct {
 }
 
 type PostgresSQLSpec struct {
+	harbormetav1.ImageSpec `json:",inline"`
+
 	Storage          string                      `json:"storage,omitempty"`
 	Replicas         int                         `json:"replicas,omitempty"`
-	Version          string                      `json:"version,omitempty"`
 	StorageClassName string                      `json:"storageClassName,omitempty"`
 	Resources        corev1.ResourceRequirements `json:"resources,omitempty"`
 	SslConfig        string                      `json:"sslConfig,omitempty"`
@@ -109,15 +113,18 @@ type Storage struct {
 
 // StorageRedirectSpec defines if the redirection is disabled.
 type StorageRedirectSpec struct {
-	// Disable the redirect.
-	// Default is false
-	// +optional
-	Disable bool `json:"disable"`
+	// Default is true
+	// +kubebuilder:default:=true
+	Enable bool `json:"enable,omitempty"`
+	// +kubebuilder:validation:Optional
+	Expose *HarborExposeComponentSpec `json:"expose,omitempty"`
 }
 
 type MinIOSpec struct {
+	harbormetav1.ImageSpec `json:",inline"`
+
 	// Determine if the redirection of minio storage is disabled.
-	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Required
 	Redirect StorageRedirectSpec `json:"redirect"`
 	// Supply number of replicas.
 	// For standalone mode, supply 1. For distributed mode, supply 4 to 16 drives (should be even).
@@ -127,8 +134,6 @@ type MinIOSpec struct {
 	// Number of persistent volumes that will be attached per server
 	// +kubebuilder:validation:Minimum:=1
 	VolumesPerServer int32 `json:"volumesPerServer"`
-	// Version defines the MinIO Client (mc) Docker image version.
-	Version string `json:"version,omitempty"`
 	// VolumeClaimTemplate allows a user to specify how volumes inside a MinIOInstance
 	// +kubebuilder:validation:Optional
 	VolumeClaimTemplate corev1.PersistentVolumeClaim `json:"volumeClaimTemplate,omitempty"`
@@ -171,6 +176,8 @@ const (
 	StorageReady HarborClusterConditionType = "StorageReady"
 	// ServiceReady means the Service of Harbor is ready.
 	ServiceReady HarborClusterConditionType = "ServiceReady"
+	// ConfigurationReady means the configuration is applied to harbor.
+	ConfigurationReady HarborClusterConditionType = "ConfigurationReady"
 	// StatusUnknown is the status of unknown.
 	StatusUnknown ClusterStatus = "unknown"
 	// StatusCreating is the status of creating.

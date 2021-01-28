@@ -6,6 +6,7 @@ import (
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-operator/controllers"
+	"github.com/goharbor/harbor-operator/pkg/config"
 	"github.com/ovh/configstore"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
@@ -41,12 +42,14 @@ func (wh *webHook) WithManager(ctx context.Context, mgr manager.Manager) error {
 }
 
 func (wh *webHook) IsEnabled(ctx context.Context) (bool, error) {
-	ok, err := configstore.GetItemValueBool(fmt.Sprintf("%s-%s", wh.Name, WebhookDisabledSuffixConfigKey))
+	configKey := fmt.Sprintf("%s-%s", wh.Name, WebhookDisabledSuffixConfigKey)
+
+	ok, err := configstore.GetItemValueBool(configKey)
 	if err == nil {
 		return ok, nil
 	}
 
-	if _, ok := err.(configstore.ErrItemNotFound); ok {
+	if config.IsNotFound(err, configKey) {
 		return true, nil
 	}
 

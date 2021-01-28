@@ -1,0 +1,15 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: harbor-operator
+spec:
+  template:
+    spec:
+      containers:
+      - name: manager
+        env:
+          - name: GITHUB_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: github-token
+                key: GITHUB_TOKEN
