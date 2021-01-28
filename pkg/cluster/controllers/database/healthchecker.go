@@ -47,7 +47,7 @@ func (p *PostgreSQLHealthChecker) CheckHealth(ctx context.Context, svc *lcm.Serv
 
 	client, err = pgx.Connect(ctx, url)
 	if err != nil {
-		return nil, fmt.Errorf("postgres: %w, %v", lcm.UnHealthError, err)
+		return nil, fmt.Errorf("postgres: %w, %v", lcm.ErrUnHealth, err)
 	}
 
 	defer client.Close(ctx)
@@ -56,7 +56,7 @@ func (p *PostgreSQLHealthChecker) CheckHealth(ctx context.Context, svc *lcm.Serv
 		resp.Status = lcm.UnHealthy
 		resp.Message = err.Error()
 
-		return resp, fmt.Errorf("postgres: %w, %v", lcm.UnHealthError, err)
+		return resp, fmt.Errorf("postgres: %w, %v", lcm.ErrUnHealth, err)
 	}
 
 	resp.Status = lcm.Healthy

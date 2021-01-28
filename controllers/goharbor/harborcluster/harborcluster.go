@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	"time"
 
 	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-operator/pkg/cluster/gos"
+	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
@@ -107,10 +107,12 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) {
 	})
 
 	if err := g.Wait(); err != nil {
-		if errors.As(err, &lcm.UnHealthError) {
+		if errors.As(err, &lcm.ErrUnHealth) {
 			log.Error(err, "check health failed.")
+
 			return errorWaitCycle, nil
 		}
+
 		return errorWaitCycle, fmt.Errorf("reconcile dependent services error: %w", err)
 	}
 

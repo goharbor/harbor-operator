@@ -53,7 +53,7 @@ func (c *RedisHealthChecker) CheckHealth(ctx context.Context, svc *lcm.ServiceCo
 		resp.Status = lcm.UnHealthy
 		resp.Message = err.Error()
 
-		return resp, fmt.Errorf("redis: %w, %v", lcm.UnHealthError, err)
+		return resp, fmt.Errorf("redis: %w, %v", lcm.ErrUnHealth, err)
 	}
 
 	resp.Status = lcm.Healthy

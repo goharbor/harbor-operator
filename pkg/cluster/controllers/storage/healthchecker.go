@@ -43,7 +43,9 @@ func (c *HealthChecker) CheckHealth(ctx context.Context, svc *lcm.ServiceConfig,
 	}
 
 	var res *lcm.CheckResponse
+
 	var err error
+
 	switch checkOpts.StorageDriver {
 	case goharborv1.S3DriverName:
 		res, err = S3StorageHealthCheck(ctx, svc, checkOpts)
@@ -59,7 +61,8 @@ func (c *HealthChecker) CheckHealth(ctx context.Context, svc *lcm.ServiceConfig,
 	}
 
 	if err != nil {
-		return res, fmt.Errorf("storage: %w, %v", lcm.UnHealthError, err)
+
+		return res, fmt.Errorf("storage: %w, %v", lcm.ErrUnHealth, err)
 	}
 	return res, nil
 }

@@ -26,7 +26,7 @@ const (
 )
 
 var (
-	UnHealthError = errors.New("service health checking error")
+	ErrUnHealth = errors.New("service health checking error")
 )
 
 type HealthStatus string
