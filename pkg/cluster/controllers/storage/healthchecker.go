@@ -61,9 +61,9 @@ func (c *HealthChecker) CheckHealth(ctx context.Context, svc *lcm.ServiceConfig,
 	}
 
 	if err != nil {
-
 		return res, fmt.Errorf("storage: %w, %v", lcm.ErrUnHealth, err)
 	}
+
 	return res, nil
 }
 

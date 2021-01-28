@@ -78,5 +78,6 @@ func (g *Group) Wait() error {
 	if err != nil {
 		return fmt.Errorf("gos.Group error: %w", err)
 	}
+
 	return nil
 }

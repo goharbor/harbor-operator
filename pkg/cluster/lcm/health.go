@@ -25,9 +25,7 @@ const (
 	Unknown   HealthStatus = "unknown"
 )
 
-var (
-	ErrUnHealth = errors.New("service health checking error")
-)
+var ErrUnHealth = errors.New("service health checking error")
 
 type HealthStatus string
 
