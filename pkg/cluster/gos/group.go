@@ -17,7 +17,6 @@ package gos
 import (
 	"context"
 	"fmt"
-	"strings"
 	"sync"
 )
 
@@ -71,14 +70,13 @@ func (g *Group) Wait() error {
 		}
 	}()
 
-	errTexts := make([]string, 0)
+	var err error
 	for _, e := range g.errors {
-		errTexts = append(errTexts, e.Error())
+		err = fmt.Errorf("%w. ", e)
 	}
 
-	if len(errTexts) > 0 {
-		return fmt.Errorf("gos.Group error: %s", strings.Join(errTexts, ":"))
+	if err != nil {
+		return fmt.Errorf("gos.Group error: %w", err)
 	}
-
 	return nil
 }

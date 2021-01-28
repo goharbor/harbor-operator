@@ -14,12 +14,19 @@
 
 package lcm
 
-import "context"
+import (
+	"context"
+	"errors"
+)
 
 const (
 	Healthy   HealthStatus = "healthy"
 	UnHealthy HealthStatus = "unhealthy"
 	Unknown   HealthStatus = "unknown"
+)
+
+var (
+	UnHealthError = errors.New("service health checking error")
 )
 
 type HealthStatus string

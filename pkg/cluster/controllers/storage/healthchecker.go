@@ -42,19 +42,26 @@ func (c *HealthChecker) CheckHealth(ctx context.Context, svc *lcm.ServiceConfig,
 		o(checkOpts)
 	}
 
+	var res *lcm.CheckResponse
+	var err error
 	switch checkOpts.StorageDriver {
 	case goharborv1.S3DriverName:
-		return S3StorageHealthCheck(ctx, svc, checkOpts)
+		res, err = S3StorageHealthCheck(ctx, svc, checkOpts)
 	case goharborv1.SwiftDriverName:
-		return SwiftStorageHealthCheck(ctx, svc, checkOpts)
+		res, err = SwiftStorageHealthCheck(ctx, svc, checkOpts)
 	case goharborv1.FileSystemDriverName:
-		return &lcm.CheckResponse{
+		res, err = &lcm.CheckResponse{
 			Message: "skipped check",
 			Status:  lcm.Healthy,
 		}, nil
 	default:
-		return nil, fmt.Errorf("unsupported storage driver: %s", checkOpts.StorageDriver)
+		res, err = nil, fmt.Errorf("unsupported storage driver: %s", checkOpts.StorageDriver)
 	}
+
+	if err != nil {
+		return res, fmt.Errorf("storage: %w, %v", lcm.UnHealthError, err)
+	}
+	return res, nil
 }
 
 func S3StorageHealthCheck(ctx context.Context, svc *lcm.ServiceConfig, options *lcm.CheckOptions) (*lcm.CheckResponse, error) {
