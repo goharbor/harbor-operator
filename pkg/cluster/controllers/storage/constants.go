@@ -12,4 +12,5 @@ const (
 	ScaleMinIOError          = "Scale minIO error"
 	CreateDefaultBucketError = "Create default bucket in minIO Error"
 	getMinIOProperties       = "Get MinIO Properties error"
+	updateIngressError       = "update minIO ingress error"
 )

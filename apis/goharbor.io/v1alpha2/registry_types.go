@@ -709,6 +709,10 @@ type RegistryStorageDriverS3Spec struct {
 	SkipVerify bool `json:"skipverify"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
+	CertificateRef string `json:"certificateRef"`
+
+	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
 	Secure *bool `json:"secure,omitempty"`
 
