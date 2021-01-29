@@ -94,6 +94,10 @@ func (hc *HarborCluster) validate(old *HarborCluster) error {
 		allErrs = append(allErrs, err)
 	}
 
+	if err := hc.validateExpose(); err != nil {
+		allErrs = append(allErrs, err)
+	}
+
 	if old == nil { // create harbor resource
 		if err := version.Validate(hc.Spec.Version); err != nil {
 			allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("version"), hc.Spec.Version, err.Error()))
@@ -173,6 +177,27 @@ func (hc *HarborCluster) validateCache() *field.Error {
 		p := field.NewPath("spec").Child("redis")
 		// Conflict and not acceptable
 		return forbidden(fp, p)
+	}
+
+	return nil
+}
+
+func (hc *HarborCluster) validateExpose() *field.Error {
+	if hc.Spec.Expose.Core.LoadBalancer != nil &&
+		hc.Spec.Expose.Core.Ingress != nil {
+		lb := field.NewPath("spec").Child("expose", "core", "loadbalancer")
+		ingress := field.NewPath("spec").Child("expose", "core", "ingress")
+
+		return forbidden(ingress, lb)
+	}
+
+	if hc.Spec.Expose.Notary != nil &&
+		hc.Spec.Expose.Notary.LoadBalancer != nil &&
+		hc.Spec.Expose.Notary.Ingress != nil {
+		lb := field.NewPath("spec").Child("expose", "notary", "loadbalancer")
+		ingress := field.NewPath("spec").Child("expose", "notary", "ingress")
+
+		return forbidden(ingress, lb)
 	}
 
 	return nil

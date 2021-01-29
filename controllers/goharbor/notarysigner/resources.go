@@ -33,13 +33,6 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrapf(err, "cannot add service %s", service.GetName())
 	}
 
-	if notary.Spec.LoadBalancer.Enable {
-		_, err = r.Controller.AddServiceToManage(ctx, GetLBService(service))
-		if err != nil {
-			return errors.Wrapf(err, "cannot add type LB service %s", service.GetName())
-		}
-	}
-
 	var storageSecret graph.Resource
 
 	if notary.Spec.Storage.Postgres.PasswordRef != "" {

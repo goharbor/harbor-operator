@@ -46,11 +46,9 @@ var _ = Describe("ChartMuseum", func() {
 		chartMuseum.ObjectMeta = metav1.ObjectMeta{
 			Name:      test.NewName("chartmuseum"),
 			Namespace: ns.GetName(),
-			/* TODO: Enable this when HarborClass is fixed
 			Annotations: map[string]string{
 				goharborv1alpha2.HarborClassAnnotation: harborClass,
 			},
-			*/
 		}
 	})
 

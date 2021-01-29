@@ -115,14 +115,16 @@ func (m *MinIOController) createSecretKeyRef(secretKey []byte, minioInstance *mi
 }
 
 func (m *MinIOController) Provision() (*lcm.CRStatus, error) {
-	credsSecret := m.generateCredsSecret()
+	if m.HarborCluster.Spec.InClusterStorage.MinIOSpec.SecretRef == "" {
+		credsSecret := m.generateCredsSecret()
 
-	err := m.KubeClient.Create(credsSecret)
-	if err != nil && !k8serror.IsAlreadyExists(err) {
-		return minioNotReadyStatus(CreateMinIOSecretError, err.Error()), err
+		err := m.KubeClient.Create(credsSecret)
+		if err != nil && !k8serror.IsAlreadyExists(err) {
+			return minioNotReadyStatus(CreateMinIOSecretError, err.Error()), err
+		}
 	}
 
-	err = m.KubeClient.Create(m.DesiredMinIOCR)
+	err := m.KubeClient.Create(m.DesiredMinIOCR)
 	if err != nil {
 		return minioNotReadyStatus(CreateMinIOError, err.Error()), err
 	}
@@ -178,7 +180,7 @@ func (m *MinIOController) Provision() (*lcm.CRStatus, error) {
 func (m *MinIOController) generateIngress() (*netv1.Ingress, error) {
 	var tls []netv1.IngressTLS
 
-	if m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Redirect.Expose.TLS.Enabled() {
+	if m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Redirect.Expose != nil && m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Redirect.Expose.TLS.Enabled() {
 		tls = []netv1.IngressTLS{{
 			SecretName: m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Redirect.Expose.TLS.CertificateRef,
 			Hosts:      []string{m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Redirect.Expose.Ingress.Host},
@@ -237,6 +239,13 @@ func (m *MinIOController) generateMinIOCR(ctx context.Context, harborcluster *go
 		return nil, err
 	}
 
+	externalCertSecret := &minio.LocalCertificateReference{}
+
+	if m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Redirect.Expose != nil && m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Redirect.Expose.TLS != nil {
+		externalCertSecret.Name = m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Redirect.Expose.TLS.CertificateRef
+		externalCertSecret.Type = "kubernetes.io/tls"
+	}
+
 	return &minio.Tenant{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       minio.MinIOCRDResourceKind,
@@ -256,14 +265,11 @@ func (m *MinIOController) generateMinIOCR(ctx context.Context, harborcluster *go
 				Labels:      m.getLabels(),
 				Annotations: m.generateAnnotations(),
 			},
-			ExternalCertSecret: &minio.LocalCertificateReference{
-				Name: m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Redirect.Expose.TLS.CertificateRef,
-				Type: "kubernetes.io/tls",
-			},
-			ServiceName:     m.getServiceName(),
-			Image:           image,
-			ImagePullPolicy: m.getImagePullPolicy(ctx, harborcluster),
-			ImagePullSecret: m.getImagePullSecret(ctx, harborcluster),
+			ExternalCertSecret: externalCertSecret,
+			ServiceName:        m.getServiceName(),
+			Image:              image,
+			ImagePullPolicy:    m.getImagePullPolicy(ctx, harborcluster),
+			ImagePullSecret:    m.getImagePullSecret(ctx, harborcluster),
 			Zones: []minio.Zone{
 				{
 					Name:                DefaultZone,

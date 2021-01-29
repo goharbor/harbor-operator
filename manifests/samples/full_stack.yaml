@@ -14,6 +14,17 @@ data:
   secret: SGFyYm9yMTIzNDU=
 type: Opaque
 ---
+# A secret for minIO access.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: minio-access-secret
+  namespace: cluster-sample-ns
+data:
+  accesskey: YWRtaW4=
+  secretkey: bWluaW8xMjM=
+type: Opaque
+---
 # Cert issuer
 apiVersion: cert-manager.io/v1alpha2
 kind: Issuer
@@ -56,8 +67,6 @@ spec:
         host: core.harbor.domain
       tls:
         certificateRef: sample-public-certificate
-      loadbalancer:
-        enable: true
   encryptionKeyRef: core-database-encryption
   internalTLS:
     enabled: true
@@ -84,9 +93,8 @@ spec:
   inClusterStorage:
     kind: MinIO
     minIOSpec:
-      redirect:
-        disable: true
       replicas: 2
+      secretRef: minio-access-secret
       volumesPerServer: 2
       volumeClaimTemplate:
         spec:

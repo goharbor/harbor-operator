@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-operator/pkg/controller/mutation"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	"github.com/goharbor/harbor-operator/pkg/factories/owner"
@@ -29,6 +30,15 @@ const (
 
 func (c *Controller) GlobalMutateFn(ctx context.Context) (resources.Mutable, error) {
 	var mutate resources.Mutable = mutation.NoOp
+
+	className, err := c.GetClassName(ctx)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot get class name")
+	}
+
+	if className != "" {
+		mutate.AppendMutation(mutation.GetAnnotationsMutation(goharborv1alpha2.HarborClassAnnotation, className))
+	}
 
 	mutate.AppendMutation(mutation.GetAnnotationsMutation(WarningAnnotation, fmt.Sprintf(WarningValueTmpl, c.GetName())))
 	mutate.AppendMutation(mutation.GetLabelsMutation(OperatorNameLabel, c.GetName(), OperatorVersionLabel, c.GetVersion()))

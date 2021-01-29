@@ -359,7 +359,6 @@ func (r *Reconciler) GetNotarySigner(ctx context.Context, harbor *goharborv1alph
 				AliasesRef: encryptionKeyAliasesRef,
 			},
 			MigrationEnabled: &migrationEnabled,
-			LoadBalancer:     harbor.Spec.Expose.Notary.LoadBalancer,
 		},
 	}, nil
 }

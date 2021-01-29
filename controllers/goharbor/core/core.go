@@ -45,9 +45,9 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 		return errors.Wrap(err, "cannot setup common controller")
 	}
 
-	className, err := r.ConfigStore.GetItemValue(config.HarborClassKey)
+	className, err := r.GetClassName(ctx)
 	if err != nil {
-		return errors.Wrap(err, "cannot get harbor class")
+		return errors.Wrap(err, "cannot get class name")
 	}
 
 	concurrentReconcile, err := r.ConfigStore.GetItemValueInt(config.ReconciliationKey)
