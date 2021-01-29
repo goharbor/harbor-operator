@@ -109,6 +109,10 @@ func (r *Reconciler) AddTrivy(ctx context.Context, harbor *goharborv1alpha2.Harb
 	}
 
 	trivyRes, err := r.AddBasicResource(ctx, trivy, certificate, seretUpdate)
+<<<<<<< HEAD
+	//	trivyRes.AddMutation(ctx, harbor)
+=======
+>>>>>>> 7b26e9a3... toto
 
 	return Trivy(trivyRes), errors.Wrap(err, "add")
 }
@@ -128,8 +132,9 @@ func (r *Reconciler) GetTrivy(ctx context.Context, harbor *goharborv1alpha2.Harb
 
 	return &goharborv1alpha2.Trivy{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
+			Name:        name,
+			Namespace:   namespace,
+			Annotations: r.NetworkPolicyAnnotationDisabled(),
 		},
 		Spec: goharborv1alpha2.TrivySpec{
 			ComponentSpec: harbor.Spec.Trivy.ComponentSpec,

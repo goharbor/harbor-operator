@@ -17,7 +17,7 @@ func (r *Reconciler) NewEmpty(_ context.Context) resources.Resource {
 	return &goharborv1alpha2.NotaryServer{}
 }
 
-func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resource) error {
+func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resource) error { // nolint:funlen
 	notaryserver, ok := resource.(*goharborv1alpha2.NotaryServer)
 	if !ok {
 		return serrors.UnrecoverrableError(errors.Errorf("%+v", resource), serrors.OperatorReason, "unable to add resource")
@@ -65,6 +65,18 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 	_, err = r.AddDeploymentToManage(ctx, deployment, configMapResource)
 	if err != nil {
 		return errors.Wrapf(err, "cannot add deployment %s", deployment.GetName())
+	}
+
+	areNetworkPoliciesEnabled, err := r.AreNetworkPoliciesEnabled(ctx, notaryserver)
+	if err != nil {
+		return errors.Wrapf(err, "cannot get network policies status")
+	}
+
+	if areNetworkPoliciesEnabled {
+		_, err = r.AddIngressNetworkPolicy(ctx, notaryserver)
+		if err != nil {
+			return errors.Wrapf(err, "ingress network policy")
+		}
 	}
 
 	return nil

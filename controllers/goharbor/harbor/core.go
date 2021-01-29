@@ -410,8 +410,9 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1alpha2.Harbo
 
 	return &goharborv1alpha2.Core{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
+			Name:        name,
+			Namespace:   namespace,
+			Annotations: r.NetworkPolicyAnnotationDisabled(),
 		},
 		Spec: goharborv1alpha2.CoreSpec{
 			ComponentSpec: harbor.Spec.Registry.ComponentSpec,

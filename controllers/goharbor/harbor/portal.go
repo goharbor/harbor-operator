@@ -52,8 +52,9 @@ func (r *Reconciler) GetPortal(ctx context.Context, harbor *goharborv1alpha2.Har
 
 	return &goharborv1alpha2.Portal{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
+			Name:        name,
+			Namespace:   namespace,
+			Annotations: r.NetworkPolicyAnnotationDisabled(),
 		},
 		Spec: goharborv1alpha2.PortalSpec{
 			ComponentSpec: harbor.Spec.Portal,

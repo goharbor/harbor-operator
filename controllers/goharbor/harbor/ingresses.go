@@ -73,7 +73,7 @@ func (r *Reconciler) GetCoreIngressRules(ctx context.Context, harbor *goharborv1
 		Service: &netv1.IngressServiceBackend{
 			Name: r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String()),
 			Port: netv1.ServiceBackendPort{
-				Number: int32(corePort),
+				Number: corePort,
 			},
 		},
 	}
@@ -87,7 +87,7 @@ func (r *Reconciler) GetCoreIngressRules(ctx context.Context, harbor *goharborv1
 		Service: &netv1.IngressServiceBackend{
 			Name: r.NormalizeName(ctx, harbor.GetName(), "portal"),
 			Port: netv1.ServiceBackendPort{
-				Number: int32(portalPort),
+				Number: portalPort,
 			},
 		},
 	}
@@ -217,7 +217,7 @@ func (err ErrInvalidIngressController) Error() string {
 }
 
 func (r *Reconciler) GetCoreIngressRuleValue(ctx context.Context, harbor *goharborv1alpha2.Harbor, core, portal netv1.IngressBackend) (*netv1.IngressRuleValue, error) { // nolint:funlen
-	pathTypeExact := netv1.PathTypeExact
+	pathTypePrefix := netv1.PathTypePrefix
 
 	switch harbor.Spec.Expose.Core.Ingress.Controller {
 	case harbormetav1.IngressControllerDefault:
@@ -225,27 +225,27 @@ func (r *Reconciler) GetCoreIngressRuleValue(ctx context.Context, harbor *goharb
 			HTTP: &netv1.HTTPIngressRuleValue{
 				Paths: []netv1.HTTPIngressPath{{
 					Path:     "/",
-					PathType: &pathTypeExact,
+					PathType: &pathTypePrefix,
 					Backend:  portal,
 				}, {
 					Path:     "/api/",
-					PathType: &pathTypeExact,
+					PathType: &pathTypePrefix,
 					Backend:  core,
 				}, {
 					Path:     "/service/",
-					PathType: &pathTypeExact,
+					PathType: &pathTypePrefix,
 					Backend:  core,
 				}, {
 					Path:     "/v2/",
-					PathType: &pathTypeExact,
+					PathType: &pathTypePrefix,
 					Backend:  core,
 				}, {
 					Path:     "/chartrepo/",
-					PathType: &pathTypeExact,
+					PathType: &pathTypePrefix,
 					Backend:  core,
 				}, {
 					Path:     "/c/",
-					PathType: &pathTypeExact,
+					PathType: &pathTypePrefix,
 					Backend:  core,
 				}},
 			},

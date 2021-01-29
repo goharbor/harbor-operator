@@ -147,8 +147,9 @@ func (r *Reconciler) GetJobService(ctx context.Context, harbor *goharborv1alpha2
 
 	return &goharborv1alpha2.JobService{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
+			Name:        name,
+			Namespace:   namespace,
+			Annotations: r.NetworkPolicyAnnotationDisabled(),
 		},
 		Spec: goharborv1alpha2.JobServiceSpec{
 			ComponentSpec: harbor.Spec.Registry.ComponentSpec,
