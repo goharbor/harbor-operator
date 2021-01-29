@@ -8,8 +8,9 @@ import (
 )
 
 const (
-	HarborClassKey    = "classname"
-	ReconciliationKey = "max-concurrent-reconciliation"
+	HarborClassKey           = "classname"
+	ReconciliationKey        = "max-concurrent-reconciliation"
+	NetworkPoliciesStatusKey = "network-policies"
 )
 
 const (
@@ -20,6 +21,10 @@ const (
 	DefaultRegistry            = ""
 )
 
+const (
+	DefaultNetworkPoliciesStatus = false
+)
+
 var ErrNotReady = errors.New("configuration not ready")
 
 func NewConfigWithDefaults() *configstore.Store {
@@ -27,6 +32,7 @@ func NewConfigWithDefaults() *configstore.Store {
 	defaultStore.InMemory("default-controller").Add(
 		configstore.NewItem(ReconciliationKey, fmt.Sprintf("%v", DefaultConcurrentReconcile), DefaultPriority),
 		configstore.NewItem(HarborClassKey, DefaultHarborClass, DefaultPriority),
+		configstore.NewItem(NetworkPoliciesStatusKey, fmt.Sprintf("%v", DefaultNetworkPoliciesStatus), DefaultPriority),
 	)
 
 	return defaultStore

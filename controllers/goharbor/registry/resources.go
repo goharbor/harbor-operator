@@ -18,7 +18,7 @@ func (r *Reconciler) NewEmpty(_ context.Context) resources.Resource {
 	return &goharborv1alpha2.Registry{}
 }
 
-func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resource) error {
+func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resource) error { // nolint:funlen
 	registry, ok := resource.(*goharborv1alpha2.Registry)
 	if !ok {
 		return serrors.UnrecoverrableError(errors.Errorf("%+v", resource), serrors.OperatorReason, "unable to add resource")
@@ -76,6 +76,18 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 	_, err = r.Controller.AddDeploymentToManage(ctx, deployment, deploymentDependencies...)
 	if err != nil {
 		return errors.Wrapf(err, "cannot add deployment %s", deployment.GetName())
+	}
+
+	areNetworkPoliciesEnabled, err := r.AreNetworkPoliciesEnabled(ctx, registry)
+	if err != nil {
+		return errors.Wrapf(err, "cannot get network policies status")
+	}
+
+	if areNetworkPoliciesEnabled {
+		_, err = r.AddIngressNetworkPolicy(ctx, registry)
+		if err != nil {
+			return errors.Wrapf(err, "ingress network policy")
+		}
 	}
 
 	return nil

@@ -55,5 +55,17 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrap(err, "deployment")
 	}
 
+	areNetworkPoliciesEnabled, err := r.AreNetworkPoliciesEnabled(ctx, trivy)
+	if err != nil {
+		return errors.Wrapf(err, "cannot get network policies status")
+	}
+
+	if areNetworkPoliciesEnabled {
+		_, err = r.AddIngressNetworkPolicy(ctx, trivy)
+		if err != nil {
+			return errors.Wrapf(err, "ingress network policy")
+		}
+	}
+
 	return nil
 }

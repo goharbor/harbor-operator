@@ -74,7 +74,7 @@ func NewRegistryCtl(ctx context.Context, className string) *registryctl.Reconcil
 	return New(ctx, name, className, registryctl.New).(*registryctl.Reconciler)
 }
 
-type CtrlBuilder func(context.Context, string, *configstore.Store) (controller.Reconciler, error)
+type CtrlBuilder func(context.Context, *configstore.Store) (controller.Reconciler, error)
 
 func New(ctx context.Context, name, className string, builder CtrlBuilder) controller.Reconciler {
 	configStore := config.NewConfigWithDefaults()
@@ -82,7 +82,7 @@ func New(ctx context.Context, name, className string, builder CtrlBuilder) contr
 	provider.Add(configstore.NewItem(config.HarborClassKey, className, 100))
 	configStore.Env(name)
 
-	r, err := builder(ctx, name, configStore)
+	r, err := builder(ctx, configStore)
 	gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 	mgr := test.GetManager(ctx)

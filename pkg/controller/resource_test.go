@@ -3,6 +3,7 @@ package controller_test
 import (
 	"context"
 
+	"github.com/goharbor/harbor-operator/controllers"
 	. "github.com/goharbor/harbor-operator/pkg/controller"
 	"github.com/goharbor/harbor-operator/pkg/scheme"
 	. "github.com/onsi/ginkgo"
@@ -55,7 +56,7 @@ var _ = Context("Adding", func() {
 		application.SetName(&setupCtx, "test-app")
 		application.SetVersion(&setupCtx, "test")
 
-		c = NewController(setupCtx, "test", nil, nil)
+		c = NewController(setupCtx, controllers.Controller(0), nil, nil)
 		scheme, err := scheme.New(setupCtx)
 		Expect(err).ToNot(HaveOccurred())
 
@@ -93,7 +94,7 @@ var _ = Context("Adding", func() {
 
 				Describe("An unknown resource", func() {
 					BeforeEach(func() {
-						c := NewController(ctx, "test", nil, nil)
+						c := NewController(ctx, controllers.Controller(0), nil, nil)
 						scheme, err := scheme.New(ctx)
 						Expect(err).ToNot(HaveOccurred())
 
