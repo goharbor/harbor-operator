@@ -13,7 +13,7 @@ const (
 )
 
 const (
-	DefaultPriority = 50
+	DefaultPriority = 5
 
 	DefaultConcurrentReconcile = 1
 	DefaultHarborClass         = ""
