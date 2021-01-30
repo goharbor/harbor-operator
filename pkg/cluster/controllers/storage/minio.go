@@ -224,7 +224,7 @@ func (m *MinIOController) getMinIONamespacedName() types.NamespacedName {
 func (m *MinIOController) getMinIOSecretNamespacedName() types.NamespacedName {
 	return types.NamespacedName{
 		Namespace: m.HarborCluster.Namespace,
-		Name:      DefaultPrefix + m.HarborCluster.Name + "-" + DefaultCredsSecret,
+		Name:      m.HarborCluster.Spec.InClusterStorage.MinIOSpec.SecretRef,
 	}
 }
 

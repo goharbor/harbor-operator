@@ -115,14 +115,7 @@ func (m *MinIOController) createSecretKeyRef(secretKey []byte, minioInstance *mi
 }
 
 func (m *MinIOController) Provision() (*lcm.CRStatus, error) {
-	credsSecret := m.generateCredsSecret()
-
-	err := m.KubeClient.Create(credsSecret)
-	if err != nil && !k8serror.IsAlreadyExists(err) {
-		return minioNotReadyStatus(CreateMinIOSecretError, err.Error()), err
-	}
-
-	err = m.KubeClient.Create(m.DesiredMinIOCR)
+	err := m.KubeClient.Create(m.DesiredMinIOCR)
 	if err != nil {
 		return minioNotReadyStatus(CreateMinIOError, err.Error()), err
 	}
@@ -380,29 +373,6 @@ func (m *MinIOController) generateService() *corev1.Service {
 					Protocol:   corev1.ProtocolTCP,
 				},
 			},
-		},
-	}
-}
-
-func (m *MinIOController) generateCredsSecret() *corev1.Secret {
-	credsAccesskey := common.RandomString(8, "a")
-	credsSecretkey := common.RandomString(8, "a")
-
-	return &corev1.Secret{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: "v1",
-			Kind:       "Secret",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        m.getMinIOSecretNamespacedName().Name,
-			Namespace:   m.HarborCluster.Namespace,
-			Labels:      m.getLabels(),
-			Annotations: m.generateAnnotations(),
-		},
-		Type: corev1.SecretTypeOpaque,
-		Data: map[string][]byte{
-			"accesskey": []byte(credsAccesskey),
-			"secretkey": []byte(credsSecretkey),
 		},
 	}
 }
