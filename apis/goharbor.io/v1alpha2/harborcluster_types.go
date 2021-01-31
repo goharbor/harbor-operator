@@ -126,7 +126,7 @@ type MinIOSpec struct {
 	// Determine if the redirection of minio storage is disabled.
 	// +kubebuilder:validation:Required
 	Redirect StorageRedirectSpec `json:"redirect"`
-	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	// Reference to the secret containing the MinIO access key and secret key.
 	SecretRef string `json:"secretRef,omitempty"`
