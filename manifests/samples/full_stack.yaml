@@ -83,6 +83,11 @@ spec:
     kind: MinIO
     minIOSpec:
       replicas: 2
+      redirect:
+        enable: true
+        expose:
+          ingress:
+            host: minio.harbor.domain
       volumesPerServer: 2
       volumeClaimTemplate:
         spec:
