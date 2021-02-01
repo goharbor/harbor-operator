@@ -95,6 +95,11 @@ spec:
     minIOSpec:
       replicas: 2
       secretRef: minio-access-secret
+      redirect:
+        enable: true
+        expose:
+          ingress:
+            host: minio.harbor.domain
       volumesPerServer: 2
       volumeClaimTemplate:
         spec:
