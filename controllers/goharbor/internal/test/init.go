@@ -5,16 +5,11 @@ import (
 	"flag"
 	"fmt"
 	"math/rand"
-	"path"
 
-	"github.com/goharbor/harbor-operator/pkg/config"
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
-	"github.com/ovh/configstore"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func InitSuite() context.Context {
@@ -33,26 +28,14 @@ func InitSuite() context.Context {
 	ginkgo.By("bootstrapping test environment", func() {
 		ctx = NewContext()
 
-		var err error
 		cfg, err := GetEnvironment(ctx).Start()
 		gomega.Expect(err).ToNot(gomega.HaveOccurred())
 		gomega.Expect(cfg).ToNot(gomega.BeNil())
 
 		ctx = WithRestConfig(ctx, cfg)
 
-		k8sClient, err := client.New(cfg, client.Options{Scheme: GetScheme(ctx)})
-		gomega.Expect(err).ToNot(gomega.HaveOccurred())
-		gomega.Expect(k8sClient).ToNot(gomega.BeNil())
-
-		ctx = WithClient(ctx, k8sClient)
-
-		mgr, err := ctrl.NewManager(cfg, ctrl.Options{
-			MetricsBindAddress: "0",
-			Scheme:             GetScheme(ctx),
-		})
-		gomega.Expect(err).NotTo(gomega.HaveOccurred(), "failed to create manager")
-
-		ctx = WithManager(ctx, mgr)
+		ctx = WithClient(ctx, NewClient(ctx))
+		ctx = WithManager(ctx, NewManager(ctx))
 	})
 
 	gomega.Expect(ctx).ToNot(gomega.BeNil())
@@ -62,8 +45,10 @@ func InitSuite() context.Context {
 
 func AfterSuite(ctx context.Context) {
 	ginkgo.By("tearing down the test environment", func() {
-		gomega.Expect(GetEnvironment(ctx).Stop()).
-			To(gomega.Succeed())
+		if ctx != nil {
+			gomega.Expect(GetEnvironment(ctx).Stop()).
+				To(gomega.Succeed())
+		}
 	})
 }
 
@@ -99,14 +84,4 @@ func InitNamespace(ctxFactory func() context.Context) *corev1.Namespace {
 	})
 
 	return ns
-}
-
-const PathToAssets = "../../../config/config/assets"
-
-func NewConfig(ctx context.Context, templateKey, fileName string) (*configstore.Store, *configstore.InMemoryProvider) {
-	configStore := config.NewConfigWithDefaults()
-	provider := configStore.InMemory("test")
-	provider.Add(configstore.NewItem(templateKey, path.Join(PathToAssets, fileName), 100))
-
-	return configStore, provider
 }

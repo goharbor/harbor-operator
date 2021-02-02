@@ -102,7 +102,7 @@ func setupCoreResourceDependencies(ctx context.Context, ns string) (string, stri
 			Name:      tokenCert,
 			Namespace: ns,
 		},
-		Data: certificate.New(),
+		Data: certificate.NewCA().NewCert().ToMap(),
 		Type: harbormetav1.SecretTypeSingle,
 	})).To(Succeed())
 
