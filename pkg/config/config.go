@@ -31,3 +31,44 @@ func NewConfigWithDefaults() *configstore.Store {
 
 	return defaultStore
 }
+
+func GetItem(configStore *configstore.Store, name string, defaultValue string) (configstore.Item, error) {
+	item, err := configstore.Filter().
+		Store(configStore).
+		Slice(name).
+		GetFirstItem()
+	if IsNotFound(err, name) {
+		return configstore.NewItem(name, defaultValue, DefaultPriority), nil
+	}
+
+	return item, err
+}
+
+func GetString(configStore *configstore.Store, name string, defaultValue string) (string, error) {
+	item, err := GetItem(configStore, name, defaultValue)
+	if err != nil {
+		return defaultValue, err
+	}
+
+	return item.Value()
+}
+
+func GetBool(configStore *configstore.Store, name string, defaultValue bool) (bool, error) {
+	item, err := GetItem(configStore, name, fmt.Sprintf("%v", defaultValue))
+	if err != nil {
+		return defaultValue, err
+	}
+
+	return item.ValueBool()
+}
+
+func GetInt(configStore *configstore.Store, name string, defaultValue int) (int, error) {
+	item, err := GetItem(configStore, name, fmt.Sprintf("%v", defaultValue))
+	if err != nil {
+		return defaultValue, err
+	}
+
+	v, err := item.ValueInt()
+
+	return int(v), err
+}
