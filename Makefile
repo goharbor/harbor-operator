@@ -106,12 +106,16 @@ diff:
 	git status
 	git diff --stat --diff-filter=d --exit-code HEAD
 
+GO_TEST_OPTS ?= -vet=off
+
 .PHONY: go-test
 go-test: install
 ifeq (, $(USE_EXISTING_CLUSTER))
 	$(warning USE_EXISTING_CLUSTER variable is not defined)
 endif
-	go test -vet=off ./... \
+	go test \
+		$(GO_TEST_OPTS) \
+		./... \
 		-coverprofile cover.out
 
 .PHONY: release
