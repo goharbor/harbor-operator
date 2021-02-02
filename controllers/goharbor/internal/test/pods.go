@@ -13,7 +13,7 @@ import (
 	"k8s.io/client-go/rest"
 )
 
-func Logs(ctx context.Context, deployment types.NamespacedName) map[string][]byte {
+func GetPods(ctx context.Context, deployment types.NamespacedName) []corev1.Pod {
 	config := NewRestConfig(ctx)
 	config.APIPath = "apis"
 	config.GroupVersion = &appsv1.SchemeGroupVersion
@@ -54,9 +54,22 @@ func Logs(ctx context.Context, deployment types.NamespacedName) map[string][]byt
 
 	gomega.Expect(pods.Items).ToNot(gomega.HaveLen(0))
 
-	results := make(map[string][]byte, len(pods.Items))
+	return pods.Items
+}
 
-	for _, pod := range pods.Items {
+func Logs(ctx context.Context, deployment types.NamespacedName) map[string][]byte {
+	config := NewRestConfig(ctx)
+	config.APIPath = "apis"
+	config.GroupVersion = &appsv1.SchemeGroupVersion
+
+	client, err := rest.UnversionedRESTClientFor(config)
+	gomega.Expect(err).ToNot(gomega.HaveOccurred())
+
+	pods := GetPods(ctx, deployment)
+
+	results := make(map[string][]byte, len(pods))
+
+	for _, pod := range pods {
 		result, err := client.Get().
 			Resource("pods").
 			Namespace(pod.GetNamespace()).

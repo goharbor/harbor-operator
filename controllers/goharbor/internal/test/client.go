@@ -5,9 +5,11 @@ import (
 	"fmt"
 
 	"github.com/goharbor/harbor-operator/pkg/factories/application"
+	"github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/client-go/rest"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func NewRestConfig(ctx context.Context) *rest.Config {
@@ -18,4 +20,12 @@ func NewRestConfig(ctx context.Context) *rest.Config {
 	config.GroupVersion = &corev1.SchemeGroupVersion
 
 	return config
+}
+
+func NewClient(ctx context.Context) client.Client {
+	k8sClient, err := client.New(GetRestConfig(ctx), client.Options{Scheme: GetScheme(ctx)})
+	gomega.Expect(err).ToNot(gomega.HaveOccurred())
+	gomega.Expect(k8sClient).ToNot(gomega.BeNil())
+
+	return k8sClient
 }

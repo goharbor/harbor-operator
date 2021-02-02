@@ -9,7 +9,7 @@ require (
 	github.com/go-kit/kit v0.10.0
 	github.com/go-logr/logr v0.3.0
 	github.com/go-logr/zapr v0.3.0 // indirect
-	github.com/goharbor/harbor/src v0.0.0-20200728051037-1d361a89a056
+	github.com/goharbor/harbor/src v0.0.0-20210202045805-2227bbdd6524
 	github.com/huandu/xstrings v1.3.2 // indirect
 	github.com/imdario/mergo v0.3.10 // indirect
 	github.com/jaegertracing/jaeger-lib v2.2.0+incompatible
@@ -25,6 +25,7 @@ require (
 	github.com/prometheus/client_golang v1.7.1
 	github.com/sethvargo/go-password v0.1.3
 	github.com/sirupsen/logrus v1.6.0
+	github.com/theupdateframework/notary v0.6.1
 	github.com/uber/jaeger-client-go v2.24.0+incompatible
 	github.com/uber/jaeger-lib v2.2.0+incompatible
 	go.uber.org/multierr v1.6.0 // indirect

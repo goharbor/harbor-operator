@@ -33,7 +33,7 @@ func setupTrivyResourceDependencies(ctx context.Context, ns string, name string)
 			Name:      trivyCertName,
 			Namespace: ns,
 		},
-		Data: certificate.New(trivyCertCommonName),
+		Data: certificate.NewCA().NewCert(trivyCertCommonName).ToMap(),
 		Type: corev1.SecretTypeTLS,
 	})).ToNot(HaveOccurred())
 

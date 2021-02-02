@@ -1,24 +1,4 @@
-<<<<<<< HEAD:controllers/goharbor/internal/test/postgres.go
-package test
-=======
-/*
-Copyright 2019 The Kubernetes Authors.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 package postgresql
->>>>>>> 3b2da700... feat(tests) Rework controllers tests:controllers/goharbor/internal/test/postgresql/postgres.go
 
 import (
 	"context"
@@ -65,7 +45,7 @@ func New(ctx context.Context, ns string, databases ...string) harbormetav1.Postg
 			Namespace: ns,
 		},
 		StringData: map[string]string{
-			harbormetav1.PostgresqlPasswordKey: "th3Adm!nPa$$w0rd",
+			harbormetav1.PostgresqlPasswordKey: "th3Adm1nPa55w0rd",
 		},
 		Type: harbormetav1.SecretTypePostgresql,
 	})).To(gomega.Succeed())

@@ -2,18 +2,14 @@ package chartmuseum_test
 
 import (
 	"context"
-	"path"
 	"testing"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/chartmuseum"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
-	internalconfig "github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/config"
-	"github.com/goharbor/harbor-operator/pkg/config"
-	"github.com/ovh/configstore"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/controllers"
 	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 )
 
@@ -34,18 +30,11 @@ func TestAPIs(t *testing.T) {
 var _ = BeforeSuite(func(done Done) {
 	ctx = test.InitSuite()
 
-	name := controllers.ChartMuseum.String()
+	className := test.NewName("class")
 
-	configStore, provider := internalconfig.New(ctx, chartmuseum.ConfigTemplatePathKey, path.Base(chartmuseum.DefaultConfigTemplatePath))
-	provider.Add(configstore.NewItem(config.HarborClassKey, test.NewName("class"), 100))
-	configStore.Env(name)
+	reconciler = controllers.NewChartMuseum(ctx, className)
 
-	r, err := chartmuseum.New(ctx, name, configStore)
-	Expect(err).ToNot(HaveOccurred())
-
-	reconciler = r.(*chartmuseum.Reconciler)
-
-	ctx, stopCh = test.StartController(ctx, reconciler)
+	ctx, stopCh = test.StartManager(ctx)
 
 	close(done)
 }, 60)
