@@ -14,6 +14,17 @@ data:
   secret: SGFyYm9yMTIzNDU=
 type: Opaque
 ---
+# A secret for minIO access.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: minio-access-secret
+  namespace: cluster-sample-ns
+data:
+  accesskey: YWRtaW4=
+  secretkey: bWluaW8xMjM=
+type: Opaque
+---
 # Cert issuer
 apiVersion: cert-manager.io/v1alpha2
 kind: Issuer
@@ -83,6 +94,7 @@ spec:
     kind: MinIO
     minIOSpec:
       replicas: 2
+      secretRef: minio-access-secret
       redirect:
         enable: true
         expose:

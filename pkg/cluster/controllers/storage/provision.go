@@ -115,14 +115,16 @@ func (m *MinIOController) createSecretKeyRef(secretKey []byte, minioInstance *mi
 }
 
 func (m *MinIOController) Provision() (*lcm.CRStatus, error) {
-	credsSecret := m.generateCredsSecret()
+	if m.HarborCluster.Spec.InClusterStorage.MinIOSpec.SecretRef == "" {
+		credsSecret := m.generateCredsSecret()
 
-	err := m.KubeClient.Create(credsSecret)
-	if err != nil && !k8serror.IsAlreadyExists(err) {
-		return minioNotReadyStatus(CreateMinIOSecretError, err.Error()), err
+		err := m.KubeClient.Create(credsSecret)
+		if err != nil && !k8serror.IsAlreadyExists(err) {
+			return minioNotReadyStatus(CreateMinIOSecretError, err.Error()), err
+		}
 	}
 
-	err = m.KubeClient.Create(m.DesiredMinIOCR)
+	err := m.KubeClient.Create(m.DesiredMinIOCR)
 	if err != nil {
 		return minioNotReadyStatus(CreateMinIOError, err.Error()), err
 	}
