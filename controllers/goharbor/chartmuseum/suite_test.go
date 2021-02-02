@@ -20,10 +20,12 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/ovh/configstore"
 
 	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/chartmuseum"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
+	"github.com/goharbor/harbor-operator/pkg/config"
 	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 )
 
@@ -54,10 +56,8 @@ var _ = BeforeSuite(func(done Done) {
 	name := controllers.ChartMuseum.String()
 	harborClass = test.NewName(name)
 
-	configStore, _ := test.NewConfig(ctx, chartmuseum.ConfigTemplatePathKey, path.Base(chartmuseum.DefaultConfigTemplatePath))
-	/* TODO: Enable this when HarborClass is fixed
+	configStore, provider := test.NewConfig(ctx, chartmuseum.ConfigTemplatePathKey, path.Base(chartmuseum.DefaultConfigTemplatePath))
 	provider.Add(configstore.NewItem(config.HarborClassKey, harborClass, 100))
-	*/
 	configStore.Env(name)
 
 	commonReconciler, err := chartmuseum.New(ctx, name, configStore)

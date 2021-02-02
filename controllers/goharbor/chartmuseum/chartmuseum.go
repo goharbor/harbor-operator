@@ -42,18 +42,9 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 		return errors.Wrap(err, "cannot setup common controller")
 	}
 
-	className := ""
-
-	configItem, err := configstore.Filter().Store(r.ConfigStore).Slice(config.HarborClassKey).GetFirstItem()
+	className, err := r.GetClassName(ctx)
 	if err != nil {
-		if !config.IsNotFound(err, config.HarborClassKey) {
-			return errors.Wrap(err, "cannot get config template path")
-		}
-	} else {
-		className, err = configItem.Value()
-		if err != nil {
-			return errors.Wrap(err, "invalid config template path")
-		}
+		return errors.Wrap(err, "cannot get class name")
 	}
 
 	concurrentReconcile, err := r.ConfigStore.GetItemValueInt(config.ReconciliationKey)
