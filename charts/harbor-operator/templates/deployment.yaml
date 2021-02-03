@@ -53,6 +53,8 @@ spec:
             path: /readyz
             port: ready
         resources: {{- toYaml .Values.resources | nindent 10 }}
+        securityContext:
+          allowPrivilegeEscalation: {{ .Values.allowPrivilegeEscalation }}
         volumeMounts:
         - mountPath: /tmp/k8s-webhook-server/serving-certs
           name: cert

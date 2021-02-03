@@ -11,6 +11,7 @@ Deploy Harbor Operator
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` | Expects input structure as per specification <https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#affinity-v1-core> For example: `{   "nodeAffinity": {     "requiredDuringSchedulingIgnoredDuringExecution": {       "nodeSelectorTerms": [         {           "matchExpressions": [             {               "key": "foo.bar.com/role",               "operator": "In",               "values": [                 "master"               ]             }           ]         }       ]     }   } }` |
+| allowPrivilegeEscalation | bool | `false` | Allow privilege escalation for the controller Pods |
 | autoscaling.enabled | bool | `false` | Whether to enabled [Horizontal Pod Autoscaling](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) |
 | autoscaling.maxReplicas | int | `100` | Maximum conroller replicas |
 | autoscaling.minReplicas | int | `1` | Minimum conroller replicas |
@@ -30,7 +31,7 @@ Deploy Harbor Operator
 | nodeSelector | object | `{}` | Expects input structure as per specification <https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#nodeselector-v1-core> For example: `[   {     "matchExpressions": [       {         "key": "kubernetes.io/e2e-az-name",         "operator": "In",         "values": [           "e2e-az1",           "e2e-az2"         ]       }     ]   } ]` |
 | podAnnotations | object | `{}` | Additional annotations to add to the controller Pods |
 | podLabels | object | `{}` | Additional labels to add to the controller Pods |
-| podSecurityContext | object | `{}` | Expects input structure as per specification <https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#podsecuritycontext-v1-core> For example: `{   "fsGroup": 2000,   "runAsUser": 1000,   "runAsNonRoot": true }` |
+| podSecurityContext | object | `{"runAsNonRoot":true,"runAsUser":65532}` | Expects input structure as per specification <https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#podsecuritycontext-v1-core> For example: `{   "fsGroup": 2000,   "runAsUser": 1000,   "runAsNonRoot": true }` |
 | priorityClassName | string | `""` | priority class to be used for the harbor-operator pods |
 | rbac.create | bool | `true` | Whether to install Role Based Access Control |
 | replicaCount | int | `1` | Number of replicas for the controller |

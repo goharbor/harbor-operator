@@ -13,6 +13,8 @@ spec:
       labels:
         control-plane: harbor-operator
     spec:
+      securityContext:
+        runAsUser: 65532
       containers:
       - command:
         - /manager
@@ -20,6 +22,8 @@ spec:
         - --enable-leader-election
         image: goharbor/harbor-operator:dev
         name: manager
+        securityContext:
+          allowPrivilegeEscalation: false
         resources:
           limits:
             cpu: 500m
