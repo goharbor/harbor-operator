@@ -237,7 +237,8 @@ func IntegTest(ctx context.Context, core *goharborv1alpha2.Core) {
 		Namespace(namespacedName.Namespace).
 		Name(fmt.Sprintf("%s:%s", namespacedName.Name, harbormetav1.CoreHTTPPortName)).
 		SubResource("proxy").
-		Suffix(healthPath)
+		Suffix(healthPath).
+		MaxRetries(0)
 
 	type ComponentStatus struct {
 		Name   string `json:"name"`
@@ -245,7 +246,9 @@ func IntegTest(ctx context.Context, core *goharborv1alpha2.Core) {
 		Error  string `json:"error,omitempty"`
 	}
 
-	Ω(proxyReq.DoRaw(ctx)).
+	Eventually(func() ([]byte, error) {
+		return proxyReq.DoRaw(ctx)
+	}).
 		Should(WithTransform(func(result []byte) []ComponentStatus {
 			var health struct {
 				Status     string            `json:"status"`

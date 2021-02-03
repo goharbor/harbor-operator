@@ -138,7 +138,10 @@ func IntegTest(ctx context.Context, registryCtl *goharborv1alpha2.RegistryContro
 		Namespace(namespacedName.Namespace).
 		Name(fmt.Sprintf("%s:%s", namespacedName.Name, harbormetav1.RegistryControllerHTTPPortName)).
 		SubResource("proxy").
-		Suffix(healthPath)
+		Suffix(healthPath).
+		MaxRetries(0)
 
-	Ω(proxyReq.Do(ctx).Error()).ShouldNot(HaveOccurred())
+	Eventually(func() error {
+		return proxyReq.Do(ctx).Error()
+	}).ShouldNot(HaveOccurred())
 }

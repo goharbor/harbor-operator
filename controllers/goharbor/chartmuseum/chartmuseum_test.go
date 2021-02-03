@@ -124,9 +124,12 @@ func IntegTest(ctx context.Context, chartMuseum *goharborv1alpha2.ChartMuseum) {
 		Namespace(namespacedName.Namespace).
 		Name(fmt.Sprintf("%s:%s", namespacedName.Name, harbormetav1.ChartMuseumHTTPPortName)).
 		SubResource("proxy").
-		Suffix("health")
+		Suffix("health").
+		MaxRetries(0)
 
-	Ω(proxyReq.DoRaw(ctx)).
+	Eventually(func() ([]byte, error) {
+		return proxyReq.DoRaw(ctx)
+	}).
 		Should(WithTransform(func(result []byte) bool {
 			var health struct {
 				Healthy bool `json:"healthy"`

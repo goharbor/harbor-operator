@@ -118,7 +118,10 @@ func IntegTest(ctx context.Context, trivy *goharborv1alpha2.Trivy) {
 		Namespace(namespacedName.Namespace).
 		Name(fmt.Sprintf("%s:%s", namespacedName.Name, harbormetav1.TrivyHTTPPortName)).
 		SubResource("proxy").
-		Suffix(healthPath)
+		Suffix(healthPath).
+		MaxRetries(0)
 
-	Ω(proxyReq.Do(ctx).Error()).ShouldNot(HaveOccurred())
+	Eventually(func() error {
+		return proxyReq.Do(ctx).Error()
+	}).ShouldNot(HaveOccurred())
 }
