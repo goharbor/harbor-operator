@@ -212,9 +212,12 @@ func IntegTest(ctx context.Context, js *goharborv1alpha2.JobService) {
 		Namespace(namespacedName.Namespace).
 		Name(fmt.Sprintf("%s:%s", namespacedName.Name, harbormetav1.CoreHTTPPortName)).
 		SubResource("proxy").
-		Suffix(healthPath)
+		Suffix(healthPath).
+		MaxRetries(0)
 
-	Ω(proxyReq.DoRaw(ctx)).
+	Eventually(func() ([]byte, error) {
+		return proxyReq.DoRaw(ctx)
+	}).
 		Should(WithTransform(func(result []byte) []Worker {
 			var health HealthResponse
 

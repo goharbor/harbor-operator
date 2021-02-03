@@ -12,15 +12,13 @@ import (
 	"k8s.io/client-go/rest"
 )
 
-func Logs(ctx context.Context, deployment types.NamespacedName) map[string][]byte {
+func (pods Pods) Logs(ctx context.Context) map[string][]byte {
 	config := test.GetRestConfig(ctx)
 	config.APIPath = "apis"
 	config.GroupVersion = &appsv1.SchemeGroupVersion
 
 	client, err := rest.UnversionedRESTClientFor(config)
 	gomega.Expect(err).ToNot(gomega.HaveOccurred())
-
-	pods := List(ctx, deployment)
 
 	results := make(map[string][]byte, len(pods))
 
@@ -55,7 +53,7 @@ func LogsAll(ctx *context.Context, name func() types.NamespacedName) interface{}
 		defer ginkgo.GinkgoRecover()
 
 		ginkgo.By("Fetching logs after failure", func() {
-			for name, logs := range Logs(*ctx, name()) {
+			for name, logs := range List(*ctx, name()).Logs(*ctx) {
 				fmt.Fprintf(ginkgo.GinkgoWriter, "\n### Logs of %s ###\n%s\n", name, string(logs))
 			}
 		})

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
+	"github.com/goharbor/harbor-operator/pkg/resources/statuscheck"
 	"github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -13,7 +14,9 @@ import (
 	"k8s.io/client-go/rest"
 )
 
-func List(ctx context.Context, deployment types.NamespacedName) []corev1.Pod {
+type Pods []corev1.Pod
+
+func List(ctx context.Context, deployment types.NamespacedName) Pods {
 	config := test.NewRestConfig(ctx)
 	config.APIPath = "apis"
 	config.GroupVersion = &appsv1.SchemeGroupVersion
@@ -54,12 +57,27 @@ func List(ctx context.Context, deployment types.NamespacedName) []corev1.Pod {
 
 	gomega.Expect(pods.Items).ToNot(gomega.HaveLen(0))
 
-	return pods.Items
+	return Pods(pods.Items)
 }
 
-func Latest(ctx context.Context, deployment types.NamespacedName) *corev1.Pod {
-	pods := List(ctx, deployment)
+func (pods Pods) Ready(ctx context.Context) Pods {
+	var result []corev1.Pod
 
+	for _, pod := range pods {
+		pod := pod
+
+		ok, err := statuscheck.BasicCheck(ctx, &pod)
+		gomega.Expect(err).ToNot(gomega.HaveOccurred())
+
+		if ok {
+			result = append(result, pod)
+		}
+	}
+
+	return Pods(result)
+}
+
+func (pods Pods) Latest(ctx context.Context) *corev1.Pod {
 	var latest *corev1.Pod
 
 	for _, pod := range pods {

@@ -7,6 +7,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"time"
 
 	"github.com/go-logr/logr"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
@@ -66,40 +67,51 @@ func New(ctx context.Context, namespacedName types.NamespacedName, remotePort in
 	client, err := rest.UnversionedRESTClientFor(config)
 	gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
-	pod := pods.Latest(ctx, namespacedName)
-	gomega.Expect(pod).ToNot(gomega.BeNil())
-
-	portForwardURL := client.Post().
-		Resource("pods").
-		Namespace(pod.GetNamespace()).
-		Name(pod.GetName()).
-		SubResource("portforward").
-		URL()
-
 	transport, upgrader, err := spdy.RoundTripperFor(config)
 	gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
-	dialer := spdy.NewDialer(upgrader, &http.Client{Transport: transport}, http.MethodPost, portForwardURL)
 	stopCh := make(chan struct{}, 1)
 	readyCh := make(chan struct{})
 	logger := ctrlzap.New(ctrlzap.WriteTo(ginkgo.GinkgoWriter), ctrlzap.UseDevMode(true)).
 		WithName("port-forward").
 		WithValues("deployment", namespacedName)
 
-	portforwarder, err := portforward.New(dialer, []string{fmt.Sprintf(":%d", remotePort)}, stopCh, readyCh, &InfoLogger{
-		Logger: logger,
-	}, &ErrorLogger{
-		Logger: logger,
-	})
-	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+	var portforwarder *portforward.PortForwarder
 
 	go func() {
 		defer ginkgo.GinkgoRecover()
 
-		gomega.Expect(portforwarder.ForwardPorts()).To(gomega.Succeed())
+		gomega.Eventually(func() error {
+			pod := pods.List(ctx, namespacedName).Ready(ctx).Latest(ctx)
+			gomega.Expect(pod).ToNot(gomega.BeNil())
+
+			portForwardURL := client.Post().
+				Resource("pods").
+				Namespace(pod.GetNamespace()).
+				Name(pod.GetName()).
+				SubResource("portforward").
+				URL()
+
+			dialer := spdy.NewDialer(upgrader, &http.Client{Transport: transport}, http.MethodPost, portForwardURL)
+
+			var err error
+			portforwarder, err = portforward.New(dialer, []string{fmt.Sprintf(":%d", remotePort)}, stopCh, readyCh, &InfoLogger{
+				Logger: logger,
+			}, &ErrorLogger{
+				Logger: logger,
+			})
+			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+
+			return portforwarder.ForwardPorts()
+		}, 30*time.Second, 400*time.Millisecond).ShouldNot(gomega.HaveOccurred())
 	}()
 
-	gomega.Eventually(readyCh).Should(gomega.BeClosed())
+	select {
+	case <-readyCh:
+		// nothing to do
+	case <-time.After(time.Minute):
+		ginkgo.Fail("port-forward: timedout")
+	}
 
 	ports, err := portforwarder.GetPorts()
 	gomega.Expect(err).ToNot(gomega.HaveOccurred())
