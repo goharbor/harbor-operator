@@ -32,7 +32,13 @@ const (
 	InternalCertificateAuthorityDirectory = "/harbor_cust_cert"
 )
 
-var varFalse = false
+var (
+	varFalse = false
+
+	fsGroup    int64 = 10000
+	runAsGroup int64 = 10000
+	runAsUser  int64 = 10000
+)
 
 const (
 	httpsPort = 8443
@@ -253,6 +259,11 @@ func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1al
 				Spec: corev1.PodSpec{
 					AutomountServiceAccountToken: &varFalse,
 					Volumes:                      volumes,
+					SecurityContext: &corev1.PodSecurityContext{
+						FSGroup:    &fsGroup,
+						RunAsGroup: &runAsGroup,
+						RunAsUser:  &runAsUser,
+					},
 					Containers: []corev1.Container{{
 						Name:  controllers.JobService.String(),
 						Image: image,

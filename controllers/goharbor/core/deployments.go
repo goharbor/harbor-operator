@@ -24,7 +24,13 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-var varFalse = false
+var (
+	varFalse = false
+
+	fsGroup    int64 = 10000
+	runAsGroup int64 = 10000
+	runAsUser  int64 = 10000
+)
 
 const (
 	healthCheckPeriod                     = 90 * time.Second
@@ -446,6 +452,11 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 				Spec: corev1.PodSpec{
 					AutomountServiceAccountToken: &varFalse,
 					Volumes:                      volumes,
+					SecurityContext: &corev1.PodSecurityContext{
+						FSGroup:    &fsGroup,
+						RunAsGroup: &runAsGroup,
+						RunAsUser:  &runAsUser,
+					},
 					Containers: []corev1.Container{{
 						Name:  controllers.Core.String(),
 						Image: image,
