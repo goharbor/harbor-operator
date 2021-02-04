@@ -85,7 +85,7 @@ func (r *Reconciler) GetCoreIngressRules(ctx context.Context, harbor *goharborv1
 
 	portalBackend := netv1.IngressBackend{
 		Service: &netv1.IngressServiceBackend{
-			Name: r.NormalizeName(ctx, harbor.GetName(), "portal"),
+			Name: r.NormalizeName(ctx, harbor.GetName(), controllers.Portal.String()),
 			Port: netv1.ServiceBackendPort{
 				Number: portalPort,
 			},
