@@ -20,8 +20,11 @@ import (
 )
 
 var (
-	varFalse       = false
-	trivyUID int64 = 10000
+	varFalse = false
+
+	fsGroup    int64 = 10000
+	runAsGroup int64 = 10000
+	runAsUser  int64 = 10000
 )
 
 const (
@@ -202,11 +205,11 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.
 					NodeSelector:                 trivy.Spec.NodeSelector,
 					AutomountServiceAccountToken: &varFalse,
 					Volumes:                      volumes,
-
 					SecurityContext: &corev1.PodSecurityContext{
-						FSGroup: &trivyUID,
+						FSGroup:    &fsGroup,
+						RunAsGroup: &runAsGroup,
+						RunAsUser:  &runAsUser,
 					},
-
 					Containers: []corev1.Container{{
 						Name:  ContainerName,
 						Image: image,

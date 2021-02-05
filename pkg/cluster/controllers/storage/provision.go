@@ -19,6 +19,12 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
+var (
+	fsGroup    int64 = 10000
+	runAsGroup int64 = 10000
+	runAsUser  int64 = 10000
+)
+
 func (m *MinIOController) ProvisionMinIOProperties(minioInstamnce *minio.Tenant) (*lcm.CRStatus, error) {
 	properties := &lcm.Properties{}
 
@@ -261,6 +267,11 @@ func (m *MinIOController) generateMinIOCR(ctx context.Context, harborcluster *go
 			},
 		},
 		Spec: minio.TenantSpec{
+			SecurityContext: &corev1.PodSecurityContext{
+				FSGroup:    &fsGroup,
+				RunAsGroup: &runAsGroup,
+				RunAsUser:  &runAsUser,
+			},
 			Metadata: &metav1.ObjectMeta{
 				Labels:      m.getLabels(),
 				Annotations: m.generateAnnotations(),

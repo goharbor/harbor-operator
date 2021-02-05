@@ -31,7 +31,13 @@ const (
 	HealthPath                            = "/api/health"
 )
 
-var varFalse = false
+var (
+	varFalse = false
+
+	fsGroup    int64 = 10000
+	runAsGroup int64 = 10000
+	runAsUser  int64 = 10000
+)
 
 const (
 	httpsPort = 8443
@@ -122,6 +128,12 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registryCtl *goharborv1a
 				},
 			}},
 		},
+	}
+
+	deploy.Spec.Template.Spec.SecurityContext = &corev1.PodSecurityContext{
+		FSGroup:    &fsGroup,
+		RunAsGroup: &runAsGroup,
+		RunAsUser:  &runAsUser,
 	}
 
 	registryContainer, err := r.getRegistryContainer(deploy)
