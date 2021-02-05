@@ -153,7 +153,7 @@ func (s *ServiceManager) Apply() error {
 		}
 
 		// Use external
-		svcCfg, options, err := s.svcConfigGetter(s.ctx, s.harborCtrl.KubeClient, s.cluster)
+		_, _, err := s.svcConfigGetter(s.ctx, s.harborCtrl.KubeClient, s.cluster)
 		if err != nil {
 			status.WithStatus(v1.ConditionFalse).
 				WithMessage("failed to get service configuration").
@@ -162,16 +162,6 @@ func (s *ServiceManager) Apply() error {
 			return err
 		}
 
-		res, err := s.ctrl.HealthChecker().CheckHealth(s.ctx, svcCfg, options...)
-		if err != nil {
-			status.WithStatus(v1.ConditionFalse).
-				WithMessage("failed to check service health").
-				WithReason(err.Error())
-
-			return err
-		}
-
-		status.WithMessage(res.Message)
 	}
 
 	return nil
