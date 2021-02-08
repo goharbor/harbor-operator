@@ -269,10 +269,10 @@ func (m *MinIOController) generateMinIOCR(ctx context.Context, harborcluster *go
 				Labels:      m.getLabels(),
 				Annotations: m.generateAnnotations(),
 			},
-			ServiceName:        m.getServiceName(),
-			Image:              image,
-			ImagePullPolicy:    m.getImagePullPolicy(ctx, harborcluster),
-			ImagePullSecret:    m.getImagePullSecret(ctx, harborcluster),
+			ServiceName:     m.getServiceName(),
+			Image:           image,
+			ImagePullPolicy: m.getImagePullPolicy(ctx, harborcluster),
+			ImagePullSecret: m.getImagePullSecret(ctx, harborcluster),
 			Zones: []minio.Zone{
 				{
 					Name:                DefaultZone,
