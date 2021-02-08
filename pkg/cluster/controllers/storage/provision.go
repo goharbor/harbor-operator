@@ -227,7 +227,7 @@ func (m *MinIOController) generateIngress() (*netv1.Ingress, error) {
 									Path: ingressPath,
 									Backend: netv1.IngressBackend{
 										ServiceName: m.getServiceName(),
-										ServicePort: intstr.FromInt(9000),
+										ServicePort: intstr.FromString("minio"),
 									},
 								},
 							},
