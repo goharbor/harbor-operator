@@ -245,13 +245,6 @@ func (m *MinIOController) generateMinIOCR(ctx context.Context, harborcluster *go
 		return nil, err
 	}
 
-	externalCertSecret := &minio.LocalCertificateReference{}
-
-	if m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Redirect.Expose != nil && m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Redirect.Expose.TLS != nil {
-		externalCertSecret.Name = m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Redirect.Expose.TLS.CertificateRef
-		externalCertSecret.Type = "kubernetes.io/tls"
-	}
-
 	return &minio.Tenant{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       minio.MinIOCRDResourceKind,
@@ -276,7 +269,6 @@ func (m *MinIOController) generateMinIOCR(ctx context.Context, harborcluster *go
 				Labels:      m.getLabels(),
 				Annotations: m.generateAnnotations(),
 			},
-			ExternalCertSecret: externalCertSecret,
 			ServiceName:        m.getServiceName(),
 			Image:              image,
 			ImagePullPolicy:    m.getImagePullPolicy(ctx, harborcluster),
