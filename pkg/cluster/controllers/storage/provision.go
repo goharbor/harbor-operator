@@ -51,6 +51,17 @@ func (m *MinIOController) getMinIOProperties(minioInstance *minio.Tenant) (*goha
 		return nil, err
 	}
 
+	storageSpec := &goharborv1alpha2.HarborStorageImageChartStorageSpec{
+		S3: &goharborv1alpha2.HarborStorageImageChartStorageS3Spec{
+			RegistryStorageDriverS3Spec: goharborv1alpha2.RegistryStorageDriverS3Spec{
+				AccessKey:    string(accessKey),
+				SecretKeyRef: secretKeyRef.Name,
+				Region:       DefaultRegion,
+				Bucket:       DefaultBucket,
+			},
+		},
+	}
+
 	var (
 		endpoint       string
 		certificateRef string
@@ -73,25 +84,16 @@ func (m *MinIOController) getMinIOProperties(minioInstance *minio.Tenant) (*goha
 		port := tls.GetInternalPort()
 
 		endpoint = fmt.Sprintf("%s://%s:%d", scheme, m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Redirect.Expose.Ingress.Host, port)
+
+		storageSpec.S3.CertificateRef = certificateRef
 	} else {
 		endpoint = fmt.Sprintf("http://%s.%s.svc:%s", m.getServiceName(), m.HarborCluster.Namespace, "9000")
 	}
 
-	storageSpec := &goharborv1alpha2.HarborStorageImageChartStorageSpec{
-		S3: &goharborv1alpha2.HarborStorageImageChartStorageS3Spec{
-			RegistryStorageDriverS3Spec: goharborv1alpha2.RegistryStorageDriverS3Spec{
-				AccessKey:      string(accessKey),
-				SecretKeyRef:   secretKeyRef.Name,
-				Region:         DefaultRegion,
-				RegionEndpoint: endpoint,
-				Bucket:         DefaultBucket,
-				Secure:         &secure,
-				V4Auth:         &v4Auth,
-				SkipVerify:     skipVerify,
-				CertificateRef: certificateRef,
-			},
-		},
-	}
+	storageSpec.S3.RegionEndpoint = endpoint
+	storageSpec.S3.Secure = &secure
+	storageSpec.S3.V4Auth = &v4Auth
+	storageSpec.S3.SkipVerify = skipVerify
 
 	return storageSpec, nil
 }
@@ -195,7 +197,6 @@ func (m *MinIOController) generateIngress() (*netv1.Ingress, error) {
 
 	annotations := make(map[string]string)
 	annotations["nginx.ingress.kubernetes.io/proxy-body-size"] = "0"
-	annotations["nginx.ingress.kubernetes.io/backend-protocol"] = "HTTPS"
 
 	if m.HarborCluster.Spec.Expose.Core.Ingress.Controller == v1alpha1.IngressControllerNCP {
 		annotations["ncp/use-regex"] = "true"
