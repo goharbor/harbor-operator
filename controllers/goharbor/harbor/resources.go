@@ -110,9 +110,24 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrapf(err, "cannot add %s ingress", controllers.Core)
 	}
 
+	_, err = r.AddCoreLB(ctx, harbor, core, portal)
+	if err != nil {
+		return errors.Wrapf(err, "cannot add %s lb service", controllers.Core)
+	}
+
+	_, err = r.AddPortalLB(ctx, harbor, portal)
+	if err != nil {
+		return errors.Wrapf(err, "cannot add %s lb service", controllers.Portal)
+	}
+
 	_, err = r.AddNotaryIngress(ctx, harbor, notaryServer)
 	if err != nil {
 		return errors.Wrapf(err, "cannot add %s ingress", controllers.NotaryServer)
+	}
+
+	_, err = r.AddNotaryServerLB(ctx, harbor, notaryServer)
+	if err != nil {
+		return errors.Wrapf(err, "cannot add %s lb service", controllers.NotaryServer)
 	}
 
 	return nil

@@ -65,6 +65,8 @@ spec:
     core:
       ingress:
         host: core.harbor.domain
+#      loadbalancer:
+#        enable: true
       tls:
         certificateRef: sample-public-certificate
   encryptionKeyRef: core-database-encryption

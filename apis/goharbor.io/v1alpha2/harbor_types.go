@@ -484,6 +484,9 @@ type HarborExposeSpec struct {
 
 	// +kubebuilder:validation:Optional
 	Notary *HarborExposeComponentSpec `json:"notary,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	Portal *HarborExposeComponentSpec `json:"portal,omitempty"`
 }
 
 type HarborExposeComponentSpec struct {
@@ -494,6 +497,8 @@ type HarborExposeComponentSpec struct {
 	Ingress *HarborExposeIngressSpec `json:"ingress,omitempty"`
 
 	// TODO Add supports to ClusterIP, LoadBalancer and NodePort by deploying the nginx component
+	// +kubebuilder:validation:Optional
+	LoadBalancer *HarborExposeLBSpec `json:"loadbalancer,omitempty"`
 }
 
 type HarborExposeIngressSpec struct {
@@ -552,6 +557,11 @@ func (ci CertificateInjection) GenerateVolumeMounts() []corev1.VolumeMount {
 	}
 
 	return volumeMounts
+}
+
+type HarborExposeLBSpec struct {
+	// +kubebuilder:validation:Optional
+	Enable bool `json:"enable,omitempty"`
 }
 
 func init() { // nolint:gochecknoinits
