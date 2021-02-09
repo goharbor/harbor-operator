@@ -142,6 +142,9 @@ func (harbor *Controller) getHarborCR(harborcluster *v1alpha2.HarborCluster) *v1
 		harborCR.Spec.ImageChartStorage.Redirect.Disable = !harborcluster.Spec.InClusterStorage.MinIOSpec.Redirect.Enable
 	}
 
+	// inject cert to harbor comps
+	injectS3CertToHarborComponents(harborCR)
+
 	return harborCR
 }
 
@@ -225,4 +228,21 @@ func harborClusterCRStatus(harbor *v1alpha2.Harbor) *lcm.CRStatus {
 	}
 
 	return harborReadyStatus
+}
+
+// injectS3CertToHarborComponents injects s3 cert to harbor spec.
+func injectS3CertToHarborComponents(harbor *v1alpha2.Harbor) {
+	if storage := harbor.Spec.ImageChartStorage; storage != nil {
+		if storage.S3 != nil && storage.S3.CertificateRef != "" {
+			certRef := storage.S3.CertificateRef
+			// inject cert to component core
+			harbor.Spec.Core.CertificateRefs = append(harbor.Spec.Core.CertificateRefs, certRef)
+			// inject cert to component jobservice
+			harbor.Spec.JobService.CertificateRefs = append(harbor.Spec.JobService.CertificateRefs, certRef)
+			// inject cert to component trivy
+			if harbor.Spec.Trivy != nil {
+				harbor.Spec.Trivy.CertificateRefs = append(harbor.Spec.Trivy.CertificateRefs, certRef)
+			}
+		}
+	}
 }

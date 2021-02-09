@@ -42,6 +42,8 @@ type CoreSpec struct {
 	// https://github.com/goharbor/harbor/blob/master/src/common/config/metadata/metadatalist.go#L62
 	CoreConfig `json:",inline"`
 
+	CertificateInjection `json:",inline"`
+
 	// +kubebuilder:validation:Optional
 	HTTP CoreHTTPSpec `json:"http,omitempty"`
 
