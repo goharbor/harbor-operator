@@ -98,7 +98,7 @@ func (r *Reconciler) GetTrivyUpdateSecret(ctx context.Context, harbor *goharborv
 
 type Trivy graph.Resource
 
-func (r *Reconciler) AddTrivy(ctx context.Context, harbor *goharborv1alpha2.Harbor, certificate TrivyInternalCertificate, seretUpdate TrivyUpdateSecret) (Trivy, error) {
+func (r *Reconciler) AddTrivy(ctx context.Context, harbor *goharborv1alpha2.Harbor, certificate TrivyInternalCertificate, secretUpdate TrivyUpdateSecret) (Trivy, error) {
 	if harbor.Spec.Trivy == nil {
 		return nil, nil
 	}
@@ -108,11 +108,7 @@ func (r *Reconciler) AddTrivy(ctx context.Context, harbor *goharborv1alpha2.Harb
 		return nil, errors.Wrap(err, "get")
 	}
 
-	trivyRes, err := r.AddBasicResource(ctx, trivy, certificate, seretUpdate)
-<<<<<<< HEAD
-	//	trivyRes.AddMutation(ctx, harbor)
-=======
->>>>>>> 7b26e9a3... toto
+	trivyRes, err := r.AddBasicResource(ctx, trivy, certificate, secretUpdate)
 
 	return Trivy(trivyRes), errors.Wrap(err, "add")
 }
