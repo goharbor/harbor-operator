@@ -66,7 +66,7 @@ test: go-test go-dependencies-test
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 .PHONY: run
-run: go-generate vendor certmanager $(TMPDIR)k8s-webhook-server/serving-certs/tls.crt
+run: go-generate certmanager $(TMPDIR)k8s-webhook-server/serving-certs/tls.crt
 	go run *.go
 
 # Install cert-manager before run
