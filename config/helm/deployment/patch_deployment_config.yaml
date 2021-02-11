@@ -9,8 +9,16 @@ spec:
       - name: manager
         env:
         - name: CONFIGURATION_FROM
-          value: 'env:'
+          value: 'env,file:/etc/harbor-operator/config/config.yaml'
         - name: CLASSNAME
           value: '{{ .Values.harborClass | quote }}'
         - name: LOG_LEVEL
           value: '{{ .Values.logLevel | quote }}'
+        volumeMounts:
+        - mountPath: /etc/harbor-operator/config
+          name: configuration
+          readOnly: true
+      volumes:
+      - name: configuration
+        configMap:
+          name: '{{ include "chart.fullname" . }}-config'
