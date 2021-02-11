@@ -8,7 +8,7 @@ import (
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/config"
 	"github.com/goharbor/harbor-operator/pkg/graph"
-	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
+	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1"
 	v1 "github.com/jetstack/cert-manager/pkg/apis/meta/v1"
 	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
