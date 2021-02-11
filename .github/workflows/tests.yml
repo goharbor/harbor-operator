@@ -105,8 +105,9 @@ jobs:
       matrix:
         # https://github.com/jetstack/cert-manager/tags
         certManager:
-        - "0.16.1"
+        - "1.0.4"
         - "1.1.0"
+        - "1.2.0"
 
         # https://snapcraft.io/microk8s
         k8sVersion:
