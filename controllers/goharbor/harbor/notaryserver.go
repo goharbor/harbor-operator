@@ -12,7 +12,7 @@ import (
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 	"github.com/goharbor/harbor-operator/pkg/version"
-	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
+	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1"
 	v1 "github.com/jetstack/cert-manager/pkg/apis/meta/v1"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -75,7 +75,7 @@ const (
 	NotaryServerCertificateAlgorithmDefaultConfig = certv1.ECDSAKeyAlgorithm
 )
 
-func (r *Reconciler) getNotaryServerCertificateAlgorithm() (certv1.KeyAlgorithm, error) {
+func (r *Reconciler) getNotaryServerCertificateAlgorithm() (certv1.PrivateKeyAlgorithm, error) {
 	algorithm, err := r.ConfigStore.GetItemValue(NotaryServerCertificateAlgorithmConfigKey)
 	if err != nil {
 		if config.IsNotFound(err, NotaryServerCertificateAlgorithmConfigKey) {
@@ -85,7 +85,7 @@ func (r *Reconciler) getNotaryServerCertificateAlgorithm() (certv1.KeyAlgorithm,
 		return NotaryServerCertificateAlgorithmDefaultConfig, err
 	}
 
-	return certv1.KeyAlgorithm(algorithm), nil
+	return certv1.PrivateKeyAlgorithm(algorithm), nil
 }
 
 func (r *Reconciler) GetNotaryServerCertificate(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*certv1.Certificate, error) {
@@ -113,10 +113,12 @@ func (r *Reconciler) GetNotaryServerCertificate(ctx context.Context, harbor *goh
 			IssuerRef: v1.ObjectReference{
 				Name: notarySignerIssuer,
 			},
-			KeyAlgorithm: algorithm,
-			Duration:     &metav1.Duration{Duration: duration},
-			CommonName:   r.NormalizeName(ctx, harbor.GetName(), controllers.NotaryServer.String()),
-			DNSNames:     []string{r.NormalizeName(ctx, harbor.GetName(), controllers.NotaryServer.String())},
+			PrivateKey: &certv1.CertificatePrivateKey{
+				Algorithm: algorithm,
+			},
+			Duration:   &metav1.Duration{Duration: duration},
+			CommonName: r.NormalizeName(ctx, harbor.GetName(), controllers.NotaryServer.String()),
+			DNSNames:   []string{r.NormalizeName(ctx, harbor.GetName(), controllers.NotaryServer.String())},
 			Usages: []certv1.KeyUsage{
 				certv1.UsageDigitalSignature,
 				certv1.UsageKeyEncipherment,
