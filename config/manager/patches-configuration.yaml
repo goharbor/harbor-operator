@@ -8,7 +8,7 @@ spec:
       containers:
       - name: manager
         volumeMounts:
-        - mountPath: /etc/harbor-operator
+        - mountPath: /etc/harbor-operator/templates
           name: configuration-templates
           readOnly: true
       volumes:

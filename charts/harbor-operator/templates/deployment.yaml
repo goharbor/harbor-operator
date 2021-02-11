@@ -22,7 +22,7 @@ spec:
         - /manager
         env:
         - name: CONFIGURATION_FROM
-          value: env,file:/etc/harbor-operator/config/config.yaml
+          value: env,file:/etc/harbor-operator/config.yaml
         - name: CLASSNAME
           value: {{ .Values.harborClass | quote }}
         - name: LOG_LEVEL
@@ -54,13 +54,13 @@ spec:
             port: ready
         resources: {{- toYaml .Values.resources | nindent 10 }}
         volumeMounts:
-        - mountPath: /etc/harbor-operator/config
+        - mountPath: /etc/harbor-operator
           name: configuration
           readOnly: true
         - mountPath: /tmp/k8s-webhook-server/serving-certs
           name: cert
           readOnly: true
-        - mountPath: /etc/harbor-operator
+        - mountPath: /etc/harbor-operator/templates
           name: configuration-templates
           readOnly: true
       nodeSelector: {{- toYaml .Values.nodeSelector | nindent 8 }}

@@ -20,7 +20,7 @@ import (
 const (
 	DefaultRequeueWait        = 2 * time.Second
 	ConfigTemplatePathKey     = "template-path"
-	DefaultConfigTemplatePath = "/etc/harbor-operator/chartmuseum-config.yaml.tmpl"
+	DefaultConfigTemplatePath = "/etc/harbor-operator/templates/chartmuseum-config.yaml.tmpl"
 	ConfigTemplateKey         = "template-content"
 	ConfigImageKey            = "docker-image"
 	DefaultImage              = config.DefaultRegistry + "goharbor/chartmuseum-photon:v2.0.0"

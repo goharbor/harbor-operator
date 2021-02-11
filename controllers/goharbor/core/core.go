@@ -23,7 +23,7 @@ const (
 
 const (
 	ConfigTemplatePathKey     = "template-path"
-	DefaultConfigTemplatePath = "/etc/harbor-operator/core-config.conf.tmpl"
+	DefaultConfigTemplatePath = "/etc/harbor-operator/templates/core-config.conf.tmpl"
 	ConfigTemplateKey         = "template-content"
 	ConfigImageKey            = "docker-image"
 	DefaultImage              = config.DefaultRegistry + "goharbor/harbor-core:v2.0.0"
