@@ -16,8 +16,8 @@ Deploy Harbor Operator
 | autoscaling.minReplicas | int | `1` | Minimum conroller replicas |
 | autoscaling.targetCPUUtilizationPercentage | int | `80` | CPU usage target for autoscaling |
 | autoscaling.targetMemoryUtilizationPercentage | int | No target | Memory usage target for autoscaling |
+| configuration | object | `{"harbor-controller-max-reconcile":1,"harbor-controller-watch-children":true}` | Configuration for controller |
 | deploymentAnnotations | object | `{}` | Additional annotations to add to the controller Deployment |
-| extraEnv | list | `[{"name":"HARBOR_CONTROLLER_MAX_RECONCILE","value":"1"},{"name":"HARBOR_CONTROLLER_WATCH_CHILDREN","value":"true"}]` | Environment variables to inject in controller |
 | fullnameOverride | string | `""` |  |
 | harborClass | string | `""` | Class name of the Harbor operator |
 | image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the controller. |
