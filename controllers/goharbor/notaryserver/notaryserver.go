@@ -24,7 +24,7 @@ const (
 
 const (
 	ConfigTemplatePathKey     = "template-path"
-	DefaultConfigTemplatePath = "/etc/harbor-operator/notaryserver-config.json.tmpl"
+	DefaultConfigTemplatePath = "/etc/harbor-operator/templates/notaryserver-config.json.tmpl"
 	ConfigTemplateKey         = "template-content"
 	ConfigImageKey            = "docker-image"
 	DefaultImage              = config.DefaultRegistry + "goharbor/notary-server-photon:v2.0.0"

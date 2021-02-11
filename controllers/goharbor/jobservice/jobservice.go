@@ -24,7 +24,7 @@ const (
 
 const (
 	ConfigTemplatePathKey     = "template-path"
-	DefaultConfigTemplatePath = "/etc/harbor-operator/jobservice-config.yaml.tmpl"
+	DefaultConfigTemplatePath = "/etc/harbor-operator/templates/jobservice-config.yaml.tmpl"
 	ConfigTemplateKey         = "template-content"
 	ConfigImageKey            = "docker-image"
 	DefaultImage              = config.DefaultRegistry + "goharbor/harbor-jobservice:v2.0.0"

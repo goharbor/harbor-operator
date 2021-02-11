@@ -21,7 +21,7 @@ import (
 const (
 	DefaultRequeueWait        = 2 * time.Second
 	ConfigTemplatePathKey     = "template-path"
-	DefaultConfigTemplatePath = "/etc/harbor-operator/notarysigner-config.json.tmpl"
+	DefaultConfigTemplatePath = "/etc/harbor-operator/templates/notarysigner-config.json.tmpl"
 	ConfigTemplateKey         = "template-content"
 	ConfigImageKey            = "docker-image"
 	DefaultImage              = config.DefaultRegistry + "goharbor/notary-signer-photon:v2.0.0"
