@@ -14,6 +14,24 @@ import (
 
 type NetworkPolicy graph.Resource
 
+func (r *Reconciler) AddNetworkPolicies(ctx context.Context, core *goharborv1alpha2.Core) error {
+	areNetworkPoliciesEnabled, err := r.AreNetworkPoliciesEnabled(ctx, core)
+	if err != nil {
+		return errors.Wrapf(err, "cannot get status")
+	}
+
+	if !areNetworkPoliciesEnabled {
+		return nil
+	}
+
+	_, err = r.AddIngressNetworkPolicy(ctx, core)
+	if err != nil {
+		return errors.Wrapf(err, "ingress")
+	}
+
+	return nil
+}
+
 func (r *Reconciler) AddIngressNetworkPolicy(ctx context.Context, core *goharborv1alpha2.Core) (NetworkPolicy, error) {
 	networkPolicy, err := r.GetIngressNetworkPolicy(ctx, core)
 	if err != nil {
@@ -26,8 +44,13 @@ func (r *Reconciler) AddIngressNetworkPolicy(ctx context.Context, core *goharbor
 }
 
 func (r *Reconciler) GetIngressNetworkPolicy(ctx context.Context, core *goharborv1alpha2.Core) (*netv1.NetworkPolicy, error) {
-	httpPort := intstr.FromString(harbormetav1.CoreHTTPPortName)
-	httpsPort := intstr.FromString(harbormetav1.CoreHTTPSPortName)
+	var port intstr.IntOrString
+
+	if core.Spec.Components.TLS != nil {
+		port = intstr.FromString(harbormetav1.CoreHTTPSPortName)
+	} else {
+		port = intstr.FromString(harbormetav1.CoreHTTPPortName)
+	}
 
 	return &netv1.NetworkPolicy{
 		ObjectMeta: metav1.ObjectMeta{
@@ -37,14 +60,9 @@ func (r *Reconciler) GetIngressNetworkPolicy(ctx context.Context, core *goharbor
 		Spec: netv1.NetworkPolicySpec{
 			Ingress: []netv1.NetworkPolicyIngressRule{
 				{
-					Ports: []netv1.NetworkPolicyPort{
-						{
-							Port: &httpPort,
-						},
-						{
-							Port: &httpsPort,
-						},
-					},
+					Ports: []netv1.NetworkPolicyPort{{
+						Port: &port,
+					}},
 				},
 			},
 			PodSelector: metav1.LabelSelector{

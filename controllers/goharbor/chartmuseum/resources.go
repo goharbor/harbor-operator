@@ -49,17 +49,7 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrapf(err, "cannot add deployment %s", deployment.GetName())
 	}
 
-	areNetworkPoliciesEnabled, err := r.AreNetworkPoliciesEnabled(ctx, chartMuseum)
-	if err != nil {
-		return errors.Wrapf(err, "cannot get network policies status")
-	}
+	err = r.AddNetworkPolicies(ctx, chartMuseum)
 
-	if areNetworkPoliciesEnabled {
-		_, err = r.AddIngressNetworkPolicy(ctx, chartMuseum)
-		if err != nil {
-			return errors.Wrapf(err, "ingress network policy")
-		}
-	}
-
-	return nil
+	return errors.Wrap(err, "network policies")
 }

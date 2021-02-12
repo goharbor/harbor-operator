@@ -49,22 +49,7 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrapf(err, "cannot add deployment %s", deployment.GetName())
 	}
 
-	areNetworkPoliciesEnabled, err := r.AreNetworkPoliciesEnabled(ctx, portal)
-	if err != nil {
-		return errors.Wrapf(err, "cannot get network policies status")
-	}
+	err = r.AddNetworkPolicies(ctx, portal)
 
-	if areNetworkPoliciesEnabled {
-		_, err = r.AddIngressNetworkPolicy(ctx, portal)
-		if err != nil {
-			return errors.Wrapf(err, "ingress network policy")
-		}
-
-		_, err = r.AddEgressNetworkPolicy(ctx, portal)
-		if err != nil {
-			return errors.Wrapf(err, "egress network policies")
-		}
-	}
-
-	return nil
+	return errors.Wrap(err, "network policies")
 }

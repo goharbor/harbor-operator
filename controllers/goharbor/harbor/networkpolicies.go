@@ -121,8 +121,13 @@ func (r *Reconciler) AddCoreIngressNetworkPolicy(ctx context.Context, harbor *go
 }
 
 func (r *Reconciler) GetCoreIngressNetworkPolicy(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*netv1.NetworkPolicy, error) { //nolint:dupl
-	httpPort := intstr.FromString(harbormetav1.CoreHTTPPortName)
-	httpsPort := intstr.FromString(harbormetav1.CoreHTTPSPortName)
+	var port intstr.IntOrString
+
+	if harbor.Spec.Expose.Core.TLS != nil {
+		port = intstr.FromString(harbormetav1.CoreHTTPSPortName)
+	} else {
+		port = intstr.FromString(harbormetav1.CoreHTTPPortName)
+	}
 
 	return &netv1.NetworkPolicy{
 		ObjectMeta: metav1.ObjectMeta{
@@ -132,14 +137,9 @@ func (r *Reconciler) GetCoreIngressNetworkPolicy(ctx context.Context, harbor *go
 		Spec: netv1.NetworkPolicySpec{
 			Ingress: []netv1.NetworkPolicyIngressRule{
 				{
-					Ports: []netv1.NetworkPolicyPort{
-						{
-							Port: &httpPort,
-						},
-						{
-							Port: &httpsPort,
-						},
-					},
+					Ports: []netv1.NetworkPolicyPort{{
+						Port: &port,
+					}},
 				},
 			},
 			PodSelector: metav1.LabelSelector{

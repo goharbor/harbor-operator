@@ -14,6 +14,24 @@ import (
 
 type NetworkPolicy graph.Resource
 
+func (r *Reconciler) AddNetworkPolicies(ctx context.Context, chartMuseum *goharborv1alpha2.ChartMuseum) error {
+	areNetworkPoliciesEnabled, err := r.AreNetworkPoliciesEnabled(ctx, chartMuseum)
+	if err != nil {
+		return errors.Wrapf(err, "cannot get status")
+	}
+
+	if !areNetworkPoliciesEnabled {
+		return nil
+	}
+
+	_, err = r.AddIngressNetworkPolicy(ctx, chartMuseum)
+	if err != nil {
+		return errors.Wrapf(err, "ingress")
+	}
+
+	return nil
+}
+
 func (r *Reconciler) AddIngressNetworkPolicy(ctx context.Context, chartmuseum *goharborv1alpha2.ChartMuseum) (NetworkPolicy, error) {
 	networkPolicy, err := r.GetIngressNetworkPolicy(ctx, chartmuseum)
 	if err != nil {
@@ -26,8 +44,13 @@ func (r *Reconciler) AddIngressNetworkPolicy(ctx context.Context, chartmuseum *g
 }
 
 func (r *Reconciler) GetIngressNetworkPolicy(ctx context.Context, chartmuseum *goharborv1alpha2.ChartMuseum) (*netv1.NetworkPolicy, error) {
-	httpPort := intstr.FromString(harbormetav1.ChartMuseumHTTPPortName)
-	httpsPort := intstr.FromString(harbormetav1.ChartMuseumHTTPSPortName)
+	var port intstr.IntOrString
+
+	if chartmuseum.Spec.Server.TLS != nil {
+		port = intstr.FromString(harbormetav1.ChartMuseumHTTPSPortName)
+	} else {
+		port = intstr.FromString(harbormetav1.ChartMuseumHTTPPortName)
+	}
 
 	return &netv1.NetworkPolicy{
 		ObjectMeta: metav1.ObjectMeta{
@@ -37,14 +60,9 @@ func (r *Reconciler) GetIngressNetworkPolicy(ctx context.Context, chartmuseum *g
 		Spec: netv1.NetworkPolicySpec{
 			Ingress: []netv1.NetworkPolicyIngressRule{
 				{
-					Ports: []netv1.NetworkPolicyPort{
-						{
-							Port: &httpPort,
-						},
-						{
-							Port: &httpsPort,
-						},
-					},
+					Ports: []netv1.NetworkPolicyPort{{
+						Port: &port,
+					}},
 				},
 			},
 			PodSelector: metav1.LabelSelector{

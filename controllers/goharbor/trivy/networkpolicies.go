@@ -14,6 +14,21 @@ import (
 
 type NetworkPolicy graph.Resource
 
+func (r *Reconciler) AddNetworkPolicies(ctx context.Context, trivy *goharborv1alpha2.Trivy) error {
+	areNetworkPoliciesEnabled, err := r.AreNetworkPoliciesEnabled(ctx, trivy)
+	if err != nil {
+		return errors.Wrapf(err, "cannot get status")
+	}
+
+	if !areNetworkPoliciesEnabled {
+		return nil
+	}
+
+	_, err = r.AddIngressNetworkPolicy(ctx, trivy)
+
+	return errors.Wrap(err, "ingress")
+}
+
 func (r *Reconciler) AddIngressNetworkPolicy(ctx context.Context, trivy *goharborv1alpha2.Trivy) (NetworkPolicy, error) {
 	networkPolicy, err := r.GetIngressNetworkPolicy(ctx, trivy)
 	if err != nil {
@@ -26,8 +41,13 @@ func (r *Reconciler) AddIngressNetworkPolicy(ctx context.Context, trivy *goharbo
 }
 
 func (r *Reconciler) GetIngressNetworkPolicy(ctx context.Context, trivy *goharborv1alpha2.Trivy) (*netv1.NetworkPolicy, error) {
-	httpPort := intstr.FromString(harbormetav1.TrivyHTTPPortName)
-	httpsPort := intstr.FromString(harbormetav1.TrivyHTTPSPortName)
+	var port intstr.IntOrString
+
+	if trivy.Spec.Server.TLS != nil {
+		port = intstr.FromString(harbormetav1.TrivyHTTPSPortName)
+	} else {
+		port = intstr.FromString(harbormetav1.TrivyHTTPPortName)
+	}
 
 	return &netv1.NetworkPolicy{
 		ObjectMeta: metav1.ObjectMeta{
@@ -37,14 +57,9 @@ func (r *Reconciler) GetIngressNetworkPolicy(ctx context.Context, trivy *goharbo
 		Spec: netv1.NetworkPolicySpec{
 			Ingress: []netv1.NetworkPolicyIngressRule{
 				{
-					Ports: []netv1.NetworkPolicyPort{
-						{
-							Port: &httpPort,
-						},
-						{
-							Port: &httpsPort,
-						},
-					},
+					Ports: []netv1.NetworkPolicyPort{{
+						Port: &port,
+					}},
 				},
 			},
 			PodSelector: metav1.LabelSelector{
