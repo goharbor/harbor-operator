@@ -12,6 +12,21 @@ import (
 
 type NetworkPolicy graph.Resource
 
+func (r *Reconciler) AddNetworkPolicies(ctx context.Context, registryctl *goharborv1alpha2.RegistryController) error {
+	areNetworkPoliciesEnabled, err := r.AreNetworkPoliciesEnabled(ctx, registryctl)
+	if err != nil {
+		return errors.Wrapf(err, "cannot get status")
+	}
+
+	if !areNetworkPoliciesEnabled {
+		return nil
+	}
+
+	_, err = r.AddIngressNetworkPolicy(ctx, registryctl)
+
+	return errors.Wrap(err, "ingress")
+}
+
 func (r *Reconciler) AddIngressNetworkPolicy(ctx context.Context, registryctl *goharborv1alpha2.RegistryController) (NetworkPolicy, error) {
 	networkPolicy, err := r.GetIngressNetworkPolicy(ctx, registryctl)
 	if err != nil {

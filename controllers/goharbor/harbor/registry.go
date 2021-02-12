@@ -206,9 +206,11 @@ func (r *Reconciler) GetRegistry(ctx context.Context, harbor *goharborv1alpha2.H
 
 	return &goharborv1alpha2.Registry{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        name,
-			Namespace:   namespace,
-			Annotations: r.NetworkPolicyAnnotationDisabled(),
+			Name:      name,
+			Namespace: namespace,
+			Annotations: map[string]string{
+				harbormetav1.NetworkPoliciesAnnotationName: harbormetav1.NetworkPoliciesAnnotationDisabled,
+			},
 		},
 		Spec: goharborv1alpha2.RegistrySpec{
 			ComponentSpec: harbor.Spec.Registry.ComponentSpec,

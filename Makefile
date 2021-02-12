@@ -106,7 +106,7 @@ diff:
 	git status
 	git diff --stat --diff-filter=d --exit-code HEAD
 
-GO_TEST_OPTS ?= -vet=off
+GO_TEST_OPTS ?= -p 1 -vet=off
 
 .PHONY: go-test
 go-test: install
@@ -448,7 +448,7 @@ certmanager: helm jetstack
 	$(HELM) repo add jetstack https://charts.jetstack.io # https://cert-manager.io/docs/installation/kubernetes/
 	$(HELM) upgrade --install certmanager jetstack/cert-manager \
 		--namespace $(CERTMANAGER_NAMESPACE) \
-		--version v0.15.1 \
+		--version v1.0.3 \
 		--set installCRDs=true
 
 .PHONY: jetstack

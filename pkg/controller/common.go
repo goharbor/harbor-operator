@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/go-logr/logr"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/pkg/config"
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
@@ -38,12 +39,6 @@ type Controller struct {
 	Log         logr.Logger
 	Scheme      *runtime.Scheme
 }
-
-const (
-	networkPoliciesAnnotationName     = "goharbor.io/network-policies"
-	networkPoliciesAnnotationEnabled  = "true"
-	networkPoliciesAnnotationDisabled = "false"
-)
 
 func NewController(ctx context.Context, base controllers.Controller, rm ResourceManager, config *configstore.Store) *Controller {
 	return &Controller{
@@ -88,29 +83,14 @@ func (c *Controller) GetAndFilter(ctx context.Context, key client.ObjectKey, obj
 
 func (c *Controller) AreNetworkPoliciesEnabled(ctx context.Context, resource resources.Resource) (bool, error) {
 	for name, value := range resource.GetAnnotations() {
-		if name == networkPoliciesAnnotationName {
-			return value == networkPoliciesAnnotationEnabled, nil
+		if name == harbormetav1.NetworkPoliciesAnnotationName {
+			return value == harbormetav1.NetworkPoliciesAnnotationEnabled, nil
 		}
 	}
 
-	defaultNetworkPoliciesStatusItem, err := configstore.Filter().Store(c.ConfigStore).Slice(config.NetworkPoliciesStatusKey).GetFirstItem()
-	if err != nil {
-		return false, err
-	}
+	networkPoliciesEnabled, err := config.GetBool(c.ConfigStore, config.NetworkPoliciesEnabledKey, config.DefaultNetworkPoliciesEnabled)
 
-	defaultNetworkPoliciesStatus, err := defaultNetworkPoliciesStatusItem.Value()
-	if err != nil {
-		return false, err
-	}
-
-	return defaultNetworkPoliciesStatus == networkPoliciesAnnotationEnabled, nil
-}
-
-func (c *Controller) NetworkPolicyAnnotationDisabled() map[string]string {
-	annotations := make(map[string]string)
-	annotations[networkPoliciesAnnotationName] = networkPoliciesAnnotationDisabled
-
-	return annotations
+	return networkPoliciesEnabled, errors.Wrap(err, "get boolean config")
 }
 
 func (c *Controller) Reconcile(req ctrl.Request) (ctrl.Result, error) {
