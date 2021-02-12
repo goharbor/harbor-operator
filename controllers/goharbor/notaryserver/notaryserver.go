@@ -49,7 +49,7 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 
 	className, err := r.GetClassName(ctx)
 	if err != nil {
-		return errors.Wrap(err, "cannot get class name")
+		return errors.Wrap(err, "classname")
 	}
 
 	concurrentReconcile, err := r.ConfigStore.GetItemValueInt(config.ReconciliationKey)
@@ -82,13 +82,9 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 }
 
 func New(ctx context.Context, name string, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
-	configTemplatePath, err := configStore.GetItemValue(ConfigTemplatePathKey)
+	configTemplatePath, err := config.GetString(configStore, ConfigTemplatePathKey, DefaultConfigTemplatePath)
 	if err != nil {
-		if !config.IsNotFound(err, ConfigTemplatePathKey) {
-			return nil, errors.Wrap(err, "cannot get config template path")
-		}
-
-		configTemplatePath = DefaultConfigTemplatePath
+		return nil, errors.Wrap(err, "template path")
 	}
 
 	r := &Reconciler{
