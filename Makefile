@@ -24,7 +24,7 @@ export CHARTMUSEUM_TEMPLATE_PATH
 export NOTARYSERVER_TEMPLATE_PATH
 export NOTARYSIGNER_TEMPLATE_PATH
 
-ifeq (,$(shell which kubens))
+ifeq (,$(shell which kubens 2> /dev/null))
 NAMESPACE ?= $$(kubectl config get-contexts "$$(kubectl config current-context)" --no-headers | awk -F " " '{ if ($$5=="") print "default" ; else print $$5; }')
 else
 NAMESPACE ?= $$(kubens -c)
@@ -44,9 +44,9 @@ define gosourcetemplate
 {{- end -}}
 endef
 
-GO_SOURCES                  := $(sort $(subst $(CURDIR)/,,$(shell go list -mod=readonly -f '$(gosourcetemplate)' ./...)))
+GO_SOURCES                  := $(sort $(subst $(CURDIR)/,,$(shell go list -mod=readonly -f '$(gosourcetemplate)' ./... 2> /dev/null)))
 GONOGENERATED_SOURCES       := $(sort $(shell grep -L 'DO NOT EDIT.' -- $(GO_SOURCES)))
-GOWITHTESTS_SOURCES         := $(sort $(subst $(CURDIR)/,,$(shell go list -mod=readonly -test -f '$(gosourcetemplate)' ./...)))
+GOWITHTESTS_SOURCES         := $(sort $(subst $(CURDIR)/,,$(shell go list -mod=readonly -test -f '$(gosourcetemplate)' ./... 2> /dev/null)))
 GO4CONTROLLERGEN_SOURCES    := $(sort $(shell grep -l '// +' -- $(GONOGENERATED_SOURCES)))
 
 .SUFFIXES:       # Delete the default suffixes
@@ -578,11 +578,11 @@ $(KUSTOMIZE):
 # find helm or raise an error
 .PHONY: helm
 helm:
-ifeq (, $(shell which helm))
+ifeq (, $(shell which helm 2> /dev/null))
 	$(error Helm not found. Please install it: https://helm.sh/docs/intro/install/#from-script)
 HELM=helm-not-found
 else
-HELM=$(shell which helm)
+HELM=$(shell which helm 2> /dev/null)
 endif
 
 # find or download goreleaser
