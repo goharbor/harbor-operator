@@ -341,6 +341,9 @@ func (r *Reconciler) GetNotarySigner(ctx context.Context, harbor *goharborv1alph
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
+			Annotations: map[string]string{
+				harbormetav1.NetworkPoliciesAnnotationName: harbormetav1.NetworkPoliciesAnnotationDisabled,
+			},
 		},
 		Spec: goharborv1alpha2.NotarySignerSpec{
 			ComponentSpec: harbor.Spec.Notary.Signer,

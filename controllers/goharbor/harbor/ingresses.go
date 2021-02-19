@@ -10,9 +10,8 @@ import (
 	"github.com/goharbor/harbor-operator/controllers/goharbor/notaryserver"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 	"github.com/pkg/errors"
-	netv1 "k8s.io/api/networking/v1beta1"
+	netv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 const (
@@ -71,8 +70,12 @@ func (r *Reconciler) GetCoreIngressRules(ctx context.Context, harbor *goharborv1
 	}
 
 	coreBackend := netv1.IngressBackend{
-		ServiceName: r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String()),
-		ServicePort: intstr.FromInt(int(corePort)),
+		Service: &netv1.IngressServiceBackend{
+			Name: r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String()),
+			Port: netv1.ServiceBackendPort{
+				Number: corePort,
+			},
+		},
 	}
 
 	portalPort, err := harbor.Spec.InternalTLS.GetInternalPort(harbormetav1.PortalTLS)
@@ -81,8 +84,12 @@ func (r *Reconciler) GetCoreIngressRules(ctx context.Context, harbor *goharborv1
 	}
 
 	portalBackend := netv1.IngressBackend{
-		ServiceName: r.NormalizeName(ctx, harbor.GetName(), "portal"),
-		ServicePort: intstr.FromInt(int(portalPort)),
+		Service: &netv1.IngressServiceBackend{
+			Name: r.NormalizeName(ctx, harbor.GetName(), controllers.Portal.String()),
+			Port: netv1.ServiceBackendPort{
+				Number: portalPort,
+			},
+		},
 	}
 
 	ruleValue, err := r.GetCoreIngressRuleValue(ctx, harbor, coreBackend, portalBackend)
@@ -126,6 +133,8 @@ func (r *Reconciler) GetNotaryServerIngresse(ctx context.Context, harbor *goharb
 		}}
 	}
 
+	pathTypeExact := netv1.PathTypeExact
+
 	return &netv1.Ingress{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        r.NormalizeName(ctx, harbor.GetName(), controllers.NotaryServer.String()),
@@ -139,10 +148,15 @@ func (r *Reconciler) GetNotaryServerIngresse(ctx context.Context, harbor *goharb
 				IngressRuleValue: netv1.IngressRuleValue{
 					HTTP: &netv1.HTTPIngressRuleValue{
 						Paths: []netv1.HTTPIngressPath{{
-							Path: "/",
+							Path:     "/",
+							PathType: &pathTypeExact,
 							Backend: netv1.IngressBackend{
-								ServiceName: r.NormalizeName(ctx, harbor.GetName(), controllers.NotaryServer.String()),
-								ServicePort: intstr.FromInt(notaryserver.PublicPort),
+								Service: &netv1.IngressServiceBackend{
+									Name: r.NormalizeName(ctx, harbor.GetName(), controllers.NotaryServer.String()),
+									Port: netv1.ServiceBackendPort{
+										Number: notaryserver.PublicPort,
+									},
+								},
 							},
 						}},
 					},
@@ -203,76 +217,101 @@ func (err ErrInvalidIngressController) Error() string {
 }
 
 func (r *Reconciler) GetCoreIngressRuleValue(ctx context.Context, harbor *goharborv1alpha2.Harbor, core, portal netv1.IngressBackend) (*netv1.IngressRuleValue, error) { // nolint:funlen
+	pathTypePrefix := netv1.PathTypePrefix
+
 	switch harbor.Spec.Expose.Core.Ingress.Controller {
 	case harbormetav1.IngressControllerDefault:
 		return &netv1.IngressRuleValue{
 			HTTP: &netv1.HTTPIngressRuleValue{
 				Paths: []netv1.HTTPIngressPath{{
-					Path:    "/",
-					Backend: portal,
+					Path:     "/",
+					PathType: &pathTypePrefix,
+					Backend:  portal,
 				}, {
-					Path:    "/api/",
-					Backend: core,
+					Path:     "/api/",
+					PathType: &pathTypePrefix,
+					Backend:  core,
 				}, {
-					Path:    "/service/",
-					Backend: core,
+					Path:     "/service/",
+					PathType: &pathTypePrefix,
+					Backend:  core,
 				}, {
-					Path:    "/v2/",
-					Backend: core,
+					Path:     "/v2/",
+					PathType: &pathTypePrefix,
+					Backend:  core,
 				}, {
-					Path:    "/chartrepo/",
-					Backend: core,
+					Path:     "/chartrepo/",
+					PathType: &pathTypePrefix,
+					Backend:  core,
 				}, {
-					Path:    "/c/",
-					Backend: core,
+					Path:     "/c/",
+					PathType: &pathTypePrefix,
+					Backend:  core,
 				}},
 			},
 		}, nil
 	case harbormetav1.IngressControllerGCE:
+		pathTypePrefix := netv1.PathTypePrefix
+
 		return &netv1.IngressRuleValue{
 			HTTP: &netv1.HTTPIngressRuleValue{
 				Paths: []netv1.HTTPIngressPath{{
-					Path:    "/*",
-					Backend: portal,
+					Path:     "/",
+					PathType: &pathTypePrefix,
+					Backend:  portal,
 				}, {
-					Path:    "/api/*",
-					Backend: core,
+					Path:     "/api",
+					PathType: &pathTypePrefix,
+					Backend:  core,
 				}, {
-					Path:    "/service/*",
-					Backend: core,
+					Path:     "/service",
+					PathType: &pathTypePrefix,
+					Backend:  core,
 				}, {
-					Path:    "/v2/*",
-					Backend: core,
+					Path:     "/v2",
+					PathType: &pathTypePrefix,
+					Backend:  core,
 				}, {
-					Path:    "/chartrepo/*",
-					Backend: core,
+					Path:     "/chartrepo",
+					PathType: &pathTypePrefix,
+					Backend:  core,
 				}, {
-					Path:    "/c/*",
-					Backend: core,
+					Path:     "/c",
+					PathType: &pathTypePrefix,
+					Backend:  core,
 				}},
 			},
 		}, nil
 	case harbormetav1.IngressControllerNCP:
+		pathTypeExact := netv1.PathTypeExact
+		pathTypePrefix := netv1.PathTypePrefix
+
 		return &netv1.IngressRuleValue{
 			HTTP: &netv1.HTTPIngressRuleValue{
 				Paths: []netv1.HTTPIngressPath{{
-					Path:    "/",
-					Backend: portal,
+					Path:     "/",
+					PathType: &pathTypeExact,
+					Backend:  portal,
 				}, {
-					Path:    "/api/.*",
-					Backend: core,
+					Path:     "/api",
+					PathType: &pathTypePrefix,
+					Backend:  core,
 				}, {
-					Path:    "/service/.*",
-					Backend: core,
+					Path:     "/service",
+					PathType: &pathTypePrefix,
+					Backend:  core,
 				}, {
-					Path:    "/v2/.*",
-					Backend: core,
+					Path:     "/v2",
+					PathType: &pathTypePrefix,
+					Backend:  core,
 				}, {
-					Path:    "/chartrepo/.*",
-					Backend: core,
+					Path:     "/chartrepo",
+					PathType: &pathTypePrefix,
+					Backend:  core,
 				}, {
-					Path:    "/c/.*",
-					Backend: core,
+					Path:     "/c",
+					PathType: &pathTypePrefix,
+					Backend:  core,
 				}},
 			},
 		}, nil

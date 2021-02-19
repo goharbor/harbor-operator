@@ -98,7 +98,7 @@ func (r *Reconciler) GetTrivyUpdateSecret(ctx context.Context, harbor *goharborv
 
 type Trivy graph.Resource
 
-func (r *Reconciler) AddTrivy(ctx context.Context, harbor *goharborv1alpha2.Harbor, certificate TrivyInternalCertificate, seretUpdate TrivyUpdateSecret) (Trivy, error) {
+func (r *Reconciler) AddTrivy(ctx context.Context, harbor *goharborv1alpha2.Harbor, certificate TrivyInternalCertificate, secretUpdate TrivyUpdateSecret) (Trivy, error) {
 	if harbor.Spec.Trivy == nil {
 		return nil, nil
 	}
@@ -108,7 +108,7 @@ func (r *Reconciler) AddTrivy(ctx context.Context, harbor *goharborv1alpha2.Harb
 		return nil, errors.Wrap(err, "get")
 	}
 
-	trivyRes, err := r.AddBasicResource(ctx, trivy, certificate, seretUpdate)
+	trivyRes, err := r.AddBasicResource(ctx, trivy, certificate, secretUpdate)
 
 	return Trivy(trivyRes), errors.Wrap(err, "add")
 }
@@ -130,6 +130,9 @@ func (r *Reconciler) GetTrivy(ctx context.Context, harbor *goharborv1alpha2.Harb
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
+			Annotations: map[string]string{
+				harbormetav1.NetworkPoliciesAnnotationName: harbormetav1.NetworkPoliciesAnnotationDisabled,
+			},
 		},
 		Spec: goharborv1alpha2.TrivySpec{
 			ComponentSpec: harbor.Spec.Trivy.ComponentSpec,

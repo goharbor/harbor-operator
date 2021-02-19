@@ -8,16 +8,18 @@ import (
 )
 
 const (
-	HarborClassKey    = "classname"
-	ReconciliationKey = "max-concurrent-reconciliation"
+	HarborClassKey            = "classname"
+	ReconciliationKey         = "max-concurrent-reconciliation"
+	NetworkPoliciesEnabledKey = "network-policies"
 )
 
 const (
 	DefaultPriority = 5
 
-	DefaultConcurrentReconcile = 1
-	DefaultHarborClass         = ""
-	DefaultRegistry            = ""
+	DefaultConcurrentReconcile    = 1
+	DefaultHarborClass            = ""
+	DefaultRegistry               = ""
+	DefaultNetworkPoliciesEnabled = false
 )
 
 var ErrNotReady = errors.New("configuration not ready")
@@ -27,6 +29,7 @@ func NewConfigWithDefaults() *configstore.Store {
 	defaultStore.InMemory("default-controller").Add(
 		configstore.NewItem(ReconciliationKey, fmt.Sprintf("%v", DefaultConcurrentReconcile), DefaultPriority),
 		configstore.NewItem(HarborClassKey, DefaultHarborClass, DefaultPriority),
+		configstore.NewItem(NetworkPoliciesEnabledKey, fmt.Sprintf("%v", DefaultNetworkPoliciesEnabled), DefaultPriority),
 	)
 
 	return defaultStore

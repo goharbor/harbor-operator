@@ -196,6 +196,9 @@ func (r *Reconciler) GetNotaryServer(ctx context.Context, harbor *goharborv1alph
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
+			Annotations: map[string]string{
+				harbormetav1.NetworkPoliciesAnnotationName: harbormetav1.NetworkPoliciesAnnotationDisabled,
+			},
 		},
 		Spec: goharborv1alpha2.NotaryServerSpec{
 			ComponentSpec: harbor.Spec.Notary.Server,

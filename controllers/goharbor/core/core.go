@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/pkg/config"
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
 	"github.com/goharbor/harbor-operator/pkg/event-filter/class"
@@ -82,7 +83,7 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 		Complete(r)
 }
 
-func New(ctx context.Context, name string, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
+func New(ctx context.Context, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
 	configTemplatePath, err := config.GetString(configStore, ConfigTemplatePathKey, DefaultConfigTemplatePath)
 	if err != nil {
 		return nil, errors.Wrap(err, "template path")
@@ -95,14 +96,14 @@ func New(ctx context.Context, name string, configStore *configstore.Store) (comm
 	configStore.FileCustomRefresh(configTemplatePath, func(data []byte) ([]configstore.Item, error) {
 		r.configError = nil
 
-		logger.Get(ctx).WithName("controller").WithName(name).
+		logger.Get(ctx).WithName("controller").WithName(controllers.Core.String()).
 			Info("config reloaded", "path", configTemplatePath)
 		// TODO reconcile all core
 
 		return []configstore.Item{configstore.NewItem(ConfigTemplateKey, string(data), config.DefaultPriority)}, nil
 	})
 
-	r.Controller = commonCtrl.NewController(ctx, name, r, configStore)
+	r.Controller = commonCtrl.NewController(ctx, controllers.Core, r, configStore)
 
 	return r, nil
 }

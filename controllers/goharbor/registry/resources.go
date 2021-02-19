@@ -18,7 +18,7 @@ func (r *Reconciler) NewEmpty(_ context.Context) resources.Resource {
 	return &goharborv1alpha2.Registry{}
 }
 
-func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resource) error {
+func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resource) error { // nolint:funlen
 	registry, ok := resource.(*goharborv1alpha2.Registry)
 	if !ok {
 		return serrors.UnrecoverrableError(errors.Errorf("%+v", resource), serrors.OperatorReason, "unable to add resource")
@@ -78,7 +78,9 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrapf(err, "cannot add deployment %s", deployment.GetName())
 	}
 
-	return nil
+	err = r.AddNetworkPolicies(ctx, registry)
+
+	return errors.Wrap(err, "network policies")
 }
 
 func (r *Reconciler) GetSecrets(ctx context.Context, registry *goharborv1alpha2.Registry) ([]graph.Resource, error) {

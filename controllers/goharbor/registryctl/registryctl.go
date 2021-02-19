@@ -39,6 +39,7 @@ type Reconciler struct {
 
 // +kubebuilder:rbac:groups=goharbor.io,resources=registrycontrollers,verbs=get;list;watch
 // +kubebuilder:rbac:groups=goharbor.io,resources=registrycontrollers/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=networking.k8s.io,resources=networkpolicies,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="",resources=configmaps;secrets;services,verbs=get;list;watch;create;update;patch;delete
 
@@ -82,7 +83,7 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 		Complete(r)
 }
 
-func New(ctx context.Context, name string, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
+func New(ctx context.Context, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
 	configTemplatePath, err := configStore.GetItemValue(ConfigTemplatePathKey)
 	if err != nil {
 		if !config.IsNotFound(err, ConfigTemplatePathKey) {
@@ -99,15 +100,15 @@ func New(ctx context.Context, name string, configStore *configstore.Store) (comm
 	configStore.FileCustomRefresh(configTemplatePath, func(data []byte) ([]configstore.Item, error) {
 		r.configError = nil
 
-		logger.Get(ctx).WithName("controller").WithName(name).
+		logger.Get(ctx).WithName("controller").WithName(controllers.RegistryController.String()).
 			Info("config reloaded", "path", configTemplatePath)
 		// TODO reconcile all core
 
 		return []configstore.Item{configstore.NewItem(ConfigTemplateKey, string(data), config.DefaultPriority)}, nil
 	})
 
-	r.Reconciler.Controller = commonCtrl.NewController(ctx, controllers.Registry.String(), r, configStore)
-	r.Controller = commonCtrl.NewController(ctx, name, r, configStore)
+	r.Reconciler.Controller = commonCtrl.NewController(ctx, controllers.Registry, r, configStore)
+	r.Controller = commonCtrl.NewController(ctx, controllers.RegistryController, r, configStore)
 
 	return r, nil
 }

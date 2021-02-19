@@ -4,6 +4,9 @@ import (
 	"context"
 
 	"github.com/go-logr/logr"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	"github.com/goharbor/harbor-operator/controllers"
+	"github.com/goharbor/harbor-operator/pkg/config"
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	sgraph "github.com/goharbor/harbor-operator/pkg/controller/internal/graph"
 	"github.com/goharbor/harbor-operator/pkg/factories/application"
@@ -28,8 +31,8 @@ type ResourceManager interface {
 type Controller struct {
 	client.Client
 
-	Name    string
-	Version string
+	BaseController controllers.Controller
+	Version        string
 
 	ConfigStore *configstore.Store
 	rm          ResourceManager
@@ -37,13 +40,13 @@ type Controller struct {
 	Scheme      *runtime.Scheme
 }
 
-func NewController(ctx context.Context, name string, rm ResourceManager, config *configstore.Store) *Controller {
+func NewController(ctx context.Context, base controllers.Controller, rm ResourceManager, config *configstore.Store) *Controller {
 	return &Controller{
-		Name:        name,
-		Version:     application.GetVersion(ctx),
-		rm:          rm,
-		Log:         ctrl.Log.WithName(application.GetName(ctx)).WithName("controller").WithValues("controller", name),
-		ConfigStore: config,
+		BaseController: base,
+		Version:        application.GetVersion(ctx),
+		rm:             rm,
+		Log:            ctrl.Log.WithName(application.GetName(ctx)).WithName("controller").WithValues("controller", base.String()),
+		ConfigStore:    config,
 	}
 }
 
@@ -59,7 +62,7 @@ func (c *Controller) GetVersion() string {
 }
 
 func (c *Controller) GetName() string {
-	return c.Name
+	return c.BaseController.String()
 }
 
 func (c *Controller) GetAndFilter(ctx context.Context, key client.ObjectKey, obj runtime.Object) (bool, error) {
@@ -76,6 +79,18 @@ func (c *Controller) GetAndFilter(ctx context.Context, key client.ObjectKey, obj
 	}
 
 	return true, nil
+}
+
+func (c *Controller) AreNetworkPoliciesEnabled(ctx context.Context, resource resources.Resource) (bool, error) {
+	for name, value := range resource.GetAnnotations() {
+		if name == harbormetav1.NetworkPoliciesAnnotationName {
+			return value == harbormetav1.NetworkPoliciesAnnotationEnabled, nil
+		}
+	}
+
+	networkPoliciesEnabled, err := config.GetBool(c.ConfigStore, config.NetworkPoliciesEnabledKey, config.DefaultNetworkPoliciesEnabled)
+
+	return networkPoliciesEnabled, errors.Wrap(err, "get boolean config")
 }
 
 func (c *Controller) Reconcile(req ctrl.Request) (ctrl.Result, error) {
