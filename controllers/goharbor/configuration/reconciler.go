@@ -120,7 +120,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) {
 		return ctrl.Result{}, fmt.Errorf("get harbor cluster cr error: %w", err)
 	}
 
-	log.V(5).Info("Get configmap and harbor cluster cr successfully", "configmap", cm, "harborcluster", cluster)
+	log.Info("Get configmap and harbor cluster cr successfully", "configmap", cm, "harborcluster", cluster)
 
 	defer func() {
 		log.Info("Reconcile end", "result", res, "error", err, "updateStatusErr", r.UpdateStatus(ctx, err, cluster))

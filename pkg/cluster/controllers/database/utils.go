@@ -158,14 +158,14 @@ func (p *PostgreSQLController) GetPosgresMaxConnections() string {
 	if err != nil {
 		if !config.IsNotFound(err, ConfigMaxConnectionsKey) {
 			// Just logged
-			p.Log.V(5).Error(err, "failed to get database max connections")
+			p.Log.Error(err, "failed to get database max connections")
 		}
 
 		maxConnections = DefaultDatabaseMaxConnections
 	}
 
 	if _, err := strconv.ParseInt(maxConnections, 10, 64); err != nil {
-		p.Log.V(5).Error(err, "%s is not a valid number for postgres max connections", maxConnections)
+		p.Log.Error(err, "%s is not a valid number for postgres max connections", maxConnections)
 
 		maxConnections = DefaultDatabaseMaxConnections
 	}

@@ -47,16 +47,23 @@ func (c *RedisConnect) NewRedisClient() *rediscli.Client {
 func BuildRedisPool(redisSentinelIP []string, redisSentinelPort, redisSentinelPassword, redisGroupName string, redisIndex int) *rediscli.Client {
 	sentinelsInfo := GenHostInfo(redisSentinelIP, redisSentinelPort)
 
+	const (
+		PoolSize     = 100
+		DialTimeout  = 10
+		ReadTimeout  = 30
+		WriteTimeout = 30
+		PoolTimeout  = 30
+	)
 	options := &rediscli.FailoverOptions{
 		MasterName:         redisGroupName,
 		SentinelAddrs:      sentinelsInfo,
 		Password:           redisSentinelPassword,
 		DB:                 redisIndex,
-		PoolSize:           100,
-		DialTimeout:        10 * time.Second,
-		ReadTimeout:        30 * time.Second,
-		WriteTimeout:       30 * time.Second,
-		PoolTimeout:        30 * time.Second,
+		PoolSize:           PoolSize,
+		DialTimeout:        DialTimeout * time.Second,
+		ReadTimeout:        ReadTimeout * time.Second,
+		WriteTimeout:       WriteTimeout * time.Second,
+		PoolTimeout:        PoolTimeout * time.Second,
 		IdleTimeout:        time.Millisecond,
 		IdleCheckFrequency: time.Millisecond,
 	}

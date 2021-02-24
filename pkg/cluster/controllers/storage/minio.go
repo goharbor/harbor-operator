@@ -24,10 +24,10 @@ const (
 
 	DefaultCredsSecret = "creds"
 	DefaultPrefix      = "minio-"
-
-	DefaultZone   = "zone-harbor"
-	DefaultRegion = "us-east-1"
-	DefaultBucket = "harbor"
+	DefaultZone        = "zone-harbor"
+	DefaultRegion      = "us-east-1"
+	DefaultBucket      = "harbor"
+	DefaultServicePort = 9000
 )
 
 type MinIOController struct {

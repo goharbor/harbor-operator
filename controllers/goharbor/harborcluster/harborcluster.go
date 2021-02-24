@@ -11,9 +11,14 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
+const (
+	DefaultWaitCycleTime = 10
+	ErrorWaitCycle       = 5
+)
+
 var (
-	defaultWaitCycle = ctrl.Result{RequeueAfter: 10 * time.Second}
-	errorWaitCycle   = ctrl.Result{RequeueAfter: 5 * time.Second}
+	defaultWaitCycle = ctrl.Result{RequeueAfter: DefaultWaitCycleTime * time.Second}
+	errorWaitCycle   = ctrl.Result{RequeueAfter: ErrorWaitCycle * time.Second}
 )
 
 // Reconcile logic of the HarborCluster.
