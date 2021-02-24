@@ -86,6 +86,7 @@ func (s *ServiceManager) WithConfig(svcCfgGetter svcConfigGetter) *ServiceManage
 }
 
 // Apply changes.
+// nolint:funlen
 func (s *ServiceManager) Apply() error {
 	if err := s.validate(); err != nil {
 		return err

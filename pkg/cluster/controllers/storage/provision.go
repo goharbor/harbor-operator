@@ -240,6 +240,7 @@ func (m *MinIOController) generateIngress() (*netv1.Ingress, error) {
 	}, err
 }
 
+// nolint:funlen
 func (m *MinIOController) generateMinIOCR(ctx context.Context, harborcluster *goharborv1alpha2.HarborCluster) (*minio.Tenant, error) {
 	image, err := m.GetImage(ctx, harborcluster)
 	if err != nil {

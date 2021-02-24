@@ -261,6 +261,7 @@ func (err ErrInvalidIngressController) Error() string {
 	return fmt.Sprintf("controller %s unsupported", err.Controller)
 }
 
+// nolint:funlen
 func (r *Reconciler) GetCoreIngressRuleValue(ctx context.Context, harbor *goharborv1alpha2.Harbor, core, portal netv1.IngressBackend) (*netv1.IngressRuleValue, error) {
 	switch harbor.Spec.Expose.Core.Ingress.Controller {
 	case harbormetav1.IngressControllerDefault:
