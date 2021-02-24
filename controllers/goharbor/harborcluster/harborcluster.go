@@ -55,9 +55,10 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) {
 				r.Log.Info("suggest client delay", "seconds", sec)
 			}
 
-			er = fmt.Errorf("defer: update status error: %s", er)
+			er = fmt.Errorf("defer: update status error: %w", er)
 
 			if err != nil {
+				// nolint:errorlint
 				err = fmt.Errorf("%s, upstreaming error: %w", er.Error(), err)
 			} else {
 				err = er
