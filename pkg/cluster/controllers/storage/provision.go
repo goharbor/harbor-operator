@@ -240,15 +240,17 @@ func (m *MinIOController) generateIngress() (*netv1.Ingress, error) {
 	}, err
 }
 
-// nolint:funlen
-func (m *MinIOController) generateMinIOCR(ctx context.Context, harborcluster *goharborv1alpha2.HarborCluster) (*minio.Tenant, error) {
+func (m *MinIOController) generateMinIOCR(ctx context.Context, harborcluster *goharborv1alpha2.HarborCluster) (*minio.Tenant, error) { // nolint:funlen
 	image, err := m.GetImage(ctx, harborcluster)
 	if err != nil {
 		return nil, err
 	}
 
-	const LivenessDelay = 120
-	const LivenessPeriod = 60
+	const (
+		LivenessDelay  = 120
+		LivenessPeriod = 60
+	)
+
 	return &minio.Tenant{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       minio.MinIOCRDResourceKind,

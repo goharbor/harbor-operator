@@ -22,8 +22,7 @@ var (
 )
 
 // Reconcile logic of the HarborCluster.
-// nolint:funlen
-func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) {
+func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) { // nolint:funlen
 	ctx := context.TODO()
 	log := r.Log.WithValues("resource", req.NamespacedName)
 

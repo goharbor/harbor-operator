@@ -69,8 +69,7 @@ func NewMinIOController(ctx context.Context, options ...k8s.Option) lcm.Controll
 }
 
 // Reconciler implements the reconcile logic of minIO service.
-// nolint:funlen
-func (m *MinIOController) Apply(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*lcm.CRStatus, error) {
+func (m *MinIOController) Apply(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*lcm.CRStatus, error) { // nolint:funlen
 	var minioCR minio.Tenant
 
 	// Use the ctx from the parameter

@@ -54,6 +54,7 @@ func BuildRedisPool(redisSentinelIP []string, redisSentinelPort, redisSentinelPa
 		WriteTimeout = 30
 		PoolTimeout  = 30
 	)
+
 	options := &rediscli.FailoverOptions{
 		MasterName:         redisGroupName,
 		SentinelAddrs:      sentinelsInfo,

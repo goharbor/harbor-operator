@@ -133,6 +133,7 @@ func (rm *redisResourceManager) GetSecretName() string {
 // GetSecret gets redis secret.
 func (rm *redisResourceManager) GetSecret() *corev1.Secret {
 	name := rm.GetSecretName()
+
 	const SecretLen = 8
 	passStr := common.RandomString(SecretLen, "a")
 

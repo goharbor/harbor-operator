@@ -169,6 +169,7 @@ func (rc *RedisController) GetSentinelServiceURL(name, namespace string, pods []
 		if err != nil {
 			panic(err)
 		}
+
 		randomPod := pods[n.Int64()]
 		url = randomPod.Status.PodIP
 	} else {

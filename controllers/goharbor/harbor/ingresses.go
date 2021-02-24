@@ -145,7 +145,7 @@ func (r *Reconciler) GetNotaryServerIngress(ctx context.Context, harbor *goharbo
 	}, nil
 }
 
-func (r *Reconciler) GetNotaryIngressRules(ctx context.Context, harbor *goharborv1alpha2.Harbor) ([]netv1.IngressRule, error) { // nolint:funlen
+func (r *Reconciler) GetNotaryIngressRules(ctx context.Context, harbor *goharborv1alpha2.Harbor) ([]netv1.IngressRule, error) {
 	var ingressRuleValue netv1.IngressRuleValue
 
 	backend := netv1.IngressBackend{
@@ -261,8 +261,7 @@ func (err ErrInvalidIngressController) Error() string {
 	return fmt.Sprintf("controller %s unsupported", err.Controller)
 }
 
-// nolint:funlen
-func (r *Reconciler) GetCoreIngressRuleValue(ctx context.Context, harbor *goharborv1alpha2.Harbor, core, portal netv1.IngressBackend) (*netv1.IngressRuleValue, error) {
+func (r *Reconciler) GetCoreIngressRuleValue(ctx context.Context, harbor *goharborv1alpha2.Harbor, core, portal netv1.IngressBackend) (*netv1.IngressRuleValue, error) { // nolint:funlen
 	switch harbor.Spec.Expose.Core.Ingress.Controller {
 	case harbormetav1.IngressControllerDefault:
 		return &netv1.IngressRuleValue{

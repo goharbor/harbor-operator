@@ -28,7 +28,7 @@ linters:
   - gocritic
   - gocyclo
   - godot
-  - goerr113
+#  - goerr113
   - gofmt
   - gofumpt
   - goheader
@@ -73,7 +73,7 @@ linters:
   - paralleltest
   - wrapcheck
 #  - errorlint
-#  - goerr113
+  - goerr113
 #  - gomnd
 #  - nestif
 #  - funlen

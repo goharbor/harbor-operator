@@ -28,10 +28,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-const (
-	TotalDependencyNum = 4
-)
-
 // status is designed to track the status and conditions of the deploying Harbor cluster.
 type status struct {
 	client.Client
@@ -202,6 +198,7 @@ func (s *status) overallStatus() goharborv1.ClusterStatus {
 	}
 
 	// Totally ready
+	const TotalDependencyNum = 4
 	if ready >= TotalDependencyNum {
 		return goharborv1.StatusHealthy
 	}

@@ -3,10 +3,11 @@ package common
 import (
 	"bytes"
 	"crypto/rand"
-	"github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
-	"github.com/goharbor/harbor-operator/controllers/goharbor/harbor"
 	"math/big"
 	"strings"
+
+	"github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/harbor"
 )
 
 func GetIngressPath(ingress v1alpha1.IngressController) (string, error) {
@@ -51,6 +52,7 @@ func RandomString(randLength int, randType string) (result string) {
 		if err != nil {
 			panic(err)
 		}
+
 		b.WriteByte(str[int32(n.Int64())])
 	}
 

@@ -115,8 +115,7 @@ func dbConfigGetter(ctx context.Context, kubeClient k8s.Client, cluster *v1alpha
 }
 
 // storageConfigGetter is for getting configurations of storage service.
-// nolint:funlen
-func storageConfigGetter(ctx context.Context, kubeClient k8s.Client, cluster *v1alpha2.HarborCluster) (*lcm.ServiceConfig, []lcm.Option, error) {
+func storageConfigGetter(ctx context.Context, kubeClient k8s.Client, cluster *v1alpha2.HarborCluster) (*lcm.ServiceConfig, []lcm.Option, error) { // nolint:funlen
 	switch {
 	case cluster.Spec.ImageChartStorage.S3 != nil:
 		accessSecret, err := getAccessSecret(kubeClient, cluster.Spec.ImageChartStorage.S3.SecretKeyRef, cluster.Namespace)
