@@ -28,7 +28,7 @@ linters:
   - gocritic
   - gocyclo
   - godot
-#  - goerr113
+  - goerr113
   - gofmt
   - gofumpt
   - goheader
@@ -72,12 +72,6 @@ linters:
   - godox
   - paralleltest
   - wrapcheck
-#  - errorlint
-  - goerr113
-#  - gomnd
-#  - nestif
-#  - funlen
-#  - gosec
 
 service:
   golangci-lint-version: 1.33.x

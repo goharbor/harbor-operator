@@ -54,7 +54,7 @@ func (h *Harbor) ValidateUpdate(old runtime.Object) error {
 
 	obj, ok := old.(*Harbor)
 	if !ok {
-		return fmt.Errorf("failed type assertion on kind: %s", old.GetObjectKind().GroupVersionKind().String())
+		return field.Invalid(field.NewPath("spec"), old, fmt.Sprintf("failed type assertion to Harbor on kind: %s", old.GetObjectKind().GroupVersionKind().String()))
 	}
 
 	return h.Validate(obj)

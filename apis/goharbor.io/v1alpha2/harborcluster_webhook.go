@@ -66,7 +66,7 @@ func (hc *HarborCluster) ValidateUpdate(old runtime.Object) error {
 
 	obj, ok := old.(*HarborCluster)
 	if !ok {
-		return fmt.Errorf("failed type assertion on kind: %s", old.GetObjectKind().GroupVersionKind().String())
+		return field.Invalid(field.NewPath("spec"), old, fmt.Sprintf("failed type assertion to HarborCluster on kind: %s", old.GetObjectKind().GroupVersionKind().String()))
 	}
 
 	return hc.validate(obj)
