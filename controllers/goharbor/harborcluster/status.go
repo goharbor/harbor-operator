@@ -28,9 +28,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-const(
+const (
 	TotalDependencyNum = 4
 )
+
 // status is designed to track the status and conditions of the deploying Harbor cluster.
 type status struct {
 	client.Client

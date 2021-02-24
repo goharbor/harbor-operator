@@ -2,8 +2,9 @@ package cache
 
 import (
 	"context"
+	"crypto/rand"
 	"fmt"
-	"math/rand"
+	"math/big"
 
 	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
@@ -164,7 +165,11 @@ func (rc *RedisController) GetSentinelServiceURL(name, namespace string, pods []
 
 	_, err := rest.InClusterConfig()
 	if err != nil {
-		randomPod := pods[rand.Intn(len(pods))]
+		n, err := rand.Int(rand.Reader, big.NewInt(int64(len(pods))))
+		if err != nil {
+			panic(err)
+		}
+		randomPod := pods[n.Int64()]
 		url = randomPod.Status.PodIP
 	} else {
 		url = fmt.Sprintf("%s-%s.%s.svc.cluster.local", "rfs", name, namespace)

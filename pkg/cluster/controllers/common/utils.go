@@ -2,12 +2,11 @@ package common
 
 import (
 	"bytes"
-	"math/rand"
-	"strings"
-	"time"
-
+	"crypto/rand"
 	"github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/harbor"
+	"math/big"
+	"strings"
 )
 
 func GetIngressPath(ingress v1alpha1.IngressController) (string, error) {
@@ -45,12 +44,14 @@ func RandomString(randLength int, randType string) (result string) {
 	str := b.String()
 	strLen := len(str)
 
-	rand.Seed(time.Now().UnixNano())
-
 	b = bytes.Buffer{}
 
 	for i := 0; i < randLength; i++ {
-		b.WriteByte(str[rand.Intn(strLen)])
+		n, err := rand.Int(rand.Reader, big.NewInt(int64(strLen)))
+		if err != nil {
+			panic(err)
+		}
+		b.WriteByte(str[int32(n.Int64())])
 	}
 
 	return b.String()

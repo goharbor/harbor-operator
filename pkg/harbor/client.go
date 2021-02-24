@@ -65,6 +65,7 @@ func WithHTTPClient(ct *http.Client) ClientOption {
 func defaultOptions() *Options {
 	// skip cert verify
 	ts := &http.Transport{
+		// nolint:gosec
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 
