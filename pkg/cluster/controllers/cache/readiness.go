@@ -2,7 +2,6 @@ package cache
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"math/rand"
 
@@ -23,13 +22,6 @@ import (
 // - ping redis server
 // - return redis properties if redis has available.
 func (rc *RedisController) Readiness(ctx context.Context, cluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
-	if checkResp, err := rc.CheckInClusterRedisHealth(ctx, cluster); err != nil {
-		rc.Log.Error(err, "Fail to check Redis.",
-			"namespace", cluster.Namespace, "name", cluster.Name, "checkResp", checkResp)
-
-		return cacheNotReadyStatus(ErrorCheckRedisHealth, err.Error()), err
-	}
-
 	rc.Log.Info("Redis already ready.",
 		"namespace", cluster.Namespace, "name", cluster.Name)
 
@@ -136,56 +128,6 @@ func (rc *RedisController) GetStatefulSetPods(name, namespace string) (*appsv1.S
 	}
 
 	return sts, pod, nil
-}
-
-// CheckInClusterRedisHealth checks in cluster redis health.
-func (rc *RedisController) CheckInClusterRedisHealth(ctx context.Context, cluster *v1alpha2.HarborCluster) (*lcm.CheckResponse, error) {
-	secret := rc.ResourceManager.GetSecret()
-
-	password, err := rc.GetRedisPassword(secret.Name, secret.Namespace)
-	if err != nil {
-		return nil, err
-	}
-
-	_, sentinelPodList, err := rc.GetDeploymentPods(rc.ResourceManager.GetCacheCRName(), cluster.Namespace)
-	if err != nil {
-		rc.Log.Error(err, "Fail to get deployment pods.")
-
-		return nil, err
-	}
-
-	_, redisPodList, err := rc.GetStatefulSetPods(rc.ResourceManager.GetCacheCRName(), cluster.Namespace)
-	if err != nil {
-		rc.Log.Error(err, "Fail to get deployment pods.")
-
-		return nil, err
-	}
-
-	if len(sentinelPodList.Items) == 0 || len(redisPodList.Items) == 0 {
-		rc.Log.Info("pod list is empty，pls wait.")
-
-		return nil, errors.New("pod list is empty，pls wait")
-	}
-
-	sentinelPodArray := sentinelPodList.Items
-	_, currentSentinelPods := rc.GetPodsStatus(sentinelPodArray)
-
-	if len(currentSentinelPods) == 0 {
-		return nil, errors.New("need to requeue")
-	}
-
-	endpoint := rc.GetSentinelServiceURL(rc.ResourceManager.GetCacheCRName(), cluster.Namespace, currentSentinelPods)
-	config := &lcm.ServiceConfig{
-		Endpoint: &lcm.Endpoint{
-			Host: endpoint,
-			Port: RedisSentinelConnPort,
-		},
-		Credentials: &lcm.Credentials{
-			AccessSecret: password,
-		},
-	}
-
-	return rc.HealthChecker().CheckHealth(ctx, config, lcm.WithSentinel(true))
 }
 
 // GetPodsStatus returns deleting  and current pod list.
