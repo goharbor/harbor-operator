@@ -46,10 +46,6 @@ type MinIOController struct {
 	ConfigStore           *configstore.Store
 }
 
-func (m *MinIOController) HealthChecker() lcm.HealthChecker {
-	return &HealthChecker{}
-}
-
 var HarborClusterMinIOGVK = schema.GroupVersionKind{
 	Group:   minio.SchemeGroupVersion.Group,
 	Version: minio.SchemeGroupVersion.Version,

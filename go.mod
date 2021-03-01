@@ -7,7 +7,6 @@ require (
 	github.com/Masterminds/semver v1.5.0 // indirect
 	github.com/Masterminds/sprig v2.22.0+incompatible
 	github.com/alicebob/miniredis/v2 v2.14.1
-	github.com/aws/aws-sdk-go v1.34.30
 	github.com/go-kit/kit v0.10.0
 	github.com/go-logr/logr v0.3.0
 	github.com/go-logr/zapr v0.3.0 // indirect
@@ -22,7 +21,6 @@ require (
 	github.com/markbates/pkger v0.15.1
 	github.com/minio/minio-go/v6 v6.0.57
 	github.com/mitchellh/reflectwalk v1.0.1 // indirect
-	github.com/ncw/swift v1.0.49
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/onsi/ginkgo v1.14.0
 	github.com/onsi/gomega v1.10.4
