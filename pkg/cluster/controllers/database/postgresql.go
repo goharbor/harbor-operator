@@ -35,10 +35,6 @@ type Connect struct {
 	Database string
 }
 
-func (p *PostgreSQLController) HealthChecker() lcm.HealthChecker {
-	return &PostgreSQLHealthChecker{}
-}
-
 func (p *PostgreSQLController) Apply(ctx context.Context, harborcluster *goharborv1alpha2.HarborCluster) (*lcm.CRStatus, error) {
 	p.DClient.WithContext(ctx)
 	p.Client.WithContext(ctx)

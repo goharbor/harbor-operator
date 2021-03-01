@@ -43,25 +43,14 @@ const (
 // - return postgre properties if postgre has available.
 func (p *PostgreSQLController) Readiness(ctx context.Context) (*lcm.CRStatus, error) {
 	var (
-		conn   *Connect
-		client *pgx.Conn
-		err    error
+		conn *Connect
+		err  error
 	)
 
 	name := p.HarborCluster.Name
 
-	conn, client, err = p.GetInClusterDatabaseInfo(ctx)
+	conn, _, err = p.GetInClusterDatabaseInfo(ctx)
 	if err != nil {
-		return nil, err
-	}
-
-	defer client.Close(ctx)
-
-	if err := client.Ping(ctx); err != nil {
-		p.Log.Error(err, "Fail to check Database.",
-			"namespace", p.HarborCluster.Namespace,
-			"name", p.HarborCluster.Name)
-
 		return nil, err
 	}
 
