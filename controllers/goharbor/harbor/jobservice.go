@@ -188,8 +188,9 @@ func (r *Reconciler) GetJobService(ctx context.Context, harbor *goharborv1alpha2
 			TokenService: goharborv1alpha2.JobServiceTokenSpec{
 				URL: serviceTokenURL,
 			},
-			SecretRef: secretRef,
-			TLS:       tls,
+			SecretRef:            secretRef,
+			TLS:                  tls,
+			CertificateInjection: harbor.Spec.JobService.CertificateInjection,
 		},
 	}, nil
 }

@@ -133,6 +133,12 @@ func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1al
 		Name:      LogsVolumeName,
 	}}
 
+	// inject s3 cert if need.
+	if jobservice.Spec.CertificateInjection.ShouldInject() {
+		volumes = append(volumes, jobservice.Spec.CertificateInjection.GenerateVolumes()...)
+		volumeMounts = append(volumeMounts, jobservice.Spec.CertificateInjection.GenerateVolumeMounts()...)
+	}
+
 	if jobservice.Spec.TLS.Enabled() {
 		envs = append(envs, corev1.EnvVar{
 			Name:  "INTERNAL_TLS_TRUST_CA_PATH",

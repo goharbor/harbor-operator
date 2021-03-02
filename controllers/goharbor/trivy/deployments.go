@@ -94,6 +94,12 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.
 		ReadOnly:  false,
 	}}
 
+	// inject s3 cert if need.
+	if trivy.Spec.CertificateInjection.ShouldInject() {
+		volumes = append(volumes, trivy.Spec.CertificateInjection.GenerateVolumes()...)
+		volumesMount = append(volumesMount, trivy.Spec.CertificateInjection.GenerateVolumeMounts()...)
+	}
+
 	for i, ref := range trivy.Spec.Server.TokenServiceCertificateAuthorityRefs {
 		volumeName := fmt.Sprintf("%s-%d", PublicCertificatesVolumeName, i)
 

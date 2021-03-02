@@ -159,6 +159,7 @@ func (r *Reconciler) GetTrivy(ctx context.Context, harbor *goharborv1alpha2.Harb
 				Skip:           harbor.Spec.Trivy.SkipUpdate,
 				GithubTokenRef: githubTokenRef,
 			},
+			CertificateInjection: harbor.Spec.Trivy.CertificateInjection,
 		},
 	}, nil
 }

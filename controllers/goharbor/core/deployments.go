@@ -129,6 +129,12 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 		SubPath:   strings.TrimLeft(corev1.TLSPrivateKeyKey, "/"),
 	}}
 
+	// inject certs if need.
+	if core.Spec.CertificateInjection.ShouldInject() {
+		volumes = append(volumes, core.Spec.CertificateInjection.GenerateVolumes()...)
+		volumeMounts = append(volumeMounts, core.Spec.CertificateInjection.GenerateVolumeMounts()...)
+	}
+
 	scheme := "http"
 	if core.Spec.Components.TLS.Enabled() {
 		scheme = "https"

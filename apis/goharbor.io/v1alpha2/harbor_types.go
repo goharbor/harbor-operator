@@ -2,6 +2,8 @@ package v1alpha2
 
 import (
 	"fmt"
+	"path"
+	"strings"
 
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	cmmeta "github.com/jetstack/cert-manager/pkg/apis/meta/v1"
@@ -209,12 +211,16 @@ func (r *HarborComponentsSpec) RedisConnection(component harbormetav1.ComponentW
 type CoreComponentSpec struct {
 	harbormetav1.ComponentSpec `json:",inline"`
 
+	CertificateInjection `json:",inline"`
+
 	// +kubebuilder:validation:Required
 	TokenIssuer cmmeta.ObjectReference `json:"tokenIssuer,omitempty"`
 }
 
 type JobServiceComponentSpec struct {
 	harbormetav1.ComponentSpec `json:",inline"`
+
+	CertificateInjection `json:",inline"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=1
@@ -245,6 +251,8 @@ type ChartMuseumComponentSpec struct {
 
 type TrivyComponentSpec struct {
 	harbormetav1.ComponentSpec `json:",inline"`
+
+	CertificateInjection `json:",inline"`
 
 	// +kubebuilder:validation:Optional
 	// The name of the secret containing the token to connect to GitHub API.
@@ -501,6 +509,49 @@ type HarborExposeIngressSpec struct {
 
 	// +kubebuilder:validation:Optional
 	Annotations map[string]string `json:"annotations,omitempty"`
+}
+
+// CertificateInjection defines the certs injection.
+type CertificateInjection struct {
+	// +kubebuilder:validation:Optional
+	CertificateRefs []string `json:"certificateRefs,omitempty"`
+}
+
+// ShouldInject returns whether should inject certs.
+func (ci CertificateInjection) ShouldInject() bool {
+	return len(ci.CertificateRefs) > 0
+}
+
+// GenerateVolumes generates volumes.
+func (ci CertificateInjection) GenerateVolumes() []corev1.Volume {
+	volumes := make([]corev1.Volume, 0, len(ci.CertificateRefs))
+	for _, ref := range ci.CertificateRefs {
+		volumes = append(volumes, corev1.Volume{
+			Name: fmt.Sprintf("%s-certifacts", ref),
+			VolumeSource: corev1.VolumeSource{
+				Secret: &corev1.SecretVolumeSource{
+					SecretName: ref,
+				},
+			},
+		})
+	}
+
+	return volumes
+}
+
+// GenerateVolumeMounts generates volumeMounts.
+func (ci CertificateInjection) GenerateVolumeMounts() []corev1.VolumeMount {
+	volumeMounts := make([]corev1.VolumeMount, 0, len(ci.CertificateRefs))
+	for _, ref := range ci.CertificateRefs {
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{
+			Name:      fmt.Sprintf("%s-certifacts", ref),
+			MountPath: path.Join("/harbor_cust_cert", fmt.Sprintf("%s.crt", ref)),
+			SubPath:   strings.TrimLeft(corev1.ServiceAccountRootCAKey, "/"),
+			ReadOnly:  true,
+		})
+	}
+
+	return volumeMounts
 }
 
 func init() { // nolint:gochecknoinits
