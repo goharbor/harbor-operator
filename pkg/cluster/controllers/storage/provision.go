@@ -65,8 +65,8 @@ func (m *MinIOController) getMinIOProperties(minioInstance *minio.Tenant) (*goha
 	var (
 		endpoint       string
 		certificateRef string
-		scheme         corev1.URIScheme
 
+		scheme     = corev1.URISchemeHTTP
 		secure     = false
 		v4Auth     = true
 		skipVerify = true
@@ -81,9 +81,7 @@ func (m *MinIOController) getMinIOProperties(minioInstance *minio.Tenant) (*goha
 			certificateRef = tls.CertificateRef
 		}
 
-		port := tls.GetInternalPort()
-
-		endpoint = fmt.Sprintf("%s://%s:%d", scheme, m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Redirect.Expose.Ingress.Host, port)
+		endpoint = fmt.Sprintf("%s://%s", scheme, m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Redirect.Expose.Ingress.Host)
 
 		storageSpec.S3.CertificateRef = certificateRef
 	} else {
