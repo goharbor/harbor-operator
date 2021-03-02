@@ -14,7 +14,6 @@ require (
 	github.com/google/go-cmp v0.5.1
 	github.com/huandu/xstrings v1.3.2 // indirect
 	github.com/imdario/mergo v0.3.10 // indirect
-	github.com/jackc/pgx/v4 v4.8.1
 	github.com/jaegertracing/jaeger-lib v2.2.0+incompatible
 	github.com/jetstack/cert-manager v1.1.0
 	github.com/markbates/pkger v0.15.1
