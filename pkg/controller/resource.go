@@ -16,7 +16,7 @@ import (
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	netv1 "k8s.io/api/networking/v1beta1"
+	netv1 "k8s.io/api/networking/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -190,7 +190,7 @@ func (c *Controller) AddServiceToManage(ctx context.Context, resource *corev1.Se
 	return res, g.AddResource(ctx, res, dependencies, c.ProcessFunc(ctx, resource, dependencies...))
 }
 
-func (c *Controller) AddBasicResource(ctx context.Context, resource resources.Resource, dependencies ...graph.Resource) (graph.Resource, error) {
+func (c *Controller) AddBasicResource(ctx context.Context, resource resources.Resource, dependencies ...graph.Resource) (*Resource, error) {
 	if resource == nil {
 		return nil, nil
 	}
@@ -321,6 +321,30 @@ func (c *Controller) AddIngressToManage(ctx context.Context, resource *netv1.Ing
 	res := &Resource{
 		mutable:   mutate,
 		checkable: statuscheck.BasicCheck,
+		resource:  resource,
+	}
+
+	g := sgraph.Get(ctx)
+	if g == nil {
+		return nil, errors.Errorf("no graph in current context")
+	}
+
+	return res, g.AddResource(ctx, res, dependencies, c.ProcessFunc(ctx, resource, dependencies...))
+}
+
+func (c *Controller) AddNetworkPolicyToManage(ctx context.Context, resource *netv1.NetworkPolicy, dependencies ...graph.Resource) (graph.Resource, error) {
+	if resource == nil {
+		return nil, nil
+	}
+
+	mutate, err := c.GlobalMutateFn(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	res := &Resource{
+		mutable:   mutate,
+		checkable: statuscheck.True,
 		resource:  resource,
 	}
 

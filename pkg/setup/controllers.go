@@ -11,8 +11,8 @@ import (
 	"github.com/goharbor/harbor-operator/controllers/goharbor/harbor"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/harborcluster"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/jobservice"
-	notaryserver "github.com/goharbor/harbor-operator/controllers/goharbor/notaryserver"
-	notarysigner "github.com/goharbor/harbor-operator/controllers/goharbor/notarysigner"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/notaryserver"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/notarysigner"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/portal"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/registry"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/registryctl"
@@ -28,7 +28,7 @@ const (
 	ControllerDisabledSuffixConfigKey = "controller-disabled"
 )
 
-var controllersBuilder = map[controllers.Controller]func(context.Context, string, *configstore.Store) (commonCtrl.Reconciler, error){
+var controllersBuilder = map[controllers.Controller]func(context.Context, *configstore.Store) (commonCtrl.Reconciler, error){
 	controllers.Core:                core.New,
 	controllers.Harbor:              harbor.New,
 	controllers.JobService:          jobservice.New,
@@ -52,7 +52,7 @@ type Controller interface {
 
 type controller struct {
 	Name controllers.Controller
-	New  func(context.Context, string, *configstore.Store) (commonCtrl.Reconciler, error)
+	New  func(context.Context, *configstore.Store) (commonCtrl.Reconciler, error)
 }
 
 func (c *controller) GetConfig(ctx context.Context) (*configstore.Store, error) {
@@ -68,7 +68,7 @@ func (c *controller) WithManager(ctx context.Context, mgr manager.Manager) error
 		return errors.Wrap(err, "get configuration")
 	}
 
-	controller, err := c.New(ctx, c.Name.String(), configStore)
+	controller, err := c.New(ctx, configStore)
 	if err != nil {
 		return errors.Wrap(err, "create")
 	}

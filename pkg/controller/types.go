@@ -9,5 +9,7 @@ import (
 
 type Reconciler interface {
 	reconcile.Reconciler
+
+	NormalizeName(context.Context, string, ...string) string
 	SetupWithManager(context.Context, manager.Manager) error
 }

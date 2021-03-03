@@ -55,5 +55,7 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrap(err, "deployment")
 	}
 
-	return nil
+	err = r.AddNetworkPolicies(ctx, trivy)
+
+	return errors.Wrap(err, "network policies")
 }

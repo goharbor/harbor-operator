@@ -4,13 +4,15 @@ go 1.14
 
 require (
 	cloud.google.com/go v0.58.0 // indirect
+	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver v1.5.0 // indirect
 	github.com/Masterminds/sprig v2.22.0+incompatible
+	github.com/docker/go v1.5.1-1 // indirect
 	github.com/go-kit/kit v0.10.0
 	github.com/go-logr/logr v0.3.0
 	github.com/go-logr/zapr v0.3.0 // indirect
 	github.com/go-redis/redis v6.15.9+incompatible
-	github.com/goharbor/harbor/src v0.0.0-20200728051037-1d361a89a056
+	github.com/goharbor/harbor/src v0.0.0-20210303054807-10ceaf5bc5ab
 	github.com/google/go-cmp v0.5.1
 	github.com/huandu/xstrings v1.3.2 // indirect
 	github.com/imdario/mergo v0.3.10 // indirect
@@ -31,6 +33,7 @@ require (
 	github.com/sethvargo/go-password v0.1.3
 	github.com/sirupsen/logrus v1.6.0
 	github.com/spotahome/redis-operator v1.0.0
+	github.com/theupdateframework/notary v0.6.1
 	github.com/uber/jaeger-client-go v2.24.0+incompatible
 	github.com/uber/jaeger-lib v2.2.0+incompatible
 	go.uber.org/multierr v1.6.0 // indirect

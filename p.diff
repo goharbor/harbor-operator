@@ -1,0 +1,337 @@
+diff --git a/go.sum b/go.sum
+index 5bd18745..cb4a6b31 100644
+--- a/go.sum
++++ b/go.sum
+@@ -450,6 +450,8 @@ github.com/gogo/protobuf v1.2.2-0.20190723190241-65acae22fc9d h1:3PaI8p3seN09Vjb
+ github.com/gogo/protobuf v1.2.2-0.20190723190241-65acae22fc9d/go.mod h1:SlYgWuQ5SjCEi6WLHjHCa1yvBfUnHcTbrrZtXPKa29o=
+ github.com/gogo/protobuf v1.3.1 h1:DqDEcV5aeaTmdFBePNpYsp3FlcVH/2ISVVM9Qf8PSls=
+ github.com/gogo/protobuf v1.3.1/go.mod h1:SlYgWuQ5SjCEi6WLHjHCa1yvBfUnHcTbrrZtXPKa29o=
++github.com/goharbor/harbor v1.10.6 h1:7mfEBxl0GvmGPRNxQSfj8jVbGBqNUz7+GpinzNMuscs=
++github.com/goharbor/harbor v2.2.0+incompatible h1:rCvcp9KRtTHeonw8XUh3NHxmPQZ31sGCG7skbaLekcc=
+ github.com/goharbor/harbor/src v0.0.0-20210303054807-10ceaf5bc5ab h1:DY++/ddgRujzTR1Hbd+GbakQRonbnWH3Wr3YBjVhJKE=
+ github.com/goharbor/harbor/src v0.0.0-20210303054807-10ceaf5bc5ab/go.mod h1:eM5xmHXBwyr++NZFPsCEyxT2y/59qTfxKubmTyPGMm4=
+ github.com/goji/httpauth v0.0.0-20160601135302-2da839ab0f4d/go.mod h1:nnjvkQ9ptGaCkuDUx6wNykzzlUixGxvkme+H/lnzb+A=
+diff --git a/manifests/cluster/deployment.yaml b/manifests/cluster/deployment.yaml
+index 2354285e..e701ca22 100644
+--- a/manifests/cluster/deployment.yaml
++++ b/manifests/cluster/deployment.yaml
+@@ -1431,6 +1431,10 @@ spec:
+                 enum:
+                 - db_auth
+                 type: string
++              certificateRefs:
++                items:
++                  type: string
++                type: array
+               components:
+                 properties:
+                   chartRepository:
+@@ -1637,7 +1641,6 @@ spec:
+                     type: string
+                 required:
+                 - encryptionKeyRef
+-                - hosts
+                 type: object
+               externalEndpoint:
+                 pattern: https?://.+
+@@ -2025,6 +2028,10 @@ spec:
+                 type: object
+               core:
+                 properties:
++                  certificateRefs:
++                    items:
++                      type: string
++                    type: array
+                   image:
+                     description: Image name for the component.
+                     type: string
+@@ -2302,6 +2309,9 @@ spec:
+                       bucket:
+                         description: The bucket name in which you want to store the registry’s data.
+                         type: string
++                      certificateRef:
++                        pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
++                        type: string
+                       chunksize:
+                         description: The S3 API requires multipart upload chunks to be at least 5MB.
+                         format: int64
+@@ -2627,9 +2637,45 @@ spec:
+                       redirect:
+                         description: Determine if the redirection of minio storage is disabled.
+                         properties:
+-                          disable:
+-                            description: Disable the redirect. Default is false
++                          enable:
++                            default: true
++                            description: Default is true
+                             type: boolean
++                          expose:
++                            properties:
++                              ingress:
++                                properties:
++                                  annotations:
++                                    additionalProperties:
++                                      type: string
++                                    type: object
++                                  controller:
++                                    allOf:
++                                    - enum:
++                                      - default
++                                      - gce
++                                      - ncp
++                                    - enum:
++                                      - gce
++                                      - ncp
++                                      - default
++                                    default: default
++                                    description: Set to the type of ingress controller.
++                                    type: string
++                                  host:
++                                    type: string
++                                required:
++                                - host
++                                type: object
++                              tls:
++                                properties:
++                                  certificateRef:
++                                    pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
++                                    type: string
++                                required:
++                                - certificateRef
++                                type: object
++                            type: object
+                         type: object
+                       replicas:
+                         description: Supply number of replicas. For standalone mode, supply 1. For distributed mode, supply 4 to 16 drives (should be even). Note that the operator does not support upgrading from standalone to distributed mode.
+@@ -2658,6 +2704,10 @@ spec:
+                             description: 'Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                             type: object
+                         type: object
++                      secretRef:
++                        description: Reference to the secret containing the MinIO access key and secret key.
++                        pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
++                        type: string
+                       volumeClaimTemplate:
+                         description: VolumeClaimTemplate allows a user to specify how volumes inside a MinIOInstance
+                         properties:
+@@ -2813,6 +2863,7 @@ spec:
+                         minimum: 1
+                         type: integer
+                     required:
++                    - redirect
+                     - replicas
+                     - volumesPerServer
+                     type: object
+@@ -2827,6 +2878,10 @@ spec:
+                 type: object
+               jobservice:
+                 properties:
++                  certificateRefs:
++                    items:
++                      type: string
++                    type: array
+                   image:
+                     description: Image name for the component.
+                     type: string
+@@ -3307,6 +3362,10 @@ spec:
+                 type: object
+               trivy:
+                 properties:
++                  certificateRefs:
++                    items:
++                      type: string
++                    type: array
+                   githubTokenRef:
+                     description: The name of the secret containing the token to connect to GitHub API.
+                     type: string
+@@ -3641,6 +3700,10 @@ spec:
+                 type: object
+               core:
+                 properties:
++                  certificateRefs:
++                    items:
++                      type: string
++                    type: array
+                   image:
+                     description: Image name for the component.
+                     type: string
+@@ -3918,6 +3981,9 @@ spec:
+                       bucket:
+                         description: The bucket name in which you want to store the registry’s data.
+                         type: string
++                      certificateRef:
++                        pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
++                        type: string
+                       chunksize:
+                         description: The S3 API requires multipart upload chunks to be at least 5MB.
+                         format: int64
+@@ -4064,6 +4130,10 @@ spec:
+                 type: object
+               jobservice:
+                 properties:
++                  certificateRefs:
++                    items:
++                      type: string
++                    type: array
+                   image:
+                     description: Image name for the component.
+                     type: string
+@@ -4544,6 +4614,10 @@ spec:
+                 type: object
+               trivy:
+                 properties:
++                  certificateRefs:
++                    items:
++                      type: string
++                    type: array
+                   githubTokenRef:
+                     description: The name of the secret containing the token to connect to GitHub API.
+                     type: string
+@@ -4791,6 +4865,10 @@ spec:
+           spec:
+             description: JobServiceSpec defines the desired state of JobService.
+             properties:
++              certificateRefs:
++                items:
++                  type: string
++                type: array
+               core:
+                 properties:
+                   secretRef:
+@@ -7148,8 +7226,6 @@ spec:
+                         description: PostgreSQL user name to connect as. Defaults to be the same as the operating system name of the user running the application.
+                         minLength: 1
+                         type: string
+-                    required:
+-                    - hosts
+                     type: object
+                 required:
+                 - postgres
+@@ -7450,8 +7526,6 @@ spec:
+                         description: PostgreSQL user name to connect as. Defaults to be the same as the operating system name of the user running the application.
+                         minLength: 1
+                         type: string
+-                    required:
+-                    - hosts
+                     type: object
+                 required:
+                 - aliasesRef
+@@ -9248,6 +9322,9 @@ spec:
+                           bucket:
+                             description: The bucket name in which you want to store the registry’s data.
+                             type: string
++                          certificateRef:
++                            pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
++                            type: string
+                           chunksize:
+                             description: The S3 API requires multipart upload chunks to be at least 5MB.
+                             format: int64
+@@ -9783,6 +9860,10 @@ spec:
+           spec:
+             description: TrivySpec defines the desired state of Trivy.
+             properties:
++              certificateRefs:
++                items:
++                  type: string
++                type: array
+               image:
+                 description: Image name for the component.
+                 type: string
+@@ -13429,6 +13510,18 @@ rules:
+   - patch
+   - update
+   - watch
++- apiGroups:
++  - networking.k8s.io
++  resources:
++  - networkpolicies
++  verbs:
++  - create
++  - delete
++  - get
++  - list
++  - patch
++  - update
++  - watch
+ ---
+ apiVersion: rbac.authorization.k8s.io/v1
+ kind: ClusterRole
+@@ -14368,7 +14461,7 @@ spec:
+         - mountPath: /tmp/k8s-webhook-server/serving-certs
+           name: cert
+           readOnly: true
+-        - mountPath: /etc/harbor-operator
++        - mountPath: /etc/harbor-operator/templates
+           name: configuration-templates
+           readOnly: true
+       securityContext:
+diff --git a/manifests/cluster/kustomization.yaml b/manifests/cluster/kustomization.yaml
+index 303ab5bc..4fb29729 100644
+--- a/manifests/cluster/kustomization.yaml
++++ b/manifests/cluster/kustomization.yaml
+@@ -6,17 +6,17 @@ namespace: harbor-operator-ns
+ 
+ # Common annotations
+ commonAnnotations:
+-  goharbor.io/operator-version: "v1.0.0"
+-  goharbor.io/deploy-mode: "cluster"
+-  goharbor.io/deploy-engine: "Kustomization"
++  goharbor.io/deploy-engine: Kustomization
++  goharbor.io/deploy-mode: cluster
++  goharbor.io/operator-version: v1.0.0
+ 
+ # All the referred deployment manifests
+ # NOTES: when doing changes to the ref versions, please also do same changes in the patch/annotation.yaml file
+ resources:
+-  - ../../config/default # harbor operator
+-  - https://raw.githubusercontent.com/spotahome/redis-operator/master/example/operator/all-redis-operator-resources.yaml?ref=v1.0.0 # redis operator
+-  - github.com/zalando/postgres-operator/manifests?ref=v1.5.0 # postgresql operator
+-  - github.com/minio/operator?ref=v3.0.13 # minIO storage operator
++- ../../config/default
++- https://raw.githubusercontent.com/spotahome/redis-operator/master/example/operator/all-redis-operator-resources.yaml?ref=v1.0.0
++- github.com/zalando/postgres-operator/manifests?ref=v1.5.0
++- github.com/minio/operator?ref=v3.0.13
+ 
+ # If you have to override the image path, uncomment this patch and also change the image paths in the patch/patches-images.yaml file.
+ # Then rebuild.
+@@ -24,22 +24,22 @@ resources:
+ # - patch/images.yaml
+ 
+ patchesJson6902:
+-  - target:
+-      kind: Namespace
+-      name: minio-operator
+-      version: v1
+-    path: patch/namespace.yaml
+-  - target:
+-      kind: Deployment
+-      name: harbor-operator
+-      group: apps
+-      version: v1
+-    path: patch/annotations.yaml # add version annotations to the harbor operator ctrl
++- path: patch/namespace.yaml
++  target:
++    kind: Namespace
++    name: minio-operator
++    version: v1
++- path: patch/annotations.yaml
++  target:
++    group: apps
++    kind: Deployment
++    name: harbor-operator
++    version: v1
+ 
+ images:
+-  - name: quay.io/spotahome/redis-operator
+-    newName: quay.io/spotahome/redis-operator
+-    newTag: v1.0.0
+-  - name: goharbor/harbor-operator
+-    newName: goharbor/harbor-operator
+-    newTag: dev_develop
+\ No newline at end of file
++- name: quay.io/spotahome/redis-operator
++  newName: quay.io/spotahome/redis-operator
++  newTag: v1.0.0
++- name: goharbor/harbor-operator
++  newName: goharbor/harbor-operator
++  newTag: dev_develop

@@ -44,13 +44,15 @@ func (c *Controller) EnsureSecretType(ctx context.Context, node graph.Resource) 
 
 	expectedSecretType := res.resource.(*corev1.Secret).Type
 
-	switch secret.Type { // nolint:exhaustive
+	// nolint:exhaustive
+	switch secret.Type {
 	default:
 		return errors.Wrapf(errSecretInvalidTyped, "got %s expected %s", secret.Type, expectedSecretType)
 	case res.resource.(*corev1.Secret).Type:
 		return nil
 	case corev1.SecretTypeOpaque:
-		switch expectedSecretType { // nolint:exhaustive
+		// nolint:exhaustive
+		switch expectedSecretType {
 		default:
 			return errors.Wrapf(errSecretInvalidTyped, "got %s expected %s", secret.Type, expectedSecretType)
 		case harbormetav1.SecretTypeRedis:

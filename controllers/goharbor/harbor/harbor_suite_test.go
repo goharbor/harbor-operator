@@ -47,7 +47,7 @@ func makeReconciler(ctx context.Context) *harbor.Reconciler {
 	configStore.Env(name)
 	configStore.InitFromEnvironment()
 
-	h, err := harbor.New(ctx, name, configStore)
+	h, err := harbor.New(ctx, configStore)
 	Expect(err).NotTo(HaveOccurred())
 
 	r := h.(*harbor.Reconciler)

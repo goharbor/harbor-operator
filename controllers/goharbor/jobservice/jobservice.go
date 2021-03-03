@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/pkg/config"
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
 	"github.com/goharbor/harbor-operator/pkg/event-filter/class"
@@ -23,7 +24,7 @@ const (
 
 const (
 	ConfigTemplatePathKey     = "template-path"
-	DefaultConfigTemplatePath = "/etc/harbor-operator/jobservice-config.yaml.tmpl"
+	DefaultConfigTemplatePath = "/etc/harbor-operator/templates/jobservice-config.yaml.tmpl"
 	ConfigTemplateKey         = "template-content"
 )
 
@@ -47,7 +48,7 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 
 	className, err := r.GetClassName(ctx)
 	if err != nil {
-		return errors.Wrap(err, "cannot get class name")
+		return errors.Wrap(err, "classname")
 	}
 
 	concurrentReconcile, err := r.ConfigStore.GetItemValueInt(config.ReconciliationKey)
@@ -80,14 +81,10 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 		Complete(r)
 }
 
-func New(ctx context.Context, name string, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
-	configTemplatePath, err := configStore.GetItemValue(ConfigTemplatePathKey)
+func New(ctx context.Context, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
+	configTemplatePath, err := config.GetString(configStore, ConfigTemplatePathKey, DefaultConfigTemplatePath)
 	if err != nil {
-		if !config.IsNotFound(err, ConfigTemplatePathKey) {
-			return nil, errors.Wrap(err, "cannot get config template path")
-		}
-
-		configTemplatePath = DefaultConfigTemplatePath
+		return nil, errors.Wrap(err, "template path")
 	}
 
 	r := &Reconciler{
@@ -97,14 +94,14 @@ func New(ctx context.Context, name string, configStore *configstore.Store) (comm
 	configStore.FileCustomRefresh(configTemplatePath, func(data []byte) ([]configstore.Item, error) {
 		r.configError = nil
 
-		logger.Get(ctx).WithName("controller").WithName(name).
+		logger.Get(ctx).WithName("controller").WithName(controllers.JobService.String()).
 			Info("config reloaded", "path", configTemplatePath)
 		// TODO reconcile all core
 
 		return []configstore.Item{configstore.NewItem(ConfigTemplateKey, string(data), config.DefaultPriority)}, nil
 	})
 
-	r.Controller = commonCtrl.NewController(ctx, name, r, configStore)
+	r.Controller = commonCtrl.NewController(ctx, controllers.JobService, r, configStore)
 
 	return r, nil
 }

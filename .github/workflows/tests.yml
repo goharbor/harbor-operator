@@ -91,7 +91,19 @@ jobs:
 
       - name: go tests
         run: |
-          make go-test
+          GO_TEST_OPTS='-p 1 -vet=off' make go-test
+
+      - name: fetch logs
+        if: ${{ failure() }}
+        run: |
+          mkdir  -p /tmp/logs
+          kind export logs --name harbor /tmp/logs
+
+      - uses: actions/upload-artifact@v2
+        if: ${{ failure() }}
+        with:
+          name: kind_go-tests
+          path: /tmp/logs
 
   harbor-tests:
     runs-on: ubuntu-latest
@@ -241,7 +253,7 @@ jobs:
     - uses: actions/upload-artifact@v2
       if: ${{ failure() }}
       with:
-        name: harbor
+        name: harbor_v${{ matrix.k8sVersion }}_v${{ matrix.certManager }}
         path: /tmp/harbor
 
     - name: fetch logs
@@ -253,7 +265,7 @@ jobs:
     - uses: actions/upload-artifact@v2
       if: ${{ failure() }}
       with:
-        name: kind
+        name: kind_v${{ matrix.k8sVersion }}_v${{ matrix.certManager }}
         path: /tmp/logs
 
     - name: Get logs for debug

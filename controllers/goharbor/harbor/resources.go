@@ -115,5 +115,10 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrapf(err, "cannot add %s ingress", controllers.NotaryServer)
 	}
 
+	err = r.AddNetworkPolicies(ctx, harbor)
+	if err != nil {
+		return errors.Wrapf(err, "network policies")
+	}
+
 	return nil
 }

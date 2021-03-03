@@ -13,6 +13,7 @@ import (
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
 	"github.com/goharbor/harbor-operator/pkg/factories/application"
 	"github.com/goharbor/harbor-operator/pkg/k8s"
+	"github.com/goharbor/harbor-operator/pkg/utils/strings"
 	"github.com/ovh/configstore"
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -92,13 +93,18 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 		Complete(r)
 }
 
+func (r *Reconciler) NormalizeName(ctx context.Context, name string, suffixes ...string) string {
+	suffixes = append([]string{"HarborCluster"}, suffixes...)
+
+	return strings.NormalizeName(name, suffixes...)
+}
+
 // New HarborCluster reconciler.
-func New(ctx context.Context, name string, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
+func New(ctx context.Context, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
 	return &Reconciler{
-		Name:        name,
 		Version:     application.GetVersion(ctx),
 		ConfigStore: configStore,
-		Log:         ctrl.Log.WithName(application.GetName(ctx)).WithName("controller").WithValues("controller", name),
+		Log:         ctrl.Log.WithName(application.GetName(ctx)).WithName("controller").WithValues("controller", "HarborCluster"),
 	}, nil
 }
 

@@ -3,6 +3,7 @@ package controller_test
 import (
 	"context"
 
+	"github.com/goharbor/harbor-operator/controllers"
 	. "github.com/goharbor/harbor-operator/pkg/controller"
 	"github.com/goharbor/harbor-operator/pkg/scheme"
 	. "github.com/onsi/ginkgo"
@@ -15,7 +16,7 @@ import (
 	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	netv1 "k8s.io/api/networking/v1beta1"
+	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
 	controllerruntime "sigs.k8s.io/controller-runtime"
@@ -55,7 +56,7 @@ var _ = Context("Adding", func() {
 		application.SetName(&setupCtx, "test-app")
 		application.SetVersion(&setupCtx, "test")
 
-		c = NewController(setupCtx, "test", nil, nil)
+		c = NewController(setupCtx, controllers.Controller(0), nil, nil)
 		scheme, err := scheme.New(setupCtx)
 		Expect(err).ToNot(HaveOccurred())
 
@@ -93,7 +94,7 @@ var _ = Context("Adding", func() {
 
 				Describe("An unknown resource", func() {
 					BeforeEach(func() {
-						c := NewController(ctx, "test", nil, nil)
+						c := NewController(ctx, controllers.Controller(0), nil, nil)
 						scheme, err := scheme.New(ctx)
 						Expect(err).ToNot(HaveOccurred())
 
