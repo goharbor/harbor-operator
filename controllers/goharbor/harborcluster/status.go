@@ -198,7 +198,8 @@ func (s *status) overallStatus() goharborv1.ClusterStatus {
 	}
 
 	// Totally ready
-	if ready == 4 {
+	const TotalDependencyNum = 4
+	if ready >= TotalDependencyNum {
 		return goharborv1.StatusHealthy
 	}
 

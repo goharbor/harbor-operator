@@ -17,8 +17,10 @@ linters:
   - dogsled
   - dupl
   - errcheck
+  - errorlint
   - exhaustive
   - exportloopref
+  - funlen
   - gci
   - gochecknoinits
   - gocognit
@@ -26,13 +28,16 @@ linters:
   - gocritic
   - gocyclo
   - godot
+#  - goerr113
   - gofmt
   - gofumpt
   - goheader
   - goimports
   - golint
+  - gomnd
   - gomodguard
   - goprintffuncname
+  - gosec
   - gosimple
   - govet
   - ineffassign
@@ -40,6 +45,7 @@ linters:
   - maligned
   - misspell
   - nakedret
+  - nestif
   - nlreturn
   - noctx
   - nolintlint
@@ -66,12 +72,12 @@ linters:
   - godox
   - paralleltest
   - wrapcheck
-  - errorlint
+#  - errorlint
   - goerr113
-  - gomnd
-  - nestif
-  - funlen
-  - gosec
+#  - gomnd
+#  - nestif
+#  - funlen
+#  - gosec
 
 service:
   golangci-lint-version: 1.33.x

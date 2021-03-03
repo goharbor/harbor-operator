@@ -240,11 +240,16 @@ func (m *MinIOController) generateIngress() (*netv1.Ingress, error) {
 	}, err
 }
 
-func (m *MinIOController) generateMinIOCR(ctx context.Context, harborcluster *goharborv1alpha2.HarborCluster) (*minio.Tenant, error) {
+func (m *MinIOController) generateMinIOCR(ctx context.Context, harborcluster *goharborv1alpha2.HarborCluster) (*minio.Tenant, error) { // nolint:funlen
 	image, err := m.GetImage(ctx, harborcluster)
 	if err != nil {
 		return nil, err
 	}
+
+	const (
+		LivenessDelay  = 120
+		LivenessPeriod = 60
+	)
 
 	return &minio.Tenant{
 		TypeMeta: metav1.TypeMeta{
@@ -301,8 +306,8 @@ func (m *MinIOController) generateMinIOCR(ctx context.Context, harborcluster *go
 				},
 			},
 			Liveness: &minio.Liveness{
-				InitialDelaySeconds: 120,
-				PeriodSeconds:       60,
+				InitialDelaySeconds: LivenessDelay,
+				PeriodSeconds:       LivenessPeriod,
 			},
 		},
 	}, nil
@@ -313,7 +318,7 @@ func (m *MinIOController) getServiceName() string {
 }
 
 func (m *MinIOController) getServicePort() int32 {
-	return 9000
+	return DefaultServicePort
 }
 
 func (m *MinIOController) getResourceRequirements() *corev1.ResourceRequirements {
@@ -386,7 +391,7 @@ func (m *MinIOController) generateService() *corev1.Service {
 				{
 					Name:       "minio",
 					Port:       m.getServicePort(),
-					TargetPort: intstr.FromInt(9000),
+					TargetPort: intstr.FromInt(DefaultServicePort),
 					Protocol:   corev1.ProtocolTCP,
 				},
 			},
@@ -395,8 +400,9 @@ func (m *MinIOController) generateService() *corev1.Service {
 }
 
 func (m *MinIOController) generateCredsSecret() *corev1.Secret {
-	credsAccesskey := common.RandomString(8, "a")
-	credsSecretkey := common.RandomString(8, "a")
+	const SecretLen = 8
+	credsAccesskey := common.RandomString(SecretLen, "a")
+	credsSecretkey := common.RandomString(SecretLen, "a")
 
 	return &corev1.Secret{
 		TypeMeta: metav1.TypeMeta{

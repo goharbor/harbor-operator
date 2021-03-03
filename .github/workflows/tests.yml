@@ -9,6 +9,7 @@ on:
     - master
     - release-*
     - develop
+    - feature/*
 
 jobs:
   # Dockerfile tests
