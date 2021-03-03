@@ -186,7 +186,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.
 		Value: address,
 	})
 
-	return &appsv1.Deployment{
+	deploy := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        name,
 			Namespace:   namespace,
@@ -239,7 +239,11 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.
 				},
 			},
 		},
-	}, nil
+	}
+
+	trivy.Spec.ComponentSpec.ApplyToDeployment(deploy)
+
+	return deploy, nil
 }
 
 func (r *Reconciler) getProbe(ctx context.Context, trivy *goharborv1alpha2.Trivy, probePath string) *corev1.Probe {
