@@ -204,7 +204,7 @@ func (s *status) overallStatus() goharborv1.ClusterStatus {
 	}
 
 	// Any related components are unhealthy, cluster should be marked as unhealthy
-	if unready > 1 {
+	if unready >= 1 {
 		return goharborv1.StatusUnHealthy
 	}
 

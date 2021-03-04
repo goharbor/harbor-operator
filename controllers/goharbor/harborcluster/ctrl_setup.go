@@ -9,17 +9,29 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/database"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/harbor"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage"
+	minio "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/api/v1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
 	"github.com/goharbor/harbor-operator/pkg/factories/application"
 	"github.com/goharbor/harbor-operator/pkg/k8s"
 	"github.com/ovh/configstore"
+	redisOp "github.com/spotahome/redis-operator/api/redisfailover/v1"
+	postgresv1 "github.com/zalando/postgres-operator/pkg/apis/acid.zalan.do/v1"
+	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions"
 	"k8s.io/apimachinery/pkg/api/equality"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/dynamic"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
+)
+
+const (
+	minioCRD    = "tenants.minio.min.io"
+	redisCRD    = "redisfailovers.databases.spotahome.com"
+	postgresCRD = "postgresqls.acid.zalan.do"
 )
 
 // TODO: Refactor to inherit the common reconciler in future
@@ -49,6 +61,7 @@ type Reconciler struct {
 // +kubebuilder:rbac:groups="",resources=pods,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=apps,resources=statefulsets;deployments,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=goharbor.io,resources=harbors,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=apiextensions.k8s.io,resources=customresourcedefinitions,verbs=get;list
 
 func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) error {
 	r.Client = mgr.GetClient()
@@ -86,10 +99,24 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 		k8s.WithScheme(mgr.GetScheme()),
 		k8s.WithClient(k8s.WrapClient(ctx, mgr.GetClient())))
 
-	return ctrl.NewControllerManagedBy(mgr).
+	builder := ctrl.NewControllerManagedBy(mgr).
 		For(&goharborv1alpha2.HarborCluster{}).
-		WithEventFilter(harborClusterPredicateFuncs).
-		Complete(r)
+		Owns(&goharborv1alpha2.Harbor{}).
+		WithEventFilter(harborClusterPredicateFuncs)
+
+	if r.CRDInstalled(ctx, dClient, minioCRD) {
+		builder.Owns(&minio.Tenant{})
+	}
+
+	if r.CRDInstalled(ctx, dClient, postgresCRD) {
+		builder.Owns(&postgresv1.Postgresql{})
+	}
+
+	if r.CRDInstalled(ctx, dClient, redisCRD) {
+		builder.Owns(&redisOp.RedisFailover{})
+	}
+
+	return builder.Complete(r)
 }
 
 // New HarborCluster reconciler.
@@ -122,4 +149,15 @@ var harborClusterPredicateFuncs = predicate.Funcs{
 
 		return true
 	},
+}
+
+func (r *Reconciler) CRDInstalled(ctx context.Context, client dynamic.Interface, crdName string) bool {
+	_, err := client.Resource(apiextensions.Resource("customresourcedefinitions").WithVersion("v1")).Get(ctx, crdName, metav1.GetOptions{})
+	if err != nil {
+		r.Log.Error(err, "check crd installed err", "crd", crdName)
+
+		return false
+	}
+
+	return true
 }
