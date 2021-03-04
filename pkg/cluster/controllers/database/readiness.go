@@ -35,6 +35,8 @@ const (
 	ClairSecretName        = "clair"
 	NotaryServerSecretName = "notary-server"
 	NotarySignerSecretName = "notary-signer"
+
+	PsqlRunningStatus = "Running"
 )
 
 // Readiness reconcile will check postgre sql cluster if that has available.
@@ -55,31 +57,35 @@ func (p *PostgreSQLController) Readiness(ctx context.Context) (*lcm.CRStatus, er
 		return nil, err
 	}
 
+	properties := &lcm.Properties{}
+	crStatus := lcm.New(goharborv1alpha2.DatabaseReady).WithProperties(*properties)
+
 	var pg api.Postgresql
 	if err := runtime.DefaultUnstructuredConverter.
 		FromUnstructured(p.ActualCR.UnstructuredContent(), &pg); err != nil {
 		return nil, err
 	}
 
-	if pg.Status.PostgresClusterStatus != "Running" {
-		return nil, errors.New("database is not ready")
+	if pg.Status.PostgresClusterStatus != PsqlRunningStatus {
+		crStatus.WithStatus(corev1.ConditionFalse).
+			WithReason("database is not ready").
+			WithMessage(fmt.Sprintf("psql is %s", pg.Status.PostgresClusterStatus))
+
+		return crStatus, nil
 	}
 
-	p.Log.Info("Database already ready.",
+	p.Log.Info("database is ready.",
 		"namespace", p.HarborCluster.Namespace,
 		"name", p.HarborCluster.Name)
-
-	properties := &lcm.Properties{}
 
 	if err := p.DeployComponentSecret(conn, getDatabasePasswordRefName(name)); err != nil {
 		return nil, err
 	}
 
 	addProperties(name, conn, properties)
-
-	crStatus := lcm.New(goharborv1alpha2.DatabaseReady).
+	crStatus = lcm.New(goharborv1alpha2.DatabaseReady).
 		WithStatus(corev1.ConditionTrue).
-		WithReason("database already ready").
+		WithReason("database is ready").
 		WithMessage("harbor component database secrets are already create.").
 		WithProperties(*properties)
 
