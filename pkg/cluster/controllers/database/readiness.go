@@ -7,11 +7,12 @@ import (
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/database/api"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
-	"github.com/jackc/pgx/v4"
 	corev1 "k8s.io/api/core/v1"
 	kerr "k8s.io/apimachinery/pkg/api/errors"
 	labels1 "k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -49,9 +50,19 @@ func (p *PostgreSQLController) Readiness(ctx context.Context) (*lcm.CRStatus, er
 
 	name := p.HarborCluster.Name
 
-	conn, _, err = p.GetInClusterDatabaseInfo(ctx)
+	conn, err = p.GetInClusterDatabaseInfo()
 	if err != nil {
 		return nil, err
+	}
+
+	var pg api.Postgresql
+	if err := runtime.DefaultUnstructuredConverter.
+		FromUnstructured(p.ActualCR.UnstructuredContent(), &pg); err != nil {
+		return nil, err
+	}
+
+	if pg.Status.PostgresClusterStatus != "Running" {
+		return nil, errors.New("database is not ready")
 	}
 
 	p.Log.Info("Database already ready.",
@@ -124,32 +135,22 @@ func (p *PostgreSQLController) DeployComponentSecret(conn *Connect, secretName s
 }
 
 // GetInClusterDatabaseInfo returns inCluster database connection client.
-func (p *PostgreSQLController) GetInClusterDatabaseInfo(ctx context.Context) (*Connect, *pgx.Conn, error) {
+func (p *PostgreSQLController) GetInClusterDatabaseInfo() (*Connect, error) {
 	var (
 		connect *Connect
-		client  *pgx.Conn
 		err     error
 	)
 
 	pw, err := p.GetInClusterDatabasePassword()
 	if err != nil {
-		return connect, client, err
+		return connect, err
 	}
 
 	if connect, err = p.GetInClusterDatabaseConn(p.resourceName(), pw); err != nil {
-		return connect, client, err
+		return connect, err
 	}
 
-	url := connect.GenDatabaseURL()
-
-	client, err = pgx.Connect(ctx, url)
-	if err != nil {
-		p.Log.Error(err, "Unable to connect to database")
-
-		return connect, client, err
-	}
-
-	return connect, client, nil
+	return connect, nil
 }
 
 // GetInClusterDatabaseConn returns inCluster database connection info.
