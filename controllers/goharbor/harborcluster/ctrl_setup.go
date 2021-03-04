@@ -27,6 +27,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 )
 
+const (
+	minioCRD    = "tenants.minio.min.io"
+	redisCRD    = "redisfailovers.databases.spotahome.com"
+	postgresCRD = "postgresqls.acid.zalan.do"
+)
+
 // TODO: Refactor to inherit the common reconciler in future
 // Reconciler reconciles a HarborCluster object.
 type Reconciler struct {
@@ -97,17 +103,16 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 		Owns(&goharborv1alpha2.Harbor{}).
 		WithEventFilter(harborClusterPredicateFuncs)
 
-	if r.CRDInstalled(ctx, dClient, "tenants.minio.min.io") {
+	if r.CRDInstalled(ctx, dClient, minioCRD) {
 		builder.Owns(&minio.Tenant{})
 	}
 
-	if r.CRDInstalled(ctx, dClient, "postgresqls.acid.zalan.do") {
+	if r.CRDInstalled(ctx, dClient, postgresCRD) {
 		builder.Owns(&postgresv1.Postgresql{})
 	}
 
-	if r.CRDInstalled(ctx, dClient, "redisfailovers.databases.spotahome.com") {
+	if r.CRDInstalled(ctx, dClient, redisCRD) {
 		builder.Owns(&redisOp.RedisFailover{})
-
 	}
 
 	return builder.Complete(r)
@@ -146,10 +151,12 @@ var harborClusterPredicateFuncs = predicate.Funcs{
 }
 
 func (r *Reconciler) CRDInstalled(ctx context.Context, client dynamic.Interface, crdName string) bool {
-	_, err := client.Resource(apiextensions.Resource("customresourcedefinitions").WithVersion("v1")).Get(ctx, "tenants.minio.min.io", metav1.GetOptions{})
+	_, err := client.Resource(apiextensions.Resource("customresourcedefinitions").WithVersion("v1")).Get(ctx, crdName, metav1.GetOptions{})
 	if err != nil {
 		r.Log.Error(err, "check crd installed err", "crd", crdName)
+
 		return false
 	}
+
 	return true
 }
