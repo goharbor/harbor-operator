@@ -9,6 +9,8 @@ import (
 	certv1alpha2 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	certv1beta1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1beta1"
 	"github.com/pkg/errors"
+	redisfailoverv1 "github.com/spotahome/redis-operator/api/redisfailover/v1"
+	postgresv1 "github.com/zalando/postgres-operator/pkg/apis/acid.zalan.do/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 )
@@ -39,6 +41,16 @@ func New(ctx context.Context) (*runtime.Scheme, error) {
 	err = goharborv1alpha2.AddToScheme(scheme)
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to configure Harbor scheme")
+	}
+
+	err = redisfailoverv1.AddToScheme(scheme)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to configure redis failover scheme")
+	}
+
+	err = postgresv1.AddToScheme(scheme)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to configure postgres scheme")
 	}
 
 	err = minio.AddToScheme(scheme)
