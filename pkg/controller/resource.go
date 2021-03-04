@@ -320,7 +320,7 @@ func (c *Controller) AddIngressToManage(ctx context.Context, resource *netv1.Ing
 
 	res := &Resource{
 		mutable:   mutate,
-		checkable: statuscheck.BasicCheck,
+		checkable: statuscheck.True,
 		resource:  resource,
 	}
 
