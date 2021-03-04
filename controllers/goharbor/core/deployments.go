@@ -33,22 +33,24 @@ var (
 )
 
 const (
-	healthCheckPeriod                     = 90 * time.Second
-	ConfigPath                            = "/etc/core"
-	VolumeName                            = "configuration"
-	InternalCertificatesVolumeName        = "internal-certificates"
-	InternalCertificateAuthorityDirectory = "/harbor_cust_cert"
-	InternalCertificatesPath              = ConfigPath + "/ssl"
-	PermittedRegistryTypesForProxyCache   = "docker-hub,harbor"
-	PublicCertificateVolumeName           = "ca-download"
-	PublicCertificatePath                 = ConfigPath + "/ca"
-	EncryptionKeyVolumeName               = "encryption"
-	EncryptionKeyPath                     = "key"
-	HealthPath                            = "/api/v2.0/ping"
-	TokenStorageVolumeName                = "psc"
-	TokenStoragePath                      = ConfigPath + "/token"
-	ServiceTokenCertificateVolumeName     = "token-service-private-key"
-	ServiceTokenCertificatePath           = ConfigPath + "/private_key.pem"
+	healthCheckPeriod                        = 90 * time.Second
+	ConfigPath                               = "/etc/core"
+	VolumeName                               = "configuration"
+	InternalCertificatesVolumeName           = "internal-certificates"
+	InternalCertificateAuthorityDirectory    = "/harbor_cust_cert"
+	InternalCertificatesPath                 = ConfigPath + "/ssl"
+	DockerHubRegistryTypesForProxyCache      = "docker-hub"
+	HarborRegistryTypesForProxyCache         = "harbor"
+	DefaultAllowedRegistryTypesForProxyCache = DockerHubRegistryTypesForProxyCache + "," + HarborRegistryTypesForProxyCache
+	PublicCertificateVolumeName              = "ca-download"
+	PublicCertificatePath                    = ConfigPath + "/ca"
+	EncryptionKeyVolumeName                  = "encryption"
+	EncryptionKeyPath                        = "key"
+	HealthPath                               = "/api/v2.0/ping"
+	TokenStorageVolumeName                   = "psc"
+	TokenStoragePath                         = ConfigPath + "/token"
+	ServiceTokenCertificateVolumeName        = "token-service-private-key"
+	ServiceTokenCertificatePath              = ConfigPath + "/private_key.pem"
 )
 
 const (
@@ -289,7 +291,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 		Value: strconv.FormatBool(core.Spec.Components.TLS.Enabled()),
 	}, {
 		Name:  "PERMITTED_REGISTRY_TYPES_FOR_PROXY_CACHE",
-		Value: PermittedRegistryTypesForProxyCache,
+		Value: DefaultAllowedRegistryTypesForProxyCache,
 	}}...)
 
 	if core.Spec.Database.MaxIdleConnections != nil {
