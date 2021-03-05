@@ -27,12 +27,6 @@ webhooks:
     resources:
     - harbors
   sideEffects: None
-- clientConfig:
-    service:
-      name: {{ include "chart.fullname" . | quote }}
-      namespace: {{ .Release.Namespace | quote }}
-      port: {{ .Values.service.port }}
-  name: mjobservice.kb.io
 - admissionReviewVersions:
   - v1beta1
   clientConfig:

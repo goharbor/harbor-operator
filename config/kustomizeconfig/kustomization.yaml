@@ -4,6 +4,7 @@ configurations:
 - chartmuseum.yaml
 - core.yaml
 - harbor.yaml
+- harborcluster.yaml
 - jobservice.yaml
 - portal.yaml
 - registry.yaml
