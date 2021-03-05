@@ -2,10 +2,12 @@ apiVersion: goharbor.io/v1alpha2
 kind: HarborCluster
 metadata:
   name: harborcluster-sample
-  namespace: cluster-sample-ns
 spec:
+  logLevel: info
+  imageSource:
+    repository: quay.io/goharbor
   harborAdminPasswordRef: admin-core-secret
-  externalURL: https://sample.harbor.domain
+  externalURL: https://core.harbor.domain
   redis:
     host: harbor-redis-master
     port: 6379
@@ -20,7 +22,12 @@ spec:
   expose:
     core:
       ingress:
-        host: sample.harbor.domain
+        host: core.harbor.domain
+      tls:
+        certificateRef: sample-public-certificate
+    notary:
+      ingress:
+        host: notary.harbor.domain
       tls:
         certificateRef: sample-public-certificate
   encryptionKeyRef: core-database-encryption
@@ -32,52 +39,19 @@ spec:
     tokenIssuer:
       name: service-token
       kind: Issuer
+  trivy:
+    skipUpdate: false
+    storage:
+      reportsPersistentVolume:
+        claimName: sample-harbor-trivy-reports
+      cachePersistentVolume:
+        claimName: sample-harbor-trivy-cache
+  chartmuseum: {}
+  notary:
+    migrationEnabled: true
   imageChartStorage:
     filesystem:
       registryPersistentVolume:
         claimName: sample-harbor-registry
-  inClusterDatabase:
-    kind: PostgresSQL
-    postgresSqlSpec:
-      storage: 1Gi
-      replicas: 2
-      version: "12"
-      resources:
-        limits:
-          cpu: 500m
-          memory: 500Mi
-        requests:
-          cpu: 100m
-          memory: 250Mi
-  inClusterStorage:
-    kind: MinIO
-    minIOSpec:
-      replicas: 2
-      volumesPerServer: 2
-      version: RELEASE.2020-08-13T02-39-50Z
-      volumeClaimTemplate:
-        spec:
-          accessModes:
-            - ReadWriteOnce
-          resources:
-            requests:
-              storage: 10Gi
-      resources:
-        requests:
-          memory: 1Gi
-          cpu: 500m
-        limits:
-          memory: 1Gi
-          cpu: 1000m
-  inClusterCache:
-    kind: Redis
-    redisSpec:
-      server:
-        replicas: 1
-        resources:
-          limits:
-            cpu: 500m
-            memory: 500Mi
-          requests:
-            cpu: 100m
-            memory: 250Mi
+      chartPersistentVolume:
+        claimName: sample-harbor-chart
