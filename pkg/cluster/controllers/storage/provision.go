@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"strings"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
@@ -88,7 +89,7 @@ func (m *MinIOController) getMinIOProperties(minioInstance *minio.Tenant) (*goha
 		endpoint = fmt.Sprintf("http://%s.%s.svc:%s", m.getServiceName(), m.HarborCluster.Namespace, "9000")
 	}
 
-	storageSpec.S3.RegionEndpoint = endpoint
+	storageSpec.S3.RegionEndpoint = strings.ToLower(endpoint)
 	storageSpec.S3.Secure = &secure
 	storageSpec.S3.V4Auth = &v4Auth
 	storageSpec.S3.SkipVerify = skipVerify

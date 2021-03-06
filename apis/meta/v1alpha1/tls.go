@@ -28,7 +28,7 @@ func (r ComponentWithTLS) GetName() string {
 type ComponentsTLSSpec struct {
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
-	CertificateRef string `json:"certificateRef"`
+	CertificateRef string `json:"certificateRef,omitempty"`
 }
 
 func (tls *ComponentsTLSSpec) Enabled() bool {
