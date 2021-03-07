@@ -32,18 +32,6 @@ func (m *MinIOController) checkRedirectUpdate() (bool, error) {
 
 	desiredingress, err := m.generateIngress()
 
-	if currntIngress.Spec.Rules[0].Host != desiredingress.Spec.Rules[0].Host {
-		return true, err
-	}
-
-	if currntIngress.Spec.Rules[0].IngressRuleValue.HTTP.Paths[0] != desiredingress.Spec.Rules[0].IngressRuleValue.HTTP.Paths[0] {
-		return true, err
-	}
-
-	if currntIngress.Spec.TLS[0].Hosts[0] != desiredingress.Spec.TLS[0].Hosts[0] {
-		return true, err
-	}
-
 	if !equality.Semantic.DeepEqual(currntIngress.DeepCopy().Spec, desiredingress.DeepCopy().Spec) {
 		return true, err
 	}
