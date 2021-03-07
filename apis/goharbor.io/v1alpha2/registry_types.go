@@ -710,7 +710,7 @@ type RegistryStorageDriverS3Spec struct {
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
-	CertificateRef string `json:"certificateRef"`
+	CertificateRef string `json:"certificateRef,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
