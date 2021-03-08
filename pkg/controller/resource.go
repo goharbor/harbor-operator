@@ -17,6 +17,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
+	netv1beta1 "k8s.io/api/networking/v1beta1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -304,7 +305,7 @@ func (c *Controller) AddIssuerToManage(ctx context.Context, resource *certv1.Iss
 	return res, g.AddResource(ctx, res, dependencies, c.ProcessFunc(ctx, resource, dependencies...))
 }
 
-func (c *Controller) AddIngressToManage(ctx context.Context, resource *netv1.Ingress, dependencies ...graph.Resource) (graph.Resource, error) {
+func (c *Controller) AddIngressToManage(ctx context.Context, resource *netv1beta1.Ingress, dependencies ...graph.Resource) (graph.Resource, error) {
 	if resource == nil {
 		return nil, nil
 	}
