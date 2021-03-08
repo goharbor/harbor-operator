@@ -6,6 +6,7 @@ import (
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/harbor"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -26,7 +27,7 @@ var _ = Describe("Harbor", func() {
 	)
 
 	BeforeEach(func() {
-		ctx = makeContext()
+		ctx = test.NewContext()
 
 		r = makeReconciler(ctx)
 

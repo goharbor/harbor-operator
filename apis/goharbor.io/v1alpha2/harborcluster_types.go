@@ -148,6 +148,9 @@ type MinIOSpec struct {
 
 // HarborClusterStatus defines the observed state of HarborCluster.
 type HarborClusterStatus struct {
+	// +kubebuilder:validation:Optional
+	Operator harbormetav1.OperatorStatus `json:"operator,omitempty"`
+
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 	// Status indicates the overall status of the Harbor cluster
@@ -201,7 +204,7 @@ type HarborClusterCondition struct {
 	Status corev1.ConditionStatus `json:"status"`
 	// Last time the condition transitioned from one status to another.
 	// +optional
-	LastTransitionTime metav1.Time `json:"lastTransitionTime,omitempty"`
+	LastTransitionTime *metav1.Time `json:"lastTransitionTime,omitempty"`
 	// Unique, one-word, CamelCase reason for the condition's last transition.
 	// +optional
 	Reason string `json:"reason,omitempty"`
@@ -232,6 +235,8 @@ const (
 // +kubebuilder:printcolumn:name="Cache Ready",type=string,JSONPath=`.status.conditions[?(@.type=="CacheReady")].status`,description="The current status of the new Cache spec",priority=20
 // +kubebuilder:printcolumn:name="Database Ready",type=string,JSONPath=`.status.conditions[?(@.type=="DatabaseReady")].status`,description="The current status of the new Database spec",priority=20
 // +kubebuilder:printcolumn:name="Storage Ready",type=string,JSONPath=`.status.conditions[?(@.type=="StorageReady")].status`,description="The current status of the new Storage spec",priority=20
+// +kubebuilder:printcolumn:name="Operator Version",type=string,JSONPath=`.status.operator.controllerVersion`,description="The operator version ",priority=30
+// +kubebuilder:printcolumn:name="Operator Git Commit",type=string,JSONPath=`.status.operator.controllerGitCommit`,description="The operator git commit",priority=30
 // HarborCluster is the Schema for the harborclusters API.
 type HarborCluster struct {
 	metav1.TypeMeta   `json:",inline"`

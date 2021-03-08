@@ -45,7 +45,7 @@ spec:
   dnsNames:
     - core.harbor.domain
     - notary.harbor.domain
-    - minio.core.harbor.domain
+    - minio.harbor.domain
   issuerRef:
     name: selfsigned-issuer
     kind: Issuer
@@ -100,6 +100,8 @@ spec:
         expose:
           ingress:
             host: minio.harbor.domain
+          tls:
+            certificateRef: sample-public-certificate
       volumesPerServer: 2
       volumeClaimTemplate:
         spec:

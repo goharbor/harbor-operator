@@ -38,6 +38,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
+        GIT_COMMIT: ${{ github.sha }}
 
   docker:
     runs-on: ubuntu-latest
@@ -47,7 +48,7 @@ jobs:
         run: |
           mkdir ./target
           echo -n "${GITHUB_REF##refs/*/}" > ./target/TAG_NAME
-          make dist/harbor-operator_linux_amd64/manager
+          make dist/harbor-operator_linux_amd64/manager GIT_COMMIT=${{ github.sha }}
       - name: Docker Build & Push to Docker Hub
         uses: opspresso/action-docker@master
         with:

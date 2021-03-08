@@ -69,6 +69,7 @@ var _ = BeforeSuite(func(done Done) {
 
 	application.SetName(&ctx, "test-app")
 	application.SetVersion(&ctx, version)
+	application.SetGitCommit(&ctx, "test")
 
 	By("bootstrapping test environment")
 	testEnv = &envtest.Environment{}

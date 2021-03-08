@@ -217,9 +217,10 @@ func (r *Reconciler) getHarborClient(ctx context.Context, cluster *v1alpha2.Harb
 
 // UpdateStatus updates harbor cluster status.
 func (r *Reconciler) UpdateStatus(ctx context.Context, err error, cluster *v1alpha2.HarborCluster) error {
+	now := metav1.Now()
 	cond := v1alpha2.HarborClusterCondition{
 		Type:               v1alpha2.ConfigurationReady,
-		LastTransitionTime: metav1.Now(),
+		LastTransitionTime: &now,
 	}
 
 	if err != nil {

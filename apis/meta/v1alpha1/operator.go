@@ -5,6 +5,10 @@ package v1alpha1
 type OperatorStatus struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:MinLength=1
+	ControllerGitCommit string `json:"controllerGitCommit,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:MinLength=1
 	ControllerVersion string `json:"controllerVersion,omitempty"`
 
 	// +kubebuilder:validation:Required

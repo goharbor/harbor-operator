@@ -67,6 +67,18 @@ jobs:
     name: Go tests
     env:
       USE_EXISTING_CLUSTER: true
+      CORE_DOCKER_IMAGE_2_1_2: quay.io/goharbor/harbor-core:v2.1.2
+      JOBSERVICE_DOCKER_IMAGE_2_1_2: quay.io/goharbor/harbor-jobservice:v2.1.2
+      PORTAL_DOCKER_IMAGE_2_1_2: quay.io/goharbor/harbor-portal:v2.1.2
+      REGISTRYCTL_DOCKER_IMAGE_2_1_2: quay.io/goharbor/harbor-registryctl:v2.1.2
+      REGISTRY_DOCKER_IMAGE_2_1_2: quay.io/goharbor/registry-photon:v2.1.2
+      CHARTMUSEUM_DOCKER_IMAGE_2_1_2: quay.io/goharbor/chartmuseum-photon:v2.1.2
+      NOTARYSERVER_DOCKER_IMAGE_2_1_2: quay.io/goharbor/notary-server-photon:v2.1.2
+      NOTARYSIGNER_DOCKER_IMAGE_2_1_2: quay.io/goharbor/notary-signer-photon:v2.1.2
+      TRIVY_DOCKER_IMAGE_2_1_2: quay.io/goharbor/trivy-adapter-photon:v2.1.2
+      HARBORCLUSTER_MINIO_DOCKER_IMAGE_2_1_2: quay.io/goharbor/minio:RELEASE.2020-08-13T02-39-50Z
+      HARBORCLUSTER_REDIS_DOCKER_IMAGE_2_1_2: quay.io/goharbor/redis:5.0-alpine
+      HARBORCLUSTER_POSTGRESQL_DOCKER_IMAGE_2_1_2: quay.io/goharbor/spilo-12:1.6-p3
       dockerImage: harbor-operator:dev_test
     steps:
       - uses: actions/checkout@v2
@@ -74,6 +86,20 @@ jobs:
       - uses: actions/setup-go@v2
         with:
           go-version: 1.14
+
+      - name: Cache go mod
+        uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Prepare memory storage for etcd of kind cluster
+        run: |
+          # Use memory storage for etcd of the kind cluster, see https://github.com/kubernetes-sigs/kind/issues/845 for more info
+          mkdir -p /tmp/lib/etcd
+          sudo mount -t tmpfs tmpfs /tmp/lib/etcd
 
       - name: Install Kubernetes
         uses: helm/kind-action@v1.1.0
@@ -125,6 +151,24 @@ jobs:
       with:
         go-version: 1.14
 
+    - uses: azure/setup-kubectl@v1
+      with:
+        version: 'latest'
+
+    - name: Cache go mod
+      uses: actions/cache@v2
+      with:
+        path: ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+
+    - name: Prepare memory storage for etcd of kind cluster
+      run: |
+        # Use memory storage for etcd of the kind cluster, see https://github.com/kubernetes-sigs/kind/issues/845 for more info
+        mkdir -p /tmp/lib/etcd
+        sudo mount -t tmpfs tmpfs /tmp/lib/etcd
+
     - name: Install Kubernetes v${{ matrix.k8sVersion }}
       uses: helm/kind-action@v1.1.0
       with:
@@ -146,7 +190,7 @@ jobs:
 
     - name: build harbor-operator
       run: |
-        make manifests docker-build IMG=${dockerImage}
+        make manifests docker-build IMG=${dockerImage} GIT_COMMIT=${{ github.sha }}
         kind load docker-image ${dockerImage} --name harbor
 
     - name: install harbor-operator
@@ -163,6 +207,10 @@ jobs:
           kubectl get all -n ${operatorNamespace}
           exit 1
         fi
+
+        # HACK: restart the harbor-operator pod so that the manager of the harbor cluster can own the redis and postgres types
+        kubectl -n ${operatorNamespace} delete pod -l 'control-plane=harbor-operator'
+        kubectl -n ${operatorNamespace} wait --for=condition=ready pod -l 'control-plane=harbor-operator' --timeout 300s
 
     - name: install harbor
       run: |
@@ -183,7 +231,9 @@ jobs:
           echo $i
           kubectl -n cluster-sample-ns get all
         done
-        if ! time kubectl -n cluster-sample-ns wait --for=condition=Ready pod --all --timeout 600s && ! time kubectl -n cluster-sample-ns wait --for=condition=Ready pod --all --timeout 60s; then
+
+        kubectl -n cluster-sample-ns wait --for=condition=InProgress=False --for=condition=Failed=False harborcluster harborcluster-sample --timeout 600s
+        if [ $? -ne 0 ] ; then
           echo install harbor failed
           kubectl get all -n cluster-sample-ns
 

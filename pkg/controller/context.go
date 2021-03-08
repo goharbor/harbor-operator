@@ -13,6 +13,7 @@ func (c *Controller) NewContext(req ctrl.Request) context.Context {
 	ctx := context.TODO()
 	application.SetName(&ctx, c.GetName())
 	application.SetVersion(&ctx, c.GetVersion())
+	application.SetGitCommit(&ctx, c.GetGitCommit())
 	ctx = sgraph.WithGraph(ctx)
 
 	logger.Set(&ctx, c.Log.WithValues("request", req))

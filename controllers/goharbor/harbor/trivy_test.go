@@ -5,6 +5,7 @@ import (
 	"os"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
 	"github.com/goharbor/harbor-operator/pkg/controller"
 	"github.com/goharbor/harbor-operator/pkg/factories/owner"
 	"github.com/goharbor/harbor-operator/pkg/graph"
@@ -28,7 +29,7 @@ var _ = Describe("Trivy", func() {
 	var ctx context.Context
 
 	BeforeEach(func() {
-		ctx = makeContext()
+		ctx = test.NewContext()
 
 		configstore.DefaultStore = configstore.NewStore()
 	})

@@ -8,6 +8,9 @@ nodes:
     nodeRegistration:
       kubeletExtraArgs:
         node-labels: "ingress-ready=true"
+  extraMounts:
+  - containerPath: /var/lib/etcd
+    hostPath: /tmp/lib/etcd
   extraPortMappings:
   - containerPort: 80
     hostPort: 80

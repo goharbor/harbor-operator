@@ -35,9 +35,11 @@ type CRStatus struct {
 
 // New returns new CRStatus.
 func New(conditionType v1alpha2.HarborClusterConditionType) *CRStatus {
+	now := metav1.Now()
+
 	return &CRStatus{
 		Condition: v1alpha2.HarborClusterCondition{
-			LastTransitionTime: metav1.Now(),
+			LastTransitionTime: &now,
 			Type:               conditionType,
 		},
 	}

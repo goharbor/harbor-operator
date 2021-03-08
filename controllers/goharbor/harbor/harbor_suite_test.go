@@ -10,13 +10,10 @@ import (
 	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/harbor"
 	"github.com/goharbor/harbor-operator/pkg/config"
-	"github.com/goharbor/harbor-operator/pkg/factories/application"
-	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
 
 func TestHarbor(t *testing.T) {
@@ -31,14 +28,6 @@ func fileString(filePath string) string {
 	Expect(err).NotTo(HaveOccurred())
 
 	return strings.TrimSpace(string(content))
-}
-
-func makeContext() context.Context {
-	ctx := logger.Context(zap.LoggerTo(GinkgoWriter, true))
-	application.SetName(&ctx, "operator")
-	application.SetVersion(&ctx, "dev")
-
-	return ctx
 }
 
 func makeReconciler(ctx context.Context) *harbor.Reconciler {
