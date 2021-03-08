@@ -3,6 +3,7 @@ package storage
 import (
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	netv1 "k8s.io/api/networking/v1beta1"
+	"k8s.io/apimachinery/pkg/api/equality"
 	k8serror "k8s.io/apimachinery/pkg/api/errors"
 )
 
@@ -31,19 +32,7 @@ func (m *MinIOController) checkRedirectUpdate() (bool, error) {
 
 	desiredingress, err := m.generateIngress()
 
-	if currntIngress.Spec.Rules[0].Host != desiredingress.Spec.Rules[0].Host {
-		return true, err
-	}
-
-	if currntIngress.Spec.Rules[0].IngressRuleValue.HTTP.Paths[0] != desiredingress.Spec.Rules[0].IngressRuleValue.HTTP.Paths[0] {
-		return true, err
-	}
-
-	if currntIngress.Spec.TLS[0].Hosts[0] != desiredingress.Spec.TLS[0].Hosts[0] {
-		return true, err
-	}
-
-	if currntIngress.Spec.TLS[0].SecretName != desiredingress.Spec.TLS[0].SecretName {
+	if !equality.Semantic.DeepEqual(currntIngress.DeepCopy().Spec, desiredingress.DeepCopy().Spec) {
 		return true, err
 	}
 
