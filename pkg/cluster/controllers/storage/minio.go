@@ -230,11 +230,13 @@ func (m *MinIOController) getMinIOSecretNamespacedName() types.NamespacedName {
 }
 
 func minioNotReadyStatus(reason, message string) *lcm.CRStatus {
+	now := metav1.Now()
+
 	return &lcm.CRStatus{
 		Condition: goharborv1.HarborClusterCondition{
 			Type:               goharborv1.StorageReady,
 			Status:             corev1.ConditionFalse,
-			LastTransitionTime: metav1.Now(),
+			LastTransitionTime: &now,
 			Reason:             reason,
 			Message:            message,
 		},
@@ -243,11 +245,13 @@ func minioNotReadyStatus(reason, message string) *lcm.CRStatus {
 }
 
 func minioUnknownStatus() *lcm.CRStatus {
+	now := metav1.Now()
+
 	return &lcm.CRStatus{
 		Condition: goharborv1.HarborClusterCondition{
 			Type:               goharborv1.StorageReady,
 			Status:             corev1.ConditionUnknown,
-			LastTransitionTime: metav1.Now(),
+			LastTransitionTime: &now,
 			Reason:             "",
 			Message:            "",
 		},
@@ -256,11 +260,13 @@ func minioUnknownStatus() *lcm.CRStatus {
 }
 
 func minioReadyStatus(properties *lcm.Properties) *lcm.CRStatus {
+	now := metav1.Now()
+
 	return &lcm.CRStatus{
 		Condition: goharborv1.HarborClusterCondition{
 			Type:               goharborv1.StorageReady,
 			Status:             corev1.ConditionTrue,
-			LastTransitionTime: metav1.Now(),
+			LastTransitionTime: &now,
 			Reason:             "",
 			Message:            "",
 		},

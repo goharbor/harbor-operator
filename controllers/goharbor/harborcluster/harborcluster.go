@@ -1,12 +1,14 @@
 package harborcluster
 
 import (
-	"context"
 	"fmt"
 	"time"
 
 	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-operator/pkg/cluster/gos"
+	"github.com/goharbor/harbor-operator/pkg/factories/logger"
+	"github.com/pkg/errors"
+	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
@@ -23,8 +25,8 @@ var (
 
 // Reconcile logic of the HarborCluster.
 func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) { // nolint:funlen
-	ctx := context.TODO()
-	log := r.Log.WithValues("resource", req.NamespacedName)
+	ctx := r.ctrl.NewContext(req)
+	log := logger.Get(ctx)
 
 	// Get the harborcluster first
 	harborcluster := &v1alpha2.HarborCluster{}
@@ -43,6 +45,10 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) { 
 		log.Info("harbor cluster is being deleted", "name", req.NamespacedName)
 
 		return ctrl.Result{}, nil
+	}
+
+	if err := r.ctrl.PrepareStatus(ctx, harborcluster); err != nil {
+		return r.ctrl.HandleError(ctx, harborcluster, errors.Wrap(err, "cannot prepare owner status"))
 	}
 
 	// For tracking status
@@ -132,6 +138,10 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) { 
 
 	// Reconcile done
 	r.Log.Info("reconcile is completed")
+
+	if harborStatus.Condition.Status == corev1.ConditionTrue {
+		return ctrl.Result{}, r.ctrl.SetSuccessStatus(ctx, harborcluster)
+	}
 
 	return ctrl.Result{}, nil
 }

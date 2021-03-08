@@ -216,14 +216,14 @@ func harborClusterCRStatus(harbor *v1alpha2.Harbor) *lcm.CRStatus {
 	}
 
 	if failedCondition == nil && inProgressCondition == nil {
-		harborUnknownStatus(EmptyHarborCRStatusError, "The ready condition of harbor.goharbor.io is empty. Please wait for minutes.")
+		return harborUnknownStatus(EmptyHarborCRStatusError, "The ready condition of harbor.goharbor.io is empty. Please wait for minutes.")
 	}
 
-	if failedCondition != nil && failedCondition.Status != corev1.ConditionFalse {
+	if failedCondition != nil && failedCondition.Status == corev1.ConditionTrue {
 		return harborNotReadyStatus(failedCondition.Reason, failedCondition.Message)
 	}
 
-	if inProgressCondition != nil && inProgressCondition.Status != corev1.ConditionFalse {
+	if inProgressCondition != nil && inProgressCondition.Status == corev1.ConditionTrue {
 		return harborNotReadyStatus(inProgressCondition.Reason, inProgressCondition.Message)
 	}
 

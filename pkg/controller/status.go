@@ -15,7 +15,7 @@ import (
 	"sigs.k8s.io/kustomize/kstatus/status"
 )
 
-func (c *Controller) prepareStatus(ctx context.Context, owner resources.Resource) error {
+func (c *Controller) PrepareStatus(ctx context.Context, owner resources.Resource) error {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "prepareStatus")
 	defer span.Finish()
 
@@ -108,6 +108,11 @@ func (c *Controller) preUpdateData(ctx context.Context, u *unstructured.Unstruct
 }
 
 func (c *Controller) preUpdateControllerStatus(ctx context.Context, data map[string]interface{}) error {
+	observedGitCommit, _, err := unstructured.NestedString(data, "status", "operator", "controllerGitCommit")
+	if err != nil {
+		return serrors.UnrecoverrableError(err, serrors.OperatorReason, "unable to get controller git commit")
+	}
+
 	observedVersion, _, err := unstructured.NestedString(data, "status", "operator", "controllerVersion")
 	if err != nil {
 		return serrors.UnrecoverrableError(err, serrors.OperatorReason, "unable to get controller version")
@@ -122,10 +127,12 @@ func (c *Controller) preUpdateControllerStatus(ctx context.Context, data map[str
 		return errors.Wrap(err, "cannot set controller status")
 	}
 
-	version, name := c.GetVersion(), c.GetName()
+	gitCommit, version, name := c.GetGitCommit(), c.GetVersion(), c.GetName()
 
 	logger.Get(ctx).V(1).Info(
 		"Updating controller status",
+		"oldGitCommit", observedGitCommit,
+		"newGitCommit", gitCommit,
 		"oldVersion", observedVersion,
 		"newVersion", version,
 		"oldName", observedName,
@@ -136,7 +143,12 @@ func (c *Controller) preUpdateControllerStatus(ctx context.Context, data map[str
 }
 
 func (c *Controller) SetControllerStatus(ctx context.Context, data map[string]interface{}) error {
-	err := unstructured.SetNestedField(data, c.GetVersion(), "status", "operator", "controllerVersion")
+	err := unstructured.SetNestedField(data, c.GetGitCommit(), "status", "operator", "controllerGitCommit")
+	if err != nil {
+		return serrors.UnrecoverrableError(err, serrors.OperatorReason, "unable to set observed generation")
+	}
+
+	err = unstructured.SetNestedField(data, c.GetVersion(), "status", "operator", "controllerVersion")
 	if err != nil {
 		return serrors.UnrecoverrableError(err, serrors.OperatorReason, "unable to set observed generation")
 	}

@@ -50,6 +50,8 @@ type Reconciler struct {
 	DatabaseCtrl lcm.Controller
 	StorageCtrl  lcm.Controller
 	HarborCtrl   *harbor.Controller
+
+	ctrl *commonCtrl.Controller // TODO: move the Reconcile to pkg/controller.Controller
 }
 
 // +kubebuilder:rbac:groups=goharbor.io,resources=harborclusters,verbs=get;list;watch
@@ -64,6 +66,10 @@ type Reconciler struct {
 // +kubebuilder:rbac:groups=apiextensions.k8s.io,resources=customresourcedefinitions,verbs=get;list
 
 func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) error {
+	if err := r.ctrl.SetupWithManager(ctx, mgr); err != nil {
+		return err
+	}
+
 	r.Client = mgr.GetClient()
 	r.Scheme = mgr.GetScheme()
 
@@ -126,6 +132,7 @@ func New(ctx context.Context, name string, configStore *configstore.Store) (comm
 		Version:     application.GetVersion(ctx),
 		ConfigStore: configStore,
 		Log:         ctrl.Log.WithName(application.GetName(ctx)).WithName("controller").WithValues("controller", name),
+		ctrl:        commonCtrl.NewController(ctx, name, nil, configStore),
 	}, nil
 }
 

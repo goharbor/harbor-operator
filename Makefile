@@ -2,6 +2,7 @@
 # Image URL to use all building/pushing image targets
 IMG ?= goharbor/harbor-operator:dev
 RELEASE_VERSION ?= 0.0.0-dev
+GIT_COMMIT ?= none
 
 CONFIGURATION_FROM ?= env,file:$(CURDIR)/config-dev.yml
 export CONFIGURATION_FROM
@@ -140,7 +141,7 @@ helm-install: helm helm-generate
 manager: go-generate
 	go build \
 		-o bin/manager \
-		-ldflags "-X $$(go list -m).OperatorVersion=$(RELEASE_VERSION)" \
+		-ldflags "-X main.version=$(RELEASE_VERSION) -X main.gitCommit=$(GIT_COMMIT)" \
 		*.go
 
 .PHONY:helm-generate
@@ -195,7 +196,7 @@ dist/harbor-operator_linux_amd64/manager:
     GOARCH="amd64" \
 	go build \
 		-o dist/harbor-operator_linux_amd64/manager \
-		-ldflags "-X $$(go list -m).OperatorVersion=$(RELEASE_VERSION)" \
+		-ldflags "-X main.version=$(RELEASE_VERSION) -X main.gitCommit=$(GIT_COMMIT)" \
 		*.go
 
 #####################

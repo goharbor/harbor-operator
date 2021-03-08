@@ -24,7 +24,7 @@ import (
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -52,6 +52,10 @@ func newStatus(source *goharborv1.HarborCluster) *status {
 			Revision:   time.Now().UnixNano(),
 			Conditions: make([]goharborv1.HarborClusterCondition, 0),
 		},
+	}
+
+	if source != nil {
+		s.data.Operator = source.Status.Operator
 	}
 
 	// Copy source status if it has been set before
@@ -167,7 +171,8 @@ func (s *status) UpdateCondition(ct goharborv1.HarborClusterConditionType, c goh
 				cp.Message = c.Message
 				cp.Reason = c.Reason
 				// Update timestamp
-				cp.LastTransitionTime = v1.Now()
+				now := metav1.Now()
+				cp.LastTransitionTime = &now
 
 				// Update revision for identifying the changes
 				s.data.Revision = time.Now().UnixNano()
@@ -178,7 +183,8 @@ func (s *status) UpdateCondition(ct goharborv1.HarborClusterConditionType, c goh
 	}
 	// Append if not existing yet
 	cc := c.DeepCopy()
-	cc.LastTransitionTime = v1.Now()
+	now := metav1.Now()
+	cc.LastTransitionTime = &now
 	s.data.Conditions = append(s.data.Conditions, *cc)
 	s.data.Revision = time.Now().UnixNano()
 }
@@ -187,6 +193,10 @@ func (s *status) overallStatus() goharborv1.ClusterStatus {
 	var ready, unready int
 
 	for _, c := range s.data.Conditions {
+		if !isDependencyConditionType(c.Type) {
+			continue
+		}
+
 		switch c.Status {
 		case corev1.ConditionTrue:
 			ready++
@@ -234,4 +244,9 @@ func (s *status) validate() error {
 	}
 
 	return nil
+}
+
+func isDependencyConditionType(t goharborv1.HarborClusterConditionType) bool {
+	return t == goharborv1.ServiceReady || t == goharborv1.CacheReady ||
+		t == goharborv1.DatabaseReady || t == goharborv1.StorageReady
 }

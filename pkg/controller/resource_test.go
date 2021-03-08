@@ -54,6 +54,7 @@ var _ = Context("Adding", func() {
 
 		application.SetName(&setupCtx, "test-app")
 		application.SetVersion(&setupCtx, "test")
+		application.SetGitCommit(&setupCtx, "test")
 
 		c = NewController(setupCtx, "test", nil, nil)
 		scheme, err := scheme.New(setupCtx)
@@ -71,6 +72,7 @@ var _ = Context("Adding", func() {
 		owner.Set(&ctx, &appsv1.Deployment{})
 		application.SetName(&ctx, "test-app")
 		application.SetVersion(&ctx, "test")
+		application.SetGitCommit(&ctx, "test")
 	})
 
 	for p, add := range resourceAdd {
