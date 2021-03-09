@@ -132,6 +132,14 @@ func (hc *HarborCluster) validateStorage() *field.Error {
 		return forbidden(fp, p)
 	}
 
+	// Validate more if incluster storage is configured.
+	if hc.Spec.InClusterStorage != nil {
+		desiredReplicas := hc.Spec.InClusterStorage.MinIOSpec.Replicas
+		if desiredReplicas%2 != 0 || desiredReplicas > 16 {
+			return invalid(fp, desiredReplicas, "minIOSpec.replicas should be even number and no more than 16")
+		}
+	}
+
 	return nil
 }
 
@@ -184,4 +192,8 @@ func forbidden(mainPath fmt.Stringer, conflictPath *field.Path) *field.Error {
 
 func required(mainPath *field.Path) *field.Error {
 	return field.Required(mainPath, fmt.Sprintf("%s should be configured", mainPath.String()))
+}
+
+func invalid(mainPath *field.Path, value interface{}, details string) *field.Error {
+	return field.Invalid(mainPath, value, details)
 }

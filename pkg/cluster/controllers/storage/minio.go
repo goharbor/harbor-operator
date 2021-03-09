@@ -2,7 +2,6 @@ package storage
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/go-logr/logr"
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
@@ -11,7 +10,7 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/k8s"
 	"github.com/ovh/configstore"
 	corev1 "k8s.io/api/core/v1"
-	k8serror "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -31,19 +30,13 @@ const (
 )
 
 type MinIOController struct {
-	// TODO remove, use params harborcluster instead of HarborCluster.
-	HarborCluster         *goharborv1.HarborCluster
-	KubeClient            k8s.Client
-	Ctx                   context.Context
-	Log                   logr.Logger
-	Scheme                *runtime.Scheme
-	Recorder              record.EventRecorder
-	CurrentMinIOCR        *minio.Tenant
-	DesiredMinIOCR        *minio.Tenant
-	CurrentExternalSecret *corev1.Secret
-	DesiredExternalSecret *corev1.Secret
-	MinioClient           Minio
-	ConfigStore           *configstore.Store
+	KubeClient  k8s.Client
+	Ctx         context.Context
+	Log         logr.Logger
+	Scheme      *runtime.Scheme
+	Recorder    record.EventRecorder
+	MinioClient Minio
+	ConfigStore *configstore.Store
 }
 
 var HarborClusterMinIOGVK = schema.GroupVersionKind{
@@ -69,89 +62,72 @@ func NewMinIOController(ctx context.Context, options ...k8s.Option) lcm.Controll
 }
 
 // Reconciler implements the reconcile logic of minIO service.
-func (m *MinIOController) Apply(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*lcm.CRStatus, error) { // nolint:funlen
-	var minioCR minio.Tenant
-
+func (m *MinIOController) Apply(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*lcm.CRStatus, error) {
 	// Use the ctx from the parameter
 	m.KubeClient.WithContext(ctx)
 
-	m.HarborCluster = harborcluster
-
-	desiredMinIOCR, err := m.generateMinIOCR(ctx, harborcluster)
-	if err != nil {
-		return minioNotReadyStatus(GenerateMinIOCrError, err.Error()), err
+	// Apply minIO tenant
+	if crs, err := m.applyTenant(ctx, harborcluster); err != nil {
+		return crs, err
 	}
 
-	m.DesiredMinIOCR = desiredMinIOCR
-
-	err = m.KubeClient.Get(m.getMinIONamespacedName(), &minioCR)
-	if k8serror.IsNotFound(err) {
-		m.Log.Info("create minio service")
-
-		return m.Provision()
-	} else if err != nil {
-		return minioNotReadyStatus(GetMinIOError, err.Error()), err
-	}
-
-	m.CurrentMinIOCR = &minioCR
-
-	// TODO remove scale event
-	isScale, err := m.checkMinIOScale()
-	if err != nil {
-		return minioNotReadyStatus(ScaleMinIOError, err.Error()), err
-	}
-
-	if isScale {
-		return m.Scale()
-	}
-
-	// if minio image update
-	if m.checkMinIOImageUpdate() {
-		return m.Update()
-	}
-
-	// if Redirect update
-	isChange, err := m.checkRedirectUpdate()
+	// Check readiness
+	mt, ready, err := m.checkMinIOReady(harborcluster)
 	if err != nil {
 		return minioNotReadyStatus(GetMinIOError, err.Error()), err
 	}
 
-	if isChange {
-		if err = m.updateMinioIngress(); err != nil {
-			return minioNotReadyStatus(updateIngressError, err.Error()), err
-		}
-	}
+	if !ready {
+		m.Log.Info("MinIO is not ready yet")
 
-	isReady, err := m.checkMinIOReady()
-	if err != nil {
-		return minioNotReadyStatus(GetMinIOError, err.Error()), err
-	}
-
-	if !isReady {
 		return minioUnknownStatus(), nil
 	}
 
-	if err := m.minioInit(ctx); err != nil {
+	// Apply minIO ingress if necessary
+	if crs, err := m.applyIngress(ctx, harborcluster); err != nil {
+		return crs, err
+	}
+
+	// Init minio
+	// TODO: init bucket in the minCR pods as creation by client may meet network connection issue.
+	if err := m.minioInit(ctx, harborcluster); err != nil {
 		return minioNotReadyStatus(CreateDefaultBucketError, err.Error()), err
 	}
 
-	crs, err := m.ProvisionMinIOProperties(&minioCR)
+	crs, err := m.ProvisionMinIOProperties(harborcluster, mt)
 	if err != nil {
 		return crs, err
 	}
 
-	m.Log.Info("minio is ready")
+	m.Log.Info("MinIO is ready")
 
 	return crs, nil
 }
 
-func (m *MinIOController) minioInit(ctx context.Context) error {
-	accessKey, secretKey, err := m.getCredsFromSecret()
+func (m *MinIOController) Delete(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*lcm.CRStatus, error) {
+	minioCR, err := m.generateMinIOCR(ctx, harborcluster)
+	if err != nil {
+		return minioNotReadyStatus(GenerateMinIOCrError, err.Error()), err
+	}
+
+	if err := m.KubeClient.Delete(minioCR); err != nil {
+		return minioUnknownStatus(), err
+	}
+
+	return nil, nil
+}
+
+func (m *MinIOController) Upgrade(_ context.Context, _ *goharborv1.HarborCluster) (*lcm.CRStatus, error) {
+	panic("implement me")
+}
+
+func (m *MinIOController) minioInit(ctx context.Context, harborcluster *goharborv1.HarborCluster) error {
+	accessKey, secretKey, err := m.getCredsFromSecret(harborcluster)
 	if err != nil {
 		return err
 	}
 
-	endpoint := m.getServiceName() + "." + m.HarborCluster.Namespace + ":9000"
+	endpoint := m.getServiceName(harborcluster) + "." + harborcluster.Namespace + ":9000"
 
 	edp := &MinioEndpoint{
 		Endpoint:        endpoint,
@@ -173,60 +149,47 @@ func (m *MinIOController) minioInit(ctx context.Context) error {
 	return m.MinioClient.CreateBucket(ctx, DefaultBucket)
 }
 
-func (m *MinIOController) checkMinIOImageUpdate() bool {
-	return m.DesiredMinIOCR.Spec.Image != m.CurrentMinIOCR.Spec.Image
-}
+func (m *MinIOController) checkMinIOReady(harborcluster *goharborv1.HarborCluster) (*minio.Tenant, bool, error) {
+	minioCR := &minio.Tenant{}
+	if err := m.KubeClient.Get(m.getMinIONamespacedName(harborcluster), minioCR); err != nil {
+		if errors.IsNotFound(err) {
+			return nil, false, nil
+		}
 
-func (m *MinIOController) checkMinIOScale() (bool, error) {
-	currentReplicas := m.CurrentMinIOCR.Spec.Zones[0].Servers
-	desiredReplicas := m.HarborCluster.Spec.InClusterStorage.MinIOSpec.Replicas
-
-	if currentReplicas == desiredReplicas {
-		return false, nil
-	} else if currentReplicas == 1 {
-		return false, fmt.Errorf("not support upgrading from standalone to distributed mode")
+		return nil, false, err
 	}
-
-	// MinIO creates erasure-coding sets of 4 to 16 drives per set.
-	// The number of drives you provide in total must be a multiple of one of those numbers.
-	// TODO validate by webhook
-	if desiredReplicas%2 == 0 && desiredReplicas < 16 {
-		return true, nil
-	}
-
-	return false, fmt.Errorf("for distributed mode, supply 4 to 16 drives (should be even)")
-}
-
-func (m *MinIOController) checkMinIOReady() (bool, error) {
-	var minioCR minio.Tenant
-	err := m.KubeClient.Get(m.getMinIONamespacedName(), &minioCR)
 
 	// For different version of minIO have different Status.
 	// Ref https://github.com/minio/operator/commit/d387108ea494cf5cec57628c40d40604ac8d57ec#diff-48972613166d50a2acb9d562e33c5247
 	if minioCR.Status.CurrentState == minio.StatusReady || minioCR.Status.CurrentState == minio.StatusInitialized {
-		return true, err
+		return minioCR, true, nil
 	}
 
-	return false, err
+	// Not ready
+	return minioCR, false, nil
 }
 
-func (m *MinIOController) getMinIONamespacedName() types.NamespacedName {
+func (m *MinIOController) getMinIONamespacedName(harborcluster *goharborv1.HarborCluster) types.NamespacedName {
 	return types.NamespacedName{
-		Namespace: m.HarborCluster.Namespace,
-		Name:      m.getServiceName(),
+		Namespace: harborcluster.Namespace,
+		Name:      m.getServiceName(harborcluster),
 	}
 }
 
-func (m *MinIOController) getMinIOSecretNamespacedName() types.NamespacedName {
-	secretName := m.HarborCluster.Spec.InClusterStorage.MinIOSpec.SecretRef
+func (m *MinIOController) getMinIOSecretNamespacedName(harborcluster *goharborv1.HarborCluster) types.NamespacedName {
+	secretName := harborcluster.Spec.InClusterStorage.MinIOSpec.SecretRef
 	if secretName == "" {
-		secretName = DefaultPrefix + m.HarborCluster.Name + "-" + DefaultCredsSecret
+		secretName = DefaultPrefix + harborcluster.Name + "-" + DefaultCredsSecret
 	}
 
 	return types.NamespacedName{
-		Namespace: m.HarborCluster.Namespace,
+		Namespace: harborcluster.Namespace,
 		Name:      secretName,
 	}
+}
+
+func (m *MinIOController) getServiceName(harborcluster *goharborv1.HarborCluster) string {
+	return DefaultPrefix + harborcluster.Name
 }
 
 func minioNotReadyStatus(reason, message string) *lcm.CRStatus {
