@@ -1267,8 +1267,6 @@ spec:
                       certificateRef:
                         pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
                         type: string
-                    required:
-                    - certificateRef
                     type: object
                   writeTimeout:
                     description: Socket timeout
@@ -1550,8 +1548,6 @@ spec:
                       certificateRef:
                         pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
                         type: string
-                    required:
-                    - certificateRef
                     type: object
                   tokenService:
                     properties:
@@ -2221,8 +2217,6 @@ spec:
                           certificateRef:
                             pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
                             type: string
-                        required:
-                        - certificateRef
                         type: object
                     type: object
                   notary:
@@ -2256,8 +2250,6 @@ spec:
                           certificateRef:
                             pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
                             type: string
-                        required:
-                        - certificateRef
                         type: object
                     type: object
                 required:
@@ -2687,8 +2679,6 @@ spec:
                                   certificateRef:
                                     pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
                                     type: string
-                                required:
-                                - certificateRef
                                 type: object
                             type: object
                         type: object
@@ -3906,8 +3896,6 @@ spec:
                           certificateRef:
                             pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
                             type: string
-                        required:
-                        - certificateRef
                         type: object
                     type: object
                   notary:
@@ -3941,8 +3929,6 @@ spec:
                           certificateRef:
                             pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
                             type: string
-                        required:
-                        - certificateRef
                         type: object
                     type: object
                 required:
@@ -6904,8 +6890,6 @@ spec:
                   certificateRef:
                     pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
                     type: string
-                required:
-                - certificateRef
                 type: object
               tokenService:
                 properties:
@@ -7267,8 +7251,6 @@ spec:
                   certificateRef:
                     pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
                     type: string
-                required:
-                - certificateRef
                 type: object
               tolerations:
                 description: If specified, the pod's tolerations.
@@ -7780,8 +7762,6 @@ spec:
                   certificateRef:
                     pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
                     type: string
-                required:
-                - certificateRef
                 type: object
               tolerations:
                 description: If specified, the pod's tolerations.
@@ -8140,8 +8120,6 @@ spec:
                       certificateRef:
                         pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
                         type: string
-                    required:
-                    - certificateRef
                     type: object
                 type: object
               image:
@@ -9768,8 +9746,6 @@ spec:
                   certificateRef:
                     pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
                     type: string
-                required:
-                - certificateRef
                 type: object
               tolerations:
                 description: If specified, the pod's tolerations.
@@ -10108,8 +10084,6 @@ spec:
                       certificateRef:
                         pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
                         type: string
-                    required:
-                    - certificateRef
                     type: object
                   tokenServiceCertificateAuthorityRefs:
                     items:

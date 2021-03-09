@@ -10,6 +10,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
 // +genclient
@@ -88,6 +89,30 @@ type HarborSpec struct {
 	// +kubebuilder:validation:Optional
 	// The version of the harbor, eg 2.1.2
 	Version string `json:"version,omitempty"`
+}
+
+func (spec *HarborSpec) ValidateNotary() *field.Error {
+	if spec.Notary == nil {
+		return nil
+	}
+
+	if spec.Expose.Notary == nil {
+		return required(field.NewPath("spec").Child("expose", "notary"))
+	}
+
+	if spec.Expose.Notary.Ingress == nil {
+		return required(field.NewPath("spec").Child("expose", "notary", "ingress"))
+	}
+
+	if spec.Expose.Notary.TLS == nil {
+		return required(field.NewPath("spec").Child("expose", "notary", "tls"))
+	}
+
+	if spec.Expose.Notary.TLS.CertificateRef == "" {
+		return required(field.NewPath("spec").Child("expose", "notary", "tls", "certificateRef"))
+	}
+
+	return nil
 }
 
 type HarborComponentsSpec struct {
@@ -483,6 +508,7 @@ type HarborExposeSpec struct {
 	Core HarborExposeComponentSpec `json:"core"`
 
 	// +kubebuilder:validation:Optional
+	// The ingress of the notary, required when notary component enabled.
 	Notary *HarborExposeComponentSpec `json:"notary,omitempty"`
 }
 
