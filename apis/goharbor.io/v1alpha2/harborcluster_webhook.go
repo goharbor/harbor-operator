@@ -94,6 +94,10 @@ func (hc *HarborCluster) validate(old *HarborCluster) error {
 		allErrs = append(allErrs, err)
 	}
 
+	if err := hc.Spec.ValidateNotary(); err != nil {
+		allErrs = append(allErrs, err)
+	}
+
 	if old == nil { // create harbor resource
 		if err := version.Validate(hc.Spec.Version); err != nil {
 			allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("version"), hc.Spec.Version, err.Error()))

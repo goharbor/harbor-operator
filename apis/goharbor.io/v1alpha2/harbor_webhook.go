@@ -88,6 +88,10 @@ func (h *Harbor) Validate(old *Harbor) error {
 		allErrs = append(allErrs, required(field.NewPath("spec").Child("redis")))
 	}
 
+	if err := h.Spec.ValidateNotary(); err != nil {
+		allErrs = append(allErrs, err)
+	}
+
 	if old == nil { // create harbor resource
 		if err := version.Validate(h.Spec.Version); err != nil {
 			allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("version"), h.Spec.Version, err.Error()))
