@@ -25,7 +25,7 @@ func (m *MinIOController) applyIngress(ctx context.Context, harborcluster *gohar
 
 	// Get current minIO ingress
 	curIngress := &netv1.Ingress{}
-	err := m.KubeClient.Get(m.getMinIONamespacedName(harborcluster), curIngress)
+	err := m.KubeClient.Get(ctx, m.getMinIONamespacedName(harborcluster), curIngress)
 
 	if k8serror.IsNotFound(err) {
 		m.Log.Info("Creating minIO ingress")
@@ -45,7 +45,7 @@ func (m *MinIOController) applyIngress(ctx context.Context, harborcluster *gohar
 	if !equality.Semantic.DeepDerivative(ingress.DeepCopy().Spec, curIngress.DeepCopy().Spec) {
 		m.Log.Info("Updating MinIO ingress")
 
-		if err := m.KubeClient.Update(ingress); err != nil {
+		if err := m.KubeClient.Update(ctx, ingress); err != nil {
 			return minioNotReadyStatus(UpdateIngressError, err.Error()), err
 		}
 
@@ -55,10 +55,10 @@ func (m *MinIOController) applyIngress(ctx context.Context, harborcluster *gohar
 	return minioUnknownStatus(), nil
 }
 
-func (m *MinIOController) createIngress(_ context.Context, harborcluster *goharborv1.HarborCluster) (*lcm.CRStatus, error) {
+func (m *MinIOController) createIngress(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*lcm.CRStatus, error) {
 	// Get the existing minIO CR first
 	minioCR := &minio.Tenant{}
-	if err := m.KubeClient.Get(m.getMinIONamespacedName(harborcluster), minioCR); err != nil {
+	if err := m.KubeClient.Get(ctx, m.getMinIONamespacedName(harborcluster), minioCR); err != nil {
 		return minioNotReadyStatus(GetMinIOError, err.Error()), err
 	}
 
@@ -72,7 +72,7 @@ func (m *MinIOController) createIngress(_ context.Context, harborcluster *goharb
 		*metav1.NewControllerRef(minioCR, HarborClusterMinIOGVK),
 	}
 
-	if err := m.KubeClient.Create(ingress); err != nil {
+	if err := m.KubeClient.Create(ctx, ingress); err != nil {
 		return minioNotReadyStatus(CreateMinIOIngressError, err.Error()), err
 	}
 

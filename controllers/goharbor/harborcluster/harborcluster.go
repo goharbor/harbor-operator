@@ -84,7 +84,6 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) { 
 		mgr := NewServiceManager(v1alpha2.ComponentCache)
 
 		return mgr.WithContext(gtx).
-			WithConfig(cacheConfigGetter).
 			TrackedBy(st).
 			From(harborcluster).
 			Use(r.CacheCtrl).
@@ -96,7 +95,6 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) { 
 		mgr := NewServiceManager(v1alpha2.ComponentDatabase)
 
 		return mgr.WithContext(gtx).
-			WithConfig(dbConfigGetter).
 			TrackedBy(st).
 			From(harborcluster).
 			Use(r.DatabaseCtrl).
@@ -108,7 +106,6 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) { 
 		mgr := NewServiceManager(v1alpha2.ComponentStorage)
 
 		return mgr.WithContext(gtx).
-			WithConfig(storageConfigGetter).
 			TrackedBy(st).
 			From(harborcluster).
 			Use(r.StorageCtrl).

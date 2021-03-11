@@ -73,52 +73,52 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 	r.Client = mgr.GetClient()
 	r.Scheme = mgr.GetScheme()
 
-	dClient, err := k8s.NewDynamicClient()
+	dClient, err := k8s.DynamicClient()
 	if err != nil {
 		r.Log.Error(err, "unable to create dynamic client")
 
 		return err
 	}
 
-	r.CacheCtrl = cache.NewRedisController(ctx,
+	r.CacheCtrl = cache.NewRedisController(
 		k8s.WithLog(r.Log.WithName("cache")),
 		k8s.WithScheme(mgr.GetScheme()),
-		k8s.WithDClient(k8s.WrapDClient(dClient)),
-		k8s.WithClient(k8s.WrapClient(ctx, mgr.GetClient())),
+		k8s.WithDClient(dClient),
+		k8s.WithClient(mgr.GetClient()),
 		k8s.WithConfigStore(r.ConfigStore),
 	)
-	r.DatabaseCtrl = database.NewDatabaseController(ctx,
+	r.DatabaseCtrl = database.NewDatabaseController(
 		k8s.WithLog(r.Log.WithName("database")),
 		k8s.WithScheme(mgr.GetScheme()),
-		k8s.WithDClient(k8s.WrapDClient(dClient)),
-		k8s.WithClient(k8s.WrapClient(ctx, mgr.GetClient())),
+		k8s.WithDClient(dClient),
+		k8s.WithClient(mgr.GetClient()),
 		k8s.WithConfigStore(r.ConfigStore),
 	)
-	r.StorageCtrl = storage.NewMinIOController(ctx,
+	r.StorageCtrl = storage.NewMinIOController(
 		k8s.WithLog(r.Log.WithName("storage")),
 		k8s.WithScheme(mgr.GetScheme()),
-		k8s.WithClient(k8s.WrapClient(ctx, mgr.GetClient())),
+		k8s.WithClient(mgr.GetClient()),
 		k8s.WithConfigStore(r.ConfigStore),
 	)
-	r.HarborCtrl = harbor.NewHarborController(ctx,
+	r.HarborCtrl = harbor.NewHarborController(
 		k8s.WithLog(r.Log.WithName("harbor")),
 		k8s.WithScheme(mgr.GetScheme()),
-		k8s.WithClient(k8s.WrapClient(ctx, mgr.GetClient())))
+		k8s.WithClient(mgr.GetClient()))
 
 	builder := ctrl.NewControllerManagedBy(mgr).
 		For(&goharborv1alpha2.HarborCluster{}).
 		Owns(&goharborv1alpha2.Harbor{}).
 		WithEventFilter(harborClusterPredicateFuncs)
 
-	if r.CRDInstalled(ctx, dClient, minioCRD) {
+	if r.CRDInstalled(ctx, dClient.RawClient(), minioCRD) {
 		builder.Owns(&minio.Tenant{})
 	}
 
-	if r.CRDInstalled(ctx, dClient, postgresCRD) {
+	if r.CRDInstalled(ctx, dClient.RawClient(), postgresCRD) {
 		builder.Owns(&postgresv1.Postgresql{})
 	}
 
-	if r.CRDInstalled(ctx, dClient, redisCRD) {
+	if r.CRDInstalled(ctx, dClient.RawClient(), redisCRD) {
 		builder.Owns(&redisOp.RedisFailover{})
 	}
 
@@ -140,17 +140,17 @@ func New(ctx context.Context, name string, configStore *configstore.Store) (comm
 var harborClusterPredicateFuncs = predicate.Funcs{
 	// we do not care other events
 	UpdateFunc: func(event event.UpdateEvent) bool {
-		old, ok := event.ObjectOld.(*goharborv1alpha2.HarborCluster)
+		oldObj, ok := event.ObjectOld.(*goharborv1alpha2.HarborCluster)
 		if !ok {
 			return true
 		}
 
-		new, ok := event.ObjectNew.(*goharborv1alpha2.HarborCluster)
+		newObj, ok := event.ObjectNew.(*goharborv1alpha2.HarborCluster)
 		if !ok {
 			return true
 		}
 		// when status was not changed and spec was not changed, not need reconcile
-		if equality.Semantic.DeepDerivative(old.Spec, new.Spec) && old.Status.Status == new.Status.Status {
+		if equality.Semantic.DeepDerivative(oldObj.Spec, newObj.Spec) && oldObj.Status.Status == newObj.Status.Status {
 			return false
 		}
 

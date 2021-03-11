@@ -1,8 +1,11 @@
 package cache
 
 import (
+	"context"
+
 	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
+	"github.com/goharbor/harbor-operator/pkg/k8s"
 	redisOp "github.com/spotahome/redis-operator/api/redisfailover/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -13,15 +16,15 @@ import (
 // It does:
 // - check resource
 // - update RedisFailovers CR resource.
-func (rc *RedisController) RollingUpgrades(cluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
-	crdClient := rc.DClient.WithResource(redisFailoversGVR).WithNamespace(cluster.Namespace)
+func (rc *RedisController) RollingUpgrades(ctx context.Context, cluster *v1alpha2.HarborCluster, actualObj, expectObj runtime.Object) (*lcm.CRStatus, error) {
+	crdClient := rc.DClient.DynamicClient(ctx, k8s.WithResource(redisFailoversGVR), k8s.WithNamespace(cluster.Namespace))
 
-	if rc.expectCR == nil || rc.actualCR == nil {
+	if expectObj == nil || actualObj == nil {
 		return cacheUnknownStatus(), nil
 	}
 
-	expectCR := rc.expectCR.(*redisOp.RedisFailover)
-	unstructuredActualCR := rc.actualCR.(*unstructured.Unstructured)
+	expectCR := expectObj.(*redisOp.RedisFailover)
+	unstructuredActualCR := actualObj.(*unstructured.Unstructured)
 	actualCR := &redisOp.RedisFailover{}
 
 	if err := runtime.DefaultUnstructuredConverter.FromUnstructured(unstructuredActualCR.UnstructuredContent(), actualCR); err != nil {
@@ -52,8 +55,8 @@ func (rc *RedisController) RollingUpgrades(cluster *v1alpha2.HarborCluster) (*lc
 	return cacheUnknownStatus(), nil
 }
 
-func (rc *RedisController) Update(cluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
-	crStatus, err := rc.RollingUpgrades(cluster)
+func (rc *RedisController) Update(ctx context.Context, cluster *v1alpha2.HarborCluster, actualObj, expectObj runtime.Object) (*lcm.CRStatus, error) {
+	crStatus, err := rc.RollingUpgrades(ctx, cluster, actualObj, expectObj)
 	if err != nil {
 		return crStatus, err
 	}

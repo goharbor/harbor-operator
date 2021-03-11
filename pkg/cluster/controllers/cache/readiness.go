@@ -22,7 +22,7 @@ import (
 // - create redis connection pool
 // - ping redis server
 // - return redis properties if redis has available.
-func (rc *RedisController) Readiness(ctx context.Context, cluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
+func (rc *RedisController) Readiness(_ context.Context, cluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
 	rc.Log.Info("Redis already ready.",
 		"namespace", cluster.Namespace, "name", cluster.Name)
 
@@ -46,10 +46,10 @@ func (rc *RedisController) generateRedisSpec() *v1alpha2.ExternalRedisSpec {
 }
 
 // GetRedisPassword is get redis password.
-func (rc *RedisController) GetRedisPassword(secretName, namespace string) (string, error) {
+func (rc *RedisController) GetRedisPassword(ctx context.Context, secretName, namespace string) (string, error) {
 	var redisPassWord string
 
-	redisPassMap, err := rc.GetRedisSecret(secretName, namespace)
+	redisPassMap, err := rc.GetRedisSecret(ctx, secretName, namespace)
 	if err != nil {
 		return "", err
 	}
@@ -66,10 +66,10 @@ func (rc *RedisController) GetRedisPassword(secretName, namespace string) (strin
 }
 
 // GetRedisSecret returns the Redis Password Secret.
-func (rc *RedisController) GetRedisSecret(secretName, namespace string) (map[string][]byte, error) {
+func (rc *RedisController) GetRedisSecret(ctx context.Context, secretName, namespace string) (map[string][]byte, error) {
 	secret := &corev1.Secret{}
 
-	err := rc.Client.Get(types.NamespacedName{Name: secretName, Namespace: namespace}, secret)
+	err := rc.Client.Get(ctx, types.NamespacedName{Name: secretName, Namespace: namespace}, secret)
 	if err != nil {
 		return nil, err
 	}
@@ -80,11 +80,11 @@ func (rc *RedisController) GetRedisSecret(secretName, namespace string) (map[str
 }
 
 // GetDeploymentPods returns the Redis Sentinel pod list.
-func (rc *RedisController) GetDeploymentPods(name, namespace string) (*appsv1.Deployment, *corev1.PodList, error) {
+func (rc *RedisController) GetDeploymentPods(ctx context.Context, name, namespace string) (*appsv1.Deployment, *corev1.PodList, error) {
 	deploy := &appsv1.Deployment{}
 	deployName := fmt.Sprintf("%s-%s", "rfs", name)
 
-	err := rc.Client.Get(types.NamespacedName{Name: deployName, Namespace: namespace}, deploy)
+	err := rc.Client.Get(ctx, types.NamespacedName{Name: deployName, Namespace: namespace}, deploy)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -95,7 +95,7 @@ func (rc *RedisController) GetDeploymentPods(name, namespace string) (*appsv1.De
 
 	pod := &corev1.PodList{}
 
-	err = rc.Client.List(opts, pod)
+	err = rc.Client.List(ctx, pod, opts)
 	if err != nil {
 		rc.Log.Error(err, "fail to get pod.", "namespace", namespace, "name", deployName)
 
@@ -106,11 +106,11 @@ func (rc *RedisController) GetDeploymentPods(name, namespace string) (*appsv1.De
 }
 
 // GetStatefulSetPods returns the Redis Server pod list.
-func (rc *RedisController) GetStatefulSetPods(name, namespace string) (*appsv1.StatefulSet, *corev1.PodList, error) {
+func (rc *RedisController) GetStatefulSetPods(ctx context.Context, name, namespace string) (*appsv1.StatefulSet, *corev1.PodList, error) {
 	sts := &appsv1.StatefulSet{}
 	stsName := fmt.Sprintf("%s-%s", "rfr", name)
 
-	err := rc.Client.Get(types.NamespacedName{Name: stsName, Namespace: namespace}, sts)
+	err := rc.Client.Get(ctx, types.NamespacedName{Name: stsName, Namespace: namespace}, sts)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -121,7 +121,7 @@ func (rc *RedisController) GetStatefulSetPods(name, namespace string) (*appsv1.S
 
 	pod := &corev1.PodList{}
 
-	err = rc.Client.List(opts, pod)
+	err = rc.Client.List(ctx, pod, opts)
 	if err != nil {
 		rc.Log.Error(err, "fail to get pod.", "namespace", namespace, "name", stsName)
 

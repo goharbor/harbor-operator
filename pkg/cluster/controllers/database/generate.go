@@ -25,11 +25,11 @@ var (
 
 // GetPostgresCR returns PostgreSqls CRs.
 func (p *PostgreSQLController) GetPostgresCR(ctx context.Context, harborcluster *goharborv1alpha2.HarborCluster) (*unstructured.Unstructured, error) {
-	resource := p.GetPostgreResource()
-	replica := p.GetPostgreReplica()
-	storageSize := p.GetPostgreStorageSize()
-	databases := p.GetDatabases()
-	storageClass := p.GetStorageClass()
+	resource := p.GetPostgreResource(harborcluster)
+	replica := p.GetPostgreReplica(harborcluster)
+	storageSize := p.GetPostgreStorageSize(harborcluster)
+	databases := p.GetDatabases(harborcluster)
+	storageClass := p.GetStorageClass(harborcluster)
 
 	image, err := p.GetImage(ctx, harborcluster)
 	if err != nil {
@@ -47,15 +47,15 @@ func (p *PostgreSQLController) GetPostgresCR(ctx context.Context, harborcluster 
 			APIVersion: databaseAPI,
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      p.resourceName(),
-			Namespace: p.HarborCluster.Namespace,
+			Name:      p.resourceName(harborcluster.Namespace, harborcluster.Name),
+			Namespace: harborcluster.Namespace,
 		},
 		Spec: api.PostgresSpec{
 			Volume: api.Volume{
 				StorageClass: storageClass,
 				Size:         storageSize,
 			},
-			TeamID:            p.teamID(),
+			TeamID:            p.teamID(harborcluster.Namespace),
 			NumberOfInstances: replica,
 			Users:             GetUsers(),
 			Patroni:           GetPatron(),
@@ -111,11 +111,11 @@ func GetUsers() map[string]api.UserFlags {
 }
 
 // GetDatabaseSecret returns database connection secret.
-func (p *PostgreSQLController) GetDatabaseSecret(conn *Connect, secretName string) *corev1.Secret {
+func (p *PostgreSQLController) GetDatabaseSecret(conn *Connect, ns, secretName string) *corev1.Secret {
 	secret := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      secretName,
-			Namespace: p.HarborCluster.Namespace,
+			Namespace: ns,
 		},
 		StringData: map[string]string{
 			harbormetav1.PostgresqlPasswordKey: conn.Password,
@@ -126,11 +126,11 @@ func (p *PostgreSQLController) GetDatabaseSecret(conn *Connect, secretName strin
 }
 
 // resourceName return the formatted name of the managed psql resource.
-func (p *PostgreSQLController) resourceName() string {
-	return fmt.Sprintf("%s-%s", p.teamID(), p.HarborCluster.Name)
+func (p *PostgreSQLController) resourceName(ns, name string) string {
+	return fmt.Sprintf("%s-%s", p.teamID(ns), name)
 }
 
 // teamID return the team ID of the managed psql service.
-func (p *PostgreSQLController) teamID() string {
-	return fmt.Sprintf("%s-%s", databasePrefix, p.HarborCluster.Namespace)
+func (p *PostgreSQLController) teamID(ns string) string {
+	return fmt.Sprintf("%s-%s", databasePrefix, ns)
 }

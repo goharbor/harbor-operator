@@ -16,12 +16,12 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/kustomize/kstatus/status"
 )
 
 type Controller struct {
-	KubeClient          k8s.Client
-	Ctx                 context.Context
+	KubeClient          client.Client
 	Log                 logr.Logger
 	Scheme              *runtime.Scheme
 	ComponentToCRStatus *sync.Map
@@ -31,18 +31,15 @@ type Controller struct {
 func (harbor *Controller) Apply(ctx context.Context, harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
 	harborCR := &v1alpha2.Harbor{}
 
-	// Use the ctx from the parameter
-	harbor.KubeClient.WithContext(ctx)
-
 	nsdName := harbor.getHarborCRNamespacedName(harborcluster)
 
-	err := harbor.KubeClient.Get(nsdName, harborCR)
+	err := harbor.KubeClient.Get(ctx, nsdName, harborCR)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			harborCR = harbor.getHarborCR(harborcluster)
 
 			// Create a new one
-			err = harbor.KubeClient.Create(harborCR)
+			err = harbor.KubeClient.Create(ctx, harborCR)
 			if err != nil {
 				return harborNotReadyStatus(CreateHarborCRError, err.Error()), err
 			}
@@ -65,7 +62,7 @@ func (harbor *Controller) Apply(ctx context.Context, harborcluster *v1alpha2.Har
 		harbor.Log.Info("update harbor service", "name", nsdName)
 
 		harborCR.Spec = desiredCR.Spec
-		if err := harbor.KubeClient.Update(harborCR); err != nil {
+		if err := harbor.KubeClient.Update(ctx, harborCR); err != nil {
 			return harborNotReadyStatus(UpdateHarborCRError, err.Error()), err
 		}
 	}
@@ -73,11 +70,11 @@ func (harbor *Controller) Apply(ctx context.Context, harborcluster *v1alpha2.Har
 	return harborClusterCRStatus(harborCR), nil
 }
 
-func (harbor *Controller) Delete(ctx context.Context, harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
+func (harbor *Controller) Delete(_ context.Context, _ *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
 	panic("implement me")
 }
 
-func (harbor *Controller) Upgrade(ctx context.Context, harborcluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
+func (harbor *Controller) Upgrade(_ context.Context, _ *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
 	panic("implement me")
 }
 
@@ -86,7 +83,7 @@ func (harbor *Controller) WithDependency(component v1alpha2.Component, svcCR *lc
 	harbor.ComponentToCRStatus.Store(component, svcCR)
 }
 
-func NewHarborController(ctx context.Context, options ...k8s.Option) *Controller {
+func NewHarborController(options ...k8s.Option) *Controller {
 	o := &k8s.CtrlOptions{}
 
 	for _, option := range options {
@@ -94,7 +91,6 @@ func NewHarborController(ctx context.Context, options ...k8s.Option) *Controller
 	}
 
 	return &Controller{
-		Ctx:                 ctx,
 		KubeClient:          o.Client,
 		Log:                 o.Log,
 		Scheme:              o.Scheme,

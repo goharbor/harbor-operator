@@ -3,6 +3,8 @@ package storage
 import (
 	"context"
 
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
 	"github.com/go-logr/logr"
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	minio "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/api/v1"
@@ -30,7 +32,7 @@ const (
 )
 
 type MinIOController struct {
-	KubeClient  k8s.Client
+	KubeClient  client.Client
 	Ctx         context.Context
 	Log         logr.Logger
 	Scheme      *runtime.Scheme
@@ -45,7 +47,7 @@ var HarborClusterMinIOGVK = schema.GroupVersionKind{
 	Kind:    minio.MinIOCRDResourceKind,
 }
 
-func NewMinIOController(ctx context.Context, options ...k8s.Option) lcm.Controller {
+func NewMinIOController(options ...k8s.Option) lcm.Controller {
 	o := &k8s.CtrlOptions{}
 
 	for _, option := range options {
@@ -53,7 +55,6 @@ func NewMinIOController(ctx context.Context, options ...k8s.Option) lcm.Controll
 	}
 
 	return &MinIOController{
-		Ctx:         ctx,
 		KubeClient:  o.Client,
 		Log:         o.Log,
 		Scheme:      o.Scheme,
@@ -63,16 +64,13 @@ func NewMinIOController(ctx context.Context, options ...k8s.Option) lcm.Controll
 
 // Reconciler implements the reconcile logic of minIO service.
 func (m *MinIOController) Apply(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*lcm.CRStatus, error) {
-	// Use the ctx from the parameter
-	m.KubeClient.WithContext(ctx)
-
 	// Apply minIO tenant
 	if crs, err := m.applyTenant(ctx, harborcluster); err != nil {
 		return crs, err
 	}
 
 	// Check readiness
-	mt, ready, err := m.checkMinIOReady(harborcluster)
+	mt, ready, err := m.checkMinIOReady(ctx, harborcluster)
 	if err != nil {
 		return minioNotReadyStatus(GetMinIOError, err.Error()), err
 	}
@@ -94,7 +92,7 @@ func (m *MinIOController) Apply(ctx context.Context, harborcluster *goharborv1.H
 		return minioNotReadyStatus(CreateDefaultBucketError, err.Error()), err
 	}
 
-	crs, err := m.ProvisionMinIOProperties(harborcluster, mt)
+	crs, err := m.ProvisionMinIOProperties(ctx, harborcluster, mt)
 	if err != nil {
 		return crs, err
 	}
@@ -110,7 +108,7 @@ func (m *MinIOController) Delete(ctx context.Context, harborcluster *goharborv1.
 		return minioNotReadyStatus(GenerateMinIOCrError, err.Error()), err
 	}
 
-	if err := m.KubeClient.Delete(minioCR); err != nil {
+	if err := m.KubeClient.Delete(ctx, minioCR); err != nil {
 		return minioUnknownStatus(), err
 	}
 
@@ -122,7 +120,7 @@ func (m *MinIOController) Upgrade(_ context.Context, _ *goharborv1.HarborCluster
 }
 
 func (m *MinIOController) minioInit(ctx context.Context, harborcluster *goharborv1.HarborCluster) error {
-	accessKey, secretKey, err := m.getCredsFromSecret(harborcluster)
+	accessKey, secretKey, err := m.getCredsFromSecret(ctx, harborcluster)
 	if err != nil {
 		return err
 	}
@@ -149,9 +147,9 @@ func (m *MinIOController) minioInit(ctx context.Context, harborcluster *goharbor
 	return m.MinioClient.CreateBucket(ctx, DefaultBucket)
 }
 
-func (m *MinIOController) checkMinIOReady(harborcluster *goharborv1.HarborCluster) (*minio.Tenant, bool, error) {
+func (m *MinIOController) checkMinIOReady(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*minio.Tenant, bool, error) {
 	minioCR := &minio.Tenant{}
-	if err := m.KubeClient.Get(m.getMinIONamespacedName(harborcluster), minioCR); err != nil {
+	if err := m.KubeClient.Get(ctx, m.getMinIONamespacedName(harborcluster), minioCR); err != nil {
 		if errors.IsNotFound(err) {
 			return nil, false, nil
 		}

@@ -27,13 +27,12 @@ import (
 
 // ServiceManager is designed to maintain the dependent services of the cluster.
 type ServiceManager struct {
-	ctx             context.Context
-	cluster         *v1alpha2.HarborCluster
-	component       v1alpha2.Component
-	st              *status
-	ctrl            lcm.Controller
-	svcConfigGetter svcConfigGetter
-	harborCtrl      *harbor.Controller
+	ctx        context.Context
+	cluster    *v1alpha2.HarborCluster
+	component  v1alpha2.Component
+	st         *status
+	ctrl       lcm.Controller
+	harborCtrl *harbor.Controller
 }
 
 // NewServiceManager constructs a new service manager for the specified component.
@@ -74,13 +73,6 @@ func (s *ServiceManager) TrackedBy(st *status) *ServiceManager {
 // Use which ctrl.
 func (s *ServiceManager) Use(ctrl lcm.Controller) *ServiceManager {
 	s.ctrl = ctrl
-
-	return s
-}
-
-// WithConfig bind service configuration getter func.
-func (s *ServiceManager) WithConfig(svcCfgGetter svcConfigGetter) *ServiceManager {
-	s.svcConfigGetter = svcCfgGetter
 
 	return s
 }
@@ -173,10 +165,6 @@ func (s *ServiceManager) validate() error {
 
 	if s.st == nil {
 		return errors.New("missing status")
-	}
-
-	if s.svcConfigGetter == nil {
-		return errors.New("missing svc config getter")
 	}
 
 	if s.harborCtrl == nil {
