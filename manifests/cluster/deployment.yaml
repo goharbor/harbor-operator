@@ -2690,6 +2690,8 @@ spec:
                                     type: string
                                 type: object
                             type: object
+                        required:
+                        - enable
                         type: object
                       replicas:
                         description: Supply number of replicas. For standalone mode, supply 1. For distributed mode, supply 4 to 16 drives (should be even). Note that the operator does not support upgrading from standalone to distributed mode.
@@ -7304,8 +7306,9 @@ spec:
                       keyAlgorithm:
                         default: ecdsa
                         enum:
-                        - rsa
                         - ecdsa
+                        - rsa
+                        - ed25519
                         type: string
                       port:
                         default: 443
@@ -14206,7 +14209,7 @@ data:
           "realm": "{{ .Spec.Authentication.Token.Realm }}",
           "service": "{{ .Spec.Authentication.Token.Service }}",
           "issuer": "{{ .Spec.Authentication.Token.Issuer }}",
-          "rootcertbundle": "/etc/notary-server/auth-certificates/ca.crt",
+          "rootcertbundle": "/etc/notary-server/auth-certificates/tls.crt",
           "autoredirect": "{{ .Spec.Authentication.Token.AutoRedirect }}"
         }
       },

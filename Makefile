@@ -108,7 +108,7 @@ generated-diff-test: fmt generate
 .PHONY: diff
 diff:
 	git status
-	git diff --stat --diff-filter=d --exit-code HEAD
+	git diff --diff-filter=d --exit-code HEAD
 
 .PHONY: go-test
 go-test: install
@@ -168,7 +168,7 @@ config/crd/bases: controller-gen $(GO4CONTROLLERGEN_SOURCES)
 	touch "$@"
 
 .PHONY: generate
-generate: go-generate helm-generate
+generate: go-generate helm-generate deployment-generate
 
 go.mod: $(GONOGENERATED_SOURCES)
 	go mod tidy
@@ -378,6 +378,9 @@ go-generate: controller-gen stringer
 deploy-rbac: go-generate kustomize
 	$(KUSTOMIZE) build --reorder legacy config/rbac \
 		| kubectl apply --validate=false -f -
+
+deployment-generate: go-generate kustomize
+	$(KUSTOMIZE) build manifests/cluster > manifests/cluster/deployment.yaml
 
 .PHONY: sample
 sample: sample-harbor
