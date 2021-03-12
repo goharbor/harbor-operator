@@ -3,13 +3,11 @@ package storage
 import (
 	"context"
 
-	"sigs.k8s.io/controller-runtime/pkg/client"
-
 	"github.com/go-logr/logr"
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	minio "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/api/v1"
+	"github.com/goharbor/harbor-operator/pkg/cluster/k8s"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
-	"github.com/goharbor/harbor-operator/pkg/k8s"
 	"github.com/ovh/configstore"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -18,6 +16,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const (
@@ -63,7 +62,7 @@ func NewMinIOController(options ...k8s.Option) lcm.Controller {
 }
 
 // Reconciler implements the reconcile logic of minIO service.
-func (m *MinIOController) Apply(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*lcm.CRStatus, error) {
+func (m *MinIOController) Apply(ctx context.Context, harborcluster *goharborv1.HarborCluster, _ ...lcm.Option) (*lcm.CRStatus, error) {
 	// Apply minIO tenant
 	if crs, err := m.applyTenant(ctx, harborcluster); err != nil {
 		return crs, err

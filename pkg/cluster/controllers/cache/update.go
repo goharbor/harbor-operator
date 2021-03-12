@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	"github.com/goharbor/harbor-operator/pkg/cluster/k8s"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
-	"github.com/goharbor/harbor-operator/pkg/k8s"
 	redisOp "github.com/spotahome/redis-operator/api/redisfailover/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"

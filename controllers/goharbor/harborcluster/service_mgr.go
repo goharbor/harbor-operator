@@ -96,7 +96,7 @@ func (s *ServiceManager) Apply() error { // nolint:funlen
 			s.st.UpdateCondition(conditionType, status.Condition)
 			// Assign to harbor ctrl for the reconcile of cluster
 			if err == nil {
-				s.harborCtrl.WithDependency(s.component, status)
+				s.st.TrackDependencies(s.component, status)
 			}
 		}
 	}()

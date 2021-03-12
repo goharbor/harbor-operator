@@ -6,8 +6,8 @@ import (
 
 	"github.com/go-logr/logr"
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	"github.com/goharbor/harbor-operator/pkg/cluster/k8s"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
-	"github.com/goharbor/harbor-operator/pkg/k8s"
 	"github.com/ovh/configstore"
 	redisOp "github.com/spotahome/redis-operator/api/redisfailover/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -52,7 +52,7 @@ type RedisController struct {
 }
 
 // Apply creates/updates/scales the resources, like kubernetes apply operation.
-func (rc *RedisController) Apply(ctx context.Context, cluster *goharborv1alpha2.HarborCluster) (*lcm.CRStatus, error) {
+func (rc *RedisController) Apply(ctx context.Context, cluster *goharborv1alpha2.HarborCluster, _ ...lcm.Option) (*lcm.CRStatus, error) {
 	rc.ResourceManager.WithCluster(cluster)
 	crdClient := rc.DClient.DynamicClient(ctx, k8s.WithResource(redisFailoversGVR), k8s.WithNamespace(cluster.Namespace))
 

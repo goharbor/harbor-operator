@@ -10,11 +10,13 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/harbor"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage"
 	minio "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/api/v1"
+	"github.com/goharbor/harbor-operator/pkg/cluster/k8s"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
+	"github.com/goharbor/harbor-operator/pkg/config"
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
 	"github.com/goharbor/harbor-operator/pkg/factories/application"
-	"github.com/goharbor/harbor-operator/pkg/k8s"
 	"github.com/ovh/configstore"
+	"github.com/pkg/errors"
 	redisOp "github.com/spotahome/redis-operator/api/redisfailover/v1"
 	postgresv1 "github.com/zalando/postgres-operator/pkg/apis/acid.zalan.do/v1"
 	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions"
@@ -24,6 +26,7 @@ import (
 	"k8s.io/client-go/dynamic"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 )
@@ -65,9 +68,14 @@ type Reconciler struct {
 // +kubebuilder:rbac:groups=goharbor.io,resources=harbors,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=apiextensions.k8s.io,resources=customresourcedefinitions,verbs=get;list
 
-func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) error {
+func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) error { // nolint:funlen
 	if err := r.ctrl.SetupWithManager(ctx, mgr); err != nil {
 		return err
+	}
+
+	concurrentReconcile, err := r.ConfigStore.GetItemValueInt(config.ReconciliationKey)
+	if err != nil {
+		return errors.Wrap(err, "cannot get concurrent reconcile")
 	}
 
 	r.Client = mgr.GetClient()
@@ -108,7 +116,10 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 	builder := ctrl.NewControllerManagedBy(mgr).
 		For(&goharborv1alpha2.HarborCluster{}).
 		Owns(&goharborv1alpha2.Harbor{}).
-		WithEventFilter(harborClusterPredicateFuncs)
+		WithEventFilter(harborClusterPredicateFuncs).
+		WithOptions(controller.Options{
+			MaxConcurrentReconciles: int(concurrentReconcile),
+		})
 
 	if r.CRDInstalled(ctx, dClient.RawClient(), minioCRD) {
 		builder.Owns(&minio.Tenant{})

@@ -46,9 +46,10 @@ type DynamicClientWrapper struct {
 }
 
 // DynamicClient returns a DClient copy.
-// Required options: WithResource and WithNamespace
+// Required options: WithResource and WithNamespace.
 func (d *DynamicClientWrapper) DynamicClient(ctx context.Context, options ...DynamicClientOption) DClient {
 	clientOptions := &DynamicClientOptions{}
+
 	for _, op := range options {
 		op(clientOptions)
 	}

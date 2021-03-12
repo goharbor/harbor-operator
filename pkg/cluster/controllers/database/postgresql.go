@@ -5,8 +5,8 @@ import (
 
 	"github.com/go-logr/logr"
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	"github.com/goharbor/harbor-operator/pkg/cluster/k8s"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
-	"github.com/goharbor/harbor-operator/pkg/k8s"
 	"github.com/ovh/configstore"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -30,7 +30,7 @@ type Connect struct {
 	Database string
 }
 
-func (p *PostgreSQLController) Apply(ctx context.Context, harborcluster *goharborv1alpha2.HarborCluster) (*lcm.CRStatus, error) {
+func (p *PostgreSQLController) Apply(ctx context.Context, harborcluster *goharborv1alpha2.HarborCluster, _ ...lcm.Option) (*lcm.CRStatus, error) {
 	crdClient := p.DClient.DynamicClient(ctx, k8s.WithResource(databaseGVR), k8s.WithNamespace(harborcluster.Namespace))
 
 	actualUnstructured, err := crdClient.Get(p.resourceName(harborcluster.Namespace, harborcluster.Name), metav1.GetOptions{})
