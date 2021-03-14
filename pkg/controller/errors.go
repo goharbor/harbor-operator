@@ -2,6 +2,8 @@ package controller
 
 import (
 	"context"
+	"strings"
+	"time"
 
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	"github.com/opentracing/opentracing-go"
@@ -12,13 +14,25 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+const optimisticLockErrorMsg = "the object has been modified; please apply your changes to the latest version and try again"
+
 type causer interface {
 	Cause() error
+}
+
+func IsOptimisticLockError(err error) bool {
+	return strings.Contains(err.Error(), optimisticLockErrorMsg)
 }
 
 func (c *Controller) HandleError(ctx context.Context, resource runtime.Object, resultError error) (ctrl.Result, error) {
 	if resultError == nil {
 		return ctrl.Result{}, c.SetSuccessStatus(ctx, resource)
+	}
+
+	// Do manual retry without error when resultError is an optimistic lock error.
+	// For more info, see https://github.com/kubernetes/kubernetes/issues/28149
+	if IsOptimisticLockError(resultError) {
+		return ctrl.Result{RequeueAfter: time.Second}, nil
 	}
 
 	span, ctx := opentracing.StartSpanFromContext(ctx, "handleError", opentracing.Tags{
