@@ -25,10 +25,10 @@ var (
 	runAsUser  int64 = 10000
 )
 
-func (m *MinIOController) ProvisionMinIOProperties(harborcluster *goharborv1.HarborCluster, minioInstance *minio.Tenant) (*lcm.CRStatus, error) {
+func (m *MinIOController) ProvisionMinIOProperties(ctx context.Context, harborcluster *goharborv1.HarborCluster, minioInstance *minio.Tenant) (*lcm.CRStatus, error) {
 	properties := &lcm.Properties{}
 
-	data, err := m.getMinIOProperties(harborcluster, minioInstance)
+	data, err := m.getMinIOProperties(ctx, harborcluster, minioInstance)
 	if err != nil {
 		return minioNotReadyStatus(GetMinIOProperties, err.Error()), err
 	}
@@ -38,15 +38,15 @@ func (m *MinIOController) ProvisionMinIOProperties(harborcluster *goharborv1.Har
 	return minioReadyStatus(properties), nil
 }
 
-func (m *MinIOController) getMinIOProperties(harborcluster *goharborv1.HarborCluster, minioInstance *minio.Tenant) (*goharborv1.HarborStorageImageChartStorageSpec, error) {
-	accessKey, secretKey, err := m.getCredsFromSecret(harborcluster)
+func (m *MinIOController) getMinIOProperties(ctx context.Context, harborcluster *goharborv1.HarborCluster, minioInstance *minio.Tenant) (*goharborv1.HarborStorageImageChartStorageSpec, error) {
+	accessKey, secretKey, err := m.getCredsFromSecret(ctx, harborcluster)
 	if err != nil {
 		return nil, err
 	}
 
 	secretKeyRef := m.createSecretKeyRef(secretKey, harborcluster, minioInstance)
 
-	err = m.KubeClient.Create(secretKeyRef)
+	err = m.KubeClient.Create(ctx, secretKeyRef)
 	if err != nil && !k8serror.IsAlreadyExists(err) {
 		return nil, err
 	}
@@ -125,7 +125,7 @@ func (m *MinIOController) applyTenant(ctx context.Context, harborcluster *goharb
 	// If the expected tenant has been there
 	minioCR := &minio.Tenant{}
 
-	err := m.KubeClient.Get(m.getMinIONamespacedName(harborcluster), minioCR)
+	err := m.KubeClient.Get(ctx, m.getMinIONamespacedName(harborcluster), minioCR)
 	if k8serror.IsNotFound(err) {
 		m.Log.Info("Creating minIO tenant")
 
@@ -144,7 +144,7 @@ func (m *MinIOController) applyTenant(ctx context.Context, harborcluster *goharb
 		m.Log.Info("Updating minIO tenant")
 
 		minioCR.Spec = *desiredMinIOCR.Spec.DeepCopy()
-		if err := m.KubeClient.Update(minioCR); err != nil {
+		if err := m.KubeClient.Update(ctx, minioCR); err != nil {
 			return minioNotReadyStatus(UpdateMinIOError, err.Error()), err
 		}
 
@@ -160,7 +160,7 @@ func (m *MinIOController) createTenant(ctx context.Context, harborcluster *gohar
 	if harborcluster.Spec.InClusterStorage.MinIOSpec.SecretRef == "" {
 		credsSecret := m.generateCredsSecret(harborcluster)
 
-		err := m.KubeClient.Create(credsSecret)
+		err := m.KubeClient.Create(ctx, credsSecret)
 		if err != nil && !k8serror.IsAlreadyExists(err) {
 			return minioNotReadyStatus(CreateMinIOSecretError, err.Error()), err
 		}
@@ -172,7 +172,7 @@ func (m *MinIOController) createTenant(ctx context.Context, harborcluster *gohar
 		return minioNotReadyStatus(GenerateMinIOCrError, err.Error()), err
 	}
 
-	if err := m.KubeClient.Create(desiredMinIOCR); err != nil {
+	if err := m.KubeClient.Create(ctx, desiredMinIOCR); err != nil {
 		return minioNotReadyStatus(CreateMinIOError, err.Error()), err
 	}
 
@@ -330,11 +330,11 @@ func (m *MinIOController) generateCredsSecret(harborcluster *goharborv1.HarborCl
 	}
 }
 
-func (m *MinIOController) getCredsFromSecret(harborcluster *goharborv1.HarborCluster) ([]byte, []byte, error) {
+func (m *MinIOController) getCredsFromSecret(ctx context.Context, harborcluster *goharborv1.HarborCluster) ([]byte, []byte, error) {
 	var minIOSecret corev1.Secret
 
 	namespaced := m.getMinIOSecretNamespacedName(harborcluster)
-	err := m.KubeClient.Get(namespaced, &minIOSecret)
+	err := m.KubeClient.Get(ctx, namespaced, &minIOSecret)
 
 	return minIOSecret.Data["accesskey"], minIOSecret.Data["secretkey"], err
 }

@@ -6,26 +6,27 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/ovh/configstore"
 	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type CtrlOptions struct {
 	CTX         context.Context
-	Client      Client
+	Client      client.Client
 	Log         logr.Logger
-	DClient     DClient
+	DClient     *DynamicClientWrapper
 	Scheme      *runtime.Scheme
 	ConfigStore *configstore.Store
 }
 
 type Option func(ops *CtrlOptions)
 
-func WithClient(client Client) Option {
+func WithClient(client client.Client) Option {
 	return func(ops *CtrlOptions) {
 		ops.Client = client
 	}
 }
 
-func WithDClient(dClient DClient) Option {
+func WithDClient(dClient *DynamicClientWrapper) Option {
 	return func(ops *CtrlOptions) {
 		ops.DClient = dClient
 	}

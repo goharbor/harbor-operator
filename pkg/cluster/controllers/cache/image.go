@@ -45,10 +45,5 @@ func (rm *redisResourceManager) GetImage(ctx context.Context, harborcluster *goh
 		)
 	}
 
-	image, err := image.GetImage(ctx, ComponentName, options...)
-	if err != nil {
-		return "", err
-	}
-
-	return image, nil
+	return image.GetImage(ctx, ComponentName, options...)
 }

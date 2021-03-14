@@ -22,6 +22,7 @@ import (
 
 	"github.com/go-logr/logr"
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -37,6 +38,7 @@ type status struct {
 	cr             *goharborv1.HarborCluster
 	data           *goharborv1.HarborClusterStatus
 	sourceRevision int64
+	collection     *lcm.CRStatusCollection
 
 	locker *sync.Mutex
 }
@@ -52,6 +54,7 @@ func newStatus(source *goharborv1.HarborCluster) *status {
 			Revision:   time.Now().UnixNano(),
 			Conditions: make([]goharborv1.HarborClusterCondition, 0),
 		},
+		collection: lcm.NewCRStatusCollection(),
 	}
 
 	if source != nil {
@@ -187,6 +190,16 @@ func (s *status) UpdateCondition(ct goharborv1.HarborClusterConditionType, c goh
 	cc.LastTransitionTime = &now
 	s.data.Conditions = append(s.data.Conditions, *cc)
 	s.data.Revision = time.Now().UnixNano()
+}
+
+// TrackDependencies tracks the status of the dependant CR.
+func (s *status) TrackDependencies(component goharborv1.Component, crStatus *lcm.CRStatus) {
+	s.collection.Set(component, crStatus)
+}
+
+// GetDependencies returns the status collection.
+func (s *status) GetDependencies() *lcm.CRStatusCollection {
+	return s.collection
 }
 
 func (s *status) overallStatus() goharborv1.ClusterStatus {

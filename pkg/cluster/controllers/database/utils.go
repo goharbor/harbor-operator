@@ -1,6 +1,7 @@
 package database
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 
@@ -22,12 +23,12 @@ var postgresqlVersions = map[string]string{
 	"*": "12", // TODO: change to postgres 9.6
 }
 
-func (p *PostgreSQLController) GetDatabases() map[string]string {
+func (p *PostgreSQLController) GetDatabases(harborcluster *goharborv1alpha2.HarborCluster) map[string]string {
 	databases := map[string]string{
 		CoreDatabase: DefaultDatabaseUser,
 	}
 
-	if p.HarborCluster.Spec.Notary != nil {
+	if harborcluster.Spec.Notary != nil {
 		databases[NotaryServerDatabase] = DefaultDatabaseUser
 		databases[NotarySignerDatabase] = DefaultDatabaseUser
 	}
@@ -36,8 +37,8 @@ func (p *PostgreSQLController) GetDatabases() map[string]string {
 }
 
 // GetDatabaseConn is getting database connection.
-func (p *PostgreSQLController) GetDatabaseConn(secretName string) (*Connect, error) {
-	secret, err := p.GetSecret(secretName)
+func (p *PostgreSQLController) GetDatabaseConn(ctx context.Context, ns, secretName string) (*Connect, error) {
+	secret, err := p.GetSecret(ctx, ns, secretName)
 	if err != nil {
 		return nil, err
 	}
@@ -54,19 +55,19 @@ func (p *PostgreSQLController) GetDatabaseConn(secretName string) (*Connect, err
 }
 
 // GetStorageClass returns the storage class name.
-func (p *PostgreSQLController) GetStorageClass() string {
-	if p.HarborCluster.Spec.InClusterDatabase != nil && p.HarborCluster.Spec.InClusterDatabase.PostgresSQLSpec != nil {
-		return p.HarborCluster.Spec.InClusterDatabase.PostgresSQLSpec.StorageClassName
+func (p *PostgreSQLController) GetStorageClass(harborcluster *goharborv1alpha2.HarborCluster) string {
+	if harborcluster.Spec.InClusterDatabase != nil && harborcluster.Spec.InClusterDatabase.PostgresSQLSpec != nil {
+		return harborcluster.Spec.InClusterDatabase.PostgresSQLSpec.StorageClassName
 	}
 
 	return ""
 }
 
 // GetSecret returns the database connection Secret.
-func (p *PostgreSQLController) GetSecret(secretName string) (map[string][]byte, error) {
+func (p *PostgreSQLController) GetSecret(ctx context.Context, ns, secretName string) (map[string][]byte, error) {
 	secret := &corev1.Secret{}
 
-	err := p.Client.Get(types.NamespacedName{Name: secretName, Namespace: p.HarborCluster.Namespace}, secret)
+	err := p.Client.Get(ctx, types.NamespacedName{Name: secretName, Namespace: ns}, secret)
 	if err != nil {
 		return nil, err
 	}
@@ -77,10 +78,10 @@ func (p *PostgreSQLController) GetSecret(secretName string) (map[string][]byte, 
 }
 
 // GetPostgreResource returns postgres resource.
-func (p *PostgreSQLController) GetPostgreResource() api.Resources {
+func (p *PostgreSQLController) GetPostgreResource(harborcluster *goharborv1alpha2.HarborCluster) api.Resources {
 	resources := api.Resources{}
 
-	if p.HarborCluster.Spec.InClusterDatabase.PostgresSQLSpec == nil {
+	if harborcluster.Spec.InClusterDatabase.PostgresSQLSpec == nil {
 		resources.ResourceRequests = api.ResourceDescription{
 			CPU:    "1",
 			Memory: "1Gi",
@@ -93,8 +94,8 @@ func (p *PostgreSQLController) GetPostgreResource() api.Resources {
 		return resources
 	}
 
-	cpu := p.HarborCluster.Spec.InClusterDatabase.PostgresSQLSpec.Resources.Requests.Cpu()
-	mem := p.HarborCluster.Spec.InClusterDatabase.PostgresSQLSpec.Resources.Requests.Memory()
+	cpu := harborcluster.Spec.InClusterDatabase.PostgresSQLSpec.Resources.Requests.Cpu()
+	mem := harborcluster.Spec.InClusterDatabase.PostgresSQLSpec.Resources.Requests.Memory()
 
 	request := api.ResourceDescription{}
 	if cpu != nil {
@@ -112,29 +113,29 @@ func (p *PostgreSQLController) GetPostgreResource() api.Resources {
 }
 
 // GetRedisServerReplica returns postgres replicas.
-func (p *PostgreSQLController) GetPostgreReplica() int32 {
-	if p.HarborCluster.Spec.InClusterDatabase.PostgresSQLSpec == nil {
+func (p *PostgreSQLController) GetPostgreReplica(harborcluster *goharborv1alpha2.HarborCluster) int32 {
+	if harborcluster.Spec.InClusterDatabase.PostgresSQLSpec == nil {
 		return DefaultDatabaseReplica
 	}
 
-	if p.HarborCluster.Spec.InClusterDatabase.PostgresSQLSpec.Replicas == 0 {
+	if harborcluster.Spec.InClusterDatabase.PostgresSQLSpec.Replicas == 0 {
 		return DefaultDatabaseReplica
 	}
 
-	return int32(p.HarborCluster.Spec.InClusterDatabase.PostgresSQLSpec.Replicas)
+	return int32(harborcluster.Spec.InClusterDatabase.PostgresSQLSpec.Replicas)
 }
 
 // GetPostgreStorageSize returns Postgre storage size.
-func (p *PostgreSQLController) GetPostgreStorageSize() string {
-	if p.HarborCluster.Spec.InClusterDatabase.PostgresSQLSpec == nil {
+func (p *PostgreSQLController) GetPostgreStorageSize(harborcluster *goharborv1alpha2.HarborCluster) string {
+	if harborcluster.Spec.InClusterDatabase.PostgresSQLSpec == nil {
 		return DefaultDatabaseMemory
 	}
 
-	if p.HarborCluster.Spec.InClusterDatabase.PostgresSQLSpec.Storage == "" {
+	if harborcluster.Spec.InClusterDatabase.PostgresSQLSpec.Storage == "" {
 		return DefaultDatabaseMemory
 	}
 
-	return p.HarborCluster.Spec.InClusterDatabase.PostgresSQLSpec.Storage
+	return harborcluster.Spec.InClusterDatabase.PostgresSQLSpec.Storage
 }
 
 func (p *PostgreSQLController) GetPostgreVersion(harborcluster *goharborv1alpha2.HarborCluster) (string, error) {

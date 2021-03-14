@@ -45,10 +45,5 @@ func (p *PostgreSQLController) GetImage(ctx context.Context, harborcluster *goha
 		)
 	}
 
-	image, err := image.GetImage(ctx, ComponentName, options...)
-	if err != nil {
-		return "", err
-	}
-
-	return image, nil
+	return image.GetImage(ctx, ComponentName, options...)
 }

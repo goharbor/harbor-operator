@@ -6,6 +6,7 @@ import (
 
 	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-operator/pkg/cluster/gos"
+	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
@@ -14,14 +15,10 @@ import (
 )
 
 const (
-	DefaultWaitCycleTime = 10
-	ErrorWaitCycle       = 5
+	DefaultWaitCycleTime = 5
 )
 
-var (
-	defaultWaitCycle = ctrl.Result{RequeueAfter: DefaultWaitCycleTime * time.Second}
-	errorWaitCycle   = ctrl.Result{RequeueAfter: ErrorWaitCycle * time.Second}
-)
+var defaultWaitCycle = ctrl.Result{RequeueAfter: DefaultWaitCycleTime * time.Second}
 
 // Reconcile logic of the HarborCluster.
 func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) { // nolint:funlen
@@ -84,7 +81,6 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) { 
 		mgr := NewServiceManager(v1alpha2.ComponentCache)
 
 		return mgr.WithContext(gtx).
-			WithConfig(cacheConfigGetter).
 			TrackedBy(st).
 			From(harborcluster).
 			Use(r.CacheCtrl).
@@ -96,7 +92,6 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) { 
 		mgr := NewServiceManager(v1alpha2.ComponentDatabase)
 
 		return mgr.WithContext(gtx).
-			WithConfig(dbConfigGetter).
 			TrackedBy(st).
 			From(harborcluster).
 			Use(r.DatabaseCtrl).
@@ -108,7 +103,6 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) { 
 		mgr := NewServiceManager(v1alpha2.ComponentStorage)
 
 		return mgr.WithContext(gtx).
-			WithConfig(storageConfigGetter).
 			TrackedBy(st).
 			From(harborcluster).
 			Use(r.StorageCtrl).
@@ -117,7 +111,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) { 
 	})
 
 	if err := g.Wait(); err != nil {
-		return errorWaitCycle, fmt.Errorf("reconcile dependent services error: %w", err)
+		return ctrl.Result{}, fmt.Errorf("reconcile dependent services error: %w", err)
 	}
 
 	if !st.DependsReady() {
@@ -127,17 +121,17 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) { 
 	}
 
 	// Create Harbor instance now
-	harborStatus, err := r.HarborCtrl.Apply(ctx, harborcluster)
+	harborStatus, err := r.HarborCtrl.Apply(ctx, harborcluster, lcm.WithDependencies(st.GetDependencies()))
 	if harborStatus != nil {
 		st.UpdateCondition(v1alpha2.ServiceReady, harborStatus.Condition)
 	}
 
 	if err != nil {
-		return errorWaitCycle, fmt.Errorf("reconcile harbor service error: %w", err)
+		return ctrl.Result{}, fmt.Errorf("reconcile harbor service error: %w", err)
 	}
 
 	// Reconcile done
-	r.Log.Info("reconcile is completed")
+	r.Log.Info("Reconcile is completed")
 
 	if harborStatus.Condition.Status == corev1.ConditionTrue {
 		return ctrl.Result{}, r.ctrl.SetSuccessStatus(ctx, harborcluster)

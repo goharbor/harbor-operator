@@ -6,6 +6,14 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
+func databaseReadyStatus(reason, message string, properties lcm.Properties) *lcm.CRStatus {
+	return lcm.New(goharborv1alpha2.DatabaseReady).
+		WithStatus(corev1.ConditionTrue).
+		WithReason(reason).
+		WithMessage(message).
+		WithProperties(properties)
+}
+
 func databaseNotReadyStatus(reason, message string) *lcm.CRStatus {
 	return lcm.New(goharborv1alpha2.DatabaseReady).
 		WithStatus(corev1.ConditionFalse).

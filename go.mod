@@ -11,7 +11,6 @@ require (
 	github.com/go-logr/zapr v0.3.0 // indirect
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/goharbor/harbor/src v0.0.0-20200728051037-1d361a89a056
-	github.com/google/go-cmp v0.5.2
 	github.com/huandu/xstrings v1.3.2 // indirect
 	github.com/imdario/mergo v0.3.10 // indirect
 	github.com/jaegertracing/jaeger-lib v2.2.0+incompatible

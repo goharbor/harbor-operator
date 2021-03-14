@@ -16,7 +16,7 @@ type Controller interface {
 	// - scale the resources if the replica is changed
 	//
 	// Equal to the previous method "Reconcile()" of lcm Controller
-	Apply(ctx context.Context, harborcluster *v1alpha2.HarborCluster) (*CRStatus, error)
+	Apply(ctx context.Context, harborcluster *v1alpha2.HarborCluster, options ...Option) (*CRStatus, error)
 
 	// Delete the related resources if the resource configuration is removed from the spec.
 	// As we support connecting to the external or incluster provisioned dependent services,

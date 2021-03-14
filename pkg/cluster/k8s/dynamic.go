@@ -15,18 +15,72 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-// WrapDClient returns a Dynamic Client.
-func WrapDClient(client dynamic.Interface) DClient {
-	return &ClusterDynamicClient{
-		dClient: client,
+// DynamicClientOptions provide options for initializing ClusterDynamicClient.
+type DynamicClientOptions struct {
+	// Resource namespace
+	Namespace string
+	// Resource schema
+	Resource schema.GroupVersionResource
+}
+
+// DynamicClientOption is option template.
+type DynamicClientOption func(opt *DynamicClientOptions)
+
+// WithResource option.
+func WithResource(resource schema.GroupVersionResource) DynamicClientOption {
+	return func(opt *DynamicClientOptions) {
+		opt.Resource = resource
 	}
+}
+
+// WithNamespace option.
+func WithNamespace(namespace string) DynamicClientOption {
+	return func(opt *DynamicClientOptions) {
+		opt.Namespace = namespace
+	}
+}
+
+// DynamicClientWrapper wraps the dynamic client to DClient.
+type DynamicClientWrapper struct {
+	dClient dynamic.Interface
+}
+
+// DynamicClient returns a DClient copy.
+// Required options: WithResource and WithNamespace.
+func (d *DynamicClientWrapper) DynamicClient(ctx context.Context, options ...DynamicClientOption) DClient {
+	clientOptions := &DynamicClientOptions{}
+
+	for _, op := range options {
+		op(clientOptions)
+	}
+
+	return &ClusterDynamicClient{
+		ctx:       ctx,
+		dClient:   d.dClient,
+		resource:  clientOptions.Resource,
+		namespace: clientOptions.Namespace,
+	}
+}
+
+// RawClient returns the used dynamic.Interface.
+func (d *DynamicClientWrapper) RawClient() dynamic.Interface {
+	return d.dClient
+}
+
+// DynamicClient returns a dynamic client wrapper.
+func DynamicClient() (*DynamicClientWrapper, error) {
+	client, err := newDynamicClient()
+	if err != nil {
+		return nil, err
+	}
+
+	return &DynamicClientWrapper{
+		dClient: client,
+	}, nil
 }
 
 // DClient wraps a client-go dynamic.
 type DClient interface {
-	WithResource(resource schema.GroupVersionResource) DClient
-	WithNamespace(namespace string) DClient
-	WithContext(ctx context.Context) DClient
 	Create(obj *unstructured.Unstructured, options metav1.CreateOptions, subresources ...string) (*unstructured.Unstructured, error)
 	Update(obj *unstructured.Unstructured, options metav1.UpdateOptions, subresources ...string) (*unstructured.Unstructured, error)
 	Delete(name string, options metav1.DeleteOptions, subresources ...string) error
@@ -39,27 +93,6 @@ type ClusterDynamicClient struct {
 	namespace string
 	resource  schema.GroupVersionResource
 	ctx       context.Context
-}
-
-// WithResource returns a client with resource.
-func (w *ClusterDynamicClient) WithResource(resource schema.GroupVersionResource) DClient {
-	w.resource = resource
-
-	return w
-}
-
-// WithNamespace returns a client with namespace.
-func (w *ClusterDynamicClient) WithNamespace(namespace string) DClient {
-	w.namespace = namespace
-
-	return w
-}
-
-// WithContext returns a client with context.
-func (w *ClusterDynamicClient) WithContext(ctx context.Context) DClient {
-	w.ctx = ctx
-
-	return w
 }
 
 // Create wraps a client-go dynamic.Create call with a context.
@@ -107,8 +140,8 @@ func (w *ClusterDynamicClient) Patch(name string, pt types.PatchType, data []byt
 	return w.dClient.Resource(w.resource).Namespace(w.namespace).Patch(w.ctx, name, pt, data, options, subresources...)
 }
 
-// NewDynamicClient returns the dynamic interface.
-func NewDynamicClient() (dynamic.Interface, error) {
+// newDynamicClient returns the dynamic interface.
+func newDynamicClient() (dynamic.Interface, error) {
 	var config *rest.Config
 
 	var err error

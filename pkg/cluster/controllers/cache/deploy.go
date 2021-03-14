@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	"github.com/goharbor/harbor-operator/pkg/cluster/k8s"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -24,7 +25,7 @@ import (
 // - perform any RedisFailovers upscale (left for upscale phase)
 // - perform any pod upgrade (left for rolling upgrade phase).
 func (rc *RedisController) Deploy(ctx context.Context, cluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
-	crdClient := rc.DClient.WithResource(redisFailoversGVR).WithNamespace(cluster.Namespace)
+	crdClient := rc.DClient.DynamicClient(ctx, k8s.WithResource(redisFailoversGVR), k8s.WithNamespace(cluster.Namespace))
 
 	expectCR, err := rc.ResourceManager.GetCacheCR(ctx, cluster)
 	if err != nil {
@@ -35,7 +36,7 @@ func (rc *RedisController) Deploy(ctx context.Context, cluster *v1alpha2.HarborC
 		return cacheNotReadyStatus(ErrorSetOwnerReference, err.Error()), err
 	}
 
-	if err := rc.DeploySecret(cluster); err != nil {
+	if err := rc.DeploySecret(ctx, cluster); err != nil {
 		return cacheNotReadyStatus(ErrorCreateRedisSecret, err.Error()), err
 	}
 
@@ -55,7 +56,7 @@ func (rc *RedisController) Deploy(ctx context.Context, cluster *v1alpha2.HarborC
 	return cacheUnknownStatus(), nil
 }
 
-func (rc *RedisController) DeploySecret(cluster *v1alpha2.HarborCluster) error {
+func (rc *RedisController) DeploySecret(ctx context.Context, cluster *v1alpha2.HarborCluster) error {
 	secret := &corev1.Secret{}
 
 	sec := rc.ResourceManager.GetSecret()
@@ -63,11 +64,11 @@ func (rc *RedisController) DeploySecret(cluster *v1alpha2.HarborCluster) error {
 		return err
 	}
 
-	err := rc.Client.Get(types.NamespacedName{Name: sec.Name, Namespace: sec.Namespace}, secret)
+	err := rc.Client.Get(ctx, types.NamespacedName{Name: sec.Name, Namespace: sec.Namespace}, secret)
 	if err != nil && errors.IsNotFound(err) {
 		rc.Log.Info("Creating Redis Password Secret", "namespace", sec.Namespace, "name", sec.Name)
 
-		return rc.Client.Create(sec)
+		return rc.Client.Create(ctx, sec)
 	}
 
 	return err

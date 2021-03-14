@@ -8,20 +8,7 @@ import (
 )
 
 const (
-	RedisDownScaling     = "RedisDownScaling"
-	RedisUpScaling       = "RedisUpScaling"
-	RedisRollingUpgrades = "RollingUpgrades"
-
-	MessageRedisCluster = "Redis  %s already created."
-
-	UpdateMessageRedisCluster = "Redis  %s already update."
-
-	MessageRedisDownScaling     = "Redis downscale from %d to %d"
-	MessageRedisUpScaling       = "Redis upscale from %d to %d"
-	MessageRedisRollingUpgrades = "Redis resource from %s to %s"
-
 	RedisSentinelConnPort  = 26379
-	RedisRedisConnPort     = 6379
 	RedisSentinelConnGroup = "mymaster"
 )
 

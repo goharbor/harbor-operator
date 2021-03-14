@@ -27,13 +27,12 @@ import (
 
 // ServiceManager is designed to maintain the dependent services of the cluster.
 type ServiceManager struct {
-	ctx             context.Context
-	cluster         *v1alpha2.HarborCluster
-	component       v1alpha2.Component
-	st              *status
-	ctrl            lcm.Controller
-	svcConfigGetter svcConfigGetter
-	harborCtrl      *harbor.Controller
+	ctx        context.Context
+	cluster    *v1alpha2.HarborCluster
+	component  v1alpha2.Component
+	st         *status
+	ctrl       lcm.Controller
+	harborCtrl *harbor.Controller
 }
 
 // NewServiceManager constructs a new service manager for the specified component.
@@ -78,13 +77,6 @@ func (s *ServiceManager) Use(ctrl lcm.Controller) *ServiceManager {
 	return s
 }
 
-// WithConfig bind service configuration getter func.
-func (s *ServiceManager) WithConfig(svcCfgGetter svcConfigGetter) *ServiceManager {
-	s.svcConfigGetter = svcCfgGetter
-
-	return s
-}
-
 // Apply changes.
 func (s *ServiceManager) Apply() error { // nolint:funlen
 	if err := s.validate(); err != nil {
@@ -104,7 +96,7 @@ func (s *ServiceManager) Apply() error { // nolint:funlen
 			s.st.UpdateCondition(conditionType, status.Condition)
 			// Assign to harbor ctrl for the reconcile of cluster
 			if err == nil {
-				s.harborCtrl.WithDependency(s.component, status)
+				s.st.TrackDependencies(s.component, status)
 			}
 		}
 	}()
@@ -173,10 +165,6 @@ func (s *ServiceManager) validate() error {
 
 	if s.st == nil {
 		return errors.New("missing status")
-	}
-
-	if s.svcConfigGetter == nil {
-		return errors.New("missing svc config getter")
 	}
 
 	if s.harborCtrl == nil {
