@@ -19,8 +19,9 @@ import (
 var ErrorOwnerNotFound = errors.New("owner not found")
 
 const (
-	WarningAnnotation = "goharbor.io/warning"
-	WarningValueTmpl  = "⚠️ This Resource is managed by *%s* ⚠️"
+	ImmutableAnnotation = "goharbor.io/immutable"
+	WarningAnnotation   = "goharbor.io/warning"
+	WarningValueTmpl    = "⚠️ This Resource is managed by *%s* ⚠️"
 )
 
 const (
@@ -127,4 +128,30 @@ func (c *Controller) DeploymentMutateFn(ctx context.Context, dependencies ...gra
 	})
 
 	return mutate, nil
+}
+
+func (c *Controller) SecretMutateFn(ctx context.Context, immutable *bool) (resources.Mutable, error) {
+	mutate, err := c.GlobalMutateFn(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if immutable != nil && *immutable {
+		mutate.AppendMutation(mutation.GetAnnotationsMutation(ImmutableAnnotation, "true"))
+	}
+
+	return mutate, nil
+}
+
+func isImmutableResource(res resources.Resource) bool {
+	annotations := res.GetAnnotations()
+	if len(annotations) == 0 {
+		return false
+	}
+
+	if value, ok := annotations[ImmutableAnnotation]; ok && value == "true" {
+		return true
+	}
+
+	return false
 }

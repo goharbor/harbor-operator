@@ -42,6 +42,7 @@ func (c *Controller) Changed(ctx context.Context, depManager *checksum.Dependenc
 
 	result := resource.DeepCopyObject()
 
+	// nolint:go-golangci-lint,nestif
 	if result, ok := result.(resources.Resource); ok {
 		err = c.Client.Get(ctx, objectKey, result)
 		if err != nil {
@@ -50,6 +51,10 @@ func (c *Controller) Changed(ctx context.Context, depManager *checksum.Dependenc
 			}
 
 			return true, nil
+		}
+
+		if isImmutableResource(result) {
+			return false, nil
 		}
 
 		checksum.CopyVersion(result.(metav1.Object), resource)
@@ -337,31 +342,7 @@ func (c *Controller) AddSecretToManage(ctx context.Context, resource *corev1.Sec
 		return nil, nil
 	}
 
-	mutate, err := c.GlobalMutateFn(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	res := &Resource{
-		mutable:   mutate,
-		checkable: statuscheck.True,
-		resource:  resource,
-	}
-
-	g := sgraph.Get(ctx)
-	if g == nil {
-		return nil, errors.Errorf("no graph in current context")
-	}
-
-	return res, g.AddResource(ctx, res, dependencies, c.ProcessFunc(ctx, resource, dependencies...))
-}
-
-func (c *Controller) AddImmutableSecretToManage(ctx context.Context, resource *corev1.Secret, dependencies ...graph.Resource) (graph.Resource, error) {
-	if resource == nil {
-		return nil, nil
-	}
-
-	mutate, err := c.GlobalMutateFn(ctx)
+	mutate, err := c.SecretMutateFn(ctx, resource.Immutable)
 	if err != nil {
 		return nil, err
 	}
