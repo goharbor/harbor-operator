@@ -267,6 +267,8 @@ type RegistryComponentSpec struct {
 type ChartMuseumComponentSpec struct {
 	harbormetav1.ComponentSpec `json:",inline"`
 
+	CertificateInjection `json:",inline"`
+
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=false
 	// Harbor defaults ChartMuseum to returning relative urls,

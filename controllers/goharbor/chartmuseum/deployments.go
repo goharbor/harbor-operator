@@ -80,6 +80,12 @@ func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1a
 		MountPath: ConfigPath,
 	}}
 
+	// inject s3 cert if need.
+	if chartMuseum.Spec.CertificateInjection.ShouldInject() {
+		volumes = append(volumes, chartMuseum.Spec.CertificateInjection.GenerateVolumes()...)
+		volumeMounts = append(volumeMounts, chartMuseum.Spec.CertificateInjection.GenerateVolumeMounts()...)
+	}
+
 	if chartMuseum.Spec.Authentication.BasicAuthRef != "" {
 		envs = append(envs, corev1.EnvVar{
 			Name: "BASIC_AUTH_USER",

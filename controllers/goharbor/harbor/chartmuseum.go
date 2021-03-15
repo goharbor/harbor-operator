@@ -121,6 +121,7 @@ func (r *Reconciler) GetChartMuseum(ctx context.Context, harbor *goharborv1alpha
 				Debug: debug,
 				JSON:  true,
 			},
+			CertificateInjection: harbor.Spec.ChartMuseum.CertificateInjection,
 		},
 	}, nil
 }

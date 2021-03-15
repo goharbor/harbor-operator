@@ -222,17 +222,22 @@ func harborClusterCRStatus(harbor *v1alpha2.Harbor) *lcm.CRStatus {
 
 // injectS3CertToHarborComponents injects s3 cert to harbor spec.
 func injectS3CertToHarborComponents(harbor *v1alpha2.Harbor) {
-	if storage := harbor.Spec.ImageChartStorage; storage != nil {
-		if storage.S3 != nil && storage.S3.CertificateRef != "" {
-			certRef := storage.S3.CertificateRef
-			// inject cert to component core
-			harbor.Spec.Core.CertificateRefs = append(harbor.Spec.Core.CertificateRefs, certRef)
-			// inject cert to component jobservice
-			harbor.Spec.JobService.CertificateRefs = append(harbor.Spec.JobService.CertificateRefs, certRef)
-			// inject cert to component trivy
-			if harbor.Spec.Trivy != nil {
-				harbor.Spec.Trivy.CertificateRefs = append(harbor.Spec.Trivy.CertificateRefs, certRef)
-			}
-		}
+	storage := harbor.Spec.ImageChartStorage
+	if storage == nil || storage.S3 == nil || storage.S3.CertificateRef == "" {
+		return
+	}
+
+	certRef := storage.S3.CertificateRef
+	// inject cert to component core
+	harbor.Spec.Core.CertificateRefs = append(harbor.Spec.Core.CertificateRefs, certRef)
+	// inject cert to component jobservice
+	harbor.Spec.JobService.CertificateRefs = append(harbor.Spec.JobService.CertificateRefs, certRef)
+	// inject cert to component trivy
+	if harbor.Spec.Trivy != nil {
+		harbor.Spec.Trivy.CertificateRefs = append(harbor.Spec.Trivy.CertificateRefs, certRef)
+	}
+	// inject cert to chartmuseum
+	if harbor.Spec.ChartMuseum != nil {
+		harbor.Spec.ChartMuseum.CertificateRefs = append(harbor.Spec.ChartMuseum.CertificateRefs, certRef)
 	}
 }
