@@ -122,6 +122,10 @@ spec:
                     - host
                     type: object
                 type: object
+              certificateRefs:
+                items:
+                  type: string
+                type: array
               chart:
                 properties:
                   allowOverwrite:
@@ -1959,6 +1963,10 @@ spec:
                     default: false
                     description: Harbor defaults ChartMuseum to returning relative urls, if you want using absolute url you should enable it
                     type: boolean
+                  certificateRefs:
+                    items:
+                      type: string
+                    type: array
                   image:
                     description: Image name for the component.
                     type: string
@@ -2220,6 +2228,7 @@ spec:
                         type: object
                     type: object
                   notary:
+                    description: The ingress of the notary, required when notary component enabled.
                     properties:
                       ingress:
                         properties:
@@ -3638,6 +3647,10 @@ spec:
                     default: false
                     description: Harbor defaults ChartMuseum to returning relative urls, if you want using absolute url you should enable it
                     type: boolean
+                  certificateRefs:
+                    items:
+                      type: string
+                    type: array
                   image:
                     description: Image name for the component.
                     type: string
@@ -3899,6 +3912,7 @@ spec:
                         type: object
                     type: object
                   notary:
+                    description: The ingress of the notary, required when notary component enabled.
                     properties:
                       ingress:
                         properties:
@@ -14443,7 +14457,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        image: heww/harbor-operator:dev
+        image: goharbor/harbor-operator:dev_develop
         livenessProbe:
           httpGet:
             path: /healthz
