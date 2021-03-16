@@ -157,6 +157,8 @@ type HarborClusterStatus struct {
 	// Status can be "unknown", "creating", "healthy" and "unhealthy"
 	Status ClusterStatus `json:"status"`
 
+	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
+
 	// Revision of the status
 	// Use unix nano
 	Revision int64 `json:"revision"`

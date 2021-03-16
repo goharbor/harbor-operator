@@ -14,12 +14,6 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
-const (
-	DefaultWaitCycleTime = 5
-)
-
-var defaultWaitCycle = ctrl.Result{RequeueAfter: DefaultWaitCycleTime * time.Second}
-
 // Reconcile logic of the HarborCluster.
 func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) { // nolint:funlen
 	ctx := r.ctrl.NewContext(req)
@@ -117,7 +111,8 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) { 
 	if !st.DependsReady() {
 		r.Log.Info("not all the dependent services are ready")
 
-		return defaultWaitCycle, nil
+		// The controller owns the dependent services so just return directly.
+		return ctrl.Result{}, nil
 	}
 
 	// Create Harbor instance now

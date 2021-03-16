@@ -208,10 +208,6 @@ jobs:
           exit 1
         fi
 
-        # HACK: restart the harbor-operator pod so that the manager of the harbor cluster can own the redis and postgres types
-        kubectl -n ${operatorNamespace} delete pod -l 'control-plane=harbor-operator'
-        kubectl -n ${operatorNamespace} wait --for=condition=ready pod -l 'control-plane=harbor-operator' --timeout 300s
-
     - name: install harbor
       run: |
         set -ex
@@ -232,8 +228,11 @@ jobs:
           kubectl -n cluster-sample-ns get all
         done
 
-        kubectl -n cluster-sample-ns wait --for=condition=InProgress=False --for=condition=Failed=False harborcluster harborcluster-sample --timeout 600s
-        if [ $? -ne 0 ] ; then
+        function wait-for-condition () {
+          time kubectl -n cluster-sample-ns wait --for=condition=$1 harborcluster harborcluster-sample --timeout $2
+        }
+
+        if ! wait-for-condition InProgress=False 600s && ! wait-for-condition Failed=False 60s; then
           echo install harbor failed
           kubectl get all -n cluster-sample-ns
 
