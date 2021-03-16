@@ -3539,6 +3539,9 @@ spec:
                   - type
                   type: object
                 type: array
+              observedGeneration:
+                format: int64
+                type: integer
               operator:
                 description: ControllerStatus represents the current status of the operator.
                 properties:
@@ -13277,6 +13280,7 @@ rules:
   verbs:
   - get
   - list
+  - watch
 - apiGroups:
   - apps
   resources:

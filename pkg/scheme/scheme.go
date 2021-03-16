@@ -11,6 +11,7 @@ import (
 	"github.com/pkg/errors"
 	redisfailoverv1 "github.com/spotahome/redis-operator/api/redisfailover/v1"
 	postgresv1 "github.com/zalando/postgres-operator/pkg/apis/acid.zalan.do/v1"
+	apiextensions "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 )
@@ -56,6 +57,11 @@ func New(ctx context.Context) (*runtime.Scheme, error) {
 	err = minio.AddToScheme(scheme)
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to configure minio scheme")
+	}
+
+	err = apiextensions.AddToScheme(scheme)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to configure apiextensions scheme")
 	}
 
 	// +kubebuilder:scaffold:scheme

@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-logr/logr"
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	"github.com/goharbor/harbor-operator/pkg/builder"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/cache"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/database"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/harbor"
@@ -19,11 +20,8 @@ import (
 	"github.com/pkg/errors"
 	redisOp "github.com/spotahome/redis-operator/api/redisfailover/v1"
 	postgresv1 "github.com/zalando/postgres-operator/pkg/apis/acid.zalan.do/v1"
-	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions"
 	"k8s.io/apimachinery/pkg/api/equality"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/dynamic"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -66,9 +64,9 @@ type Reconciler struct {
 // +kubebuilder:rbac:groups="",resources=pods,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=apps,resources=statefulsets;deployments,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=goharbor.io,resources=harbors,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=apiextensions.k8s.io,resources=customresourcedefinitions,verbs=get;list
+// +kubebuilder:rbac:groups=apiextensions.k8s.io,resources=customresourcedefinitions,verbs=get;list;watch
 
-func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) error { // nolint:funlen
+func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) error {
 	if err := r.ctrl.SetupWithManager(ctx, mgr); err != nil {
 		return err
 	}
@@ -113,27 +111,17 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 		k8s.WithScheme(mgr.GetScheme()),
 		k8s.WithClient(mgr.GetClient()))
 
-	builder := ctrl.NewControllerManagedBy(mgr).
+	return builder.ControllerManagedBy(mgr).
 		For(&goharborv1alpha2.HarborCluster{}).
 		Owns(&goharborv1alpha2.Harbor{}).
+		TryOwns(&minio.Tenant{}, minioCRD).
+		TryOwns(&postgresv1.Postgresql{}, postgresCRD).
+		TryOwns(&redisOp.RedisFailover{}, redisCRD).
 		WithEventFilter(harborClusterPredicateFuncs).
 		WithOptions(controller.Options{
 			MaxConcurrentReconciles: int(concurrentReconcile),
-		})
-
-	if r.CRDInstalled(ctx, dClient.RawClient(), minioCRD) {
-		builder.Owns(&minio.Tenant{})
-	}
-
-	if r.CRDInstalled(ctx, dClient.RawClient(), postgresCRD) {
-		builder.Owns(&postgresv1.Postgresql{})
-	}
-
-	if r.CRDInstalled(ctx, dClient.RawClient(), redisCRD) {
-		builder.Owns(&redisOp.RedisFailover{})
-	}
-
-	return builder.Complete(r)
+		}).
+		Complete(r)
 }
 
 // New HarborCluster reconciler.
@@ -167,15 +155,4 @@ var harborClusterPredicateFuncs = predicate.Funcs{
 
 		return true
 	},
-}
-
-func (r *Reconciler) CRDInstalled(ctx context.Context, client dynamic.Interface, crdName string) bool {
-	_, err := client.Resource(apiextensions.Resource("customresourcedefinitions").WithVersion("v1")).Get(ctx, crdName, metav1.GetOptions{})
-	if err != nil {
-		r.Log.Error(err, "check crd installed err", "crd", crdName)
-
-		return false
-	}
-
-	return true
 }
