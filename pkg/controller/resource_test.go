@@ -16,7 +16,7 @@ import (
 	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	netv1 "k8s.io/api/networking/v1"
+	netv1beta1 "k8s.io/api/networking/v1beta1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
 	controllerruntime "sigs.k8s.io/controller-runtime"
@@ -36,8 +36,8 @@ var _ = Context("Adding", func() {
 		&corev1.Secret{}: func(c *Controller, ctx context.Context, res resources.Resource, dep ...graph.Resource) (graph.Resource, error) {
 			return c.AddSecretToManage(ctx, res.(*corev1.Secret), dep...)
 		},
-		&netv1.Ingress{}: func(c *Controller, ctx context.Context, res resources.Resource, dep ...graph.Resource) (graph.Resource, error) {
-			return c.AddIngressToManage(ctx, res.(*netv1.Ingress), dep...)
+		&netv1beta1.Ingress{}: func(c *Controller, ctx context.Context, res resources.Resource, dep ...graph.Resource) (graph.Resource, error) {
+			return c.AddIngressToManage(ctx, res.(*netv1beta1.Ingress), dep...)
 		},
 		&certv1.Certificate{}: func(c *Controller, ctx context.Context, res resources.Resource, dep ...graph.Resource) (graph.Resource, error) {
 			return c.AddCertificateToManage(ctx, res.(*certv1.Certificate), dep...)

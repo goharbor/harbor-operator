@@ -13,6 +13,7 @@ import (
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	netv1 "k8s.io/api/networking/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 )
@@ -71,6 +72,7 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 		For(r.NewEmpty(ctx)).
 		Owns(&appsv1.Deployment{}).
 		Owns(&corev1.Service{}).
+		Owns(&netv1.NetworkPolicy{}).
 		WithOptions(controller.Options{
 			MaxConcurrentReconciles: int(concurrentReconcile),
 		}).

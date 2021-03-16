@@ -14,6 +14,7 @@ import (
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	netv1 "k8s.io/api/networking/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 )
@@ -36,6 +37,7 @@ type Reconciler struct {
 
 // +kubebuilder:rbac:groups=goharbor.io,resources=chartmuseums,verbs=get;list;watch
 // +kubebuilder:rbac:groups=goharbor.io,resources=chartmuseums/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=networking.k8s.io,resources=networkpolicies,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="",resources=configmaps;services,verbs=get;list;watch;create;update;patch;delete
 
@@ -73,6 +75,7 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 		Owns(&appsv1.Deployment{}).
 		Owns(&corev1.ConfigMap{}).
 		Owns(&corev1.Service{}).
+		Owns(&netv1.NetworkPolicy{}).
 		WithOptions(controller.Options{
 			MaxConcurrentReconciles: int(concurrentReconcile),
 		}).
