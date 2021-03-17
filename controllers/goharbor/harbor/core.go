@@ -10,7 +10,7 @@ import (
 	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 	"github.com/goharbor/harbor-operator/pkg/version"
-	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
+	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1"
 	"github.com/pkg/errors"
 	"github.com/sethvargo/go-password/password"
 	corev1 "k8s.io/api/core/v1"
@@ -247,12 +247,14 @@ func (r *Reconciler) GetCoreTokenCertificate(ctx context.Context, harbor *goharb
 			Duration: &metav1.Duration{
 				Duration: CoreTokenServiceDefaultCertificateDuration,
 			},
-			KeyAlgorithm: certv1.RSAKeyAlgorithm,
-			KeySize:      CoreTokenServiceDefaultKeySize,
-			DNSNames:     []string{publicDNS.Host},
-			SecretName:   secretName,
-			Usages:       []certv1.KeyUsage{certv1.UsageSigning},
-			IssuerRef:    harbor.Spec.Core.TokenIssuer,
+			PrivateKey: &certv1.CertificatePrivateKey{
+				Algorithm: certv1.RSAKeyAlgorithm,
+				Size:      CoreTokenServiceDefaultKeySize,
+			},
+			DNSNames:   []string{publicDNS.Host},
+			SecretName: secretName,
+			Usages:     []certv1.KeyUsage{certv1.UsageSigning},
+			IssuerRef:  harbor.Spec.Core.TokenIssuer,
 		},
 	}, nil
 }

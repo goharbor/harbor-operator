@@ -2,7 +2,6 @@ package v1alpha2
 
 import (
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
-	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -81,7 +80,8 @@ type NotaryServerTrustServiceRemoteSpec struct {
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=ecdsa
-	KeyAlgorithm certv1.KeyAlgorithm `json:"keyAlgorithm,omitempty"`
+	// +kubebuilder:validation:Enum=ecdsa;rsa;ed25519
+	KeyAlgorithm string `json:"keyAlgorithm,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"

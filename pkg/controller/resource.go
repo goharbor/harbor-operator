@@ -11,7 +11,7 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/resources"
 	"github.com/goharbor/harbor-operator/pkg/resources/checksum"
 	"github.com/goharbor/harbor-operator/pkg/resources/statuscheck"
-	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
+	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
