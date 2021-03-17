@@ -20,7 +20,7 @@ func (m *MinIOController) applyIngress(ctx context.Context, harborcluster *gohar
 	if !harborcluster.Spec.InClusterStorage.MinIOSpec.Redirect.Enable {
 		m.Log.Info("Redirect of MinIO is not enabled")
 
-		return minioUnknownStatus(), nil
+		return m.cleanupIngress(ctx, harborcluster)
 	}
 
 	// Get current minIO ingress
@@ -77,6 +77,32 @@ func (m *MinIOController) createIngress(ctx context.Context, harborcluster *goha
 	}
 
 	m.Log.Info("MinIO ingress is created")
+
+	return minioUnknownStatus(), nil
+}
+
+// cleanupIngress cleanups ingress of minio if exist.
+func (m *MinIOController) cleanupIngress(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*lcm.CRStatus, error) {
+	ingress := &netv1.Ingress{}
+
+	err := m.KubeClient.Get(ctx, m.getMinIONamespacedName(harborcluster), ingress)
+	if err != nil {
+		if k8serror.IsNotFound(err) {
+			// no need cleanup
+			return minioUnknownStatus(), nil
+		}
+
+		m.Log.Error(err, "Get minio ingress error")
+
+		return minioUnknownStatus(), err
+	}
+
+	// clean ingress
+	if err = m.KubeClient.Delete(ctx, ingress); err != nil {
+		m.Log.Error(err, "Delete minio ingress error")
+
+		return minioUnknownStatus(), err
+	}
 
 	return minioUnknownStatus(), nil
 }
