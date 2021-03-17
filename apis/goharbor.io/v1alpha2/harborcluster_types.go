@@ -115,7 +115,7 @@ type Storage struct {
 type StorageRedirectSpec struct {
 	// Default is true
 	// +kubebuilder:default:=true
-	Enable bool `json:"enable,omitempty"`
+	Enable bool `json:"enable"`
 	// +kubebuilder:validation:Optional
 	Expose *HarborExposeComponentSpec `json:"expose,omitempty"`
 }
