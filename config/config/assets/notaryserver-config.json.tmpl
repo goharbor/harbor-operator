@@ -44,7 +44,7 @@
       "realm": "{{ .Spec.Authentication.Token.Realm }}",
       "service": "{{ .Spec.Authentication.Token.Service }}",
       "issuer": "{{ .Spec.Authentication.Token.Issuer }}",
-      "rootcertbundle": "/etc/notary-server/auth-certificates/ca.crt",
+      "rootcertbundle": "/etc/notary-server/auth-certificates/tls.crt",
       "autoredirect": "{{ .Spec.Authentication.Token.AutoRedirect }}"
     }
   },
