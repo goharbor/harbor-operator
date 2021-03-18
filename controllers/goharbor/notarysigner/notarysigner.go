@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/pkg/config"
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
 	"github.com/goharbor/harbor-operator/pkg/event-filter/class"
@@ -20,7 +21,7 @@ import (
 const (
 	DefaultRequeueWait        = 2 * time.Second
 	ConfigTemplatePathKey     = "template-path"
-	DefaultConfigTemplatePath = "/etc/harbor-operator/notarysigner-config.json.tmpl"
+	DefaultConfigTemplatePath = "/etc/harbor-operator/templates/notarysigner-config.json.tmpl"
 	ConfigTemplateKey         = "template-content"
 )
 
@@ -76,14 +77,10 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 		Complete(r)
 }
 
-func New(ctx context.Context, name string, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
-	configTemplatePath, err := configStore.GetItemValue(ConfigTemplatePathKey)
+func New(ctx context.Context, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
+	configTemplatePath, err := config.GetString(configStore, ConfigTemplatePathKey, DefaultConfigTemplatePath)
 	if err != nil {
-		if !config.IsNotFound(err, ConfigTemplatePathKey) {
-			return nil, errors.Wrap(err, "cannot get config template path")
-		}
-
-		configTemplatePath = DefaultConfigTemplatePath
+		return nil, errors.Wrap(err, "template path")
 	}
 
 	r := &Reconciler{
@@ -93,14 +90,14 @@ func New(ctx context.Context, name string, configStore *configstore.Store) (comm
 	configStore.FileCustomRefresh(configTemplatePath, func(data []byte) ([]configstore.Item, error) {
 		r.configError = nil
 
-		logger.Get(ctx).WithName("controller").WithName(name).
+		logger.Get(ctx).WithName("controller").WithName(controllers.NotarySigner.String()).
 			Info("config reloaded", "path", configTemplatePath)
 		// TODO reconcile all core
 
 		return []configstore.Item{configstore.NewItem(ConfigTemplateKey, string(data), config.DefaultPriority)}, nil
 	})
 
-	r.Controller = commonCtrl.NewController(ctx, name, r, configStore)
+	r.Controller = commonCtrl.NewController(ctx, controllers.NotarySigner, r, configStore)
 
 	return r, nil
 }

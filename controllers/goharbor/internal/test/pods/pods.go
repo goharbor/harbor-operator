@@ -1,11 +1,12 @@
-package test
+package pods
 
 import (
 	"context"
 	"fmt"
 	"strings"
 
-	"github.com/onsi/ginkgo"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
+	"github.com/goharbor/harbor-operator/pkg/resources/statuscheck"
 	"github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -13,8 +14,10 @@ import (
 	"k8s.io/client-go/rest"
 )
 
-func Logs(ctx context.Context, deployment types.NamespacedName) map[string][]byte {
-	config := NewRestConfig(ctx)
+type Pods []corev1.Pod
+
+func List(ctx context.Context, deployment types.NamespacedName) Pods {
+	config := test.NewRestConfig(ctx)
 	config.APIPath = "apis"
 	config.GroupVersion = &appsv1.SchemeGroupVersion
 
@@ -39,7 +42,7 @@ func Logs(ctx context.Context, deployment types.NamespacedName) map[string][]byt
 		labelSelectors = append(labelSelectors, fmt.Sprintf("%s=%s", label, value))
 	}
 
-	client, err = rest.UnversionedRESTClientFor(NewRestConfig(ctx))
+	client, err = rest.UnversionedRESTClientFor(test.NewRestConfig(ctx))
 	gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 	var pods corev1.PodList
@@ -54,42 +57,42 @@ func Logs(ctx context.Context, deployment types.NamespacedName) map[string][]byt
 
 	gomega.Expect(pods.Items).ToNot(gomega.HaveLen(0))
 
-	results := make(map[string][]byte, len(pods.Items))
-
-	for _, pod := range pods.Items {
-		result, err := client.Get().
-			Resource("pods").
-			Namespace(pod.GetNamespace()).
-			Name(pod.GetName()).
-			SubResource("log").
-			Param("pretty", "true").
-			DoRaw(ctx)
-		if err != nil {
-			results[pod.GetName()] = []byte(fmt.Sprintf("%v: status %s", err, pod.Status.Phase))
-
-			continue
-		}
-
-		results[pod.GetName()] = result
-	}
-
-	return results
+	return Pods(pods.Items)
 }
 
-func LogsAll(ctx *context.Context, name func() types.NamespacedName) interface{} {
-	return func(done ginkgo.Done) {
-		defer close(done)
+func (pods Pods) Ready(ctx context.Context) Pods {
+	var result []corev1.Pod
 
-		if !ginkgo.CurrentGinkgoTestDescription().Failed {
-			return
+	for _, pod := range pods {
+		pod := pod
+
+		ok, err := statuscheck.BasicCheck(ctx, &pod)
+		gomega.Expect(err).ToNot(gomega.HaveOccurred())
+
+		if ok {
+			result = append(result, pod)
+		}
+	}
+
+	return Pods(result)
+}
+
+func (pods Pods) Latest(ctx context.Context) *corev1.Pod {
+	var latest *corev1.Pod
+
+	for _, pod := range pods {
+		pod := pod
+
+		if latest == nil {
+			latest = &pod
+
+			break
 		}
 
-		defer ginkgo.GinkgoRecover()
-
-		ginkgo.By("Fetching logs after failure", func() {
-			for name, logs := range Logs(*ctx, name()) {
-				fmt.Fprintf(ginkgo.GinkgoWriter, "\n### Logs of %s ###\n%s\n", name, string(logs))
-			}
-		})
+		if pod.CreationTimestamp.After(latest.CreationTimestamp.Time) {
+			latest = &pod
+		}
 	}
+
+	return latest
 }

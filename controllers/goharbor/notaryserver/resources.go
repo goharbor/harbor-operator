@@ -67,5 +67,7 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrapf(err, "cannot add deployment %s", deployment.GetName())
 	}
 
-	return nil
+	err = r.AddNetworkPolicies(ctx, notaryserver)
+
+	return errors.Wrap(err, "network policies")
 }

@@ -117,7 +117,6 @@ jobs:
 
       - name: go tests
         run: |
-          make go-test
           GO_TEST_OPTS='-p 1 -vet=off' make go-test
       - name: fetch logs
         if: ${{ failure() }}
