@@ -17,8 +17,8 @@ const (
 const (
 	DefaultPriority = 5
 
-	DefaultConcurrentReconcile = 1
-	DefaultHarborClass         = ""
+	DefaultConcurrentReconcile    = 1
+	DefaultHarborClass            = ""
 	DefaultNetworkPoliciesEnabled = false
 
 	// DefaultImagePullPolicy specifies the policy to image pulls.

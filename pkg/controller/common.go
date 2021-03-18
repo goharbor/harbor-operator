@@ -41,12 +41,12 @@ type Controller struct {
 	Scheme      *runtime.Scheme
 }
 
-func NewController(ctx context.Context, name string, rm ResourceManager, config *configstore.Store) *Controller {
+func NewController(ctx context.Context, base controllers.Controller, rm ResourceManager, config *configstore.Store) *Controller {
 	version := application.GetVersion(ctx)
 	gitCommit := application.GetGitCommit(ctx)
 
 	logValues := []interface{}{
-		"controller", name,
+		"controller", base.String(),
 		"version", version,
 		"git.commit", gitCommit,
 	}
@@ -54,8 +54,9 @@ func NewController(ctx context.Context, name string, rm ResourceManager, config 
 	return &Controller{
 		BaseController: base,
 		Version:        application.GetVersion(ctx),
+		GitCommit:      gitCommit,
 		rm:             rm,
-		Log:            ctrl.Log.WithName(application.GetName(ctx)).WithName("controller").WithValues("controller", name),
+		Log:            ctrl.Log.WithName(application.GetName(ctx)).WithName("controller").WithValues(logValues...),
 		ConfigStore:    config,
 	}
 }

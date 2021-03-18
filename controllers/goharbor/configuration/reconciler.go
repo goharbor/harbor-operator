@@ -11,6 +11,7 @@ import (
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
 	"github.com/goharbor/harbor-operator/pkg/factories/application"
 	"github.com/goharbor/harbor-operator/pkg/harbor"
+	"github.com/goharbor/harbor-operator/pkg/utils/strings"
 	"github.com/ovh/configstore"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -28,9 +29,9 @@ import (
 var pwdFields = []string{"email_password", "ldap_search_password", "uaa_client_secret", "oidc_client_secret"}
 
 // New HarborConfiguration reconciler.
-func New(ctx context.Context, name string, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
+func New(ctx context.Context, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
 	return &Reconciler{
-		Log: ctrl.Log.WithName(application.GetName(ctx)).WithName("configuration-controller").WithValues("controller", name),
+		Log: ctrl.Log.WithName(application.GetName(ctx)).WithName("configuration-controller").WithValues("controller", "HarborConfiguration"),
 	}, nil
 }
 
@@ -84,6 +85,12 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 		For(&corev1.ConfigMap{}).
 		WithEventFilter(configMapPredicate).
 		Complete(r)
+}
+
+func (r *Reconciler) NormalizeName(ctx context.Context, name string, suffixes ...string) string {
+	suffixes = append([]string{"Configuration"}, suffixes...)
+
+	return strings.NormalizeName(name, suffixes...)
 }
 
 // Reconcile does configuration reconcile.

@@ -110,7 +110,7 @@ func (r *Reconciler) AddNotaryIngress(ctx context.Context, harbor *goharborv1alp
 	return NotaryIngress(ingressRes), errors.Wrapf(err, "cannot add notary ingress")
 }
 
-func (r *Reconciler) GetNotaryServerIngress(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*netv1.Ingress, error) {
+func (r *Reconciler) GetNotaryServerIngress(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*netv1beta1.Ingress, error) {
 	if harbor.Spec.Notary == nil {
 		return nil, nil
 	}
@@ -153,17 +153,17 @@ func (r *Reconciler) GetNotaryIngressRules(ctx context.Context, harbor *goharbor
 		ServicePort: intstr.FromInt(notaryserver.PublicPort),
 	}
 
-	pathTypeExact := netv1beta1.PathTypeExact
+	pathTypePrefix := netv1beta1.PathTypePrefix
 
 	switch harbor.Spec.Expose.Core.Ingress.Controller {
 	case harbormetav1.IngressControllerDefault:
 		ingressRuleValue = netv1beta1.IngressRuleValue{
 			HTTP: &netv1beta1.HTTPIngressRuleValue{
-				Paths: []netv1.HTTPIngressPath{
+				Paths: []netv1beta1.HTTPIngressPath{
 					{
-						Path:    "/",
-						PathType: &pathTypeExact,
-						Backend: backend,
+						Path:     "/",
+						PathType: &pathTypePrefix,
+						Backend:  backend,
 					},
 				},
 			},
@@ -173,20 +173,21 @@ func (r *Reconciler) GetNotaryIngressRules(ctx context.Context, harbor *goharbor
 			HTTP: &netv1beta1.HTTPIngressRuleValue{
 				Paths: []netv1beta1.HTTPIngressPath{
 					{
-						Path:    "/",
-						PathType: &pathTypeExact,
-						Backend: backend,
+						Path:     "/",
+						PathType: &pathTypePrefix,
+						Backend:  backend,
 					},
 				},
 			},
 		}
 	case harbormetav1.IngressControllerNCP:
-		ingressRuleValue = netv1.IngressRuleValue{
-			HTTP: &netv1.HTTPIngressRuleValue{
-				Paths: []netv1.HTTPIngressPath{
+		ingressRuleValue = netv1beta1.IngressRuleValue{
+			HTTP: &netv1beta1.HTTPIngressRuleValue{
+				Paths: []netv1beta1.HTTPIngressPath{
 					{
-						Path:    "/.*",
-						Backend: backend,
+						Path:     "/",
+						PathType: &pathTypePrefix,
+						Backend:  backend,
 					},
 				},
 			},
@@ -195,7 +196,7 @@ func (r *Reconciler) GetNotaryIngressRules(ctx context.Context, harbor *goharbor
 		return nil, ErrInvalidIngressController{Controller: harbor.Spec.Expose.Core.Ingress.Controller}
 	}
 
-	return []netv1.IngressRule{
+	return []netv1beta1.IngressRule{
 		{
 			Host:             harbor.Spec.Expose.Notary.Ingress.Host,
 			IngressRuleValue: ingressRuleValue,
@@ -267,6 +268,7 @@ func (err ErrInvalidIngressController) Error() string {
 
 func (r *Reconciler) GetCoreIngressRuleValue(ctx context.Context, harbor *goharborv1alpha2.Harbor, core, portal netv1beta1.IngressBackend) (*netv1beta1.IngressRuleValue, error) { // nolint:funlen
 	pathTypePrefix := netv1beta1.PathTypePrefix
+	pathTypeExact := netv1beta1.PathTypeExact
 
 	switch harbor.Spec.Expose.Core.Ingress.Controller {
 	case harbormetav1.IngressControllerDefault:
@@ -300,8 +302,6 @@ func (r *Reconciler) GetCoreIngressRuleValue(ctx context.Context, harbor *goharb
 			},
 		}, nil
 	case harbormetav1.IngressControllerGCE:
-		pathTypePrefix := netv1beta1.PathTypePrefix
-
 		return &netv1beta1.IngressRuleValue{
 			HTTP: &netv1beta1.HTTPIngressRuleValue{
 				Paths: []netv1beta1.HTTPIngressPath{{
@@ -332,9 +332,6 @@ func (r *Reconciler) GetCoreIngressRuleValue(ctx context.Context, harbor *goharb
 			},
 		}, nil
 	case harbormetav1.IngressControllerNCP:
-		pathTypeExact := netv1beta1.PathTypeExact
-		pathTypePrefix := netv1beta1.PathTypePrefix
-
 		return &netv1beta1.IngressRuleValue{
 			HTTP: &netv1beta1.HTTPIngressRuleValue{
 				Paths: []netv1beta1.HTTPIngressPath{{
