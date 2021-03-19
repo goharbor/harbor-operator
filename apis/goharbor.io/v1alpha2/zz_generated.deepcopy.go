@@ -1072,6 +1072,11 @@ func (in *HarborComponentsSpec) DeepCopyInto(out *HarborComponentsSpec) {
 	in.Core.DeepCopyInto(&out.Core)
 	in.JobService.DeepCopyInto(&out.JobService)
 	in.Registry.DeepCopyInto(&out.Registry)
+	if in.RegistryController != nil {
+		in, out := &in.RegistryController, &out.RegistryController
+		*out = new(v1alpha1.ComponentSpec)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.ChartMuseum != nil {
 		in, out := &in.ChartMuseum, &out.ChartMuseum
 		*out = new(ChartMuseumComponentSpec)

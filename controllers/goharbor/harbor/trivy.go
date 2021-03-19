@@ -145,7 +145,7 @@ func (r *Reconciler) GetTrivy(ctx context.Context, harbor *goharborv1alpha2.Harb
 			}, harbor.Spec.Version),
 		},
 		Spec: goharborv1alpha2.TrivySpec{
-			ComponentSpec: r.getComponentSpec(ctx, harbor, harbormetav1.TrivyComponent),
+			ComponentSpec: harbor.GetComponentSpec(ctx, harbormetav1.TrivyComponent),
 			Redis: goharborv1alpha2.TrivyRedisSpec{
 				RedisConnection: redis,
 			},

@@ -1,14 +1,17 @@
 package v1alpha2
 
 import (
+	"context"
 	"fmt"
 	"path"
 	"strings"
 
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	"github.com/goharbor/harbor-operator/pkg/image"
 	cmmeta "github.com/jetstack/cert-manager/pkg/apis/meta/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/equality"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
@@ -34,6 +37,103 @@ type Harbor struct {
 	Spec HarborSpec `json:"spec,omitempty"`
 
 	Status harbormetav1.ComponentStatus `json:"status,omitempty"`
+}
+
+func (h *Harbor) GetComponentSpec(ctx context.Context, component harbormetav1.Component) harbormetav1.ComponentSpec {
+	var spec harbormetav1.ComponentSpec
+
+	h.deepCopyComponentSpecInto(ctx, component, &spec)
+	h.deepCopyImageSpecInto(ctx, component, &spec)
+
+	return spec
+}
+
+func (h *Harbor) deepCopyComponentSpecInto(_ context.Context, component harbormetav1.Component, spec *harbormetav1.ComponentSpec) {
+	// nolint:exhaustive
+	switch component {
+	case harbormetav1.ChartMuseumComponent:
+		if h.Spec.ChartMuseum != nil {
+			h.Spec.ChartMuseum.ComponentSpec.DeepCopyInto(spec)
+		}
+	case harbormetav1.CoreComponent:
+		h.Spec.Core.ComponentSpec.DeepCopyInto(spec)
+	case harbormetav1.JobServiceComponent:
+		h.Spec.JobService.ComponentSpec.DeepCopyInto(spec)
+	case harbormetav1.NotaryServerComponent:
+		if h.Spec.Notary != nil {
+			h.Spec.Notary.Server.DeepCopyInto(spec)
+		}
+	case harbormetav1.NotarySignerComponent:
+		if h.Spec.Notary != nil {
+			h.Spec.Notary.Signer.DeepCopyInto(spec)
+		}
+	case harbormetav1.PortalComponent:
+		h.Spec.Portal.DeepCopyInto(spec)
+	case harbormetav1.RegistryComponent:
+		h.Spec.Registry.ComponentSpec.DeepCopyInto(spec)
+	case harbormetav1.RegistryControllerComponent:
+		if h.Spec.RegistryController != nil {
+			h.Spec.RegistryController.DeepCopyInto(spec)
+		}
+
+		h.deepCopyNodeSelectorAndTolerationsOfRegistryInto(spec)
+	case harbormetav1.TrivyComponent:
+		if h.Spec.Trivy != nil {
+			h.Spec.Trivy.ComponentSpec.DeepCopyInto(spec)
+		}
+	}
+}
+
+func (h *Harbor) deepCopyNodeSelectorAndTolerationsOfRegistryInto(spec *harbormetav1.ComponentSpec) {
+	if h.Spec.ImageChartStorage.FileSystem == nil {
+		return
+	}
+
+	if len(spec.NodeSelector) == 0 && len(h.Spec.Registry.NodeSelector) != 0 {
+		in, out := &h.Spec.Registry.NodeSelector, &spec.NodeSelector
+		*out = make(map[string]string, len(*in))
+
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
+
+	if len(spec.Tolerations) == 0 && len(h.Spec.Registry.Tolerations) != 0 {
+		in, out := &h.Spec.Registry.Tolerations, &spec.Tolerations
+		*out = make([]corev1.Toleration, len(*in))
+
+		for i := range *in {
+			(*in)[i].DeepCopyInto(&(*out)[i])
+		}
+	}
+}
+
+func (h *Harbor) deepCopyImageSpecInto(ctx context.Context, component harbormetav1.Component, spec *harbormetav1.ComponentSpec) {
+	imageSource := h.Spec.ImageSource
+	if imageSource == nil {
+		return
+	}
+
+	if spec.Image == "" && (imageSource.Repository != "" || imageSource.TagSuffix != "") {
+		getImageOptions := []image.Option{
+			image.WithRepository(imageSource.Repository),
+			image.WithTagSuffix(imageSource.TagSuffix),
+			image.WithHarborVersion(h.Spec.Version),
+		}
+		spec.Image, _ = image.GetImage(ctx, component.String(), getImageOptions...)
+	}
+
+	if spec.ImagePullPolicy == nil && imageSource.ImagePullPolicy != nil {
+		in, out := &imageSource.ImagePullPolicy, &spec.ImagePullPolicy
+		*out = new(corev1.PullPolicy)
+		**out = **in
+	}
+
+	if len(spec.ImagePullSecrets) == 0 && len(imageSource.ImagePullSecrets) != 0 {
+		in, out := &imageSource.ImagePullSecrets, &spec.ImagePullSecrets
+		*out = make([]corev1.LocalObjectReference, len(*in))
+		copy(*out, *in)
+	}
 }
 
 // +kubebuilder:object:root=true
@@ -115,6 +215,33 @@ func (spec *HarborSpec) ValidateNotary() *field.Error {
 	return nil
 }
 
+func (spec *HarborSpec) ValidateRegistryController() *field.Error {
+	if spec.RegistryController == nil {
+		return nil
+	}
+
+	// nodeSelector and tolerations must equal with registry's
+	// when the image chart storage is filesystem and the access mode of pvc is ReadWriteOnce
+	// TODO: check the access mode of pvc is ReadWriteOnce
+	if spec.ImageChartStorage.FileSystem != nil {
+		if len(spec.RegistryController.NodeSelector) > 0 &&
+			!equality.Semantic.DeepEqual(spec.RegistryController.NodeSelector, spec.Registry.NodeSelector) {
+			p := field.NewPath("spec").Child("registryctl", "nodeSelector")
+
+			return field.Forbidden(p, "must be empty or equal with spec.registry.nodeSelector")
+		}
+
+		if len(spec.RegistryController.Tolerations) > 0 &&
+			!equality.Semantic.DeepEqual(spec.RegistryController.Tolerations, spec.Registry.Tolerations) {
+			p := field.NewPath("spec").Child("registryctl", "tolerations")
+
+			return field.Forbidden(p, "must be empty or equal with spec.registry.tolerations")
+		}
+	}
+
+	return nil
+}
+
 type HarborComponentsSpec struct {
 	// +kubebuilder:validation:Required
 	Portal harbormetav1.ComponentSpec `json:"portal,omitempty"`
@@ -127,6 +254,9 @@ type HarborComponentsSpec struct {
 
 	// +kubebuilder:validation:Required
 	Registry RegistryComponentSpec `json:"registry,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	RegistryController *harbormetav1.ComponentSpec `json:"registryctl,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	ChartMuseum *ChartMuseumComponentSpec `json:"chartmuseum,omitempty"`

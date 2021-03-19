@@ -60,7 +60,7 @@ func (r *Reconciler) GetPortal(ctx context.Context, harbor *goharborv1alpha2.Har
 			}, harbor.Spec.Version),
 		},
 		Spec: goharborv1alpha2.PortalSpec{
-			ComponentSpec: r.getComponentSpec(ctx, harbor, harbormetav1.PortalComponent),
+			ComponentSpec: harbor.GetComponentSpec(ctx, harbormetav1.PortalComponent),
 			TLS:           tls,
 		},
 	}, nil

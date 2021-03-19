@@ -349,7 +349,7 @@ func (r *Reconciler) GetNotarySigner(ctx context.Context, harbor *goharborv1alph
 			}, harbor.Spec.Version),
 		},
 		Spec: goharborv1alpha2.NotarySignerSpec{
-			ComponentSpec: r.getComponentSpec(ctx, harbor, harbormetav1.NotarySignerComponent),
+			ComponentSpec: harbor.GetComponentSpec(ctx, harbormetav1.NotarySignerComponent),
 			Authentication: goharborv1alpha2.NotarySignerAuthenticationSpec{
 				CertificateRef: certificateRef,
 			},
