@@ -36,6 +36,7 @@ var _ = Describe("Intializing tracing", func() {
 
 		application.SetName(&ctx, fmt.Sprintf("test-default-service-%d", atomic.AddInt32(&i, 1)))
 		application.SetVersion(&ctx, "test-version")
+		application.SetGitCommit(&ctx, "test-commit")
 	})
 
 	Context("With no value", func() {

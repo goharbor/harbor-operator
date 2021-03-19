@@ -2,6 +2,7 @@
 # Image URL to use all building/pushing image targets
 IMG ?= goharbor/harbor-operator:dev
 RELEASE_VERSION ?= 0.0.0-dev
+GIT_COMMIT ?= none
 
 CONFIGURATION_FROM ?= env,file:$(CURDIR)/config-dev.yml
 export CONFIGURATION_FROM
@@ -69,6 +70,9 @@ test: go-test go-dependencies-test
 run: go-generate certmanager $(TMPDIR)k8s-webhook-server/serving-certs/tls.crt
 	go run *.go
 
+# Install cert-manager before run
+run-with-cm: certmanager run
+
 # Run linters against all files
 .PHONY: lint
 lint: \
@@ -104,7 +108,7 @@ generated-diff-test: fmt generate
 .PHONY: diff
 diff:
 	git status
-	git diff --stat --diff-filter=d --exit-code HEAD
+	git diff --diff-filter=d --exit-code HEAD
 
 GO_TEST_OPTS ?= -p 1 -vet=off
 
@@ -141,7 +145,7 @@ helm-install: helm helm-generate
 manager: go-generate
 	go build \
 		-o bin/manager \
-		-ldflags "-X $$(go list -m).OperatorVersion=$(RELEASE_VERSION)" \
+		-ldflags "-X main.version=$(RELEASE_VERSION) -X main.gitCommit=$(GIT_COMMIT)" \
 		*.go
 
 .PHONY:helm-generate
@@ -160,7 +164,7 @@ config/webhook: controller-gen $(GO4CONTROLLERGEN_SOURCES)
 	touch "$@"
 
 config/rbac: controller-gen $(GO4CONTROLLERGEN_SOURCES)
-	$(CONTROLLER_GEN) rbac:roleName="manager-role" output:artifacts:config="$@" paths="./..."
+	$(CONTROLLER_GEN) rbac:roleName="harbor-operator-role" output:artifacts:config="$@" paths="./..."
 	touch "$@"
 
 config/crd/bases: controller-gen $(GO4CONTROLLERGEN_SOURCES)
@@ -168,7 +172,7 @@ config/crd/bases: controller-gen $(GO4CONTROLLERGEN_SOURCES)
 	touch "$@"
 
 .PHONY: generate
-generate: go-generate helm-generate
+generate: go-generate helm-generate deployment-generate
 
 go.mod: $(GONOGENERATED_SOURCES)
 	go mod tidy
@@ -188,6 +192,7 @@ docker-build: dist/harbor-operator_linux_amd64/manager
 docker-push:
 	docker push "$(IMG)"
 
+.PHONY: dist/harbor-operator_linux_amd64/manager
 dist/harbor-operator_linux_amd64/manager:
 	mkdir -p dist/harbor-operator_linux_amd64
 	CGO_ENABLED=0 \
@@ -195,7 +200,7 @@ dist/harbor-operator_linux_amd64/manager:
     GOARCH="amd64" \
 	go build \
 		-o dist/harbor-operator_linux_amd64/manager \
-		-ldflags "-X $$(go list -m).OperatorVersion=$(RELEASE_VERSION)" \
+		-ldflags "-X main.version=$(RELEASE_VERSION) -X main.gitCommit=$(GIT_COMMIT)" \
 		*.go
 
 #####################
@@ -205,7 +210,7 @@ dist/harbor-operator_linux_amd64/manager:
 # Run go linters
 .PHONY: go-lint
 go-lint: golangci-lint vet go-generate
-	$(GOLANGCI_LINT) run --verbose
+	$(GOLANGCI_LINT) run --verbose --max-same-issues 0 --sort-results
 
 # Run go fmt against code
 .PHONY: fmt
@@ -377,6 +382,9 @@ go-generate: controller-gen stringer
 deploy-rbac: go-generate kustomize
 	$(KUSTOMIZE) build --reorder legacy config/rbac \
 		| kubectl apply --validate=false -f -
+
+deployment-generate: go-generate kustomize
+	$(KUSTOMIZE) build manifests/cluster > manifests/cluster/deployment.yaml
 
 .PHONY: sample
 sample: sample-harbor

@@ -10,6 +10,8 @@ import (
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/graph"
+	"github.com/goharbor/harbor-operator/pkg/image"
+	"github.com/goharbor/harbor-operator/pkg/version"
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -18,8 +20,11 @@ import (
 )
 
 var (
-	varFalse       = false
-	trivyUID int64 = 10000
+	varFalse = false
+
+	fsGroup    int64 = 10000
+	runAsGroup int64 = 10000
+	runAsUser  int64 = 10000
 )
 
 const (
@@ -61,7 +66,13 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.
 	name := r.NormalizeName(ctx, trivy.GetName())
 	namespace := trivy.GetNamespace()
 
-	image, err := r.GetImage(ctx)
+	getImageOptions := []image.Option{
+		image.WithConfigstore(r.ConfigStore),
+		image.WithImageFromSpec(trivy.Spec.Image),
+		image.WithHarborVersion(version.GetVersion(trivy.Annotations)),
+	}
+
+	image, err := image.GetImage(ctx, harbormetav1.TrivyComponent.String(), getImageOptions...)
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot get image for deploy: %s", name)
 	}
@@ -82,6 +93,12 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.
 		MountPath: CacheVolumePath,
 		ReadOnly:  false,
 	}}
+
+	// inject s3 cert if need.
+	if trivy.Spec.CertificateInjection.ShouldInject() {
+		volumes = append(volumes, trivy.Spec.CertificateInjection.GenerateVolumes()...)
+		volumesMount = append(volumesMount, trivy.Spec.CertificateInjection.GenerateVolumeMounts()...)
+	}
 
 	for i, ref := range trivy.Spec.Server.TokenServiceCertificateAuthorityRefs {
 		volumeName := fmt.Sprintf("%s-%d", PublicCertificatesVolumeName, i)
@@ -169,10 +186,11 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.
 		Value: address,
 	})
 
-	return &appsv1.Deployment{
+	deploy := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
+			Name:        name,
+			Namespace:   namespace,
+			Annotations: version.NewVersionAnnotations(trivy.Annotations),
 		},
 		Spec: appsv1.DeploymentSpec{
 			Selector: &metav1.LabelSelector{
@@ -193,11 +211,11 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.
 					NodeSelector:                 trivy.Spec.NodeSelector,
 					AutomountServiceAccountToken: &varFalse,
 					Volumes:                      volumes,
-
 					SecurityContext: &corev1.PodSecurityContext{
-						FSGroup: &trivyUID,
+						FSGroup:    &fsGroup,
+						RunAsGroup: &runAsGroup,
+						RunAsUser:  &runAsUser,
 					},
-
 					Containers: []corev1.Container{{
 						Name:  ContainerName,
 						Image: image,
@@ -221,7 +239,11 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.
 				},
 			},
 		},
-	}, nil
+	}
+
+	trivy.Spec.ComponentSpec.ApplyToDeployment(deploy)
+
+	return deploy, nil
 }
 
 func (r *Reconciler) getProbe(ctx context.Context, trivy *goharborv1alpha2.Trivy, probePath string) *corev1.Probe {

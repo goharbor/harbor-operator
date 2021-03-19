@@ -9,6 +9,8 @@ import (
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers"
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
+	"github.com/goharbor/harbor-operator/pkg/image"
+	"github.com/goharbor/harbor-operator/pkg/version"
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -29,12 +31,17 @@ const (
 	StorageName                           = "storage"
 	StoragePath                           = "/var/lib/registry"
 	HealthPath                            = "/"
+	StorageServiceCAName                  = "storage-service-ca"
+	StorageServiceCAMountPath             = "/harbor_cust_cert/custom-ca-bundle.crt"
 )
 
 var (
-	varFalse          = false
-	varTrue           = true
-	registryUID int64 = 10000
+	varFalse = false
+	varTrue  = true
+
+	fsGroup    int64 = 10000
+	runAsGroup int64 = 10000
+	runAsUser  int64 = 10000
 )
 
 const (
@@ -43,7 +50,13 @@ const (
 )
 
 func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alpha2.Registry) (*appsv1.Deployment, error) { // nolint:funlen
-	image, err := r.GetImage(ctx)
+	getImageOptions := []image.Option{
+		image.WithConfigstore(r.ConfigStore),
+		image.WithImageFromSpec(registry.Spec.Image),
+		image.WithHarborVersion(version.GetVersion(registry.Annotations)),
+	}
+
+	image, err := image.GetImage(ctx, harbormetav1.RegistryComponent.String(), getImageOptions...)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot get image")
 	}
@@ -176,6 +189,24 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 		})
 	}
 
+	if registry.Spec.Storage.Driver.S3 != nil && registry.Spec.Storage.Driver.S3.CertificateRef != "" {
+		volumes = append(volumes, corev1.Volume{
+			Name: StorageServiceCAName,
+			VolumeSource: corev1.VolumeSource{
+				Secret: &corev1.SecretVolumeSource{
+					SecretName: registry.Spec.Storage.Driver.S3.CertificateRef,
+				},
+			},
+		})
+
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{
+			Name:      StorageServiceCAName,
+			MountPath: StorageServiceCAMountPath,
+			ReadOnly:  true,
+			SubPath:   corev1.ServiceAccountRootCAKey,
+		})
+	}
+
 	if registry.Spec.HTTP.TLS.Enabled() {
 		volumeMounts = append(volumeMounts, corev1.VolumeMount{
 			Name:      InternalCertificatesVolumeName,
@@ -218,8 +249,9 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 
 	deploy := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
+			Name:        name,
+			Namespace:   namespace,
+			Annotations: version.NewVersionAnnotations(registry.Annotations),
 		},
 		Spec: appsv1.DeploymentSpec{
 			Selector: &metav1.LabelSelector{
@@ -240,7 +272,9 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 					AutomountServiceAccountToken: &varFalse,
 					Volumes:                      volumes,
 					SecurityContext: &corev1.PodSecurityContext{
-						FSGroup: &registryUID,
+						FSGroup:    &fsGroup,
+						RunAsGroup: &runAsGroup,
+						RunAsUser:  &runAsUser,
 					},
 					Containers: []corev1.Container{{
 						Name:  controllers.Registry.String(),

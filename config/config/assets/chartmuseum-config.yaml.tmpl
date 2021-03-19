@@ -28,13 +28,22 @@ bearer.auth: 1
 {{- end }}
 
 {{- if .Spec.Cache.Redis }}
+{{- if .Spec.Cache.Redis.SentinelMasterSet }}
+cache: redis_sentinel
+{{- else }}
 cache: redis
+{{- end }}
 cache.redis:
-  {{- with (.Spec.Cache.Redis.GetDSN "") }}
-  addr: {{ quote .Host }}
-  # password: Will be set with environment variable
-  db: {{ .EscapedPath | trimAll "/" }}
+  {{- if .Spec.Cache.Redis.SentinelMasterSet }}
+  mastername: {{ .Spec.Cache.Redis.SentinelMasterSet | quote }}
   {{- end }}
+  {{- if .Spec.Cache.Redis.Port }}
+  addr: {{ printf "%s:%d" .Spec.Cache.Redis.Host .Spec.Cache.Redis.Port | quote }}
+  {{- else }}
+  addr: {{ .Spec.Cache.Redis.Host | quote }}
+  {{- end }}
+  # password: setted through environment variable
+  db: {{ .Spec.Cache.Redis.Database }}
 {{- end }}
 
 context.path: ''

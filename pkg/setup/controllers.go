@@ -6,8 +6,10 @@ import (
 
 	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/chartmuseum"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/configuration"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/core"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/harbor"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/harborcluster"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/jobservice"
 	notaryserver "github.com/goharbor/harbor-operator/controllers/goharbor/notaryserver"
 	notarysigner "github.com/goharbor/harbor-operator/controllers/goharbor/notarysigner"
@@ -27,16 +29,18 @@ const (
 )
 
 var controllersBuilder = map[controllers.Controller]func(context.Context, *configstore.Store) (commonCtrl.Reconciler, error){
-	controllers.Core:               core.New,
-	controllers.Harbor:             harbor.New,
-	controllers.JobService:         jobservice.New,
-	controllers.Registry:           registry.New,
-	controllers.NotaryServer:       notaryserver.New,
-	controllers.NotarySigner:       notarysigner.New,
-	controllers.RegistryController: registryctl.New,
-	controllers.Portal:             portal.New,
-	controllers.ChartMuseum:        chartmuseum.New,
-	controllers.Trivy:              trivy.New,
+	controllers.Core:                core.New,
+	controllers.Harbor:              harbor.New,
+	controllers.JobService:          jobservice.New,
+	controllers.Registry:            registry.New,
+	controllers.NotaryServer:        notaryserver.New,
+	controllers.NotarySigner:        notarysigner.New,
+	controllers.RegistryController:  registryctl.New,
+	controllers.Portal:              portal.New,
+	controllers.ChartMuseum:         chartmuseum.New,
+	controllers.Trivy:               trivy.New,
+	controllers.HarborCluster:       harborcluster.New,
+	controllers.HarborConfiguration: configuration.New,
 }
 
 type ControllerFactory func(context.Context, string, string, *configstore.Store) (commonCtrl.Reconciler, error)

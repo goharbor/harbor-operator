@@ -53,10 +53,7 @@ func ControllersWithManager(ctx context.Context, mgr manager.Manager) error {
 }
 
 func WebhooksWithManager(ctx context.Context, mgr manager.Manager) error {
-	var g errgroup.Group
-
 	for name, object := range webhooksBuilder {
-		name := name
 		wh := &webHook{
 			Name:    name,
 			webhook: object,
@@ -73,10 +70,13 @@ func WebhooksWithManager(ctx context.Context, mgr manager.Manager) error {
 			continue
 		}
 
-		g.Go(func() error {
-			return errors.Wrapf(wh.WithManager(ctx, mgr), "webhook %s", name)
-		})
+		// Fail earlier.
+		// 'controller-runtime' does not support webhook registrations concurrently.
+		// Check issue: https://github.com/kubernetes-sigs/controller-runtime/issues/1285.
+		if err := wh.WithManager(ctx, mgr); err != nil {
+			return errors.Wrapf(err, "webhook %s", name)
+		}
 	}
 
-	return g.Wait()
+	return nil
 }

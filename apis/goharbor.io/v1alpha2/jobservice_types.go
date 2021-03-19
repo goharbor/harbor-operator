@@ -42,6 +42,8 @@ type JobServiceList struct {
 type JobServiceSpec struct {
 	harbormetav1.ComponentSpec `json:",inline"`
 
+	CertificateInjection `json:",inline"`
+
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	SecretRef string `json:"secretRef"`

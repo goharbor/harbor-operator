@@ -33,6 +33,7 @@ type Controller struct {
 
 	BaseController controllers.Controller
 	Version        string
+	GitCommit      string
 
 	ConfigStore *configstore.Store
 	rm          ResourceManager
@@ -41,11 +42,21 @@ type Controller struct {
 }
 
 func NewController(ctx context.Context, base controllers.Controller, rm ResourceManager, config *configstore.Store) *Controller {
+	version := application.GetVersion(ctx)
+	gitCommit := application.GetGitCommit(ctx)
+
+	logValues := []interface{}{
+		"controller", base.String(),
+		"version", version,
+		"git.commit", gitCommit,
+	}
+
 	return &Controller{
 		BaseController: base,
 		Version:        application.GetVersion(ctx),
+		GitCommit:      gitCommit,
 		rm:             rm,
-		Log:            ctrl.Log.WithName(application.GetName(ctx)).WithName("controller").WithValues("controller", base.String()),
+		Log:            ctrl.Log.WithName(application.GetName(ctx)).WithName("controller").WithValues(logValues...),
 		ConfigStore:    config,
 	}
 }
@@ -55,6 +66,10 @@ func (c *Controller) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 	c.Scheme = mgr.GetScheme()
 
 	return nil
+}
+
+func (c *Controller) GetGitCommit() string {
+	return c.GitCommit
 }
 
 func (c *Controller) GetVersion() string {
@@ -167,7 +182,7 @@ func (c *Controller) Run(ctx context.Context, owner resources.Resource) error {
 		return errors.Wrap(err, "cannot add resources")
 	}
 
-	if err := c.prepareStatus(ctx, owner); err != nil {
+	if err := c.PrepareStatus(ctx, owner); err != nil {
 		return errors.Wrap(err, "cannot prepare owner status")
 	}
 

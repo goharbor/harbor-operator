@@ -42,6 +42,8 @@ type CoreSpec struct {
 	// https://github.com/goharbor/harbor/blob/master/src/common/config/metadata/metadatalist.go#L62
 	CoreConfig `json:",inline"`
 
+	CertificateInjection `json:",inline"`
+
 	// +kubebuilder:validation:Optional
 	HTTP CoreHTTPSpec `json:"http,omitempty"`
 
@@ -140,7 +142,7 @@ type CoreDatabaseSpec struct {
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=0
-	// +kubebuilder:default=100
+	// +kubebuilder:default=1000
 	MaxOpenConnections *int32 `json:"maxOpenConnections,omitempty"`
 
 	// +kubebuilder:validation:Required

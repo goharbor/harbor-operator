@@ -75,6 +75,7 @@ func NewContext() context.Context {
 
 	application.SetName(&ctx, NewName("app"))
 	application.SetVersion(&ctx, NewName("version"))
+	application.SetGitCommit(&ctx, NewName("commit"))
 
 	s, err := scheme.New(ctx)
 	gomega.Expect(err).ToNot(gomega.HaveOccurred())

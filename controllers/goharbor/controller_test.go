@@ -33,8 +33,6 @@ type controllerTest struct {
 type Resource interface {
 	runtime.Object
 	metav1.Object
-
-	DeepCopyObject() runtime.Object
 }
 
 var (

@@ -27,8 +27,6 @@ const (
 	ConfigTemplatePathKey     = "template-path"
 	DefaultConfigTemplatePath = "/etc/harbor-operator/templates/core-config.conf.tmpl"
 	ConfigTemplateKey         = "template-content"
-	ConfigImageKey            = "docker-image"
-	DefaultImage              = config.DefaultRegistry + "goharbor/harbor-core:v2.0.0"
 )
 
 // Reconciler reconciles a Core object.
@@ -92,9 +90,8 @@ func New(ctx context.Context, configStore *configstore.Store) (commonCtrl.Reconc
 		return nil, errors.Wrap(err, "template path")
 	}
 
-	r := &Reconciler{
-		configError: config.ErrNotReady,
-	}
+	r := &Reconciler{}
+	r.configError = config.ErrNotReady
 
 	configStore.FileCustomRefresh(configTemplatePath, func(data []byte) ([]configstore.Item, error) {
 		r.configError = nil

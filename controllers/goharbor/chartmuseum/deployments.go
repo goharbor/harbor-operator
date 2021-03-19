@@ -8,6 +8,8 @@ import (
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers"
+	"github.com/goharbor/harbor-operator/pkg/image"
+	"github.com/goharbor/harbor-operator/pkg/version"
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -26,7 +28,13 @@ const (
 	DefaultLocalStoragePath               = "/mnt/chartstorage"
 )
 
-var varFalse = false
+var (
+	varFalse = false
+
+	fsGroup    int64 = 10000
+	runAsGroup int64 = 10000
+	runAsUser  int64 = 10000
+)
 
 const (
 	httpsPort = 8443
@@ -34,7 +42,13 @@ const (
 )
 
 func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1alpha2.ChartMuseum) (*appsv1.Deployment, error) { // nolint:funlen
-	image, err := r.GetImage(ctx)
+	getImageOptions := []image.Option{
+		image.WithConfigstore(r.ConfigStore),
+		image.WithImageFromSpec(chartMuseum.Spec.Image),
+		image.WithHarborVersion(version.GetVersion(chartMuseum.Annotations)),
+	}
+
+	image, err := image.GetImage(ctx, harbormetav1.ChartMuseumComponent.String(), getImageOptions...)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot get image")
 	}
@@ -65,6 +79,12 @@ func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1a
 		Name:      VolumeName,
 		MountPath: ConfigPath,
 	}}
+
+	// inject s3 cert if need.
+	if chartMuseum.Spec.CertificateInjection.ShouldInject() {
+		volumes = append(volumes, chartMuseum.Spec.CertificateInjection.GenerateVolumes()...)
+		volumeMounts = append(volumeMounts, chartMuseum.Spec.CertificateInjection.GenerateVolumeMounts()...)
+	}
 
 	if chartMuseum.Spec.Authentication.BasicAuthRef != "" {
 		envs = append(envs, corev1.EnvVar{
@@ -272,8 +292,9 @@ func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1a
 
 	deploy := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
+			Name:        name,
+			Namespace:   namespace,
+			Annotations: version.NewVersionAnnotations(chartMuseum.Annotations),
 		},
 		Spec: appsv1.DeploymentSpec{
 			Selector: &metav1.LabelSelector{
@@ -294,7 +315,11 @@ func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1a
 					NodeSelector:                 chartMuseum.Spec.NodeSelector,
 					AutomountServiceAccountToken: &varFalse,
 					Volumes:                      volumes,
-
+					SecurityContext: &corev1.PodSecurityContext{
+						FSGroup:    &fsGroup,
+						RunAsGroup: &runAsGroup,
+						RunAsUser:  &runAsUser,
+					},
 					Containers: []corev1.Container{{
 						Name:  controllers.ChartMuseum.String(),
 						Image: image,

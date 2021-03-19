@@ -10,6 +10,7 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/config"
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	"github.com/goharbor/harbor-operator/pkg/graph"
+	"github.com/goharbor/harbor-operator/pkg/version"
 	"github.com/pkg/errors"
 	"github.com/sethvargo/go-password/password"
 	"golang.org/x/crypto/bcrypt"
@@ -208,12 +209,12 @@ func (r *Reconciler) GetRegistry(ctx context.Context, harbor *goharborv1alpha2.H
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
-			Annotations: map[string]string{
+			Annotations: version.SetVersion(map[string]string{
 				harbormetav1.NetworkPoliciesAnnotationName: harbormetav1.NetworkPoliciesAnnotationDisabled,
-			},
+			}, harbor.Spec.Version),
 		},
 		Spec: goharborv1alpha2.RegistrySpec{
-			ComponentSpec: harbor.Spec.Registry.ComponentSpec,
+			ComponentSpec: harbor.GetComponentSpec(ctx, harbormetav1.RegistryComponent),
 			RegistryConfig01: goharborv1alpha2.RegistryConfig01{
 				Log: goharborv1alpha2.RegistryLogSpec{
 					AccessLog: goharborv1alpha2.RegistryAccessLogSpec{

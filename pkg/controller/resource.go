@@ -11,7 +11,7 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/resources"
 	"github.com/goharbor/harbor-operator/pkg/resources/checksum"
 	"github.com/goharbor/harbor-operator/pkg/resources/statuscheck"
-	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
+	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
@@ -31,6 +31,10 @@ type Resource struct {
 	resource  resources.Resource
 }
 
+func (res *Resource) GetResource() resources.Resource {
+	return res.resource
+}
+
 func (c *Controller) Changed(ctx context.Context, depManager *checksum.Dependencies, resource resources.Resource) (bool, error) {
 	objectKey, err := client.ObjectKeyFromObject(resource)
 	if err != nil {
@@ -39,6 +43,7 @@ func (c *Controller) Changed(ctx context.Context, depManager *checksum.Dependenc
 
 	result := resource.DeepCopyObject()
 
+	// nolint:go-golangci-lint,nestif
 	if result, ok := result.(resources.Resource); ok {
 		err = c.Client.Get(ctx, objectKey, result)
 		if err != nil {
@@ -47,6 +52,10 @@ func (c *Controller) Changed(ctx context.Context, depManager *checksum.Dependenc
 			}
 
 			return true, nil
+		}
+
+		if isImmutableResource(result) {
+			return false, nil
 		}
 
 		checksum.CopyVersion(result.(metav1.Object), resource)
@@ -317,7 +326,7 @@ func (c *Controller) AddIngressToManage(ctx context.Context, resource *netv1beta
 
 	res := &Resource{
 		mutable:   mutate,
-		checkable: statuscheck.BasicCheck,
+		checkable: statuscheck.True,
 		resource:  resource,
 	}
 
@@ -358,31 +367,7 @@ func (c *Controller) AddSecretToManage(ctx context.Context, resource *corev1.Sec
 		return nil, nil
 	}
 
-	mutate, err := c.GlobalMutateFn(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	res := &Resource{
-		mutable:   mutate,
-		checkable: statuscheck.True,
-		resource:  resource,
-	}
-
-	g := sgraph.Get(ctx)
-	if g == nil {
-		return nil, errors.Errorf("no graph in current context")
-	}
-
-	return res, g.AddResource(ctx, res, dependencies, c.ProcessFunc(ctx, resource, dependencies...))
-}
-
-func (c *Controller) AddImmutableSecretToManage(ctx context.Context, resource *corev1.Secret, dependencies ...graph.Resource) (graph.Resource, error) {
-	if resource == nil {
-		return nil, nil
-	}
-
-	mutate, err := c.GlobalMutateFn(ctx)
+	mutate, err := c.SecretMutateFn(ctx, resource.Immutable)
 	if err != nil {
 		return nil, err
 	}

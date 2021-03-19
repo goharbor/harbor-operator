@@ -9,7 +9,8 @@ import (
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/pkg/graph"
-	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
+	"github.com/goharbor/harbor-operator/pkg/version"
+	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1"
 	"github.com/pkg/errors"
 	"github.com/sethvargo/go-password/password"
 	corev1 "k8s.io/api/core/v1"
@@ -72,7 +73,7 @@ func (r *Reconciler) AddCoreAdminPassword(ctx context.Context, harbor *goharborv
 		return nil, errors.Wrap(err, "get")
 	}
 
-	adminPasswordRes, err := r.AddImmutableSecretToManage(ctx, adminPassword)
+	adminPasswordRes, err := r.AddSecretToManage(ctx, adminPassword)
 	if err != nil {
 		return nil, errors.Wrap(err, "add")
 	}
@@ -246,12 +247,14 @@ func (r *Reconciler) GetCoreTokenCertificate(ctx context.Context, harbor *goharb
 			Duration: &metav1.Duration{
 				Duration: CoreTokenServiceDefaultCertificateDuration,
 			},
-			KeyAlgorithm: certv1.RSAKeyAlgorithm,
-			KeySize:      CoreTokenServiceDefaultKeySize,
-			DNSNames:     []string{publicDNS.Host},
-			SecretName:   secretName,
-			Usages:       []certv1.KeyUsage{certv1.UsageSigning},
-			IssuerRef:    harbor.Spec.Core.TokenIssuer,
+			PrivateKey: &certv1.CertificatePrivateKey{
+				Algorithm: certv1.RSAKeyAlgorithm,
+				Size:      CoreTokenServiceDefaultKeySize,
+			},
+			DNSNames:   []string{publicDNS.Host},
+			SecretName: secretName,
+			Usages:     []certv1.KeyUsage{certv1.UsageSigning},
+			IssuerRef:  harbor.Spec.Core.TokenIssuer,
 		},
 	}, nil
 }
@@ -412,12 +415,12 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1alpha2.Harbo
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
-			Annotations: map[string]string{
+			Annotations: version.SetVersion(map[string]string{
 				harbormetav1.NetworkPoliciesAnnotationName: harbormetav1.NetworkPoliciesAnnotationDisabled,
-			},
+			}, harbor.Spec.Version),
 		},
 		Spec: goharborv1alpha2.CoreSpec{
-			ComponentSpec: harbor.Spec.Registry.ComponentSpec,
+			ComponentSpec: harbor.GetComponentSpec(ctx, harbormetav1.CoreComponent),
 			Components: goharborv1alpha2.CoreComponentsSpec{
 				Registry: goharborv1alpha2.CoreComponentsRegistrySpec{
 					RegistryControllerConnectionSpec: goharborv1alpha2.RegistryControllerConnectionSpec{
@@ -458,7 +461,8 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1alpha2.Harbo
 			Redis: goharborv1alpha2.CoreRedisSpec{
 				RedisConnection: coreRedis,
 			},
-			Proxy: harbor.Spec.Proxy,
+			Proxy:                harbor.Spec.Proxy,
+			CertificateInjection: harbor.Spec.Core.CertificateInjection,
 		},
 	}, nil
 }

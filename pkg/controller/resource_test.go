@@ -13,7 +13,7 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/factories/owner"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 	"github.com/goharbor/harbor-operator/pkg/resources"
-	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
+	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	netv1beta1 "k8s.io/api/networking/v1beta1"
@@ -55,6 +55,7 @@ var _ = Context("Adding", func() {
 
 		application.SetName(&setupCtx, "test-app")
 		application.SetVersion(&setupCtx, "test")
+		application.SetGitCommit(&setupCtx, "test")
 
 		c = NewController(setupCtx, controllers.Controller(0), nil, nil)
 		scheme, err := scheme.New(setupCtx)
@@ -72,6 +73,7 @@ var _ = Context("Adding", func() {
 		owner.Set(&ctx, &appsv1.Deployment{})
 		application.SetName(&ctx, "test-app")
 		application.SetVersion(&ctx, "test")
+		application.SetGitCommit(&ctx, "test")
 	})
 
 	for p, add := range resourceAdd {

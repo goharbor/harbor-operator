@@ -16,10 +16,10 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
-const (
-	name    = "harbor-operator"
-	version = "dev"
-	commit  = "none"
+var (
+	name      = "harbor-operator"
+	version   = "dev"
+	gitCommit = "none"
 )
 
 const (
@@ -42,6 +42,7 @@ func setupContextAndLogger() (context.Context, logr.Logger, error) {
 
 	application.SetName(&ctx, name)
 	application.SetVersion(&ctx, version)
+	application.SetGitCommit(&ctx, gitCommit)
 
 	return ctx, setupLog, nil
 }
@@ -93,7 +94,7 @@ func main() {
 
 	// +kubebuilder:scaffold:builder
 
-	setupLog.Info("starting manager", "version", version, "commit", commit)
+	setupLog.Info("starting manager", "version", version, "commit", gitCommit)
 
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 		setupLog.Error(err, "cannot start manager")

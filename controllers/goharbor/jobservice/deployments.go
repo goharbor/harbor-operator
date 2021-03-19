@@ -10,6 +10,8 @@ import (
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/pkg/config/harbor"
+	"github.com/goharbor/harbor-operator/pkg/image"
+	"github.com/goharbor/harbor-operator/pkg/version"
 	"github.com/goharbor/harbor/src/common"
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
@@ -30,7 +32,13 @@ const (
 	InternalCertificateAuthorityDirectory = "/harbor_cust_cert"
 )
 
-var varFalse = false
+var (
+	varFalse = false
+
+	fsGroup    int64 = 10000
+	runAsGroup int64 = 10000
+	runAsUser  int64 = 10000
+)
 
 const (
 	httpsPort = 8443
@@ -38,7 +46,13 @@ const (
 )
 
 func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1alpha2.JobService) (*appsv1.Deployment, error) { // nolint:funlen
-	image, err := r.GetImage(ctx)
+	getImageOptions := []image.Option{
+		image.WithConfigstore(r.ConfigStore),
+		image.WithImageFromSpec(jobservice.Spec.Image),
+		image.WithHarborVersion(version.GetVersion(jobservice.Annotations)),
+	}
+
+	image, err := image.GetImage(ctx, harbormetav1.JobServiceComponent.String(), getImageOptions...)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot get image")
 	}
@@ -118,6 +132,12 @@ func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1al
 		MountPath: logsDirectory,
 		Name:      LogsVolumeName,
 	}}
+
+	// inject s3 cert if need.
+	if jobservice.Spec.CertificateInjection.ShouldInject() {
+		volumes = append(volumes, jobservice.Spec.CertificateInjection.GenerateVolumes()...)
+		volumeMounts = append(volumeMounts, jobservice.Spec.CertificateInjection.GenerateVolumeMounts()...)
+	}
 
 	if jobservice.Spec.TLS.Enabled() {
 		envs = append(envs, corev1.EnvVar{
@@ -223,8 +243,9 @@ func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1al
 
 	deploy := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
+			Name:        name,
+			Namespace:   namespace,
+			Annotations: version.NewVersionAnnotations(jobservice.Annotations),
 		},
 		Spec: appsv1.DeploymentSpec{
 			Selector: &metav1.LabelSelector{
@@ -244,6 +265,11 @@ func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1al
 				Spec: corev1.PodSpec{
 					AutomountServiceAccountToken: &varFalse,
 					Volumes:                      volumes,
+					SecurityContext: &corev1.PodSecurityContext{
+						FSGroup:    &fsGroup,
+						RunAsGroup: &runAsGroup,
+						RunAsUser:  &runAsUser,
+					},
 					Containers: []corev1.Container{{
 						Name:  controllers.JobService.String(),
 						Image: image,

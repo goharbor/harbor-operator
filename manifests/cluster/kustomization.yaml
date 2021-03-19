@@ -1,0 +1,45 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Override namespace
+namespace: harbor-operator-ns
+
+# Common annotations
+commonAnnotations:
+  goharbor.io/operator-version: "v1.0.0"
+  goharbor.io/deploy-mode: "cluster"
+  goharbor.io/deploy-engine: "Kustomization"
+
+# All the referred deployment manifests
+# NOTES: when doing changes to the ref versions, please also do same changes in the patch/annotation.yaml file
+resources:
+  - ../../config/default # harbor operator
+  - https://raw.githubusercontent.com/spotahome/redis-operator/master/example/operator/all-redis-operator-resources.yaml?ref=v1.0.0 # redis operator
+  - github.com/zalando/postgres-operator/manifests?ref=v1.5.0 # postgresql operator
+  - github.com/minio/operator?ref=v3.0.13 # minIO storage operator
+
+# If you have to override the image path, uncomment this patch and also change the image paths in the patch/patches-images.yaml file.
+# Then rebuild.
+# patchesStrategicMerge:
+# - patch/images.yaml
+
+patchesJson6902:
+  - target:
+      kind: Namespace
+      name: minio-operator
+      version: v1
+    path: patch/namespace.yaml
+  - target:
+      kind: Deployment
+      name: harbor-operator
+      group: apps
+      version: v1
+    path: patch/annotations.yaml # add version annotations to the harbor operator ctrl
+
+images:
+  - name: quay.io/spotahome/redis-operator
+    newName: quay.io/spotahome/redis-operator
+    newTag: v1.0.0
+  - name: goharbor/harbor-operator
+    newName: goharbor/harbor-operator
+    newTag: dev_develop

@@ -4,16 +4,16 @@ import (
 	"context"
 	"net/url"
 
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
-
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/postgresql"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/redis"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
-	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
+	harborversion "github.com/goharbor/harbor-operator/pkg/version"
+	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1"
 	cmmeta "github.com/jetstack/cert-manager/pkg/apis/meta/v1"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -147,7 +147,8 @@ func setupValidHarbor(ctx context.Context, ns string) (Resource, client.ObjectKe
 			ExternalURL:            publicURL.String(),
 			HarborAdminPasswordRef: adminSecretName,
 			EncryptionKeyRef:       "encryption-key",
-			ImageChartStorage: goharborv1alpha2.HarborStorageImageChartStorageSpec{
+			Version:                harborversion.Default(),
+			ImageChartStorage: &goharborv1alpha2.HarborStorageImageChartStorageSpec{
 				FileSystem: &goharborv1alpha2.HarborStorageImageChartStorageFileSystemSpec{
 					RegistryPersistentVolume: goharborv1alpha2.HarborStorageRegistryPersistentVolumeSpec{
 						HarborStoragePersistentVolumeSpec: goharborv1alpha2.HarborStoragePersistentVolumeSpec{
@@ -169,12 +170,12 @@ func setupValidHarbor(ctx context.Context, ns string) (Resource, client.ObjectKe
 						Name: tokenIssuerName,
 					},
 				},
-				Database: goharborv1alpha2.HarborDatabaseSpec{
+				Database: &goharborv1alpha2.HarborDatabaseSpec{
 					PostgresCredentials: database.PostgresCredentials,
 					Hosts:               database.Hosts,
 					SSLMode:             harbormetav1.PostgresSSLMode(database.Parameters[harbormetav1.PostgresSSLModeKey]),
 				},
-				Redis: goharborv1alpha2.ExternalRedisSpec{
+				Redis: &goharborv1alpha2.ExternalRedisSpec{
 					RedisHostSpec:    redis.RedisHostSpec,
 					RedisCredentials: redis.RedisCredentials,
 				},

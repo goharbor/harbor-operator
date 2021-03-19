@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/ovh/configstore"
+	corev1 "k8s.io/api/core/v1"
 )
 
 const (
@@ -18,8 +19,10 @@ const (
 
 	DefaultConcurrentReconcile    = 1
 	DefaultHarborClass            = ""
-	DefaultRegistry               = ""
 	DefaultNetworkPoliciesEnabled = false
+
+	// DefaultImagePullPolicy specifies the policy to image pulls.
+	DefaultImagePullPolicy = corev1.PullIfNotPresent
 )
 
 var ErrNotReady = errors.New("configuration not ready")

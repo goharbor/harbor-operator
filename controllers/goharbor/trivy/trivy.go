@@ -8,7 +8,7 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/config"
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
 	"github.com/goharbor/harbor-operator/pkg/event-filter/class"
-	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
+	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1"
 	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
@@ -20,8 +20,6 @@ import (
 
 const (
 	DefaultRequeueWait = 2 * time.Second
-	ConfigImageKey     = "docker-image"
-	DefaultImage       = config.DefaultRegistry + "goharbor/trivy-adapter-photon:v2.0.1"
 )
 
 // Reconciler reconciles a Trivy object.

@@ -7,6 +7,8 @@ import (
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers"
+	"github.com/goharbor/harbor-operator/pkg/image"
+	"github.com/goharbor/harbor-operator/pkg/version"
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -25,12 +27,24 @@ const (
 	AuthCertificatePath  = ConfigPath + "/auth-certificates"
 )
 
-var varFalse = false
+var (
+	varFalse = false
+
+	fsGroup    int64 = 10000
+	runAsGroup int64 = 10000
+	runAsUser  int64 = 10000
+)
 
 const apiPort = 4443
 
 func (r *Reconciler) GetDeployment(ctx context.Context, notary *goharborv1alpha2.NotaryServer) (*appsv1.Deployment, error) { // nolint:funlen
-	image, err := r.GetImage(ctx)
+	getImageOptions := []image.Option{
+		image.WithConfigstore(r.ConfigStore),
+		image.WithImageFromSpec(notary.Spec.Image),
+		image.WithHarborVersion(version.GetVersion(notary.Annotations)),
+	}
+
+	image, err := image.GetImage(ctx, harbormetav1.NotaryServerComponent.String(), getImageOptions...)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot get image")
 	}
@@ -142,8 +156,9 @@ func (r *Reconciler) GetDeployment(ctx context.Context, notary *goharborv1alpha2
 
 	deploy := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
+			Name:        name,
+			Namespace:   namespace,
+			Annotations: version.NewVersionAnnotations(notary.Annotations),
 		},
 		Spec: appsv1.DeploymentSpec{
 			Selector: &metav1.LabelSelector{
@@ -163,7 +178,12 @@ func (r *Reconciler) GetDeployment(ctx context.Context, notary *goharborv1alpha2
 				Spec: corev1.PodSpec{
 					AutomountServiceAccountToken: &varFalse,
 					Volumes:                      volumes,
-					InitContainers:               initContainers,
+					SecurityContext: &corev1.PodSecurityContext{
+						FSGroup:    &fsGroup,
+						RunAsGroup: &runAsGroup,
+						RunAsUser:  &runAsUser,
+					},
+					InitContainers: initContainers,
 					Containers: []corev1.Container{{
 						Name:    controllers.NotaryServer.String(),
 						Image:   image,

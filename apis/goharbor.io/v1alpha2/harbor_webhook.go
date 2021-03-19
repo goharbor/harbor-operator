@@ -2,8 +2,10 @@ package v1alpha2
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 
+	"github.com/goharbor/harbor-operator/pkg/version"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -22,6 +24,19 @@ func (h *Harbor) SetupWebhookWithManager(ctx context.Context, mgr ctrl.Manager) 
 		Complete()
 }
 
+// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
+
+// +kubebuilder:webhook:path=/mutate-goharbor-io-v1alpha2-harbor,mutating=true,failurePolicy=fail,groups=goharbor.io,resources=harbors,verbs=create;update,versions=v1alpha2,name=mharbor.kb.io,admissionReviewVersions={"v1beta1"},sideEffects=None
+
+var _ webhook.Defaulter = &Harbor{}
+
+// Default implements webhook.Defaulter so a webhook will be registered for the type.
+func (h *Harbor) Default() {
+	if h.Spec.Version == "" {
+		h.Spec.Version = version.Default()
+	}
+}
+
 // +kubebuilder:webhook:verbs=create;update,path=/validate-goharbor-io-v1alpha2-harbor,mutating=false,failurePolicy=fail,groups=goharbor.io,resources=harbors,versions=v1alpha2,name=vharbor.kb.io,admissionReviewVersions={"v1beta1"},sideEffects=None
 
 var _ webhook.Validator = &Harbor{}
@@ -30,14 +45,19 @@ var _ webhook.Validator = &Harbor{}
 func (h *Harbor) ValidateCreate() error {
 	harborlog.Info("validate create", "name", h.Name)
 
-	return h.Validate()
+	return h.Validate(nil)
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type.
 func (h *Harbor) ValidateUpdate(old runtime.Object) error {
 	harborlog.Info("validate update", "name", h.Name)
 
-	return h.Validate()
+	obj, ok := old.(*Harbor)
+	if !ok {
+		return fmt.Errorf("failed type assertion on kind: %s", old.GetObjectKind().GroupVersionKind().String())
+	}
+
+	return h.Validate(obj)
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type.
@@ -47,21 +67,43 @@ func (h *Harbor) ValidateDelete() error {
 	return nil
 }
 
-func (h *Harbor) Validate() error {
+func (h *Harbor) Validate(old *Harbor) error {
 	var allErrs field.ErrorList
 
 	err := h.Spec.ImageChartStorage.Validate()
 	if err != nil {
-		allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("persistence").Child("imageChartStorage"), h.Spec.ImageChartStorage, err.Error()))
-	}
-
-	if len(allErrs) == 0 {
-		return nil
+		allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("imageChartStorage"), h.Spec.ImageChartStorage, err.Error()))
 	}
 
 	_, err = url.Parse(h.Spec.ExternalURL)
 	if err != nil {
 		allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("externalURL"), h.Spec.ExternalURL, err.Error()))
+	}
+
+	if h.Spec.Database == nil {
+		allErrs = append(allErrs, required(field.NewPath("spec").Child("database")))
+	}
+
+	if h.Spec.Redis == nil {
+		allErrs = append(allErrs, required(field.NewPath("spec").Child("redis")))
+	}
+
+	if err := h.Spec.ValidateNotary(); err != nil {
+		allErrs = append(allErrs, err)
+	}
+
+	if err := h.Spec.ValidateRegistryController(); err != nil {
+		allErrs = append(allErrs, err)
+	}
+
+	if old == nil { // create harbor resource
+		if err := version.Validate(h.Spec.Version); err != nil {
+			allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("version"), h.Spec.Version, err.Error()))
+		}
+	} else { // update harbor resource
+		if err := version.UpgradeAllowed(old.Spec.Version, h.Spec.Version); err != nil {
+			allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("version"), h.Spec.Version, err.Error()))
+		}
 	}
 
 	if len(allErrs) == 0 {

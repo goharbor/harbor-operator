@@ -1,13 +1,19 @@
 package v1alpha2
 
 import (
+	"context"
 	"fmt"
+	"path"
+	"strings"
 
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	"github.com/goharbor/harbor-operator/pkg/image"
 	cmmeta "github.com/jetstack/cert-manager/pkg/apis/meta/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/equality"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
 // +genclient
@@ -33,6 +39,103 @@ type Harbor struct {
 	Status harbormetav1.ComponentStatus `json:"status,omitempty"`
 }
 
+func (h *Harbor) GetComponentSpec(ctx context.Context, component harbormetav1.Component) harbormetav1.ComponentSpec {
+	var spec harbormetav1.ComponentSpec
+
+	h.deepCopyComponentSpecInto(ctx, component, &spec)
+	h.deepCopyImageSpecInto(ctx, component, &spec)
+
+	return spec
+}
+
+func (h *Harbor) deepCopyComponentSpecInto(_ context.Context, component harbormetav1.Component, spec *harbormetav1.ComponentSpec) {
+	// nolint:exhaustive
+	switch component {
+	case harbormetav1.ChartMuseumComponent:
+		if h.Spec.ChartMuseum != nil {
+			h.Spec.ChartMuseum.ComponentSpec.DeepCopyInto(spec)
+		}
+	case harbormetav1.CoreComponent:
+		h.Spec.Core.ComponentSpec.DeepCopyInto(spec)
+	case harbormetav1.JobServiceComponent:
+		h.Spec.JobService.ComponentSpec.DeepCopyInto(spec)
+	case harbormetav1.NotaryServerComponent:
+		if h.Spec.Notary != nil {
+			h.Spec.Notary.Server.DeepCopyInto(spec)
+		}
+	case harbormetav1.NotarySignerComponent:
+		if h.Spec.Notary != nil {
+			h.Spec.Notary.Signer.DeepCopyInto(spec)
+		}
+	case harbormetav1.PortalComponent:
+		h.Spec.Portal.DeepCopyInto(spec)
+	case harbormetav1.RegistryComponent:
+		h.Spec.Registry.ComponentSpec.DeepCopyInto(spec)
+	case harbormetav1.RegistryControllerComponent:
+		if h.Spec.RegistryController != nil {
+			h.Spec.RegistryController.DeepCopyInto(spec)
+		}
+
+		h.deepCopyNodeSelectorAndTolerationsOfRegistryInto(spec)
+	case harbormetav1.TrivyComponent:
+		if h.Spec.Trivy != nil {
+			h.Spec.Trivy.ComponentSpec.DeepCopyInto(spec)
+		}
+	}
+}
+
+func (h *Harbor) deepCopyNodeSelectorAndTolerationsOfRegistryInto(spec *harbormetav1.ComponentSpec) {
+	if h.Spec.ImageChartStorage.FileSystem == nil {
+		return
+	}
+
+	if len(spec.NodeSelector) == 0 && len(h.Spec.Registry.NodeSelector) != 0 {
+		in, out := &h.Spec.Registry.NodeSelector, &spec.NodeSelector
+		*out = make(map[string]string, len(*in))
+
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
+
+	if len(spec.Tolerations) == 0 && len(h.Spec.Registry.Tolerations) != 0 {
+		in, out := &h.Spec.Registry.Tolerations, &spec.Tolerations
+		*out = make([]corev1.Toleration, len(*in))
+
+		for i := range *in {
+			(*in)[i].DeepCopyInto(&(*out)[i])
+		}
+	}
+}
+
+func (h *Harbor) deepCopyImageSpecInto(ctx context.Context, component harbormetav1.Component, spec *harbormetav1.ComponentSpec) {
+	imageSource := h.Spec.ImageSource
+	if imageSource == nil {
+		return
+	}
+
+	if spec.Image == "" && (imageSource.Repository != "" || imageSource.TagSuffix != "") {
+		getImageOptions := []image.Option{
+			image.WithRepository(imageSource.Repository),
+			image.WithTagSuffix(imageSource.TagSuffix),
+			image.WithHarborVersion(h.Spec.Version),
+		}
+		spec.Image, _ = image.GetImage(ctx, component.String(), getImageOptions...)
+	}
+
+	if spec.ImagePullPolicy == nil && imageSource.ImagePullPolicy != nil {
+		in, out := &imageSource.ImagePullPolicy, &spec.ImagePullPolicy
+		*out = new(corev1.PullPolicy)
+		**out = **in
+	}
+
+	if len(spec.ImagePullSecrets) == 0 && len(imageSource.ImagePullSecrets) != 0 {
+		in, out := &imageSource.ImagePullSecrets, &spec.ImagePullSecrets
+		*out = make([]corev1.LocalObjectReference, len(*in))
+		copy(*out, *in)
+	}
+}
+
 // +kubebuilder:object:root=true
 // +resource:path=harbors
 // HarborList contains a list of Harbor.
@@ -46,6 +149,8 @@ type HarborList struct {
 type HarborSpec struct {
 	HarborComponentsSpec `json:",inline"`
 
+	ImageSource *ImageSourceSpec `json:"imageSource,omitempty"`
+
 	// +kubebuilder:validation:Required
 	Expose HarborExposeSpec `json:"expose"`
 
@@ -56,8 +161,10 @@ type HarborSpec struct {
 	// +kubebuilder:validation:Optional
 	InternalTLS HarborInternalTLSSpec `json:"internalTLS"`
 
-	// +kubebuilder:validation:Required
-	ImageChartStorage HarborStorageImageChartStorageSpec `json:"imageChartStorage"`
+	// Skip OpenAPI schema validation
+	// Use validating webhook to do verification (field required)
+	// +kubebuilder:validation:Optional
+	ImageChartStorage *HarborStorageImageChartStorageSpec `json:"imageChartStorage,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default="info"
@@ -78,6 +185,61 @@ type HarborSpec struct {
 
 	// +kubebuilder:validation:Optional
 	Proxy *CoreProxySpec `json:"proxy,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// The version of the harbor, eg 2.1.2
+	Version string `json:"version,omitempty"`
+}
+
+func (spec *HarborSpec) ValidateNotary() *field.Error {
+	if spec.Notary == nil {
+		return nil
+	}
+
+	if spec.Expose.Notary == nil {
+		return required(field.NewPath("spec").Child("expose", "notary"))
+	}
+
+	if spec.Expose.Notary.Ingress == nil {
+		return required(field.NewPath("spec").Child("expose", "notary", "ingress"))
+	}
+
+	if spec.Expose.Notary.TLS == nil {
+		return required(field.NewPath("spec").Child("expose", "notary", "tls"))
+	}
+
+	if spec.Expose.Notary.TLS.CertificateRef == "" {
+		return required(field.NewPath("spec").Child("expose", "notary", "tls", "certificateRef"))
+	}
+
+	return nil
+}
+
+func (spec *HarborSpec) ValidateRegistryController() *field.Error {
+	if spec.RegistryController == nil {
+		return nil
+	}
+
+	// nodeSelector and tolerations must equal with registry's
+	// when the image chart storage is filesystem and the access mode of pvc is ReadWriteOnce
+	// TODO: check the access mode of pvc is ReadWriteOnce
+	if spec.ImageChartStorage.FileSystem != nil {
+		if len(spec.RegistryController.NodeSelector) > 0 &&
+			!equality.Semantic.DeepEqual(spec.RegistryController.NodeSelector, spec.Registry.NodeSelector) {
+			p := field.NewPath("spec").Child("registryctl", "nodeSelector")
+
+			return field.Forbidden(p, "must be empty or equal with spec.registry.nodeSelector")
+		}
+
+		if len(spec.RegistryController.Tolerations) > 0 &&
+			!equality.Semantic.DeepEqual(spec.RegistryController.Tolerations, spec.Registry.Tolerations) {
+			p := field.NewPath("spec").Child("registryctl", "tolerations")
+
+			return field.Forbidden(p, "must be empty or equal with spec.registry.tolerations")
+		}
+	}
+
+	return nil
 }
 
 type HarborComponentsSpec struct {
@@ -94,6 +256,9 @@ type HarborComponentsSpec struct {
 	Registry RegistryComponentSpec `json:"registry,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	RegistryController *harbormetav1.ComponentSpec `json:"registryctl,omitempty"`
+
+	// +kubebuilder:validation:Optional
 	ChartMuseum *ChartMuseumComponentSpec `json:"chartmuseum,omitempty"`
 
 	// +kubebuilder:validation:Optional
@@ -102,11 +267,15 @@ type HarborComponentsSpec struct {
 	// +kubebuilder:validation:Optional
 	Notary *NotaryComponentSpec `json:"notary,omitempty"`
 
-	// +kubebuilder:validation:Required
-	Redis ExternalRedisSpec `json:"redis"`
+	// Skip OpenAPI schema validation
+	// Use validating webhook to do verification (field required)
+	// +kubebuilder:validation:Optional
+	Redis *ExternalRedisSpec `json:"redis,omitempty"`
 
-	// +kubebuilder:validation:Required
-	Database HarborDatabaseSpec `json:"database"`
+	// Skip OpenAPI schema validation
+	// Use validating webhook to do verification (field required)
+	// +kubebuilder:validation:Optional
+	Database *HarborDatabaseSpec `json:"database,omitempty"`
 }
 
 type HarborDatabaseSpec struct {
@@ -197,12 +366,16 @@ func (r *HarborComponentsSpec) RedisConnection(component harbormetav1.ComponentW
 type CoreComponentSpec struct {
 	harbormetav1.ComponentSpec `json:",inline"`
 
+	CertificateInjection `json:",inline"`
+
 	// +kubebuilder:validation:Required
 	TokenIssuer cmmeta.ObjectReference `json:"tokenIssuer,omitempty"`
 }
 
 type JobServiceComponentSpec struct {
 	harbormetav1.ComponentSpec `json:",inline"`
+
+	CertificateInjection `json:",inline"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=1
@@ -224,6 +397,8 @@ type RegistryComponentSpec struct {
 type ChartMuseumComponentSpec struct {
 	harbormetav1.ComponentSpec `json:",inline"`
 
+	CertificateInjection `json:",inline"`
+
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=false
 	// Harbor defaults ChartMuseum to returning relative urls,
@@ -233,6 +408,8 @@ type ChartMuseumComponentSpec struct {
 
 type TrivyComponentSpec struct {
 	harbormetav1.ComponentSpec `json:",inline"`
+
+	CertificateInjection `json:",inline"`
 
 	// +kubebuilder:validation:Optional
 	// The name of the secret containing the token to connect to GitHub API.
@@ -299,6 +476,10 @@ func (r *HarborStorageImageChartStorageSpec) ProviderName() string {
 }
 
 func (r *HarborStorageImageChartStorageSpec) Validate() error {
+	if r == nil {
+		return ErrNoStorageConfiguration
+	}
+
 	found := 0
 
 	if r.FileSystem != nil {
@@ -325,7 +506,7 @@ func (r *HarborStorageImageChartStorageSpec) Validate() error {
 
 type HarborStorageImageChartStorageFileSystemSpec struct {
 	// +kubebuilder:validation:Optional
-	ChartPersistentVolume *HarborStoragePersistentVolumeSpec `json:"chartPersistentVolume"`
+	ChartPersistentVolume *HarborStoragePersistentVolumeSpec `json:"chartPersistentVolume,omitempty"`
 
 	// +kubebuilder:validation:Required
 	RegistryPersistentVolume HarborStorageRegistryPersistentVolumeSpec `json:"registryPersistentVolume"`
@@ -433,11 +614,33 @@ func (r *HarborInternalTLSSpec) GetComponentTLSSpec(certificateRef string) *harb
 	}
 }
 
+type ImageSourceSpec struct {
+	// +kubebuilder:validation:Required
+	// The default repository for the images of the components. eg docker.io/goharbor/
+	Repository string `json:"repository,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// The tag suffix for the images of the images of the components. eg '-patch1'
+	TagSuffix string `json:"tagSuffix,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Enum={"Always","Never","IfNotPresent"}
+	// Image pull policy.
+	// More info: https://kubernetes.io/docs/concepts/containers/images#updating-images
+	ImagePullPolicy *corev1.PullPolicy `json:"imagePullPolicy,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +listType:map
+	// +listMapKey:name
+	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets,omitempty" patchStrategy:"merge" patchMergeKey:"name"`
+}
+
 type HarborExposeSpec struct {
 	// +kubebuilder:validation:Required
 	Core HarborExposeComponentSpec `json:"core"`
 
 	// +kubebuilder:validation:Optional
+	// The ingress of the notary, required when notary component enabled.
 	Notary *HarborExposeComponentSpec `json:"notary,omitempty"`
 }
 
@@ -464,6 +667,49 @@ type HarborExposeIngressSpec struct {
 
 	// +kubebuilder:validation:Optional
 	Annotations map[string]string `json:"annotations,omitempty"`
+}
+
+// CertificateInjection defines the certs injection.
+type CertificateInjection struct {
+	// +kubebuilder:validation:Optional
+	CertificateRefs []string `json:"certificateRefs,omitempty"`
+}
+
+// ShouldInject returns whether should inject certs.
+func (ci CertificateInjection) ShouldInject() bool {
+	return len(ci.CertificateRefs) > 0
+}
+
+// GenerateVolumes generates volumes.
+func (ci CertificateInjection) GenerateVolumes() []corev1.Volume {
+	volumes := make([]corev1.Volume, 0, len(ci.CertificateRefs))
+	for _, ref := range ci.CertificateRefs {
+		volumes = append(volumes, corev1.Volume{
+			Name: fmt.Sprintf("%s-certifacts", ref),
+			VolumeSource: corev1.VolumeSource{
+				Secret: &corev1.SecretVolumeSource{
+					SecretName: ref,
+				},
+			},
+		})
+	}
+
+	return volumes
+}
+
+// GenerateVolumeMounts generates volumeMounts.
+func (ci CertificateInjection) GenerateVolumeMounts() []corev1.VolumeMount {
+	volumeMounts := make([]corev1.VolumeMount, 0, len(ci.CertificateRefs))
+	for _, ref := range ci.CertificateRefs {
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{
+			Name:      fmt.Sprintf("%s-certifacts", ref),
+			MountPath: path.Join("/harbor_cust_cert", fmt.Sprintf("%s.crt", ref)),
+			SubPath:   strings.TrimLeft(corev1.ServiceAccountRootCAKey, "/"),
+			ReadOnly:  true,
+		})
+	}
+
+	return volumeMounts
 }
 
 func init() { // nolint:gochecknoinits

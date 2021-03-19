@@ -9,6 +9,7 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/config"
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	"github.com/goharbor/harbor-operator/pkg/graph"
+	"github.com/goharbor/harbor-operator/pkg/version"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -80,6 +81,10 @@ func (r *Reconciler) GetTrivyUpdateSecret(ctx context.Context, harbor *goharborv
 			return nil, nil
 		}
 
+		if config.IsNotFound(err, GithubCredentialsConfigKey) {
+			return nil, nil
+		}
+
 		return nil, serrors.UnrecoverrableError(err, serrors.OperatorReason, "cannot get github credentials")
 	}
 
@@ -103,7 +108,7 @@ func (r *Reconciler) AddTrivy(ctx context.Context, harbor *goharborv1alpha2.Harb
 		return nil, nil
 	}
 
-	trivy, err := r.GetTrivy(ctx, harbor)
+	trivy, err := r.GetTrivy(ctx, harbor, secretUpdate != nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "get")
 	}
@@ -113,29 +118,34 @@ func (r *Reconciler) AddTrivy(ctx context.Context, harbor *goharborv1alpha2.Harb
 	return Trivy(trivyRes), errors.Wrap(err, "add")
 }
 
-func (r *Reconciler) GetTrivy(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*goharborv1alpha2.Trivy, error) {
+func (r *Reconciler) GetTrivy(ctx context.Context, harbor *goharborv1alpha2.Harbor, hasUpdateSecret bool) (*goharborv1alpha2.Trivy, error) {
 	name := r.NormalizeName(ctx, harbor.GetName())
 	namespace := harbor.GetNamespace()
 
 	redis := harbor.Spec.RedisConnection(harbormetav1.TrivyRedis)
 
 	githubTokenRef := harbor.Spec.Trivy.GithubTokenRef
-	if githubTokenRef == "" {
+	if githubTokenRef == "" && hasUpdateSecret {
 		githubTokenRef = r.NormalizeName(ctx, harbor.GetName(), controllers.Trivy.String(), "github")
 	}
 
 	tls := harbor.Spec.InternalTLS.GetComponentTLSSpec(r.GetInternalTLSCertificateSecretName(ctx, harbor, harbormetav1.TrivyTLS))
 
+	var tokenServiceCertificateAuthorityRefs []string
+	if harbor.Spec.Expose.Core.TLS != nil {
+		tokenServiceCertificateAuthorityRefs = append(tokenServiceCertificateAuthorityRefs, harbor.Spec.Expose.Core.TLS.CertificateRef)
+	}
+
 	return &goharborv1alpha2.Trivy{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
-			Annotations: map[string]string{
+			Annotations: version.SetVersion(map[string]string{
 				harbormetav1.NetworkPoliciesAnnotationName: harbormetav1.NetworkPoliciesAnnotationDisabled,
-			},
+			}, harbor.Spec.Version),
 		},
 		Spec: goharborv1alpha2.TrivySpec{
-			ComponentSpec: harbor.Spec.Trivy.ComponentSpec,
+			ComponentSpec: harbor.GetComponentSpec(ctx, harbormetav1.TrivyComponent),
 			Redis: goharborv1alpha2.TrivyRedisSpec{
 				RedisConnection: redis,
 			},
@@ -145,12 +155,13 @@ func (r *Reconciler) GetTrivy(ctx context.Context, harbor *goharborv1alpha2.Harb
 			},
 			Server: goharborv1alpha2.TrivyServerSpec{
 				TLS:                                  tls,
-				TokenServiceCertificateAuthorityRefs: []string{harbor.Spec.Expose.Core.TLS.CertificateRef},
+				TokenServiceCertificateAuthorityRefs: tokenServiceCertificateAuthorityRefs,
 			},
 			Update: goharborv1alpha2.TrivyUpdateSpec{
 				Skip:           harbor.Spec.Trivy.SkipUpdate,
 				GithubTokenRef: githubTokenRef,
 			},
+			CertificateInjection: harbor.Spec.Trivy.CertificateInjection,
 		},
 	}, nil
 }

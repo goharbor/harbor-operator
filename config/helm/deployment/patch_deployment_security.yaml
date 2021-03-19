@@ -22,3 +22,6 @@
  - op: replace
    path: /spec/template/spec/containers/0/imagePullPolicy
    value: '{{ .Values.image.pullPolicy | quote }}'
+ - op: replace
+   path: /spec/template/spec/containers/0/securityContext/allowPrivilegeEscalation
+   value: '{{ .Values.allowPrivilegeEscalation }}'

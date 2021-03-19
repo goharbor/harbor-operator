@@ -1,0 +1,31 @@
+apiVersion: goharbor.io/v1alpha2
+kind: Trivy
+metadata:
+  annotations:
+    goharbor.io/network-policies: "false"
+    harbor.goharbor.io/version: ""
+  creationTimestamp: null
+  name: example-harbor
+  namespace: default
+spec:
+  log: {}
+  redis:
+    database: 5
+    host: 127.0.0.1
+    jobs: {}
+    pool: {}
+    port: 3306
+  resources: {}
+  server: {}
+  storage:
+    cache:
+      volumeSource:
+        emptyDir: {}
+    reports:
+      volumeSource:
+        emptyDir: {}
+  update:
+    skip: false
+status:
+  conditions: []
+  operator: {}

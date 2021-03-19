@@ -45,6 +45,8 @@ type TrivySpec struct {
 
 	harbormetav1.TrivySeverityTypes `json:",inline"`
 
+	CertificateInjection `json:",inline"`
+
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default={"level":"info"}
 	Log TrivyLogSpec `json:"log,omitempty"`

@@ -6,6 +6,7 @@ import (
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/graph"
+	"github.com/goharbor/harbor-operator/pkg/version"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -54,12 +55,12 @@ func (r *Reconciler) GetPortal(ctx context.Context, harbor *goharborv1alpha2.Har
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
-			Annotations: map[string]string{
+			Annotations: version.SetVersion(map[string]string{
 				harbormetav1.NetworkPoliciesAnnotationName: harbormetav1.NetworkPoliciesAnnotationDisabled,
-			},
+			}, harbor.Spec.Version),
 		},
 		Spec: goharborv1alpha2.PortalSpec{
-			ComponentSpec: harbor.Spec.Portal,
+			ComponentSpec: harbor.GetComponentSpec(ctx, harbormetav1.PortalComponent),
 			TLS:           tls,
 		},
 	}, nil

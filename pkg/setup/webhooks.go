@@ -16,11 +16,12 @@ const (
 )
 
 var webhooksBuilder = map[controllers.Controller]WebHook{
-	controllers.Harbor:       &goharborv1alpha2.Harbor{},
-	controllers.JobService:   &goharborv1alpha2.JobService{},
-	controllers.Registry:     &goharborv1alpha2.Registry{},
-	controllers.NotaryServer: &goharborv1alpha2.NotaryServer{},
-	controllers.NotarySigner: &goharborv1alpha2.NotarySigner{},
+	controllers.Harbor:        &goharborv1alpha2.Harbor{},
+	controllers.JobService:    &goharborv1alpha2.JobService{},
+	controllers.Registry:      &goharborv1alpha2.Registry{},
+	controllers.NotaryServer:  &goharborv1alpha2.NotaryServer{},
+	controllers.NotarySigner:  &goharborv1alpha2.NotarySigner{},
+	controllers.HarborCluster: &goharborv1alpha2.HarborCluster{},
 }
 
 type WebHook interface {

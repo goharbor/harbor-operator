@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels: {{- include "chart.labels" . | nindent 4 }}
-  name: '{{ include "chart.fullname" . }}-controller-manager'
+  name: '{{ include "chart.fullname" . }}-harbor-operator'
   namespace: {{ .Release.Namespace | quote }}
 spec:
   selector:
@@ -53,6 +53,8 @@ spec:
             path: /readyz
             port: ready
         resources: {{- toYaml .Values.resources | nindent 10 }}
+        securityContext:
+          allowPrivilegeEscalation: {{ .Values.allowPrivilegeEscalation }}
         volumeMounts:
         - mountPath: /etc/harbor-operator
           name: configuration

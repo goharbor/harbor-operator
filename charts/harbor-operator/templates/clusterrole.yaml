@@ -4,7 +4,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   creationTimestamp: null
-  name: '{{ include "chart.fullname" . }}-manager-role'
+  name: '{{ include "chart.fullname" . }}-harbor-operator-role'
 rules:
 - apiGroups:
   - ""
@@ -36,7 +36,61 @@ rules:
 - apiGroups:
   - ""
   resources:
+  - pods
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
   - services
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - acid.zalan.do
+  resources:
+  - operatorconfigurations
+  - postgresqls
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - acid.zalan.do
+  resources:
+  - postgresqls/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - apiextensions.k8s.io
+  resources:
+  - customresourcedefinitions
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - deployments
   verbs:
   - create
   - delete
@@ -49,6 +103,7 @@ rules:
   - apps
   resources:
   - deployments
+  - statefulsets
   verbs:
   - create
   - delete
@@ -82,6 +137,12 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - databases.spotahome.com
+  resources:
+  - redisfailovers
+  verbs:
+  - '*'
 - apiGroups:
   - goharbor.io
   resources:
@@ -137,10 +198,30 @@ rules:
 - apiGroups:
   - goharbor.io
   resources:
-  - harbors
+  - harborclusters
   verbs:
   - get
   - list
+  - watch
+- apiGroups:
+  - goharbor.io
+  resources:
+  - harborclusters/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - goharbor.io
+  resources:
+  - harbors
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
   - watch
 - apiGroups:
   - goharbor.io
@@ -262,6 +343,12 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - minio.min.io
+  resources:
+  - '*'
+  verbs:
+  - '*'
 - apiGroups:
   - networking.k8s.io
   resources:

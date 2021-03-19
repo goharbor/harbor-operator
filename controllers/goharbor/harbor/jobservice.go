@@ -11,6 +11,7 @@ import (
 	"github.com/goharbor/harbor-operator/controllers"
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	"github.com/goharbor/harbor-operator/pkg/graph"
+	"github.com/goharbor/harbor-operator/pkg/version"
 	"github.com/pkg/errors"
 	"github.com/sethvargo/go-password/password"
 	corev1 "k8s.io/api/core/v1"
@@ -149,12 +150,12 @@ func (r *Reconciler) GetJobService(ctx context.Context, harbor *goharborv1alpha2
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
-			Annotations: map[string]string{
+			Annotations: version.SetVersion(map[string]string{
 				harbormetav1.NetworkPoliciesAnnotationName: harbormetav1.NetworkPoliciesAnnotationDisabled,
-			},
+			}, harbor.Spec.Version),
 		},
 		Spec: goharborv1alpha2.JobServiceSpec{
-			ComponentSpec: harbor.Spec.Registry.ComponentSpec,
+			ComponentSpec: harbor.GetComponentSpec(ctx, harbormetav1.JobServiceComponent),
 			Core: goharborv1alpha2.JobServiceCoreSpec{
 				SecretRef: coreSecretRef,
 				URL:       coreURL,
@@ -189,8 +190,9 @@ func (r *Reconciler) GetJobService(ctx context.Context, harbor *goharborv1alpha2
 			TokenService: goharborv1alpha2.JobServiceTokenSpec{
 				URL: serviceTokenURL,
 			},
-			SecretRef: secretRef,
-			TLS:       tls,
+			SecretRef:            secretRef,
+			TLS:                  tls,
+			CertificateInjection: harbor.Spec.JobService.CertificateInjection,
 		},
 	}, nil
 }

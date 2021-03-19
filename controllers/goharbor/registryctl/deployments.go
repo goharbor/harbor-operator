@@ -13,6 +13,8 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/config"
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
+	"github.com/goharbor/harbor-operator/pkg/image"
+	"github.com/goharbor/harbor-operator/pkg/version"
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -29,7 +31,13 @@ const (
 	HealthPath                            = "/api/health"
 )
 
-var varFalse = false
+var (
+	varFalse = false
+
+	fsGroup    int64 = 10000
+	runAsGroup int64 = 10000
+	runAsUser  int64 = 10000
+)
 
 const (
 	httpsPort = 8443
@@ -43,7 +51,13 @@ const (
 )
 
 func (r *Reconciler) GetDeployment(ctx context.Context, registryCtl *goharborv1alpha2.RegistryController) (*appsv1.Deployment, error) { // nolint:funlen
-	image, err := r.GetImage(ctx)
+	getImageOptions := []image.Option{
+		image.WithConfigstore(r.ConfigStore),
+		image.WithImageFromSpec(registryCtl.Spec.Image),
+		image.WithHarborVersion(version.GetVersion(registryCtl.Annotations)),
+	}
+
+	image, err := image.GetImage(ctx, harbormetav1.RegistryControllerComponent.String(), getImageOptions...)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot get image")
 	}
@@ -62,8 +76,9 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registryCtl *goharborv1a
 	}
 
 	deploy.ObjectMeta = metav1.ObjectMeta{
-		Name:      name,
-		Namespace: namespace,
+		Name:        name,
+		Namespace:   namespace,
+		Annotations: version.NewVersionAnnotations(registryCtl.Annotations),
 	}
 	deploy.Spec.Selector = &metav1.LabelSelector{
 		MatchLabels: map[string]string{
@@ -113,6 +128,12 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registryCtl *goharborv1a
 				},
 			}},
 		},
+	}
+
+	deploy.Spec.Template.Spec.SecurityContext = &corev1.PodSecurityContext{
+		FSGroup:    &fsGroup,
+		RunAsGroup: &runAsGroup,
+		RunAsUser:  &runAsUser,
 	}
 
 	registryContainer, err := r.getRegistryContainer(deploy)

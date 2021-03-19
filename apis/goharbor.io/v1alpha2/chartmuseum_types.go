@@ -40,6 +40,8 @@ type ChartMuseumList struct {
 type ChartMuseumSpec struct {
 	harbormetav1.ComponentSpec `json:",inline"`
 
+	CertificateInjection `json:",inline"`
+
 	// +kubebuilder:validation:Optional
 	Log ChartMuseumLogSpec `json:"log,omitempty"`
 

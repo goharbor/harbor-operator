@@ -108,7 +108,12 @@ podLabels: {}
 #   "runAsUser": 1000,
 #   "runAsNonRoot": true
 # }`
-podSecurityContext: {}
+podSecurityContext:
+  runAsUser: 65532
+  runAsNonRoot: true
+
+# allowPrivilegeEscalation -- Allow privilege escalation for the controller Pods
+allowPrivilegeEscalation: false
 
 # <https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#servicespec-v1-core>
 service:

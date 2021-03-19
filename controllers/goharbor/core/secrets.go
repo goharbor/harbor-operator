@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	RedisDSNKey         = "_REDIS_URL"
+	RedisDSNKey         = "_REDIS_URL_CORE"
 	RegistryRedisDSNKey = "_REDIS_URL_REG"
 )
 
@@ -41,6 +41,8 @@ func (r *Reconciler) GetSecret(ctx context.Context, core *goharborv1alpha2.Core)
 
 		redisPassword = string(password)
 	}
+
+	coreCacheDSN := core.Spec.Redis.GetDSNStringWithRawPassword(redisPassword)
 
 	var registryPassword string
 
@@ -71,8 +73,8 @@ func (r *Reconciler) GetSecret(ctx context.Context, core *goharborv1alpha2.Core)
 			Namespace: namespace,
 		},
 		StringData: map[string]string{
-			RedisDSNKey:         fmt.Sprintf("%s:%d,100,%s,%d,%.0f", core.Spec.Redis.Host, core.Spec.Redis.Port, redisPassword, core.Spec.Redis.Database, core.Spec.Redis.IdleTimeout.Duration.Seconds()),
-			RegistryRedisDSNKey: registryCacheDSN,
+			RedisDSNKey:         fmt.Sprintf("%s?idle_timeout_seconds=%.0f", coreCacheDSN, core.Spec.Redis.IdleTimeout.Duration.Seconds()),
+			RegistryRedisDSNKey: fmt.Sprintf("%s?idle_timeout_seconds=%.0f", registryCacheDSN, core.Spec.Redis.IdleTimeout.Duration.Seconds()),
 		},
 	}, nil
 }

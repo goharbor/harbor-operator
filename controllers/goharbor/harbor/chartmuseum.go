@@ -8,6 +8,7 @@ import (
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/pkg/graph"
+	"github.com/goharbor/harbor-operator/pkg/version"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -91,12 +92,12 @@ func (r *Reconciler) GetChartMuseum(ctx context.Context, harbor *goharborv1alpha
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
-			Annotations: map[string]string{
+			Annotations: version.SetVersion(map[string]string{
 				harbormetav1.NetworkPoliciesAnnotationName: harbormetav1.NetworkPoliciesAnnotationDisabled,
-			},
+			}, harbor.Spec.Version),
 		},
 		Spec: goharborv1alpha2.ChartMuseumSpec{
-			ComponentSpec: harbor.Spec.ChartMuseum.ComponentSpec,
+			ComponentSpec: harbor.GetComponentSpec(ctx, harbormetav1.ChartMuseumComponent),
 			Authentication: goharborv1alpha2.ChartMuseumAuthSpec{
 				AnonymousGet: false,
 				BasicAuthRef: basicAuthRef,
@@ -122,6 +123,7 @@ func (r *Reconciler) GetChartMuseum(ctx context.Context, harbor *goharborv1alpha
 				Debug: debug,
 				JSON:  true,
 			},
+			CertificateInjection: harbor.Spec.ChartMuseum.CertificateInjection,
 		},
 	}, nil
 }

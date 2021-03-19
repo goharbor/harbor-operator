@@ -14,6 +14,8 @@ import (
 	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/pkg/config/harbor"
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
+	"github.com/goharbor/harbor-operator/pkg/image"
+	"github.com/goharbor/harbor-operator/pkg/version"
 	"github.com/goharbor/harbor/src/common"
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
@@ -22,24 +24,33 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-var varFalse = false
+var (
+	varFalse = false
+
+	fsGroup    int64 = 10000
+	runAsGroup int64 = 10000
+	runAsUser  int64 = 10000
+)
 
 const (
-	healthCheckPeriod                     = 90 * time.Second
-	ConfigPath                            = "/etc/core"
-	VolumeName                            = "configuration"
-	InternalCertificatesVolumeName        = "internal-certificates"
-	InternalCertificateAuthorityDirectory = "/harbor_cust_cert"
-	InternalCertificatesPath              = ConfigPath + "/ssl"
-	PublicCertificateVolumeName           = "ca-download"
-	PublicCertificatePath                 = ConfigPath + "/ca"
-	EncryptionKeyVolumeName               = "encryption"
-	EncryptionKeyPath                     = "key"
-	HealthPath                            = "/api/v2.0/ping"
-	TokenStorageVolumeName                = "psc"
-	TokenStoragePath                      = ConfigPath + "/token"
-	ServiceTokenCertificateVolumeName     = "token-service-private-key"
-	ServiceTokenCertificatePath           = ConfigPath + "/private_key.pem"
+	healthCheckPeriod                        = 90 * time.Second
+	ConfigPath                               = "/etc/core"
+	VolumeName                               = "configuration"
+	InternalCertificatesVolumeName           = "internal-certificates"
+	InternalCertificateAuthorityDirectory    = "/harbor_cust_cert"
+	InternalCertificatesPath                 = ConfigPath + "/ssl"
+	DockerHubRegistryTypesForProxyCache      = "docker-hub"
+	HarborRegistryTypesForProxyCache         = "harbor"
+	DefaultAllowedRegistryTypesForProxyCache = DockerHubRegistryTypesForProxyCache + "," + HarborRegistryTypesForProxyCache
+	PublicCertificateVolumeName              = "ca-download"
+	PublicCertificatePath                    = ConfigPath + "/ca"
+	EncryptionKeyVolumeName                  = "encryption"
+	EncryptionKeyPath                        = "key"
+	HealthPath                               = "/api/v2.0/ping"
+	TokenStorageVolumeName                   = "psc"
+	TokenStoragePath                         = ConfigPath + "/token"
+	ServiceTokenCertificateVolumeName        = "token-service-private-key"
+	ServiceTokenCertificatePath              = ConfigPath + "/private_key.pem"
 )
 
 const (
@@ -48,7 +59,13 @@ const (
 )
 
 func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.Core) (*appsv1.Deployment, error) { // nolint:funlen
-	image, err := r.GetImage(ctx)
+	getImageOptions := []image.Option{
+		image.WithConfigstore(r.ConfigStore),
+		image.WithImageFromSpec(core.Spec.Image),
+		image.WithHarborVersion(version.GetVersion(core.Annotations)),
+	}
+
+	image, err := image.GetImage(ctx, harbormetav1.CoreComponent.String(), getImageOptions...)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot get image")
 	}
@@ -113,6 +130,12 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 		MountPath: ServiceTokenCertificatePath,
 		SubPath:   strings.TrimLeft(corev1.TLSPrivateKeyKey, "/"),
 	}}
+
+	// inject certs if need.
+	if core.Spec.CertificateInjection.ShouldInject() {
+		volumes = append(volumes, core.Spec.CertificateInjection.GenerateVolumes()...)
+		volumeMounts = append(volumeMounts, core.Spec.CertificateInjection.GenerateVolumeMounts()...)
+	}
 
 	scheme := "http"
 	if core.Spec.Components.TLS.Enabled() {
@@ -192,7 +215,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 			},
 		},
 	}, {
-		Name: "_REDIS_URL",
+		Name: RedisDSNKey,
 		ValueFrom: &corev1.EnvVarSource{
 			SecretKeyRef: &corev1.SecretKeySelector{
 				LocalObjectReference: corev1.LocalObjectReference{
@@ -265,6 +288,9 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 	}, {
 		Name:  "INTERNAL_TLS_ENABLED",
 		Value: strconv.FormatBool(core.Spec.Components.TLS.Enabled()),
+	}, {
+		Name:  "PERMITTED_REGISTRY_TYPES_FOR_PROXY_CACHE",
+		Value: DefaultAllowedRegistryTypesForProxyCache,
 	}}...)
 
 	if core.Spec.Database.MaxIdleConnections != nil {
@@ -296,7 +322,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 
 	if core.Spec.Components.Registry.Redis != nil {
 		envs = append(envs, corev1.EnvVar{
-			Name: "_REDIS_URL_REG",
+			Name: RegistryRedisDSNKey,
 			ValueFrom: &corev1.EnvVarSource{
 				SecretKeyRef: &corev1.SecretKeySelector{
 					Key:      RegistryRedisDSNKey,
@@ -411,8 +437,9 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 
 	deploy := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
+			Name:        name,
+			Namespace:   namespace,
+			Annotations: version.NewVersionAnnotations(core.Annotations),
 		},
 		Spec: appsv1.DeploymentSpec{
 			Selector: &metav1.LabelSelector{
@@ -432,6 +459,11 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 				Spec: corev1.PodSpec{
 					AutomountServiceAccountToken: &varFalse,
 					Volumes:                      volumes,
+					SecurityContext: &corev1.PodSecurityContext{
+						FSGroup:    &fsGroup,
+						RunAsGroup: &runAsGroup,
+						RunAsUser:  &runAsUser,
+					},
 					Containers: []corev1.Container{{
 						Name:  controllers.Core.String(),
 						Image: image,

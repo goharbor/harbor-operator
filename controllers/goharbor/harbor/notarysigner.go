@@ -10,7 +10,8 @@ import (
 	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/pkg/config"
 	"github.com/goharbor/harbor-operator/pkg/graph"
-	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
+	"github.com/goharbor/harbor-operator/pkg/version"
+	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1"
 	v1 "github.com/jetstack/cert-manager/pkg/apis/meta/v1"
 	"github.com/pkg/errors"
 	"github.com/sethvargo/go-password/password"
@@ -70,13 +71,13 @@ func (r *Reconciler) GetNotarySignerCertificateAuthority(ctx context.Context, ha
 
 	return &certv1.Certificate{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      r.NormalizeName(ctx, harbor.GetName(), controllers.NotarySigner.String(), "authentication", "authority"),
+			Name:      r.NormalizeName(ctx, harbor.GetName(), controllers.NotarySigner.String(), "authority"),
 			Namespace: harbor.GetNamespace(),
 		},
 		Spec: certv1.CertificateSpec{
-			SecretName: r.NormalizeName(ctx, harbor.GetName(), controllers.NotarySigner.String(), "authentication", "authority"),
+			SecretName: r.NormalizeName(ctx, harbor.GetName(), controllers.NotarySigner.String(), "authority"),
 			IssuerRef: v1.ObjectReference{
-				Name: r.NormalizeName(ctx, harbor.GetName(), controllers.NotarySigner.String(), "authentication", "authority"),
+				Name: r.NormalizeName(ctx, harbor.GetName(), controllers.NotarySigner.String(), "authority"),
 			},
 			Duration: &metav1.Duration{
 				Duration: duration,
@@ -102,7 +103,7 @@ func (r *Reconciler) AddNotarySignerEncryptionKey(ctx context.Context, harbor *g
 		return nil, errors.Wrap(err, "get")
 	}
 
-	secretRes, err := r.Controller.AddImmutableSecretToManage(ctx, secret)
+	secretRes, err := r.Controller.AddSecretToManage(ctx, secret)
 	if err != nil {
 		return nil, errors.Wrap(err, "add")
 	}
@@ -156,7 +157,7 @@ func (r *Reconciler) AddNotarySignerCertificateAuthorityIssuer(ctx context.Conte
 func (r *Reconciler) GetNotarySignerCertificateAuthorityIssuer(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*certv1.Issuer, error) {
 	return &certv1.Issuer{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      r.NormalizeName(ctx, harbor.GetName(), controllers.NotarySigner.String(), "authentication", "authority"),
+			Name:      r.NormalizeName(ctx, harbor.GetName(), controllers.NotarySigner.String(), "authority"),
 			Namespace: harbor.GetNamespace(),
 		},
 		Spec: certv1.IssuerSpec{
@@ -208,7 +209,7 @@ func (r *Reconciler) GetNotarySignerCertificateIssuer(ctx context.Context, harbo
 		Spec: certv1.IssuerSpec{
 			IssuerConfig: certv1.IssuerConfig{
 				CA: &certv1.CAIssuer{
-					SecretName: r.NormalizeName(ctx, harbor.GetName(), controllers.NotarySigner.String(), "authentication", "authority"),
+					SecretName: r.NormalizeName(ctx, harbor.GetName(), controllers.NotarySigner.String(), "authority"),
 				},
 			},
 		},
@@ -254,7 +255,7 @@ const (
 	NotarySignerCertificateAlgorithmDefaultConfig = certv1.ECDSAKeyAlgorithm
 )
 
-func (r *Reconciler) getNotarySignerCertificateAlgorithm() (certv1.KeyAlgorithm, error) {
+func (r *Reconciler) getNotarySignerCertificateAlgorithm() (certv1.PrivateKeyAlgorithm, error) {
 	algorithm, err := r.ConfigStore.GetItemValue(NotarySignerCertificateAlgorithmConfigKey)
 	if err != nil {
 		if config.IsNotFound(err, NotarySignerCertificateAlgorithmConfigKey) {
@@ -264,7 +265,7 @@ func (r *Reconciler) getNotarySignerCertificateAlgorithm() (certv1.KeyAlgorithm,
 		return NotarySignerCertificateAlgorithmDefaultConfig, err
 	}
 
-	return certv1.KeyAlgorithm(algorithm), nil
+	return certv1.PrivateKeyAlgorithm(algorithm), nil
 }
 
 func (r *Reconciler) GetNotarySignerCertificate(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*certv1.Certificate, error) {
@@ -290,10 +291,12 @@ func (r *Reconciler) GetNotarySignerCertificate(ctx context.Context, harbor *goh
 			IssuerRef: v1.ObjectReference{
 				Name: r.NormalizeName(ctx, harbor.GetName(), controllers.NotarySigner.String(), "authentication"),
 			},
-			KeyAlgorithm: algorithm,
-			Duration:     &metav1.Duration{Duration: duration},
-			CommonName:   r.NormalizeName(ctx, harbor.GetName(), controllers.NotarySigner.String()),
-			DNSNames:     []string{r.NormalizeName(ctx, harbor.GetName(), controllers.NotarySigner.String())},
+			PrivateKey: &certv1.CertificatePrivateKey{
+				Algorithm: algorithm,
+			},
+			Duration:   &metav1.Duration{Duration: duration},
+			CommonName: r.NormalizeName(ctx, harbor.GetName(), controllers.NotarySigner.String()),
+			DNSNames:   []string{r.NormalizeName(ctx, harbor.GetName(), controllers.NotarySigner.String())},
 			Usages: []certv1.KeyUsage{
 				certv1.UsageDigitalSignature,
 				certv1.UsageKeyEncipherment,
@@ -341,12 +344,12 @@ func (r *Reconciler) GetNotarySigner(ctx context.Context, harbor *goharborv1alph
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
-			Annotations: map[string]string{
+			Annotations: version.SetVersion(map[string]string{
 				harbormetav1.NetworkPoliciesAnnotationName: harbormetav1.NetworkPoliciesAnnotationDisabled,
-			},
+			}, harbor.Spec.Version),
 		},
 		Spec: goharborv1alpha2.NotarySignerSpec{
-			ComponentSpec: harbor.Spec.Notary.Signer,
+			ComponentSpec: harbor.GetComponentSpec(ctx, harbormetav1.NotarySignerComponent),
 			Authentication: goharborv1alpha2.NotarySignerAuthenticationSpec{
 				CertificateRef: certificateRef,
 			},
