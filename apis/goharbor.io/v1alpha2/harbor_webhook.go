@@ -92,6 +92,10 @@ func (h *Harbor) Validate(old *Harbor) error {
 		allErrs = append(allErrs, err)
 	}
 
+	if err := h.Spec.ValidateRegistryController(); err != nil {
+		allErrs = append(allErrs, err)
+	}
+
 	if old == nil { // create harbor resource
 		if err := version.Validate(h.Spec.Version); err != nil {
 			allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("version"), h.Spec.Version, err.Error()))

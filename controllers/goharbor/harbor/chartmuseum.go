@@ -97,7 +97,7 @@ func (r *Reconciler) GetChartMuseum(ctx context.Context, harbor *goharborv1alpha
 			}, harbor.Spec.Version),
 		},
 		Spec: goharborv1alpha2.ChartMuseumSpec{
-			ComponentSpec: r.getComponentSpec(ctx, harbor, harbormetav1.ChartMuseumComponent),
+			ComponentSpec: harbor.GetComponentSpec(ctx, harbormetav1.ChartMuseumComponent),
 			Authentication: goharborv1alpha2.ChartMuseumAuthSpec{
 				AnonymousGet: false,
 				BasicAuthRef: basicAuthRef,

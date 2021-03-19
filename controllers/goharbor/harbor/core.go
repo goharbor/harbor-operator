@@ -420,7 +420,7 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1alpha2.Harbo
 			}, harbor.Spec.Version),
 		},
 		Spec: goharborv1alpha2.CoreSpec{
-			ComponentSpec: r.getComponentSpec(ctx, harbor, harbormetav1.CoreComponent),
+			ComponentSpec: harbor.GetComponentSpec(ctx, harbormetav1.CoreComponent),
 			Components: goharborv1alpha2.CoreComponentsSpec{
 				Registry: goharborv1alpha2.CoreComponentsRegistrySpec{
 					RegistryControllerConnectionSpec: goharborv1alpha2.RegistryControllerConnectionSpec{
