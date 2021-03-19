@@ -1642,7 +1642,6 @@ spec:
                     type: string
                 required:
                 - encryptionKeyRef
-                - hosts
                 type: object
               externalEndpoint:
                 pattern: https?://.+
@@ -7259,8 +7258,6 @@ spec:
                         description: PostgreSQL user name to connect as. Defaults to be the same as the operating system name of the user running the application.
                         minLength: 1
                         type: string
-                    required:
-                    - hosts
                     type: object
                 required:
                 - postgres
@@ -7563,8 +7560,6 @@ spec:
                         description: PostgreSQL user name to connect as. Defaults to be the same as the operating system name of the user running the application.
                         minLength: 1
                         type: string
-                    required:
-                    - hosts
                     type: object
                 required:
                 - aliasesRef
@@ -13558,6 +13553,18 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - networkpolicies
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -14497,7 +14504,7 @@ spec:
         - mountPath: /tmp/k8s-webhook-server/serving-certs
           name: cert
           readOnly: true
-        - mountPath: /etc/harbor-operator
+        - mountPath: /etc/harbor-operator/templates
           name: configuration-templates
           readOnly: true
       securityContext:

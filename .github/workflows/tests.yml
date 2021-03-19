@@ -117,7 +117,6 @@ jobs:
 
       - name: go tests
         run: |
-          make go-test
           GO_TEST_OPTS='-p 1 -vet=off' make go-test
       - name: fetch logs
         if: ${{ failure() }}
@@ -144,13 +143,13 @@ jobs:
         # https://github.com/jetstack/cert-manager/tags
         certManager:
         - "1.0.4"
-        - "1.1.0"
+#        - "1.1.0"
         - "1.2.0"
 
         # https://snapcraft.io/microk8s
         k8sVersion:
         - "1.18.8"
-        - "1.19.1"
+#        - "1.19.1"
         - "1.20.2"
 
         ingress:
@@ -292,9 +291,9 @@ jobs:
         kubectl -n cluster-sample-ns patch deploy harborcluster-sample-harbor-harbor-core -p '{"spec":{"template":{"spec":{"containers":[{"name":"core","env":[{"name":"GC_TIME_WINDOW_HOURS","value":"0"}]}]}}}}'
         sleep 5
         kubectl -n cluster-sample-ns wait --for=condition=Ready pod --all --timeout 600s
-        docker run --rm -t --privileged -v `pwd`/harbor:/drone -v /etc/docker/certs.d/$CORE_HOST/:/ca -v /etc/docker/certs.d/$CORE_HOST/:/root/.docker/tls/$NOTARY_HOST/ -e NOTARY_URL=https://$NOTARY_HOST -w /drone goharbor/harbor-e2e-engine:2.6 \
+        docker run --rm -t --privileged -v `pwd`/harbor:/drone -v /etc/docker/certs.d/$CORE_HOST/:/ca -v /etc/docker/certs.d/$CORE_HOST/:/root/.docker/tls/$NOTARY_HOST/ -e NOTARY_URL=https://$NOTARY_HOST -w /drone goharbor/harbor-e2e-engine:2.6.3 \
           python -u -m robot -v DOCKER_USER:${{ secrets.DOCKER_USER }} -v DOCKER_PWD:${{ secrets.DOCKER_TOKEN }} -v ip:$CORE_HOST -v ip1: -v HARBOR_PASSWORD:Harbor12345 -X \
-          --exclude gc --exclude singularity \
+          --exclude gc --exclude singularity --exclude proxy_cache \
           /drone/tests/robot-cases/Group1-Nightly/Setup.robot /drone/tests/robot-cases/Group0-BAT/API_DB.robot
 
     - name: fetch harbor logs
@@ -360,6 +359,24 @@ jobs:
       - uses: actions/setup-go@v2
         with:
           go-version: 1.14
+
+      - uses: azure/setup-kubectl@v1
+        with:
+          version: 'latest'
+
+      - name: Cache go mod
+        uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Prepare memory storage for etcd of kind cluster
+        run: |
+          # Use memory storage for etcd of the kind cluster, see https://github.com/kubernetes-sigs/kind/issues/845 for more info
+          mkdir -p /tmp/lib/etcd
+          sudo mount -t tmpfs tmpfs /tmp/lib/etcd
 
       - name: Install Kubernetes v${{ matrix.k8sVersion }}
         uses: helm/kind-action@v1.1.0
@@ -459,9 +476,9 @@ jobs:
           kubectl patch deploy harborcluster-sample-harbor-harbor-core -p '{"spec":{"template":{"spec":{"containers":[{"name":"core","env":[{"name":"GC_TIME_WINDOW_HOURS","value":"0"}]}]}}}}'
           sleep 5
           kubectl wait --for=condition=Ready pod --all --timeout 600s
-          docker run --rm -t --privileged -v `pwd`/harbor:/drone -v /etc/docker/certs.d/$CORE_HOST/:/ca -v /etc/docker/certs.d/$CORE_HOST/:/root/.docker/tls/$NOTARY_HOST/ -e NOTARY_URL=https://$NOTARY_HOST -w /drone goharbor/harbor-e2e-engine:2.6 \
+          docker run --rm -t --privileged -v `pwd`/harbor:/drone -v /etc/docker/certs.d/$CORE_HOST/:/ca -v /etc/docker/certs.d/$CORE_HOST/:/root/.docker/tls/$NOTARY_HOST/ -e NOTARY_URL=https://$NOTARY_HOST -w /drone goharbor/harbor-e2e-engine:2.6.3 \
           python -u -m robot -v DOCKER_USER:${{ secrets.DOCKER_USER }} -v DOCKER_PWD:${{ secrets.DOCKER_TOKEN }} -v ip:$CORE_HOST -v ip1: -v HARBOR_PASSWORD:Harbor12345 -X \
-          --exclude gc --exclude singularity \
+          --exclude gc --exclude singularity --exclude proxy_cache \
           /drone/tests/robot-cases/Group1-Nightly/Setup.robot /drone/tests/robot-cases/Group0-BAT/API_DB.robot
 
       - name: fetch harbor logs

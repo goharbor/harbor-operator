@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-logr/logr"
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/pkg/builder"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/cache"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/database"
@@ -16,6 +17,7 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/config"
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
 	"github.com/goharbor/harbor-operator/pkg/factories/application"
+	"github.com/goharbor/harbor-operator/pkg/utils/strings"
 	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
 	redisOp "github.com/spotahome/redis-operator/api/redisfailover/v1"
@@ -124,14 +126,19 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 		Complete(r)
 }
 
+func (r *Reconciler) NormalizeName(ctx context.Context, name string, suffixes ...string) string {
+	suffixes = append([]string{"HarborCluster"}, suffixes...)
+
+	return strings.NormalizeName(name, suffixes...)
+}
+
 // New HarborCluster reconciler.
-func New(ctx context.Context, name string, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
+func New(ctx context.Context, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
 	return &Reconciler{
-		Name:        name,
 		Version:     application.GetVersion(ctx),
 		ConfigStore: configStore,
-		Log:         ctrl.Log.WithName(application.GetName(ctx)).WithName("controller").WithValues("controller", name),
-		ctrl:        commonCtrl.NewController(ctx, name, nil, configStore),
+		Log:         ctrl.Log.WithName(application.GetName(ctx)).WithName("controller").WithValues("controller", "HarborCluster"),
+		ctrl:        commonCtrl.NewController(ctx, controllers.HarborCluster, nil, configStore),
 	}, nil
 }
 

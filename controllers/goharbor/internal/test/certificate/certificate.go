@@ -1,4 +1,4 @@
-package test
+package certificate
 
 import (
 	"bytes"
@@ -33,11 +33,11 @@ func bytesToPEM(certBytes []byte, certPrivKey *rsa.PrivateKey) (*bytes.Buffer, *
 	return certPEM, certPrivKeyPEM
 }
 
-func verifyCertificate(caPEM *bytes.Buffer, certPEM *bytes.Buffer, dnsNames ...string) {
+func verifyCertificate(caPEM []byte, certPEM []byte, dnsNames ...string) {
 	roots := x509.NewCertPool()
-	gomega.Expect(roots.AppendCertsFromPEM(caPEM.Bytes())).To(gomega.BeTrue())
+	gomega.Expect(roots.AppendCertsFromPEM(caPEM)).To(gomega.BeTrue())
 
-	block, _ := pem.Decode(certPEM.Bytes())
+	block, _ := pem.Decode(certPEM)
 	gomega.Expect(block).ToNot(gomega.BeNil())
 
 	cert, err := x509.ParseCertificate(block.Bytes)
@@ -62,7 +62,13 @@ func verifyCertificate(caPEM *bytes.Buffer, certPEM *bytes.Buffer, dnsNames ...s
 	}
 }
 
-func GenerateCertificate(dnsNames ...string) map[string][]byte {
+type CA struct {
+	Cert    *x509.Certificate
+	PrivKey *rsa.PrivateKey
+	PEM     []byte
+}
+
+func NewCA() *CA {
 	ca := &x509.Certificate{
 		SerialNumber: big.NewInt(2019),
 		Subject: pkix.Name{
@@ -84,6 +90,14 @@ func GenerateCertificate(dnsNames ...string) map[string][]byte {
 
 	caPEM, _ := bytesToPEM(caBytes, caPrivKey)
 
+	return &CA{
+		Cert:    ca,
+		PrivKey: caPrivKey,
+		PEM:     caPEM.Bytes(),
+	}
+}
+
+func (ca *CA) NewCert(dnsNames ...string) *Cert {
 	cert := &x509.Certificate{
 		SerialNumber: big.NewInt(1658),
 		Subject: pkix.Name{
@@ -100,15 +114,31 @@ func GenerateCertificate(dnsNames ...string) map[string][]byte {
 	certPrivKey, err := rsa.GenerateKey(rand.Reader, 4096)
 	gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
-	certBytes, err := x509.CreateCertificate(rand.Reader, cert, ca, &certPrivKey.PublicKey, caPrivKey)
+	certBytes, err := x509.CreateCertificate(rand.Reader, cert, ca.Cert, &certPrivKey.PublicKey, ca.PrivKey)
 	gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 	certPEM, certPrivKeyPEM := bytesToPEM(certBytes, certPrivKey)
-	verifyCertificate(caPEM, certPEM, dnsNames...)
 
+	pem := certPEM.Bytes()
+	verifyCertificate(ca.PEM, pem, dnsNames...)
+
+	return &Cert{
+		CA:      ca,
+		PrivKey: certPrivKeyPEM.Bytes(),
+		PEM:     pem,
+	}
+}
+
+type Cert struct {
+	CA      *CA
+	PrivKey []byte
+	PEM     []byte
+}
+
+func (cert *Cert) ToMap() map[string][]byte {
 	return map[string][]byte{
-		corev1.TLSPrivateKeyKey:        certPrivKeyPEM.Bytes(),
-		corev1.TLSCertKey:              certPEM.Bytes(),
-		corev1.ServiceAccountRootCAKey: caPEM.Bytes(),
+		corev1.TLSPrivateKeyKey:        cert.PrivKey,
+		corev1.TLSCertKey:              cert.PEM,
+		corev1.ServiceAccountRootCAKey: cert.CA.PEM,
 	}
 }

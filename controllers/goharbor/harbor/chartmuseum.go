@@ -63,7 +63,7 @@ func (r *Reconciler) AddChartMuseum(ctx context.Context, harbor *goharborv1alpha
 	return ChartMuseum(chartmuseumRes), errors.Wrap(err, "add")
 }
 
-func (r *Reconciler) GetChartMuseum(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*goharborv1alpha2.ChartMuseum, error) {
+func (r *Reconciler) GetChartMuseum(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*goharborv1alpha2.ChartMuseum, error) { //nolint:funlen
 	name := r.NormalizeName(ctx, harbor.GetName())
 	namespace := harbor.GetNamespace()
 
@@ -90,9 +90,11 @@ func (r *Reconciler) GetChartMuseum(ctx context.Context, harbor *goharborv1alpha
 
 	return &goharborv1alpha2.ChartMuseum{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        name,
-			Namespace:   namespace,
-			Annotations: version.SetVersion(nil, harbor.Spec.Version),
+			Name:      name,
+			Namespace: namespace,
+			Annotations: version.SetVersion(map[string]string{
+				harbormetav1.NetworkPoliciesAnnotationName: harbormetav1.NetworkPoliciesAnnotationDisabled,
+			}, harbor.Spec.Version),
 		},
 		Spec: goharborv1alpha2.ChartMuseumSpec{
 			ComponentSpec: r.getComponentSpec(ctx, harbor, harbormetav1.ChartMuseumComponent),

@@ -22,7 +22,7 @@ spec:
         - /manager
         env:
         - name: CONFIGURATION_FROM
-          value: 'env:'
+          value: env,file:/etc/harbor-operator/config.yaml
         - name: CLASSNAME
           value: {{ .Values.harborClass | quote }}
         - name: LOG_LEVEL
@@ -56,10 +56,13 @@ spec:
         securityContext:
           allowPrivilegeEscalation: {{ .Values.allowPrivilegeEscalation }}
         volumeMounts:
+        - mountPath: /etc/harbor-operator
+          name: configuration
+          readOnly: true
         - mountPath: /tmp/k8s-webhook-server/serving-certs
           name: cert
           readOnly: true
-        - mountPath: /etc/harbor-operator
+        - mountPath: /etc/harbor-operator/templates
           name: configuration-templates
           readOnly: true
       nodeSelector: {{- toYaml .Values.nodeSelector | nindent 8 }}
@@ -72,6 +75,9 @@ spec:
         secret:
           defaultMode: 420
           secretName: '{{ include "chart.fullname" . }}-certificate'
+      - configMap:
+          name: '{{ include "chart.fullname" . }}-config'
+        name: configuration
       - configMap:
           name: '{{ include "chart.fullname" . }}-config-template'
         name: configuration-templates

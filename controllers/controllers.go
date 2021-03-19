@@ -1,5 +1,10 @@
 package controllers
 
+import (
+	"fmt"
+	"strings"
+)
+
 //go:generate controller-gen rbac:roleName="harbor-operator-role" output:artifacts:config="../config/rbac" paths="./..."
 
 //go:generate stringer -type=Controller -linecomment
@@ -20,3 +25,24 @@ const (
 	HarborCluster                         // harborcluster
 	HarborConfiguration                   // harborconfiguration
 )
+
+func (c Controller) GetFQDN() string {
+	return fmt.Sprintf("%s.goharbor.io", strings.ToLower(c.String()))
+}
+
+func (c Controller) Label(suffix ...string) string {
+	return c.LabelWithPrefix("", suffix...)
+}
+
+func (c Controller) LabelWithPrefix(prefix string, suffix ...string) string {
+	var suffixString string
+	if len(suffix) > 0 {
+		suffixString = "/" + strings.Join(suffix, "-")
+	}
+
+	if prefix != "" {
+		prefix = "." + prefix
+	}
+
+	return fmt.Sprintf("%s%s%s", prefix, c.GetFQDN(), suffixString)
+}

@@ -46,7 +46,7 @@ func (r *Reconciler) GetSecret(ctx context.Context, core *goharborv1alpha2.Core)
 
 	var registryPassword string
 
-	if core.Spec.Components.Registry.Redis.PasswordRef != "" {
+	if core.Spec.Components.Registry.Redis != nil && core.Spec.Components.Registry.Redis.PasswordRef != "" {
 		var passwordSecret corev1.Secret
 
 		err := r.Client.Get(ctx, types.NamespacedName{

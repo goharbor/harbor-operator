@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/pkg/config"
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
 	"github.com/goharbor/harbor-operator/pkg/event-filter/class"
@@ -12,13 +13,14 @@ import (
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	netv1 "k8s.io/api/networking/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 )
 
 const (
 	ConfigTemplatePathKey     = "template-path"
-	DefaultConfigTemplatePath = "/etc/harbor-operator/portal-config.conf.tmpl"
+	DefaultConfigTemplatePath = "/etc/harbor-operator/templates/portal-config.conf.tmpl"
 	ConfigTemplateKey         = "template-content"
 )
 
@@ -31,6 +33,7 @@ type Reconciler struct {
 
 // +kubebuilder:rbac:groups=goharbor.io,resources=portals,verbs=get;list;watch
 // +kubebuilder:rbac:groups=goharbor.io,resources=portals/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=networking.k8s.io,resources=networkpolicies,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="",resources=services,verbs=get;list;watch;create;update;patch;delete
 
@@ -67,20 +70,17 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 		For(r.NewEmpty(ctx)).
 		Owns(&appsv1.Deployment{}).
 		Owns(&corev1.Service{}).
+		Owns(&netv1.NetworkPolicy{}).
 		WithOptions(controller.Options{
 			MaxConcurrentReconciles: int(concurrentReconcile),
 		}).
 		Complete(r)
 }
 
-func New(ctx context.Context, name string, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
-	configTemplatePath, err := configStore.GetItemValue(ConfigTemplatePathKey)
+func New(ctx context.Context, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
+	configTemplatePath, err := config.GetString(configStore, ConfigTemplatePathKey, DefaultConfigTemplatePath)
 	if err != nil {
-		if !config.IsNotFound(err, ConfigTemplatePathKey) {
-			return nil, errors.Wrap(err, "cannot get config template path")
-		}
-
-		configTemplatePath = DefaultConfigTemplatePath
+		return nil, errors.Wrap(err, "template path")
 	}
 
 	r := &Reconciler{
@@ -90,14 +90,14 @@ func New(ctx context.Context, name string, configStore *configstore.Store) (comm
 	configStore.FileCustomRefresh(configTemplatePath, func(data []byte) ([]configstore.Item, error) {
 		r.configError = nil
 
-		logger.Get(ctx).WithName("controller").WithName(name).
+		logger.Get(ctx).WithName("controller").WithName(controllers.Portal.String()).
 			Info("config reloaded", "path", configTemplatePath)
 		// TODO reconcile all core
 
 		return []configstore.Item{configstore.NewItem(ConfigTemplateKey, string(data), config.DefaultPriority)}, nil
 	})
 
-	r.Controller = commonCtrl.NewController(ctx, name, r, configStore)
+	r.Controller = commonCtrl.NewController(ctx, controllers.Portal, r, configStore)
 
 	return r, nil
 }

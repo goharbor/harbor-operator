@@ -1,19 +1,3 @@
-/*
-Copyright 2019 The Kubernetes Authors.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 package chartmuseum_test
 
 import (
@@ -28,6 +12,7 @@ import (
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/pods"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -43,16 +28,19 @@ var _ = Describe("ChartMuseum", func() {
 	)
 
 	BeforeEach(func() {
+		className, err := reconciler.GetClassName(ctx)
+		Expect(err).ToNot(HaveOccurred())
+
 		chartMuseum.ObjectMeta = metav1.ObjectMeta{
 			Name:      test.NewName("chartmuseum"),
 			Namespace: ns.GetName(),
 			Annotations: map[string]string{
-				goharborv1alpha2.HarborClassAnnotation: harborClass,
+				goharborv1alpha2.HarborClassAnnotation: className,
 			},
 		}
 	})
 
-	JustAfterEach(test.LogsAll(&ctx, func() types.NamespacedName {
+	JustAfterEach(pods.LogsAll(&ctx, func() types.NamespacedName {
 		return types.NamespacedName{
 			Name:      reconciler.NormalizeName(ctx, chartMuseum.GetName()),
 			Namespace: chartMuseum.GetNamespace(),
@@ -136,9 +124,12 @@ func IntegTest(ctx context.Context, chartMuseum *goharborv1alpha2.ChartMuseum) {
 		Namespace(namespacedName.Namespace).
 		Name(fmt.Sprintf("%s:%s", namespacedName.Name, harbormetav1.ChartMuseumHTTPPortName)).
 		SubResource("proxy").
-		Suffix("health")
+		Suffix("health").
+		MaxRetries(0)
 
-	Ω(proxyReq.DoRaw(ctx)).
+	Eventually(func() ([]byte, error) {
+		return proxyReq.DoRaw(ctx)
+	}).
 		Should(WithTransform(func(result []byte) bool {
 			var health struct {
 				Healthy bool `json:"healthy"`
