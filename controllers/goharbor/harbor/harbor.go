@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/pkg/config"
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
@@ -56,14 +56,14 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 			ClassName: className,
 		}).
 		For(r.NewEmpty(ctx)).
-		Owns(&goharborv1alpha2.ChartMuseum{}).
-		Owns(&goharborv1alpha2.Core{}).
-		Owns(&goharborv1alpha2.JobService{}).
-		Owns(&goharborv1alpha2.Portal{}).
-		Owns(&goharborv1alpha2.Registry{}).
-		Owns(&goharborv1alpha2.RegistryController{}).
-		Owns(&goharborv1alpha2.NotaryServer{}).
-		Owns(&goharborv1alpha2.NotarySigner{}).
+		Owns(&goharborv1.ChartMuseum{}).
+		Owns(&goharborv1.Core{}).
+		Owns(&goharborv1.JobService{}).
+		Owns(&goharborv1.Portal{}).
+		Owns(&goharborv1.Registry{}).
+		Owns(&goharborv1.RegistryController{}).
+		Owns(&goharborv1.NotaryServer{}).
+		Owns(&goharborv1.NotarySigner{}).
 		Owns(&corev1.Secret{}).
 		Owns(&certv1.Issuer{}).
 		Owns(&certv1.Certificate{}).

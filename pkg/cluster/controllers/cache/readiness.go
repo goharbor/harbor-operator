@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	appsv1 "k8s.io/api/apps/v1"
@@ -22,7 +22,7 @@ import (
 // - create redis connection pool
 // - ping redis server
 // - return redis properties if redis has available.
-func (rc *RedisController) Readiness(_ context.Context, cluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
+func (rc *RedisController) Readiness(_ context.Context, cluster *goharborv1.HarborCluster) (*lcm.CRStatus, error) {
 	rc.Log.Info("Redis already ready.",
 		"namespace", cluster.Namespace, "name", cluster.Name)
 
@@ -32,8 +32,8 @@ func (rc *RedisController) Readiness(_ context.Context, cluster *v1alpha2.Harbor
 	return cacheReadyStatus(&properties), nil
 }
 
-func (rc *RedisController) generateRedisSpec() *v1alpha2.ExternalRedisSpec {
-	return &v1alpha2.ExternalRedisSpec{
+func (rc *RedisController) generateRedisSpec() *goharborv1.ExternalRedisSpec {
+	return &goharborv1.ExternalRedisSpec{
 		RedisHostSpec: harbormetav1.RedisHostSpec{
 			Host:              fmt.Sprintf("rfs-%s", rc.ResourceManager.GetCacheCRName()),
 			Port:              RedisSentinelConnPort,

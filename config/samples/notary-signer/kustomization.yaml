@@ -13,7 +13,7 @@ secretGenerator:
 resources:
 - notarysigner-certificate.yaml
 - notarysigner-certificate-issuer.yaml
-- goharbor_v1alpha2_notarysigner.yaml
+- goharbor_v1alpha3_notarysigner.yaml
 
 bases:
 - ../../kustomizeconfig

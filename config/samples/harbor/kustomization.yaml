@@ -8,7 +8,7 @@ resources:
 - internal_tls.yaml
 - service_token_issuer.yaml
 - storage.yaml
-- goharbor_v1alpha2_harbor.yaml
+- goharbor_v1alpha3_harbor.yaml
 
 secretGenerator:
 - name: core-secret

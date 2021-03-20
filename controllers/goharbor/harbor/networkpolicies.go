@@ -3,7 +3,7 @@ package harbor
 import (
 	"context"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/pkg/graph"
@@ -15,7 +15,7 @@ import (
 
 type NetworkPolicy graph.Resource
 
-func (r *Reconciler) AddNetworkPolicies(ctx context.Context, harbor *goharborv1alpha2.Harbor) error {
+func (r *Reconciler) AddNetworkPolicies(ctx context.Context, harbor *goharborv1.Harbor) error {
 	areNetworkPoliciesEnabled, err := r.AreNetworkPoliciesEnabled(ctx, harbor)
 	if err != nil {
 		return errors.Wrapf(err, "cannot get status")
@@ -78,7 +78,7 @@ func (r *Reconciler) AddNetworkPolicies(ctx context.Context, harbor *goharborv1a
 	return nil
 }
 
-func (r *Reconciler) AddChartMuseumIngressNetworkPolicy(ctx context.Context, harbor *goharborv1alpha2.Harbor) (NetworkPolicy, error) {
+func (r *Reconciler) AddChartMuseumIngressNetworkPolicy(ctx context.Context, harbor *goharborv1.Harbor) (NetworkPolicy, error) {
 	networkPolicy, err := r.GetChartMuseumIngressNetworkPolicy(ctx, harbor)
 	if err != nil {
 		return nil, errors.Wrap(err, "get")
@@ -89,7 +89,7 @@ func (r *Reconciler) AddChartMuseumIngressNetworkPolicy(ctx context.Context, har
 	return NetworkPolicy(networkPolicyRes), errors.Wrap(err, "add")
 }
 
-func (r *Reconciler) GetChartMuseumIngressNetworkPolicy(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*netv1.NetworkPolicy, error) {
+func (r *Reconciler) GetChartMuseumIngressNetworkPolicy(ctx context.Context, harbor *goharborv1.Harbor) (*netv1.NetworkPolicy, error) {
 	return &netv1.NetworkPolicy{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      r.NormalizeName(ctx, harbor.GetName(), controllers.ChartMuseum.String(), "ingress"),
@@ -109,7 +109,7 @@ func (r *Reconciler) GetChartMuseumIngressNetworkPolicy(ctx context.Context, har
 	}, nil
 }
 
-func (r *Reconciler) AddCoreIngressNetworkPolicy(ctx context.Context, harbor *goharborv1alpha2.Harbor) (NetworkPolicy, error) {
+func (r *Reconciler) AddCoreIngressNetworkPolicy(ctx context.Context, harbor *goharborv1.Harbor) (NetworkPolicy, error) {
 	networkPolicy, err := r.GetCoreIngressNetworkPolicy(ctx, harbor)
 	if err != nil {
 		return nil, errors.Wrap(err, "get")
@@ -120,7 +120,7 @@ func (r *Reconciler) AddCoreIngressNetworkPolicy(ctx context.Context, harbor *go
 	return NetworkPolicy(networkPolicyRes), errors.Wrap(err, "add")
 }
 
-func (r *Reconciler) GetCoreIngressNetworkPolicy(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*netv1.NetworkPolicy, error) { //nolint:dupl
+func (r *Reconciler) GetCoreIngressNetworkPolicy(ctx context.Context, harbor *goharborv1.Harbor) (*netv1.NetworkPolicy, error) { //nolint:dupl
 	var port intstr.IntOrString
 
 	if harbor.Spec.Expose.Core.TLS != nil {
@@ -154,7 +154,7 @@ func (r *Reconciler) GetCoreIngressNetworkPolicy(ctx context.Context, harbor *go
 	}, nil
 }
 
-func (r *Reconciler) AddJobServiceIngressNetworkPolicy(ctx context.Context, harbor *goharborv1alpha2.Harbor) (NetworkPolicy, error) {
+func (r *Reconciler) AddJobServiceIngressNetworkPolicy(ctx context.Context, harbor *goharborv1.Harbor) (NetworkPolicy, error) {
 	networkPolicy, err := r.GetJobServiceIngressNetworkPolicy(ctx, harbor)
 	if err != nil {
 		return nil, errors.Wrap(err, "get")
@@ -165,7 +165,7 @@ func (r *Reconciler) AddJobServiceIngressNetworkPolicy(ctx context.Context, harb
 	return NetworkPolicy(networkPolicyRes), errors.Wrap(err, "add")
 }
 
-func (r *Reconciler) GetJobServiceIngressNetworkPolicy(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*netv1.NetworkPolicy, error) {
+func (r *Reconciler) GetJobServiceIngressNetworkPolicy(ctx context.Context, harbor *goharborv1.Harbor) (*netv1.NetworkPolicy, error) {
 	return &netv1.NetworkPolicy{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      r.NormalizeName(ctx, harbor.GetName(), controllers.JobService.String(), "ingress"),
@@ -185,7 +185,7 @@ func (r *Reconciler) GetJobServiceIngressNetworkPolicy(ctx context.Context, harb
 	}, nil
 }
 
-func (r *Reconciler) AddNotaryServerIngressNetworkPolicy(ctx context.Context, harbor *goharborv1alpha2.Harbor) (NetworkPolicy, error) {
+func (r *Reconciler) AddNotaryServerIngressNetworkPolicy(ctx context.Context, harbor *goharborv1.Harbor) (NetworkPolicy, error) {
 	networkPolicy, err := r.GetNotaryServerIngressNetworkPolicy(ctx, harbor)
 	if err != nil {
 		return nil, errors.Wrap(err, "get")
@@ -196,7 +196,7 @@ func (r *Reconciler) AddNotaryServerIngressNetworkPolicy(ctx context.Context, ha
 	return NetworkPolicy(networkPolicyRes), errors.Wrap(err, "add")
 }
 
-func (r *Reconciler) GetNotaryServerIngressNetworkPolicy(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*netv1.NetworkPolicy, error) {
+func (r *Reconciler) GetNotaryServerIngressNetworkPolicy(ctx context.Context, harbor *goharborv1.Harbor) (*netv1.NetworkPolicy, error) {
 	port := intstr.FromString(harbormetav1.NotaryServerAPIPortName)
 
 	return &netv1.NetworkPolicy{
@@ -226,7 +226,7 @@ func (r *Reconciler) GetNotaryServerIngressNetworkPolicy(ctx context.Context, ha
 	}, nil
 }
 
-func (r *Reconciler) AddNotarySignerIngressNetworkPolicy(ctx context.Context, harbor *goharborv1alpha2.Harbor) (NetworkPolicy, error) {
+func (r *Reconciler) AddNotarySignerIngressNetworkPolicy(ctx context.Context, harbor *goharborv1.Harbor) (NetworkPolicy, error) {
 	networkPolicy, err := r.GetNotarySignerIngressNetworkPolicy(ctx, harbor)
 	if err != nil {
 		return nil, errors.Wrap(err, "get")
@@ -237,7 +237,7 @@ func (r *Reconciler) AddNotarySignerIngressNetworkPolicy(ctx context.Context, ha
 	return NetworkPolicy(networkPolicyRes), errors.Wrap(err, "add")
 }
 
-func (r *Reconciler) GetNotarySignerIngressNetworkPolicy(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*netv1.NetworkPolicy, error) {
+func (r *Reconciler) GetNotarySignerIngressNetworkPolicy(ctx context.Context, harbor *goharborv1.Harbor) (*netv1.NetworkPolicy, error) {
 	return &netv1.NetworkPolicy{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      r.NormalizeName(ctx, harbor.GetName(), controllers.NotarySigner.String(), "ingress"),
@@ -257,7 +257,7 @@ func (r *Reconciler) GetNotarySignerIngressNetworkPolicy(ctx context.Context, ha
 	}, nil
 }
 
-func (r *Reconciler) AddPortalIngressNetworkPolicy(ctx context.Context, harbor *goharborv1alpha2.Harbor) (NetworkPolicy, error) {
+func (r *Reconciler) AddPortalIngressNetworkPolicy(ctx context.Context, harbor *goharborv1.Harbor) (NetworkPolicy, error) {
 	networkPolicy, err := r.GetPortalIngressNetworkPolicy(ctx, harbor)
 	if err != nil {
 		return nil, errors.Wrap(err, "get")
@@ -268,7 +268,7 @@ func (r *Reconciler) AddPortalIngressNetworkPolicy(ctx context.Context, harbor *
 	return NetworkPolicy(networkPolicyRes), errors.Wrap(err, "add")
 }
 
-func (r *Reconciler) GetPortalIngressNetworkPolicy(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*netv1.NetworkPolicy, error) { //nolint:dupl
+func (r *Reconciler) GetPortalIngressNetworkPolicy(ctx context.Context, harbor *goharborv1.Harbor) (*netv1.NetworkPolicy, error) { //nolint:dupl
 	httpPort := intstr.FromString(harbormetav1.PortalHTTPPortName)
 	httpsPort := intstr.FromString(harbormetav1.PortalHTTPSPortName)
 
@@ -302,7 +302,7 @@ func (r *Reconciler) GetPortalIngressNetworkPolicy(ctx context.Context, harbor *
 	}, nil
 }
 
-func (r *Reconciler) AddPortalEgressNetworkPolicy(ctx context.Context, harbor *goharborv1alpha2.Harbor) (NetworkPolicy, error) {
+func (r *Reconciler) AddPortalEgressNetworkPolicy(ctx context.Context, harbor *goharborv1.Harbor) (NetworkPolicy, error) {
 	networkPolicy, err := r.GetPortalEgressNetworkPolicy(ctx, harbor)
 	if err != nil {
 		return nil, errors.Wrap(err, "get")
@@ -313,7 +313,7 @@ func (r *Reconciler) AddPortalEgressNetworkPolicy(ctx context.Context, harbor *g
 	return NetworkPolicy(networkPolicyRes), errors.Wrap(err, "add")
 }
 
-func (r *Reconciler) GetPortalEgressNetworkPolicy(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*netv1.NetworkPolicy, error) {
+func (r *Reconciler) GetPortalEgressNetworkPolicy(ctx context.Context, harbor *goharborv1.Harbor) (*netv1.NetworkPolicy, error) {
 	return &netv1.NetworkPolicy{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      r.NormalizeName(ctx, harbor.GetName(), controllers.Portal.String(), "egress"),
@@ -333,7 +333,7 @@ func (r *Reconciler) GetPortalEgressNetworkPolicy(ctx context.Context, harbor *g
 	}, nil
 }
 
-func (r *Reconciler) AddRegistryIngressNetworkPolicy(ctx context.Context, harbor *goharborv1alpha2.Harbor) (NetworkPolicy, error) {
+func (r *Reconciler) AddRegistryIngressNetworkPolicy(ctx context.Context, harbor *goharborv1.Harbor) (NetworkPolicy, error) {
 	networkPolicy, err := r.GetRegistryIngressNetworkPolicy(ctx, harbor)
 	if err != nil {
 		return nil, errors.Wrap(err, "get")
@@ -344,7 +344,7 @@ func (r *Reconciler) AddRegistryIngressNetworkPolicy(ctx context.Context, harbor
 	return NetworkPolicy(networkPolicyRes), errors.Wrap(err, "add")
 }
 
-func (r *Reconciler) GetRegistryIngressNetworkPolicy(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*netv1.NetworkPolicy, error) {
+func (r *Reconciler) GetRegistryIngressNetworkPolicy(ctx context.Context, harbor *goharborv1.Harbor) (*netv1.NetworkPolicy, error) {
 	return &netv1.NetworkPolicy{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      r.NormalizeName(ctx, harbor.GetName(), controllers.Registry.String(), "ingress"),
@@ -364,7 +364,7 @@ func (r *Reconciler) GetRegistryIngressNetworkPolicy(ctx context.Context, harbor
 	}, nil
 }
 
-func (r *Reconciler) AddRegistryControllerIngressNetworkPolicy(ctx context.Context, harbor *goharborv1alpha2.Harbor) (NetworkPolicy, error) {
+func (r *Reconciler) AddRegistryControllerIngressNetworkPolicy(ctx context.Context, harbor *goharborv1.Harbor) (NetworkPolicy, error) {
 	networkPolicy, err := r.GetRegistryControllerIngressNetworkPolicy(ctx, harbor)
 	if err != nil {
 		return nil, errors.Wrap(err, "get")
@@ -375,7 +375,7 @@ func (r *Reconciler) AddRegistryControllerIngressNetworkPolicy(ctx context.Conte
 	return NetworkPolicy(networkPolicyRes), errors.Wrap(err, "add")
 }
 
-func (r *Reconciler) GetRegistryControllerIngressNetworkPolicy(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*netv1.NetworkPolicy, error) {
+func (r *Reconciler) GetRegistryControllerIngressNetworkPolicy(ctx context.Context, harbor *goharborv1.Harbor) (*netv1.NetworkPolicy, error) {
 	return &netv1.NetworkPolicy{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      r.NormalizeName(ctx, harbor.GetName(), controllers.RegistryController.String(), "ingress"),
@@ -395,7 +395,7 @@ func (r *Reconciler) GetRegistryControllerIngressNetworkPolicy(ctx context.Conte
 	}, nil
 }
 
-func (r *Reconciler) AddTrivyIngressNetworkPolicy(ctx context.Context, harbor *goharborv1alpha2.Harbor) (NetworkPolicy, error) {
+func (r *Reconciler) AddTrivyIngressNetworkPolicy(ctx context.Context, harbor *goharborv1.Harbor) (NetworkPolicy, error) {
 	networkPolicy, err := r.GetTrivyIngressNetworkPolicy(ctx, harbor)
 	if err != nil {
 		return nil, errors.Wrap(err, "get")
@@ -406,7 +406,7 @@ func (r *Reconciler) AddTrivyIngressNetworkPolicy(ctx context.Context, harbor *g
 	return NetworkPolicy(networkPolicyRes), errors.Wrap(err, "add")
 }
 
-func (r *Reconciler) GetTrivyIngressNetworkPolicy(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*netv1.NetworkPolicy, error) {
+func (r *Reconciler) GetTrivyIngressNetworkPolicy(ctx context.Context, harbor *goharborv1.Harbor) (*netv1.NetworkPolicy, error) {
 	return &netv1.NetworkPolicy{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      r.NormalizeName(ctx, harbor.GetName(), controllers.Trivy.String(), "ingress"),

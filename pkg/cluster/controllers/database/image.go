@@ -17,7 +17,7 @@ package database
 import (
 	"context"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"github.com/goharbor/harbor-operator/pkg/image"
 )
 
@@ -27,7 +27,7 @@ const (
 )
 
 // GetImage returns the configured image via configstore or default one.
-func (p *PostgreSQLController) GetImage(ctx context.Context, harborcluster *goharborv1alpha2.HarborCluster) (string, error) {
+func (p *PostgreSQLController) GetImage(ctx context.Context, harborcluster *goharborv1.HarborCluster) (string, error) {
 	if harborcluster.Spec.InClusterDatabase.PostgresSQLSpec.Image != "" {
 		return harborcluster.Spec.InClusterDatabase.PostgresSQLSpec.Image, nil
 	}

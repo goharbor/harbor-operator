@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/url"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/pkg/graph"
@@ -13,7 +13,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func (r *Reconciler) AddChartMuseumConfigurations(ctx context.Context, harbor *goharborv1alpha2.Harbor, tlsIssuer InternalTLSIssuer) (ChartMuseumInternalCertificate, error) {
+func (r *Reconciler) AddChartMuseumConfigurations(ctx context.Context, harbor *goharborv1.Harbor, tlsIssuer InternalTLSIssuer) (ChartMuseumInternalCertificate, error) {
 	if harbor.Spec.ChartMuseum == nil {
 		return nil, nil
 	}
@@ -28,7 +28,7 @@ func (r *Reconciler) AddChartMuseumConfigurations(ctx context.Context, harbor *g
 
 type ChartMuseumInternalCertificate graph.Resource
 
-func (r *Reconciler) AddChartMuseumInternalCertificate(ctx context.Context, harbor *goharborv1alpha2.Harbor, tlsIssuer InternalTLSIssuer) (ChartMuseumInternalCertificate, error) {
+func (r *Reconciler) AddChartMuseumInternalCertificate(ctx context.Context, harbor *goharborv1.Harbor, tlsIssuer InternalTLSIssuer) (ChartMuseumInternalCertificate, error) {
 	cert, err := r.GetInternalTLSCertificate(ctx, harbor, harbormetav1.ChartMuseumTLS)
 	if err != nil {
 		return nil, errors.Wrap(err, "get")
@@ -48,7 +48,7 @@ const (
 
 type ChartMuseum graph.Resource
 
-func (r *Reconciler) AddChartMuseum(ctx context.Context, harbor *goharborv1alpha2.Harbor, certificate ChartMuseumInternalCertificate, coreSecret CoreSecret) (ChartMuseum, error) {
+func (r *Reconciler) AddChartMuseum(ctx context.Context, harbor *goharborv1.Harbor, certificate ChartMuseumInternalCertificate, coreSecret CoreSecret) (ChartMuseum, error) {
 	if harbor.Spec.ChartMuseum == nil {
 		return nil, nil
 	}
@@ -63,7 +63,7 @@ func (r *Reconciler) AddChartMuseum(ctx context.Context, harbor *goharborv1alpha
 	return ChartMuseum(chartmuseumRes), errors.Wrap(err, "add")
 }
 
-func (r *Reconciler) GetChartMuseum(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*goharborv1alpha2.ChartMuseum, error) { //nolint:funlen
+func (r *Reconciler) GetChartMuseum(ctx context.Context, harbor *goharborv1.Harbor) (*goharborv1.ChartMuseum, error) { //nolint:funlen
 	name := r.NormalizeName(ctx, harbor.GetName())
 	namespace := harbor.GetNamespace()
 
@@ -88,7 +88,7 @@ func (r *Reconciler) GetChartMuseum(ctx context.Context, harbor *goharborv1alpha
 
 	tls := harbor.Spec.InternalTLS.GetComponentTLSSpec(r.GetInternalTLSCertificateSecretName(ctx, harbor, harbormetav1.ChartMuseumTLS))
 
-	return &goharborv1alpha2.ChartMuseum{
+	return &goharborv1.ChartMuseum{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
@@ -96,30 +96,30 @@ func (r *Reconciler) GetChartMuseum(ctx context.Context, harbor *goharborv1alpha
 				harbormetav1.NetworkPoliciesAnnotationName: harbormetav1.NetworkPoliciesAnnotationDisabled,
 			}, harbor.Spec.Version),
 		},
-		Spec: goharborv1alpha2.ChartMuseumSpec{
+		Spec: goharborv1.ChartMuseumSpec{
 			ComponentSpec: harbor.GetComponentSpec(ctx, harbormetav1.ChartMuseumComponent),
-			Authentication: goharborv1alpha2.ChartMuseumAuthSpec{
+			Authentication: goharborv1.ChartMuseumAuthSpec{
 				AnonymousGet: false,
 				BasicAuthRef: basicAuthRef,
 			},
-			Server: goharborv1alpha2.ChartMuseumServerSpec{
+			Server: goharborv1.ChartMuseumServerSpec{
 				TLS: tls,
 			},
-			Cache: goharborv1alpha2.ChartMuseumCacheSpec{
+			Cache: goharborv1.ChartMuseumCacheSpec{
 				Redis: &redis,
 			},
-			Chart: goharborv1alpha2.ChartMuseumChartSpec{
+			Chart: goharborv1.ChartMuseumChartSpec{
 				AllowOvewrite: &varTrue,
-				Storage: goharborv1alpha2.ChartMuseumChartStorageSpec{
+				Storage: goharborv1.ChartMuseumChartStorageSpec{
 					ChartMuseumChartStorageDriverSpec: r.ChartMuseumStorage(ctx, harbor),
 					MaxStorageObjects:                 &maxStorageObjects,
 				},
-				Index: goharborv1alpha2.ChartMuseumChartIndexSpec{
+				Index: goharborv1.ChartMuseumChartIndexSpec{
 					ParallelLimit: &parallelLimit,
 				},
 				URL: chartServerURL,
 			},
-			Log: goharborv1alpha2.ChartMuseumLogSpec{
+			Log: goharborv1.ChartMuseumLogSpec{
 				Debug: debug,
 				JSON:  true,
 			},

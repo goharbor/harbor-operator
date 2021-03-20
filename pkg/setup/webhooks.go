@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/pkg/config"
 	"github.com/ovh/configstore"
@@ -16,12 +16,12 @@ const (
 )
 
 var webhooksBuilder = map[controllers.Controller]WebHook{
-	controllers.Harbor:        &goharborv1alpha2.Harbor{},
-	controllers.JobService:    &goharborv1alpha2.JobService{},
-	controllers.Registry:      &goharborv1alpha2.Registry{},
-	controllers.NotaryServer:  &goharborv1alpha2.NotaryServer{},
-	controllers.NotarySigner:  &goharborv1alpha2.NotarySigner{},
-	controllers.HarborCluster: &goharborv1alpha2.HarborCluster{},
+	controllers.Harbor:        &goharborv1.Harbor{},
+	controllers.JobService:    &goharborv1.JobService{},
+	controllers.Registry:      &goharborv1.Registry{},
+	controllers.NotaryServer:  &goharborv1.NotaryServer{},
+	controllers.NotarySigner:  &goharborv1.NotarySigner{},
+	controllers.HarborCluster: &goharborv1.HarborCluster{},
 }
 
 type WebHook interface {

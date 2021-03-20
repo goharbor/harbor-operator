@@ -5,7 +5,7 @@ import (
 
 	. "github.com/onsi/gomega"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -21,7 +21,7 @@ func newPortalController() controllerTest {
 
 func setupValidPortal(ctx context.Context, ns string) (Resource, client.ObjectKey) {
 	name := newName("portal")
-	portal := &goharborv1alpha2.Portal{
+	portal := &goharborv1.Portal{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: ns,
@@ -37,7 +37,7 @@ func setupValidPortal(ctx context.Context, ns string) (Resource, client.ObjectKe
 }
 
 func updatePortal(ctx context.Context, object Resource) {
-	portal, ok := object.(*goharborv1alpha2.Portal)
+	portal, ok := object.(*goharborv1.Portal)
 	Expect(ok).To(BeTrue())
 
 	var replicas int32 = 1
@@ -51,7 +51,7 @@ func updatePortal(ctx context.Context, object Resource) {
 
 func getPortalStatusFunc(ctx context.Context, key client.ObjectKey) func() harbormetav1.ComponentStatus {
 	return func() harbormetav1.ComponentStatus {
-		var portal goharborv1alpha2.Portal
+		var portal goharborv1.Portal
 
 		err := k8sClient.Get(ctx, key, &portal)
 

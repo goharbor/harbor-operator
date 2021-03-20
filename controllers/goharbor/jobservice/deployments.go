@@ -6,7 +6,7 @@ import (
 	"path"
 	"strconv"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/pkg/config/harbor"
@@ -45,7 +45,7 @@ const (
 	httpPort  = 8080
 )
 
-func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1alpha2.JobService) (*appsv1.Deployment, error) { // nolint:funlen
+func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1.JobService) (*appsv1.Deployment, error) { // nolint:funlen
 	getImageOptions := []image.Option{
 		image.WithConfigstore(r.ConfigStore),
 		image.WithImageFromSpec(jobservice.Spec.Image),

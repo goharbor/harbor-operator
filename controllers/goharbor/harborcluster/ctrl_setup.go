@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/go-logr/logr"
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/pkg/builder"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/cache"
@@ -114,8 +114,8 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 		k8s.WithClient(mgr.GetClient()))
 
 	return builder.ControllerManagedBy(mgr).
-		For(&goharborv1alpha2.HarborCluster{}).
-		Owns(&goharborv1alpha2.Harbor{}).
+		For(&goharborv1.HarborCluster{}).
+		Owns(&goharborv1.Harbor{}).
 		TryOwns(&minio.Tenant{}, minioCRD).
 		TryOwns(&postgresv1.Postgresql{}, postgresCRD).
 		TryOwns(&redisOp.RedisFailover{}, redisCRD).
@@ -146,12 +146,12 @@ func New(ctx context.Context, configStore *configstore.Store) (commonCtrl.Reconc
 var harborClusterPredicateFuncs = predicate.Funcs{
 	// we do not care other events
 	UpdateFunc: func(event event.UpdateEvent) bool {
-		oldObj, ok := event.ObjectOld.(*goharborv1alpha2.HarborCluster)
+		oldObj, ok := event.ObjectOld.(*goharborv1.HarborCluster)
 		if !ok {
 			return true
 		}
 
-		newObj, ok := event.ObjectNew.(*goharborv1alpha2.HarborCluster)
+		newObj, ok := event.ObjectNew.(*goharborv1.HarborCluster)
 		if !ok {
 			return true
 		}

@@ -3,7 +3,7 @@ package core
 import (
 	"context"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 	"github.com/pkg/errors"
@@ -14,7 +14,7 @@ import (
 
 type NetworkPolicy graph.Resource
 
-func (r *Reconciler) AddNetworkPolicies(ctx context.Context, core *goharborv1alpha2.Core) error {
+func (r *Reconciler) AddNetworkPolicies(ctx context.Context, core *goharborv1.Core) error {
 	areNetworkPoliciesEnabled, err := r.AreNetworkPoliciesEnabled(ctx, core)
 	if err != nil {
 		return errors.Wrapf(err, "cannot get status")
@@ -32,7 +32,7 @@ func (r *Reconciler) AddNetworkPolicies(ctx context.Context, core *goharborv1alp
 	return nil
 }
 
-func (r *Reconciler) AddIngressNetworkPolicy(ctx context.Context, core *goharborv1alpha2.Core) (NetworkPolicy, error) {
+func (r *Reconciler) AddIngressNetworkPolicy(ctx context.Context, core *goharborv1.Core) (NetworkPolicy, error) {
 	networkPolicy, err := r.GetIngressNetworkPolicy(ctx, core)
 	if err != nil {
 		return nil, errors.Wrap(err, "get")
@@ -43,7 +43,7 @@ func (r *Reconciler) AddIngressNetworkPolicy(ctx context.Context, core *goharbor
 	return NetworkPolicy(networkPolicyRes), errors.Wrap(err, "add")
 }
 
-func (r *Reconciler) GetIngressNetworkPolicy(ctx context.Context, core *goharborv1alpha2.Core) (*netv1.NetworkPolicy, error) {
+func (r *Reconciler) GetIngressNetworkPolicy(ctx context.Context, core *goharborv1.Core) (*netv1.NetworkPolicy, error) {
 	var port intstr.IntOrString
 
 	if core.Spec.Components.TLS != nil {

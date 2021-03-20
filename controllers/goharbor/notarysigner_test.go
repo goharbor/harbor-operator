@@ -5,7 +5,7 @@ import (
 
 	. "github.com/onsi/gomega"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/certificate"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/postgresql"
@@ -54,19 +54,19 @@ func setupValidNotarySigner(ctx context.Context, ns string) (Resource, client.Ob
 	authCertName, aliasesName := setupNotarySignerResourceDependencies(ctx, ns)
 
 	name := newName("notary-signer")
-	notarySigner := &goharborv1alpha2.NotarySigner{
+	notarySigner := &goharborv1.NotarySigner{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: ns,
 		},
-		Spec: goharborv1alpha2.NotarySignerSpec{
-			Storage: goharborv1alpha2.NotarySignerStorageSpec{
-				NotaryStorageSpec: goharborv1alpha2.NotaryStorageSpec{
+		Spec: goharborv1.NotarySignerSpec{
+			Storage: goharborv1.NotarySignerStorageSpec{
+				NotaryStorageSpec: goharborv1.NotaryStorageSpec{
 					Postgres: database,
 				},
 				AliasesRef: aliasesName,
 			},
-			Authentication: goharborv1alpha2.NotarySignerAuthenticationSpec{
+			Authentication: goharborv1.NotarySignerAuthenticationSpec{
 				CertificateRef: authCertName,
 			},
 		},
@@ -81,7 +81,7 @@ func setupValidNotarySigner(ctx context.Context, ns string) (Resource, client.Ob
 }
 
 func updateNotarySigner(ctx context.Context, object Resource) {
-	notarySigner, ok := object.(*goharborv1alpha2.NotarySigner)
+	notarySigner, ok := object.(*goharborv1.NotarySigner)
 	Expect(ok).To(BeTrue())
 
 	var replicas int32 = 1
@@ -95,7 +95,7 @@ func updateNotarySigner(ctx context.Context, object Resource) {
 
 func getNotarySignerStatusFunc(ctx context.Context, key client.ObjectKey) func() harbormetav1.ComponentStatus {
 	return func() harbormetav1.ComponentStatus {
-		var notarySigner goharborv1alpha2.NotarySigner
+		var notarySigner goharborv1.NotarySigner
 
 		err := k8sClient.Get(ctx, key, &notarySigner)
 

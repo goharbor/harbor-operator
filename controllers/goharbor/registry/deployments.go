@@ -5,7 +5,7 @@ import (
 	"path"
 	"strings"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers"
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
@@ -49,7 +49,7 @@ const (
 	metricsPort = 5001 // https://github.com/docker/distribution/blob/b12bd4004afc203f1cbd2072317c8fda30b89710/cmd/registry/config-dev.yml#L34
 )
 
-func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alpha2.Registry) (*appsv1.Deployment, error) { // nolint:funlen
+func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1.Registry) (*appsv1.Deployment, error) { // nolint:funlen
 	getImageOptions := []image.Option{
 		image.WithConfigstore(r.ConfigStore),
 		image.WithImageFromSpec(registry.Spec.Image),
@@ -316,7 +316,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1alph
 
 const registryContainerIndex = 0
 
-func (r *Reconciler) ApplyFilesystemStorageEnvs(ctx context.Context, registry *goharborv1alpha2.Registry, deploy *appsv1.Deployment) error {
+func (r *Reconciler) ApplyFilesystemStorageEnvs(ctx context.Context, registry *goharborv1.Registry, deploy *appsv1.Deployment) error {
 	regContainer := &deploy.Spec.Template.Spec.Containers[registryContainerIndex]
 
 	deploy.Spec.Template.Spec.Volumes = append(deploy.Spec.Template.Spec.Volumes, corev1.Volume{
@@ -334,7 +334,7 @@ func (r *Reconciler) ApplyFilesystemStorageEnvs(ctx context.Context, registry *g
 	return nil
 }
 
-func (r *Reconciler) ApplyS3StorageEnvs(ctx context.Context, registry *goharborv1alpha2.Registry, deploy *appsv1.Deployment) error {
+func (r *Reconciler) ApplyS3StorageEnvs(ctx context.Context, registry *goharborv1.Registry, deploy *appsv1.Deployment) error {
 	regContainer := &deploy.Spec.Template.Spec.Containers[registryContainerIndex]
 
 	regContainer.Env = append(regContainer.Env, corev1.EnvVar{
@@ -352,7 +352,7 @@ func (r *Reconciler) ApplyS3StorageEnvs(ctx context.Context, registry *goharborv
 	return nil
 }
 
-func (r *Reconciler) ApplySwiftStorageEnvs(ctx context.Context, registry *goharborv1alpha2.Registry, deploy *appsv1.Deployment) error {
+func (r *Reconciler) ApplySwiftStorageEnvs(ctx context.Context, registry *goharborv1.Registry, deploy *appsv1.Deployment) error {
 	regContainer := &deploy.Spec.Template.Spec.Containers[registryContainerIndex]
 
 	regContainer.Env = append(regContainer.Env, corev1.EnvVar{
@@ -380,7 +380,7 @@ func (r *Reconciler) ApplySwiftStorageEnvs(ctx context.Context, registry *goharb
 	return nil
 }
 
-func (r *Reconciler) ApplyInMemoryStorageEnvs(ctx context.Context, registry *goharborv1alpha2.Registry, deploy *appsv1.Deployment) error {
+func (r *Reconciler) ApplyInMemoryStorageEnvs(ctx context.Context, registry *goharborv1.Registry, deploy *appsv1.Deployment) error {
 	regContainer := &deploy.Spec.Template.Spec.Containers[registryContainerIndex]
 
 	regContainer.Env = append(regContainer.Env, corev1.EnvVar{
@@ -393,7 +393,7 @@ func (r *Reconciler) ApplyInMemoryStorageEnvs(ctx context.Context, registry *goh
 
 var errNoStorageDriverFound = errors.New("no storage driver found")
 
-func (r *Reconciler) ApplyStorageConfiguration(ctx context.Context, registry *goharborv1alpha2.Registry, deploy *appsv1.Deployment) error {
+func (r *Reconciler) ApplyStorageConfiguration(ctx context.Context, registry *goharborv1.Registry, deploy *appsv1.Deployment) error {
 	if registry.Spec.Storage.Driver.S3 != nil {
 		return r.ApplyS3StorageEnvs(ctx, registry, deploy)
 	}

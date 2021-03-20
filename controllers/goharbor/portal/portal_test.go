@@ -8,7 +8,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/pods"
@@ -22,7 +22,7 @@ const defaultGenerationNumber int64 = 1
 var _ = Describe("Portal", func() {
 	var (
 		ns     = test.InitNamespace(func() context.Context { return ctx })
-		portal goharborv1alpha2.Portal
+		portal goharborv1.Portal
 	)
 
 	BeforeEach(func() {
@@ -33,7 +33,7 @@ var _ = Describe("Portal", func() {
 			Name:      test.NewName("portal"),
 			Namespace: ns.GetName(),
 			Annotations: map[string]string{
-				goharborv1alpha2.HarborClassAnnotation: className,
+				goharborv1.HarborClassAnnotation: className,
 			},
 		}
 	})
@@ -47,7 +47,7 @@ var _ = Describe("Portal", func() {
 
 	Context("Without TLS", func() {
 		BeforeEach(func() {
-			portal.Spec = goharborv1alpha2.PortalSpec{}
+			portal.Spec = goharborv1.PortalSpec{}
 		})
 
 		It("Should works", func() {
@@ -97,7 +97,7 @@ var _ = Describe("Portal", func() {
 
 const healthPath = "/"
 
-func IntegTest(ctx context.Context, portal *goharborv1alpha2.Portal) {
+func IntegTest(ctx context.Context, portal *goharborv1.Portal) {
 	client, err := rest.UnversionedRESTClientFor(test.NewRestConfig(ctx))
 	Expect(err).ToNot(HaveOccurred())
 

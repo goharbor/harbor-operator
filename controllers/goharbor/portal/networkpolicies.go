@@ -3,7 +3,7 @@ package portal
 import (
 	"context"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 	"github.com/pkg/errors"
@@ -14,7 +14,7 @@ import (
 
 type NetworkPolicy graph.Resource
 
-func (r *Reconciler) AddNetworkPolicies(ctx context.Context, portal *goharborv1alpha2.Portal) error {
+func (r *Reconciler) AddNetworkPolicies(ctx context.Context, portal *goharborv1.Portal) error {
 	areNetworkPoliciesEnabled, err := r.AreNetworkPoliciesEnabled(ctx, portal)
 	if err != nil {
 		return errors.Wrapf(err, "cannot get status")
@@ -37,7 +37,7 @@ func (r *Reconciler) AddNetworkPolicies(ctx context.Context, portal *goharborv1a
 	return nil
 }
 
-func (r *Reconciler) AddIngressNetworkPolicy(ctx context.Context, portal *goharborv1alpha2.Portal) (NetworkPolicy, error) {
+func (r *Reconciler) AddIngressNetworkPolicy(ctx context.Context, portal *goharborv1.Portal) (NetworkPolicy, error) {
 	networkPolicy, err := r.GetIngressNetworkPolicy(ctx, portal)
 	if err != nil {
 		return nil, errors.Wrap(err, "get")
@@ -48,7 +48,7 @@ func (r *Reconciler) AddIngressNetworkPolicy(ctx context.Context, portal *goharb
 	return NetworkPolicy(networkPolicyRes), errors.Wrap(err, "add")
 }
 
-func (r *Reconciler) GetIngressNetworkPolicy(ctx context.Context, portal *goharborv1alpha2.Portal) (*netv1.NetworkPolicy, error) {
+func (r *Reconciler) GetIngressNetworkPolicy(ctx context.Context, portal *goharborv1.Portal) (*netv1.NetworkPolicy, error) {
 	var port intstr.IntOrString
 
 	if portal.Spec.TLS != nil {
@@ -82,7 +82,7 @@ func (r *Reconciler) GetIngressNetworkPolicy(ctx context.Context, portal *goharb
 	}, nil
 }
 
-func (r *Reconciler) AddEgressNetworkPolicy(ctx context.Context, portal *goharborv1alpha2.Portal) (NetworkPolicy, error) {
+func (r *Reconciler) AddEgressNetworkPolicy(ctx context.Context, portal *goharborv1.Portal) (NetworkPolicy, error) {
 	networkPolicy, err := r.GetEgressNetworkPolicy(ctx, portal)
 	if err != nil {
 		return nil, errors.Wrap(err, "get")
@@ -93,7 +93,7 @@ func (r *Reconciler) AddEgressNetworkPolicy(ctx context.Context, portal *goharbo
 	return NetworkPolicy(networkPolicyRes), errors.Wrap(err, "add")
 }
 
-func (r *Reconciler) GetEgressNetworkPolicy(ctx context.Context, portal *goharborv1alpha2.Portal) (*netv1.NetworkPolicy, error) {
+func (r *Reconciler) GetEgressNetworkPolicy(ctx context.Context, portal *goharborv1.Portal) (*netv1.NetworkPolicy, error) {
 	return &netv1.NetworkPolicy{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      r.NormalizeName(ctx, portal.GetName(), "egress"),

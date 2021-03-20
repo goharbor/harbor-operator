@@ -10,7 +10,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/certificate"
@@ -29,7 +29,7 @@ const defaultGenerationNumber int64 = 1
 var _ = Describe("NotarySigner", func() {
 	var (
 		ns           = test.InitNamespace(func() context.Context { return ctx })
-		notarysigner goharborv1alpha2.NotarySigner
+		notarysigner goharborv1.NotarySigner
 		ca           *certificate.CA
 	)
 
@@ -43,7 +43,7 @@ var _ = Describe("NotarySigner", func() {
 			Name:      test.NewName("notarysigner"),
 			Namespace: ns.GetName(),
 			Annotations: map[string]string{
-				goharborv1alpha2.HarborClassAnnotation: className,
+				goharborv1.HarborClassAnnotation: className,
 			},
 		}
 	})
@@ -62,13 +62,13 @@ var _ = Describe("NotarySigner", func() {
 			certificateName := test.NewName("certificate")
 			aliasesName := test.NewName("aliases")
 
-			notarysigner.Spec = goharborv1alpha2.NotarySignerSpec{
-				Authentication: goharborv1alpha2.NotarySignerAuthenticationSpec{
+			notarysigner.Spec = goharborv1.NotarySignerSpec{
+				Authentication: goharborv1.NotarySignerAuthenticationSpec{
 					CertificateRef: certificateName,
 				},
-				Storage: goharborv1alpha2.NotarySignerStorageSpec{
+				Storage: goharborv1.NotarySignerStorageSpec{
 					AliasesRef: aliasesName,
-					NotaryStorageSpec: goharborv1alpha2.NotaryStorageSpec{
+					NotaryStorageSpec: goharborv1.NotaryStorageSpec{
 						Postgres: postgresql.New(ctx, namespace),
 					},
 				},
@@ -142,13 +142,13 @@ var _ = Describe("NotarySigner", func() {
 	})
 })
 
-func IntegTest(ctx context.Context, notarysigner *goharborv1alpha2.NotarySigner, ca *certificate.CA) {
+func IntegTest(ctx context.Context, notarysigner *goharborv1.NotarySigner, ca *certificate.CA) {
 	namespacedName := types.NamespacedName{
 		Name:      reconciler.NormalizeName(ctx, notarysigner.GetName()),
 		Namespace: notarysigner.GetNamespace(),
 	}
 
-	localPort, pf := portforward.New(ctx, namespacedName, goharborv1alpha2.NotarySignerAPIPort)
+	localPort, pf := portforward.New(ctx, namespacedName, goharborv1.NotarySignerAPIPort)
 	defer pf.Close()
 
 	rootPool := x509.NewCertPool()

@@ -8,7 +8,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -35,7 +35,7 @@ var _ = Describe("class-filter", func() {
 				var h Object
 
 				BeforeEach(func() {
-					h = &goharborv1alpha2.Harbor{}
+					h = &goharborv1.Harbor{}
 				})
 
 				Context("With no annotation", func() {
@@ -52,7 +52,7 @@ var _ = Describe("class-filter", func() {
 				Context("With other annotations", func() {
 					BeforeEach(func() {
 						h.SetAnnotations(map[string]string{
-							fmt.Sprintf("%s-false", goharborv1alpha2.HarborClassAnnotation): "",
+							fmt.Sprintf("%s-false", goharborv1.HarborClassAnnotation): "",
 						})
 					})
 
@@ -65,7 +65,7 @@ var _ = Describe("class-filter", func() {
 				Context("With empty class", func() {
 					BeforeEach(func() {
 						h.SetAnnotations(map[string]string{
-							goharborv1alpha2.HarborClassAnnotation: "",
+							goharborv1.HarborClassAnnotation: "",
 						})
 					})
 
@@ -78,7 +78,7 @@ var _ = Describe("class-filter", func() {
 				Context("With other-class should not match", func() {
 					BeforeEach(func() {
 						h.SetAnnotations(map[string]string{
-							goharborv1alpha2.HarborClassAnnotation: "other-class",
+							goharborv1.HarborClassAnnotation: "other-class",
 						})
 					})
 
@@ -92,10 +92,10 @@ var _ = Describe("class-filter", func() {
 
 		Describe("Deletion event", func() {
 			Context("For an Harbor resource", func() {
-				var h *goharborv1alpha2.Harbor
+				var h *goharborv1.Harbor
 
 				BeforeEach(func() {
-					h = &goharborv1alpha2.Harbor{}
+					h = &goharborv1.Harbor{}
 				})
 
 				Context("With no annotation", func() {
@@ -112,7 +112,7 @@ var _ = Describe("class-filter", func() {
 				Context("With other annotations", func() {
 					BeforeEach(func() {
 						h.SetAnnotations(map[string]string{
-							fmt.Sprintf("%s-false", goharborv1alpha2.HarborClassAnnotation): "",
+							fmt.Sprintf("%s-false", goharborv1.HarborClassAnnotation): "",
 						})
 					})
 
@@ -125,7 +125,7 @@ var _ = Describe("class-filter", func() {
 				Context("With empty class", func() {
 					BeforeEach(func() {
 						h.SetAnnotations(map[string]string{
-							goharborv1alpha2.HarborClassAnnotation: "",
+							goharborv1.HarborClassAnnotation: "",
 						})
 					})
 
@@ -138,7 +138,7 @@ var _ = Describe("class-filter", func() {
 				Context("With other-class should not match", func() {
 					BeforeEach(func() {
 						h.SetAnnotations(map[string]string{
-							goharborv1alpha2.HarborClassAnnotation: "other-class",
+							goharborv1.HarborClassAnnotation: "other-class",
 						})
 					})
 
@@ -151,7 +151,7 @@ var _ = Describe("class-filter", func() {
 				Context("With the right class should match", func() {
 					BeforeEach(func() {
 						h.SetAnnotations(map[string]string{
-							goharborv1alpha2.HarborClassAnnotation: cf.ClassName,
+							goharborv1.HarborClassAnnotation: cf.ClassName,
 						})
 					})
 
@@ -165,10 +165,10 @@ var _ = Describe("class-filter", func() {
 
 		Describe("Generic event", func() {
 			Context("For an Harbor resource", func() {
-				var h *goharborv1alpha2.Harbor
+				var h *goharborv1.Harbor
 
 				BeforeEach(func() {
-					h = &goharborv1alpha2.Harbor{}
+					h = &goharborv1.Harbor{}
 				})
 
 				Context("With no annotation", func() {
@@ -185,7 +185,7 @@ var _ = Describe("class-filter", func() {
 				Context("With other annotations", func() {
 					BeforeEach(func() {
 						h.SetAnnotations(map[string]string{
-							fmt.Sprintf("%s-false", goharborv1alpha2.HarborClassAnnotation): "",
+							fmt.Sprintf("%s-false", goharborv1.HarborClassAnnotation): "",
 						})
 					})
 
@@ -198,7 +198,7 @@ var _ = Describe("class-filter", func() {
 				Context("With empty class", func() {
 					BeforeEach(func() {
 						h.SetAnnotations(map[string]string{
-							goharborv1alpha2.HarborClassAnnotation: "",
+							goharborv1.HarborClassAnnotation: "",
 						})
 					})
 
@@ -211,7 +211,7 @@ var _ = Describe("class-filter", func() {
 				Context("With other-class should not match", func() {
 					BeforeEach(func() {
 						h.SetAnnotations(map[string]string{
-							goharborv1alpha2.HarborClassAnnotation: "other-class",
+							goharborv1.HarborClassAnnotation: "other-class",
 						})
 					})
 
@@ -224,7 +224,7 @@ var _ = Describe("class-filter", func() {
 				Context("With the right class should match", func() {
 					BeforeEach(func() {
 						h.SetAnnotations(map[string]string{
-							goharborv1alpha2.HarborClassAnnotation: cf.ClassName,
+							goharborv1.HarborClassAnnotation: cf.ClassName,
 						})
 					})
 
@@ -238,10 +238,10 @@ var _ = Describe("class-filter", func() {
 
 		Describe("Update event", func() {
 			Context("From an Harbor resource", func() {
-				var oldResource *goharborv1alpha2.Harbor
+				var oldResource *goharborv1.Harbor
 
 				BeforeEach(func() {
-					oldResource = &goharborv1alpha2.Harbor{}
+					oldResource = &goharborv1.Harbor{}
 				})
 
 				Context("With no annotation", func() {
@@ -250,10 +250,10 @@ var _ = Describe("class-filter", func() {
 					})
 
 					Context("To resource", func() {
-						var newResource *goharborv1alpha2.Harbor
+						var newResource *goharborv1.Harbor
 
 						BeforeEach(func() {
-							newResource = &goharborv1alpha2.Harbor{}
+							newResource = &goharborv1.Harbor{}
 						})
 
 						Context("With no annotation", func() {
@@ -270,7 +270,7 @@ var _ = Describe("class-filter", func() {
 						Context("With other annotations", func() {
 							BeforeEach(func() {
 								newResource.SetAnnotations(map[string]string{
-									fmt.Sprintf("%s-false", goharborv1alpha2.HarborClassAnnotation): "",
+									fmt.Sprintf("%s-false", goharborv1.HarborClassAnnotation): "",
 								})
 							})
 
@@ -283,7 +283,7 @@ var _ = Describe("class-filter", func() {
 						Context("With empty class", func() {
 							BeforeEach(func() {
 								newResource.SetAnnotations(map[string]string{
-									goharborv1alpha2.HarborClassAnnotation: "",
+									goharborv1.HarborClassAnnotation: "",
 								})
 							})
 
@@ -296,7 +296,7 @@ var _ = Describe("class-filter", func() {
 						Context("To resource with other-class", func() {
 							BeforeEach(func() {
 								newResource.SetAnnotations(map[string]string{
-									goharborv1alpha2.HarborClassAnnotation: "other-class",
+									goharborv1.HarborClassAnnotation: "other-class",
 								})
 							})
 
@@ -311,15 +311,15 @@ var _ = Describe("class-filter", func() {
 				Context("With other annotations", func() {
 					BeforeEach(func() {
 						oldResource.SetAnnotations(map[string]string{
-							fmt.Sprintf("%s-false", goharborv1alpha2.HarborClassAnnotation): "",
+							fmt.Sprintf("%s-false", goharborv1.HarborClassAnnotation): "",
 						})
 					})
 
 					Context("To resource", func() {
-						var newResource *goharborv1alpha2.Harbor
+						var newResource *goharborv1.Harbor
 
 						BeforeEach(func() {
-							newResource = &goharborv1alpha2.Harbor{}
+							newResource = &goharborv1.Harbor{}
 						})
 
 						Context("With no annotation", func() {
@@ -328,7 +328,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1alpha2.Harbor{}})
+								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1.Harbor{}})
 								Expect(ok).To(BeTrue())
 							})
 						})
@@ -336,12 +336,12 @@ var _ = Describe("class-filter", func() {
 						Context("With other annotations", func() {
 							BeforeEach(func() {
 								newResource.SetAnnotations(map[string]string{
-									fmt.Sprintf("%s-false", goharborv1alpha2.HarborClassAnnotation): "",
+									fmt.Sprintf("%s-false", goharborv1.HarborClassAnnotation): "",
 								})
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1alpha2.Harbor{}})
+								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1.Harbor{}})
 								Expect(ok).To(BeTrue())
 							})
 						})
@@ -349,12 +349,12 @@ var _ = Describe("class-filter", func() {
 						Context("With empty class", func() {
 							BeforeEach(func() {
 								newResource.SetAnnotations(map[string]string{
-									goharborv1alpha2.HarborClassAnnotation: "",
+									goharborv1.HarborClassAnnotation: "",
 								})
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1alpha2.Harbor{}})
+								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1.Harbor{}})
 								Expect(ok).To(BeTrue())
 							})
 						})
@@ -362,12 +362,12 @@ var _ = Describe("class-filter", func() {
 						Context("With other-class", func() {
 							BeforeEach(func() {
 								newResource.SetAnnotations(map[string]string{
-									goharborv1alpha2.HarborClassAnnotation: "other-class",
+									goharborv1.HarborClassAnnotation: "other-class",
 								})
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1alpha2.Harbor{}})
+								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1.Harbor{}})
 								Expect(ok).To(BeTrue())
 							})
 						})
@@ -377,15 +377,15 @@ var _ = Describe("class-filter", func() {
 				Context("With empty class", func() {
 					BeforeEach(func() {
 						oldResource.SetAnnotations(map[string]string{
-							goharborv1alpha2.HarborClassAnnotation: "",
+							goharborv1.HarborClassAnnotation: "",
 						})
 					})
 
 					Context("To resource", func() {
-						var newResource *goharborv1alpha2.Harbor
+						var newResource *goharborv1.Harbor
 
 						BeforeEach(func() {
-							newResource = &goharborv1alpha2.Harbor{}
+							newResource = &goharborv1.Harbor{}
 						})
 
 						Context("With no annotation", func() {
@@ -394,7 +394,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1alpha2.Harbor{}})
+								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1.Harbor{}})
 								Expect(ok).To(BeTrue())
 							})
 						})
@@ -402,12 +402,12 @@ var _ = Describe("class-filter", func() {
 						Context("To resource with other annotations", func() {
 							BeforeEach(func() {
 								newResource.SetAnnotations(map[string]string{
-									fmt.Sprintf("%s-false", goharborv1alpha2.HarborClassAnnotation): "",
+									fmt.Sprintf("%s-false", goharborv1.HarborClassAnnotation): "",
 								})
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1alpha2.Harbor{}})
+								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1.Harbor{}})
 								Expect(ok).To(BeTrue())
 							})
 						})
@@ -415,12 +415,12 @@ var _ = Describe("class-filter", func() {
 						Context("To resource with empty class", func() {
 							BeforeEach(func() {
 								newResource.SetAnnotations(map[string]string{
-									goharborv1alpha2.HarborClassAnnotation: "",
+									goharborv1.HarborClassAnnotation: "",
 								})
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1alpha2.Harbor{}})
+								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1.Harbor{}})
 								Expect(ok).To(BeTrue())
 							})
 						})
@@ -428,12 +428,12 @@ var _ = Describe("class-filter", func() {
 						Context("To resource with other-class", func() {
 							BeforeEach(func() {
 								newResource.SetAnnotations(map[string]string{
-									goharborv1alpha2.HarborClassAnnotation: "other-class",
+									goharborv1.HarborClassAnnotation: "other-class",
 								})
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1alpha2.Harbor{}})
+								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1.Harbor{}})
 								Expect(ok).To(BeTrue())
 							})
 						})
@@ -443,15 +443,15 @@ var _ = Describe("class-filter", func() {
 				Context("With other-class", func() {
 					BeforeEach(func() {
 						oldResource.SetAnnotations(map[string]string{
-							goharborv1alpha2.HarborClassAnnotation: "other-class",
+							goharborv1.HarborClassAnnotation: "other-class",
 						})
 					})
 
 					Context("To resource", func() {
-						var newResource *goharborv1alpha2.Harbor
+						var newResource *goharborv1.Harbor
 
 						BeforeEach(func() {
-							newResource = &goharborv1alpha2.Harbor{}
+							newResource = &goharborv1.Harbor{}
 						})
 
 						Context("With no annotation", func() {
@@ -460,7 +460,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1alpha2.Harbor{}})
+								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1.Harbor{}})
 								Expect(ok).To(BeTrue())
 							})
 						})
@@ -468,12 +468,12 @@ var _ = Describe("class-filter", func() {
 						Context("With other annotations", func() {
 							BeforeEach(func() {
 								newResource.SetAnnotations(map[string]string{
-									fmt.Sprintf("%s-false", goharborv1alpha2.HarborClassAnnotation): "",
+									fmt.Sprintf("%s-false", goharborv1.HarborClassAnnotation): "",
 								})
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1alpha2.Harbor{}})
+								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1.Harbor{}})
 								Expect(ok).To(BeTrue())
 							})
 						})
@@ -481,12 +481,12 @@ var _ = Describe("class-filter", func() {
 						Context("With empty class", func() {
 							BeforeEach(func() {
 								newResource.SetAnnotations(map[string]string{
-									goharborv1alpha2.HarborClassAnnotation: "",
+									goharborv1.HarborClassAnnotation: "",
 								})
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1alpha2.Harbor{}})
+								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1.Harbor{}})
 								Expect(ok).To(BeTrue())
 							})
 						})
@@ -494,12 +494,12 @@ var _ = Describe("class-filter", func() {
 						Context("With other-class", func() {
 							BeforeEach(func() {
 								newResource.SetAnnotations(map[string]string{
-									goharborv1alpha2.HarborClassAnnotation: "other-class",
+									goharborv1.HarborClassAnnotation: "other-class",
 								})
 							})
 
 							It("Should not match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1alpha2.Harbor{}})
+								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1.Harbor{}})
 								Expect(ok).To(BeFalse())
 							})
 						})
@@ -519,10 +519,10 @@ var _ = Describe("class-filter", func() {
 
 		Describe("Creation event", func() {
 			Context("For an Harbor resource", func() {
-				var h *goharborv1alpha2.Harbor
+				var h *goharborv1.Harbor
 
 				BeforeEach(func() {
-					h = &goharborv1alpha2.Harbor{}
+					h = &goharborv1.Harbor{}
 				})
 
 				Context("With no annotation", func() {
@@ -539,7 +539,7 @@ var _ = Describe("class-filter", func() {
 				Context("with other annotations", func() {
 					BeforeEach(func() {
 						h.SetAnnotations(map[string]string{
-							fmt.Sprintf("%s-false", goharborv1alpha2.HarborClassAnnotation): "",
+							fmt.Sprintf("%s-false", goharborv1.HarborClassAnnotation): "",
 						})
 					})
 
@@ -552,7 +552,7 @@ var _ = Describe("class-filter", func() {
 				Context("resource with empty class", func() {
 					BeforeEach(func() {
 						h.SetAnnotations(map[string]string{
-							goharborv1alpha2.HarborClassAnnotation: "",
+							goharborv1.HarborClassAnnotation: "",
 						})
 					})
 
@@ -565,7 +565,7 @@ var _ = Describe("class-filter", func() {
 				Context("resource with other-class should not match", func() {
 					BeforeEach(func() {
 						h.SetAnnotations(map[string]string{
-							goharborv1alpha2.HarborClassAnnotation: "other-class",
+							goharborv1.HarborClassAnnotation: "other-class",
 						})
 					})
 
@@ -578,7 +578,7 @@ var _ = Describe("class-filter", func() {
 				Context("resource with the right class should match", func() {
 					BeforeEach(func() {
 						h.SetAnnotations(map[string]string{
-							goharborv1alpha2.HarborClassAnnotation: cf.ClassName,
+							goharborv1.HarborClassAnnotation: cf.ClassName,
 						})
 					})
 
@@ -592,10 +592,10 @@ var _ = Describe("class-filter", func() {
 
 		Describe("Deletion event", func() {
 			Context("For an Harbor resource", func() {
-				var h *goharborv1alpha2.Harbor
+				var h *goharborv1.Harbor
 
 				BeforeEach(func() {
-					h = &goharborv1alpha2.Harbor{}
+					h = &goharborv1.Harbor{}
 				})
 
 				Context("With no annotation", func() {
@@ -612,7 +612,7 @@ var _ = Describe("class-filter", func() {
 				Context("With other annotations", func() {
 					BeforeEach(func() {
 						h.SetAnnotations(map[string]string{
-							fmt.Sprintf("%s-false", goharborv1alpha2.HarborClassAnnotation): "",
+							fmt.Sprintf("%s-false", goharborv1.HarborClassAnnotation): "",
 						})
 					})
 
@@ -625,7 +625,7 @@ var _ = Describe("class-filter", func() {
 				Context("With empty class", func() {
 					BeforeEach(func() {
 						h.SetAnnotations(map[string]string{
-							goharborv1alpha2.HarborClassAnnotation: "",
+							goharborv1.HarborClassAnnotation: "",
 						})
 					})
 
@@ -638,7 +638,7 @@ var _ = Describe("class-filter", func() {
 				Context("resource with other-class should not match", func() {
 					BeforeEach(func() {
 						h.SetAnnotations(map[string]string{
-							goharborv1alpha2.HarborClassAnnotation: "other-class",
+							goharborv1.HarborClassAnnotation: "other-class",
 						})
 					})
 
@@ -651,7 +651,7 @@ var _ = Describe("class-filter", func() {
 				Context("resource with the right class should match", func() {
 					BeforeEach(func() {
 						h.SetAnnotations(map[string]string{
-							goharborv1alpha2.HarborClassAnnotation: cf.ClassName,
+							goharborv1.HarborClassAnnotation: cf.ClassName,
 						})
 					})
 
@@ -665,10 +665,10 @@ var _ = Describe("class-filter", func() {
 
 		Describe("Generic event", func() {
 			Context("For an Harbor resource", func() {
-				var h *goharborv1alpha2.Harbor
+				var h *goharborv1.Harbor
 
 				BeforeEach(func() {
-					h = &goharborv1alpha2.Harbor{}
+					h = &goharborv1.Harbor{}
 				})
 
 				Context("Harbor with no annotation", func() {
@@ -685,7 +685,7 @@ var _ = Describe("class-filter", func() {
 				Context("Harbor with other annotations", func() {
 					BeforeEach(func() {
 						h.SetAnnotations(map[string]string{
-							fmt.Sprintf("%s-false", goharborv1alpha2.HarborClassAnnotation): "",
+							fmt.Sprintf("%s-false", goharborv1.HarborClassAnnotation): "",
 						})
 					})
 
@@ -698,7 +698,7 @@ var _ = Describe("class-filter", func() {
 				Context("resource with empty class", func() {
 					BeforeEach(func() {
 						h.SetAnnotations(map[string]string{
-							goharborv1alpha2.HarborClassAnnotation: "",
+							goharborv1.HarborClassAnnotation: "",
 						})
 					})
 
@@ -711,7 +711,7 @@ var _ = Describe("class-filter", func() {
 				Context("resource with other-class should not match", func() {
 					BeforeEach(func() {
 						h.SetAnnotations(map[string]string{
-							goharborv1alpha2.HarborClassAnnotation: "other-class",
+							goharborv1.HarborClassAnnotation: "other-class",
 						})
 					})
 
@@ -724,7 +724,7 @@ var _ = Describe("class-filter", func() {
 				Context("resource with the right class should match", func() {
 					BeforeEach(func() {
 						h.SetAnnotations(map[string]string{
-							goharborv1alpha2.HarborClassAnnotation: cf.ClassName,
+							goharborv1.HarborClassAnnotation: cf.ClassName,
 						})
 					})
 
@@ -738,10 +738,10 @@ var _ = Describe("class-filter", func() {
 
 		Describe("Update event", func() {
 			Context("From an Harbor resource", func() {
-				var oldResource *goharborv1alpha2.Harbor
+				var oldResource *goharborv1.Harbor
 
 				BeforeEach(func() {
-					oldResource = &goharborv1alpha2.Harbor{}
+					oldResource = &goharborv1.Harbor{}
 				})
 
 				Context("With no annotation", func() {
@@ -750,10 +750,10 @@ var _ = Describe("class-filter", func() {
 					})
 
 					Context("To resource", func() {
-						var newResource *goharborv1alpha2.Harbor
+						var newResource *goharborv1.Harbor
 
 						BeforeEach(func() {
-							newResource = &goharborv1alpha2.Harbor{}
+							newResource = &goharborv1.Harbor{}
 						})
 
 						Context("With no annotation", func() {
@@ -770,7 +770,7 @@ var _ = Describe("class-filter", func() {
 						Context("With other annotations", func() {
 							BeforeEach(func() {
 								newResource.SetAnnotations(map[string]string{
-									fmt.Sprintf("%s-false", goharborv1alpha2.HarborClassAnnotation): "",
+									fmt.Sprintf("%s-false", goharborv1.HarborClassAnnotation): "",
 								})
 							})
 
@@ -783,7 +783,7 @@ var _ = Describe("class-filter", func() {
 						Context("With empty class", func() {
 							BeforeEach(func() {
 								newResource.SetAnnotations(map[string]string{
-									goharborv1alpha2.HarborClassAnnotation: "",
+									goharborv1.HarborClassAnnotation: "",
 								})
 							})
 
@@ -796,7 +796,7 @@ var _ = Describe("class-filter", func() {
 						Context("With other-class", func() {
 							BeforeEach(func() {
 								newResource.SetAnnotations(map[string]string{
-									goharborv1alpha2.HarborClassAnnotation: "other-class",
+									goharborv1.HarborClassAnnotation: "other-class",
 								})
 							})
 
@@ -809,7 +809,7 @@ var _ = Describe("class-filter", func() {
 						Context("With the right class", func() {
 							BeforeEach(func() {
 								newResource.SetAnnotations(map[string]string{
-									goharborv1alpha2.HarborClassAnnotation: cf.ClassName,
+									goharborv1.HarborClassAnnotation: cf.ClassName,
 								})
 							})
 
@@ -824,15 +824,15 @@ var _ = Describe("class-filter", func() {
 				Context("With other annotations", func() {
 					BeforeEach(func() {
 						oldResource.SetAnnotations(map[string]string{
-							fmt.Sprintf("%s-false", goharborv1alpha2.HarborClassAnnotation): "",
+							fmt.Sprintf("%s-false", goharborv1.HarborClassAnnotation): "",
 						})
 					})
 
 					Context("To resource", func() {
-						var newResource *goharborv1alpha2.Harbor
+						var newResource *goharborv1.Harbor
 
 						BeforeEach(func() {
-							newResource = &goharborv1alpha2.Harbor{}
+							newResource = &goharborv1.Harbor{}
 						})
 
 						Context("With no annotation", func() {
@@ -849,7 +849,7 @@ var _ = Describe("class-filter", func() {
 						Context("With other annotations", func() {
 							BeforeEach(func() {
 								newResource.SetAnnotations(map[string]string{
-									fmt.Sprintf("%s-false", goharborv1alpha2.HarborClassAnnotation): "",
+									fmt.Sprintf("%s-false", goharborv1.HarborClassAnnotation): "",
 								})
 							})
 
@@ -862,7 +862,7 @@ var _ = Describe("class-filter", func() {
 						Context("With empty class", func() {
 							BeforeEach(func() {
 								newResource.SetAnnotations(map[string]string{
-									goharborv1alpha2.HarborClassAnnotation: "",
+									goharborv1.HarborClassAnnotation: "",
 								})
 							})
 
@@ -875,7 +875,7 @@ var _ = Describe("class-filter", func() {
 						Context("With other-class", func() {
 							BeforeEach(func() {
 								newResource.SetAnnotations(map[string]string{
-									goharborv1alpha2.HarborClassAnnotation: "other-class",
+									goharborv1.HarborClassAnnotation: "other-class",
 								})
 							})
 
@@ -888,7 +888,7 @@ var _ = Describe("class-filter", func() {
 						Context("With the right class", func() {
 							BeforeEach(func() {
 								newResource.SetAnnotations(map[string]string{
-									goharborv1alpha2.HarborClassAnnotation: cf.ClassName,
+									goharborv1.HarborClassAnnotation: cf.ClassName,
 								})
 							})
 
@@ -903,15 +903,15 @@ var _ = Describe("class-filter", func() {
 				Context("With empty class", func() {
 					BeforeEach(func() {
 						oldResource.SetAnnotations(map[string]string{
-							goharborv1alpha2.HarborClassAnnotation: "",
+							goharborv1.HarborClassAnnotation: "",
 						})
 					})
 
 					Context("To resource", func() {
-						var newResource *goharborv1alpha2.Harbor
+						var newResource *goharborv1.Harbor
 
 						BeforeEach(func() {
-							newResource = &goharborv1alpha2.Harbor{}
+							newResource = &goharborv1.Harbor{}
 						})
 
 						Context("With no annotation", func() {
@@ -928,7 +928,7 @@ var _ = Describe("class-filter", func() {
 						Context("With other annotations", func() {
 							BeforeEach(func() {
 								newResource.SetAnnotations(map[string]string{
-									fmt.Sprintf("%s-false", goharborv1alpha2.HarborClassAnnotation): "",
+									fmt.Sprintf("%s-false", goharborv1.HarborClassAnnotation): "",
 								})
 							})
 
@@ -941,7 +941,7 @@ var _ = Describe("class-filter", func() {
 						Context("With empty class", func() {
 							BeforeEach(func() {
 								newResource.SetAnnotations(map[string]string{
-									goharborv1alpha2.HarborClassAnnotation: "",
+									goharborv1.HarborClassAnnotation: "",
 								})
 							})
 
@@ -954,7 +954,7 @@ var _ = Describe("class-filter", func() {
 						Context("With other-class", func() {
 							BeforeEach(func() {
 								newResource.SetAnnotations(map[string]string{
-									goharborv1alpha2.HarborClassAnnotation: "other-class",
+									goharborv1.HarborClassAnnotation: "other-class",
 								})
 							})
 
@@ -967,7 +967,7 @@ var _ = Describe("class-filter", func() {
 						Context("With the right class", func() {
 							BeforeEach(func() {
 								newResource.SetAnnotations(map[string]string{
-									goharborv1alpha2.HarborClassAnnotation: cf.ClassName,
+									goharborv1.HarborClassAnnotation: cf.ClassName,
 								})
 							})
 
@@ -982,15 +982,15 @@ var _ = Describe("class-filter", func() {
 				Context("With other-class", func() {
 					BeforeEach(func() {
 						oldResource.SetAnnotations(map[string]string{
-							goharborv1alpha2.HarborClassAnnotation: "other-class",
+							goharborv1.HarborClassAnnotation: "other-class",
 						})
 					})
 
 					Context("To resource", func() {
-						var newResource *goharborv1alpha2.Harbor
+						var newResource *goharborv1.Harbor
 
 						BeforeEach(func() {
-							newResource = &goharborv1alpha2.Harbor{}
+							newResource = &goharborv1.Harbor{}
 						})
 
 						Context("With no annotation", func() {
@@ -1007,7 +1007,7 @@ var _ = Describe("class-filter", func() {
 						Context("With other annotations", func() {
 							BeforeEach(func() {
 								newResource.SetAnnotations(map[string]string{
-									fmt.Sprintf("%s-false", goharborv1alpha2.HarborClassAnnotation): "",
+									fmt.Sprintf("%s-false", goharborv1.HarborClassAnnotation): "",
 								})
 							})
 
@@ -1020,7 +1020,7 @@ var _ = Describe("class-filter", func() {
 						Context("With empty class", func() {
 							BeforeEach(func() {
 								newResource.SetAnnotations(map[string]string{
-									goharborv1alpha2.HarborClassAnnotation: "",
+									goharborv1.HarborClassAnnotation: "",
 								})
 							})
 
@@ -1033,7 +1033,7 @@ var _ = Describe("class-filter", func() {
 						Context("With other-class", func() {
 							BeforeEach(func() {
 								newResource.SetAnnotations(map[string]string{
-									goharborv1alpha2.HarborClassAnnotation: "other-class",
+									goharborv1.HarborClassAnnotation: "other-class",
 								})
 							})
 
@@ -1046,7 +1046,7 @@ var _ = Describe("class-filter", func() {
 						Context("With the right class", func() {
 							BeforeEach(func() {
 								newResource.SetAnnotations(map[string]string{
-									goharborv1alpha2.HarborClassAnnotation: cf.ClassName,
+									goharborv1.HarborClassAnnotation: cf.ClassName,
 								})
 							})
 
@@ -1061,15 +1061,15 @@ var _ = Describe("class-filter", func() {
 				Context("With the right class", func() {
 					BeforeEach(func() {
 						oldResource.SetAnnotations(map[string]string{
-							goharborv1alpha2.HarborClassAnnotation: cf.ClassName,
+							goharborv1.HarborClassAnnotation: cf.ClassName,
 						})
 					})
 
 					Context("To resource", func() {
-						var newResource *goharborv1alpha2.Harbor
+						var newResource *goharborv1.Harbor
 
 						BeforeEach(func() {
-							newResource = &goharborv1alpha2.Harbor{}
+							newResource = &goharborv1.Harbor{}
 						})
 
 						Context("With no annotation", func() {
@@ -1086,7 +1086,7 @@ var _ = Describe("class-filter", func() {
 						Context("With other annotations", func() {
 							BeforeEach(func() {
 								newResource.SetAnnotations(map[string]string{
-									fmt.Sprintf("%s-false", goharborv1alpha2.HarborClassAnnotation): "",
+									fmt.Sprintf("%s-false", goharborv1.HarborClassAnnotation): "",
 								})
 							})
 
@@ -1099,7 +1099,7 @@ var _ = Describe("class-filter", func() {
 						Context("With empty class", func() {
 							BeforeEach(func() {
 								newResource.SetAnnotations(map[string]string{
-									goharborv1alpha2.HarborClassAnnotation: "",
+									goharborv1.HarborClassAnnotation: "",
 								})
 							})
 
@@ -1112,7 +1112,7 @@ var _ = Describe("class-filter", func() {
 						Context("With other-class", func() {
 							BeforeEach(func() {
 								newResource.SetAnnotations(map[string]string{
-									goharborv1alpha2.HarborClassAnnotation: "other-class",
+									goharborv1.HarborClassAnnotation: "other-class",
 								})
 							})
 
@@ -1125,7 +1125,7 @@ var _ = Describe("class-filter", func() {
 						Context("With the right class", func() {
 							BeforeEach(func() {
 								newResource.SetAnnotations(map[string]string{
-									goharborv1alpha2.HarborClassAnnotation: cf.ClassName,
+									goharborv1.HarborClassAnnotation: cf.ClassName,
 								})
 							})
 

@@ -1,0 +1,4 @@
+apiVersion: goharbor.io/v1alpha3
+kind: Portal
+metadata:
+  name: sample

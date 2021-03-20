@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
-	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
 	"github.com/goharbor/harbor-operator/pkg/factories/application"
 	"github.com/goharbor/harbor-operator/pkg/harbor"
@@ -116,7 +116,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) {
 		return ctrl.Result{}, nil
 	}
 	// get harbor cluster
-	cluster := &v1alpha2.HarborCluster{}
+	cluster := &goharborv1.HarborCluster{}
 	if err = r.Client.Get(ctx, types.NamespacedName{Namespace: req.Namespace, Name: harborClusterName}, cluster); err != nil {
 		if apierrors.IsNotFound(err) {
 			// The resource may have be deleted after reconcile request coming in
@@ -195,7 +195,7 @@ func (r *Reconciler) assembleConfig(ctx context.Context, cm *corev1.ConfigMap) (
 }
 
 // getHarborClient gets harbor client.
-func (r *Reconciler) getHarborClient(ctx context.Context, cluster *v1alpha2.HarborCluster) (harbor.Client, error) {
+func (r *Reconciler) getHarborClient(ctx context.Context, cluster *goharborv1.HarborCluster) (harbor.Client, error) {
 	if cluster == nil {
 		return nil, fmt.Errorf("harbor cluster can not be nil")
 	}
@@ -223,10 +223,10 @@ func (r *Reconciler) getHarborClient(ctx context.Context, cluster *v1alpha2.Harb
 }
 
 // UpdateStatus updates harbor cluster status.
-func (r *Reconciler) UpdateStatus(ctx context.Context, err error, cluster *v1alpha2.HarborCluster) error {
+func (r *Reconciler) UpdateStatus(ctx context.Context, err error, cluster *goharborv1.HarborCluster) error {
 	now := metav1.Now()
-	cond := v1alpha2.HarborClusterCondition{
-		Type:               v1alpha2.ConfigurationReady,
+	cond := goharborv1.HarborClusterCondition{
+		Type:               goharborv1.ConfigurationReady,
 		LastTransitionTime: &now,
 	}
 

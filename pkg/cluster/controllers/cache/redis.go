@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/go-logr/logr"
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"github.com/goharbor/harbor-operator/pkg/cluster/k8s"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	"github.com/ovh/configstore"
@@ -52,7 +52,7 @@ type RedisController struct {
 }
 
 // Apply creates/updates/scales the resources, like kubernetes apply operation.
-func (rc *RedisController) Apply(ctx context.Context, cluster *goharborv1alpha2.HarborCluster, _ ...lcm.Option) (*lcm.CRStatus, error) {
+func (rc *RedisController) Apply(ctx context.Context, cluster *goharborv1.HarborCluster, _ ...lcm.Option) (*lcm.CRStatus, error) {
 	rc.ResourceManager.WithCluster(cluster)
 	crdClient := rc.DClient.DynamicClient(ctx, k8s.WithResource(redisFailoversGVR), k8s.WithNamespace(cluster.Namespace))
 
@@ -81,28 +81,28 @@ func (rc *RedisController) Apply(ctx context.Context, cluster *goharborv1alpha2.
 }
 
 // Delete...
-func (rc *RedisController) Delete(_ context.Context, _ *goharborv1alpha2.HarborCluster) (*lcm.CRStatus, error) {
+func (rc *RedisController) Delete(_ context.Context, _ *goharborv1.HarborCluster) (*lcm.CRStatus, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
-func (rc *RedisController) Upgrade(_ context.Context, _ *goharborv1alpha2.HarborCluster) (*lcm.CRStatus, error) {
+func (rc *RedisController) Upgrade(_ context.Context, _ *goharborv1.HarborCluster) (*lcm.CRStatus, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
 func cacheNotReadyStatus(reason, message string) *lcm.CRStatus {
-	return lcm.New(goharborv1alpha2.CacheReady).
+	return lcm.New(goharborv1.CacheReady).
 		WithStatus(corev1.ConditionFalse).
 		WithReason(reason).
 		WithMessage(message)
 }
 
 func cacheUnknownStatus() *lcm.CRStatus {
-	return lcm.New(goharborv1alpha2.CacheReady).
+	return lcm.New(goharborv1.CacheReady).
 		WithStatus(corev1.ConditionUnknown)
 }
 
 func cacheReadyStatus(properties *lcm.Properties) *lcm.CRStatus {
-	return lcm.New(goharborv1alpha2.CacheReady).
+	return lcm.New(goharborv1.CacheReady).
 		WithStatus(corev1.ConditionTrue).
 		WithReason("redis already ready").
 		WithMessage("harbor component redis secrets are already create.").

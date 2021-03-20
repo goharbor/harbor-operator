@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/certificate"
@@ -58,25 +58,25 @@ func setupValidTrivy(ctx context.Context, ns string) (Resource, client.ObjectKey
 	redis := redis.New(ctx, ns)
 	trivyCertName, trivyGithubTokenName := setupTrivyResourceDependencies(ctx, ns, name)
 
-	trivy := &goharborv1alpha2.Trivy{
+	trivy := &goharborv1.Trivy{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: ns,
 		},
 
-		Spec: goharborv1alpha2.TrivySpec{
+		Spec: goharborv1.TrivySpec{
 			ComponentSpec: harbormetav1.ComponentSpec{
 				Replicas: &replicas,
 			},
-			Redis: goharborv1alpha2.TrivyRedisSpec{
+			Redis: goharborv1.TrivyRedisSpec{
 				RedisConnection: redis,
 			},
-			Server: goharborv1alpha2.TrivyServerSpec{
+			Server: goharborv1.TrivyServerSpec{
 				TLS: &harbormetav1.ComponentsTLSSpec{
 					CertificateRef: trivyCertName,
 				},
 			},
-			Update: goharborv1alpha2.TrivyUpdateSpec{
+			Update: goharborv1.TrivyUpdateSpec{
 				GithubTokenRef: trivyGithubTokenName,
 				Skip:           false,
 			},
@@ -92,7 +92,7 @@ func setupValidTrivy(ctx context.Context, ns string) (Resource, client.ObjectKey
 }
 
 func updateTrivy(ctx context.Context, object Resource) {
-	trivy, ok := object.(*goharborv1alpha2.Trivy)
+	trivy, ok := object.(*goharborv1.Trivy)
 	Expect(ok).To(BeTrue())
 
 	var replicas int32 = 1
@@ -106,7 +106,7 @@ func updateTrivy(ctx context.Context, object Resource) {
 
 func getTrivyStatusFunc(ctx context.Context, key client.ObjectKey) func() harbormetav1.ComponentStatus {
 	return func() harbormetav1.ComponentStatus {
-		var trivy goharborv1alpha2.Trivy
+		var trivy goharborv1.Trivy
 
 		err := k8sClient.Get(ctx, key, &trivy)
 

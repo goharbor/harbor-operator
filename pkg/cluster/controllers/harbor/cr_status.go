@@ -15,20 +15,20 @@
 package harbor
 
 import (
-	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	corev1 "k8s.io/api/core/v1"
 )
 
 // harborReadyStatus indicates harbor (CR) is ready.
-var harborReadyStatus = lcm.New(v1alpha2.ServiceReady).WithStatus(corev1.ConditionTrue)
+var harborReadyStatus = lcm.New(goharborv1.ServiceReady).WithStatus(corev1.ConditionTrue)
 
 // harborNotReadyStatus indicates harbor (CR) is not ready.
 var harborNotReadyStatus = func(reason, message string) *lcm.CRStatus {
-	return lcm.New(v1alpha2.ServiceReady).WithStatus(corev1.ConditionFalse).WithReason(reason).WithMessage(message)
+	return lcm.New(goharborv1.ServiceReady).WithStatus(corev1.ConditionFalse).WithReason(reason).WithMessage(message)
 }
 
 // harborUnknownStatus indicates status of harbor (CR) is unknown.
 var harborUnknownStatus = func(reason, message string) *lcm.CRStatus {
-	return lcm.New(v1alpha2.ServiceReady).WithStatus(corev1.ConditionUnknown).WithReason(reason).WithMessage(message)
+	return lcm.New(goharborv1.ServiceReady).WithStatus(corev1.ConditionUnknown).WithReason(reason).WithMessage(message)
 }

@@ -8,7 +8,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/pods"
@@ -23,7 +23,7 @@ const defaultGenerationNumber int64 = 1
 var _ = Describe("Trivy", func() {
 	var (
 		ns    = test.InitNamespace(func() context.Context { return ctx })
-		trivy goharborv1alpha2.Trivy
+		trivy goharborv1.Trivy
 	)
 
 	BeforeEach(func() {
@@ -34,7 +34,7 @@ var _ = Describe("Trivy", func() {
 			Name:      test.NewName("trivy"),
 			Namespace: ns.GetName(),
 			Annotations: map[string]string{
-				goharborv1alpha2.HarborClassAnnotation: className,
+				goharborv1.HarborClassAnnotation: className,
 			},
 		}
 	})
@@ -50,8 +50,8 @@ var _ = Describe("Trivy", func() {
 		BeforeEach(func() {
 			namespace := trivy.GetNamespace()
 
-			trivy.Spec = goharborv1alpha2.TrivySpec{
-				Redis: goharborv1alpha2.TrivyRedisSpec{
+			trivy.Spec = goharborv1.TrivySpec{
+				Redis: goharborv1.TrivyRedisSpec{
 					RedisConnection: redis.New(ctx, namespace),
 				},
 			}
@@ -104,7 +104,7 @@ var _ = Describe("Trivy", func() {
 
 const healthPath = "/probe/ready"
 
-func IntegTest(ctx context.Context, trivy *goharborv1alpha2.Trivy) {
+func IntegTest(ctx context.Context, trivy *goharborv1.Trivy) {
 	client, err := rest.UnversionedRESTClientFor(test.NewRestConfig(ctx))
 	Expect(err).ToNot(HaveOccurred())
 

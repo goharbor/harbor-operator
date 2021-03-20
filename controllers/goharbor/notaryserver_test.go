@@ -5,7 +5,7 @@ import (
 
 	. "github.com/onsi/gomega"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/postgresql"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -24,13 +24,13 @@ func setupValidNotaryServer(ctx context.Context, ns string) (Resource, client.Ob
 	database := postgresql.New(ctx, ns)
 
 	name := newName("notary-server")
-	notaryServer := &goharborv1alpha2.NotaryServer{
+	notaryServer := &goharborv1.NotaryServer{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: ns,
 		},
-		Spec: goharborv1alpha2.NotaryServerSpec{
-			Storage: goharborv1alpha2.NotaryStorageSpec{
+		Spec: goharborv1.NotaryServerSpec{
+			Storage: goharborv1.NotaryStorageSpec{
 				Postgres: database,
 			},
 		},
@@ -45,7 +45,7 @@ func setupValidNotaryServer(ctx context.Context, ns string) (Resource, client.Ob
 }
 
 func updateNotaryServer(ctx context.Context, object Resource) {
-	notaryServer, ok := object.(*goharborv1alpha2.NotaryServer)
+	notaryServer, ok := object.(*goharborv1.NotaryServer)
 	Expect(ok).To(BeTrue())
 
 	var replicas int32 = 1
@@ -59,7 +59,7 @@ func updateNotaryServer(ctx context.Context, object Resource) {
 
 func getNotaryServerStatusFunc(ctx context.Context, key client.ObjectKey) func() harbormetav1.ComponentStatus {
 	return func() harbormetav1.ComponentStatus {
-		var notaryServer goharborv1alpha2.NotaryServer
+		var notaryServer goharborv1.NotaryServer
 
 		err := k8sClient.Get(ctx, key, &notaryServer)
 

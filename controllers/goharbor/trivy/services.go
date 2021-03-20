@@ -3,7 +3,7 @@ package trivy
 import (
 	"context"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
@@ -11,7 +11,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-func (r *Reconciler) AddService(ctx context.Context, trivy *goharborv1alpha2.Trivy) error {
+func (r *Reconciler) AddService(ctx context.Context, trivy *goharborv1.Trivy) error {
 	service, err := r.GetService(ctx, trivy)
 	if err != nil {
 		return errors.Wrap(err, "get")
@@ -25,7 +25,7 @@ func (r *Reconciler) AddService(ctx context.Context, trivy *goharborv1alpha2.Tri
 	return nil
 }
 
-func (r *Reconciler) GetService(ctx context.Context, trivy *goharborv1alpha2.Trivy) (*corev1.Service, error) {
+func (r *Reconciler) GetService(ctx context.Context, trivy *goharborv1.Trivy) (*corev1.Service, error) {
 	name := r.NormalizeName(ctx, trivy.GetName())
 	namespace := trivy.GetNamespace()
 

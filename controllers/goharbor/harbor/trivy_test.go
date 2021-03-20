@@ -4,7 +4,7 @@ import (
 	"context"
 	"os"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
 	"github.com/goharbor/harbor-operator/pkg/controller"
 	"github.com/goharbor/harbor-operator/pkg/factories/owner"
@@ -15,11 +15,11 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
-func trivyFromResource(r graph.Resource) *goharborv1alpha2.Trivy {
+func trivyFromResource(r graph.Resource) *goharborv1.Trivy {
 	res, ok := r.(*controller.Resource)
 	Expect(ok).To(BeTrue())
 
-	trivy, ok := res.GetResource().(*goharborv1alpha2.Trivy)
+	trivy, ok := res.GetResource().(*goharborv1.Trivy)
 	Expect(ok).To(BeTrue(), "resource is not trivy")
 
 	return trivy

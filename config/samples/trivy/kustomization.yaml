@@ -4,7 +4,7 @@ commonLabels:
   sample: "true"
 
 resources:
-- goharbor_v1alpha2_trivy.yaml
+- goharbor_v1alpha3_trivy.yaml
 
 bases:
 - ../../kustomizeconfig

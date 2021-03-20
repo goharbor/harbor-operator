@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/database/api"
 	"github.com/pkg/errors"
@@ -24,7 +24,7 @@ var (
 )
 
 // GetPostgresCR returns PostgreSqls CRs.
-func (p *PostgreSQLController) GetPostgresCR(ctx context.Context, harborcluster *goharborv1alpha2.HarborCluster) (*unstructured.Unstructured, error) {
+func (p *PostgreSQLController) GetPostgresCR(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*unstructured.Unstructured, error) {
 	resource := p.GetPostgreResource(harborcluster)
 	replica := p.GetPostgreReplica(harborcluster)
 	storageSize := p.GetPostgreStorageSize(harborcluster)

@@ -3,7 +3,7 @@ package harbor
 import (
 	"context"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"github.com/goharbor/harbor-operator/controllers"
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	"github.com/goharbor/harbor-operator/pkg/resources"
@@ -11,11 +11,11 @@ import (
 )
 
 func (r *Reconciler) NewEmpty(_ context.Context) resources.Resource {
-	return &goharborv1alpha2.Harbor{}
+	return &goharborv1.Harbor{}
 }
 
 func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resource) error { // nolint:funlen
-	harbor, ok := resource.(*goharborv1alpha2.Harbor)
+	harbor, ok := resource.(*goharborv1.Harbor)
 	if !ok {
 		return serrors.UnrecoverrableError(errors.Errorf("%+v", resource), serrors.OperatorReason, "unable to add resource")
 	}
