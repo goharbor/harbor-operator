@@ -12183,7 +12183,7 @@ spec:
         - name: TRIVY_DOCKER_IMAGE
           value: quay.io/goharbor/trivy-adapter-photon:v2.1.2
         - name: HARBORCLUSTER_STORAGE_IMAGE
-          value: quay.io/goharbor/minio:RELEASE.2020-08-13T02-39-50Z
+          value: quay.io/goharbor/minio:RELEASE.2021-03-01T04-20-55Z
         - name: HARBORCLUSTER_CACHE_IMAGE
           value: quay.io/goharbor/redis:5.0-alpine
         - name: NAMESPACE

@@ -170,7 +170,7 @@ func init() { // nolint:gochecknoinits
 
 	RegisterRepsitory("cluster-minio", "minio", "*") // the minio repository of dockerhub
 	RegisterImageName("cluster-minio", "minio", "*")
-	RegisterTag("cluster-minio", "RELEASE.2020-08-13T02-39-50Z", "2.1.2")
+	RegisterTag("cluster-minio", "RELEASE.2021-03-01T04-20-55Z", "2.1.2")
 }
 
 type Options struct {

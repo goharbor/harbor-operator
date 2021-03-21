@@ -15,8 +15,7 @@ import (
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:storageversion
 
-// Tenant is a https://kubernetes.io/docs/concepts/overview/working-with-objects/kubernetes-objects/[Kubernetes object] describing a MinIO Tenant. +
-//
+// Tenant is a https://kubernetes.io/docs/concepts/overview/working-with-objects/kubernetes-objects/[Kubernetes object] describing a MinIO Tenant.
 type Tenant struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -41,11 +40,11 @@ type TenantScheduler struct {
 
 // S3Features (`s3`) - Object describing which S3 features to enable/disable in the MinIO Tenant. +
 //
-// Currently only supports `BucketDNS`
+// Currently only supports `BucketDNS`.
 type S3Features struct {
 	// *Optional* +
 	//
-	//Specify `true` to allow clients to access buckets using the DNS path `<bucket>.minio.default.svc.cluster.local`. Defaults to `false`.
+	// Specify `true` to allow clients to access buckets using the DNS path `<bucket>.minio.default.svc.cluster.local`. Defaults to `false`.
 	//
 	BucketDNS bool `json:"bucketDNS"`
 }
@@ -54,7 +53,7 @@ type S3Features struct {
 //
 // The following parameters are specific to the `minio.min.io/v2` MinIO CRD API `spec` definition added as part of the MinIO Operator v4.0.0. +
 //
-// For more complete documentation on this object, see the https://docs.min.io/minio/k8s/reference/minio-operator-reference.html#minio-operator-yaml-reference[MinIO Kubernetes Documentation]. +
+// For more complete documentation on this object, see the https://docs.min.io/minio/k8s/reference/minio-operator-reference.html#minio-operator-yaml-reference[MinIO Kubernetes Documentation].
 //
 //
 type TenantSpec struct {
@@ -263,7 +262,7 @@ type TenantSpec struct {
 	ServiceMetadata *ServiceMetadata `json:"serviceMetadata,omitempty"`
 }
 
-// ServiceMetadata (`serviceMetadata`) defines custom labels and annotations for the MinIO Object Storage service and/or MinIO Console service. +
+// ServiceMetadata (`serviceMetadata`) defines custom labels and annotations for the MinIO Object Storage service and/or MinIO Console service.
 type ServiceMetadata struct {
 	// *Optional* +
 	//
@@ -287,7 +286,7 @@ type ServiceMetadata struct {
 	ConsoleServiceAnnotations map[string]string `json:"consoleServiceAnnotations,omitempty"`
 }
 
-// LocalCertificateReference (`externalCertSecret`, `externalCaCertSecret`,`clientCertSecret`) contains a Kubernetes secret containing TLS certificates or Certificate Authority files for use with enabling TLS in the MinIO Tenant. +
+// LocalCertificateReference (`externalCertSecret`, `externalCaCertSecret`,`clientCertSecret`) contains a Kubernetes secret containing TLS certificates or Certificate Authority files for use with enabling TLS in the MinIO Tenant.
 type LocalCertificateReference struct {
 	// *Required* +
 	//
@@ -299,7 +298,7 @@ type LocalCertificateReference struct {
 	Type string `json:"type,omitempty"`
 }
 
-// ExposeServices (`exposeServices`) defines the exposure of the MinIO object storage and Console services. +
+// ExposeServices (`exposeServices`) defines the exposure of the MinIO object storage and Console services.
 type ExposeServices struct {
 	// *Optional* +
 	//
@@ -313,41 +312,41 @@ type ExposeServices struct {
 	Console bool `json:"console,omitempty"`
 }
 
-// CertificateStatus keeps track of all the certificates managed by the operator
+// CertificateStatus keeps track of all the certificates managed by the operator.
 type CertificateStatus struct {
 	// AutoCertEnabled registers whether we know if the tenant has autocert enabled
 	// +nullable
 	AutoCertEnabled *bool `json:"autoCertEnabled,omitempty"`
 }
 
-// PoolState represents the state of a pool
+// PoolState represents the state of a pool.
 type PoolState string
 
 const (
-	// PoolNotCreated of a pool when it's not even created yet
+	// PoolNotCreated of a pool when it's not even created yet.
 	PoolNotCreated PoolState = "PoolNotCreated"
-	// PoolCreated indicates a pool was created
+	// PoolCreated indicates a pool was created.
 	PoolCreated PoolState = "PoolCreated"
-	// PoolInitialized indicates if a pool has been observed to be online
+	// PoolInitialized indicates if a pool has been observed to be online.
 	PoolInitialized PoolState = "PoolInitialized"
 )
 
-// PoolStatus keeps track of all the pools and their current state
+// PoolStatus keeps track of all the pools and their current state.
 type PoolStatus struct {
 	SSName string    `json:"ssName"`
 	State  PoolState `json:"state"`
 }
 
-// TenantStatus is the status for a Tenant resource
+// TenantStatus is the status for a Tenant resource.
 type TenantStatus struct {
 	CurrentState      string `json:"currentState"`
 	AvailableReplicas int32  `json:"availableReplicas"`
 	Revision          int32  `json:"revision"`
 	SyncVersion       string `json:"syncVersion"`
-	// Keeps track of all the TLS certificates managed by the operator
+	// Keeps track of all the TLS certificates managed by the operator.
 	// +nullable
 	Certificates CertificateStatus `json:"certificates"`
-	// All the pools get an individual status
+	// All the pools get an individual status.
 	// +nullable
 	Pools []PoolStatus `json:"pools"`
 }
@@ -370,7 +369,7 @@ type CertificateConfig struct {
 
 // Pool (`pools`) defines a MinIO server pool on a Tenant. Each pool consists of a set of MinIO server pods which "pool" their storage resources for supporting object storage and retrieval requests. Each server pool is independent of all others and supports horizontal scaling of available storage resources in the MinIO Tenant. +
 //
-// See the https://docs.min.io/minio/k8s/reference/minio-operator-reference.html#server-pools[MinIO Operator CRD] reference for the `pools` object for examples and more complete documentation. +
+// See the https://docs.min.io/minio/k8s/reference/minio-operator-reference.html#server-pools[MinIO Operator CRD] reference for the `pools` object for examples and more complete documentation.
 type Pool struct {
 	// *Optional* +
 	//
@@ -554,16 +553,17 @@ type ConsoleConfiguration struct {
 	SecurityContext *corev1.PodSecurityContext `json:"securityContext,omitempty"`
 }
 
-// EqualImage returns true if config image and current input image are same
+// EqualImage returns true if config image and current input image are same.
 func (c ConsoleConfiguration) EqualImage(currentImage string) bool {
 	return c.Image == currentImage
 }
 
-// EqualImage returns true if image specified in `LogConfig` is equal to `image`
+// EqualImage returns true if image specified in `LogConfig` is equal to `image`.
 func (lc *LogConfig) EqualImage(image string) bool {
 	if lc == nil {
 		return false
 	}
+
 	return lc.Image == image
 }
 
@@ -612,7 +612,7 @@ type LogConfig struct {
 	//
 	// Object specification for configuring the backing PostgreSQL database for the LogSearch API. +
 	// +optional
-	Db *LogDbConfig `json:"db,omitempty"`
+	Db *LogDbConfig `json:"db,omitempty"` // nolint:stylecheck
 	// *Required* +
 	//
 	// Object specification for configuring LogSearch API.
@@ -637,7 +637,7 @@ type LogConfig struct {
 	SecurityContext *corev1.PodSecurityContext `json:"securityContext,omitempty"`
 }
 
-// AuditConfig defines configuration parameters for Audit (type) logs
+// AuditConfig defines configuration parameters for Audit (type) logs.
 type AuditConfig struct {
 	// *Required* +
 	//
@@ -657,7 +657,7 @@ type PrometheusConfig struct {
 	Image string `json:"image,omitempty"`
 	// *Optional* +
 	//
-	// *Deprecated in Operator v4.0.1* +
+	// Deprecated: in Operator v4.0.1* +
 	//
 	// Defines the Docker image to use as a sidecar for the Prometheus server. Defaults to `alpine`. +
 	//
@@ -666,7 +666,7 @@ type PrometheusConfig struct {
 	SideCarImage string `json:"sidecarimage,omitempty"`
 	// *Optional* +
 	//
-	// *Deprecated in Operator v4.0.1* +
+	// Deprecated: in Operator v4.0.1* +
 	//
 	// Defines the Docker image to use as the init container for running the Prometheus server. Defaults to `busybox`. +
 	//
@@ -719,8 +719,8 @@ type PrometheusConfig struct {
 	SecurityContext *corev1.PodSecurityContext `json:"securityContext,omitempty"`
 }
 
-// LogDbConfig (`db`) defines the configuration of the PostgreSQL StatefulSet deployed to support the MinIO LogSearch API. +
-type LogDbConfig struct {
+// LogDbConfig (`db`) defines the configuration of the PostgreSQL StatefulSet deployed to support the MinIO LogSearch API.
+type LogDbConfig struct { // nolint: stylecheck
 	// *Optional* +
 	//
 	// The Docker image to use for deploying PostgreSQL. Defaults to {postgres-image}. +
@@ -781,7 +781,7 @@ type LogDbConfig struct {
 	SecurityContext *corev1.PodSecurityContext `json:"securityContext,omitempty"`
 }
 
-// KESConfig (`kes`) defines the configuration of the https://github.com/minio/kes[MinIO Key Encryption Service] (KES) StatefulSet deployed as part of the MinIO Tenant. KES supports Server-Side Encryption of objects using an external Key Management Service (KMS). +
+// KESConfig (`kes`) defines the configuration of the https://github.com/minio/kes[MinIO Key Encryption Service] (KES) StatefulSet deployed as part of the MinIO Tenant. KES supports Server-Side Encryption of objects using an external Key Management Service (KMS).
 type KESConfig struct {
 	// *Optional* +
 	//
@@ -888,7 +888,7 @@ type KESConfig struct {
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// TenantList is a list of Tenant resources
+// TenantList is a list of Tenant resources.
 type TenantList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata"`
