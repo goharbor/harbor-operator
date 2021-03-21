@@ -4,7 +4,7 @@ import (
 	"context"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
-	minio "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/api/v1"
+	minio "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/apis/minio.min.io/v2"
 	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1"
 	certv1alpha2 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	certv1beta1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1beta1"

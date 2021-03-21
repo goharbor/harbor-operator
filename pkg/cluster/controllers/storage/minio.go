@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-logr/logr"
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
-	minio "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/api/v1"
+	miniov2 "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/apis/minio.min.io/v2"
 	"github.com/goharbor/harbor-operator/pkg/cluster/k8s"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	"github.com/ovh/configstore"
@@ -22,12 +22,13 @@ import (
 const (
 	Storage = "storage"
 
-	DefaultCredsSecret = "creds"
-	DefaultPrefix      = "minio-"
-	DefaultZone        = "zone-harbor"
-	DefaultRegion      = "us-east-1"
-	DefaultBucket      = "harbor"
-	DefaultServicePort = 9000
+	DefaultCredsSecret  = "creds"
+	DefaultPrefix       = "minio-"
+	DefaultZone         = "zone-harbor"
+	DefaultRegion       = "us-east-1"
+	DefaultBucket       = "harbor"
+	DefaultServicePort  = "80"
+	defaultMinIOService = "minio"
 )
 
 type MinIOController struct {
@@ -41,9 +42,9 @@ type MinIOController struct {
 }
 
 var HarborClusterMinIOGVK = schema.GroupVersionKind{
-	Group:   minio.SchemeGroupVersion.Group,
-	Version: minio.SchemeGroupVersion.Version,
-	Kind:    minio.MinIOCRDResourceKind,
+	Group:   miniov2.SchemeGroupVersion.Group,
+	Version: miniov2.SchemeGroupVersion.Version,
+	Kind:    miniov2.MinIOCRDResourceKind,
 }
 
 func NewMinIOController(options ...k8s.Option) lcm.Controller {
@@ -124,7 +125,7 @@ func (m *MinIOController) minioInit(ctx context.Context, harborcluster *goharbor
 		return err
 	}
 
-	endpoint := m.getServiceName(harborcluster) + "." + harborcluster.Namespace + ":9000"
+	endpoint := m.getTenantsServiceName(harborcluster) + "." + harborcluster.Namespace + ":" + m.getServicePort()
 
 	edp := &MinioEndpoint{
 		Endpoint:        endpoint,
@@ -146,8 +147,8 @@ func (m *MinIOController) minioInit(ctx context.Context, harborcluster *goharbor
 	return m.MinioClient.CreateBucket(ctx, DefaultBucket)
 }
 
-func (m *MinIOController) checkMinIOReady(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*minio.Tenant, bool, error) {
-	minioCR := &minio.Tenant{}
+func (m *MinIOController) checkMinIOReady(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*miniov2.Tenant, bool, error) {
+	minioCR := &miniov2.Tenant{}
 	if err := m.KubeClient.Get(ctx, m.getMinIONamespacedName(harborcluster), minioCR); err != nil {
 		if errors.IsNotFound(err) {
 			return nil, false, nil
@@ -158,7 +159,7 @@ func (m *MinIOController) checkMinIOReady(ctx context.Context, harborcluster *go
 
 	// For different version of minIO have different Status.
 	// Ref https://github.com/minio/operator/commit/d387108ea494cf5cec57628c40d40604ac8d57ec#diff-48972613166d50a2acb9d562e33c5247
-	if minioCR.Status.CurrentState == minio.StatusReady || minioCR.Status.CurrentState == minio.StatusInitialized {
+	if minioCR.Status.CurrentState == miniov2.StatusReady || minioCR.Status.CurrentState == miniov2.StatusInitialized {
 		return minioCR, true, nil
 	}
 
@@ -187,6 +188,11 @@ func (m *MinIOController) getMinIOSecretNamespacedName(harborcluster *goharborv1
 
 func (m *MinIOController) getServiceName(harborcluster *goharborv1.HarborCluster) string {
 	return DefaultPrefix + harborcluster.Name
+}
+
+func (m *MinIOController) getTenantsServiceName(harborcluster *goharborv1.HarborCluster) string {
+	// In latest minio operator, The name of the service is forced to be "minio"
+	return defaultMinIOService
 }
 
 func minioNotReadyStatus(reason, message string) *lcm.CRStatus {
