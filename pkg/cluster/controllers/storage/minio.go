@@ -2,10 +2,10 @@ package storage
 
 import (
 	"context"
+	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/apis/minio.min.io/v2"
 
 	"github.com/go-logr/logr"
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
-	minio "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/api/v1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/k8s"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	"github.com/ovh/configstore"
@@ -41,9 +41,9 @@ type MinIOController struct {
 }
 
 var HarborClusterMinIOGVK = schema.GroupVersionKind{
-	Group:   minio.SchemeGroupVersion.Group,
-	Version: minio.SchemeGroupVersion.Version,
-	Kind:    minio.MinIOCRDResourceKind,
+	Group:   v2.SchemeGroupVersion.Group,
+	Version: v2.SchemeGroupVersion.Version,
+	Kind:    v2.MinIOCRDResourceKind,
 }
 
 func NewMinIOController(options ...k8s.Option) lcm.Controller {
@@ -146,8 +146,8 @@ func (m *MinIOController) minioInit(ctx context.Context, harborcluster *goharbor
 	return m.MinioClient.CreateBucket(ctx, DefaultBucket)
 }
 
-func (m *MinIOController) checkMinIOReady(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*minio.Tenant, bool, error) {
-	minioCR := &minio.Tenant{}
+func (m *MinIOController) checkMinIOReady(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*v2.Tenant, bool, error) {
+	minioCR := &v2.Tenant{}
 	if err := m.KubeClient.Get(ctx, m.getMinIONamespacedName(harborcluster), minioCR); err != nil {
 		if errors.IsNotFound(err) {
 			return nil, false, nil
@@ -158,7 +158,7 @@ func (m *MinIOController) checkMinIOReady(ctx context.Context, harborcluster *go
 
 	// For different version of minIO have different Status.
 	// Ref https://github.com/minio/operator/commit/d387108ea494cf5cec57628c40d40604ac8d57ec#diff-48972613166d50a2acb9d562e33c5247
-	if minioCR.Status.CurrentState == minio.StatusReady || minioCR.Status.CurrentState == minio.StatusInitialized {
+	if minioCR.Status.CurrentState == v2.StatusReady || minioCR.Status.CurrentState == v2.StatusInitialized {
 		return minioCR, true, nil
 	}
 

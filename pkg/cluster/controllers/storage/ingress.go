@@ -2,11 +2,11 @@ package storage
 
 import (
 	"context"
+	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/apis/minio.min.io/v2"
 
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/common"
-	minio "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/api/v1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	netv1 "k8s.io/api/networking/v1beta1"
 	"k8s.io/apimachinery/pkg/api/equality"
@@ -57,7 +57,7 @@ func (m *MinIOController) applyIngress(ctx context.Context, harborcluster *gohar
 
 func (m *MinIOController) createIngress(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*lcm.CRStatus, error) {
 	// Get the existing minIO CR first
-	minioCR := &minio.Tenant{}
+	minioCR := &v2.Tenant{}
 	if err := m.KubeClient.Get(ctx, m.getMinIONamespacedName(harborcluster), minioCR); err != nil {
 		return minioNotReadyStatus(GetMinIOError, err.Error()), err
 	}
