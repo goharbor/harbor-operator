@@ -223,7 +223,7 @@ func (spec *HarborSpec) ValidateRegistryController() *field.Error {
 	// nodeSelector and tolerations must equal with registry's
 	// when the image chart storage is filesystem and the access mode of pvc is ReadWriteOnce
 	// TODO: check the access mode of pvc is ReadWriteOnce
-	if spec.ImageChartStorage.FileSystem != nil {
+	if spec.ImageChartStorage != nil && spec.ImageChartStorage.FileSystem != nil {
 		if len(spec.RegistryController.NodeSelector) > 0 &&
 			!equality.Semantic.DeepEqual(spec.RegistryController.NodeSelector, spec.Registry.NodeSelector) {
 			p := field.NewPath("spec").Child("registryctl", "nodeSelector")
