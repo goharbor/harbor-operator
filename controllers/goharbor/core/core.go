@@ -2,14 +2,13 @@ package core
 
 import (
 	"context"
-	"net/http"
 	"time"
 
 	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/pkg/config"
+	"github.com/goharbor/harbor-operator/pkg/config/template"
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
 	"github.com/goharbor/harbor-operator/pkg/event-filter/class"
-	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
@@ -20,20 +19,13 @@ import (
 )
 
 const (
-	DefaultRequeueWait = 2 * time.Second
-)
-
-const (
-	ConfigTemplatePathKey     = "template-path"
-	DefaultConfigTemplatePath = "/etc/harbor-operator/templates/core-config.conf.tmpl"
-	ConfigTemplateKey         = "template-content"
+	DefaultRequeueWait            = 2 * time.Second
+	DefaultConfigTemplateFileName = "core-config.conf.tmpl"
 )
 
 // Reconciler reconciles a Core object.
 type Reconciler struct {
 	*commonCtrl.Controller
-
-	configError error
 }
 
 // +kubebuilder:rbac:groups=goharbor.io,resources=cores,verbs=get;list;watch
@@ -48,24 +40,27 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 		return errors.Wrap(err, "cannot setup common controller")
 	}
 
+	templateConfig, err := r.Template(ctx)
+	if err != nil {
+		return errors.Wrap(err, "template")
+	}
+
+	if err := mgr.AddReadyzCheck(r.NormalizeName(ctx, "template"), templateConfig.ReadyzCheck); err != nil {
+		return errors.Wrap(err, "cannot add template ready check")
+	}
+
+	if err := mgr.AddHealthzCheck(r.NormalizeName(ctx, "template"), templateConfig.HealthzCheck); err != nil {
+		return errors.Wrap(err, "cannot add template health check")
+	}
+
 	className, err := r.GetClassName(ctx)
 	if err != nil {
 		return errors.Wrap(err, "classname")
 	}
 
-	concurrentReconcile, err := r.ConfigStore.GetItemValueInt(config.ReconciliationKey)
+	concurrentReconcile, err := config.GetInt(r.ConfigStore, config.ReconciliationKey, config.DefaultConcurrentReconcile)
 	if err != nil {
 		return errors.Wrap(err, "cannot get concurrent reconcile")
-	}
-
-	err = mgr.AddReadyzCheck(r.NormalizeName(ctx, "template"), func(req *http.Request) error { return r.configError })
-	if err != nil {
-		return errors.Wrap(err, "cannot add template ready check")
-	}
-
-	err = mgr.AddHealthzCheck(r.NormalizeName(ctx, "template"), func(req *http.Request) error { return r.configError })
-	if err != nil {
-		return errors.Wrap(err, "cannot add template health check")
 	}
 
 	return ctrl.NewControllerManagedBy(mgr).
@@ -79,29 +74,24 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 		Owns(&corev1.Service{}).
 		Owns(&netv1.NetworkPolicy{}).
 		WithOptions(controller.Options{
-			MaxConcurrentReconciles: int(concurrentReconcile),
+			MaxConcurrentReconciles: concurrentReconcile,
 		}).
 		Complete(r)
 }
 
-func New(ctx context.Context, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
-	configTemplatePath, err := config.GetString(configStore, ConfigTemplatePathKey, DefaultConfigTemplatePath)
+func (r *Reconciler) Template(ctx context.Context) (*template.ConfigTemplate, error) {
+	templateConfig, err := template.FromConfigStore(r.ConfigStore, DefaultConfigTemplateFileName)
 	if err != nil {
-		return nil, errors.Wrap(err, "template path")
+		return nil, errors.Wrap(err, "from configstore")
 	}
 
+	templateConfig.Register(r.ConfigStore)
+
+	return templateConfig, nil
+}
+
+func New(ctx context.Context, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
 	r := &Reconciler{}
-	r.configError = config.ErrNotReady
-
-	configStore.FileCustomRefresh(configTemplatePath, func(data []byte) ([]configstore.Item, error) {
-		r.configError = nil
-
-		logger.Get(ctx).WithName("controller").WithName(controllers.Core.String()).
-			Info("config reloaded", "path", configTemplatePath)
-		// TODO reconcile all core
-
-		return []configstore.Item{configstore.NewItem(ConfigTemplateKey, string(data), config.DefaultPriority)}, nil
-	})
 
 	r.Controller = commonCtrl.NewController(ctx, controllers.Core, r, configStore)
 
