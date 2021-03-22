@@ -6,11 +6,111 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
 data:
   config.yaml: |-
-    {{- range $key, $value := .Values.configuration }}
-    - key: {{ $key | quote }}
+    - key: controllers-config-directory
       priority: 100
-      value: {{ $value | quote }}
+      value: /etc/harbor-operator
+
+    {{- with .Values.controllers.common.classname }}
+    - key: classname
+      priority: 100
+      value: {{ . | quote }}
     {{- end }}
+
+    {{- with .Values.controllers.common.networkPolicies }}
+    - key: network-policies
+      priority: 100
+      value: {{ . | quote }}
+    {{- end }}
+
+    {{- with .Values.controllers.common.watchChildren }}
+    - key: watch-children
+      priority: 100
+      value: {{ . | quote }}
+    {{- end}}
+
+  chartmuseum-ctrl.yaml: |-
+    {{- with .Values.controllers.chartmuseum.maxReconcile }}
+    - key: max-reconcile
+      priority: 200
+      value: {{ . | quote }}
+    {{- end}}
+
+  harborconfiguration-ctrl.yaml: |-
+    {{- with .Values.controllers.harborConfiguration.maxReconcile }}
+    - key: max-reconcile
+      priority: 200
+      value: {{ . | quote }}
+    {{- end}}
+
+  core-ctrl.yaml: |-
+    {{- with .Values.controllers.core.maxReconcile }}
+    - key: max-reconcile
+      priority: 200
+      value: {{ . | quote }}
+    {{- end}}
+
+  harbor-ctrl.yaml: |-
+    {{- with .Values.controllers.harbor.maxReconcile }}
+    - key: max-reconcile
+      priority: 200
+      value: {{ . | quote }}
+    {{- end}}
+
+  harborcluster-ctrl.yaml: |-
+    {{- with .Values.controllers.harborcluster.maxReconcile }}
+    - key: max-reconcile
+      priority: 200
+      value: {{ . | quote }}
+    {{- end}}
+
+  jobservice-ctrl.yaml: |-
+    {{- with .Values.controllers.jobservice.maxReconcile }}
+    - key: max-reconcile
+      priority: 200
+      value: {{ . | quote }}
+    {{- end}}
+
+  notaryserver-ctrl.yaml: |-
+    {{- with .Values.controllers.notaryserver.maxReconcile }}
+    - key: max-reconcile
+      priority: 200
+      value: {{ . | quote }}
+    {{- end}}
+
+  notarysigner-ctrl.yaml: |-
+    {{- with .Values.controllers.notarysigner.maxReconcile }}
+    - key: max-reconcile
+      priority: 200
+      value: {{ . | quote }}
+    {{- end}}
+
+  portal-ctrl.yaml: |-
+    {{- with .Values.controllers.portal.maxReconcile }}
+    - key: max-reconcile
+      priority: 200
+      value: {{ . | quote }}
+    {{- end}}
+
+  registry-ctrl.yaml: |-
+    {{- with .Values.controllers.registry.maxReconcile }}
+    - key: max-reconcile
+      priority: 200
+      value: {{ . | quote }}
+    {{- end}}
+
+  registryctl-ctrl.yaml: |-
+    {{- with .Values.controllers.registryctl.maxReconcile }}
+    - key: max-reconcile
+      priority: 200
+      value: {{ . | quote }}
+    {{- end}}
+
+  trivy-ctrl.yaml: |-
+    {{- with .Values.controllers.trivy.maxReconcile }}
+    - key: max-reconcile
+      priority: 200
+      value: {{ . | quote }}
+    {{- end}}
 ---
 apiVersion: v1
 kind: ConfigMap

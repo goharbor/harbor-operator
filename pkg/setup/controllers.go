@@ -3,6 +3,8 @@ package setup
 import (
 	"context"
 	"fmt"
+	"os"
+	"path"
 
 	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/chartmuseum"
@@ -19,6 +21,7 @@ import (
 	"github.com/goharbor/harbor-operator/controllers/goharbor/trivy"
 	"github.com/goharbor/harbor-operator/pkg/config"
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
+	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -46,7 +49,7 @@ var controllersBuilder = map[controllers.Controller]func(context.Context, *confi
 type ControllerFactory func(context.Context, string, string, *configstore.Store) (commonCtrl.Reconciler, error)
 
 type Controller interface {
-	WithManager(context.Context, manager.Manager) error
+	WithManager(context.Context, manager.Manager) (commonCtrl.Reconciler, error)
 	IsEnabled(context.Context) (bool, error)
 }
 
@@ -55,27 +58,58 @@ type controller struct {
 	New  func(context.Context, *configstore.Store) (commonCtrl.Reconciler, error)
 }
 
+func NewController(name controllers.Controller, factory func(context.Context, *configstore.Store) (commonCtrl.Reconciler, error)) Controller {
+	return &controller{Name: name, New: factory}
+}
+
 func (c *controller) GetConfig(ctx context.Context) (*configstore.Store, error) {
 	configStore := config.NewConfigWithDefaults()
+
+	configStore.RegisterProvider("common", func() (configstore.ItemList, error) {
+		itemList, err := configstore.DefaultStore.GetItemList()
+		if err != nil {
+			return configstore.ItemList{}, errors.Wrap(err, "item list from default")
+		}
+
+		return *itemList, nil
+	})
+
 	configStore.Env(c.Name.String())
+
+	configDirectory, err := config.GetString(configstore.DefaultStore, config.CtrlConfigDirectoryKey, config.DefaultConfigDirectory)
+	if err != nil {
+		return nil, errors.Wrap(err, "config directory")
+	}
+
+	configPath := path.Join(configDirectory, fmt.Sprintf("%s-ctrl.yaml", c.Name.String()))
+
+	if _, err := os.Stat(configPath); err != nil {
+		if !os.IsNotExist(err) {
+			return nil, errors.Wrap(err, "invalid config file")
+		}
+
+		logger.Get(ctx).Error(err, "invalid config file")
+	} else {
+		configStore.FileRefresh(configPath)
+	}
 
 	return configStore, nil
 }
 
-func (c *controller) WithManager(ctx context.Context, mgr manager.Manager) error {
+func (c *controller) WithManager(ctx context.Context, mgr manager.Manager) (commonCtrl.Reconciler, error) {
 	configStore, err := c.GetConfig(ctx)
 	if err != nil {
-		return errors.Wrap(err, "get configuration")
+		return nil, errors.Wrap(err, "get configuration")
 	}
 
 	controller, err := c.New(ctx, configStore)
 	if err != nil {
-		return errors.Wrap(err, "create")
+		return controller, errors.Wrap(err, "create")
 	}
 
 	err = controller.SetupWithManager(ctx, mgr)
 
-	return errors.Wrap(err, "setup")
+	return controller, errors.Wrap(err, "setup")
 }
 
 func (c *controller) IsEnabled(ctx context.Context) (bool, error) {

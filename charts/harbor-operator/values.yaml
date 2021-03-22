@@ -55,10 +55,65 @@ replicaCount: 1
 # }`
 strategy: {}
 
-# configuration -- Configuration for controller
-configuration:
-  harbor-controller-max-reconcile: 1
-  harbor-controller-watch-children: true
+controllers:
+  common:
+    # controllers.common.classname -- Harbor class handled by the operator.
+    # An empty class means watch all resources
+    classname: ""
+
+    # controllers.common.networkPolicies -- Whether the operator should manage network policies
+    networkPolicies: false
+
+    # controllers.common.watchChildren -- Whether the operator should watch children
+    watchChildren: true
+
+  chartmuseum:
+    # controllers.chartmuseum.maxReconcile -- Max parallel reconciliation for ChartMuseum controller
+    maxReconcile: 1
+
+  harborConfiguration:
+    # controllers.harborConfiguration.maxReconcile -- Max parallel reconciliation for HarborConfiguration controller
+    maxReconcile: 1
+
+  core:
+    # controllers.core.maxReconcile -- Max parallel reconciliation for Core controller
+    maxReconcile: 1
+
+  harbor:
+    # controllers.harbor.maxReconcile -- Max parallel reconciliation for Harbor controller
+    maxReconcile: 1
+
+  harborcluster:
+    # controllers.harborcluster.maxReconcile -- Max parallel reconciliation for HarborCluster controller
+    maxReconcile: 1
+
+  jobservice:
+    # controllers.jobservice.maxReconcile -- Max parallel reconciliation for JobService controller
+    maxReconcile: 1
+
+  notaryserver:
+    # controllers.notaryserver.maxReconcile -- Max parallel reconciliation for NotaryServer controller
+    maxReconcile: 1
+
+  notarysigner:
+    # controllers.notarysigner.maxReconcile -- Max parallel reconciliation for NotarySigner controller
+    maxReconcile: 1
+
+  portal:
+    # controllers.portal.maxReconcile -- Max parallel reconciliation for Portal controller
+    maxReconcile: 1
+
+  registry:
+    # controllers.registry.maxReconcile -- Max parallel reconciliation for Registry controller
+    maxReconcile: 1
+
+  registryctl:
+    # controllers.registryctl.maxReconcile -- Max parallel reconciliation for RegistryCtl controller
+    maxReconcile: 1
+
+  trivy:
+    # controllers.trivy.maxReconcile -- Max parallel reconciliation for Trivy controller
+    maxReconcile: 1
 
 # resources -- Expects input structure as per specification <https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#resourcerequirements-v1-core>
 resources:

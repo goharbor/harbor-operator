@@ -73,7 +73,7 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 		return err
 	}
 
-	concurrentReconcile, err := r.ConfigStore.GetItemValueInt(config.ReconciliationKey)
+	concurrentReconcile, err := config.GetInt(r.ConfigStore, config.ReconciliationKey, config.DefaultConcurrentReconcile)
 	if err != nil {
 		return errors.Wrap(err, "cannot get concurrent reconcile")
 	}
@@ -121,7 +121,7 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 		TryOwns(&redisOp.RedisFailover{}, redisCRD).
 		WithEventFilter(harborClusterPredicateFuncs).
 		WithOptions(controller.Options{
-			MaxConcurrentReconciles: int(concurrentReconcile),
+			MaxConcurrentReconciles: concurrentReconcile,
 		}).
 		Complete(r)
 }
