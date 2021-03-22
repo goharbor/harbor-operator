@@ -3,7 +3,7 @@ package registryctl
 import (
 	"context"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	"github.com/goharbor/harbor-operator/pkg/resources"
 	"github.com/pkg/errors"
@@ -11,11 +11,11 @@ import (
 )
 
 func (r *Reconciler) NewEmpty(_ context.Context) resources.Resource {
-	return &goharborv1alpha2.RegistryController{}
+	return &goharborv1.RegistryController{}
 }
 
 func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resource) error {
-	registryctl, ok := resource.(*goharborv1alpha2.RegistryController)
+	registryctl, ok := resource.(*goharborv1.RegistryController)
 	if !ok {
 		return serrors.UnrecoverrableError(errors.Errorf("%+v", resource), serrors.OperatorReason, "unable to add resource")
 	}
@@ -25,7 +25,7 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrap(err, "cannot get service")
 	}
 
-	registry, err := r.AddExternalResource(ctx, &goharborv1alpha2.Registry{
+	registry, err := r.AddExternalResource(ctx, &goharborv1.Registry{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      registryctl.Spec.RegistryRef,
 			Namespace: registryctl.GetNamespace(),

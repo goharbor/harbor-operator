@@ -3,7 +3,7 @@ package scheme
 import (
 	"context"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	minio "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/api/v1"
 	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1"
 	certv1alpha2 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
@@ -39,7 +39,7 @@ func New(ctx context.Context) (*runtime.Scheme, error) {
 		return nil, errors.Wrap(err, "unable to configure certificate-manager scheme certv1")
 	}
 
-	err = goharborv1alpha2.AddToScheme(scheme)
+	err = goharborv1.AddToScheme(scheme)
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to configure Harbor scheme")
 	}

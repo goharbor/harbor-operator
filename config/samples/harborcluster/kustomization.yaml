@@ -7,7 +7,7 @@ resources:
 - https.yaml
 - service_token_issuer.yaml
 - storage.yaml
-- goharbor_v1alpha2_harborcluster.yaml
+- goharbor_v1alpha3_harborcluster.yaml
 
 secretGenerator:
 - name: admin-core-secret

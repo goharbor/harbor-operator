@@ -18,7 +18,7 @@ secretGenerator:
   type: "goharbor.io/single-secret"
 
 resources:
-- goharbor_v1alpha2_registry.yaml
+- goharbor_v1alpha3_registry.yaml
 
 bases:
 - ../../kustomizeconfig

@@ -6,7 +6,7 @@ import (
 	"path"
 	"strings"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/registry"
@@ -50,7 +50,7 @@ const (
 	AffinityTopology            = "kubernetes.io/hostname"
 )
 
-func (r *Reconciler) GetDeployment(ctx context.Context, registryCtl *goharborv1alpha2.RegistryController) (*appsv1.Deployment, error) { // nolint:funlen
+func (r *Reconciler) GetDeployment(ctx context.Context, registryCtl *goharborv1.RegistryController) (*appsv1.Deployment, error) { // nolint:funlen
 	getImageOptions := []image.Option{
 		image.WithConfigstore(r.ConfigStore),
 		image.WithImageFromSpec(registryCtl.Spec.Image),
@@ -262,7 +262,7 @@ func (r *Reconciler) applyTLSVolumeMountConfig(ctx context.Context, container *c
 	}
 }
 
-func (r *Reconciler) applyTLSVolumeConfig(ctx context.Context, registryCtl *goharborv1alpha2.RegistryController, deploy *appsv1.Deployment) {
+func (r *Reconciler) applyTLSVolumeConfig(ctx context.Context, registryCtl *goharborv1.RegistryController, deploy *appsv1.Deployment) {
 	for i, volume := range deploy.Spec.Template.Spec.Volumes {
 		if volume.Name == registry.InternalCertificatesVolumeName {
 			logger.Get(ctx).V(0).Info("tls volume found, updating it")

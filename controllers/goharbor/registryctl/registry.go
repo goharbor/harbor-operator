@@ -3,14 +3,14 @@ package registryctl
 import (
 	"context"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"k8s.io/apimachinery/pkg/types"
 )
 
 // +kubebuilder:rbac:groups=goharbor.io,resources=registries,verbs=get;list;watch
 
-func (r *Reconciler) GetRegistry(ctx context.Context, registryCtl *goharborv1alpha2.RegistryController) (*goharborv1alpha2.Registry, error) {
-	var registry goharborv1alpha2.Registry
+func (r *Reconciler) GetRegistry(ctx context.Context, registryCtl *goharborv1.RegistryController) (*goharborv1.Registry, error) {
+	var registry goharborv1.Registry
 
 	err := r.Client.Get(ctx, types.NamespacedName{
 		Namespace: registryCtl.GetNamespace(),

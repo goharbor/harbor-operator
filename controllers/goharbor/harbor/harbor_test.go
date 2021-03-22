@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/harbor"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
 	. "github.com/onsi/ginkgo"
@@ -22,7 +22,7 @@ var _ = Describe("Harbor", func() {
 		r       *harbor.Reconciler
 
 		input        string
-		getComponent func(*goharborv1alpha2.Harbor) runtime.Object
+		getComponent func(*goharborv1.Harbor) runtime.Object
 		output       string
 	)
 
@@ -32,7 +32,7 @@ var _ = Describe("Harbor", func() {
 		r = makeReconciler(ctx)
 
 		sch := runtime.NewScheme()
-		_ = goharborv1alpha2.AddToScheme(sch)
+		_ = goharborv1.AddToScheme(sch)
 
 		decoder = serializer.NewCodecFactory(sch).UniversalDeserializer()
 
@@ -45,7 +45,7 @@ var _ = Describe("Harbor", func() {
 		obj, _, err := decoder.Decode([]byte(input), nil, nil)
 		Expect(err).NotTo(HaveOccurred())
 
-		h, ok := obj.(*goharborv1alpha2.Harbor)
+		h, ok := obj.(*goharborv1.Harbor)
 		Expect(ok).To(BeTrue())
 
 		bytes, err := yaml.Marshal(getComponent(h))
@@ -56,11 +56,11 @@ var _ = Describe("Harbor", func() {
 
 	Context("GetJobService", func() {
 		BeforeEach(func() {
-			getComponent = func(h *goharborv1alpha2.Harbor) runtime.Object {
+			getComponent = func(h *goharborv1.Harbor) runtime.Object {
 				j, err := r.GetJobService(ctx, h)
 				Expect(err).NotTo(HaveOccurred())
 
-				j.SetGroupVersionKind(schema.FromAPIVersionAndKind("goharbor.io/v1alpha2", "JobService"))
+				j.SetGroupVersionKind(schema.FromAPIVersionAndKind("goharbor.io/v1alpha3", "JobService"))
 
 				return j
 			}
@@ -93,11 +93,11 @@ var _ = Describe("Harbor", func() {
 
 	Context("GetTrivy", func() {
 		BeforeEach(func() {
-			getComponent = func(h *goharborv1alpha2.Harbor) runtime.Object {
+			getComponent = func(h *goharborv1.Harbor) runtime.Object {
 				t, err := r.GetTrivy(ctx, h, false)
 				Expect(err).NotTo(HaveOccurred())
 
-				t.SetGroupVersionKind(schema.FromAPIVersionAndKind("goharbor.io/v1alpha2", "Trivy"))
+				t.SetGroupVersionKind(schema.FromAPIVersionAndKind("goharbor.io/v1alpha3", "Trivy"))
 
 				return t
 			}

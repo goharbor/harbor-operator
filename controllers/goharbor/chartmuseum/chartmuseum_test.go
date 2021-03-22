@@ -9,7 +9,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/pods"
@@ -24,7 +24,7 @@ const defaultGenerationNumber int64 = 1
 var _ = Describe("ChartMuseum", func() {
 	var (
 		ns          = test.InitNamespace(func() context.Context { return ctx })
-		chartMuseum goharborv1alpha2.ChartMuseum
+		chartMuseum goharborv1.ChartMuseum
 	)
 
 	BeforeEach(func() {
@@ -35,7 +35,7 @@ var _ = Describe("ChartMuseum", func() {
 			Name:      test.NewName("chartmuseum"),
 			Namespace: ns.GetName(),
 			Annotations: map[string]string{
-				goharborv1alpha2.HarborClassAnnotation: className,
+				goharborv1.HarborClassAnnotation: className,
 			},
 		}
 	})
@@ -49,11 +49,11 @@ var _ = Describe("ChartMuseum", func() {
 
 	Context("Without TLS", func() {
 		BeforeEach(func() {
-			chartMuseum.Spec = goharborv1alpha2.ChartMuseumSpec{
-				Chart: goharborv1alpha2.ChartMuseumChartSpec{
-					Storage: goharborv1alpha2.ChartMuseumChartStorageSpec{
-						ChartMuseumChartStorageDriverSpec: goharborv1alpha2.ChartMuseumChartStorageDriverSpec{
-							FileSystem: &goharborv1alpha2.ChartMuseumChartStorageDriverFilesystemSpec{
+			chartMuseum.Spec = goharborv1.ChartMuseumSpec{
+				Chart: goharborv1.ChartMuseumChartSpec{
+					Storage: goharborv1.ChartMuseumChartStorageSpec{
+						ChartMuseumChartStorageDriverSpec: goharborv1.ChartMuseumChartStorageDriverSpec{
+							FileSystem: &goharborv1.ChartMuseumChartStorageDriverFilesystemSpec{
 								VolumeSource: corev1.VolumeSource{
 									EmptyDir: &corev1.EmptyDirVolumeSource{},
 								},
@@ -110,7 +110,7 @@ var _ = Describe("ChartMuseum", func() {
 	})
 })
 
-func IntegTest(ctx context.Context, chartMuseum *goharborv1alpha2.ChartMuseum) {
+func IntegTest(ctx context.Context, chartMuseum *goharborv1.ChartMuseum) {
 	client, err := rest.UnversionedRESTClientFor(test.NewRestConfig(ctx))
 	Expect(err).ToNot(HaveOccurred())
 

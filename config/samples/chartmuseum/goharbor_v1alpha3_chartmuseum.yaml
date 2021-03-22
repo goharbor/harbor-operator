@@ -1,0 +1,12 @@
+apiVersion: goharbor.io/v1alpha3
+kind: ChartMuseum
+metadata:
+  name: sample
+spec:
+  chart:
+    url: https://harbor.public/chartrepo
+    storage:
+      filesystem:
+        prefix: /charts
+        volumeSource:
+          emptyDir: {}

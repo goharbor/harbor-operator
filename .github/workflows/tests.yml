@@ -425,7 +425,7 @@ jobs:
           echo "NOTARY_HOST=$NOTARY_HOST" >> $GITHUB_ENV
           sed -i "s/core.harbor.domain/$CORE_HOST/g" config/samples/harborcluster/*.yaml
           sed -i "s/notary.harbor.domain/$NOTARY_HOST/g" config/samples/harborcluster/*.yaml
-          sed -i "s/logLevel: info/logLevel: debug/g" config/samples/harborcluster/goharbor_v1alpha2_harborcluster.yaml
+          sed -i "s/logLevel: info/logLevel: debug/g" config/samples/harborcluster/goharbor_v1alpha3_harborcluster.yaml
 
           make sample-harborcluster
 

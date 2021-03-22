@@ -3,19 +3,19 @@ package harbor
 import (
 	"context"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	corev1 "k8s.io/api/core/v1"
 )
 
-func (r *Reconciler) ChartMuseumStorage(ctx context.Context, harbor *goharborv1alpha2.Harbor) goharborv1alpha2.ChartMuseumChartStorageDriverSpec {
+func (r *Reconciler) ChartMuseumStorage(ctx context.Context, harbor *goharborv1.Harbor) goharborv1.ChartMuseumChartStorageDriverSpec {
 	if harbor.Spec.ImageChartStorage.S3 != nil {
-		return goharborv1alpha2.ChartMuseumChartStorageDriverSpec{
+		return goharborv1.ChartMuseumChartStorageDriverSpec{
 			Amazon: harbor.Spec.ImageChartStorage.S3.ChartMuseum(),
 		}
 	}
 
 	if harbor.Spec.ImageChartStorage.Swift != nil {
-		return goharborv1alpha2.ChartMuseumChartStorageDriverSpec{
+		return goharborv1.ChartMuseumChartStorageDriverSpec{
 			OpenStack: harbor.Spec.ImageChartStorage.Swift.ChartMuseum(),
 		}
 	}
@@ -28,8 +28,8 @@ func (r *Reconciler) ChartMuseumStorage(ctx context.Context, harbor *goharborv1a
 		prefix = harbor.Spec.ImageChartStorage.FileSystem.ChartPersistentVolume.Prefix
 	}
 
-	return goharborv1alpha2.ChartMuseumChartStorageDriverSpec{
-		FileSystem: &goharborv1alpha2.ChartMuseumChartStorageDriverFilesystemSpec{
+	return goharborv1.ChartMuseumChartStorageDriverSpec{
+		FileSystem: &goharborv1.ChartMuseumChartStorageDriverFilesystemSpec{
 			VolumeSource: corev1.VolumeSource{
 				PersistentVolumeClaim: pvc,
 			},
@@ -38,57 +38,57 @@ func (r *Reconciler) ChartMuseumStorage(ctx context.Context, harbor *goharborv1a
 	}
 }
 
-func (r *Reconciler) TrivyReportsStorage(ctx context.Context, harbor *goharborv1alpha2.Harbor) goharborv1alpha2.TrivyStorageVolumeSpec {
+func (r *Reconciler) TrivyReportsStorage(ctx context.Context, harbor *goharborv1.Harbor) goharborv1.TrivyStorageVolumeSpec {
 	if harbor.Spec.Trivy.Storage.ReportsPersistentVolume != nil {
 		pvc := &harbor.Spec.Trivy.Storage.ReportsPersistentVolume.PersistentVolumeClaimVolumeSource
 
-		return goharborv1alpha2.TrivyStorageVolumeSpec{
+		return goharborv1.TrivyStorageVolumeSpec{
 			VolumeSource: corev1.VolumeSource{
 				PersistentVolumeClaim: pvc,
 			},
 		}
 	}
 
-	return goharborv1alpha2.TrivyStorageVolumeSpec{
+	return goharborv1.TrivyStorageVolumeSpec{
 		VolumeSource: corev1.VolumeSource{
 			EmptyDir: &corev1.EmptyDirVolumeSource{},
 		},
 	}
 }
 
-func (r *Reconciler) TrivyCacheStorage(ctx context.Context, harbor *goharborv1alpha2.Harbor) goharborv1alpha2.TrivyStorageVolumeSpec {
+func (r *Reconciler) TrivyCacheStorage(ctx context.Context, harbor *goharborv1.Harbor) goharborv1.TrivyStorageVolumeSpec {
 	if harbor.Spec.Trivy.Storage.CachePersistentVolume != nil {
 		pvc := &harbor.Spec.Trivy.Storage.CachePersistentVolume.PersistentVolumeClaimVolumeSource
 
-		return goharborv1alpha2.TrivyStorageVolumeSpec{
+		return goharborv1.TrivyStorageVolumeSpec{
 			VolumeSource: corev1.VolumeSource{
 				PersistentVolumeClaim: pvc,
 			},
 		}
 	}
 
-	return goharborv1alpha2.TrivyStorageVolumeSpec{
+	return goharborv1.TrivyStorageVolumeSpec{
 		VolumeSource: corev1.VolumeSource{
 			EmptyDir: &corev1.EmptyDirVolumeSource{},
 		},
 	}
 }
 
-func (r *Reconciler) RegistryStorage(ctx context.Context, harbor *goharborv1alpha2.Harbor) goharborv1alpha2.RegistryStorageDriverSpec {
+func (r *Reconciler) RegistryStorage(ctx context.Context, harbor *goharborv1.Harbor) goharborv1.RegistryStorageDriverSpec {
 	if harbor.Spec.ImageChartStorage.S3 != nil {
-		return goharborv1alpha2.RegistryStorageDriverSpec{
+		return goharborv1.RegistryStorageDriverSpec{
 			S3: harbor.Spec.ImageChartStorage.S3.Registry(),
 		}
 	}
 
 	if harbor.Spec.ImageChartStorage.Swift != nil {
-		return goharborv1alpha2.RegistryStorageDriverSpec{
+		return goharborv1.RegistryStorageDriverSpec{
 			Swift: harbor.Spec.ImageChartStorage.Swift.Registry(),
 		}
 	}
 
-	return goharborv1alpha2.RegistryStorageDriverSpec{
-		FileSystem: &goharborv1alpha2.RegistryStorageDriverFilesystemSpec{
+	return goharborv1.RegistryStorageDriverSpec{
+		FileSystem: &goharborv1.RegistryStorageDriverFilesystemSpec{
 			VolumeSource: corev1.VolumeSource{
 				PersistentVolumeClaim: &harbor.Spec.ImageChartStorage.FileSystem.RegistryPersistentVolume.PersistentVolumeClaimVolumeSource,
 			},

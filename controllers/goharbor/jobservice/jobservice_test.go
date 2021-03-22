@@ -10,7 +10,7 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
 	harborcore "github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/harbor-core"
@@ -29,7 +29,7 @@ const defaultGenerationNumber int64 = 1
 var _ = Describe("JobService", func() {
 	var (
 		ns         = test.InitNamespace(func() context.Context { return ctx })
-		jobservice goharborv1alpha2.JobService
+		jobservice goharborv1.JobService
 	)
 
 	BeforeEach(func() {
@@ -40,7 +40,7 @@ var _ = Describe("JobService", func() {
 			Name:      test.NewName("jobservice"),
 			Namespace: ns.GetName(),
 			Annotations: map[string]string{
-				goharborv1alpha2.HarborClassAnnotation: className,
+				goharborv1.HarborClassAnnotation: className,
 			},
 		}
 	})
@@ -70,35 +70,35 @@ var _ = Describe("JobService", func() {
 			coreConfig.Set(common.MetricPort, 8080)
 			coreConfig.Set(common.MetricEnable, false)
 
-			jobservice.Spec = goharborv1alpha2.JobServiceSpec{
+			jobservice.Spec = goharborv1.JobServiceSpec{
 				SecretRef: test.NewName("secret"),
-				Core: goharborv1alpha2.JobServiceCoreSpec{
+				Core: goharborv1.JobServiceCoreSpec{
 					SecretRef: test.NewName("core"),
 					URL:       harborcore.New(ctx, namespace, coreConfig).String(),
 				},
-				TokenService: goharborv1alpha2.JobServiceTokenSpec{
+				TokenService: goharborv1.JobServiceTokenSpec{
 					URL: fmt.Sprintf("http://%s", tokenServiceName),
 				},
-				WorkerPool: goharborv1alpha2.JobServicePoolSpec{
-					Redis: goharborv1alpha2.JobServicePoolRedisSpec{
+				WorkerPool: goharborv1.JobServicePoolSpec{
+					Redis: goharborv1.JobServicePoolRedisSpec{
 						RedisConnection: redis.New(ctx, namespace),
 					},
 				},
-				Registry: goharborv1alpha2.RegistryControllerConnectionSpec{
-					Credentials: goharborv1alpha2.CoreComponentsRegistryCredentialsSpec{
+				Registry: goharborv1.RegistryControllerConnectionSpec{
+					Credentials: goharborv1.CoreComponentsRegistryCredentialsSpec{
 						Username:    "jobservice",
 						PasswordRef: test.NewName("registry"),
 					},
 					RegistryURL:   fmt.Sprintf("http://%s", registryName),
 					ControllerURL: fmt.Sprintf("http://%s", registryControllerName),
 				},
-				JobLoggers: goharborv1alpha2.JobServiceLoggerConfigSpec{
-					STDOUT: &goharborv1alpha2.JobServiceLoggerConfigSTDOUTSpec{
+				JobLoggers: goharborv1.JobServiceLoggerConfigSpec{
+					STDOUT: &goharborv1.JobServiceLoggerConfigSTDOUTSpec{
 						Level: harbormetav1.JobServiceInfo,
 					},
 				},
-				Loggers: goharborv1alpha2.JobServiceLoggerConfigSpec{
-					STDOUT: &goharborv1alpha2.JobServiceLoggerConfigSTDOUTSpec{
+				Loggers: goharborv1.JobServiceLoggerConfigSpec{
+					STDOUT: &goharborv1.JobServiceLoggerConfigSTDOUTSpec{
 						Level: harbormetav1.JobServiceInfo,
 					},
 				},
@@ -198,7 +198,7 @@ type HealthResponse struct {
 	WorkerPools []Worker `json:"worker_pools"`
 }
 
-func IntegTest(ctx context.Context, js *goharborv1alpha2.JobService) {
+func IntegTest(ctx context.Context, js *goharborv1.JobService) {
 	client, err := rest.UnversionedRESTClientFor(test.NewRestConfig(ctx))
 	Expect(err).ToNot(HaveOccurred())
 

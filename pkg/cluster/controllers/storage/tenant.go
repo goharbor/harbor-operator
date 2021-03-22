@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"strings"
 
-	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/common"
 	minio "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/api/v1"

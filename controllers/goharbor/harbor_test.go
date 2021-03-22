@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/url"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/postgresql"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/redis"
@@ -32,12 +32,12 @@ var _ = Context("Harbor reconciler", func() {
 
 	Describe("Creating resources with invalid public url", func() {
 		It("Should raise an error", func() {
-			harbor := &goharborv1alpha2.Harbor{
+			harbor := &goharborv1.Harbor{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "harbor-invalid-url",
 					Namespace: ns.Name,
 				},
-				Spec: goharborv1alpha2.HarborSpec{
+				Spec: goharborv1.HarborSpec{
 					ExternalURL: "123::bad::dns",
 				},
 			}
@@ -138,44 +138,44 @@ func setupValidHarbor(ctx context.Context, ns string) (Resource, client.ObjectKe
 		Host:   "the.dns",
 	}
 
-	harbor := &goharborv1alpha2.Harbor{
+	harbor := &goharborv1.Harbor{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: ns,
 		},
-		Spec: goharborv1alpha2.HarborSpec{
+		Spec: goharborv1.HarborSpec{
 			ExternalURL:            publicURL.String(),
 			HarborAdminPasswordRef: adminSecretName,
 			EncryptionKeyRef:       "encryption-key",
 			Version:                harborversion.Default(),
-			ImageChartStorage: &goharborv1alpha2.HarborStorageImageChartStorageSpec{
-				FileSystem: &goharborv1alpha2.HarborStorageImageChartStorageFileSystemSpec{
-					RegistryPersistentVolume: goharborv1alpha2.HarborStorageRegistryPersistentVolumeSpec{
-						HarborStoragePersistentVolumeSpec: goharborv1alpha2.HarborStoragePersistentVolumeSpec{
+			ImageChartStorage: &goharborv1.HarborStorageImageChartStorageSpec{
+				FileSystem: &goharborv1.HarborStorageImageChartStorageFileSystemSpec{
+					RegistryPersistentVolume: goharborv1.HarborStorageRegistryPersistentVolumeSpec{
+						HarborStoragePersistentVolumeSpec: goharborv1.HarborStoragePersistentVolumeSpec{
 							PersistentVolumeClaimVolumeSource: corev1.PersistentVolumeClaimVolumeSource{
 								ClaimName: registryPvcName,
 							},
 						},
 					},
-					ChartPersistentVolume: &goharborv1alpha2.HarborStoragePersistentVolumeSpec{
+					ChartPersistentVolume: &goharborv1.HarborStoragePersistentVolumeSpec{
 						PersistentVolumeClaimVolumeSource: corev1.PersistentVolumeClaimVolumeSource{
 							ClaimName: chartPvcName,
 						},
 					},
 				},
 			},
-			HarborComponentsSpec: goharborv1alpha2.HarborComponentsSpec{
-				Core: goharborv1alpha2.CoreComponentSpec{
+			HarborComponentsSpec: goharborv1.HarborComponentsSpec{
+				Core: goharborv1.CoreComponentSpec{
 					TokenIssuer: cmmeta.ObjectReference{
 						Name: tokenIssuerName,
 					},
 				},
-				Database: &goharborv1alpha2.HarborDatabaseSpec{
+				Database: &goharborv1.HarborDatabaseSpec{
 					PostgresCredentials: database.PostgresCredentials,
 					Hosts:               database.Hosts,
 					SSLMode:             harbormetav1.PostgresSSLMode(database.Parameters[harbormetav1.PostgresSSLModeKey]),
 				},
-				Redis: &goharborv1alpha2.ExternalRedisSpec{
+				Redis: &goharborv1.ExternalRedisSpec{
 					RedisHostSpec:    redis.RedisHostSpec,
 					RedisCredentials: redis.RedisCredentials,
 				},
@@ -192,7 +192,7 @@ func setupValidHarbor(ctx context.Context, ns string) (Resource, client.ObjectKe
 }
 
 func updateHarbor(ctx context.Context, object Resource) {
-	harbor, ok := object.(*goharborv1alpha2.Harbor)
+	harbor, ok := object.(*goharborv1.Harbor)
 	Expect(ok).To(BeTrue())
 
 	u, err := url.Parse(harbor.Spec.ExternalURL)
@@ -204,7 +204,7 @@ func updateHarbor(ctx context.Context, object Resource) {
 
 func getHarborStatusFunc(ctx context.Context, key client.ObjectKey) func() harbormetav1.ComponentStatus {
 	return func() harbormetav1.ComponentStatus {
-		var harbor goharborv1alpha2.Harbor
+		var harbor goharborv1.Harbor
 
 		err := k8sClient.Get(ctx, key, &harbor)
 

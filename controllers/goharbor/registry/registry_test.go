@@ -8,7 +8,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/pods"
@@ -22,7 +22,7 @@ const defaultGenerationNumber int64 = 1
 var _ = Describe("Registry", func() {
 	var (
 		ns       = test.InitNamespace(func() context.Context { return ctx })
-		registry goharborv1alpha2.Registry
+		registry goharborv1.Registry
 	)
 
 	BeforeEach(func() {
@@ -33,7 +33,7 @@ var _ = Describe("Registry", func() {
 			Name:      test.NewName("registry"),
 			Namespace: ns.GetName(),
 			Annotations: map[string]string{
-				goharborv1alpha2.HarborClassAnnotation: className,
+				goharborv1.HarborClassAnnotation: className,
 			},
 		}
 	})
@@ -47,11 +47,11 @@ var _ = Describe("Registry", func() {
 
 	Context("Without TLS", func() {
 		BeforeEach(func() {
-			registry.Spec = goharborv1alpha2.RegistrySpec{
-				RegistryConfig01: goharborv1alpha2.RegistryConfig01{
-					Storage: goharborv1alpha2.RegistryStorageSpec{
-						Driver: goharborv1alpha2.RegistryStorageDriverSpec{
-							InMemory: &goharborv1alpha2.RegistryStorageDriverInmemorySpec{},
+			registry.Spec = goharborv1.RegistrySpec{
+				RegistryConfig01: goharborv1.RegistryConfig01{
+					Storage: goharborv1.RegistryStorageSpec{
+						Driver: goharborv1.RegistryStorageDriverSpec{
+							InMemory: &goharborv1.RegistryStorageDriverInmemorySpec{},
 						},
 					},
 				},
@@ -105,7 +105,7 @@ var _ = Describe("Registry", func() {
 
 const healthPath = "/"
 
-func IntegTest(ctx context.Context, registry *goharborv1alpha2.Registry) {
+func IntegTest(ctx context.Context, registry *goharborv1.Registry) {
 	client, err := rest.UnversionedRESTClientFor(test.NewRestConfig(ctx))
 	Expect(err).ToNot(HaveOccurred())
 

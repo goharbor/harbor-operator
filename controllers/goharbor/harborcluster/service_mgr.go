@@ -19,7 +19,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/harbor"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	v1 "k8s.io/api/core/v1"
@@ -28,15 +28,15 @@ import (
 // ServiceManager is designed to maintain the dependent services of the cluster.
 type ServiceManager struct {
 	ctx        context.Context
-	cluster    *v1alpha2.HarborCluster
-	component  v1alpha2.Component
+	cluster    *goharborv1.HarborCluster
+	component  goharborv1.Component
 	st         *status
 	ctrl       lcm.Controller
 	harborCtrl *harbor.Controller
 }
 
 // NewServiceManager constructs a new service manager for the specified component.
-func NewServiceManager(component v1alpha2.Component) *ServiceManager {
+func NewServiceManager(component goharborv1.Component) *ServiceManager {
 	return &ServiceManager{
 		component: component,
 	}
@@ -50,7 +50,7 @@ func (s *ServiceManager) WithContext(ctx context.Context) *ServiceManager {
 }
 
 // From which spec.
-func (s *ServiceManager) From(cluster *v1alpha2.HarborCluster) *ServiceManager {
+func (s *ServiceManager) From(cluster *goharborv1.HarborCluster) *ServiceManager {
 	s.cluster = cluster
 
 	return s
@@ -105,20 +105,20 @@ func (s *ServiceManager) Apply() error { // nolint:funlen
 	useInCluster := true
 
 	switch s.component {
-	case v1alpha2.ComponentCache:
+	case goharborv1.ComponentCache:
 		if s.cluster.Spec.InClusterCache == nil {
 			useInCluster = false
 		}
-	case v1alpha2.ComponentDatabase:
+	case goharborv1.ComponentDatabase:
 		if s.cluster.Spec.InClusterDatabase == nil {
 			useInCluster = false
 		}
-	case v1alpha2.ComponentStorage:
+	case goharborv1.ComponentStorage:
 		if s.cluster.Spec.InClusterStorage == nil {
 			useInCluster = false
 		}
 		// Only for wsl check
-	case v1alpha2.ComponentHarbor:
+	case goharborv1.ComponentHarbor:
 		return fmt.Errorf("%s is not supported", s.component)
 	default:
 		// Should not happen, just in case
@@ -138,7 +138,7 @@ func (s *ServiceManager) Apply() error { // nolint:funlen
 	} else {
 		// Default is ready
 		status = &lcm.CRStatus{
-			Condition: v1alpha2.HarborClusterCondition{
+			Condition: goharborv1.HarborClusterCondition{
 				Type:   conditionType,
 				Status: v1.ConditionTrue,
 			},
@@ -149,9 +149,9 @@ func (s *ServiceManager) Apply() error { // nolint:funlen
 }
 
 func (s *ServiceManager) validate() error {
-	if s.component != v1alpha2.ComponentCache &&
-		s.component != v1alpha2.ComponentStorage &&
-		s.component != v1alpha2.ComponentDatabase {
+	if s.component != goharborv1.ComponentCache &&
+		s.component != goharborv1.ComponentStorage &&
+		s.component != goharborv1.ComponentDatabase {
 		return fmt.Errorf("invalid service component: %s", s.component)
 	}
 
@@ -174,17 +174,17 @@ func (s *ServiceManager) validate() error {
 	return nil
 }
 
-func (s *ServiceManager) conditionType() v1alpha2.HarborClusterConditionType {
+func (s *ServiceManager) conditionType() goharborv1.HarborClusterConditionType {
 	switch s.component {
-	case v1alpha2.ComponentStorage:
-		return v1alpha2.StorageReady
-	case v1alpha2.ComponentDatabase:
-		return v1alpha2.DatabaseReady
-	case v1alpha2.ComponentCache:
-		return v1alpha2.CacheReady
+	case goharborv1.ComponentStorage:
+		return goharborv1.StorageReady
+	case goharborv1.ComponentDatabase:
+		return goharborv1.DatabaseReady
+	case goharborv1.ComponentCache:
+		return goharborv1.CacheReady
 		// Only for wsl check
-	case v1alpha2.ComponentHarbor:
-		return v1alpha2.ServiceReady
+	case goharborv1.ComponentHarbor:
+		return goharborv1.ServiceReady
 	default:
 		// Should not reach here
 		return ""

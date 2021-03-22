@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"github.com/goharbor/harbor-operator/pkg/controller/mutation"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	"github.com/goharbor/harbor-operator/pkg/factories/owner"
@@ -38,7 +38,7 @@ func (c *Controller) GlobalMutateFn(ctx context.Context) (resources.Mutable, err
 	}
 
 	if className != "" {
-		mutate.AppendMutation(mutation.GetAnnotationsMutation(goharborv1alpha2.HarborClassAnnotation, className))
+		mutate.AppendMutation(mutation.GetAnnotationsMutation(goharborv1.HarborClassAnnotation, className))
 	}
 
 	mutate.AppendMutation(mutation.GetAnnotationsMutation(WarningAnnotation, fmt.Sprintf(WarningValueTmpl, c.GetName())))

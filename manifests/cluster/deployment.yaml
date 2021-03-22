@@ -39,7 +39,7 @@ spec:
       name: Failure
       priority: 5
       type: string
-    name: v1alpha2
+    name: v1alpha3
     schema:
       openAPIV3Schema:
         description: ChartMuseum is the Schema for the ChartMuseum API.
@@ -1410,7 +1410,7 @@ spec:
       name: Failure
       priority: 5
       type: string
-    name: v1alpha2
+    name: v1alpha3
     schema:
       openAPIV3Schema:
         description: Core is the Schema for the Core API.
@@ -1940,7 +1940,7 @@ spec:
       name: Operator Git Commit
       priority: 30
       type: string
-    name: v1alpha2
+    name: v1alpha3
     schema:
       openAPIV3Schema:
         description: HarborCluster is the Schema for the harborclusters API.
@@ -3709,7 +3709,7 @@ spec:
       name: Failure
       priority: 5
       type: string
-    name: v1alpha2
+    name: v1alpha3
     schema:
       openAPIV3Schema:
         description: Harbor is the Schema for the harbors API.
@@ -5044,7 +5044,7 @@ spec:
       name: Failure
       priority: 5
       type: string
-    name: v1alpha2
+    name: v1alpha3
     schema:
       openAPIV3Schema:
         description: JobService is the Schema for the JobService API.
@@ -7268,7 +7268,7 @@ spec:
       name: Failure
       priority: 5
       type: string
-    name: v1alpha2
+    name: v1alpha3
     schema:
       openAPIV3Schema:
         description: NotaryServer is the Schema for the NotaryServer API.
@@ -7584,7 +7584,7 @@ spec:
       name: Failure
       priority: 5
       type: string
-    name: v1alpha2
+    name: v1alpha3
     schema:
       openAPIV3Schema:
         description: NotarySigner is the Schema for the NotarySigner API.
@@ -7856,7 +7856,7 @@ spec:
       name: Failure
       priority: 5
       type: string
-    name: v1alpha2
+    name: v1alpha3
     schema:
       openAPIV3Schema:
         description: Portal is the Schema for the portals API.
@@ -8066,7 +8066,7 @@ spec:
       name: Failure
       priority: 5
       type: string
-    name: v1alpha2
+    name: v1alpha3
     schema:
       openAPIV3Schema:
         description: Registry is the Schema for the registries API.
@@ -9821,7 +9821,7 @@ spec:
       name: Failure
       priority: 5
       type: string
-    name: v1alpha2
+    name: v1alpha3
     schema:
       openAPIV3Schema:
         description: RegistryController is the Schema for the RegistryController API.
@@ -10042,7 +10042,7 @@ spec:
       name: Failure
       priority: 5
       type: string
-    name: v1alpha2
+    name: v1alpha3
     schema:
       openAPIV3Schema:
         description: Trivy is the Schema for the Trivy API.
@@ -14849,14 +14849,14 @@ webhooks:
     service:
       name: webhook-service
       namespace: harbor-operator-ns
-      path: /mutate-goharbor-io-v1alpha2-harbor
+      path: /mutate-goharbor-io-v1alpha3-harbor
   failurePolicy: Fail
   name: mharbor.kb.io
   rules:
   - apiGroups:
     - goharbor.io
     apiVersions:
-    - v1alpha2
+    - v1alpha3
     operations:
     - CREATE
     - UPDATE
@@ -14869,14 +14869,14 @@ webhooks:
     service:
       name: webhook-service
       namespace: harbor-operator-ns
-      path: /mutate-goharbor-io-v1alpha2-harborcluster
+      path: /mutate-goharbor-io-v1alpha3-harborcluster
   failurePolicy: Fail
   name: mharborcluster.kb.io
   rules:
   - apiGroups:
     - goharbor.io
     apiVersions:
-    - v1alpha2
+    - v1alpha3
     operations:
     - CREATE
     - UPDATE
@@ -14900,14 +14900,14 @@ webhooks:
     service:
       name: webhook-service
       namespace: harbor-operator-ns
-      path: /validate-goharbor-io-v1alpha2-harbor
+      path: /validate-goharbor-io-v1alpha3-harbor
   failurePolicy: Fail
   name: vharbor.kb.io
   rules:
   - apiGroups:
     - goharbor.io
     apiVersions:
-    - v1alpha2
+    - v1alpha3
     operations:
     - CREATE
     - UPDATE
@@ -14920,14 +14920,14 @@ webhooks:
     service:
       name: webhook-service
       namespace: harbor-operator-ns
-      path: /validate-goharbor-io-v1alpha2-harborcluster
+      path: /validate-goharbor-io-v1alpha3-harborcluster
   failurePolicy: Fail
   name: vharborcluster.kb.io
   rules:
   - apiGroups:
     - goharbor.io
     apiVersions:
-    - v1alpha2
+    - v1alpha3
     operations:
     - CREATE
     - UPDATE
@@ -14940,14 +14940,14 @@ webhooks:
     service:
       name: webhook-service
       namespace: harbor-operator-ns
-      path: /validate-goharbor-io-v1alpha2-jobservice
+      path: /validate-goharbor-io-v1alpha3-jobservice
   failurePolicy: Fail
   name: vjobservice.kb.io
   rules:
   - apiGroups:
     - goharbor.io
     apiVersions:
-    - v1alpha2
+    - v1alpha3
     operations:
     - CREATE
     - UPDATE
@@ -14960,14 +14960,14 @@ webhooks:
     service:
       name: webhook-service
       namespace: harbor-operator-ns
-      path: /validate-goharbor-io-v1alpha2-notaryserver
+      path: /validate-goharbor-io-v1alpha3-notaryserver
   failurePolicy: Fail
   name: vnotaryserver.kb.io
   rules:
   - apiGroups:
     - goharbor.io
     apiVersions:
-    - v1alpha2
+    - v1alpha3
     operations:
     - CREATE
     - UPDATE
@@ -14980,14 +14980,14 @@ webhooks:
     service:
       name: webhook-service
       namespace: harbor-operator-ns
-      path: /validate-goharbor-io-v1alpha2-notarysigner
+      path: /validate-goharbor-io-v1alpha3-notarysigner
   failurePolicy: Fail
   name: vnotarysigner.kb.io
   rules:
   - apiGroups:
     - goharbor.io
     apiVersions:
-    - v1alpha2
+    - v1alpha3
     operations:
     - CREATE
     - UPDATE
@@ -15000,14 +15000,14 @@ webhooks:
     service:
       name: webhook-service
       namespace: harbor-operator-ns
-      path: /validate-goharbor-io-v1alpha2-registry
+      path: /validate-goharbor-io-v1alpha3-registry
   failurePolicy: Fail
   name: vregistry.kb.io
   rules:
   - apiGroups:
     - goharbor.io
     apiVersions:
-    - v1alpha2
+    - v1alpha3
     operations:
     - CREATE
     - UPDATE

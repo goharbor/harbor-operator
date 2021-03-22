@@ -8,7 +8,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/pods"
@@ -23,7 +23,7 @@ const defaultGenerationNumber int64 = 1
 var _ = Describe("NotaryServer", func() {
 	var (
 		ns           = test.InitNamespace(func() context.Context { return ctx })
-		notaryserver goharborv1alpha2.NotaryServer
+		notaryserver goharborv1.NotaryServer
 	)
 
 	BeforeEach(func() {
@@ -34,7 +34,7 @@ var _ = Describe("NotaryServer", func() {
 			Name:      test.NewName("notaryserver"),
 			Namespace: ns.GetName(),
 			Annotations: map[string]string{
-				goharborv1alpha2.HarborClassAnnotation: className,
+				goharborv1.HarborClassAnnotation: className,
 			},
 		}
 	})
@@ -50,8 +50,8 @@ var _ = Describe("NotaryServer", func() {
 		BeforeEach(func() {
 			namespace := notaryserver.GetNamespace()
 
-			notaryserver.Spec = goharborv1alpha2.NotaryServerSpec{
-				Storage: goharborv1alpha2.NotaryStorageSpec{
+			notaryserver.Spec = goharborv1.NotaryServerSpec{
+				Storage: goharborv1.NotaryStorageSpec{
 					Postgres: postgresql.New(ctx, namespace),
 				},
 			}
@@ -106,7 +106,7 @@ var _ = Describe("NotaryServer", func() {
 
 const healthPath = "/_notary_server/health"
 
-func IntegTest(ctx context.Context, notaryserver *goharborv1alpha2.NotaryServer) {
+func IntegTest(ctx context.Context, notaryserver *goharborv1.NotaryServer) {
 	client, err := rest.UnversionedRESTClientFor(test.NewRestConfig(ctx))
 	Expect(err).ToNot(HaveOccurred())
 

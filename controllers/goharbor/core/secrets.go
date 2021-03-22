@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
@@ -17,7 +17,7 @@ const (
 	RegistryRedisDSNKey = "_REDIS_URL_REG"
 )
 
-func (r *Reconciler) GetSecret(ctx context.Context, core *goharborv1alpha2.Core) (*corev1.Secret, error) {
+func (r *Reconciler) GetSecret(ctx context.Context, core *goharborv1.Core) (*corev1.Secret, error) {
 	name := r.NormalizeName(ctx, core.GetName())
 	namespace := core.GetNamespace()
 

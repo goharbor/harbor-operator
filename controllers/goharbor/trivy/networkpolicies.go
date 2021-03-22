@@ -3,7 +3,7 @@ package trivy
 import (
 	"context"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 	"github.com/pkg/errors"
@@ -14,7 +14,7 @@ import (
 
 type NetworkPolicy graph.Resource
 
-func (r *Reconciler) AddNetworkPolicies(ctx context.Context, trivy *goharborv1alpha2.Trivy) error {
+func (r *Reconciler) AddNetworkPolicies(ctx context.Context, trivy *goharborv1.Trivy) error {
 	areNetworkPoliciesEnabled, err := r.AreNetworkPoliciesEnabled(ctx, trivy)
 	if err != nil {
 		return errors.Wrapf(err, "cannot get status")
@@ -29,7 +29,7 @@ func (r *Reconciler) AddNetworkPolicies(ctx context.Context, trivy *goharborv1al
 	return errors.Wrap(err, "ingress")
 }
 
-func (r *Reconciler) AddIngressNetworkPolicy(ctx context.Context, trivy *goharborv1alpha2.Trivy) (NetworkPolicy, error) {
+func (r *Reconciler) AddIngressNetworkPolicy(ctx context.Context, trivy *goharborv1.Trivy) (NetworkPolicy, error) {
 	networkPolicy, err := r.GetIngressNetworkPolicy(ctx, trivy)
 	if err != nil {
 		return nil, errors.Wrap(err, "get")
@@ -40,7 +40,7 @@ func (r *Reconciler) AddIngressNetworkPolicy(ctx context.Context, trivy *goharbo
 	return NetworkPolicy(networkPolicyRes), errors.Wrap(err, "add")
 }
 
-func (r *Reconciler) GetIngressNetworkPolicy(ctx context.Context, trivy *goharborv1alpha2.Trivy) (*netv1.NetworkPolicy, error) {
+func (r *Reconciler) GetIngressNetworkPolicy(ctx context.Context, trivy *goharborv1.Trivy) (*netv1.NetworkPolicy, error) {
 	var port intstr.IntOrString
 
 	if trivy.Spec.Server.TLS != nil {

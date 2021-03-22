@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/pkg/config"
@@ -34,7 +34,7 @@ var (
 
 type RegistryAuthSecret graph.Resource
 
-func (r *Reconciler) AddRegistryAuthenticationSecret(ctx context.Context, harbor *goharborv1alpha2.Harbor) (RegistryAuthSecret, error) {
+func (r *Reconciler) AddRegistryAuthenticationSecret(ctx context.Context, harbor *goharborv1.Harbor) (RegistryAuthSecret, error) {
 	authSecret, err := r.GetRegistryAuthenticationSecret(ctx, harbor)
 	if err != nil {
 		return nil, errors.Wrap(err, "get")
@@ -48,7 +48,7 @@ func (r *Reconciler) AddRegistryAuthenticationSecret(ctx context.Context, harbor
 	return RegistryAuthSecret(authSecretRes), nil
 }
 
-func (r *Reconciler) AddRegistryConfigurations(ctx context.Context, harbor *goharborv1alpha2.Harbor, tlsIssuer InternalTLSIssuer) (RegistryInternalCertificate, RegistryAuthSecret, RegistryHTTPSecret, error) {
+func (r *Reconciler) AddRegistryConfigurations(ctx context.Context, harbor *goharborv1.Harbor, tlsIssuer InternalTLSIssuer) (RegistryInternalCertificate, RegistryAuthSecret, RegistryHTTPSecret, error) {
 	certificate, err := r.AddRegistryInternalCertificate(ctx, harbor, tlsIssuer)
 	if err != nil {
 		return nil, nil, nil, errors.Wrap(err, "certificate")
@@ -69,7 +69,7 @@ func (r *Reconciler) AddRegistryConfigurations(ctx context.Context, harbor *goha
 
 type Registry graph.Resource
 
-func (r *Reconciler) AddRegistry(ctx context.Context, harbor *goharborv1alpha2.Harbor, certificate RegistryInternalCertificate, authSecret RegistryAuthSecret, httpSecret RegistryHTTPSecret) (Registry, error) {
+func (r *Reconciler) AddRegistry(ctx context.Context, harbor *goharborv1.Harbor, certificate RegistryInternalCertificate, authSecret RegistryAuthSecret, httpSecret RegistryHTTPSecret) (Registry, error) {
 	registry, err := r.GetRegistry(ctx, harbor)
 	if err != nil {
 		return nil, errors.Wrap(err, "get")
@@ -85,7 +85,7 @@ func (r *Reconciler) AddRegistry(ctx context.Context, harbor *goharborv1alpha2.H
 
 type RegistryHTTPSecret graph.Resource
 
-func (r *Reconciler) AddRegistryHTTPSecret(ctx context.Context, harbor *goharborv1alpha2.Harbor) (RegistryHTTPSecret, error) {
+func (r *Reconciler) AddRegistryHTTPSecret(ctx context.Context, harbor *goharborv1.Harbor) (RegistryHTTPSecret, error) {
 	httpSecret, err := r.GetRegistryHTTPSecret(ctx, harbor)
 	if err != nil {
 		return nil, errors.Wrap(err, "get")
@@ -101,7 +101,7 @@ func (r *Reconciler) AddRegistryHTTPSecret(ctx context.Context, harbor *goharbor
 
 type RegistryInternalCertificate graph.Resource
 
-func (r *Reconciler) AddRegistryInternalCertificate(ctx context.Context, harbor *goharborv1alpha2.Harbor, tlsIssuer InternalTLSIssuer) (RegistryInternalCertificate, error) {
+func (r *Reconciler) AddRegistryInternalCertificate(ctx context.Context, harbor *goharborv1.Harbor, tlsIssuer InternalTLSIssuer) (RegistryInternalCertificate, error) {
 	cert, err := r.GetInternalTLSCertificate(ctx, harbor, harbormetav1.RegistryTLS)
 	if err != nil {
 		return nil, errors.Wrap(err, "get")
@@ -124,7 +124,7 @@ const (
 	RegistryAuthenticationPasswordNumSpecials = 10
 )
 
-func (r *Reconciler) GetRegistryAuthenticationSecret(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*corev1.Secret, error) {
+func (r *Reconciler) GetRegistryAuthenticationSecret(ctx context.Context, harbor *goharborv1.Harbor) (*corev1.Secret, error) {
 	name := r.NormalizeName(ctx, harbor.GetName(), controllers.Registry.String(), "basicauth")
 	namespace := harbor.GetNamespace()
 
@@ -167,7 +167,7 @@ const (
 	RegistrySecretPasswordNumSpecials = 48
 )
 
-func (r *Reconciler) GetRegistryHTTPSecret(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*corev1.Secret, error) {
+func (r *Reconciler) GetRegistryHTTPSecret(ctx context.Context, harbor *goharborv1.Harbor) (*corev1.Secret, error) {
 	name := r.NormalizeName(ctx, harbor.GetName(), controllers.Registry.String(), "http")
 	namespace := harbor.GetNamespace()
 
@@ -194,7 +194,7 @@ func (r *Reconciler) GetRegistryHTTPSecret(ctx context.Context, harbor *goharbor
 	}, nil
 }
 
-func (r *Reconciler) GetRegistry(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*goharborv1alpha2.Registry, error) {
+func (r *Reconciler) GetRegistry(ctx context.Context, harbor *goharborv1.Harbor) (*goharborv1.Registry, error) {
 	name := r.NormalizeName(ctx, harbor.GetName())
 	namespace := harbor.GetNamespace()
 
@@ -205,7 +205,7 @@ func (r *Reconciler) GetRegistry(ctx context.Context, harbor *goharborv1alpha2.H
 
 	tls := harbor.Spec.InternalTLS.GetComponentTLSSpec(r.GetInternalTLSCertificateSecretName(ctx, harbor, harbormetav1.RegistryTLS))
 
-	return &goharborv1alpha2.Registry{
+	return &goharborv1.Registry{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
@@ -213,40 +213,40 @@ func (r *Reconciler) GetRegistry(ctx context.Context, harbor *goharborv1alpha2.H
 				harbormetav1.NetworkPoliciesAnnotationName: harbormetav1.NetworkPoliciesAnnotationDisabled,
 			}, harbor.Spec.Version),
 		},
-		Spec: goharborv1alpha2.RegistrySpec{
+		Spec: goharborv1.RegistrySpec{
 			ComponentSpec: harbor.GetComponentSpec(ctx, harbormetav1.RegistryComponent),
-			RegistryConfig01: goharborv1alpha2.RegistryConfig01{
-				Log: goharborv1alpha2.RegistryLogSpec{
-					AccessLog: goharborv1alpha2.RegistryAccessLogSpec{
+			RegistryConfig01: goharborv1.RegistryConfig01{
+				Log: goharborv1.RegistryLogSpec{
+					AccessLog: goharborv1.RegistryAccessLogSpec{
 						Disabled: false,
 					},
 					Level: harbor.Spec.LogLevel.Registry(),
 				},
-				Authentication: goharborv1alpha2.RegistryAuthenticationSpec{
-					HTPasswd: &goharborv1alpha2.RegistryAuthenticationHTPasswdSpec{
+				Authentication: goharborv1.RegistryAuthenticationSpec{
+					HTPasswd: &goharborv1.RegistryAuthenticationHTPasswdSpec{
 						Realm:     RegistryAuthRealm,
 						SecretRef: authenticationSecretName,
 					},
 				},
-				Validation: goharborv1alpha2.RegistryValidationSpec{
+				Validation: goharborv1.RegistryValidationSpec{
 					Disabled: true,
 				},
-				Middlewares: goharborv1alpha2.RegistryMiddlewaresSpec{
+				Middlewares: goharborv1.RegistryMiddlewaresSpec{
 					Storage: harbor.Spec.Registry.StorageMiddlewares,
 				},
-				HTTP: goharborv1alpha2.RegistryHTTPSpec{
+				HTTP: goharborv1.RegistryHTTPSpec{
 					RelativeURLs: harbor.Spec.Registry.RelativeURLs,
 					SecretRef:    httpSecretName,
 					TLS:          tls,
 				},
-				Storage: goharborv1alpha2.RegistryStorageSpec{
+				Storage: goharborv1.RegistryStorageSpec{
 					Driver: r.RegistryStorage(ctx, harbor),
-					Cache: goharborv1alpha2.RegistryStorageCacheSpec{
+					Cache: goharborv1.RegistryStorageCacheSpec{
 						Blobdescriptor: "redis",
 					},
 					Redirect: harbor.Spec.ImageChartStorage.Redirect,
 				},
-				Redis: &goharborv1alpha2.RegistryRedisSpec{
+				Redis: &goharborv1.RegistryRedisSpec{
 					RedisConnection: redis,
 				},
 			},

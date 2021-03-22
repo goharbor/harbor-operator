@@ -10,7 +10,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/certificate"
@@ -28,7 +28,7 @@ const defaultGenerationNumber int64 = 1
 var _ = Describe("Core", func() {
 	var (
 		ns   = test.InitNamespace(func() context.Context { return ctx })
-		core goharborv1alpha2.Core
+		core goharborv1.Core
 	)
 
 	BeforeEach(func() {
@@ -39,7 +39,7 @@ var _ = Describe("Core", func() {
 			Name:      test.NewName("core"),
 			Namespace: ns.GetName(),
 			Annotations: map[string]string{
-				goharborv1alpha2.HarborClassAnnotation: className,
+				goharborv1.HarborClassAnnotation: className,
 			},
 		}
 	})
@@ -61,24 +61,24 @@ var _ = Describe("Core", func() {
 			registryName := test.NewName("registry")
 			registryControllerName := test.NewName("registryctl")
 
-			core.Spec = goharborv1alpha2.CoreSpec{
-				Components: goharborv1alpha2.CoreComponentsSpec{
-					TokenService: goharborv1alpha2.CoreComponentsTokenServiceSpec{
+			core.Spec = goharborv1.CoreSpec{
+				Components: goharborv1.CoreComponentsSpec{
+					TokenService: goharborv1.CoreComponentsTokenServiceSpec{
 						URL:            fmt.Sprintf("http://%s", tokenServiceName),
 						CertificateRef: tokenServiceName,
 					},
-					JobService: goharborv1alpha2.CoreComponentsJobServiceSpec{
+					JobService: goharborv1.CoreComponentsJobServiceSpec{
 						URL:       fmt.Sprintf("http://%s", jobserviceName),
 						SecretRef: jobserviceName,
 					},
-					Portal: goharborv1alpha2.CoreComponentPortalSpec{
+					Portal: goharborv1.CoreComponentPortalSpec{
 						URL: fmt.Sprintf("http://%s", portalName),
 					},
-					Registry: goharborv1alpha2.CoreComponentsRegistrySpec{
-						RegistryControllerConnectionSpec: goharborv1alpha2.RegistryControllerConnectionSpec{
+					Registry: goharborv1.CoreComponentsRegistrySpec{
+						RegistryControllerConnectionSpec: goharborv1.RegistryControllerConnectionSpec{
 							RegistryURL:   fmt.Sprintf("http://%s", registryName),
 							ControllerURL: fmt.Sprintf("http://%s", registryControllerName),
-							Credentials: goharborv1alpha2.CoreComponentsRegistryCredentialsSpec{
+							Credentials: goharborv1.CoreComponentsRegistryCredentialsSpec{
 								PasswordRef: test.NewName("registry-core"),
 								Username:    "core",
 							},
@@ -86,15 +86,15 @@ var _ = Describe("Core", func() {
 					},
 				},
 				ExternalEndpoint: fmt.Sprintf("http://%s", core.GetName()),
-				Redis: goharborv1alpha2.CoreRedisSpec{
+				Redis: goharborv1.CoreRedisSpec{
 					RedisConnection: redis.New(ctx, namespace),
 				},
-				CoreConfig: goharborv1alpha2.CoreConfig{
+				CoreConfig: goharborv1.CoreConfig{
 					SecretRef:               namespace,
 					AdminInitialPasswordRef: test.NewName("initial-password"),
 				},
 				CSRFKeyRef: test.NewName("csrf"),
-				Database: goharborv1alpha2.CoreDatabaseSpec{
+				Database: goharborv1.CoreDatabaseSpec{
 					EncryptionKeyRef:                 test.NewName("encryption-key"),
 					PostgresConnectionWithParameters: postgresql.New(ctx, core.GetNamespace()),
 				},
@@ -223,7 +223,7 @@ var _ = Describe("Core", func() {
 
 const healthPath = "api/v2.0/health"
 
-func IntegTest(ctx context.Context, core *goharborv1alpha2.Core) {
+func IntegTest(ctx context.Context, core *goharborv1.Core) {
 	client, err := rest.UnversionedRESTClientFor(test.NewRestConfig(ctx))
 	Expect(err).ToNot(HaveOccurred())
 

@@ -8,7 +8,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/pods"
@@ -22,7 +22,7 @@ const defaultGenerationNumber int64 = 1
 var _ = Describe("RegistryController", func() {
 	var (
 		ns          = test.InitNamespace(func() context.Context { return ctx })
-		registryCtl goharborv1alpha2.RegistryController
+		registryCtl goharborv1.RegistryController
 	)
 
 	BeforeEach(func() {
@@ -33,7 +33,7 @@ var _ = Describe("RegistryController", func() {
 			Name:      test.NewName("registryctl"),
 			Namespace: ns.GetName(),
 			Annotations: map[string]string{
-				goharborv1alpha2.HarborClassAnnotation: className,
+				goharborv1.HarborClassAnnotation: className,
 			},
 		}
 	})
@@ -50,19 +50,19 @@ var _ = Describe("RegistryController", func() {
 			className, err := registryReconciler.GetClassName(ctx)
 			Expect(err).ToNot(HaveOccurred())
 
-			registry := &goharborv1alpha2.Registry{
+			registry := &goharborv1.Registry{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      test.NewName("registry"),
 					Namespace: registryCtl.GetNamespace(),
 					Annotations: map[string]string{
-						goharborv1alpha2.HarborClassAnnotation: className,
+						goharborv1.HarborClassAnnotation: className,
 					},
 				},
-				Spec: goharborv1alpha2.RegistrySpec{
-					RegistryConfig01: goharborv1alpha2.RegistryConfig01{
-						Storage: goharborv1alpha2.RegistryStorageSpec{
-							Driver: goharborv1alpha2.RegistryStorageDriverSpec{
-								InMemory: &goharborv1alpha2.RegistryStorageDriverInmemorySpec{},
+				Spec: goharborv1.RegistrySpec{
+					RegistryConfig01: goharborv1.RegistryConfig01{
+						Storage: goharborv1.RegistryStorageSpec{
+							Driver: goharborv1.RegistryStorageDriverSpec{
+								InMemory: &goharborv1.RegistryStorageDriverInmemorySpec{},
 							},
 						},
 					},
@@ -72,7 +72,7 @@ var _ = Describe("RegistryController", func() {
 			Expect(test.GetClient(ctx).Create(ctx, registry)).To(Succeed())
 			test.EnsureReady(ctx, registry, time.Minute, 5*time.Second)
 
-			registryCtl.Spec = goharborv1alpha2.RegistryControllerSpec{
+			registryCtl.Spec = goharborv1.RegistryControllerSpec{
 				RegistryRef: registry.GetName(),
 			}
 		})
@@ -124,7 +124,7 @@ var _ = Describe("RegistryController", func() {
 
 const healthPath = "/api/health"
 
-func IntegTest(ctx context.Context, registryCtl *goharborv1alpha2.RegistryController) {
+func IntegTest(ctx context.Context, registryCtl *goharborv1.RegistryController) {
 	client, err := rest.UnversionedRESTClientFor(test.NewRestConfig(ctx))
 	Expect(err).ToNot(HaveOccurred())
 

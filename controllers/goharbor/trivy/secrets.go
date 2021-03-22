@@ -3,7 +3,7 @@ package trivy
 import (
 	"context"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 	"github.com/pkg/errors"
@@ -12,7 +12,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
-func (r *Reconciler) AddSecret(ctx context.Context, trivy *goharborv1alpha2.Trivy) (graph.Resource, error) {
+func (r *Reconciler) AddSecret(ctx context.Context, trivy *goharborv1.Trivy) (graph.Resource, error) {
 	secret, err := r.GetSecret(ctx, trivy)
 	if err != nil {
 		return nil, errors.Wrap(err, "get")
@@ -26,7 +26,7 @@ func (r *Reconciler) AddSecret(ctx context.Context, trivy *goharborv1alpha2.Triv
 	return secretRes, nil
 }
 
-func (r *Reconciler) GetSecret(ctx context.Context, trivy *goharborv1alpha2.Trivy) (*corev1.Secret, error) {
+func (r *Reconciler) GetSecret(ctx context.Context, trivy *goharborv1.Trivy) (*corev1.Secret, error) {
 	var redisPassword string
 
 	name := r.NormalizeName(ctx, trivy.GetName())

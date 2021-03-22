@@ -3,7 +3,7 @@ package registry
 import (
 	"context"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 	"github.com/pkg/errors"
@@ -14,7 +14,7 @@ import (
 
 type NetworkPolicy graph.Resource
 
-func (r *Reconciler) AddNetworkPolicies(ctx context.Context, registry *goharborv1alpha2.Registry) error {
+func (r *Reconciler) AddNetworkPolicies(ctx context.Context, registry *goharborv1.Registry) error {
 	areNetworkPoliciesEnabled, err := r.AreNetworkPoliciesEnabled(ctx, registry)
 	if err != nil {
 		return errors.Wrapf(err, "cannot get status")
@@ -32,7 +32,7 @@ func (r *Reconciler) AddNetworkPolicies(ctx context.Context, registry *goharborv
 	return nil
 }
 
-func (r *Reconciler) AddIngressNetworkPolicy(ctx context.Context, registry *goharborv1alpha2.Registry) (NetworkPolicy, error) {
+func (r *Reconciler) AddIngressNetworkPolicy(ctx context.Context, registry *goharborv1.Registry) (NetworkPolicy, error) {
 	networkPolicy, err := r.GetIngressNetworkPolicy(ctx, registry)
 	if err != nil {
 		return nil, errors.Wrap(err, "get")
@@ -43,7 +43,7 @@ func (r *Reconciler) AddIngressNetworkPolicy(ctx context.Context, registry *goha
 	return NetworkPolicy(networkPolicyRes), errors.Wrap(err, "add")
 }
 
-func (r *Reconciler) GetIngressNetworkPolicy(ctx context.Context, registry *goharborv1alpha2.Registry) (*netv1.NetworkPolicy, error) {
+func (r *Reconciler) GetIngressNetworkPolicy(ctx context.Context, registry *goharborv1.Registry) (*netv1.NetworkPolicy, error) {
 	apiPort := intstr.FromString(harbormetav1.RegistryAPIPortName)
 	metricsPort := intstr.FromString(harbormetav1.RegistryMetricsPortName)
 

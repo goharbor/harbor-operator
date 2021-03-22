@@ -1,0 +1,46 @@
+apiVersion: goharbor.io/v1alpha3
+kind: Core
+metadata:
+  name: sample
+spec:
+  adminInitialPasswordRef: admin-core-secret
+  secretRef: core-secret
+  csrfKeyRef: csrf-key
+  externalEndpoint: https://harbor.public
+  redis:
+    host: harbor-redis-master
+    port: 6379
+    database: 0
+    passwordRef: harbor-redis
+  database:
+    hosts:
+    - host: harbor-database-postgresql
+      port: 5432
+    username: postgres
+    passwordRef: harbor-database-password
+    encryptionKeyRef: core-database-encryption
+    database: core
+  components:
+    chartRepository:
+      url: http://harbor-chartmuseum
+    jobService:
+      url: http://harbor-jobservice
+      secretRef: jobservice-secret
+    tokenService:
+      url: http://localhost/service/token
+      certificateRef: core-token-certificate
+    registry:
+      url: http://harbor-registry:80
+      controllerURL: http://harbor-registryctl
+      credentials:
+        username: harbor_registry_user
+        passwordRef: registry-password
+      redis:
+        host: harbor-redis-master
+        database: 2
+        port: 6379
+        passwordRef: harbor-redis
+    notaryServer:
+      url: http://harbor-notary-server
+    portal:
+      url: http://harbor-portal
