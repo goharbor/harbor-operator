@@ -13101,7 +13101,7 @@ spec:
           name: config-template
         name: configuration-templates
 ---
-apiVersion: cert-manager.io/v1alpha2
+apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   annotations:
@@ -13119,7 +13119,7 @@ spec:
     name: selfsigned-issuer
   secretName: webhook-server-cert
 ---
-apiVersion: cert-manager.io/v1alpha2
+apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
   annotations:
