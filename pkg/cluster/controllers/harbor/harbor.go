@@ -3,20 +3,20 @@ package harbor
 import (
 	"context"
 	"fmt"
-
 	"github.com/go-logr/logr"
 	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/k8s"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
+	"github.com/mitchellh/hashstructure/v2"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/kustomize/kstatus/status"
+	"strconv"
 )
 
 type Controller struct {
@@ -58,8 +58,7 @@ func (harbor *Controller) Apply(ctx context.Context, harborcluster *v1alpha2.Har
 	}
 
 	// Found the existing one and check whether it needs to be updated
-	same := equality.Semantic.DeepDerivative(desiredCR.Spec, harborCR.Spec)
-	if !same {
+	if k8s.GetLastAppliedHash(desiredCR.Annotations) != k8s.GetLastAppliedHash(harborCR.Annotations) {
 		// Spec is changed, do update now
 		harbor.Log.Info("Updating Harbor service", "name", nsdName)
 
@@ -138,6 +137,17 @@ func (harbor *Controller) getHarborCR(harborcluster *v1alpha2.HarborCluster, dep
 
 	// inject cert to harbor comps
 	injectS3CertToHarborComponents(harborCR)
+
+	harbor.Log.Info("get harbor cr.", "harborcluster", harborcluster, "harborCR", harborCR)
+
+	hash, err := hashstructure.Hash(harborCR, hashstructure.FormatV2, nil)
+	if err != nil {
+		harbor.Log.Error(err, "fail to calculate hash")
+	} else {
+		harborCR.Annotations = map[string]string{
+			k8s.HarborClusterLastAppliedHash: strconv.FormatUint(hash, 10),
+		}
+	}
 
 	return harborCR
 }
