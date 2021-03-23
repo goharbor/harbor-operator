@@ -4,14 +4,14 @@ import (
 	"context"
 	"strconv"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func (r *Reconciler) AddConfigMap(ctx context.Context, trivy *goharborv1alpha2.Trivy) (graph.Resource, error) {
+func (r *Reconciler) AddConfigMap(ctx context.Context, trivy *goharborv1.Trivy) (graph.Resource, error) {
 	// Forge the ConfigMap resource
 	cm, err := r.GetConfigMap(ctx, trivy)
 	if err != nil {
@@ -28,7 +28,7 @@ func (r *Reconciler) AddConfigMap(ctx context.Context, trivy *goharborv1alpha2.T
 }
 
 // GetConfigMap get the config map linked to the trivy deployment.
-func (r *Reconciler) GetConfigMap(ctx context.Context, trivy *goharborv1alpha2.Trivy) (*corev1.ConfigMap, error) {
+func (r *Reconciler) GetConfigMap(ctx context.Context, trivy *goharborv1.Trivy) (*corev1.ConfigMap, error) {
 	name := r.NormalizeName(ctx, trivy.GetName())
 	namespace := trivy.GetNamespace()
 

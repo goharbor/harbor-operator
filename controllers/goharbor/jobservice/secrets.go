@@ -3,7 +3,7 @@ package jobservice
 import (
 	"context"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"github.com/sethvargo/go-password/password"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -19,7 +19,7 @@ const (
 	allowRepeat = true
 )
 
-func (r *Reconciler) GetSecrets(ctx context.Context, jobservice *goharborv1alpha2.JobService) (*corev1.Secret, error) {
+func (r *Reconciler) GetSecrets(ctx context.Context, jobservice *goharborv1.JobService) (*corev1.Secret, error) {
 	name := r.NormalizeName(ctx, jobservice.GetName())
 	namespace := jobservice.GetNamespace()
 

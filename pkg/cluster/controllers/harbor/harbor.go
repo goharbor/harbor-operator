@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-logr/logr"
-	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/k8s"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
@@ -24,14 +24,14 @@ type Controller struct {
 }
 
 // Apply Harbor instance.
-func (harbor *Controller) Apply(ctx context.Context, harborcluster *v1alpha2.HarborCluster, options ...lcm.Option) (*lcm.CRStatus, error) {
+func (harbor *Controller) Apply(ctx context.Context, harborcluster *goharborv1.HarborCluster, options ...lcm.Option) (*lcm.CRStatus, error) {
 	opts := &lcm.Options{}
 
 	for _, op := range options {
 		op(opts)
 	}
 
-	harborCR := &v1alpha2.Harbor{}
+	harborCR := &goharborv1.Harbor{}
 	nsdName := harbor.getHarborCRNamespacedName(harborcluster)
 	desiredCR := harbor.getHarborCR(harborcluster, opts.Dependencies)
 
@@ -71,11 +71,11 @@ func (harbor *Controller) Apply(ctx context.Context, harborcluster *v1alpha2.Har
 	return harborClusterCRStatus(harborCR), nil
 }
 
-func (harbor *Controller) Delete(_ context.Context, _ *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
+func (harbor *Controller) Delete(_ context.Context, _ *goharborv1.HarborCluster) (*lcm.CRStatus, error) {
 	panic("implement me")
 }
 
-func (harbor *Controller) Upgrade(_ context.Context, _ *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
+func (harbor *Controller) Upgrade(_ context.Context, _ *goharborv1.HarborCluster) (*lcm.CRStatus, error) {
 	panic("implement me")
 }
 
@@ -94,14 +94,14 @@ func NewHarborController(options ...k8s.Option) *Controller {
 }
 
 // getHarborCR will get a Harbor CR from the harborcluster definition.
-func (harbor *Controller) getHarborCR(harborcluster *v1alpha2.HarborCluster, dependencies *lcm.CRStatusCollection) *v1alpha2.Harbor {
+func (harbor *Controller) getHarborCR(harborcluster *goharborv1.HarborCluster, dependencies *lcm.CRStatusCollection) *goharborv1.Harbor {
 	namespacedName := harbor.getHarborCRNamespacedName(harborcluster)
 
-	var spec v1alpha2.HarborSpec
+	var spec goharborv1.HarborSpec
 
 	harborcluster.Spec.HarborSpec.DeepCopyInto(&spec)
 
-	harborCR := &v1alpha2.Harbor{
+	harborCR := &goharborv1.Harbor{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      namespacedName.Name,
 			Namespace: namespacedName.Namespace,
@@ -109,7 +109,7 @@ func (harbor *Controller) getHarborCR(harborcluster *v1alpha2.HarborCluster, dep
 				k8s.HarborClusterNameLabel: harborcluster.Name,
 			},
 			OwnerReferences: []metav1.OwnerReference{
-				*metav1.NewControllerRef(harborcluster, v1alpha2.HarborClusterGVK),
+				*metav1.NewControllerRef(harborcluster, goharborv1.HarborClusterGVK),
 			},
 		},
 		Spec: spec,
@@ -144,7 +144,7 @@ func (harbor *Controller) getHarborCR(harborcluster *v1alpha2.HarborCluster, dep
 	return harborCR
 }
 
-func (harbor *Controller) getHarborCRNamespacedName(harborcluster *v1alpha2.HarborCluster) types.NamespacedName {
+func (harbor *Controller) getHarborCRNamespacedName(harborcluster *goharborv1.HarborCluster) types.NamespacedName {
 	return types.NamespacedName{
 		Namespace: harborcluster.Namespace,
 		Name:      fmt.Sprintf("%s-harbor", harborcluster.Name),
@@ -152,36 +152,36 @@ func (harbor *Controller) getHarborCRNamespacedName(harborcluster *v1alpha2.Harb
 }
 
 // getCacheSpec will get a name of k8s secret which stores cache info.
-func (harbor *Controller) getCacheSpec(dependencies *lcm.CRStatusCollection) *v1alpha2.ExternalRedisSpec {
-	p := harbor.getProperty(dependencies, v1alpha2.ComponentCache, lcm.CachePropertyName)
+func (harbor *Controller) getCacheSpec(dependencies *lcm.CRStatusCollection) *goharborv1.ExternalRedisSpec {
+	p := harbor.getProperty(dependencies, goharborv1.ComponentCache, lcm.CachePropertyName)
 	if p != nil {
-		return p.Value.(*v1alpha2.ExternalRedisSpec)
+		return p.Value.(*goharborv1.ExternalRedisSpec)
 	}
 
 	return nil
 }
 
 // getDatabaseSecret will get a name of k8s secret which stores database info.
-func (harbor *Controller) getDatabaseSpec(dependencies *lcm.CRStatusCollection) *v1alpha2.HarborDatabaseSpec {
-	p := harbor.getProperty(dependencies, v1alpha2.ComponentDatabase, lcm.DatabasePropertyName)
+func (harbor *Controller) getDatabaseSpec(dependencies *lcm.CRStatusCollection) *goharborv1.HarborDatabaseSpec {
+	p := harbor.getProperty(dependencies, goharborv1.ComponentDatabase, lcm.DatabasePropertyName)
 	if p != nil {
-		return p.Value.(*v1alpha2.HarborDatabaseSpec)
+		return p.Value.(*goharborv1.HarborDatabaseSpec)
 	}
 
 	return nil
 }
 
 // getStorageSecretForChartMuseum will get the secret name of chart museum storage config.
-func (harbor *Controller) getStorageSpec(dependencies *lcm.CRStatusCollection) *v1alpha2.HarborStorageImageChartStorageSpec {
-	p := harbor.getProperty(dependencies, v1alpha2.ComponentStorage, lcm.StoragePropertyName)
+func (harbor *Controller) getStorageSpec(dependencies *lcm.CRStatusCollection) *goharborv1.HarborStorageImageChartStorageSpec {
+	p := harbor.getProperty(dependencies, goharborv1.ComponentStorage, lcm.StoragePropertyName)
 	if p != nil {
-		return p.Value.(*v1alpha2.HarborStorageImageChartStorageSpec)
+		return p.Value.(*goharborv1.HarborStorageImageChartStorageSpec)
 	}
 
 	return nil
 }
 
-func (harbor *Controller) getProperty(propertySet *lcm.CRStatusCollection, component v1alpha2.Component, name string) *lcm.Property {
+func (harbor *Controller) getProperty(propertySet *lcm.CRStatusCollection, component goharborv1.Component, name string) *lcm.Property {
 	crStatus, ok := propertySet.Get(component)
 	if !ok {
 		return nil
@@ -194,7 +194,7 @@ func (harbor *Controller) getProperty(propertySet *lcm.CRStatusCollection, compo
 	return nil
 }
 
-func harborClusterCRStatus(harbor *v1alpha2.Harbor) *lcm.CRStatus {
+func harborClusterCRStatus(harbor *goharborv1.Harbor) *lcm.CRStatus {
 	var failedCondition, inProgressCondition *v1alpha1.Condition
 
 	for _, condition := range harbor.Status.Conditions {
@@ -223,7 +223,7 @@ func harborClusterCRStatus(harbor *v1alpha2.Harbor) *lcm.CRStatus {
 }
 
 // injectS3CertToHarborComponents injects s3 cert to harbor spec.
-func injectS3CertToHarborComponents(harbor *v1alpha2.Harbor) {
+func injectS3CertToHarborComponents(harbor *goharborv1.Harbor) {
 	storage := harbor.Spec.ImageChartStorage
 	if storage == nil || storage.S3 == nil || storage.S3.CertificateRef == "" {
 		return

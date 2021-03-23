@@ -12,7 +12,7 @@ webhooks:
     service:
       name: {{ include "chart.fullname" . | quote }}
       namespace: {{ .Release.Namespace | quote }}
-      path: /mutate-goharbor-io-v1alpha2-harbor
+      path: /mutate-goharbor-io-v1alpha3-harbor
       port: {{ .Values.service.port }}
   failurePolicy: Fail
   name: mharbor.kb.io
@@ -20,7 +20,7 @@ webhooks:
   - apiGroups:
     - goharbor.io
     apiVersions:
-    - v1alpha2
+    - v1alpha3
     operations:
     - CREATE
     - UPDATE
@@ -33,7 +33,7 @@ webhooks:
     service:
       name: {{ include "chart.fullname" . | quote }}
       namespace: {{ .Release.Namespace | quote }}
-      path: /mutate-goharbor-io-v1alpha2-harborcluster
+      path: /mutate-goharbor-io-v1alpha3-harborcluster
       port: {{ .Values.service.port }}
   failurePolicy: Fail
   name: mharborcluster.kb.io
@@ -41,7 +41,7 @@ webhooks:
   - apiGroups:
     - goharbor.io
     apiVersions:
-    - v1alpha2
+    - v1alpha3
     operations:
     - CREATE
     - UPDATE

@@ -65,7 +65,7 @@ type PostgresConnection struct {
 
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:MinItems=1
-	Hosts []PostgresHostSpec `json:"hosts"`
+	Hosts []PostgresHostSpec `json:"hosts,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:MinLength=1
@@ -133,7 +133,7 @@ type PostgresConnectionWithParameters struct {
 
 	// +kubebuilder:validation:Optional
 	// libpq parameters.
-	Parameters map[string]string `json:"parameters"`
+	Parameters map[string]string `json:"parameters,omitempty"`
 }
 
 func (c *PostgresConnectionWithParameters) GetDSNNoCredentials() *url.URL {

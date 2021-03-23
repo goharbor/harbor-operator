@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/harbor"
 	"github.com/goharbor/harbor-operator/pkg/config"
@@ -36,30 +36,30 @@ func makeReconciler(ctx context.Context) *harbor.Reconciler {
 	configStore.Env(name)
 	configStore.InitFromEnvironment()
 
-	h, err := harbor.New(ctx, name, configStore)
+	h, err := harbor.New(ctx, configStore)
 	Expect(err).NotTo(HaveOccurred())
 
 	r := h.(*harbor.Reconciler)
 
 	sch := runtime.NewScheme()
-	_ = goharborv1alpha2.AddToScheme(sch)
+	_ = goharborv1.AddToScheme(sch)
 
 	r.Controller.Scheme = sch
 
 	return r
 }
 
-func getSpec(file string) *goharborv1alpha2.Harbor {
+func getSpec(file string) *goharborv1.Harbor {
 	input := fileString(file)
 
 	sch := runtime.NewScheme()
-	_ = goharborv1alpha2.AddToScheme(sch)
+	_ = goharborv1.AddToScheme(sch)
 	decoder := serializer.NewCodecFactory(sch).UniversalDeserializer()
 
 	obj, _, err := decoder.Decode([]byte(input), nil, nil)
 	Expect(err).NotTo(HaveOccurred())
 
-	h, ok := obj.(*goharborv1alpha2.Harbor)
+	h, ok := obj.(*goharborv1.Harbor)
 	Expect(ok).To(BeTrue())
 
 	return h

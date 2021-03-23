@@ -22,7 +22,7 @@ func EnsureReady(ctx context.Context, object runtime.Object, timeouts ...interfa
 	gomega.Expect(GetClient(ctx).Get(ctx, GetNamespacedName(object), object)).
 		ToNot(gomega.HaveOccurred())
 
-	gomega.Consistently(f, 2*time.Second).
+	gomega.Consistently(f, 2*time.Second, 500*time.Millisecond).
 		Should(matchReadyStatus, "once ready, status should be constant")
 }
 

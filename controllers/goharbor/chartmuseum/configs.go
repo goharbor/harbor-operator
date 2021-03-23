@@ -5,7 +5,7 @@ import (
 	"crypto/sha256"
 	"fmt"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"github.com/goharbor/harbor-operator/pkg/resources/checksum"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
@@ -18,7 +18,7 @@ const (
 
 // https://github.com/goharbor/harbor/blob/master/make/photon/prepare/templates/chartserver/env.jinja
 
-func (r *Reconciler) GetConfigMap(ctx context.Context, chartMuseum *goharborv1alpha2.ChartMuseum) (*corev1.ConfigMap, error) {
+func (r *Reconciler) GetConfigMap(ctx context.Context, chartMuseum *goharborv1.ChartMuseum) (*corev1.ConfigMap, error) {
 	templateConfig, err := r.ConfigStore.GetItemValue(ConfigTemplateKey)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot get template")

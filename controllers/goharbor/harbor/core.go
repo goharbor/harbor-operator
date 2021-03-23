@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"time"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/pkg/graph"
@@ -19,7 +19,7 @@ import (
 
 type CoreCSRF graph.Resource
 
-func (r *Reconciler) AddCoreCSRF(ctx context.Context, harbor *goharborv1alpha2.Harbor) (CoreCSRF, error) {
+func (r *Reconciler) AddCoreCSRF(ctx context.Context, harbor *goharborv1.Harbor) (CoreCSRF, error) {
 	csrf, err := r.GetCSRFSecret(ctx, harbor)
 	if err != nil {
 		return nil, errors.Wrap(err, "get")
@@ -35,7 +35,7 @@ func (r *Reconciler) AddCoreCSRF(ctx context.Context, harbor *goharborv1alpha2.H
 
 type CoreSecret graph.Resource
 
-func (r *Reconciler) AddCoreSecret(ctx context.Context, harbor *goharborv1alpha2.Harbor) (CoreSecret, error) {
+func (r *Reconciler) AddCoreSecret(ctx context.Context, harbor *goharborv1.Harbor) (CoreSecret, error) {
 	secret, err := r.GetCoreSecret(ctx, harbor)
 	if err != nil {
 		return nil, errors.Wrap(err, "get")
@@ -51,7 +51,7 @@ func (r *Reconciler) AddCoreSecret(ctx context.Context, harbor *goharborv1alpha2
 
 type CoreTokenCertificate graph.Resource
 
-func (r *Reconciler) AddCoreTokenCertificate(ctx context.Context, harbor *goharborv1alpha2.Harbor) (CoreTokenCertificate, error) {
+func (r *Reconciler) AddCoreTokenCertificate(ctx context.Context, harbor *goharborv1.Harbor) (CoreTokenCertificate, error) {
 	certificate, err := r.GetCoreTokenCertificate(ctx, harbor)
 	if err != nil {
 		return nil, errors.Wrap(err, "get")
@@ -67,7 +67,7 @@ func (r *Reconciler) AddCoreTokenCertificate(ctx context.Context, harbor *goharb
 
 type CoreAdminPassword graph.Resource
 
-func (r *Reconciler) AddCoreAdminPassword(ctx context.Context, harbor *goharborv1alpha2.Harbor) (CoreAdminPassword, error) {
+func (r *Reconciler) AddCoreAdminPassword(ctx context.Context, harbor *goharborv1.Harbor) (CoreAdminPassword, error) {
 	adminPassword, err := r.GetCoreAdminPassword(ctx, harbor)
 	if err != nil {
 		return nil, errors.Wrap(err, "get")
@@ -83,7 +83,7 @@ func (r *Reconciler) AddCoreAdminPassword(ctx context.Context, harbor *goharborv
 
 type CoreEncryptionKey graph.Resource
 
-func (r *Reconciler) AddCoreEncryptionKey(ctx context.Context, harbor *goharborv1alpha2.Harbor) (CoreEncryptionKey, error) {
+func (r *Reconciler) AddCoreEncryptionKey(ctx context.Context, harbor *goharborv1.Harbor) (CoreEncryptionKey, error) {
 	encryptionKey, err := r.GetCoreEncryptionKey(ctx, harbor)
 	if err != nil {
 		return nil, errors.Wrap(err, "get")
@@ -99,7 +99,7 @@ func (r *Reconciler) AddCoreEncryptionKey(ctx context.Context, harbor *goharborv
 
 type CoreInternalCertificate graph.Resource
 
-func (r *Reconciler) AddCoreInternalCertificate(ctx context.Context, harbor *goharborv1alpha2.Harbor, tlsIssuer InternalTLSIssuer) (CoreInternalCertificate, error) {
+func (r *Reconciler) AddCoreInternalCertificate(ctx context.Context, harbor *goharborv1.Harbor, tlsIssuer InternalTLSIssuer) (CoreInternalCertificate, error) {
 	cert, err := r.GetInternalTLSCertificate(ctx, harbor, harbormetav1.CoreTLS)
 	if err != nil {
 		return nil, errors.Wrap(err, "get")
@@ -113,7 +113,7 @@ func (r *Reconciler) AddCoreInternalCertificate(ctx context.Context, harbor *goh
 	return CoreInternalCertificate(certRes), nil
 }
 
-func (r *Reconciler) AddCoreConfigurations(ctx context.Context, harbor *goharborv1alpha2.Harbor, tlsIssuer InternalTLSIssuer) (CoreInternalCertificate, CoreCSRF, CoreTokenCertificate, CoreSecret, CoreAdminPassword, CoreEncryptionKey, error) {
+func (r *Reconciler) AddCoreConfigurations(ctx context.Context, harbor *goharborv1.Harbor, tlsIssuer InternalTLSIssuer) (CoreInternalCertificate, CoreCSRF, CoreTokenCertificate, CoreSecret, CoreAdminPassword, CoreEncryptionKey, error) {
 	certificate, err := r.AddCoreInternalCertificate(ctx, harbor, tlsIssuer)
 	if err != nil {
 		return nil, nil, nil, nil, nil, nil, errors.Wrap(err, "certificate")
@@ -149,7 +149,7 @@ func (r *Reconciler) AddCoreConfigurations(ctx context.Context, harbor *goharbor
 
 type Core graph.Resource
 
-func (r *Reconciler) AddCore(ctx context.Context, harbor *goharborv1alpha2.Harbor, coreCertificate CoreInternalCertificate, registryAuth RegistryAuthSecret, csrf CoreCSRF, tokenCertificate CoreTokenCertificate, secret CoreSecret, adminPassword CoreAdminPassword, encryptionKey CoreEncryptionKey) (Core, error) {
+func (r *Reconciler) AddCore(ctx context.Context, harbor *goharborv1.Harbor, coreCertificate CoreInternalCertificate, registryAuth RegistryAuthSecret, csrf CoreCSRF, tokenCertificate CoreTokenCertificate, secret CoreSecret, adminPassword CoreAdminPassword, encryptionKey CoreEncryptionKey) (Core, error) {
 	core, err := r.GetCore(ctx, harbor)
 	if err != nil {
 		return nil, errors.Wrap(err, "get")
@@ -166,7 +166,7 @@ const (
 	CoreAdminPasswordNumSpecials = 10
 )
 
-func (r *Reconciler) GetCoreAdminPassword(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*corev1.Secret, error) {
+func (r *Reconciler) GetCoreAdminPassword(ctx context.Context, harbor *goharborv1.Harbor) (*corev1.Secret, error) {
 	if len(harbor.Spec.HarborAdminPasswordRef) > 0 {
 		return nil, nil
 	}
@@ -198,7 +198,7 @@ const (
 	CoreSecretPasswordNumSpecials = 48
 )
 
-func (r *Reconciler) GetCoreSecret(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*corev1.Secret, error) {
+func (r *Reconciler) GetCoreSecret(ctx context.Context, harbor *goharborv1.Harbor) (*corev1.Secret, error) {
 	name := r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String(), "secret")
 	namespace := harbor.GetNamespace()
 
@@ -227,7 +227,7 @@ const (
 	CoreTokenServiceDefaultCertificateDuration = 3 * 30 * 24 * time.Hour
 )
 
-func (r *Reconciler) GetCoreTokenCertificate(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*certv1.Certificate, error) {
+func (r *Reconciler) GetCoreTokenCertificate(ctx context.Context, harbor *goharborv1.Harbor) (*certv1.Certificate, error) {
 	name := r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String(), "tokencert")
 	namespace := harbor.GetNamespace()
 
@@ -265,7 +265,7 @@ const (
 	EncryptionKeyNumSpecials = 2
 )
 
-func (r *Reconciler) GetCoreEncryptionKey(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*corev1.Secret, error) {
+func (r *Reconciler) GetCoreEncryptionKey(ctx context.Context, harbor *goharborv1.Harbor) (*corev1.Secret, error) {
 	name := r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String(), "encryptionkey")
 	namespace := harbor.GetNamespace()
 
@@ -293,7 +293,7 @@ const (
 	CSRFSecretPasswordNumSpecials = 0
 )
 
-func (r *Reconciler) GetCSRFSecret(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*corev1.Secret, error) {
+func (r *Reconciler) GetCSRFSecret(ctx context.Context, harbor *goharborv1.Harbor) (*corev1.Secret, error) {
 	name := r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String(), "csrf")
 	namespace := harbor.GetNamespace()
 
@@ -315,11 +315,11 @@ func (r *Reconciler) GetCSRFSecret(ctx context.Context, harbor *goharborv1alpha2
 	}, nil
 }
 
-func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*goharborv1alpha2.Core, error) { // nolint:funlen
+func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1.Harbor) (*goharborv1.Core, error) { // nolint:funlen
 	name := r.NormalizeName(ctx, harbor.GetName())
 	namespace := harbor.GetNamespace()
 
-	credentials := goharborv1alpha2.CoreComponentsRegistryCredentialsSpec{
+	credentials := goharborv1.CoreComponentsRegistryCredentialsSpec{
 		Username:    RegistryAuthenticationUsername,
 		PasswordRef: r.NormalizeName(ctx, harbor.GetName(), controllers.Registry.String(), "basicauth"),
 	}
@@ -337,39 +337,39 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1alpha2.Harbo
 		Host:   r.NormalizeName(ctx, harbor.GetName(), controllers.Portal.String()),
 	}).String()
 
-	var chartmuseum *goharborv1alpha2.CoreComponentsChartRepositorySpec
+	var chartmuseum *goharborv1.CoreComponentsChartRepositorySpec
 
 	if harbor.Spec.ChartMuseum != nil {
 		chartmuseumURL := (&url.URL{
 			Scheme: harbor.Spec.InternalTLS.GetScheme(),
 			Host:   r.NormalizeName(ctx, harbor.GetName(), controllers.ChartMuseum.String()),
 		}).String()
-		chartmuseum = &goharborv1alpha2.CoreComponentsChartRepositorySpec{
+		chartmuseum = &goharborv1.CoreComponentsChartRepositorySpec{
 			URL: chartmuseumURL,
 		}
 	}
 
-	var trivy *goharborv1alpha2.CoreComponentsTrivySpec
+	var trivy *goharborv1.CoreComponentsTrivySpec
 
 	if harbor.Spec.Trivy != nil {
 		trivyURL := (&url.URL{
 			Scheme: harbor.Spec.InternalTLS.GetScheme(),
 			Host:   r.NormalizeName(ctx, harbor.GetName(), controllers.Trivy.String()),
 		}).String()
-		trivy = &goharborv1alpha2.CoreComponentsTrivySpec{
+		trivy = &goharborv1.CoreComponentsTrivySpec{
 			AdapterURL: trivyURL,
 			URL:        trivyURL,
 		}
 	}
 
-	var notary *goharborv1alpha2.CoreComponentsNotaryServerSpec
+	var notary *goharborv1.CoreComponentsNotaryServerSpec
 
 	if harbor.Spec.Notary != nil {
 		notaryURL := (&url.URL{
 			Scheme: harbor.Spec.InternalTLS.GetScheme(),
 			Host:   r.NormalizeName(ctx, harbor.GetName(), controllers.NotaryServer.String()),
 		}).String()
-		notary = &goharborv1alpha2.CoreComponentsNotaryServerSpec{
+		notary = &goharborv1.CoreComponentsNotaryServerSpec{
 			URL: notaryURL,
 		}
 	}
@@ -411,17 +411,19 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1alpha2.Harbo
 		return nil, errors.Wrap(err, "cannot get database configuration")
 	}
 
-	return &goharborv1alpha2.Core{
+	return &goharborv1.Core{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        name,
-			Namespace:   namespace,
-			Annotations: version.SetVersion(nil, harbor.Spec.Version),
+			Name:      name,
+			Namespace: namespace,
+			Annotations: version.SetVersion(map[string]string{
+				harbormetav1.NetworkPoliciesAnnotationName: harbormetav1.NetworkPoliciesAnnotationDisabled,
+			}, harbor.Spec.Version),
 		},
-		Spec: goharborv1alpha2.CoreSpec{
-			ComponentSpec: r.getComponentSpec(ctx, harbor, harbormetav1.CoreComponent),
-			Components: goharborv1alpha2.CoreComponentsSpec{
-				Registry: goharborv1alpha2.CoreComponentsRegistrySpec{
-					RegistryControllerConnectionSpec: goharborv1alpha2.RegistryControllerConnectionSpec{
+		Spec: goharborv1.CoreSpec{
+			ComponentSpec: harbor.GetComponentSpec(ctx, harbormetav1.CoreComponent),
+			Components: goharborv1.CoreComponentsSpec{
+				Registry: goharborv1.CoreComponentsRegistrySpec{
+					RegistryControllerConnectionSpec: goharborv1.RegistryControllerConnectionSpec{
 						RegistryURL:   registryURL,
 						ControllerURL: registryCtlURL,
 						Credentials:   credentials,
@@ -429,15 +431,15 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1alpha2.Harbo
 					Redis:               &registryRedis,
 					StorageProviderName: harbor.Spec.ImageChartStorage.ProviderName(),
 				},
-				JobService: goharborv1alpha2.CoreComponentsJobServiceSpec{
+				JobService: goharborv1.CoreComponentsJobServiceSpec{
 					URL:       jobserviceURL,
 					SecretRef: jobserviceSecretRef,
 				},
-				Portal: goharborv1alpha2.CoreComponentPortalSpec{
+				Portal: goharborv1.CoreComponentPortalSpec{
 					URL: portalURL,
 				},
 				ChartRepository: chartmuseum,
-				TokenService: goharborv1alpha2.CoreComponentsTokenServiceSpec{
+				TokenService: goharborv1.CoreComponentsTokenServiceSpec{
 					URL:            tokenServiceURL,
 					CertificateRef: tokenCertificateRef,
 				},
@@ -445,18 +447,18 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1alpha2.Harbo
 				Trivy:        trivy,
 				TLS:          tls,
 			},
-			CoreConfig: goharborv1alpha2.CoreConfig{
+			CoreConfig: goharborv1.CoreConfig{
 				AdminInitialPasswordRef: adminPasswordRef,
 				SecretRef:               coreSecretRef,
 				PublicCertificateRef:    publicCertificateRef,
 			},
 			CSRFKeyRef: csrfRef,
-			Database: goharborv1alpha2.CoreDatabaseSpec{
+			Database: goharborv1.CoreDatabaseSpec{
 				PostgresConnectionWithParameters: *storage,
 				EncryptionKeyRef:                 encryptionKeyRef,
 			},
 			ExternalEndpoint: harbor.Spec.ExternalURL,
-			Redis: goharborv1alpha2.CoreRedisSpec{
+			Redis: goharborv1.CoreRedisSpec{
 				RedisConnection: coreRedis,
 			},
 			Proxy:                harbor.Spec.Proxy,

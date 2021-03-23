@@ -3,7 +3,7 @@ package notarysigner
 import (
 	"context"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	"github.com/goharbor/harbor-operator/pkg/graph"
@@ -14,11 +14,11 @@ import (
 )
 
 func (r *Reconciler) NewEmpty(_ context.Context) resources.Resource {
-	return &goharborv1alpha2.NotarySigner{}
+	return &goharborv1.NotarySigner{}
 }
 
 func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resource) error {
-	notary, ok := resource.(*goharborv1alpha2.NotarySigner)
+	notary, ok := resource.(*goharborv1.NotarySigner)
 	if !ok {
 		return serrors.UnrecoverrableError(errors.Errorf("%+v", resource), serrors.OperatorReason, "unable to add resource")
 	}

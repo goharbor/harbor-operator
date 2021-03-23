@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/database/api"
 	"github.com/goharbor/harbor-operator/pkg/cluster/k8s"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
@@ -14,7 +14,7 @@ import (
 )
 
 // Update reconcile will update PostgreSQL CR.
-func (p *PostgreSQLController) Update(ctx context.Context, harborcluster *goharborv1alpha2.HarborCluster, curUnstructured *unstructured.Unstructured) (*lcm.CRStatus, error) {
+func (p *PostgreSQLController) Update(ctx context.Context, harborcluster *goharborv1.HarborCluster, curUnstructured *unstructured.Unstructured) (*lcm.CRStatus, error) {
 	expectUnstructuredCR, err := p.GetPostgresCR(ctx, harborcluster)
 	if err != nil {
 		return databaseNotReadyStatus(GenerateDatabaseCrError, err.Error()), err

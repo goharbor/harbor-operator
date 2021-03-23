@@ -4,7 +4,7 @@ commonLabels:
   sample: "true"
 
 resources:
-- goharbor_v1alpha2_registryctl.yaml
+- goharbor_v1alpha3_registryctl.yaml
 
 bases:
 - ../../kustomizeconfig
