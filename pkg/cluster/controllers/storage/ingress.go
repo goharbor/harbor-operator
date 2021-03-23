@@ -127,6 +127,9 @@ func (m *MinIOController) generateIngress(harborcluster *goharborv1.HarborCluste
 	}
 
 	ingressPath, err := common.GetIngressPath(harborcluster.Spec.Expose.Core.Ingress.Controller)
+	if err != nil {
+		return nil, err
+	}
 
 	ingress := &netv1.Ingress{
 		TypeMeta: metav1.TypeMeta{
@@ -163,6 +166,7 @@ func (m *MinIOController) generateIngress(harborcluster *goharborv1.HarborCluste
 	}
 
 	err = k8s.SetLastAppliedHash(ingress)
+
 	return ingress, err
 }
 

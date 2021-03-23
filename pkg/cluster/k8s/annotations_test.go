@@ -1,9 +1,10 @@
-package k8s
+package k8s_test
 
 import (
 	"testing"
 
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	"github.com/goharbor/harbor-operator/pkg/cluster/k8s"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -12,6 +13,7 @@ func TestHashEquals(t *testing.T) {
 		o1 metav1.Object
 		o2 metav1.Object
 	}
+
 	tests := []struct {
 		name string
 		args args
@@ -23,7 +25,7 @@ func TestHashEquals(t *testing.T) {
 				o1: &goharborv1alpha2.Harbor{
 					ObjectMeta: metav1.ObjectMeta{
 						Annotations: map[string]string{
-							HarborClusterLastAppliedHash: "1",
+							k8s.HarborClusterLastAppliedHash: "1",
 						},
 					},
 					Spec: goharborv1alpha2.HarborSpec{},
@@ -31,7 +33,7 @@ func TestHashEquals(t *testing.T) {
 				o2: &goharborv1alpha2.Harbor{
 					ObjectMeta: metav1.ObjectMeta{
 						Annotations: map[string]string{
-							HarborClusterLastAppliedHash: "1",
+							k8s.HarborClusterLastAppliedHash: "1",
 						},
 					},
 					Spec: goharborv1alpha2.HarborSpec{},
@@ -46,7 +48,7 @@ func TestHashEquals(t *testing.T) {
 				o2: &goharborv1alpha2.Harbor{
 					ObjectMeta: metav1.ObjectMeta{
 						Annotations: map[string]string{
-							HarborClusterLastAppliedHash: "1",
+							k8s.HarborClusterLastAppliedHash: "1",
 						},
 					},
 					Spec: goharborv1alpha2.HarborSpec{},
@@ -68,7 +70,7 @@ func TestHashEquals(t *testing.T) {
 				o1: &goharborv1alpha2.Harbor{
 					ObjectMeta: metav1.ObjectMeta{
 						Annotations: map[string]string{
-							HarborClusterLastAppliedHash: "1",
+							k8s.HarborClusterLastAppliedHash: "1",
 						},
 					},
 					Spec: goharborv1alpha2.HarborSpec{},
@@ -76,7 +78,7 @@ func TestHashEquals(t *testing.T) {
 				o2: &goharborv1alpha2.Harbor{
 					ObjectMeta: metav1.ObjectMeta{
 						Annotations: map[string]string{
-							HarborClusterLastAppliedHash: "2",
+							k8s.HarborClusterLastAppliedHash: "2",
 						},
 					},
 					Spec: goharborv1alpha2.HarborSpec{},
@@ -85,10 +87,12 @@ func TestHashEquals(t *testing.T) {
 			want: false,
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := HashEquals(tt.args.o1, tt.args.o2); got != tt.want {
-				t.Errorf("HashEquals() = %v, want %v", got, tt.want)
+
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			if got := k8s.HashEquals(tc.args.o1, tc.args.o2); got != tc.want {
+				t.Errorf("HashEquals() = %v, want %v", got, tc.want)
 			}
 		})
 	}

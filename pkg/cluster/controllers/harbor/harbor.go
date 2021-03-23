@@ -3,6 +3,7 @@ package harbor
 import (
 	"context"
 	"fmt"
+
 	"github.com/go-logr/logr"
 	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
