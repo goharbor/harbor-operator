@@ -7,6 +7,7 @@ import (
 	"github.com/go-logr/logr"
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/common"
+	"github.com/goharbor/harbor-operator/pkg/cluster/k8s"
 	"github.com/goharbor/harbor-operator/pkg/config"
 	"github.com/ovh/configstore"
 	redisOp "github.com/spotahome/redis-operator/api/redisfailover/v1"
@@ -80,7 +81,7 @@ func (rm *redisResourceManager) GetCacheCR(ctx context.Context, harborcluster *g
 		return nil, err
 	}
 
-	return &redisOp.RedisFailover{
+	rf := &redisOp.RedisFailover{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       redisOp.RFKind,
 			APIVersion: "databases.spotahome.com/v1",
@@ -117,7 +118,10 @@ func (rm *redisResourceManager) GetCacheCR(ctx context.Context, harborcluster *g
 			},
 			Auth: redisOp.AuthSettings{SecretPath: rm.GetSecretName()},
 		},
-	}, nil
+	}
+
+	err = k8s.SetLastAppliedHash(rf)
+	return rf, err
 }
 
 // GetCacheCRName gets cache cr name.

@@ -7,9 +7,9 @@ import (
 	"github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/common"
 	minio "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/api/v1"
+	"github.com/goharbor/harbor-operator/pkg/cluster/k8s"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	netv1 "k8s.io/api/networking/v1beta1"
-	"k8s.io/apimachinery/pkg/api/equality"
 	k8serror "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -42,7 +42,7 @@ func (m *MinIOController) applyIngress(ctx context.Context, harborcluster *gohar
 	}
 
 	// Update if necessary
-	if !equality.Semantic.DeepDerivative(ingress.DeepCopy().Spec, curIngress.DeepCopy().Spec) {
+	if !k8s.HashEquals(ingress, curIngress) {
 		m.Log.Info("Updating MinIO ingress")
 
 		if err := m.KubeClient.Update(ctx, ingress); err != nil {
@@ -128,7 +128,7 @@ func (m *MinIOController) generateIngress(harborcluster *goharborv1.HarborCluste
 
 	ingressPath, err := common.GetIngressPath(harborcluster.Spec.Expose.Core.Ingress.Controller)
 
-	return &netv1.Ingress{
+	ingress := &netv1.Ingress{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Ingress",
 			APIVersion: netv1.SchemeGroupVersion.String(),
@@ -160,7 +160,10 @@ func (m *MinIOController) generateIngress(harborcluster *goharborv1.HarborCluste
 				},
 			},
 		},
-	}, err
+	}
+
+	err = k8s.SetLastAppliedHash(ingress)
+	return ingress, err
 }
 
 func (m *MinIOController) getServicePort() int32 {

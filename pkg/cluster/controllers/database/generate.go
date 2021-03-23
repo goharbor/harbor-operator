@@ -7,6 +7,7 @@ import (
 	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/database/api"
+	"github.com/goharbor/harbor-operator/pkg/cluster/k8s"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -67,6 +68,11 @@ func (p *PostgreSQLController) GetPostgresCR(ctx context.Context, harborcluster 
 			Resources:   resource,
 			DockerImage: image,
 		},
+	}
+
+	err = k8s.SetLastAppliedHash(conf)
+	if err != nil {
+		return nil, err
 	}
 
 	mapResult, err := runtime.DefaultUnstructuredConverter.ToUnstructured(conf)

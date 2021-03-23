@@ -2,7 +2,6 @@ package cache
 
 import (
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -64,9 +63,4 @@ func MergeLabels(allLabels ...map[string]string) map[string]string {
 	}
 
 	return lb
-}
-
-// IsEqual check two object is equal.
-func IsEqual(obj1, obj2 interface{}) bool {
-	return equality.Semantic.DeepEqual(obj1, obj2)
 }

@@ -10,10 +10,10 @@ import (
 	"github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/common"
 	minio "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/api/v1"
+	"github.com/goharbor/harbor-operator/pkg/cluster/k8s"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	"github.com/goharbor/harbor-operator/pkg/config"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/equality"
 	k8serror "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -140,7 +140,7 @@ func (m *MinIOController) applyTenant(ctx context.Context, harborcluster *goharb
 		return minioNotReadyStatus(GenerateMinIOCrError, err.Error()), err
 	}
 
-	if !equality.Semantic.DeepEqual(minioCR.Spec.DeepCopy(), desiredMinIOCR.Spec.DeepCopy()) {
+	if !k8s.HashEquals(desiredMinIOCR, minioCR) {
 		m.Log.Info("Updating minIO tenant")
 
 		minioCR.Spec = *desiredMinIOCR.Spec.DeepCopy()
@@ -193,7 +193,7 @@ func (m *MinIOController) generateMinIOCR(ctx context.Context, harborcluster *go
 		LivenessPeriod = 60
 	)
 
-	return &minio.Tenant{
+	tenant := &minio.Tenant{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       minio.MinIOCRDResourceKind,
 			APIVersion: minio.SchemeGroupVersion.String(),
@@ -252,7 +252,13 @@ func (m *MinIOController) generateMinIOCR(ctx context.Context, harborcluster *go
 				PeriodSeconds:       LivenessPeriod,
 			},
 		},
-	}, nil
+	}
+
+	if err := k8s.SetLastAppliedHash(tenant); err != nil {
+		return nil, err
+	}
+
+	return tenant, nil
 }
 
 func (m *MinIOController) getResourceRequirements(harborcluster *goharborv1.HarborCluster) *corev1.ResourceRequirements {

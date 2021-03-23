@@ -31,7 +31,7 @@ func (rc *RedisController) RollingUpgrades(ctx context.Context, cluster *v1alpha
 		return cacheNotReadyStatus(ErrorDefaultUnstructuredConverter, err.Error()), err
 	}
 
-	if !IsEqual(actualCR.DeepCopy().Spec, expectCR.DeepCopy().Spec) {
+	if !k8s.HashEquals(actualCR, expectCR) {
 		rc.Log.Info(
 			"Update Redis resource",
 			"namespace", cluster.Namespace, "name", cluster.Name,

@@ -8,7 +8,6 @@ import (
 	"github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/k8s"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
-	"github.com/mitchellh/hashstructure/v2"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -16,7 +15,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/kustomize/kstatus/status"
-	"strconv"
 )
 
 type Controller struct {
@@ -58,7 +56,7 @@ func (harbor *Controller) Apply(ctx context.Context, harborcluster *v1alpha2.Har
 	}
 
 	// Found the existing one and check whether it needs to be updated
-	if k8s.GetLastAppliedHash(desiredCR.Annotations) != k8s.GetLastAppliedHash(harborCR.Annotations) {
+	if !k8s.HashEquals(desiredCR, harborCR) {
 		// Spec is changed, do update now
 		harbor.Log.Info("Updating Harbor service", "name", nsdName)
 
@@ -138,15 +136,9 @@ func (harbor *Controller) getHarborCR(harborcluster *v1alpha2.HarborCluster, dep
 	// inject cert to harbor comps
 	injectS3CertToHarborComponents(harborCR)
 
-	harbor.Log.Info("get harbor cr.", "harborcluster", harborcluster, "harborCR", harborCR)
-
-	hash, err := hashstructure.Hash(harborCR, hashstructure.FormatV2, nil)
+	err := k8s.SetLastAppliedHash(harborCR)
 	if err != nil {
-		harbor.Log.Error(err, "fail to calculate hash")
-	} else {
-		harborCR.Annotations = map[string]string{
-			k8s.HarborClusterLastAppliedHash: strconv.FormatUint(hash, 10),
-		}
+		harbor.Log.Error(err, "Failed to set last-applied-hash annotations")
 	}
 
 	return harborCR
