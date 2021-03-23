@@ -156,7 +156,7 @@ var harborClusterPredicateFuncs = predicate.Funcs{
 			return true
 		}
 		// when status was not changed and spec was not changed, not need reconcile
-		if equality.Semantic.DeepDerivative(oldObj.Spec, newObj.Spec) && oldObj.Status.Status == newObj.Status.Status {
+		if equality.Semantic.DeepDerivative(newObj.Spec, oldObj.Spec) && oldObj.Status.Status == newObj.Status.Status {
 			return false
 		}
 
