@@ -1,27 +1,13 @@
-/*
-Copyright 2019 The Kubernetes Authors.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 package goharbor_test
 
 import (
 	"context"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
-	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/certificate"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/postgresql"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/redis"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -116,7 +102,7 @@ func setupCoreResourceDependencies(ctx context.Context, ns string) (string, stri
 			Name:      tokenCert,
 			Namespace: ns,
 		},
-		Data: test.GenerateCertificate(),
+		Data: certificate.NewCA().NewCert().ToMap(),
 		Type: harbormetav1.SecretTypeSingle,
 	})).To(Succeed())
 
@@ -126,36 +112,36 @@ func setupCoreResourceDependencies(ctx context.Context, ns string) (string, stri
 func setupValidCore(ctx context.Context, ns string) (Resource, client.ObjectKey) {
 	encryptionKeyName, csrfKey, registryCtlPassword, adminPassword, coreSecret, jobserviceSecret, tokenCertificate := setupCoreResourceDependencies(ctx, ns)
 
-	database := setupPostgresql(ctx, ns)
-	redis := setupRedis(ctx, ns)
+	database := postgresql.New(ctx, ns)
+	redis := redis.New(ctx, ns)
 
 	name := newName("core")
-	core := &goharborv1alpha2.Core{
+	core := &goharborv1.Core{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: ns,
 		},
-		Spec: goharborv1alpha2.CoreSpec{
-			Database: goharborv1alpha2.CoreDatabaseSpec{
+		Spec: goharborv1.CoreSpec{
+			Database: goharborv1.CoreDatabaseSpec{
 				PostgresConnectionWithParameters: database,
 				EncryptionKeyRef:                 encryptionKeyName,
 			},
 			CSRFKeyRef: csrfKey,
-			CoreConfig: goharborv1alpha2.CoreConfig{
+			CoreConfig: goharborv1.CoreConfig{
 				AdminInitialPasswordRef: adminPassword,
 				SecretRef:               coreSecret,
 			},
 			ExternalEndpoint: "https://the.public.url",
-			Components: goharborv1alpha2.CoreComponentsSpec{
-				TokenService: goharborv1alpha2.CoreComponentsTokenServiceSpec{
+			Components: goharborv1.CoreComponentsSpec{
+				TokenService: goharborv1.CoreComponentsTokenServiceSpec{
 					URL:            "https://the.public.url/service/token",
 					CertificateRef: tokenCertificate,
 				},
-				Registry: goharborv1alpha2.CoreComponentsRegistrySpec{
-					RegistryControllerConnectionSpec: goharborv1alpha2.RegistryControllerConnectionSpec{
+				Registry: goharborv1.CoreComponentsRegistrySpec{
+					RegistryControllerConnectionSpec: goharborv1.RegistryControllerConnectionSpec{
 						ControllerURL: "http://the.registryctl.url",
 						RegistryURL:   "http://the.registry.url",
-						Credentials: goharborv1alpha2.CoreComponentsRegistryCredentialsSpec{
+						Credentials: goharborv1.CoreComponentsRegistryCredentialsSpec{
 							Username:    "admin",
 							PasswordRef: registryCtlPassword,
 						},
@@ -167,15 +153,15 @@ func setupValidCore(ctx context.Context, ns string) (Resource, client.ObjectKey)
 						Database: 2,
 					},
 				},
-				JobService: goharborv1alpha2.CoreComponentsJobServiceSpec{
+				JobService: goharborv1.CoreComponentsJobServiceSpec{
 					URL:       "http://the.jobservice.url",
 					SecretRef: jobserviceSecret,
 				},
-				Portal: goharborv1alpha2.CoreComponentPortalSpec{
+				Portal: goharborv1.CoreComponentPortalSpec{
 					URL: "https://the.public.url",
 				},
 			},
-			Redis: goharborv1alpha2.CoreRedisSpec{
+			Redis: goharborv1.CoreRedisSpec{
 				RedisConnection: redis,
 			},
 		},
@@ -189,7 +175,7 @@ func setupValidCore(ctx context.Context, ns string) (Resource, client.ObjectKey)
 }
 
 func updateCore(ctx context.Context, object Resource) {
-	core, ok := object.(*goharborv1alpha2.Core)
+	core, ok := object.(*goharborv1.Core)
 	Expect(ok).To(BeTrue())
 
 	var replicas int32 = 1
@@ -203,7 +189,7 @@ func updateCore(ctx context.Context, object Resource) {
 
 func getCoreStatusFunc(ctx context.Context, key client.ObjectKey) func() harbormetav1.ComponentStatus {
 	return func() harbormetav1.ComponentStatus {
-		var core goharborv1alpha2.Core
+		var core goharborv1.Core
 
 		err := k8sClient.Get(ctx, key, &core)
 

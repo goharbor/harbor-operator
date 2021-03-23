@@ -55,12 +55,10 @@ replicaCount: 1
 # }`
 strategy: {}
 
-# extraEnv -- Environment variables to inject in controller
-extraEnv:
-- name: HARBOR_CONTROLLER_MAX_RECONCILE
-  value: '1'
-- name: HARBOR_CONTROLLER_WATCH_CHILDREN
-  value: 'true'
+# configuration -- Configuration for controller
+configuration:
+  harbor-controller-max-reconcile: 1
+  harbor-controller-watch-children: true
 
 # resources -- Expects input structure as per specification <https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#resourcerequirements-v1-core>
 resources:

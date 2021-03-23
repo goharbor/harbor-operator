@@ -9,7 +9,7 @@ import (
 	. "github.com/onsi/gomega"
 	"sigs.k8s.io/kustomize/kstatus/status"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/scheme"
 	appsv1 "k8s.io/api/apps/v1"
@@ -21,14 +21,14 @@ import (
 
 var _ = Describe("Check the status", func() {
 	Context("Of a chartMuseum resource", func() {
-		var resource *goharborv1alpha2.ChartMuseum
-		var data *goharborv1alpha2.ChartMuseum
+		var resource *goharborv1.ChartMuseum
+		var data *goharborv1.ChartMuseum
 
 		BeforeEach(func() {
 			s, err := scheme.New(context.TODO())
 			Expect(err).ToNot(HaveOccurred())
 
-			data = &goharborv1alpha2.ChartMuseum{}
+			data = &goharborv1.ChartMuseum{}
 			gvks, _, err := s.ObjectKinds(data)
 			Expect(err).ToNot(HaveOccurred())
 

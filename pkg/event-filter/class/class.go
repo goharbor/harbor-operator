@@ -1,7 +1,7 @@
 package class
 
 import (
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 )
@@ -32,7 +32,7 @@ func (cf *Filter) Generic(e event.GenericEvent) bool {
 
 func (cf *Filter) HarborClassAnnotationMatch(meta metav1.Object) bool {
 	annotations := meta.GetAnnotations()
-	value, ok := annotations[goharborv1alpha2.HarborClassAnnotation]
+	value, ok := annotations[goharborv1.HarborClassAnnotation]
 
 	return value == cf.ClassName || (!ok && cf.ClassName == "")
 }

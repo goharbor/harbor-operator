@@ -7,7 +7,7 @@ import (
 	"path"
 	"strings"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 	"github.com/goharbor/harbor-operator/pkg/image"
@@ -46,7 +46,7 @@ const (
 	httpPort  = 8080
 )
 
-func (r *Reconciler) AddDeployment(ctx context.Context, trivy *goharborv1alpha2.Trivy, dependencies ...graph.Resource) error {
+func (r *Reconciler) AddDeployment(ctx context.Context, trivy *goharborv1.Trivy, dependencies ...graph.Resource) error {
 	// Forge the deploy resource
 	deploy, err := r.GetDeployment(ctx, trivy)
 	if err != nil {
@@ -62,7 +62,7 @@ func (r *Reconciler) AddDeployment(ctx context.Context, trivy *goharborv1alpha2.
 	return nil
 }
 
-func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.Trivy) (*appsv1.Deployment, error) { // nolint:funlen
+func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1.Trivy) (*appsv1.Deployment, error) { // nolint:funlen
 	name := r.NormalizeName(ctx, trivy.GetName())
 	namespace := trivy.GetNamespace()
 
@@ -246,7 +246,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1alpha2.
 	return deploy, nil
 }
 
-func (r *Reconciler) getProbe(ctx context.Context, trivy *goharborv1alpha2.Trivy, probePath string) *corev1.Probe {
+func (r *Reconciler) getProbe(ctx context.Context, trivy *goharborv1.Trivy, probePath string) *corev1.Probe {
 	if trivy.Spec.Server.TLS.Enabled() {
 		hostname := r.NormalizeName(ctx, trivy.GetName())
 

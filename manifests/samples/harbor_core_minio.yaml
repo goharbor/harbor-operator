@@ -61,7 +61,7 @@ spec:
     kind: Issuer
 ---
 # Full stack Harbor
-apiVersion: goharbor.io/v1alpha2
+apiVersion: goharbor.io/v1alpha3
 kind: HarborCluster
 metadata:
   name: harborcluster-sample

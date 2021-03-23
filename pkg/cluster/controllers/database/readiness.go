@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/database/api"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
@@ -33,7 +33,7 @@ const (
 // - create postgre connection pool
 // - ping postgre server
 // - return postgre properties if postgre has available.
-func (p *PostgreSQLController) Readiness(ctx context.Context, harborcluster *goharborv1alpha2.HarborCluster, curUnstructured *unstructured.Unstructured) (*lcm.CRStatus, error) {
+func (p *PostgreSQLController) Readiness(ctx context.Context, harborcluster *goharborv1.HarborCluster, curUnstructured *unstructured.Unstructured) (*lcm.CRStatus, error) {
 	var (
 		conn *Connect
 		err  error
@@ -85,8 +85,8 @@ func addProperties(name string, conn *Connect, properties *lcm.Properties) {
 	properties.Add(lcm.DatabasePropertyName, db)
 }
 
-func getHarborDatabaseSpec(name string, conn *Connect) *goharborv1alpha2.HarborDatabaseSpec {
-	return &goharborv1alpha2.HarborDatabaseSpec{
+func getHarborDatabaseSpec(name string, conn *Connect) *goharborv1.HarborDatabaseSpec {
+	return &goharborv1.HarborDatabaseSpec{
 		PostgresCredentials: harbormetav1.PostgresCredentials{
 			Username:    DefaultDatabaseUser,
 			PasswordRef: getDatabasePasswordRefName(name),
@@ -125,7 +125,7 @@ func (p *PostgreSQLController) DeployComponentSecret(ctx context.Context, conn *
 }
 
 // GetInClusterDatabaseInfo returns inCluster database connection client.
-func (p *PostgreSQLController) GetInClusterDatabaseInfo(ctx context.Context, harborcluster *goharborv1alpha2.HarborCluster) (*Connect, error) {
+func (p *PostgreSQLController) GetInClusterDatabaseInfo(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*Connect, error) {
 	var (
 		connect *Connect
 		err     error
@@ -144,7 +144,7 @@ func (p *PostgreSQLController) GetInClusterDatabaseInfo(ctx context.Context, har
 }
 
 // GetInClusterDatabaseConn returns inCluster database connection info.
-func (p *PostgreSQLController) GetInClusterDatabaseConn(ctx context.Context, harborcluster *goharborv1alpha2.HarborCluster, pw string) (*Connect, error) {
+func (p *PostgreSQLController) GetInClusterDatabaseConn(ctx context.Context, harborcluster *goharborv1.HarborCluster, pw string) (*Connect, error) {
 	host, err := p.GetInClusterHost(ctx, harborcluster)
 	if err != nil {
 		return nil, err
@@ -166,7 +166,7 @@ func GenInClusterPasswordSecretName(user, crName string) string {
 }
 
 // GetInClusterHost returns the Database master pod ip or service name.
-func (p *PostgreSQLController) GetInClusterHost(ctx context.Context, harborcluster *goharborv1alpha2.HarborCluster) (string, error) {
+func (p *PostgreSQLController) GetInClusterHost(ctx context.Context, harborcluster *goharborv1.HarborCluster) (string, error) {
 	var (
 		url string
 		err error
@@ -186,7 +186,7 @@ func (p *PostgreSQLController) GetInClusterHost(ctx context.Context, harborclust
 }
 
 // GetInClusterDatabasePassword is get inCluster postgresql password.
-func (p *PostgreSQLController) GetInClusterDatabasePassword(ctx context.Context, harborcluster *goharborv1alpha2.HarborCluster) (string, error) {
+func (p *PostgreSQLController) GetInClusterDatabasePassword(ctx context.Context, harborcluster *goharborv1.HarborCluster) (string, error) {
 	var pw string
 
 	secretName := GenInClusterPasswordSecretName(DefaultDatabaseUser, p.resourceName(harborcluster.Namespace, harborcluster.Name))
@@ -208,7 +208,7 @@ func (p *PostgreSQLController) GetInClusterDatabasePassword(ctx context.Context,
 }
 
 // GetStatefulSetPods returns the postgresql master pod.
-func (p *PostgreSQLController) GetStatefulSetPods(ctx context.Context, harborcluster *goharborv1alpha2.HarborCluster) (*corev1.PodList, error) {
+func (p *PostgreSQLController) GetStatefulSetPods(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*corev1.PodList, error) {
 	resName := p.resourceName(harborcluster.Namespace, harborcluster.Name)
 
 	label := map[string]string{
@@ -233,7 +233,7 @@ func (p *PostgreSQLController) GetStatefulSetPods(ctx context.Context, harborclu
 }
 
 // GetMasterPodsIP returns postgresql master node ip.
-func (p *PostgreSQLController) GetMasterPodsIP(ctx context.Context, harborcluster *goharborv1alpha2.HarborCluster) (string, error) {
+func (p *PostgreSQLController) GetMasterPodsIP(ctx context.Context, harborcluster *goharborv1.HarborCluster) (string, error) {
 	var masterIP string
 
 	podList, err := p.GetStatefulSetPods(ctx, harborcluster)

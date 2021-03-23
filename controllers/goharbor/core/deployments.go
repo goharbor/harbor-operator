@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/pkg/config/harbor"
@@ -58,7 +58,7 @@ const (
 	httpPort  = 8080 // https://github.com/goharbor/harbor/blob/2fb1cc89d9ef9313842cc68b4b7c36be73681505/src/common/const.go#L127
 )
 
-func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.Core) (*appsv1.Deployment, error) { // nolint:funlen
+func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1.Core) (*appsv1.Deployment, error) { // nolint:funlen
 	getImageOptions := []image.Option{
 		image.WithConfigstore(r.ConfigStore),
 		image.WithImageFromSpec(core.Spec.Image),
@@ -164,7 +164,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 	envs, err := harbor.EnvVars(map[string]harbor.ConfigValue{
 		common.ExtEndpoint:        harbor.Value(core.Spec.ExternalEndpoint),
 		common.AUTHMode:           harbor.Value(core.Spec.AuthenticationMode),
-		common.DatabaseType:       harbor.Value(goharborv1alpha2.CoreDatabaseType),
+		common.DatabaseType:       harbor.Value(goharborv1.CoreDatabaseType),
 		common.PostGreSQLHOST:     harbor.Value(firstDatabaseHost.Host),
 		common.PostGreSQLPort:     harbor.Value(fmt.Sprintf("%d", firstDatabaseHost.Port)),
 		common.PostGreSQLUsername: harbor.Value(core.Spec.Database.Username),
@@ -193,7 +193,6 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1alpha2.C
 			},
 		}),
 		common.WithChartMuseum: harbor.Value(strconv.FormatBool(core.Spec.Components.ChartRepository != nil)),
-		common.WithClair:       harbor.Value("false"),
 		common.WithNotary:      harbor.Value(strconv.FormatBool(core.Spec.Components.NotaryServer != nil)),
 		common.WithTrivy:       harbor.Value(strconv.FormatBool(core.Spec.Components.Trivy != nil)),
 	})

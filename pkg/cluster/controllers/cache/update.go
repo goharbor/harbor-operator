@@ -3,7 +3,7 @@ package cache
 import (
 	"context"
 
-	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"github.com/goharbor/harbor-operator/pkg/cluster/k8s"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	redisOp "github.com/spotahome/redis-operator/api/redisfailover/v1"
@@ -16,7 +16,7 @@ import (
 // It does:
 // - check resource
 // - update RedisFailovers CR resource.
-func (rc *RedisController) RollingUpgrades(ctx context.Context, cluster *v1alpha2.HarborCluster, actualObj, expectObj runtime.Object) (*lcm.CRStatus, error) {
+func (rc *RedisController) RollingUpgrades(ctx context.Context, cluster *goharborv1.HarborCluster, actualObj, expectObj runtime.Object) (*lcm.CRStatus, error) {
 	crdClient := rc.DClient.DynamicClient(ctx, k8s.WithResource(redisFailoversGVR), k8s.WithNamespace(cluster.Namespace))
 
 	if expectObj == nil || actualObj == nil {
@@ -55,7 +55,7 @@ func (rc *RedisController) RollingUpgrades(ctx context.Context, cluster *v1alpha
 	return cacheUnknownStatus(), nil
 }
 
-func (rc *RedisController) Update(ctx context.Context, cluster *v1alpha2.HarborCluster, actualObj, expectObj runtime.Object) (*lcm.CRStatus, error) {
+func (rc *RedisController) Update(ctx context.Context, cluster *goharborv1.HarborCluster, actualObj, expectObj runtime.Object) (*lcm.CRStatus, error) {
 	crStatus, err := rc.RollingUpgrades(ctx, cluster, actualObj, expectObj)
 	if err != nil {
 		return crStatus, err

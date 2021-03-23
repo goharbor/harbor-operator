@@ -1,0 +1,21 @@
+apiVersion: goharbor.io/v1alpha3
+kind: Registry
+metadata:
+  name: sample
+spec:
+  storage:
+    driver:
+      inmemory: {}
+    cache:
+      blobdescriptor: redis
+  authentication:
+    htPasswd:
+      realm: "harbor-registry"
+      secretRef: registry-htpasswd
+  redis:
+    host: harbor-redis-master
+    port: 6379
+    database: 2
+    passwordRef: harbor-redis
+  http:
+    secretRef: registry-secret

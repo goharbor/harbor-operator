@@ -8,7 +8,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/scheme"
 	corev1 "k8s.io/api/core/v1"
@@ -114,13 +114,13 @@ var _ = Describe("Check the status", func() {
 
 	Context("Of a portal resource", func() {
 		var resource *unstructured.Unstructured
-		var data *goharborv1alpha2.Portal
+		var data *goharborv1.Portal
 
 		BeforeEach(func() {
 			s, err := scheme.New(context.TODO())
 			Expect(err).ToNot(HaveOccurred())
 
-			data = &goharborv1alpha2.Portal{}
+			data = &goharborv1.Portal{}
 			gvks, _, err := s.ObjectKinds(data)
 			Expect(err).ToNot(HaveOccurred())
 

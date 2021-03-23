@@ -1,4 +1,4 @@
-apiVersion: goharbor.io/v1alpha2
+apiVersion: goharbor.io/v1alpha3
 kind: Harbor
 metadata:
   name: sample

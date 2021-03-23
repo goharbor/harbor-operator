@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/go-logr/logr"
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/common"
 	"github.com/goharbor/harbor-operator/pkg/cluster/k8s"
 	"github.com/goharbor/harbor-operator/pkg/config"
@@ -20,12 +20,12 @@ import (
 type ResourceManager interface {
 	ResourceGetter
 	// With the specified cluster
-	WithCluster(cluster *goharborv1alpha2.HarborCluster) ResourceManager
+	WithCluster(cluster *goharborv1.HarborCluster) ResourceManager
 }
 
 // ResourceGetter gets resources.
 type ResourceGetter interface {
-	GetCacheCR(ctx context.Context, harborcluster *goharborv1alpha2.HarborCluster) (runtime.Object, error)
+	GetCacheCR(ctx context.Context, harborcluster *goharborv1.HarborCluster) (runtime.Object, error)
 	GetCacheCRName() string
 	GetResourceList() corev1.ResourceList
 	GetSecretName() string
@@ -38,7 +38,7 @@ type ResourceGetter interface {
 var _ ResourceManager = &redisResourceManager{}
 
 type redisResourceManager struct {
-	cluster     *goharborv1alpha2.HarborCluster
+	cluster     *goharborv1.HarborCluster
 	configStore *configstore.Store
 	logger      logr.Logger
 }
@@ -63,14 +63,14 @@ func NewResourceManager(store *configstore.Store, logger logr.Logger) ResourceMa
 }
 
 // WithCluster get resources based on the specified cluster spec.
-func (rm *redisResourceManager) WithCluster(cluster *goharborv1alpha2.HarborCluster) ResourceManager {
+func (rm *redisResourceManager) WithCluster(cluster *goharborv1.HarborCluster) ResourceManager {
 	rm.cluster = cluster
 
 	return rm
 }
 
 // GetCacheCR gets cache cr instance.
-func (rm *redisResourceManager) GetCacheCR(ctx context.Context, harborcluster *goharborv1alpha2.HarborCluster) (runtime.Object, error) {
+func (rm *redisResourceManager) GetCacheCR(ctx context.Context, harborcluster *goharborv1.HarborCluster) (runtime.Object, error) {
 	resource := rm.GetResourceList()
 	pvc, _ := GenerateStoragePVC(rm.GetStorageClass(), rm.cluster.Name, rm.GetStorageSize(), rm.GetLabels())
 	// keep pvc after cr deleted.
@@ -222,7 +222,7 @@ func (rm *redisResourceManager) GetStorageClass() string {
 	return ""
 }
 
-func (rm *redisResourceManager) getImagePullPolicy(_ context.Context, harborcluster *goharborv1alpha2.HarborCluster) corev1.PullPolicy {
+func (rm *redisResourceManager) getImagePullPolicy(_ context.Context, harborcluster *goharborv1.HarborCluster) corev1.PullPolicy {
 	if harborcluster.Spec.InClusterCache.RedisSpec.ImagePullPolicy != nil {
 		return *harborcluster.Spec.InClusterCache.RedisSpec.ImagePullPolicy
 	}
@@ -234,7 +234,7 @@ func (rm *redisResourceManager) getImagePullPolicy(_ context.Context, harborclus
 	return config.DefaultImagePullPolicy
 }
 
-func (rm *redisResourceManager) getImagePullSecrets(_ context.Context, harborcluster *goharborv1alpha2.HarborCluster) []corev1.LocalObjectReference {
+func (rm *redisResourceManager) getImagePullSecrets(_ context.Context, harborcluster *goharborv1.HarborCluster) []corev1.LocalObjectReference {
 	if len(harborcluster.Spec.InClusterCache.RedisSpec.ImagePullSecrets) > 0 {
 		return harborcluster.Spec.InClusterCache.RedisSpec.ImagePullSecrets
 	}

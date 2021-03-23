@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"github.com/goharbor/harbor-operator/pkg/cluster/gos"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
@@ -20,7 +20,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) { 
 	log := logger.Get(ctx)
 
 	// Get the harborcluster first
-	harborcluster := &v1alpha2.HarborCluster{}
+	harborcluster := &goharborv1.HarborCluster{}
 	if err := r.Client.Get(ctx, req.NamespacedName, harborcluster); err != nil {
 		if apierrors.IsNotFound(err) {
 			// The resource may have be deleted after reconcile request coming in
@@ -72,7 +72,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) { 
 	// Only need to do check if they're configured.
 	g, gtx := gos.NewGroup(ctx)
 	g.Go(func() error {
-		mgr := NewServiceManager(v1alpha2.ComponentCache)
+		mgr := NewServiceManager(goharborv1.ComponentCache)
 
 		return mgr.WithContext(gtx).
 			TrackedBy(st).
@@ -83,7 +83,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) { 
 	})
 
 	g.Go(func() error {
-		mgr := NewServiceManager(v1alpha2.ComponentDatabase)
+		mgr := NewServiceManager(goharborv1.ComponentDatabase)
 
 		return mgr.WithContext(gtx).
 			TrackedBy(st).
@@ -94,7 +94,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) { 
 	})
 
 	g.Go(func() error {
-		mgr := NewServiceManager(v1alpha2.ComponentStorage)
+		mgr := NewServiceManager(goharborv1.ComponentStorage)
 
 		return mgr.WithContext(gtx).
 			TrackedBy(st).
@@ -118,7 +118,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) { 
 	// Create Harbor instance now
 	harborStatus, err := r.HarborCtrl.Apply(ctx, harborcluster, lcm.WithDependencies(st.GetDependencies()))
 	if harborStatus != nil {
-		st.UpdateCondition(v1alpha2.ServiceReady, harborStatus.Condition)
+		st.UpdateCondition(goharborv1.ServiceReady, harborStatus.Condition)
 	}
 
 	if err != nil {

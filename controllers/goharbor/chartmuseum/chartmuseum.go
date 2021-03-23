@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/pkg/config"
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
 	"github.com/goharbor/harbor-operator/pkg/event-filter/class"
@@ -13,6 +14,7 @@ import (
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	netv1 "k8s.io/api/networking/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 )
@@ -20,7 +22,7 @@ import (
 const (
 	DefaultRequeueWait        = 2 * time.Second
 	ConfigTemplatePathKey     = "template-path"
-	DefaultConfigTemplatePath = "/etc/harbor-operator/chartmuseum-config.yaml.tmpl"
+	DefaultConfigTemplatePath = "/etc/harbor-operator/templates/chartmuseum-config.yaml.tmpl"
 	ConfigTemplateKey         = "template-content"
 )
 
@@ -33,6 +35,7 @@ type Reconciler struct {
 
 // +kubebuilder:rbac:groups=goharbor.io,resources=chartmuseums,verbs=get;list;watch
 // +kubebuilder:rbac:groups=goharbor.io,resources=chartmuseums/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=networking.k8s.io,resources=networkpolicies,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="",resources=configmaps;services,verbs=get;list;watch;create;update;patch;delete
 
@@ -44,7 +47,7 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 
 	className, err := r.GetClassName(ctx)
 	if err != nil {
-		return errors.Wrap(err, "cannot get class name")
+		return errors.Wrap(err, "classname")
 	}
 
 	concurrentReconcile, err := r.ConfigStore.GetItemValueInt(config.ReconciliationKey)
@@ -70,25 +73,17 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 		Owns(&appsv1.Deployment{}).
 		Owns(&corev1.ConfigMap{}).
 		Owns(&corev1.Service{}).
+		Owns(&netv1.NetworkPolicy{}).
 		WithOptions(controller.Options{
 			MaxConcurrentReconciles: int(concurrentReconcile),
 		}).
 		Complete(r)
 }
 
-func New(ctx context.Context, name string, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
-	configTemplatePath := DefaultConfigTemplatePath
-
-	configItem, err := configstore.Filter().Store(configStore).Slice(ConfigTemplatePathKey).GetFirstItem()
+func New(ctx context.Context, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
+	configTemplatePath, err := config.GetString(configStore, ConfigTemplatePathKey, DefaultConfigTemplatePath)
 	if err != nil {
-		if !config.IsNotFound(err, ConfigTemplatePathKey) {
-			return nil, errors.Wrap(err, "cannot get config template path")
-		}
-	} else {
-		configTemplatePath, err = configItem.Value()
-		if err != nil {
-			return nil, errors.Wrap(err, "invalid config template path")
-		}
+		return nil, errors.Wrap(err, "template path")
 	}
 
 	r := &Reconciler{
@@ -98,14 +93,14 @@ func New(ctx context.Context, name string, configStore *configstore.Store) (comm
 	configStore.FileCustomRefresh(configTemplatePath, func(data []byte) ([]configstore.Item, error) {
 		r.configError = nil
 
-		logger.Get(ctx).WithName("controller").WithName(name).
+		logger.Get(ctx).WithName("controller").WithName(controllers.ChartMuseum.String()).
 			Info("config reloaded", "path", configTemplatePath)
 		// TODO reconcile all core
 
 		return []configstore.Item{configstore.NewItem(ConfigTemplateKey, string(data), config.DefaultPriority)}, nil
 	})
 
-	r.Controller = commonCtrl.NewController(ctx, name, r, configStore)
+	r.Controller = commonCtrl.NewController(ctx, controllers.ChartMuseum, r, configStore)
 
 	return r, nil
 }

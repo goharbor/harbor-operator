@@ -1,7 +1,8 @@
-apiVersion: goharbor.io/v1alpha2
+apiVersion: goharbor.io/v1alpha3
 kind: Trivy
 metadata:
   annotations:
+    goharbor.io/network-policies: "false"
     harbor.goharbor.io/version: ""
   creationTimestamp: null
   name: example-harbor

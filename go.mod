@@ -10,7 +10,7 @@ require (
 	github.com/go-logr/logr v0.3.0
 	github.com/go-logr/zapr v0.3.0 // indirect
 	github.com/go-redis/redis v6.15.9+incompatible
-	github.com/goharbor/harbor/src v0.0.0-20200728051037-1d361a89a056
+	github.com/goharbor/harbor/src v0.0.0-20210202045805-2227bbdd6524
 	github.com/huandu/xstrings v1.3.2 // indirect
 	github.com/imdario/mergo v0.3.10 // indirect
 	github.com/jaegertracing/jaeger-lib v2.2.0+incompatible
@@ -30,6 +30,7 @@ require (
 	github.com/sethvargo/go-password v0.1.3
 	github.com/sirupsen/logrus v1.7.0
 	github.com/spotahome/redis-operator v1.0.0
+	github.com/theupdateframework/notary v0.6.1
 	github.com/uber/jaeger-client-go v2.24.0+incompatible
 	github.com/uber/jaeger-lib v2.2.0+incompatible
 	github.com/zalando/postgres-operator v1.6.1

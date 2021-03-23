@@ -4,7 +4,8 @@ import (
 	"context"
 
 	"github.com/go-logr/logr"
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
+	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/pkg/builder"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/cache"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/database"
@@ -16,6 +17,7 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/config"
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
 	"github.com/goharbor/harbor-operator/pkg/factories/application"
+	"github.com/goharbor/harbor-operator/pkg/utils/strings"
 	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
 	redisOp "github.com/spotahome/redis-operator/api/redisfailover/v1"
@@ -112,8 +114,8 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 		k8s.WithClient(mgr.GetClient()))
 
 	return builder.ControllerManagedBy(mgr).
-		For(&goharborv1alpha2.HarborCluster{}).
-		Owns(&goharborv1alpha2.Harbor{}).
+		For(&goharborv1.HarborCluster{}).
+		Owns(&goharborv1.Harbor{}).
 		TryOwns(&minio.Tenant{}, minioCRD).
 		TryOwns(&postgresv1.Postgresql{}, postgresCRD).
 		TryOwns(&redisOp.RedisFailover{}, redisCRD).
@@ -124,14 +126,19 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 		Complete(r)
 }
 
+func (r *Reconciler) NormalizeName(ctx context.Context, name string, suffixes ...string) string {
+	suffixes = append([]string{"HarborCluster"}, suffixes...)
+
+	return strings.NormalizeName(name, suffixes...)
+}
+
 // New HarborCluster reconciler.
-func New(ctx context.Context, name string, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
+func New(ctx context.Context, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
 	return &Reconciler{
-		Name:        name,
 		Version:     application.GetVersion(ctx),
 		ConfigStore: configStore,
-		Log:         ctrl.Log.WithName(application.GetName(ctx)).WithName("controller").WithValues("controller", name),
-		ctrl:        commonCtrl.NewController(ctx, name, nil, configStore),
+		Log:         ctrl.Log.WithName(application.GetName(ctx)).WithName("controller").WithValues("controller", "HarborCluster"),
+		ctrl:        commonCtrl.NewController(ctx, controllers.HarborCluster, nil, configStore),
 	}, nil
 }
 
@@ -139,12 +146,12 @@ func New(ctx context.Context, name string, configStore *configstore.Store) (comm
 var harborClusterPredicateFuncs = predicate.Funcs{
 	// we do not care other events
 	UpdateFunc: func(event event.UpdateEvent) bool {
-		oldObj, ok := event.ObjectOld.(*goharborv1alpha2.HarborCluster)
+		oldObj, ok := event.ObjectOld.(*goharborv1.HarborCluster)
 		if !ok {
 			return true
 		}
 
-		newObj, ok := event.ObjectNew.(*goharborv1alpha2.HarborCluster)
+		newObj, ok := event.ObjectNew.(*goharborv1.HarborCluster)
 		if !ok {
 			return true
 		}

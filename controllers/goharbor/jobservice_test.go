@@ -1,19 +1,3 @@
-/*
-Copyright 2019 The Kubernetes Authors.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 package goharbor_test
 
 import (
@@ -22,8 +6,9 @@ import (
 
 	. "github.com/onsi/gomega"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/redis"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -58,41 +43,41 @@ func setupValidJobService(ctx context.Context, ns string) (Resource, client.Obje
 	registrySecret := setupJobServiceResourceDependencies(ctx, ns)
 
 	coreResource, _ := setupValidCore(ctx, ns)
-	redis := setupRedis(ctx, ns)
+	redis := redis.New(ctx, ns)
 
-	core := coreResource.(*goharborv1alpha2.Core)
+	core := coreResource.(*goharborv1.Core)
 
 	name := newName("jobservice")
-	jobService := &goharborv1alpha2.JobService{
+	jobService := &goharborv1.JobService{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: ns,
 		},
-		Spec: goharborv1alpha2.JobServiceSpec{
-			Core: goharborv1alpha2.JobServiceCoreSpec{
+		Spec: goharborv1.JobServiceSpec{
+			Core: goharborv1.JobServiceCoreSpec{
 				URL:       fmt.Sprintf("http://%s-core", core.GetName()),
 				SecretRef: core.Spec.SecretRef,
 			},
-			WorkerPool: goharborv1alpha2.JobServicePoolSpec{
-				Redis: goharborv1alpha2.JobServicePoolRedisSpec{
+			WorkerPool: goharborv1.JobServicePoolSpec{
+				Redis: goharborv1.JobServicePoolRedisSpec{
 					RedisConnection: redis,
 				},
 			},
 			SecretRef: core.Spec.Components.JobService.SecretRef,
-			Registry: goharborv1alpha2.RegistryControllerConnectionSpec{
+			Registry: goharborv1.RegistryControllerConnectionSpec{
 				ControllerURL: "http://the.registryctl.url",
 				RegistryURL:   "http://the.registry.url",
-				Credentials: goharborv1alpha2.CoreComponentsRegistryCredentialsSpec{
+				Credentials: goharborv1.CoreComponentsRegistryCredentialsSpec{
 					PasswordRef: registrySecret,
 				},
 			},
-			JobLoggers: goharborv1alpha2.JobServiceLoggerConfigSpec{
-				STDOUT: &goharborv1alpha2.JobServiceLoggerConfigSTDOUTSpec{},
+			JobLoggers: goharborv1.JobServiceLoggerConfigSpec{
+				STDOUT: &goharborv1.JobServiceLoggerConfigSTDOUTSpec{},
 			},
-			Loggers: goharborv1alpha2.JobServiceLoggerConfigSpec{
-				STDOUT: &goharborv1alpha2.JobServiceLoggerConfigSTDOUTSpec{},
+			Loggers: goharborv1.JobServiceLoggerConfigSpec{
+				STDOUT: &goharborv1.JobServiceLoggerConfigSTDOUTSpec{},
 			},
-			TokenService: goharborv1alpha2.JobServiceTokenSpec{
+			TokenService: goharborv1.JobServiceTokenSpec{
 				URL: "http://the.tokenservice.url",
 			},
 		},
@@ -107,7 +92,7 @@ func setupValidJobService(ctx context.Context, ns string) (Resource, client.Obje
 }
 
 func updateJobService(ctx context.Context, object Resource) {
-	jobService, ok := object.(*goharborv1alpha2.JobService)
+	jobService, ok := object.(*goharborv1.JobService)
 	Expect(ok).To(BeTrue())
 
 	var replicas int32 = 1
@@ -121,7 +106,7 @@ func updateJobService(ctx context.Context, object Resource) {
 
 func getJobServiceStatusFunc(ctx context.Context, key client.ObjectKey) func() harbormetav1.ComponentStatus {
 	return func() harbormetav1.ComponentStatus {
-		var jobService goharborv1alpha2.JobService
+		var jobService goharborv1.JobService
 
 		err := k8sClient.Get(ctx, key, &jobService)
 

@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"time"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/pkg/config"
@@ -18,7 +18,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func (r *Reconciler) AddNotaryServerConfigurations(ctx context.Context, harbor *goharborv1alpha2.Harbor, tlsIssuer InternalTLSIssuer, notaryIssuer NotarySignerCertificateIssuer) (NotaryServerCertificate, NotaryServerInternalCertificate, error) {
+func (r *Reconciler) AddNotaryServerConfigurations(ctx context.Context, harbor *goharborv1.Harbor, tlsIssuer InternalTLSIssuer, notaryIssuer NotarySignerCertificateIssuer) (NotaryServerCertificate, NotaryServerInternalCertificate, error) {
 	if harbor.Spec.Notary == nil {
 		return nil, nil, nil
 	}
@@ -38,7 +38,7 @@ func (r *Reconciler) AddNotaryServerConfigurations(ctx context.Context, harbor *
 
 type NotaryServerCertificate graph.Resource
 
-func (r *Reconciler) AddNotaryServerClientCertificate(ctx context.Context, harbor *goharborv1alpha2.Harbor, issuer NotarySignerCertificateIssuer) (NotaryServerCertificate, error) {
+func (r *Reconciler) AddNotaryServerClientCertificate(ctx context.Context, harbor *goharborv1.Harbor, issuer NotarySignerCertificateIssuer) (NotaryServerCertificate, error) {
 	cert, err := r.GetNotaryServerCertificate(ctx, harbor)
 	if err != nil {
 		return nil, errors.Wrap(err, "get")
@@ -89,7 +89,7 @@ func (r *Reconciler) getNotaryServerCertificateAlgorithm() (certv1.PrivateKeyAlg
 	return certv1.PrivateKeyAlgorithm(algorithm), nil
 }
 
-func (r *Reconciler) GetNotaryServerCertificate(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*certv1.Certificate, error) {
+func (r *Reconciler) GetNotaryServerCertificate(ctx context.Context, harbor *goharborv1.Harbor) (*certv1.Certificate, error) {
 	duration, err := r.getNotaryServerCertificateDuration()
 	if err != nil {
 		return nil, errors.Wrap(err, "duration configuration")
@@ -132,7 +132,7 @@ func (r *Reconciler) GetNotaryServerCertificate(ctx context.Context, harbor *goh
 
 type NotaryServerInternalCertificate graph.Resource
 
-func (r *Reconciler) AddNotaryServerInternalCertificate(ctx context.Context, harbor *goharborv1alpha2.Harbor, tlsIssuer InternalTLSIssuer) (NotaryServerInternalCertificate, error) {
+func (r *Reconciler) AddNotaryServerInternalCertificate(ctx context.Context, harbor *goharborv1.Harbor, tlsIssuer InternalTLSIssuer) (NotaryServerInternalCertificate, error) {
 	cert, err := r.GetInternalTLSCertificate(ctx, harbor, harbormetav1.NotaryServerTLS)
 	if err != nil {
 		return nil, errors.Wrap(err, "get")
@@ -148,7 +148,7 @@ func (r *Reconciler) AddNotaryServerInternalCertificate(ctx context.Context, har
 
 type NotaryServer graph.Resource
 
-func (r *Reconciler) AddNotaryServer(ctx context.Context, harbor *goharborv1alpha2.Harbor, certificate NotaryServerInternalCertificate, authCert NotaryServerCertificate) (NotaryServer, error) {
+func (r *Reconciler) AddNotaryServer(ctx context.Context, harbor *goharborv1.Harbor, certificate NotaryServerInternalCertificate, authCert NotaryServerCertificate) (NotaryServer, error) {
 	if harbor.Spec.Notary == nil {
 		return nil, nil
 	}
@@ -168,7 +168,7 @@ const (
 	NotaryServerAuthenticationService = "harbor-notary"
 )
 
-func (r *Reconciler) GetNotaryServer(ctx context.Context, harbor *goharborv1alpha2.Harbor) (*goharborv1alpha2.NotaryServer, error) {
+func (r *Reconciler) GetNotaryServer(ctx context.Context, harbor *goharborv1.Harbor) (*goharborv1.NotaryServer, error) {
 	name := r.NormalizeName(ctx, harbor.GetName())
 	namespace := harbor.GetNamespace()
 
@@ -192,34 +192,37 @@ func (r *Reconciler) GetNotaryServer(ctx context.Context, harbor *goharborv1alph
 
 	migrationEnabled := harbor.Spec.Notary.IsMigrationEnabled()
 
-	return &goharborv1alpha2.NotaryServer{
+	return &goharborv1.NotaryServer{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
+			Annotations: map[string]string{
+				harbormetav1.NetworkPoliciesAnnotationName: harbormetav1.NetworkPoliciesAnnotationDisabled,
+			},
 		},
-		Spec: goharborv1alpha2.NotaryServerSpec{
-			ComponentSpec: r.getComponentSpec(ctx, harbor, harbormetav1.NotaryServerComponent),
+		Spec: goharborv1.NotaryServerSpec{
+			ComponentSpec: harbor.GetComponentSpec(ctx, harbormetav1.NotaryServerComponent),
 			TLS:           tls,
-			Authentication: &goharborv1alpha2.NotaryServerAuthSpec{
-				Token: goharborv1alpha2.NotaryServerAuthTokenSpec{
+			Authentication: &goharborv1.NotaryServerAuthSpec{
+				Token: goharborv1.NotaryServerAuthTokenSpec{
 					CertificateRef: tokenServiceCertificateRef,
 					Issuer:         TokenServiceIssuer,
 					Realm:          serviceTokenURL.String(),
 					Service:        NotaryServerAuthenticationService,
 				},
 			},
-			Logging: goharborv1alpha2.NotaryLoggingSpec{
+			Logging: goharborv1.NotaryLoggingSpec{
 				Level: harbor.Spec.LogLevel.Notary(),
 			},
-			Storage: goharborv1alpha2.NotaryStorageSpec{
+			Storage: goharborv1.NotaryStorageSpec{
 				Postgres: *storage,
 			},
-			TrustService: goharborv1alpha2.NotaryServerTrustServiceSpec{
-				Remote: &goharborv1alpha2.NotaryServerTrustServiceRemoteSpec{
+			TrustService: goharborv1.NotaryServerTrustServiceSpec{
+				Remote: &goharborv1.NotaryServerTrustServiceRemoteSpec{
 					Host:           trustServiceHost,
 					CertificateRef: authCertificateRef,
 					KeyAlgorithm:   NotaryServerKeyAlgorithmDefaultConfig,
-					Port:           goharborv1alpha2.NotarySignerAPIPort,
+					Port:           goharborv1.NotarySignerAPIPort,
 				},
 			},
 			MigrationEnabled: &migrationEnabled,

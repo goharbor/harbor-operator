@@ -4,7 +4,7 @@ import (
 	"context"
 	"text/template"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
@@ -67,7 +67,7 @@ func (r *Reconciler) GetDataFuncFromArraySecret(ctx context.Context, getter func
 	}, err
 }
 
-func (r *Reconciler) GetHookDataFunc(ctx context.Context, registry *goharborv1alpha2.Registry) (interface{}, error) {
+func (r *Reconciler) GetHookDataFunc(ctx context.Context, registry *goharborv1.Registry) (interface{}, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "hookDataFunc")
 	defer span.Finish()
 
@@ -81,7 +81,7 @@ func (r *Reconciler) GetHookDataFunc(ctx context.Context, registry *goharborv1al
 	}, len(registry.Spec.Log.Hooks))
 }
 
-func (r *Reconciler) GetReportingDataFunc(ctx context.Context, registry *goharborv1alpha2.Registry) (interface{}, error) {
+func (r *Reconciler) GetReportingDataFunc(ctx context.Context, registry *goharborv1.Registry) (interface{}, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "registryMiddleware")
 	defer span.Finish()
 
@@ -104,7 +104,7 @@ func (r *Reconciler) GetReportingDataFunc(ctx context.Context, registry *goharbo
 	}, reportingCount)
 }
 
-func (r *Reconciler) GetRegistryMiddlewareDataFunc(ctx context.Context, registry *goharborv1alpha2.Registry) (interface{}, error) {
+func (r *Reconciler) GetRegistryMiddlewareDataFunc(ctx context.Context, registry *goharborv1.Registry) (interface{}, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "registryMiddlewareDataFunc")
 	defer span.Finish()
 
@@ -118,7 +118,7 @@ func (r *Reconciler) GetRegistryMiddlewareDataFunc(ctx context.Context, registry
 	}, len(registry.Spec.Middlewares.Registry))
 }
 
-func (r *Reconciler) GetRepositoryMiddlewareDataFunc(ctx context.Context, registry *goharborv1alpha2.Registry) (interface{}, error) {
+func (r *Reconciler) GetRepositoryMiddlewareDataFunc(ctx context.Context, registry *goharborv1.Registry) (interface{}, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "repositoryMiddlewareDataFunc")
 	defer span.Finish()
 
@@ -132,7 +132,7 @@ func (r *Reconciler) GetRepositoryMiddlewareDataFunc(ctx context.Context, regist
 	}, len(registry.Spec.Middlewares.Repository))
 }
 
-func (r *Reconciler) GetStorageMiddlewareDataFunc(ctx context.Context, registry *goharborv1alpha2.Registry) (interface{}, error) {
+func (r *Reconciler) GetStorageMiddlewareDataFunc(ctx context.Context, registry *goharborv1.Registry) (interface{}, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "storageMiddlewareDataFunc")
 	defer span.Finish()
 
@@ -146,7 +146,7 @@ func (r *Reconciler) GetStorageMiddlewareDataFunc(ctx context.Context, registry 
 	}, len(registry.Spec.Middlewares.Storage))
 }
 
-func (r *Reconciler) GetConfigFuncs(ctx context.Context, registry *goharborv1alpha2.Registry) (template.FuncMap, error) {
+func (r *Reconciler) GetConfigFuncs(ctx context.Context, registry *goharborv1.Registry) (template.FuncMap, error) {
 	var hookDataFunc, storageDataFunc, reportingData, registryMiddlewareData, repositoryMiddlewareData, storageMiddlewareData interface{}
 
 	g, gctx := errgroup.WithContext(ctx)

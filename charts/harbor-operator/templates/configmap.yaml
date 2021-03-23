@@ -2,6 +2,20 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   labels: {{- include "chart.labels" . | nindent 4 }}
+  name: '{{ include "chart.fullname" . }}-config'
+  namespace: {{ .Release.Namespace | quote }}
+data:
+  config.yaml: |-
+    {{- range $key, $value := .Values.configuration }}
+    - key: {{ $key | quote }}
+      priority: 100
+      value: {{ $value | quote }}
+    {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels: {{- include "chart.labels" . | nindent 4 }}
   name: '{{ include "chart.fullname" . }}-config-template'
   namespace: {{ .Release.Namespace | quote }}
 data:

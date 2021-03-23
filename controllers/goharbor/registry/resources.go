@@ -3,7 +3,7 @@ package registry
 import (
 	"context"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	"github.com/goharbor/harbor-operator/pkg/graph"
@@ -15,11 +15,11 @@ import (
 )
 
 func (r *Reconciler) NewEmpty(_ context.Context) resources.Resource {
-	return &goharborv1alpha2.Registry{}
+	return &goharborv1.Registry{}
 }
 
-func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resource) error {
-	registry, ok := resource.(*goharborv1alpha2.Registry)
+func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resource) error { // nolint:funlen
+	registry, ok := resource.(*goharborv1.Registry)
 	if !ok {
 		return serrors.UnrecoverrableError(errors.Errorf("%+v", resource), serrors.OperatorReason, "unable to add resource")
 	}
@@ -78,10 +78,12 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrapf(err, "cannot add deployment %s", deployment.GetName())
 	}
 
-	return nil
+	err = r.AddNetworkPolicies(ctx, registry)
+
+	return errors.Wrap(err, "network policies")
 }
 
-func (r *Reconciler) GetSecrets(ctx context.Context, registry *goharborv1alpha2.Registry) ([]graph.Resource, error) {
+func (r *Reconciler) GetSecrets(ctx context.Context, registry *goharborv1.Registry) ([]graph.Resource, error) {
 	secrets, err := r.GetStorageSecrets(ctx, registry)
 	if err != nil {
 		return nil, errors.Wrap(err, "storage")
@@ -111,7 +113,7 @@ func (r *Reconciler) GetSecrets(ctx context.Context, registry *goharborv1alpha2.
 	return secrets, nil
 }
 
-func (r *Reconciler) GetProxySecrets(ctx context.Context, registry *goharborv1alpha2.Registry) ([]graph.Resource, error) {
+func (r *Reconciler) GetProxySecrets(ctx context.Context, registry *goharborv1.Registry) ([]graph.Resource, error) {
 	if registry.Spec.Proxy == nil {
 		return nil, nil
 	}
@@ -130,7 +132,7 @@ func (r *Reconciler) GetProxySecrets(ctx context.Context, registry *goharborv1al
 	return nil, nil
 }
 
-func (r *Reconciler) GetHTTPSecrets(ctx context.Context, registry *goharborv1alpha2.Registry) ([]graph.Resource, error) {
+func (r *Reconciler) GetHTTPSecrets(ctx context.Context, registry *goharborv1.Registry) ([]graph.Resource, error) {
 	if registry.Spec.HTTP.SecretRef != "" {
 		secret, err := r.Controller.AddExternalTypedSecret(ctx, &corev1.Secret{
 			ObjectMeta: metav1.ObjectMeta{
@@ -145,7 +147,7 @@ func (r *Reconciler) GetHTTPSecrets(ctx context.Context, registry *goharborv1alp
 	return nil, nil
 }
 
-func (r *Reconciler) GetAuthenticationSecrets(ctx context.Context, registry *goharborv1alpha2.Registry) ([]graph.Resource, error) {
+func (r *Reconciler) GetAuthenticationSecrets(ctx context.Context, registry *goharborv1.Registry) ([]graph.Resource, error) {
 	if registry.Spec.Authentication.Token != nil {
 		secret, err := r.Controller.AddExternalTypedSecret(ctx, &corev1.Secret{
 			ObjectMeta: metav1.ObjectMeta{
@@ -171,7 +173,7 @@ func (r *Reconciler) GetAuthenticationSecrets(ctx context.Context, registry *goh
 	return nil, nil
 }
 
-func (r *Reconciler) GetStorageSecrets(ctx context.Context, registry *goharborv1alpha2.Registry) ([]graph.Resource, error) {
+func (r *Reconciler) GetStorageSecrets(ctx context.Context, registry *goharborv1.Registry) ([]graph.Resource, error) {
 	if registry.Spec.Storage.Driver.S3 != nil {
 		return r.GetS3StorageSecrets(ctx, registry)
 	}
@@ -183,7 +185,7 @@ func (r *Reconciler) GetStorageSecrets(ctx context.Context, registry *goharborv1
 	return nil, nil
 }
 
-func (r *Reconciler) GetS3StorageSecrets(ctx context.Context, registry *goharborv1alpha2.Registry) ([]graph.Resource, error) {
+func (r *Reconciler) GetS3StorageSecrets(ctx context.Context, registry *goharborv1.Registry) ([]graph.Resource, error) {
 	if registry.Spec.Storage.Driver.S3.SecretKeyRef != "" {
 		secret, err := r.Controller.AddExternalTypedSecret(ctx, &corev1.Secret{
 			ObjectMeta: metav1.ObjectMeta{
@@ -198,7 +200,7 @@ func (r *Reconciler) GetS3StorageSecrets(ctx context.Context, registry *goharbor
 	return nil, nil
 }
 
-func (r *Reconciler) GetSwiftStorageSecrets(ctx context.Context, registry *goharborv1alpha2.Registry) ([]graph.Resource, error) {
+func (r *Reconciler) GetSwiftStorageSecrets(ctx context.Context, registry *goharborv1.Registry) ([]graph.Resource, error) {
 	secret, err := r.Controller.AddExternalTypedSecret(ctx, &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      registry.Spec.Storage.Driver.Swift.PasswordRef,

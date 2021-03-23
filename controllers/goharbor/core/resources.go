@@ -3,18 +3,18 @@ package core
 import (
 	"context"
 
-	goharborv1alpha2 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	"github.com/goharbor/harbor-operator/pkg/resources"
 	"github.com/pkg/errors"
 )
 
 func (r *Reconciler) NewEmpty(_ context.Context) resources.Resource {
-	return &goharborv1alpha2.Core{}
+	return &goharborv1.Core{}
 }
 
 func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resource) error {
-	core, ok := resource.(*goharborv1alpha2.Core)
+	core, ok := resource.(*goharborv1.Core)
 	if !ok {
 		return serrors.UnrecoverrableError(errors.Errorf("%+v", resource), serrors.OperatorReason, "unable to add resource")
 	}
@@ -59,5 +59,7 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrapf(err, "cannot add deployment %s", deployment.GetName())
 	}
 
-	return nil
+	err = r.AddNetworkPolicies(ctx, core)
+
+	return errors.Wrap(err, "network policies")
 }

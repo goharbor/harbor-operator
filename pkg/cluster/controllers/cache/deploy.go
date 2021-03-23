@@ -3,7 +3,7 @@ package cache
 import (
 	"context"
 
-	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha2"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"github.com/goharbor/harbor-operator/pkg/cluster/k8s"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	corev1 "k8s.io/api/core/v1"
@@ -24,7 +24,7 @@ import (
 // - perform any RedisFailovers downscale (left for downscale phase)
 // - perform any RedisFailovers upscale (left for upscale phase)
 // - perform any pod upgrade (left for rolling upgrade phase).
-func (rc *RedisController) Deploy(ctx context.Context, cluster *v1alpha2.HarborCluster) (*lcm.CRStatus, error) {
+func (rc *RedisController) Deploy(ctx context.Context, cluster *goharborv1.HarborCluster) (*lcm.CRStatus, error) {
 	crdClient := rc.DClient.DynamicClient(ctx, k8s.WithResource(redisFailoversGVR), k8s.WithNamespace(cluster.Namespace))
 
 	expectCR, err := rc.ResourceManager.GetCacheCR(ctx, cluster)
@@ -56,7 +56,7 @@ func (rc *RedisController) Deploy(ctx context.Context, cluster *v1alpha2.HarborC
 	return cacheUnknownStatus(), nil
 }
 
-func (rc *RedisController) DeploySecret(ctx context.Context, cluster *v1alpha2.HarborCluster) error {
+func (rc *RedisController) DeploySecret(ctx context.Context, cluster *goharborv1.HarborCluster) error {
 	secret := &corev1.Secret{}
 
 	sec := rc.ResourceManager.GetSecret()
