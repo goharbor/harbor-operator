@@ -16,7 +16,12 @@ func SetLastAppliedHash(obj metav1.Object) error {
 	if err != nil {
 		return err
 	}
-	obj.GetAnnotations()[HarborClusterLastAppliedHash] = strconv.FormatUint(hash, 10)
+	annotations := obj.GetAnnotations()
+	if annotations == nil {
+		annotations = make(map[string]string)
+	}
+	annotations[HarborClusterLastAppliedHash] = strconv.FormatUint(hash, 10)
+	obj.SetAnnotations(annotations)
 	return nil
 }
 
