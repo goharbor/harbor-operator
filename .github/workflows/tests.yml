@@ -8,7 +8,6 @@ on:
     branches:
     - master
     - release-*
-    - develop
     - feature/*
 
 jobs:
@@ -251,6 +250,8 @@ jobs:
 
         if ! wait-for-condition InProgress=False 600s && ! wait-for-condition Failed=False 60s; then
           echo install harbor failed
+          kubectl describe harborcluster -n cluster-sample-ns
+          kubectl describe harbor -n cluster-sample-ns
           kubectl get all -n cluster-sample-ns
 
           for n in $(kubectl -n cluster-sample-ns get po |grep -v Running|grep -v NAME|awk '{print $1}');do
@@ -263,11 +264,12 @@ jobs:
           free -h
           exit 1
         else
-          kubectl -n cluster-sample-ns get all
+          kubectl -n cluster-sample-ns get all -o wide
           kubectl get harbor -n cluster-sample-ns -o wide
           kubectl get harborcluster -n cluster-sample-ns -o wide
         fi
         free -h
+        df -h
 
     - name: test harbor
       run: |
