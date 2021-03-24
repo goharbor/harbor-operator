@@ -137,7 +137,7 @@ func (harbor *Controller) getHarborCR(harborcluster *goharborv1.HarborCluster, d
 	// inject cert to harbor comps
 	injectS3CertToHarborComponents(harborCR)
 
-	err := k8s.SetLastAppliedHash(harborCR)
+	err := k8s.SetLastAppliedHash(harborCR, harborCR.Spec)
 	if err != nil {
 		harbor.Log.Error(err, "Failed to set last-applied-hash annotations")
 	}

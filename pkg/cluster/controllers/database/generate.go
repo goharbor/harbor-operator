@@ -70,7 +70,7 @@ func (p *PostgreSQLController) GetPostgresCR(ctx context.Context, harborcluster 
 		},
 	}
 
-	err = k8s.SetLastAppliedHash(conf)
+	err = k8s.SetLastAppliedHash(conf, conf.Spec)
 	if err != nil {
 		return nil, err
 	}

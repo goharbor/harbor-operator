@@ -12,8 +12,11 @@ const (
 	HarborClusterLastAppliedHash = "goharbor.io/last-applied-hash"
 )
 
-func SetLastAppliedHash(obj metav1.Object) error {
-	hash, err := hashstructure.Hash(obj, hashstructure.FormatV2, nil)
+func SetLastAppliedHash(obj metav1.Object, value interface{}) error {
+
+	hash, err := hashstructure.Hash(value, hashstructure.FormatV2, nil)
+	//logrus.WithField("value", value).WithField("hash", hash).WithField("name", obj.GetName()).
+	//	Info("SetLastAppliedHash")
 	if err != nil {
 		return err
 	}
@@ -28,6 +31,22 @@ func SetLastAppliedHash(obj metav1.Object) error {
 	obj.SetAnnotations(annotations)
 
 	return nil
+}
+
+// UpdateLastAppliedHash update the list-applied-hash annotation in to Object.
+func UpdateLastAppliedHash(to, from metav1.Object) {
+	if to == nil || from == nil {
+		return
+	}
+	if from.GetAnnotations() == nil {
+		return
+	}
+	annotations := to.GetAnnotations()
+	if annotations == nil {
+		annotations = make(map[string]string)
+	}
+	annotations[HarborClusterLastAppliedHash] = from.GetAnnotations()[HarborClusterLastAppliedHash]
+	to.SetAnnotations(annotations)
 }
 
 func HashEquals(o1, o2 metav1.Object) bool {

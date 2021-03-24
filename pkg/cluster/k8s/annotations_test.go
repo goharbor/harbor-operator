@@ -1,6 +1,7 @@
 package k8s_test
 
 import (
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"testing"
 
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
@@ -95,5 +96,69 @@ func TestHashEquals(t *testing.T) {
 				t.Errorf("HashEquals() = %v, want %v", got, tc.want)
 			}
 		})
+	}
+}
+
+func TestSetLastAppliedHash(t *testing.T) {
+	HarborCR1 := &goharborv1.Harbor{
+		TypeMeta:   metav1.TypeMeta{},
+		ObjectMeta: metav1.ObjectMeta{},
+		Spec: goharborv1.HarborSpec{
+			LogLevel: "info",
+			Version:  "2.12",
+		},
+		Status: harbormetav1.ComponentStatus{},
+	}
+	HarborCR2 := &goharborv1.Harbor{
+		TypeMeta:   metav1.TypeMeta{},
+		ObjectMeta: metav1.ObjectMeta{},
+		Spec: goharborv1.HarborSpec{
+			LogLevel: "info",
+			Version:  "2.12",
+		},
+		Status: harbormetav1.ComponentStatus{},
+	}
+
+	HarborCR3 := &goharborv1.Harbor{
+		TypeMeta:   metav1.TypeMeta{},
+		ObjectMeta: metav1.ObjectMeta{},
+		Spec: goharborv1.HarborSpec{
+			LogLevel: "info",
+			Version:  "2.12",
+		},
+		Status: harbormetav1.ComponentStatus{
+			ObservedGeneration: 1,
+			Replicas:           func(v int32) *int32 { return &v }(2),
+		},
+	}
+
+	HarborCR4 := &goharborv1.Harbor{
+		TypeMeta:   metav1.TypeMeta{},
+		ObjectMeta: metav1.ObjectMeta{},
+		Spec: goharborv1.HarborSpec{
+			LogLevel: "debug",
+			Version:  "2.12",
+		},
+		Status: harbormetav1.ComponentStatus{
+			ObservedGeneration: 1,
+			Replicas:           func(v int32) *int32 { return &v }(2),
+		},
+	}
+
+	k8s.SetLastAppliedHash(HarborCR1, HarborCR1.Spec)
+	k8s.SetLastAppliedHash(HarborCR2, HarborCR2.Spec)
+	k8s.SetLastAppliedHash(HarborCR3, HarborCR3.Spec)
+	k8s.SetLastAppliedHash(HarborCR4, HarborCR4.Spec)
+
+	if !k8s.HashEquals(HarborCR1, HarborCR2) {
+		t.Error("Expect HashEquals true, but false")
+	}
+
+	if !k8s.HashEquals(HarborCR1, HarborCR3) {
+		t.Error("Expect HashEquals true, but false")
+	}
+
+	if k8s.HashEquals(HarborCR1, HarborCR4) {
+		t.Error("Expect HashEquals false, but true")
 	}
 }

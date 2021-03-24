@@ -120,7 +120,9 @@ func (rm *redisResourceManager) GetCacheCR(ctx context.Context, harborcluster *g
 		},
 	}
 
-	err = k8s.SetLastAppliedHash(rf)
+	if err = k8s.SetLastAppliedHash(rf, rf.Spec); err != nil {
+		return nil, err
+	}
 
 	return rf, err
 }

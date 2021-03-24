@@ -2,7 +2,6 @@ package harborcluster
 
 import (
 	"context"
-
 	"github.com/go-logr/logr"
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"github.com/goharbor/harbor-operator/controllers"
@@ -22,13 +21,10 @@ import (
 	"github.com/pkg/errors"
 	redisOp "github.com/spotahome/redis-operator/api/redisfailover/v1"
 	postgresv1 "github.com/zalando/postgres-operator/pkg/apis/acid.zalan.do/v1"
-	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sigs.k8s.io/controller-runtime/pkg/event"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 )
 
 const (
@@ -119,7 +115,6 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 		TryOwns(&minio.Tenant{}, minioCRD).
 		TryOwns(&postgresv1.Postgresql{}, postgresCRD).
 		TryOwns(&redisOp.RedisFailover{}, redisCRD).
-		WithEventFilter(harborClusterPredicateFuncs).
 		WithOptions(controller.Options{
 			MaxConcurrentReconciles: int(concurrentReconcile),
 		}).
@@ -140,26 +135,4 @@ func New(ctx context.Context, configStore *configstore.Store) (commonCtrl.Reconc
 		Log:         ctrl.Log.WithName(application.GetName(ctx)).WithName("controller").WithValues("controller", "HarborCluster"),
 		ctrl:        commonCtrl.NewController(ctx, controllers.HarborCluster, nil, configStore),
 	}, nil
-}
-
-// harborClusterPredicateFuncs do filter for events.
-var harborClusterPredicateFuncs = predicate.Funcs{
-	// we do not care other events
-	UpdateFunc: func(event event.UpdateEvent) bool {
-		oldObj, ok := event.ObjectOld.(*goharborv1.HarborCluster)
-		if !ok {
-			return true
-		}
-
-		newObj, ok := event.ObjectNew.(*goharborv1.HarborCluster)
-		if !ok {
-			return true
-		}
-		// when status was not changed and spec was not changed, not need reconcile
-		if equality.Semantic.DeepDerivative(newObj.Spec, oldObj.Spec) && oldObj.Status.Status == newObj.Status.Status {
-			return false
-		}
-
-		return true
-	},
 }

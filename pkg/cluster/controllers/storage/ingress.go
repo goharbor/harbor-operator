@@ -165,7 +165,9 @@ func (m *MinIOController) generateIngress(harborcluster *goharborv1.HarborCluste
 		},
 	}
 
-	err = k8s.SetLastAppliedHash(ingress)
+	if err = k8s.SetLastAppliedHash(ingress, ingress.Spec); err != nil {
+		return nil, err
+	}
 
 	return ingress, err
 }
