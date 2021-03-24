@@ -145,6 +145,7 @@ func (m *MinIOController) applyTenant(ctx context.Context, harborcluster *goharb
 
 		minioCR.Spec = *desiredMinIOCR.Spec.DeepCopy()
 		k8s.UpdateLastAppliedHash(minioCR, desiredMinIOCR)
+
 		if err := m.KubeClient.Update(ctx, minioCR); err != nil {
 			return minioNotReadyStatus(UpdateMinIOError, err.Error()), err
 		}

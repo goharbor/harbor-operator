@@ -1,10 +1,10 @@
 package k8s_test
 
 import (
-	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"testing"
 
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/k8s"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -145,10 +145,10 @@ func TestSetLastAppliedHash(t *testing.T) {
 		},
 	}
 
-	k8s.SetLastAppliedHash(HarborCR1, HarborCR1.Spec)
-	k8s.SetLastAppliedHash(HarborCR2, HarborCR2.Spec)
-	k8s.SetLastAppliedHash(HarborCR3, HarborCR3.Spec)
-	k8s.SetLastAppliedHash(HarborCR4, HarborCR4.Spec)
+	_ = k8s.SetLastAppliedHash(HarborCR1, HarborCR1.Spec)
+	_ = k8s.SetLastAppliedHash(HarborCR2, HarborCR2.Spec)
+	_ = k8s.SetLastAppliedHash(HarborCR3, HarborCR3.Spec)
+	_ = k8s.SetLastAppliedHash(HarborCR4, HarborCR4.Spec)
 
 	if !k8s.HashEquals(HarborCR1, HarborCR2) {
 		t.Error("Expect HashEquals true, but false")

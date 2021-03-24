@@ -107,7 +107,7 @@ func (m *MinIOController) cleanupIngress(ctx context.Context, harborcluster *goh
 	return minioUnknownStatus(), nil
 }
 
-func (m *MinIOController) generateIngress(harborcluster *goharborv1.HarborCluster) (*netv1.Ingress, error) {
+func (m *MinIOController) generateIngress(harborcluster *goharborv1.HarborCluster) (*netv1.Ingress, error) { //nolint:funlen
 	var tls []netv1.IngressTLS
 
 	if harborcluster.Spec.InClusterStorage.MinIOSpec.Redirect.Expose != nil &&
