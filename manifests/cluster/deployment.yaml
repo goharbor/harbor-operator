@@ -2545,9 +2545,6 @@ spec:
                           storageClassName:
                             type: string
                         type: object
-                      tlsConfig:
-                        description: TLS Config to use. When set TLS will be negotiated. set the secret which type of Opaque, and contains "tls.key","tls.crt","ca.crt".
-                        type: string
                     type: object
                 required:
                 - kind
