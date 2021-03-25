@@ -55,10 +55,6 @@ type RedisSpec struct {
 	// Default is 10 connections per every CPU as reported by runtime.NumCPU.
 	PoolSize int `json:"poolSize,omitempty"`
 
-	// TLS Config to use. When set TLS will be negotiated.
-	// set the secret which type of Opaque, and contains "tls.key","tls.crt","ca.crt".
-	TLSConfig string `json:"tlsConfig,omitempty"`
-
 	GroupName string `json:"groupName,omitempty"`
 
 	Hosts []RedisHosts `json:"hosts,omitempty"`
