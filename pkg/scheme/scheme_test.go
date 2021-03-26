@@ -29,14 +29,6 @@ var _ = Describe("Runtime scheme ", func() {
 			Group:   "cert-manager.io",
 			Version: "v1",
 			Kind:    "Certificate",
-		}), Entry("v1alpha2.cert-manager.io/Certificate", schema.GroupVersionKind{
-			Group:   "cert-manager.io",
-			Version: "v1alpha2",
-			Kind:    "Certificate",
-		}), Entry("v1beta1.cert-manager.io/Certificate", schema.GroupVersionKind{
-			Group:   "cert-manager.io",
-			Version: "v1beta1",
-			Kind:    "Certificate",
 		}), Entry("v1.apps/Deployment", schema.GroupVersionKind{
 			Group:   "apps",
 			Version: "v1",
