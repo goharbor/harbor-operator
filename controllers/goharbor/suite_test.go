@@ -16,15 +16,19 @@ package goharbor_test
 import (
 	"fmt"
 	"math/rand"
+	"path"
 	"testing"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
+	"github.com/goharbor/harbor-operator/pkg/config"
 	"github.com/goharbor/harbor-operator/pkg/factories/application"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	"github.com/goharbor/harbor-operator/pkg/scheme"
 	"github.com/goharbor/harbor-operator/pkg/setup"
+	"github.com/ovh/configstore"
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
@@ -47,6 +51,8 @@ var (
 	version   string
 	log       = zap.LoggerTo(GinkgoWriter, true)
 )
+
+const configDirectory = "../../config/config"
 
 func TestAPIs(t *testing.T) {
 	t.Parallel()
@@ -93,6 +99,10 @@ var _ = BeforeSuite(func(done Done) {
 		Scheme:             s,
 	})
 	Expect(err).NotTo(HaveOccurred(), "failed to create manager")
+
+	configstore.DefaultStore.InMemory(test.NewName("test-")).
+		Add(configstore.NewItem(config.TemplateDirectoryKey, path.Join(configDirectory, "assets"), 100)).
+		Add(configstore.NewItem(config.CtrlConfigDirectoryKey, path.Join(configDirectory, "controllers"), 100))
 
 	Expect(setup.ControllersWithManager(ctx, mgr)).To(Succeed())
 

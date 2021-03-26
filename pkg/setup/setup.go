@@ -13,11 +13,11 @@ func WithManager(ctx context.Context, mgr manager.Manager) error {
 	g, ctx := errgroup.WithContext(ctx)
 
 	g.Go(func() error {
-		return ControllersWithManager(ctx, mgr)
+		return errors.Wrap(ControllersWithManager(ctx, mgr), "controllers")
 	})
 
 	g.Go(func() error {
-		return WebhooksWithManager(ctx, mgr)
+		return errors.Wrap(WebhooksWithManager(ctx, mgr), "webhooks")
 	})
 
 	return g.Wait()
@@ -27,25 +27,29 @@ func ControllersWithManager(ctx context.Context, mgr manager.Manager) error {
 	var g errgroup.Group
 
 	for name, builder := range controllersBuilder {
-		name := name
-		c := &controller{
-			Name: name,
-			New:  builder,
-		}
+		ctx := ctx
+
+		logger.Set(&ctx, logger.Get(ctx).WithName(name.String()))
+
+		c := NewController(name, builder)
 
 		ok, err := c.IsEnabled(ctx)
 		if err != nil {
-			return errors.Wrapf(err, "cannot check if controller %s is enabled", name)
+			return errors.Wrap(err, "cannot check if controller is enabled")
 		}
 
 		if !ok {
-			logger.Get(ctx).Info("Controller disabled", "controller", name)
+			logger.Get(ctx).Info("Controller disabled")
 
 			continue
 		}
 
+		name := name
+
 		g.Go(func() error {
-			return errors.Wrapf(c.WithManager(ctx, mgr), "controller %s", name)
+			_, err := c.WithManager(ctx, mgr)
+
+			return errors.Wrap(err, name.String())
 		})
 	}
 
@@ -54,6 +58,10 @@ func ControllersWithManager(ctx context.Context, mgr manager.Manager) error {
 
 func WebhooksWithManager(ctx context.Context, mgr manager.Manager) error {
 	for name, object := range webhooksBuilder {
+		ctx := ctx
+
+		logger.Set(&ctx, logger.Get(ctx).WithName(name.String()))
+
 		wh := &webHook{
 			Name:    name,
 			webhook: object,
@@ -61,11 +69,11 @@ func WebhooksWithManager(ctx context.Context, mgr manager.Manager) error {
 
 		ok, err := wh.IsEnabled(ctx)
 		if err != nil {
-			return errors.Wrapf(err, "cannot check if webhook %s is enabled", name)
+			return errors.Wrap(err, "cannot check if webhook is enabled")
 		}
 
 		if !ok {
-			logger.Get(ctx).Info("Controller disabled", "controller", name)
+			logger.Get(ctx).Info("Webhook disabled")
 
 			continue
 		}
@@ -74,7 +82,7 @@ func WebhooksWithManager(ctx context.Context, mgr manager.Manager) error {
 		// 'controller-runtime' does not support webhook registrations concurrently.
 		// Check issue: https://github.com/kubernetes-sigs/controller-runtime/issues/1285.
 		if err := wh.WithManager(ctx, mgr); err != nil {
-			return errors.Wrapf(err, "webhook %s", name)
+			return errors.Wrap(err, name.String())
 		}
 	}
 
