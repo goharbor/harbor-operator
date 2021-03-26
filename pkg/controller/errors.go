@@ -64,7 +64,7 @@ func (c *Controller) HandleError(ctx context.Context, resource runtime.Object, r
 		return ctrl.Result{}, errors.Wrap(resultError, errors.Wrap(err, "cannot set status to error").Error())
 	}
 
-	logger.Get(ctx).Info("error handled")
+	logger.Get(ctx).Info("error reported to resource status", "error", resultError.Error())
 
 	return ctrl.Result{}, nil
 }
