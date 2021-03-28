@@ -76,7 +76,7 @@ jobs:
       NOTARYSERVER_DOCKER_IMAGE_2_1_2: quay.io/goharbor/notary-server-photon:v2.1.2
       NOTARYSIGNER_DOCKER_IMAGE_2_1_2: quay.io/goharbor/notary-signer-photon:v2.1.2
       TRIVY_DOCKER_IMAGE_2_1_2: quay.io/goharbor/trivy-adapter-photon:v2.1.2
-      HARBORCLUSTER_MINIO_DOCKER_IMAGE_2_1_2: quay.io/goharbor/minio:RELEASE.2020-08-13T02-39-50Z
+      HARBORCLUSTER_MINIO_DOCKER_IMAGE_2_1_2: quay.io/goharbor/minio:2021-03-01T04-20-55Z
       HARBORCLUSTER_REDIS_DOCKER_IMAGE_2_1_2: quay.io/goharbor/redis:5.0-alpine
       HARBORCLUSTER_POSTGRESQL_DOCKER_IMAGE_2_1_2: quay.io/goharbor/spilo-12:1.6-p3
       dockerImage: harbor-operator:dev_test

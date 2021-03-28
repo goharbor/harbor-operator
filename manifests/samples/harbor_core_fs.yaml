@@ -59,7 +59,7 @@ spec:
   volumeMode: Filesystem
   resources:
     requests:
-      storage: 5Gi
+      storage: 3Gi
 ---
 # Full stack Harbor
 apiVersion: goharbor.io/v1alpha3
