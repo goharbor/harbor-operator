@@ -7,23 +7,11 @@ GIT_COMMIT ?= none
 CONFIGURATION_FROM ?= env,file:$(CURDIR)/config-dev.yml
 export CONFIGURATION_FROM
 
-REGISTRY_TEMPLATE_PATH     ?= $(CURDIR)/config/config/assets/registry-config.yaml.tmpl
-PORTAL_TEMPLATE_PATH       ?= $(CURDIR)/config/config/assets/portal-config.conf.tmpl
-REGISTRYCTL_TEMPLATE_PATH  ?= $(CURDIR)/config/config/assets/registryctl-config.yaml.tmpl
-JOBSERVICE_TEMPLATE_PATH   ?= $(CURDIR)/config/config/assets/jobservice-config.yaml.tmpl
-CORE_TEMPLATE_PATH         ?= $(CURDIR)/config/config/assets/core-config.conf.tmpl
-CHARTMUSEUM_TEMPLATE_PATH  ?= $(CURDIR)/config/config/assets/chartmuseum-config.yaml.tmpl
-NOTARYSERVER_TEMPLATE_PATH ?= $(CURDIR)/config/config/assets/notaryserver-config.json.tmpl
-NOTARYSIGNER_TEMPLATE_PATH ?= $(CURDIR)/config/config/assets/notarysigner-config.json.tmpl
+CONTROLLERS_CONFIG_DIRECTORY ?= config/config/controllers
+export CONTROLLERS_CONFIG_DIRECTORY
 
-export REGISTRY_TEMPLATE_PATH
-export PORTAL_TEMPLATE_PATH
-export REGISTRYCTL_TEMPLATE_PATH
-export JOBSERVICE_TEMPLATE_PATH
-export CORE_TEMPLATE_PATH
-export CHARTMUSEUM_TEMPLATE_PATH
-export NOTARYSERVER_TEMPLATE_PATH
-export NOTARYSIGNER_TEMPLATE_PATH
+TEMPLATE_DIRECTORY ?= config/config/assets
+export TEMPLATE_DIRECTORY
 
 ifeq (,$(shell which kubens 2> /dev/null))
 NAMESPACE ?= $$(kubectl config get-contexts "$$(kubectl config current-context)" --no-headers | awk -F " " '{ if ($$5=="") print "default" ; else print $$5; }')

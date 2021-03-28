@@ -12,6 +12,8 @@ const (
 	HarborClassKey            = "classname"
 	ReconciliationKey         = "max-concurrent-reconciliation"
 	NetworkPoliciesEnabledKey = "network-policies"
+	CtrlConfigDirectoryKey    = "controllers-config-directory"
+	TemplateDirectoryKey      = "template-directory"
 )
 
 const (
@@ -20,6 +22,8 @@ const (
 	DefaultConcurrentReconcile    = 1
 	DefaultHarborClass            = ""
 	DefaultNetworkPoliciesEnabled = false
+	DefaultConfigDirectory        = "/etc/harbor-operator"
+	DefaultTemplateDirectory      = DefaultConfigDirectory + "/templates"
 
 	// DefaultImagePullPolicy specifies the policy to image pulls.
 	DefaultImagePullPolicy = corev1.PullIfNotPresent
@@ -28,14 +32,17 @@ const (
 var ErrNotReady = errors.New("configuration not ready")
 
 func NewConfigWithDefaults() *configstore.Store {
-	defaultStore := configstore.NewStore()
-	defaultStore.InMemory("default-controller").Add(
+	store := configstore.NewStore()
+
+	store.InMemory("default-controller").Add(
 		configstore.NewItem(ReconciliationKey, fmt.Sprintf("%v", DefaultConcurrentReconcile), DefaultPriority),
 		configstore.NewItem(HarborClassKey, DefaultHarborClass, DefaultPriority),
 		configstore.NewItem(NetworkPoliciesEnabledKey, fmt.Sprintf("%v", DefaultNetworkPoliciesEnabled), DefaultPriority),
+		configstore.NewItem(CtrlConfigDirectoryKey, DefaultConfigDirectory, DefaultPriority),
+		configstore.NewItem(TemplateDirectoryKey, DefaultTemplateDirectory, DefaultPriority),
 	)
 
-	return defaultStore
+	return store
 }
 
 func GetItem(configStore *configstore.Store, name string, defaultValue string) (configstore.Item, error) {

@@ -45,7 +45,7 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 		return errors.Wrap(err, "cannot get class name")
 	}
 
-	concurrentReconcile, err := r.ConfigStore.GetItemValueInt(config.ReconciliationKey)
+	concurrentReconcile, err := config.GetInt(r.ConfigStore, config.ReconciliationKey, config.DefaultConcurrentReconcile)
 	if err != nil {
 		return errors.Wrap(err, "cannot get concurrent reconcile")
 	}
@@ -62,7 +62,7 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 		Owns(&corev1.Service{}).
 		Owns(&netv1.NetworkPolicy{}).
 		WithOptions(controller.Options{
-			MaxConcurrentReconciles: int(concurrentReconcile),
+			MaxConcurrentReconciles: concurrentReconcile,
 		}).
 		Complete(r)
 }
