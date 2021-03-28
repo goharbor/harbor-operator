@@ -125,7 +125,7 @@ spec:
       volumesPerServer: 2
       volumeClaimTemplate:
         spec:
-          storageClassName: hostpath
+          storageClassName: standard
           accessModes:
             - ReadWriteOnce
           resources:
