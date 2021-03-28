@@ -130,12 +130,12 @@ spec:
       volumesPerServer: 2
       volumeClaimTemplate:
         spec:
-          storageClassName: standard
+          storageClassName: hostpath
           accessModes:
             - ReadWriteOnce
           resources:
             requests:
-              storage: 10Gi
+              storage: 3Gi
       resources:
         limits:
           cpu: 500m
