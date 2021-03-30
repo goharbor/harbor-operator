@@ -3,13 +3,11 @@ package checksum
 import (
 	"context"
 	"fmt"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"strings"
 	"sync"
 
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	"github.com/goharbor/harbor-operator/pkg/version"
-	"github.com/mitchellh/hashstructure/v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
@@ -61,44 +59,12 @@ func GetStaticID(name string) string {
 	return fmt.Sprintf("static.checksum.goharbor.io/%s", name)
 }
 
-func (d *Dependencies) ComputeChecksum(ctx context.Context, resource metav1.Object, onlySpec bool) string {
+func (d *Dependencies) ComputeChecksum(resource metav1.Object, onlySpec bool) string {
 	if !onlySpec {
 		return resource.GetResourceVersion()
 	}
 
-	hash, err := GetHash(resource)
-	if err != nil {
-		logger.Get(ctx).V(1).Error(err, "dependencies get hash err", "resource", resource.GetName())
-		return fmt.Sprintf("%d", resource.GetGeneration())
-	}
-
-	return hash
-}
-
-func GetHash(resource metav1.Object) (string, error) {
-	unstructuredObj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(resource)
-
-	if err != nil {
-		return "", err
-	}
-
-	obj, existed, err := unstructured.NestedFieldCopy(unstructuredObj, "spec")
-
-	if err != nil {
-		return "", err
-	}
-
-	if !existed {
-		return "", fmt.Errorf("no spec in %s", resource.GetName())
-	}
-
-	hash, err := hashstructure.Hash(obj, hashstructure.FormatV2, nil)
-
-	if err != nil {
-		return "", err
-	}
-
-	return fmt.Sprintf("%d", hash), nil
+	return fmt.Sprintf("%d", resource.GetGeneration())
 }
 
 func (d *Dependencies) ChangedFor(ctx context.Context, resource Dependency) bool {
@@ -118,7 +84,7 @@ func (d *Dependencies) ChangedFor(ctx context.Context, resource Dependency) bool
 			return true
 		}
 
-		current := d.ComputeChecksum(ctx, object, onlySpec)
+		current := d.ComputeChecksum(object, onlySpec)
 		if previous != current {
 			logger.Get(ctx).V(1).Info(fmt.Sprintf("dependencies changed (expected %s, got %s)", previous, current), "dependency.kind", object.GetObjectKind(), "dependency", object)
 
@@ -144,14 +110,14 @@ func (d *Dependencies) ChangedFor(ctx context.Context, resource Dependency) bool
 	return false
 }
 
-func (d *Dependencies) AddAnnotations(ctx context.Context, object metav1.Object) {
+func (d *Dependencies) AddAnnotations(object metav1.Object) {
 	annotations := object.GetAnnotations()
 	if annotations == nil {
 		annotations = map[string]string{}
 	}
 
 	for obj, onlySpec := range d.objects {
-		annotations[d.GetID(obj)] = d.ComputeChecksum(ctx, obj, onlySpec)
+		annotations[d.GetID(obj)] = d.ComputeChecksum(obj, onlySpec)
 	}
 
 	if ver := version.GetVersion(annotations); ver != "" {

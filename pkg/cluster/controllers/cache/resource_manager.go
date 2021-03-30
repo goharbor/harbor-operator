@@ -8,6 +8,7 @@ import (
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/common"
 	"github.com/goharbor/harbor-operator/pkg/config"
+	"github.com/goharbor/harbor-operator/pkg/resources/checksum"
 	"github.com/ovh/configstore"
 	redisOp "github.com/spotahome/redis-operator/api/redisfailover/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -26,7 +27,7 @@ type ResourceManager interface {
 type ResourceGetter interface {
 	GetCacheCR(ctx context.Context, harborcluster *goharborv1.HarborCluster) (runtime.Object, error)
 	GetCacheCRName() string
-	GetResourceList() corev1.ResourceList
+	GetResources() corev1.ResourceRequirements
 	GetSecretName() string
 	GetSecret() *corev1.Secret
 	GetServerReplica() int
@@ -40,6 +41,7 @@ type redisResourceManager struct {
 	cluster     *goharborv1.HarborCluster
 	configStore *configstore.Store
 	logger      logr.Logger
+	scheme      *runtime.Scheme
 }
 
 const (
@@ -54,10 +56,11 @@ const (
 )
 
 // NewResourceManager constructs a new cache resource manager.
-func NewResourceManager(store *configstore.Store, logger logr.Logger) ResourceManager {
+func NewResourceManager(store *configstore.Store, logger logr.Logger, scheme *runtime.Scheme) ResourceManager {
 	return &redisResourceManager{
 		configStore: store,
 		logger:      logger,
+		scheme:      scheme,
 	}
 }
 
@@ -70,7 +73,7 @@ func (rm *redisResourceManager) WithCluster(cluster *goharborv1.HarborCluster) R
 
 // GetCacheCR gets cache cr instance.
 func (rm *redisResourceManager) GetCacheCR(ctx context.Context, harborcluster *goharborv1.HarborCluster) (runtime.Object, error) {
-	resource := rm.GetResourceList()
+	resources := rm.GetResources()
 	pvc, _ := GenerateStoragePVC(rm.GetStorageClass(), rm.cluster.Name, rm.GetStorageSize(), rm.GetLabels())
 
 	image, err := rm.GetImage(ctx, harborcluster)
@@ -78,7 +81,7 @@ func (rm *redisResourceManager) GetCacheCR(ctx context.Context, harborcluster *g
 		return nil, err
 	}
 
-	return &redisOp.RedisFailover{
+	rf := &redisOp.RedisFailover{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       redisOp.RFKind,
 			APIVersion: "databases.spotahome.com/v1",
@@ -90,11 +93,8 @@ func (rm *redisResourceManager) GetCacheCR(ctx context.Context, harborcluster *g
 		},
 		Spec: redisOp.RedisFailoverSpec{
 			Redis: redisOp.RedisSettings{
-				Replicas: int32(rm.GetServerReplica()),
-				Resources: corev1.ResourceRequirements{
-					Limits:   resource,
-					Requests: resource,
-				},
+				Replicas:  int32(rm.GetServerReplica()),
+				Resources: resources,
 				Storage: redisOp.RedisStorage{
 					PersistentVolumeClaim: pvc,
 				},
@@ -103,18 +103,21 @@ func (rm *redisResourceManager) GetCacheCR(ctx context.Context, harborcluster *g
 				ImagePullSecrets: rm.getImagePullSecrets(ctx, harborcluster),
 			},
 			Sentinel: redisOp.SentinelSettings{
-				Replicas: int32(rm.GetClusterServerReplica()),
-				Resources: corev1.ResourceRequirements{
-					Limits:   resource,
-					Requests: resource,
-				},
+				Replicas:         int32(rm.GetClusterServerReplica()),
+				Resources:        resources,
 				Image:            image,
 				ImagePullPolicy:  rm.getImagePullPolicy(ctx, harborcluster),
 				ImagePullSecrets: rm.getImagePullSecrets(ctx, harborcluster),
 			},
 			Auth: redisOp.AuthSettings{SecretPath: rm.GetSecretName()},
 		},
-	}, nil
+	}
+
+	dependencies := checksum.New(rm.scheme)
+	dependencies.Add(ctx, harborcluster, true)
+	dependencies.AddAnnotations(rf)
+
+	return rf, nil
 }
 
 // GetCacheCRName gets cache cr name.
@@ -159,23 +162,16 @@ func (rm *redisResourceManager) GetLabels() map[string]string {
 }
 
 // GetResourceList gets redis resources.
-func (rm *redisResourceManager) GetResourceList() corev1.ResourceList {
-	resources := corev1.ResourceList{}
+func (rm *redisResourceManager) GetResources() corev1.ResourceRequirements {
+	resources := corev1.ResourceRequirements{}
+
 	if rm.cluster.Spec.InClusterCache.RedisSpec.Server == nil {
-		resources, _ = GenerateResourceList(defaultResourceCPU, defaultResourceMemory)
-
-		return resources
-	}
-	// assemble cpu
-	if cpu := rm.cluster.Spec.InClusterCache.RedisSpec.Server.Resources.Requests.Cpu(); cpu != nil {
-		resources[corev1.ResourceCPU] = *cpu
-	}
-	// assemble memory
-	if mem := rm.cluster.Spec.InClusterCache.RedisSpec.Server.Resources.Requests.Memory(); mem != nil {
-		resources[corev1.ResourceMemory] = *mem
+		resourcesList, _ := GenerateResourceList(defaultResourceCPU, defaultResourceMemory)
+		resources.Limits = resourcesList
+		resources.Requests = resourcesList
 	}
 
-	return resources
+	return rm.cluster.Spec.InClusterCache.RedisSpec.Server.Resources
 }
 
 // GetServerReplica gets deployment replica.

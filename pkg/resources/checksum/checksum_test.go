@@ -80,7 +80,7 @@ var _ = Describe("Checksum", func() {
 		It("Should pass", func() {
 			addDependencies()
 
-			depManager.AddAnnotations(ctx, resource)
+			depManager.AddAnnotations(resource)
 
 			changed := depManager.ChangedFor(ctx, resource)
 			Expect(changed).To(Equal(false))
@@ -91,7 +91,7 @@ var _ = Describe("Checksum", func() {
 		It("Should pass", func() {
 			addDependencies()
 
-			depManager.AddAnnotations(ctx, resource)
+			depManager.AddAnnotations(resource)
 
 			owner.SetGeneration(100)
 
@@ -115,7 +115,7 @@ var _ = Describe("Checksum", func() {
 			resource.Annotations = version.SetVersion(resource.Annotations, "v1")
 			Expect(len(resource.Annotations)).To(Equal(1))
 
-			depManager.AddAnnotations(ctx, resource)
+			depManager.AddAnnotations(resource)
 			Expect(len(resource.Annotations)).To(Equal(2))
 
 			changed := depManager.ChangedFor(ctx, resource)
@@ -128,7 +128,7 @@ var _ = Describe("Checksum", func() {
 			resource.Annotations = version.SetVersion(resource.Annotations, "v1")
 			Expect(len(resource.Annotations)).To(Equal(1))
 
-			depManager.AddAnnotations(ctx, resource)
+			depManager.AddAnnotations(resource)
 			Expect(len(resource.Annotations)).To(Equal(2))
 
 			resource.Annotations = version.SetVersion(resource.Annotations, "v2")
