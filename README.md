@@ -1,5 +1,9 @@
 # Harbor Operator
 
+[![CI Pipeline](https://github.com/goharbor/harbor-operator/actions/workflows/tests.yml/badge.svg)](https://github.com/goharbor/harbor-operator/actions/workflows/tests.yml)
+[![CodeQL](https://github.com/goharbor/harbor-operator/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/goharbor/harbor-operator/actions/workflows/codeql-analysis.yml)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/bb3adb454b424e66ae3b9bdf2ab2fce1)](https://www.codacy.com/gh/goharbor/harbor-operator/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=goharbor/harbor-operator&amp;utm_campaign=Badge_Grade)
+
 **ATTENTIONS: THIS PROJECT IS STILL UNDER DEVELOPMENT AND NOT STABLE YET.**
 **ATTENTIONS: WE USE THIS BRANCH TO MERGE HARBOR-CLUSTER-OPERATOR AND HARBOR-OPERATOR.**
 
