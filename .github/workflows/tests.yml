@@ -288,6 +288,7 @@ jobs:
     - name: apidb test
       run: |
         git clone https://github.com/goharbor/harbor -b v2.1.2
+        cd harbor
         git apply --ignore-whitespace <<EOF
         diff --git a/tests/apitests/python/library/docker_api.py b/tests/apitests/python/library/docker_api.py
         index 656d00a42..3ebb6a1f0 100644
@@ -303,6 +304,7 @@ jobs:
 
              def docker_login(self, registry, username, password, expected_error_message = None):
         EOF
+        cd ..
         kubectl -n cluster-sample-ns patch deploy harborcluster-sample-harbor-harbor-core -p '{"spec":{"template":{"spec":{"containers":[{"name":"core","env":[{"name":"GC_TIME_WINDOW_HOURS","value":"0"}]}]}}}}'
         sleep 5
         kubectl -n cluster-sample-ns wait --for=condition=Ready pod --all --timeout 600s
