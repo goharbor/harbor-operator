@@ -136,7 +136,7 @@ func (c *Controller) ProcessFunc(ctx context.Context, resource runtime.Object, d
 
 		res.mutable.AppendMutation(func(ctx context.Context, resource runtime.Object) error {
 			if res, ok := resource.(metav1.Object); ok {
-				depManager.AddAnnotations(res)
+				depManager.AddAnnotations(ctx, res)
 			}
 
 			return nil
