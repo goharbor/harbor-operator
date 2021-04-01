@@ -8,7 +8,7 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/database/api"
 	"github.com/goharbor/harbor-operator/pkg/cluster/k8s"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
-	"k8s.io/apimachinery/pkg/api/equality"
+	"github.com/goharbor/harbor-operator/pkg/resources/checksum"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -36,7 +36,10 @@ func (p *PostgreSQLController) Update(ctx context.Context, harborcluster *goharb
 		return databaseNotReadyStatus(DefaultUnstructuredConverterError, err.Error()), err
 	}
 
-	if !IsEqual(expectCR, actualCR) {
+	dependencies := checksum.New(p.Scheme)
+	dependencies.Add(ctx, harborcluster, true)
+
+	if dependencies.ChangedFor(ctx, &actualCR) {
 		p.Log.Info(
 			"Update Database resource",
 			"namespace", harborcluster.Namespace, "name", name,
@@ -56,9 +59,4 @@ func (p *PostgreSQLController) Update(ctx context.Context, harborcluster *goharb
 	}
 
 	return databaseUnknownStatus(), nil
-}
-
-// isEqual check whether cache cr is equal expect.
-func IsEqual(actualCR, expectCR api.Postgresql) bool {
-	return equality.Semantic.DeepDerivative(expectCR.DeepCopy().Spec, actualCR.DeepCopy().Spec)
 }

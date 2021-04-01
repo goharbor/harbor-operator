@@ -6,6 +6,7 @@ import (
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"github.com/goharbor/harbor-operator/pkg/cluster/k8s"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
+	"github.com/goharbor/harbor-operator/pkg/resources/checksum"
 	redisOp "github.com/spotahome/redis-operator/api/redisfailover/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -31,7 +32,10 @@ func (rc *RedisController) RollingUpgrades(ctx context.Context, cluster *goharbo
 		return cacheNotReadyStatus(ErrorDefaultUnstructuredConverter, err.Error()), err
 	}
 
-	if !IsEqual(actualCR.DeepCopy().Spec, expectCR.DeepCopy().Spec) {
+	dependencies := checksum.New(rc.Scheme)
+	dependencies.Add(ctx, cluster, true)
+
+	if dependencies.ChangedFor(ctx, actualObj.(checksum.Dependency)) {
 		rc.Log.Info(
 			"Update Redis resource",
 			"namespace", cluster.Namespace, "name", cluster.Name,

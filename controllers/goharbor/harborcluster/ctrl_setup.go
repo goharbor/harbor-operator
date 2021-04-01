@@ -22,7 +22,6 @@ import (
 	"github.com/pkg/errors"
 	redisOp "github.com/spotahome/redis-operator/api/redisfailover/v1"
 	postgresv1 "github.com/zalando/postgres-operator/pkg/apis/acid.zalan.do/v1"
-	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -146,7 +145,7 @@ func New(ctx context.Context, configStore *configstore.Store) (commonCtrl.Reconc
 var harborClusterPredicateFuncs = predicate.Funcs{
 	// we do not care other events
 	UpdateFunc: func(event event.UpdateEvent) bool {
-		oldObj, ok := event.ObjectOld.(*goharborv1.HarborCluster)
+		_, ok := event.ObjectOld.(*goharborv1.HarborCluster)
 		if !ok {
 			return true
 		}
@@ -156,7 +155,7 @@ var harborClusterPredicateFuncs = predicate.Funcs{
 			return true
 		}
 		// when status was not changed and spec was not changed, not need reconcile
-		if equality.Semantic.DeepDerivative(oldObj.Spec, newObj.Spec) && oldObj.Status.Status == newObj.Status.Status {
+		if newObj.Status.ObservedGeneration == newObj.Generation {
 			return false
 		}
 
