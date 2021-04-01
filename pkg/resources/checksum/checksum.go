@@ -3,7 +3,6 @@ package checksum
 import (
 	"context"
 	"fmt"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"strings"
 	"sync"
 
@@ -11,6 +10,7 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/version"
 	"github.com/mitchellh/hashstructure/v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -69,6 +69,7 @@ func (d *Dependencies) ComputeChecksum(ctx context.Context, resource metav1.Obje
 	hash, err := GetHash(resource)
 	if err != nil {
 		logger.Get(ctx).V(1).Error(err, "dependencies get hash err", "resource", resource.GetName())
+
 		return fmt.Sprintf("%d", resource.GetGeneration())
 	}
 
@@ -77,13 +78,11 @@ func (d *Dependencies) ComputeChecksum(ctx context.Context, resource metav1.Obje
 
 func GetHash(resource metav1.Object) (string, error) {
 	unstructuredObj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(resource)
-
 	if err != nil {
 		return "", err
 	}
 
 	obj, existed, err := unstructured.NestedFieldCopy(unstructuredObj, "spec")
-
 	if err != nil {
 		return "", err
 	}
@@ -93,7 +92,6 @@ func GetHash(resource metav1.Object) (string, error) {
 	}
 
 	hash, err := hashstructure.Hash(obj, hashstructure.FormatV2, nil)
-
 	if err != nil {
 		return "", err
 	}
