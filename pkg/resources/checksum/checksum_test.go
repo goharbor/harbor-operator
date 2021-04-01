@@ -94,6 +94,7 @@ var _ = Describe("Checksum", func() {
 			depManager.AddAnnotations(ctx, resource)
 
 			owner.SetGeneration(100)
+			owner.Spec.Replicas = func(i int32) *int32 { return &i }(2)
 
 			changed := depManager.ChangedFor(ctx, resource)
 			Expect(changed).To(Equal(true))
