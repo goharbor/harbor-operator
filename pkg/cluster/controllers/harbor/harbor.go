@@ -64,6 +64,8 @@ func (harbor *Controller) Apply(ctx context.Context, harborcluster *goharborv1.H
 		harbor.Log.Info("Updating Harbor service", "name", nsdName)
 
 		harborCR.Spec = desiredCR.Spec
+		checksum.CopyMarkers(desiredCR, harborCR)
+
 		if err := harbor.KubeClient.Update(ctx, harborCR); err != nil {
 			return harborNotReadyStatus(UpdateHarborCRError, err.Error()), err
 		}
