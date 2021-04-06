@@ -8,9 +8,7 @@ import (
 
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	"github.com/goharbor/harbor-operator/pkg/version"
-	"github.com/mitchellh/hashstructure/v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -66,37 +64,7 @@ func (d *Dependencies) ComputeChecksum(ctx context.Context, resource metav1.Obje
 		return resource.GetResourceVersion()
 	}
 
-	hash, err := GetHash(resource)
-	if err != nil {
-		logger.Get(ctx).V(1).Error(err, "dependencies get hash err", "resource", resource.GetName())
-
-		return fmt.Sprintf("%d", resource.GetGeneration())
-	}
-
-	return hash
-}
-
-func GetHash(resource metav1.Object) (string, error) {
-	unstructuredObj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(resource)
-	if err != nil {
-		return "", err
-	}
-
-	obj, existed, err := unstructured.NestedFieldCopy(unstructuredObj, "spec")
-	if err != nil {
-		return "", err
-	}
-
-	if !existed {
-		return "", fmt.Errorf("no spec in %s", resource.GetName())
-	}
-
-	hash, err := hashstructure.Hash(obj, hashstructure.FormatV2, nil)
-	if err != nil {
-		return "", err
-	}
-
-	return fmt.Sprintf("%d", hash), nil
+	return fmt.Sprintf("%d", resource.GetGeneration())
 }
 
 func (d *Dependencies) ChangedFor(ctx context.Context, resource Dependency) bool {
