@@ -26,8 +26,6 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sigs.k8s.io/controller-runtime/pkg/event"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 )
 
 const (
@@ -118,7 +116,6 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 		TryOwns(&minio.Tenant{}, minioCRD).
 		TryOwns(&postgresv1.Postgresql{}, postgresCRD).
 		TryOwns(&redisOp.RedisFailover{}, redisCRD).
-		WithEventFilter(harborClusterPredicateFuncs).
 		WithOptions(controller.Options{
 			MaxConcurrentReconciles: concurrentReconcile,
 		}).
@@ -139,26 +136,4 @@ func New(ctx context.Context, configStore *configstore.Store) (commonCtrl.Reconc
 		Log:         ctrl.Log.WithName(application.GetName(ctx)).WithName("controller").WithValues("controller", "HarborCluster"),
 		ctrl:        commonCtrl.NewController(ctx, controllers.HarborCluster, nil, configStore),
 	}, nil
-}
-
-// harborClusterPredicateFuncs do filter for events.
-var harborClusterPredicateFuncs = predicate.Funcs{
-	// we do not care other events
-	UpdateFunc: func(event event.UpdateEvent) bool {
-		_, ok := event.ObjectOld.(*goharborv1.HarborCluster)
-		if !ok {
-			return true
-		}
-
-		newObj, ok := event.ObjectNew.(*goharborv1.HarborCluster)
-		if !ok {
-			return true
-		}
-		// when status was not changed and spec was not changed, not need reconcile
-		if newObj.Status.ObservedGeneration == newObj.Generation {
-			return false
-		}
-
-		return true
-	},
 }
