@@ -59,7 +59,7 @@ func GetStaticID(name string) string {
 	return fmt.Sprintf("static.checksum.goharbor.io/%s", name)
 }
 
-func (d *Dependencies) ComputeChecksum(ctx context.Context, resource metav1.Object, onlySpec bool) string {
+func (d *Dependencies) ComputeChecksum(resource metav1.Object, onlySpec bool) string {
 	if !onlySpec {
 		return resource.GetResourceVersion()
 	}
@@ -84,7 +84,7 @@ func (d *Dependencies) ChangedFor(ctx context.Context, resource Dependency) bool
 			return true
 		}
 
-		current := d.ComputeChecksum(ctx, object, onlySpec)
+		current := d.ComputeChecksum(object, onlySpec)
 		if previous != current {
 			logger.Get(ctx).V(1).Info(fmt.Sprintf("dependencies changed (expected %s, got %s)", previous, current), "dependency.kind", object.GetObjectKind(), "dependency", object)
 
@@ -110,14 +110,14 @@ func (d *Dependencies) ChangedFor(ctx context.Context, resource Dependency) bool
 	return false
 }
 
-func (d *Dependencies) AddAnnotations(ctx context.Context, object metav1.Object) {
+func (d *Dependencies) AddAnnotations(object metav1.Object) {
 	annotations := object.GetAnnotations()
 	if annotations == nil {
 		annotations = map[string]string{}
 	}
 
 	for obj, onlySpec := range d.objects {
-		annotations[d.GetID(obj)] = d.ComputeChecksum(ctx, obj, onlySpec)
+		annotations[d.GetID(obj)] = d.ComputeChecksum(obj, onlySpec)
 	}
 
 	if ver := version.GetVersion(annotations); ver != "" {

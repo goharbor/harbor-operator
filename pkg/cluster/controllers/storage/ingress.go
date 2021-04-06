@@ -164,7 +164,7 @@ func (m *MinIOController) generateIngress(ctx context.Context, harborcluster *go
 
 	dependencies := checksum.New(m.Scheme)
 	dependencies.Add(ctx, harborcluster, true)
-	dependencies.AddAnnotations(ctx, ingress)
+	dependencies.AddAnnotations(ingress)
 
 	return ingress, err
 }

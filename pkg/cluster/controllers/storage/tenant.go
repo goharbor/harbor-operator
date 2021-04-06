@@ -258,7 +258,7 @@ func (m *MinIOController) generateMinIOCR(ctx context.Context, harborcluster *go
 
 	dependencies := checksum.New(m.Scheme)
 	dependencies.Add(ctx, harborcluster, true)
-	dependencies.AddAnnotations(ctx, tenant)
+	dependencies.AddAnnotations(tenant)
 
 	return tenant, nil
 }

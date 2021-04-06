@@ -143,7 +143,7 @@ func (harbor *Controller) getHarborCR(ctx context.Context, harborcluster *goharb
 
 	dep := checksum.New(harbor.Scheme)
 	dep.Add(ctx, harborcluster, true)
-	dep.AddAnnotations(ctx, harborCR)
+	dep.AddAnnotations(harborCR)
 
 	return harborCR
 }

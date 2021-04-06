@@ -115,7 +115,7 @@ func (rm *redisResourceManager) GetCacheCR(ctx context.Context, harborcluster *g
 
 	dependencies := checksum.New(rm.scheme)
 	dependencies.Add(ctx, harborcluster, true)
-	dependencies.AddAnnotations(ctx, rf)
+	dependencies.AddAnnotations(rf)
 
 	return rf, nil
 }

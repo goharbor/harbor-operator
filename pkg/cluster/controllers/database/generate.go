@@ -72,7 +72,7 @@ func (p *PostgreSQLController) GetPostgresCR(ctx context.Context, harborcluster 
 
 	dependencies := checksum.New(p.Scheme)
 	dependencies.Add(ctx, harborcluster, true)
-	dependencies.AddAnnotations(ctx, conf)
+	dependencies.AddAnnotations(conf)
 
 	mapResult, err := runtime.DefaultUnstructuredConverter.ToUnstructured(conf)
 	if err != nil {
