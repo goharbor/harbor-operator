@@ -4,6 +4,7 @@ import (
 	"context"
 
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
+	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/common"
 	"github.com/goharbor/harbor-operator/pkg/cluster/k8s"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	"github.com/goharbor/harbor-operator/pkg/resources/checksum"
@@ -35,7 +36,7 @@ func (rc *RedisController) RollingUpgrades(ctx context.Context, cluster *goharbo
 	dependencies := checksum.New(rc.Scheme)
 	dependencies.Add(ctx, cluster, true)
 
-	if dependencies.ChangedFor(ctx, actualObj.(checksum.Dependency)) {
+	if !common.Equals(ctx, rc.Scheme, cluster, actualObj.(checksum.Dependency)) {
 		rc.Log.Info(
 			"Update Redis resource",
 			"namespace", cluster.Namespace, "name", cluster.Name,

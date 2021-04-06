@@ -7,6 +7,7 @@ import (
 	"github.com/go-logr/logr"
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/common"
 	"github.com/goharbor/harbor-operator/pkg/cluster/k8s"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	"github.com/goharbor/harbor-operator/pkg/resources/checksum"
@@ -57,11 +58,8 @@ func (harbor *Controller) Apply(ctx context.Context, harborcluster *goharborv1.H
 		return harborUnknownStatus(GetHarborCRError, err.Error()), err
 	}
 
-	dep := checksum.New(harbor.Scheme)
-	dep.Add(ctx, harborcluster, true)
-
 	// Found the existing one and check whether it needs to be updated
-	if !dep.ChangedFor(ctx, harborCR) {
+	if !common.Equals(ctx, harbor.Scheme, harborcluster, harborCR) {
 		// Spec is changed, do update now
 		harbor.Log.Info("Updating Harbor service", "name", nsdName)
 

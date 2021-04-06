@@ -140,10 +140,7 @@ func (m *MinIOController) applyTenant(ctx context.Context, harborcluster *goharb
 		return minioNotReadyStatus(GenerateMinIOCrError, err.Error()), err
 	}
 
-	dependencies := checksum.New(m.Scheme)
-	dependencies.Add(ctx, harborcluster, true)
-
-	if !dependencies.ChangedFor(ctx, minioCR) {
+	if !common.Equals(ctx, m.Scheme, harborcluster, minioCR) {
 		m.Log.Info("Updating minIO tenant")
 
 		minioCR.Spec = *desiredMinIOCR.Spec.DeepCopy()

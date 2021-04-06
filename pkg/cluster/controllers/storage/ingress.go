@@ -41,10 +41,8 @@ func (m *MinIOController) applyIngress(ctx context.Context, harborcluster *gohar
 		return minioNotReadyStatus(CreateMinIOIngressError, err.Error()), err
 	}
 
-	dependencies := checksum.New(m.Scheme)
-	dependencies.Add(ctx, harborcluster, true)
 	// Update if necessary
-	if !dependencies.ChangedFor(ctx, curIngress) {
+	if !common.Equals(ctx, m.Scheme, harborcluster, curIngress) {
 		m.Log.Info("Updating MinIO ingress")
 
 		if err := m.KubeClient.Update(ctx, ingress); err != nil {
