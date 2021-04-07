@@ -4,6 +4,7 @@
 resources:
 - bases/goharbor.io_chartmuseums.yaml
 - bases/goharbor.io_cores.yaml
+- bases/goharbor.io_exporters.yaml
 - bases/goharbor.io_harbors.yaml
 - bases/goharbor.io_jobservices.yaml
 - bases/goharbor.io_notaryservers.yaml

@@ -37,7 +37,11 @@ var _ = Describe("Runtime scheme ", func() {
 			Group:   "extensions",
 			Version: "v1beta1",
 			Kind:    "Ingress",
-		}), Entry("v1alpha3.goharbor.io/Habor", schema.GroupVersionKind{
+		}), Entry("v1alpha3.goharbor.io/Harbor", schema.GroupVersionKind{
+			Group:   "goharbor.io",
+			Version: "v1alpha3",
+			Kind:    "Exporter",
+		}), Entry("v1alpha3.goharbor.io/Harbor", schema.GroupVersionKind{
 			Group:   "goharbor.io",
 			Version: "v1alpha3",
 			Kind:    "Harbor",

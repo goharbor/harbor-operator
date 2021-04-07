@@ -41,7 +41,7 @@ func EnvVar(configName string, value ConfigValue) (corev1.EnvVar, error) {
 }
 
 func EnvVars(configs map[string]ConfigValue) ([]corev1.EnvVar, error) {
-	errors := []corev1.EnvVar{}
+	envVars := []corev1.EnvVar{}
 
 	for name, value := range configs {
 		envVar, err := EnvVar(name, value)
@@ -49,10 +49,10 @@ func EnvVars(configs map[string]ConfigValue) ([]corev1.EnvVar, error) {
 			return nil, err
 		}
 
-		errors = append(errors, envVar)
+		envVars = append(envVars, envVar)
 	}
 
-	return errors, nil
+	return envVars, nil
 }
 
 type Value string

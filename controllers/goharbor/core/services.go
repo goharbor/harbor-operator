@@ -14,23 +14,41 @@ func (r *Reconciler) GetService(ctx context.Context, core *goharborv1.Core) (*co
 	name := r.NormalizeName(ctx, core.GetName())
 	namespace := core.GetNamespace()
 
+	var ports []corev1.ServicePort
+
+	if core.Spec.Components.TLS.Enabled() {
+		ports = append(ports, corev1.ServicePort{
+			Name:       harbormetav1.CoreHTTPSPortName,
+			Port:       harbormetav1.HTTPSPort,
+			TargetPort: intstr.FromString(harbormetav1.CoreHTTPSPortName),
+			Protocol:   corev1.ProtocolTCP,
+		})
+	} else {
+		ports = append(ports, corev1.ServicePort{
+			Name:       harbormetav1.CoreHTTPPortName,
+			Port:       harbormetav1.HTTPPort,
+			TargetPort: intstr.FromString(harbormetav1.CoreHTTPPortName),
+			Protocol:   corev1.ProtocolTCP,
+		})
+	}
+
+	if core.Spec.Metrics.IsEnabled() {
+		ports = append(ports, corev1.ServicePort{
+			Name:       harbormetav1.CoreMetricsPortName,
+			Port:       core.Spec.Metrics.Port,
+			TargetPort: intstr.FromString(harbormetav1.CoreMetricsPortName),
+			Protocol:   corev1.ProtocolTCP,
+		})
+	}
+
 	return &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
+			Name:        name,
+			Namespace:   namespace,
+			Annotations: core.Spec.Metrics.AddPrometheusAnnotations(nil),
 		},
 		Spec: corev1.ServiceSpec{
-			Ports: []corev1.ServicePort{{
-				Name:       harbormetav1.CoreHTTPPortName,
-				Port:       harbormetav1.HTTPPort,
-				TargetPort: intstr.FromString(harbormetav1.CoreHTTPPortName),
-				Protocol:   corev1.ProtocolTCP,
-			}, {
-				Name:       harbormetav1.CoreHTTPSPortName,
-				Port:       harbormetav1.HTTPSPort,
-				TargetPort: intstr.FromString(harbormetav1.CoreHTTPSPortName),
-				Protocol:   corev1.ProtocolTCP,
-			}},
+			Ports: ports,
 			Selector: map[string]string{
 				r.Label("name"):      name,
 				r.Label("namespace"): namespace,

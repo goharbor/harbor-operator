@@ -11,8 +11,13 @@ const (
 )
 
 const (
-	CoreHTTPPortName  = "http"
-	CoreHTTPSPortName = "https"
+	CoreHTTPPortName    = "http"
+	CoreHTTPSPortName   = "https"
+	CoreMetricsPortName = "metrics"
+)
+
+const (
+	ExporterMetricsPortName = "metrics"
 )
 
 const (

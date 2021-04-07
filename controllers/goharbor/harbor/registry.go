@@ -194,7 +194,7 @@ func (r *Reconciler) GetRegistryHTTPSecret(ctx context.Context, harbor *goharbor
 	}, nil
 }
 
-func (r *Reconciler) GetRegistry(ctx context.Context, harbor *goharborv1.Harbor) (*goharborv1.Registry, error) {
+func (r *Reconciler) GetRegistry(ctx context.Context, harbor *goharborv1.Harbor) (*goharborv1.Registry, error) { // nolint:funlen
 	name := r.NormalizeName(ctx, harbor.GetName())
 	namespace := harbor.GetNamespace()
 
@@ -204,6 +204,17 @@ func (r *Reconciler) GetRegistry(ctx context.Context, harbor *goharborv1.Harbor)
 	redis := harbor.Spec.RedisConnection(harbormetav1.RegistryRedis)
 
 	tls := harbor.Spec.InternalTLS.GetComponentTLSSpec(r.GetInternalTLSCertificateSecretName(ctx, harbor, harbormetav1.RegistryTLS))
+
+	var httpDebug *goharborv1.RegistryHTTPDebugSpec
+	if harbor.Spec.Registry.Metrics.IsEnabled() {
+		httpDebug = &goharborv1.RegistryHTTPDebugSpec{
+			Port: harbor.Spec.Registry.Metrics.Port,
+			Prometheus: goharborv1.RegistryHTTPDebugPrometheusSpec{
+				Enabled: true,
+				Path:    harbor.Spec.Registry.Metrics.Path,
+			},
+		}
+	}
 
 	return &goharborv1.Registry{
 		ObjectMeta: metav1.ObjectMeta{
@@ -235,6 +246,7 @@ func (r *Reconciler) GetRegistry(ctx context.Context, harbor *goharborv1.Harbor)
 					Storage: harbor.Spec.Registry.StorageMiddlewares,
 				},
 				HTTP: goharborv1.RegistryHTTPSpec{
+					Debug:        httpDebug,
 					RelativeURLs: harbor.Spec.Registry.RelativeURLs,
 					SecretRef:    httpSecretName,
 					TLS:          tls,

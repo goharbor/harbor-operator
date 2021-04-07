@@ -42,6 +42,36 @@ func (l HarborLogLevel) Core() CoreLogLevel {
 }
 
 // +kubebuilder:validation:Type=string
+// +kubebuilder:validation:Enum={"debug","info","warning","error","panic"}
+// ExporterLogLevel is the log level for Exporter.
+type ExporterLogLevel string
+
+const (
+	ExporterDebug   ExporterLogLevel = "debug"
+	ExporterInfo    ExporterLogLevel = "info"
+	ExporterWarning ExporterLogLevel = "warning"
+	ExporterError   ExporterLogLevel = "error"
+	ExporterFatal   ExporterLogLevel = "panic"
+)
+
+func (l HarborLogLevel) Exporter() ExporterLogLevel {
+	switch l {
+	default:
+		return ExporterInfo
+	case HarborDebug:
+		return ExporterDebug
+	case HarborInfo:
+		return ExporterInfo
+	case HarborWarning:
+		return ExporterWarning
+	case HarborError:
+		return ExporterError
+	case HarborFatal:
+		return ExporterFatal
+	}
+}
+
+// +kubebuilder:validation:Type=string
 // +kubebuilder:validation:Enum={"debug","info","warn","error"}
 // RegistryLogLevel is the log level for Registry.
 type RegistryLogLevel string

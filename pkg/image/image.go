@@ -146,6 +146,7 @@ func init() { // nolint:gochecknoinits
 	harborComponentImageNames := map[string]string{
 		"chartmuseum":  "chartmuseum-photon",
 		"core":         "harbor-core",
+		"exporter":     "harbor-exporter",
 		"jobservice":   "harbor-jobservice",
 		"notaryserver": "notary-server-photon",
 		"notarysigner": "notary-signer-photon",
@@ -162,15 +163,15 @@ func init() { // nolint:gochecknoinits
 	// Register the cluster service components
 	RegisterRepsitory("cluster-redis", "", "*") // the - repository of dockerhub
 	RegisterImageName("cluster-redis", "redis", "*")
-	RegisterTag("cluster-redis", "5.0-alpine", "2.1.2")
+	RegisterTag("cluster-redis", "5.0-alpine", "2.2.1")
 
 	RegisterRepsitory("cluster-postgresql", "registry.opensource.zalan.do/acid", "*")
 	RegisterImageName("cluster-postgresql", "spilo-12", "*")
-	RegisterTag("cluster-postgresql", "1.6-p3", "2.1.2")
+	RegisterTag("cluster-postgresql", "1.6-p3", "2.2.1")
 
 	RegisterRepsitory("cluster-minio", "minio", "*") // the minio repository of dockerhub
 	RegisterImageName("cluster-minio", "minio", "*")
-	RegisterTag("cluster-minio", "RELEASE.2020-08-13T02-39-50Z", "2.1.2")
+	RegisterTag("cluster-minio", "RELEASE.2020-08-13T02-39-50Z", "2.2.1")
 }
 
 type Options struct {
