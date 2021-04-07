@@ -2,6 +2,7 @@ package harbor
 
 import (
 	"context"
+	"net/url"
 	"time"
 
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
@@ -30,7 +31,7 @@ type Reconciler struct {
 
 // +kubebuilder:rbac:groups=goharbor.io,resources=harbors,verbs=get;list;watch
 // +kubebuilder:rbac:groups=goharbor.io,resources=harbors/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=goharbor.io,resources=chartmuseums;cores;jobservices;notaryservers;notarysigners;portals;registries;registrycontrollers;trivies,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=goharbor.io,resources=chartmuseums;cores;exporters;jobservices;notaryservers;notarysigners;portals;registries;registrycontrollers;trivies,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=networking.k8s.io,resources=ingresses,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=networking.k8s.io,resources=networkpolicies,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=cert-manager.io,resources=issuers;certificates,verbs=get;list;watch;create;update;patch;delete
@@ -58,6 +59,7 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 		For(r.NewEmpty(ctx)).
 		Owns(&goharborv1.ChartMuseum{}).
 		Owns(&goharborv1.Core{}).
+		Owns(&goharborv1.Exporter{}).
 		Owns(&goharborv1.JobService{}).
 		Owns(&goharborv1.Portal{}).
 		Owns(&goharborv1.Registry{}).
@@ -73,6 +75,29 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 			MaxConcurrentReconciles: concurrentReconcile,
 		}).
 		Complete(r)
+}
+
+func (r *Reconciler) getAdminPasswordRef(ctx context.Context, harbor *goharborv1.Harbor) string {
+	adminPasswordRef := harbor.Spec.HarborAdminPasswordRef
+	if len(adminPasswordRef) == 0 {
+		adminPasswordRef = r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String(), "admin-password")
+	}
+
+	return adminPasswordRef
+}
+
+func (r *Reconciler) getCoreURL(ctx context.Context, harbor *goharborv1.Harbor) string {
+	host := r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String())
+	if harbor.Spec.InternalTLS.IsEnabled() {
+		host += ":443"
+	} else {
+		host += ":80"
+	}
+
+	return (&url.URL{
+		Scheme: harbor.Spec.InternalTLS.GetScheme(),
+		Host:   host,
+	}).String()
 }
 
 func New(ctx context.Context, configStore *configstore.Store) (commonCtrl.Reconciler, error) {

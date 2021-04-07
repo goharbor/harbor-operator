@@ -1,20 +1,6 @@
 package v1alpha3
 
 const (
-	HarborClairDatabaseHostKey     = "host"
-	HarborClairDatabasePortKey     = "port"
-	HarborClairDatabaseNameKey     = "database"
-	HarborClairDatabaseUserKey     = "username"
-	HarborClairDatabasePasswordKey = "password"
-	HarborClairDatabaseSSLKey      = "ssl"
-)
-
-const (
-	HarborClairAdapterBrokerURLKey       = "url"
-	HarborClairAdapterBrokerNamespaceKey = "namespace"
-)
-
-const (
 	HarborNotaryServerDatabaseHostKey     = "host"
 	HarborNotaryServerDatabasePortKey     = "port"
 	HarborNotaryServerDatabaseNameKey     = "database"

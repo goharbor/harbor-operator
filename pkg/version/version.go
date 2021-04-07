@@ -16,7 +16,7 @@ var (
 
 func init() { // nolint:gochecknoinits
 	RegisterKnowVersions(
-		"2.1.2",
+		"2.2.1",
 	)
 }
 

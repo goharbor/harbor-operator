@@ -262,6 +262,9 @@ type HarborComponentsSpec struct {
 	ChartMuseum *ChartMuseumComponentSpec `json:"chartmuseum,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	Exporter *ExporterComponentSpec `json:"exporter,omitempty"`
+
+	// +kubebuilder:validation:Optional
 	Trivy *TrivyComponentSpec `json:"trivy,omitempty"`
 
 	// +kubebuilder:validation:Optional
@@ -300,14 +303,15 @@ func (r *HarborDatabaseSpec) GetPostgresqlConnection(component harbormetav1.Comp
 	switch component { // nolint:exhaustive
 	case harbormetav1.CoreComponent:
 		databaseName = harbormetav1.CoreDatabase
+	case harbormetav1.ExporterComponent:
+		// exporter requires to access the database of core component
+		databaseName = harbormetav1.CoreDatabase
 	case harbormetav1.NotarySignerComponent:
 		sslMode = r.getSSLModeForNotary()
 		databaseName = harbormetav1.NotarySignerDatabase
 	case harbormetav1.NotaryServerComponent:
 		sslMode = r.getSSLModeForNotary()
 		databaseName = harbormetav1.NotaryServerDatabase
-	case harbormetav1.ClairComponent:
-		databaseName = harbormetav1.ClairDatabase
 	default:
 		return nil, harbormetav1.ErrUnsupportedComponent
 	}
@@ -370,6 +374,9 @@ type CoreComponentSpec struct {
 
 	// +kubebuilder:validation:Required
 	TokenIssuer cmmeta.ObjectReference `json:"tokenIssuer,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	Metrics *harbormetav1.MetricsSpec `json:"metrics,omitempty"`
 }
 
 type JobServiceComponentSpec struct {
@@ -392,6 +399,9 @@ type RegistryComponentSpec struct {
 
 	// +kubebuilder:validation:Optional
 	StorageMiddlewares []RegistryMiddlewareSpec `json:"storageMiddlewares,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	Metrics *harbormetav1.MetricsSpec `json:"metrics,omitempty"`
 }
 
 type ChartMuseumComponentSpec struct {
@@ -404,6 +414,41 @@ type ChartMuseumComponentSpec struct {
 	// Harbor defaults ChartMuseum to returning relative urls,
 	// if you want using absolute url you should enable it
 	AbsoluteURL bool `json:"absoluteUrl"`
+}
+
+type ExporterComponentSpec struct {
+	harbormetav1.ComponentSpec `json:",inline"`
+
+	// +kubebuilder:validation:Optional
+	Cache HarborExporterCacheSpec `json:"cache,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=8001
+	// +kubebuilder:validation:Minimum=1
+	// The port of the exporter.
+	Port int32 `json:"port"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default="/metrics"
+	// +kubebuilder:validation:Pattern="/.+"
+	// The metrics path of the exporter.
+	Path string `json:"path"`
+}
+
+type HarborExporterCacheSpec struct {
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type="string"
+	// +kubebuilder:validation:Pattern="([0-9]+h)?([0-9]+m)?([0-9]+s)?"
+	// +kubebuilder:default="30s"
+	// The duration to cache info from the database and core.
+	Duration *metav1.Duration `json:"duration,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type="string"
+	// +kubebuilder:validation:Pattern="([0-9]+h)?([0-9]+m)?([0-9]+s)?"
+	// +kubebuilder:default="4h"
+	// The interval to clean the cache info from the database and core.
+	CleanInterval *metav1.Duration `json:"cleanInterval,omitempty"`
 }
 
 type TrivyComponentSpec struct {

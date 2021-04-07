@@ -17,6 +17,7 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/image"
 	"github.com/goharbor/harbor-operator/pkg/version"
 	"github.com/goharbor/harbor/src/common"
+	registry "github.com/goharbor/harbor/src/pkg/reg/model"
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -30,33 +31,44 @@ var (
 	fsGroup    int64 = 10000
 	runAsGroup int64 = 10000
 	runAsUser  int64 = 10000
+
+	metricNamespace = "harbor"
+	metricSubsystem = "core"
 )
 
 const (
-	healthCheckPeriod                        = 90 * time.Second
-	ConfigPath                               = "/etc/core"
-	VolumeName                               = "configuration"
-	InternalCertificatesVolumeName           = "internal-certificates"
-	InternalCertificateAuthorityDirectory    = "/harbor_cust_cert"
-	InternalCertificatesPath                 = ConfigPath + "/ssl"
-	DockerHubRegistryTypesForProxyCache      = "docker-hub"
-	HarborRegistryTypesForProxyCache         = "harbor"
-	DefaultAllowedRegistryTypesForProxyCache = DockerHubRegistryTypesForProxyCache + "," + HarborRegistryTypesForProxyCache
-	PublicCertificateVolumeName              = "ca-download"
-	PublicCertificatePath                    = ConfigPath + "/ca"
-	EncryptionKeyVolumeName                  = "encryption"
-	EncryptionKeyPath                        = "key"
-	HealthPath                               = "/api/v2.0/ping"
-	TokenStorageVolumeName                   = "psc"
-	TokenStoragePath                         = ConfigPath + "/token"
-	ServiceTokenCertificateVolumeName        = "token-service-private-key"
-	ServiceTokenCertificatePath              = ConfigPath + "/private_key.pem"
+	healthCheckPeriod                     = 90 * time.Second
+	ConfigPath                            = "/etc/core"
+	VolumeName                            = "configuration"
+	InternalCertificatesVolumeName        = "internal-certificates"
+	InternalCertificateAuthorityDirectory = "/harbor_cust_cert"
+	InternalCertificatesPath              = ConfigPath + "/ssl"
+	PublicCertificateVolumeName           = "ca-download"
+	PublicCertificatePath                 = ConfigPath + "/ca"
+	EncryptionKeyVolumeName               = "encryption"
+	EncryptionKeyPath                     = "key"
+	HealthPath                            = "/api/v2.0/ping"
+	TokenStorageVolumeName                = "psc"
+	TokenStoragePath                      = ConfigPath + "/token"
+	ServiceTokenCertificateVolumeName     = "token-service-private-key"
+	ServiceTokenCertificatePath           = ConfigPath + "/private_key.pem"
 )
 
 const (
 	httpsPort = 8443 // https://github.com/goharbor/harbor/blob/46d7434d0b0e647d4638e69693d4eddf50841ccb/src/core/main.go#L215
 	httpPort  = 8080 // https://github.com/goharbor/harbor/blob/2fb1cc89d9ef9313842cc68b4b7c36be73681505/src/common/const.go#L127
 )
+
+func getDefaultAllowedRegistryTypesForProxyCache() string {
+	return strings.Join([]string{
+		registry.RegistryTypeDockerHub,
+		registry.RegistryTypeHarbor,
+		registry.RegistryTypeAzureAcr,
+		registry.RegistryTypeAwsEcr,
+		registry.RegistryTypeGoogleGcr,
+		registry.RegistryTypeQuay,
+	}, ",")
+}
 
 func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1.Core) (*appsv1.Deployment, error) { // nolint:funlen
 	getImageOptions := []image.Option{
@@ -200,6 +212,13 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1.Core) (
 		return nil, errors.Wrap(err, "cannot configure environment variables")
 	}
 
+	metricsEnvs, err := r.getMetricsEnvVars(core)
+	if err != nil {
+		return nil, errors.Wrap(err, "get metrics environment variables")
+	}
+
+	envs = append(envs, metricsEnvs...)
+
 	envs = append(envs, []corev1.EnvVar{{
 		Name:  "LOG_LEVEL",
 		Value: string(core.Spec.Log.Level),
@@ -290,7 +309,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1.Core) (
 		Value: strconv.FormatBool(core.Spec.Components.TLS.Enabled()),
 	}, {
 		Name:  "PERMITTED_REGISTRY_TYPES_FOR_PROXY_CACHE",
-		Value: DefaultAllowedRegistryTypesForProxyCache,
+		Value: getDefaultAllowedRegistryTypesForProxyCache(),
 	}}...)
 
 	if core.Spec.Database.MaxIdleConnections != nil {
@@ -424,15 +443,32 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1.Core) (
 		})
 	}
 
-	port := harbormetav1.CoreHTTPPortName
+	port := httpPort
+	portName := harbormetav1.CoreHTTPPortName
+
 	if core.Spec.Components.TLS.Enabled() {
-		port = harbormetav1.CoreHTTPSPortName
+		port = httpsPort
+		portName = harbormetav1.CoreHTTPSPortName
 	}
 
 	httpGET := &corev1.HTTPGetAction{
 		Path:   HealthPath,
-		Port:   intstr.FromString(port),
+		Port:   intstr.FromString(portName),
 		Scheme: core.Spec.Components.TLS.GetScheme(),
+	}
+
+	containerPorts := []corev1.ContainerPort{{
+		Name:          portName,
+		ContainerPort: int32(port),
+		Protocol:      corev1.ProtocolTCP,
+	}}
+
+	if core.Spec.Metrics.IsEnabled() {
+		containerPorts = append(containerPorts, corev1.ContainerPort{
+			Name:          harbormetav1.CoreMetricsPortName,
+			ContainerPort: core.Spec.Metrics.Port,
+			Protocol:      corev1.ProtocolTCP,
+		})
 	}
 
 	deploy := &appsv1.Deployment{
@@ -467,16 +503,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1.Core) (
 					Containers: []corev1.Container{{
 						Name:  controllers.Core.String(),
 						Image: image,
-						Ports: []corev1.ContainerPort{{
-							Name:          harbormetav1.CoreHTTPPortName,
-							ContainerPort: httpPort,
-							Protocol:      corev1.ProtocolTCP,
-						}, {
-							Name:          harbormetav1.CoreHTTPSPortName,
-							ContainerPort: httpsPort,
-							Protocol:      corev1.ProtocolTCP,
-						}},
-
+						Ports: containerPorts,
 						// https://github.com/goharbor/harbor/blob/master/make/photon/prepare/templates/core/env.jinja
 						Env: envs,
 						LivenessProbe: &corev1.Probe{
@@ -500,4 +527,36 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1.Core) (
 	core.Spec.ComponentSpec.ApplyToDeployment(deploy)
 
 	return deploy, nil
+}
+
+func (r *Reconciler) getMetricsEnvVars(core *goharborv1.Core) ([]corev1.EnvVar, error) {
+	if !core.Spec.Metrics.IsEnabled() {
+		envs, err := harbor.EnvVars(map[string]harbor.ConfigValue{
+			common.MetricEnable: harbor.Value(strconv.FormatBool(false)),
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		return envs, nil
+	}
+
+	envs, err := harbor.EnvVars(map[string]harbor.ConfigValue{
+		common.MetricEnable: harbor.Value(strconv.FormatBool(core.Spec.Metrics.Enabled)),
+		common.MetricPort:   harbor.Value(fmt.Sprintf("%d", core.Spec.Metrics.Port)),
+		common.MetricPath:   harbor.Value(core.Spec.Metrics.Path),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	envs = append(envs, []corev1.EnvVar{{
+		Name:  "METRIC_NAMESPACE",
+		Value: metricNamespace,
+	}, {
+		Name:  "METRIC_SUBSYSTEM",
+		Value: metricSubsystem,
+	}}...)
+
+	return envs, nil
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"path"
 	"strings"
+	"time"
 
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
@@ -26,6 +27,7 @@ const (
 	InternalCertificatesPath              = ConfigPath + "/ssl"
 	LocalStorageVolume                    = "storage"
 	DefaultLocalStoragePath               = "/mnt/chartstorage"
+	StorageTimestampTolerance             = 1 * time.Second
 )
 
 var (
@@ -59,6 +61,9 @@ func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1.
 	envs := []corev1.EnvVar{{
 		Name:  "CONFIG",
 		Value: path.Join(ConfigPath, ConfigName),
+	}, {
+		Name:  "STORAGE_TIMESTAMP_TOLERANCE",
+		Value: StorageTimestampTolerance.String(),
 	}}
 
 	volumes := []corev1.Volume{

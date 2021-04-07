@@ -374,11 +374,6 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1.Harbor) (*g
 		}
 	}
 
-	adminPasswordRef := harbor.Spec.HarborAdminPasswordRef
-	if len(adminPasswordRef) == 0 {
-		adminPasswordRef = r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String(), "admin-password")
-	}
-
 	coreSecretRef := r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String(), "secret")
 	encryptionKeyRef := r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String(), "encryptionkey")
 	csrfRef := r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String(), "csrf")
@@ -421,6 +416,9 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1.Harbor) (*g
 		},
 		Spec: goharborv1.CoreSpec{
 			ComponentSpec: harbor.GetComponentSpec(ctx, harbormetav1.CoreComponent),
+			Log: goharborv1.CoreLogSpec{
+				Level: harbor.Spec.LogLevel.Core(),
+			},
 			Components: goharborv1.CoreComponentsSpec{
 				Registry: goharborv1.CoreComponentsRegistrySpec{
 					RegistryControllerConnectionSpec: goharborv1.RegistryControllerConnectionSpec{
@@ -448,7 +446,7 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1.Harbor) (*g
 				TLS:          tls,
 			},
 			CoreConfig: goharborv1.CoreConfig{
-				AdminInitialPasswordRef: adminPasswordRef,
+				AdminInitialPasswordRef: r.getAdminPasswordRef(ctx, harbor),
 				SecretRef:               coreSecretRef,
 				PublicCertificateRef:    publicCertificateRef,
 			},
@@ -463,6 +461,7 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1.Harbor) (*g
 			},
 			Proxy:                harbor.Spec.Proxy,
 			CertificateInjection: harbor.Spec.Core.CertificateInjection,
+			Metrics:              harbor.Spec.Core.Metrics,
 		},
 	}, nil
 }

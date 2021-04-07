@@ -14,7 +14,6 @@ const (
 	JobServiceRedis  = ComponentWithRedis(JobServiceComponent)
 	RegistryRedis    = ComponentWithRedis(RegistryComponent)
 	ChartMuseumRedis = ComponentWithRedis(ChartMuseumComponent)
-	ClairRedis       = ComponentWithRedis(ClairComponent)
 	TrivyRedis       = ComponentWithRedis(TrivyComponent)
 )
 
@@ -117,7 +116,6 @@ const (
 	registryRedisDatabaseIndex    = 1
 	jobServiceRedisDatabaseIndex  = 2
 	chartMuseumRedisDatabaseIndex = 3
-	clairRedisDatabaseIndex       = 4
 	trivyRedisDatabaseIndex       = 5
 )
 
@@ -127,7 +125,6 @@ func (r ComponentWithRedis) Index() int32 {
 		JobServiceRedis:  jobServiceRedisDatabaseIndex,
 		RegistryRedis:    registryRedisDatabaseIndex,
 		ChartMuseumRedis: chartMuseumRedisDatabaseIndex,
-		ClairRedis:       clairRedisDatabaseIndex,
 		TrivyRedis:       trivyRedisDatabaseIndex,
 	}[r]
 }

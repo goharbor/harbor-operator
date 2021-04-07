@@ -70,7 +70,7 @@ metadata:
 spec:
   logLevel: info
   imageSource:
-    repository: quay.io/goharbor
+    repository: ghcr.io/goharbor
   harborAdminPasswordRef: admin-core-secret
   externalURL: https://core.harbor.domain
   expose:
