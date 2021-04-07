@@ -75,6 +75,9 @@ type CoreSpec struct {
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	CSRFKeyRef string `json:"csrfKeyRef"`
+
+	// +kubebuilder:validation:Optional
+	Metrics *harbormetav1.MetricsSpec `json:"metrics,omitempty"`
 }
 
 type CoreRedisSpec struct {
@@ -230,19 +233,6 @@ type CoreComponentsTrivySpec struct {
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Pattern="https?://.+"
 	AdapterURL string `json:"adapterURL"`
-}
-
-type CoreComponentsClairSpec struct {
-	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Pattern="https?://.+"
-	URL string `json:"url"`
-
-	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Pattern="https?://.+"
-	AdapterURL string `json:"adapterURL"`
-
-	// +kubebuilder:validation:Required
-	Database harbormetav1.PostgresConnectionWithParameters `json:"database"`
 }
 
 type CoreComponentsNotaryServerSpec struct {

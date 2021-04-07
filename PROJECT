@@ -30,6 +30,9 @@ resources:
   kind: Core
   version: v1alpha3
 - group: goharbor
+  kind: Exporter
+  version: v1alpha3
+- group: goharbor
   kind: HarborCluster
   version: v1alpha3
 version: "2"

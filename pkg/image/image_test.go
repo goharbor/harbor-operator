@@ -47,9 +47,9 @@ var _ = Describe("Get image", func() {
 
 	Describe("Get image with repository", func() {
 		It("Should pass", func() {
-			image, err := GetImage(ctx, "core", WithRepository("quay.io/goharbor/"))
+			image, err := GetImage(ctx, "core", WithRepository("ghcr.io/goharbor/"))
 			Expect(err).ToNot(HaveOccurred())
-			Expect(image).To(Equal(fmt.Sprintf("quay.io/goharbor/harbor-core:v%s", version.Default())))
+			Expect(image).To(Equal(fmt.Sprintf("ghcr.io/goharbor/harbor-core:v%s", version.Default())))
 		})
 	})
 
@@ -63,9 +63,9 @@ var _ = Describe("Get image", func() {
 
 	Describe("Get image with repository and tag suffix", func() {
 		It("Should pass", func() {
-			image, err := GetImage(ctx, "core", WithRepository("quay.io/goharbor/"), WithTagSuffix("-suffix"))
+			image, err := GetImage(ctx, "core", WithRepository("ghcr.io/goharbor/"), WithTagSuffix("-suffix"))
 			Expect(err).ToNot(HaveOccurred())
-			Expect(image).To(Equal(fmt.Sprintf("quay.io/goharbor/harbor-core:v%s-suffix", version.Default())))
+			Expect(image).To(Equal(fmt.Sprintf("ghcr.io/goharbor/harbor-core:v%s-suffix", version.Default())))
 		})
 	})
 

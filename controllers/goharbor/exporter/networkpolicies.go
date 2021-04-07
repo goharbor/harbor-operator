@@ -1,4 +1,4 @@
-package core
+package exporter
 
 import (
 	"context"
@@ -14,8 +14,8 @@ import (
 
 type NetworkPolicy graph.Resource
 
-func (r *Reconciler) AddNetworkPolicies(ctx context.Context, core *goharborv1.Core) error {
-	areNetworkPoliciesEnabled, err := r.AreNetworkPoliciesEnabled(ctx, core)
+func (r *Reconciler) AddNetworkPolicies(ctx context.Context, exporter *goharborv1.Exporter) error {
+	areNetworkPoliciesEnabled, err := r.AreNetworkPoliciesEnabled(ctx, exporter)
 	if err != nil {
 		return errors.Wrapf(err, "cannot get status")
 	}
@@ -24,7 +24,7 @@ func (r *Reconciler) AddNetworkPolicies(ctx context.Context, core *goharborv1.Co
 		return nil
 	}
 
-	_, err = r.AddIngressNetworkPolicy(ctx, core)
+	_, err = r.AddIngressNetworkPolicy(ctx, exporter)
 	if err != nil {
 		return errors.Wrapf(err, "ingress")
 	}
@@ -32,8 +32,8 @@ func (r *Reconciler) AddNetworkPolicies(ctx context.Context, core *goharborv1.Co
 	return nil
 }
 
-func (r *Reconciler) AddIngressNetworkPolicy(ctx context.Context, core *goharborv1.Core) (NetworkPolicy, error) {
-	networkPolicy, err := r.GetIngressNetworkPolicy(ctx, core)
+func (r *Reconciler) AddIngressNetworkPolicy(ctx context.Context, exporter *goharborv1.Exporter) (NetworkPolicy, error) {
+	networkPolicy, err := r.GetIngressNetworkPolicy(ctx, exporter)
 	if err != nil {
 		return nil, errors.Wrap(err, "get")
 	}
@@ -43,35 +43,25 @@ func (r *Reconciler) AddIngressNetworkPolicy(ctx context.Context, core *goharbor
 	return NetworkPolicy(networkPolicyRes), errors.Wrap(err, "add")
 }
 
-func (r *Reconciler) GetIngressNetworkPolicy(ctx context.Context, core *goharborv1.Core) (*netv1.NetworkPolicy, error) {
-	var port intstr.IntOrString
-
-	if core.Spec.Components.TLS != nil {
-		port = intstr.FromString(harbormetav1.CoreHTTPSPortName)
-	} else {
-		port = intstr.FromString(harbormetav1.CoreHTTPPortName)
-	}
-
-	metricsPort := intstr.FromString(harbormetav1.CoreMetricsPortName)
+func (r *Reconciler) GetIngressNetworkPolicy(ctx context.Context, exporter *goharborv1.Exporter) (*netv1.NetworkPolicy, error) {
+	port := intstr.FromString(harbormetav1.ExporterMetricsPortName)
 
 	return &netv1.NetworkPolicy{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      r.NormalizeName(ctx, core.GetName(), "ingress"),
-			Namespace: core.GetNamespace(),
+			Name:      r.NormalizeName(ctx, exporter.GetName(), "ingress"),
+			Namespace: exporter.GetNamespace(),
 		},
 		Spec: netv1.NetworkPolicySpec{
 			Ingress: []netv1.NetworkPolicyIngressRule{
 				{
 					Ports: []netv1.NetworkPolicyPort{{
 						Port: &port,
-					}, {
-						Port: &metricsPort,
 					}},
 				},
 			},
 			PodSelector: metav1.LabelSelector{
 				MatchLabels: map[string]string{
-					r.Label("name"): r.NormalizeName(ctx, core.GetName()),
+					r.Label("name"): r.NormalizeName(ctx, exporter.GetName()),
 				},
 			},
 			PolicyTypes: []netv1.PolicyType{

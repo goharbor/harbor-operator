@@ -156,6 +156,7 @@ rules:
   resources:
   - chartmuseums
   - cores
+  - exporters
   - jobservices
   - notaryservers
   - notarysigners
@@ -191,6 +192,22 @@ rules:
   - goharbor.io
   resources:
   - cores/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - goharbor.io
+  resources:
+  - exporters
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - goharbor.io
+  resources:
+  - exporters/status
   verbs:
   - get
   - patch

@@ -109,7 +109,7 @@ metadata:
 spec:
   logLevel: info
   imageSource:
-    repository: quay.io/goharbor
+    repository: ghcr.io/goharbor
   harborAdminPasswordRef: admin-core-secret
   externalURL: https://core.harbor.domain
   expose:
@@ -134,12 +134,17 @@ spec:
   internalTLS:
     enabled: true
   portal: {}
-  registry: {}
+  registry:
+    metrics:
+      enabled: true
   core:
     tokenIssuer:
       name: selfsigned-issuer
       kind: Issuer
+    metrics:
+      enabled: true
   chartmuseum: {}
+  exporter: {}
   notary:
     migrationEnabled: true
   imageChartStorage:

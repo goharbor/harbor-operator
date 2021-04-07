@@ -14,23 +14,38 @@ func (r *Reconciler) GetService(ctx context.Context, registry *goharborv1.Regist
 	name := r.NormalizeName(ctx, registry.GetName())
 	namespace := registry.GetNamespace()
 
+	ports := []corev1.ServicePort{{
+		Name:       harbormetav1.RegistryAPIPortName,
+		Port:       registry.Spec.HTTP.TLS.GetInternalPort(),
+		TargetPort: intstr.FromString(harbormetav1.RegistryAPIPortName),
+		Protocol:   corev1.ProtocolTCP,
+	}}
+
+	var annotations map[string]string
+
+	if registry.Spec.HTTP.Debug != nil && registry.Spec.HTTP.Debug.Prometheus.Enabled {
+		ports = append(ports, corev1.ServicePort{
+			Name:       harbormetav1.RegistryMetricsPortName,
+			Port:       registry.Spec.HTTP.Debug.Port,
+			TargetPort: intstr.FromString(harbormetav1.RegistryMetricsPortName),
+			Protocol:   corev1.ProtocolTCP,
+		})
+
+		annotations = harbormetav1.AddPrometheusAnnotations(
+			annotations,
+			registry.Spec.HTTP.Debug.Port,
+			registry.Spec.HTTP.Debug.Prometheus.Path,
+		)
+	}
+
 	return &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
+			Name:        name,
+			Namespace:   namespace,
+			Annotations: annotations,
 		},
 		Spec: corev1.ServiceSpec{
-			Ports: []corev1.ServicePort{{
-				Name:       harbormetav1.RegistryAPIPortName,
-				Port:       registry.Spec.HTTP.TLS.GetInternalPort(),
-				TargetPort: intstr.FromString(harbormetav1.RegistryAPIPortName),
-				Protocol:   corev1.ProtocolTCP,
-			}, {
-				Name:       harbormetav1.RegistryMetricsPortName,
-				Port:       registry.Spec.HTTP.TLS.GetInternalPort() + 1,
-				TargetPort: intstr.FromString(harbormetav1.RegistryMetricsPortName),
-				Protocol:   corev1.ProtocolTCP,
-			}},
+			Ports: ports,
 			Selector: map[string]string{
 				r.Label("name"):      name,
 				r.Label("namespace"): namespace,
