@@ -7,10 +7,11 @@ import (
 	"github.com/go-logr/logr"
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/common"
 	"github.com/goharbor/harbor-operator/pkg/cluster/k8s"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
+	"github.com/goharbor/harbor-operator/pkg/resources/checksum"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -35,7 +36,7 @@ func (harbor *Controller) Apply(ctx context.Context, harborcluster *goharborv1.H
 
 	harborCR := &goharborv1.Harbor{}
 	nsdName := harbor.getHarborCRNamespacedName(harborcluster)
-	desiredCR := harbor.getHarborCR(harborcluster, opts.Dependencies)
+	desiredCR := harbor.getHarborCR(ctx, harborcluster, opts.Dependencies)
 
 	err := harbor.KubeClient.Get(ctx, nsdName, harborCR)
 	if err != nil {
@@ -58,12 +59,13 @@ func (harbor *Controller) Apply(ctx context.Context, harborcluster *goharborv1.H
 	}
 
 	// Found the existing one and check whether it needs to be updated
-	same := equality.Semantic.DeepDerivative(desiredCR.Spec, harborCR.Spec)
-	if !same {
+	if !common.Equals(ctx, harbor.Scheme, harborcluster, harborCR) {
 		// Spec is changed, do update now
 		harbor.Log.Info("Updating Harbor service", "name", nsdName)
 
 		harborCR.Spec = desiredCR.Spec
+		checksum.CopyMarkers(desiredCR, harborCR)
+
 		if err := harbor.KubeClient.Update(ctx, harborCR); err != nil {
 			return harborNotReadyStatus(UpdateHarborCRError, err.Error()), err
 		}
@@ -97,7 +99,7 @@ func NewHarborController(options ...k8s.Option) *Controller {
 }
 
 // getHarborCR will get a Harbor CR from the harborcluster definition.
-func (harbor *Controller) getHarborCR(harborcluster *goharborv1.HarborCluster, dependencies *lcm.CRStatusCollection) *goharborv1.Harbor {
+func (harbor *Controller) getHarborCR(ctx context.Context, harborcluster *goharborv1.HarborCluster, dependencies *lcm.CRStatusCollection) *goharborv1.Harbor {
 	namespacedName := harbor.getHarborCRNamespacedName(harborcluster)
 
 	var spec goharborv1.HarborSpec
@@ -138,6 +140,10 @@ func (harbor *Controller) getHarborCR(harborcluster *goharborv1.HarborCluster, d
 
 	// inject cert to harbor comps
 	injectS3CertToHarborComponents(harborCR)
+
+	dep := checksum.New(harbor.Scheme)
+	dep.Add(ctx, harborcluster, true)
+	dep.AddAnnotations(harborCR)
 
 	return harborCR
 }

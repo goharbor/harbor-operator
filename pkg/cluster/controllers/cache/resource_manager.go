@@ -8,6 +8,7 @@ import (
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/common"
 	"github.com/goharbor/harbor-operator/pkg/config"
+	"github.com/goharbor/harbor-operator/pkg/resources/checksum"
 	"github.com/ovh/configstore"
 	redisOp "github.com/spotahome/redis-operator/api/redisfailover/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -40,6 +41,7 @@ type redisResourceManager struct {
 	cluster     *goharborv1.HarborCluster
 	configStore *configstore.Store
 	logger      logr.Logger
+	scheme      *runtime.Scheme
 }
 
 const (
@@ -54,10 +56,11 @@ const (
 )
 
 // NewResourceManager constructs a new cache resource manager.
-func NewResourceManager(store *configstore.Store, logger logr.Logger) ResourceManager {
+func NewResourceManager(store *configstore.Store, logger logr.Logger, scheme *runtime.Scheme) ResourceManager {
 	return &redisResourceManager{
 		configStore: store,
 		logger:      logger,
+		scheme:      scheme,
 	}
 }
 
@@ -78,7 +81,7 @@ func (rm *redisResourceManager) GetCacheCR(ctx context.Context, harborcluster *g
 		return nil, err
 	}
 
-	return &redisOp.RedisFailover{
+	rf := &redisOp.RedisFailover{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       redisOp.RFKind,
 			APIVersion: "databases.spotahome.com/v1",
@@ -108,7 +111,13 @@ func (rm *redisResourceManager) GetCacheCR(ctx context.Context, harborcluster *g
 			},
 			Auth: redisOp.AuthSettings{SecretPath: rm.GetSecretName()},
 		},
-	}, nil
+	}
+
+	dependencies := checksum.New(rm.scheme)
+	dependencies.Add(ctx, harborcluster, true)
+	dependencies.AddAnnotations(rf)
+
+	return rf, nil
 }
 
 // GetCacheCRName gets cache cr name.

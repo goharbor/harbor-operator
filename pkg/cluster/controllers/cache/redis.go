@@ -34,7 +34,7 @@ func NewRedisController(opts ...k8s.Option) lcm.Controller {
 		Client:          ctrlOpts.Client,
 		Log:             ctrlOpts.Log,
 		Scheme:          ctrlOpts.Scheme,
-		ResourceManager: NewResourceManager(ctrlOpts.ConfigStore, ctrlOpts.Log),
+		ResourceManager: NewResourceManager(ctrlOpts.ConfigStore, ctrlOpts.Log, ctrlOpts.Scheme),
 		ConfigStore:     ctrlOpts.ConfigStore,
 	}
 }
