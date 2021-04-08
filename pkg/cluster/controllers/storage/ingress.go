@@ -151,7 +151,7 @@ func (m *MinIOController) generateIngress(harborcluster *goharborv1.HarborCluste
 									Path: ingressPath,
 									Backend: netv1.IngressBackend{
 										ServiceName: m.getTenantsServiceName(harborcluster),
-										ServicePort: intstr.FromString(m.getServicePort()),
+										ServicePort: intstr.FromInt(m.getServicePort()),
 									},
 								},
 							},
@@ -163,6 +163,6 @@ func (m *MinIOController) generateIngress(harborcluster *goharborv1.HarborCluste
 	}, err
 }
 
-func (m *MinIOController) getServicePort() string {
+func (m *MinIOController) getServicePort() int {
 	return DefaultServicePort
 }

@@ -16,7 +16,7 @@ resources:
   - ../../config/default # harbor operator
   - https://raw.githubusercontent.com/spotahome/redis-operator/master/example/operator/all-redis-operator-resources.yaml?ref=v1.0.0 # redis operator
   - github.com/zalando/postgres-operator/manifests?ref=v1.5.0 # postgresql operator
-  - github.com/minio/operator?ref=v4.0.3 # minIO storage operator
+  - github.com/minio/operator?ref=v4.0.6 # minIO storage operator
 
 # If you have to override the image path, uncomment this patch and also change the image paths in the patch/patches-images.yaml file.
 # Then rebuild.

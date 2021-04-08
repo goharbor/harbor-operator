@@ -27,7 +27,7 @@ const (
 	DefaultZone         = "zone-harbor"
 	DefaultRegion       = "us-east-1"
 	DefaultBucket       = "harbor"
-	DefaultServicePort  = "80"
+	DefaultServicePort  = 80
 	defaultMinIOService = "minio"
 )
 

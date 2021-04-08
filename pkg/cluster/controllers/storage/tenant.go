@@ -85,7 +85,7 @@ func (m *MinIOController) getMinIOProperties(ctx context.Context, harborcluster 
 
 		storageSpec.S3.CertificateRef = certificateRef
 	} else {
-		endpoint = fmt.Sprintf("http://%s.%s.svc:%s", m.getTenantsServiceName(harborcluster), harborcluster.Namespace, m.getServicePort())
+		endpoint = fmt.Sprintf("http://%s.%s.svc:%d", m.getTenantsServiceName(harborcluster), harborcluster.Namespace, m.getServicePort())
 	}
 
 	storageSpec.S3.RegionEndpoint = strings.ToLower(endpoint)

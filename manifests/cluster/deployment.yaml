@@ -12120,6 +12120,8 @@ spec:
                     type: object
                   sidecarimage:
                     type: string
+                  storageClassName:
+                    type: string
                 type: object
               requestAutoCert:
                 type: boolean
@@ -16075,6 +16077,19 @@ spec:
                     type: object
                   sidecarimage:
                     type: string
+                  storageClassName:
+                    type: string
+                type: object
+              prometheusOperator:
+                properties:
+                  annotations:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  labels:
+                    additionalProperties:
+                      type: string
+                    type: object
                 type: object
               requestAutoCert:
                 type: boolean
@@ -20449,6 +20464,12 @@ rules:
   - '*'
   verbs:
   - '*'
+- apiGroups:
+  - monitoring.coreos.com
+  resources:
+  - servicemonitors
+  verbs:
+  - '*'
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -21343,9 +21364,9 @@ spec:
         name: console
         ports:
         - containerPort: 9090
-          name: http
+          name: console-http
         - containerPort: 9443
-          name: https
+          name: console-https
       serviceAccountName: console-sa
 ---
 apiVersion: apps/v1
@@ -21461,7 +21482,7 @@ spec:
         name: minio-operator
     spec:
       containers:
-      - image: minio/operator:v4.0.3
+      - image: minio/operator:v4.0.6
         imagePullPolicy: IfNotPresent
         name: minio-operator
         resources:

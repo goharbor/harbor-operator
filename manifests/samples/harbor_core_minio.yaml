@@ -123,10 +123,10 @@ spec:
       resources:
         limits:
           cpu: 500m
-          memory: 500Mi
+          memory: 700Mi
         requests:
-          cpu: 100m
-          memory: 250Mi
+          cpu: 200m
+          memory: 500Mi
   inClusterCache:
     kind: Redis
     redisSpec:
