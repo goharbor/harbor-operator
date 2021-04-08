@@ -41,11 +41,6 @@ func (p *PostgreSQLController) Readiness(ctx context.Context, harborcluster *goh
 
 	name := harborcluster.Name
 
-	conn, err = p.GetInClusterDatabaseInfo(ctx, harborcluster)
-	if err != nil {
-		return nil, err
-	}
-
 	var pg api.Postgresql
 	if err := runtime.DefaultUnstructuredConverter.
 		FromUnstructured(curUnstructured.UnstructuredContent(), &pg); err != nil {
@@ -57,6 +52,11 @@ func (p *PostgreSQLController) Readiness(ctx context.Context, harborcluster *goh
 			"Database is not ready",
 			fmt.Sprintf("psql is %s", pg.Status.PostgresClusterStatus),
 		), nil
+	}
+
+	conn, err = p.GetInClusterDatabaseInfo(ctx, harborcluster)
+	if err != nil {
+		return nil, err
 	}
 
 	secret, err := p.DeployComponentSecret(ctx, conn, harborcluster.Namespace, getDatabasePasswordRefName(name))

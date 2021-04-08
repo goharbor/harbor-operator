@@ -11,7 +11,7 @@ spec:
   core:
     secretRef: example-harbor-core-secret
     url: http://example-harbor-core:80
-  image: goharbor/harbor-jobservice:v2.1.2-patch1
+  image: goharbor/harbor-jobservice:v2.2.1-patch1
   jobLoggers:
     files:
     - level: INFO

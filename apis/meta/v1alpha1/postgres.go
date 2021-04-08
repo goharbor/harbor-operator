@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"strings"
 
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -15,7 +16,6 @@ const (
 	CoreDatabase         = "core"
 	NotaryServerDatabase = "notaryserver"
 	NotarySignerDatabase = "notarysigner"
-	ClairDatabase        = "clair"
 )
 
 type ErrPostgresNoHost bool
@@ -58,6 +58,17 @@ type PostgresCredentials struct {
 	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	// Secret containing the password to be used if the server demands password authentication.
 	PasswordRef string `json:"passwordRef,omitempty"`
+}
+
+func (p *PostgresCredentials) GetPasswordEnvVarSource() *corev1.EnvVarSource {
+	return &corev1.EnvVarSource{
+		SecretKeyRef: &corev1.SecretKeySelector{
+			Key: PostgresqlPasswordKey,
+			LocalObjectReference: corev1.LocalObjectReference{
+				Name: p.PasswordRef,
+			},
+		},
+	}
 }
 
 type PostgresConnection struct {

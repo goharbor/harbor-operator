@@ -107,17 +107,6 @@ func (r *Reconciler) GetJobService(ctx context.Context, harbor *goharborv1.Harbo
 	name := r.NormalizeName(ctx, harbor.GetName())
 	namespace := harbor.GetNamespace()
 
-	host := r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String())
-	if harbor.Spec.InternalTLS.IsEnabled() {
-		host += ":443"
-	} else {
-		host += ":80"
-	}
-
-	coreURL := (&url.URL{
-		Scheme: harbor.Spec.InternalTLS.GetScheme(),
-		Host:   host,
-	}).String()
 	coreSecretRef := r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String(), "secret")
 	registryAuthRef := r.NormalizeName(ctx, harbor.GetName(), controllers.Registry.String(), "basicauth")
 	secretRef := r.NormalizeName(ctx, harbor.GetName(), controllers.JobService.String(), "secret")
@@ -158,7 +147,7 @@ func (r *Reconciler) GetJobService(ctx context.Context, harbor *goharborv1.Harbo
 			ComponentSpec: harbor.GetComponentSpec(ctx, harbormetav1.JobServiceComponent),
 			Core: goharborv1.JobServiceCoreSpec{
 				SecretRef: coreSecretRef,
-				URL:       coreURL,
+				URL:       r.getCoreURL(ctx, harbor),
 			},
 			JobLoggers: goharborv1.JobServiceLoggerConfigSpec{
 				Files: []goharborv1.JobServiceLoggerConfigFileSpec{{

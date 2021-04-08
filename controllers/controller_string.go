@@ -14,18 +14,18 @@ func _() {
 	_ = x[Registry-3]
 	_ = x[RegistryController-4]
 	_ = x[ChartMuseum-5]
-	_ = x[NotaryServer-6]
-	_ = x[NotarySigner-7]
-	_ = x[Clair-8]
+	_ = x[Exporter-6]
+	_ = x[NotaryServer-7]
+	_ = x[NotarySigner-8]
 	_ = x[Trivy-9]
 	_ = x[Harbor-10]
 	_ = x[HarborCluster-11]
 	_ = x[HarborConfiguration-12]
 }
 
-const _Controller_name = "corejobserviceportalregistryregistryctlchartmuseumnotaryservernotarysignerclairtrivyharborharborclusterharborconfiguration"
+const _Controller_name = "corejobserviceportalregistryregistryctlchartmuseumexporternotaryservernotarysignertrivyharborharborclusterharborconfiguration"
 
-var _Controller_index = [...]uint8{0, 4, 14, 20, 28, 39, 50, 62, 74, 79, 84, 90, 103, 122}
+var _Controller_index = [...]uint8{0, 4, 14, 20, 28, 39, 50, 58, 70, 82, 87, 93, 106, 125}
 
 func (i Controller) String() string {
 	if i < 0 || i >= Controller(len(_Controller_index)-1) {

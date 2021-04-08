@@ -446,8 +446,8 @@ github.com/gogo/protobuf v1.2.2-0.20190723190241-65acae22fc9d h1:3PaI8p3seN09Vjb
 github.com/gogo/protobuf v1.2.2-0.20190723190241-65acae22fc9d/go.mod h1:SlYgWuQ5SjCEi6WLHjHCa1yvBfUnHcTbrrZtXPKa29o=
 github.com/gogo/protobuf v1.3.1 h1:DqDEcV5aeaTmdFBePNpYsp3FlcVH/2ISVVM9Qf8PSls=
 github.com/gogo/protobuf v1.3.1/go.mod h1:SlYgWuQ5SjCEi6WLHjHCa1yvBfUnHcTbrrZtXPKa29o=
-github.com/goharbor/harbor/src v0.0.0-20210202045805-2227bbdd6524 h1:K8re6yhQi+s657yO7GcJCjbT4Gvk2jKGfNplVjUCWcw=
-github.com/goharbor/harbor/src v0.0.0-20210202045805-2227bbdd6524/go.mod h1:eM5xmHXBwyr++NZFPsCEyxT2y/59qTfxKubmTyPGMm4=
+github.com/goharbor/harbor/src v0.0.0-20210402093914-fbf2409c78c4 h1:52bOMKELEwMTQHMKEMz3Xu+fz6yOzuXGL9RzT396wqw=
+github.com/goharbor/harbor/src v0.0.0-20210402093914-fbf2409c78c4/go.mod h1:eM5xmHXBwyr++NZFPsCEyxT2y/59qTfxKubmTyPGMm4=
 github.com/goji/httpauth v0.0.0-20160601135302-2da839ab0f4d/go.mod h1:nnjvkQ9ptGaCkuDUx6wNykzzlUixGxvkme+H/lnzb+A=
 github.com/golang-migrate/migrate/v4 v4.11.0 h1:uqtd0ysK5WyBQ/T1K2uDIooJV0o2Obt6uPwP062DupQ=
 github.com/golang-migrate/migrate/v4 v4.11.0/go.mod h1:nqbpDbckcYjsCD5I8q5+NI9Tkk7SVcmaF40Ax1eAWhg=

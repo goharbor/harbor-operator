@@ -21,9 +21,9 @@ const (
 	RegistryComponent                            // registry
 	RegistryControllerComponent                  // registryctl
 	ChartMuseumComponent                         // chartmuseum
+	ExporterComponent                            // exporter
 	NotaryServerComponent                        // notaryserver
 	NotarySignerComponent                        // notarysigner
-	ClairComponent                               // clair
 	TrivyComponent                               // trivy
 
 	componentCount
