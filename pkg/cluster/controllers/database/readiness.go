@@ -59,12 +59,7 @@ func (p *PostgreSQLController) Readiness(ctx context.Context, harborcluster *goh
 		return nil, err
 	}
 
-	secret, err := p.DeployComponentSecret(ctx, conn, harborcluster.Namespace, getDatabasePasswordRefName(name))
-	if err != nil {
-		return nil, err
-	}
-
-	if err := controllerutil.SetControllerReference(harborcluster, secret, p.Scheme); err != nil {
+	if err := p.DeployComponentSecret(ctx, conn, getDatabasePasswordRefName(name), harborcluster); err != nil {
 		return nil, err
 	}
 
@@ -106,22 +101,27 @@ func getDatabasePasswordRefName(name string) string {
 }
 
 // DeployComponentSecret deploy harbor component database secret.
-func (p *PostgreSQLController) DeployComponentSecret(ctx context.Context, conn *Connect, ns string, secretName string) (*corev1.Secret, error) {
+func (p *PostgreSQLController) DeployComponentSecret(ctx context.Context, conn *Connect, secretName string, harborcluster *goharborv1.HarborCluster) error {
+	ns := harborcluster.Namespace
 	secret := &corev1.Secret{}
 	sc := p.GetDatabaseSecret(conn, ns, secretName)
+
+	if err := controllerutil.SetControllerReference(harborcluster, sc, p.Scheme); err != nil {
+		return err
+	}
 
 	err := p.Client.Get(ctx, types.NamespacedName{Name: secretName, Namespace: ns}, secret)
 	if kerr.IsNotFound(err) {
 		p.Log.Info("Creating Harbor Component Secret", "namespace", ns, "name", secretName)
 
 		if err := p.Client.Create(ctx, sc); err != nil {
-			return nil, err
+			return err
 		}
 	} else if err != nil {
-		return nil, err
+		return err
 	}
 
-	return secret, nil
+	return nil
 }
 
 // GetInClusterDatabaseInfo returns inCluster database connection client.
