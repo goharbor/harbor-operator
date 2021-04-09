@@ -76,7 +76,7 @@ jobs:
       NOTARYSERVER_DOCKER_IMAGE_2_2_1: ghcr.io/goharbor/notary-server-photon:v2.2.1
       NOTARYSIGNER_DOCKER_IMAGE_2_2_1: ghcr.io/goharbor/notary-signer-photon:v2.2.1
       TRIVY_DOCKER_IMAGE_2_2_1: ghcr.io/goharbor/trivy-adapter-photon:v2.2.1
-      HARBORCLUSTER_MINIO_DOCKER_IMAGE_2_2_1: ghcr.io/goharbor/minio:RELEASE.2020-08-13T02-39-50Z
+      HARBORCLUSTER_MINIO_DOCKER_IMAGE_2_2_1: ghcr.io/goharbor/minio:2021-04-06T23-11-00Z
       HARBORCLUSTER_REDIS_DOCKER_IMAGE_2_2_1: ghcr.io/goharbor/redis:5.0-alpine
       HARBORCLUSTER_POSTGRESQL_DOCKER_IMAGE_2_2_1: ghcr.io/goharbor/spilo-12:1.6-p3
       dockerImage: harbor-operator:dev_test
@@ -275,6 +275,8 @@ jobs:
     - name: test harbor
       run: |
         set -ex
+        free -h
+        df -h
         curl https://$CORE_HOST/api/v2.0/systeminfo -i -k -f
         sudo mkdir -p /etc/docker/certs.d/$CORE_HOST
         kubectl -n cluster-sample-ns get secret sample-public-certificate -o jsonpath='{.data.ca\.crt}' \
@@ -291,6 +293,9 @@ jobs:
     - name: apidb test
       run: |
         git clone https://github.com/goharbor/harbor -b v2.2.1
+        cd harbor
+        sed -i '15i\    ${dfout}=  Run  df -h\n    Log To Console  ${dfout}' tests/resources/APITest-Util.robot
+        cd ..
         kubectl -n cluster-sample-ns patch deploy harborcluster-sample-harbor-harbor-core -p '{"spec":{"template":{"spec":{"containers":[{"name":"core","env":[{"name":"GC_TIME_WINDOW_HOURS","value":"0"}]}]}}}}'
         sleep 5
         kubectl -n cluster-sample-ns wait --for=condition=Ready pod --all --timeout 600s
@@ -298,10 +303,14 @@ jobs:
           python -u -m robot -v DOCKER_USER:${{ secrets.DOCKER_USER }} -v DOCKER_PWD:${{ secrets.DOCKER_TOKEN }} -v ip:$CORE_HOST -v ip1: -v HARBOR_PASSWORD:Harbor12345 -X \
           --exclude gc --exclude metrics --exclude singularity --exclude proxy_cache \
           /drone/tests/robot-cases/Group1-Nightly/Setup.robot /drone/tests/robot-cases/Group0-BAT/API_DB.robot
+        free -m
+        df -h
 
     - name: fetch harbor logs
       if: ${{ failure() }}
       run: |
+        df -h
+        free -m
         mkdir -p /tmp/harbor
         for name in core jobservice registry registryctl trivy chartmuseum notaryserver notarysigner portal; do \
           kubectl -n cluster-sample-ns logs -l "goharbor.io/operator-controller=$name" --all-containers > /tmp/harbor/$name.log ; \

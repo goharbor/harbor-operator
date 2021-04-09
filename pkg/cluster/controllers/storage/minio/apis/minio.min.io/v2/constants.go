@@ -1,4 +1,4 @@
-package v1
+package v2
 
 // MinIOVolumeMountPath specifies the default mount path for MinIO volumes.
 const MinIOVolumeMountPath = "/export"
