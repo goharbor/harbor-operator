@@ -48,6 +48,11 @@ type RegistryList struct {
 type RegistrySpec struct {
 	harbormetav1.ComponentSpec `json:",inline"`
 	RegistryConfig01           `json:",inline"`
+
+	CertificateInjection `json:",inline"`
+
+	// +kubebuilder:validation:Optional
+	Proxy *harbormetav1.ProxySpec `json:"proxy,omitempty"`
 }
 
 func (r *RegistrySpec) Default() {
@@ -95,18 +100,6 @@ type RegistryConfig01 struct {
 
 	// +kubebuilder:validation:Optional
 	Redis *RegistryRedisSpec `json:"redis,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	Proxy *RegistryProxySpec `json:"proxy,omitempty"`
-}
-
-type RegistryProxySpec struct {
-	// +kubebuilder:validation:Required
-	RemoteURL string `json:"remoteURL"`
-
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
-	BasicAuthRef string `json:"basicAuthRef,omitempty"`
 }
 
 type RegistryRedisSpec struct {

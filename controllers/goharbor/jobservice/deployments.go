@@ -70,6 +70,8 @@ func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1.J
 		return nil, errors.Wrap(err, "cannot configure environment variables")
 	}
 
+	envs = append(envs, jobservice.Spec.Proxy.GetEnvVars()...)
+
 	envs = append(envs, corev1.EnvVar{
 		Name: "CORE_SECRET",
 		ValueFrom: &corev1.EnvVarSource{

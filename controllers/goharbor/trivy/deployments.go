@@ -186,6 +186,8 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1.Trivy)
 		Value: address,
 	})
 
+	envs = append(envs, trivy.Spec.Proxy.GetEnvVars()...)
+
 	deploy := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        name,

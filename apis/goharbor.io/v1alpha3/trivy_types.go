@@ -63,6 +63,9 @@ type TrivySpec struct {
 
 	// +kubebuilder:validation:Required
 	Storage TrivyStorageSpec `json:"storage"`
+
+	// +kubebuilder:validation:Optional
+	Proxy *harbormetav1.ProxySpec `json:"proxy,omitempty"`
 }
 
 type TrivyUpdateSpec struct {

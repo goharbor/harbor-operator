@@ -113,31 +113,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1.Reg
 		})
 	}
 
-	if registry.Spec.Proxy != nil {
-		envs = append(envs, corev1.EnvVar{
-			Name: "REGISTRY_PROXY_PASSWORD",
-			ValueFrom: &corev1.EnvVarSource{
-				SecretKeyRef: &corev1.SecretKeySelector{
-					Key: corev1.BasicAuthPasswordKey,
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: registry.Spec.Proxy.BasicAuthRef,
-					},
-					Optional: &varTrue,
-				},
-			},
-		}, corev1.EnvVar{
-			Name: "REGISTRY_PROXY_USERNAME",
-			ValueFrom: &corev1.EnvVarSource{
-				SecretKeyRef: &corev1.SecretKeySelector{
-					Key: corev1.BasicAuthUsernameKey,
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: registry.Spec.Proxy.BasicAuthRef,
-					},
-					Optional: &varTrue,
-				},
-			},
-		})
-	}
+	envs = append(envs, registry.Spec.Proxy.GetEnvVars()...)
 
 	if registry.Spec.Compatibility.Schema1.Enabled {
 		envs = append(envs, corev1.EnvVar{
@@ -239,6 +215,12 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1.Reg
 				EmptyDir: &corev1.EmptyDirVolumeSource{},
 			},
 		})
+	}
+
+	// inject certs if need.
+	if registry.Spec.CertificateInjection.ShouldInject() {
+		volumes = append(volumes, registry.Spec.CertificateInjection.GenerateVolumes()...)
+		volumeMounts = append(volumeMounts, registry.Spec.CertificateInjection.GenerateVolumeMounts()...)
 	}
 
 	httpGET := &corev1.HTTPGetAction{
