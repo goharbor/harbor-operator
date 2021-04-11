@@ -133,7 +133,7 @@ func RegisterImageName(component, imageName string, harborVersions ...string) {
 	knowCompoents.RegisterImageName(component, imageName, harborVersions...)
 }
 
-func RegisterRepsitory(component, repository string, harborVersions ...string) {
+func RegisterRepository(component, repository string, harborVersions ...string) {
 	knowCompoents.RegisterRepository(component, repository, harborVersions...)
 }
 
@@ -156,22 +156,26 @@ func init() { // nolint:gochecknoinits
 		"trivy":        "trivy-adapter-photon",
 	}
 	for component, imageName := range harborComponentImageNames {
-		RegisterRepsitory(component, "goharbor", "*") // the goharbor repository of dockerhub
+		RegisterRepository(component, "goharbor", "*") // the goharbor repository of dockerhub
 		RegisterImageName(component, imageName, "*")
 	}
 
 	// Register the cluster service components
-	RegisterRepsitory("cluster-redis", "", "*") // the - repository of dockerhub
+	RegisterRepository("cluster-redis", "", "*") // the - repository of dockerhub
 	RegisterImageName("cluster-redis", "redis", "*")
 	RegisterTag("cluster-redis", "5.0-alpine", "2.2.1")
 
-	RegisterRepsitory("cluster-postgresql", "registry.opensource.zalan.do/acid", "*")
+	RegisterRepository("cluster-postgresql", "registry.opensource.zalan.do/acid", "*")
 	RegisterImageName("cluster-postgresql", "spilo-12", "*")
 	RegisterTag("cluster-postgresql", "1.6-p3", "2.2.1")
 
-	RegisterRepsitory("cluster-minio", "minio", "*") // the minio repository of dockerhub
+	RegisterRepository("cluster-minio", "minio", "*") // the minio repository of dockerhub
 	RegisterImageName("cluster-minio", "minio", "*")
 	RegisterTag("cluster-minio", "RELEASE.2021-04-06T23-11-00Z", "2.2.1")
+
+	RegisterRepository("cluster-minio-init", "s3cmd", "*") // the minio repository of dockerhub
+	RegisterImageName("cluster-minio-init", "s3cmd", "*")
+	RegisterTag("cluster-minio-init", "latest", "2.2.1")
 }
 
 type Options struct {

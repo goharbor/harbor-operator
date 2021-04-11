@@ -21,13 +21,8 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/image"
 )
 
-const (
-	ComponentName  = "cluster-minio"
-	ConfigImageKey = "minio-docker-image"
-)
-
 // GetImage returns the configured image via configstore or default one.
-func (m *MinIOController) GetImage(ctx context.Context, harborcluster *goharborv1.HarborCluster) (string, error) {
+func (m *MinIOController) GetImage(ctx context.Context, harborcluster *goharborv1.HarborCluster, ComponentName string, ConfigImageKey string) (string, error) {
 	if harborcluster.Spec.InClusterStorage.MinIOSpec.Image != "" {
 		return harborcluster.Spec.InClusterStorage.MinIOSpec.Image, nil
 	}

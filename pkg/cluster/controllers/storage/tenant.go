@@ -20,9 +20,13 @@ import (
 )
 
 var (
-	fsGroup    int64 = 10000
-	runAsGroup int64 = 10000
-	runAsUser  int64 = 10000
+	fsGroup            int64 = 10000
+	runAsGroup         int64 = 10000
+	runAsUser          int64 = 10000
+	ComponentName            = "cluster-minio"
+	ConfigImageKey           = "minio-docker-image"
+	MinioInitName            = "cluster-minio-init"
+	InitConfigImageKey       = "minio-docker-image-init"
 )
 
 func (m *MinIOController) ProvisionMinIOProperties(ctx context.Context, harborcluster *goharborv1.HarborCluster, minioInstance *miniov2.Tenant) (*lcm.CRStatus, error) {
@@ -183,10 +187,22 @@ func (m *MinIOController) createTenant(ctx context.Context, harborcluster *gohar
 }
 
 func (m *MinIOController) generateMinIOCR(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*miniov2.Tenant, error) {
-	image, err := m.GetImage(ctx, harborcluster)
+	image, err := m.GetImage(ctx, harborcluster, ComponentName, ConfigImageKey)
 	if err != nil {
 		return nil, err
 	}
+
+	initImage, err := m.GetImage(ctx, harborcluster, MinioInitName, InitConfigImageKey)
+	if err != nil {
+		return nil, err
+	}
+
+	accessKey, secretKey, err := m.getCredsFromSecret(ctx, harborcluster)
+	if err != nil {
+		return nil, err
+	}
+
+	initCommand := "echo \"[default]\naccess_key = " + string(accessKey) + "\nsecret_key = " + string(secretKey) + "\nbucket_location = us-east-1\nhost_base = 127.0.0.1:9000\nhost_bucket = 127.0.0.1:9000\nuse_https = False\" > /root/.s3cfg && while true; do s3cmd mb s3://harbor; if [ $? -eq 0 ]; then; exit 0 ;else ;sleep 3; fi; done"
 
 	return &miniov2.Tenant{
 		TypeMeta: metav1.TypeMeta{
@@ -207,6 +223,15 @@ func (m *MinIOController) generateMinIOCR(ctx context.Context, harborcluster *go
 			Image:           image,
 			ImagePullPolicy: m.getImagePullPolicy(ctx, harborcluster),
 			ImagePullSecret: m.getImagePullSecret(ctx, harborcluster),
+			SideCars: &miniov2.SideCars{
+				Containers: []corev1.Container{
+					{
+						Name:    "init-minio",
+						Image:   initImage,
+						Command: []string{initCommand},
+					},
+				},
+			},
 			Pools: []miniov2.Pool{
 				{
 					Name:                DefaultZone,

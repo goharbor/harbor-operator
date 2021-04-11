@@ -87,10 +87,10 @@ func (m *MinIOController) Apply(ctx context.Context, harborcluster *goharborv1.H
 	}
 
 	// Init minio
-	// TODO: init bucket in the minCR pods as creation by client may meet network connection issue.
-	if err := m.minioInit(ctx, harborcluster); err != nil {
-		return minioNotReadyStatus(CreateDefaultBucketError, err.Error()), err
-	}
+	// TODO: remove init bucket in the minCR pods as creation by client may meet network connection issue.
+	//if err := m.minioInit(ctx, harborcluster); err != nil {
+	//	return minioNotReadyStatus(CreateDefaultBucketError, err.Error()), err
+	//}
 
 	crs, err := m.ProvisionMinIOProperties(ctx, harborcluster, mt)
 	if err != nil {
