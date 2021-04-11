@@ -247,7 +247,7 @@ func (m *MinIOController) getResourceRequirements(harborcluster *goharborv1.Harb
 		return &harborcluster.Spec.InClusterStorage.MinIOSpec.Resources
 	}
 
-	return &corev1.ResourceRequirements{}
+	return nil
 }
 
 func (m *MinIOController) getVolumeClaimTemplate(harborcluster *goharborv1.HarborCluster) *corev1.PersistentVolumeClaim {
