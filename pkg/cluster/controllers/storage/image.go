@@ -22,7 +22,7 @@ import (
 )
 
 // GetImage returns the configured image via configstore or default one.
-func (m *MinIOController) GetImage(ctx context.Context, harborcluster *goharborv1.HarborCluster, ComponentName string, ConfigImageKey string) (string, error) {
+func (m *MinIOController) GetImage(ctx context.Context, harborcluster *goharborv1.HarborCluster, componentName string, configImageKey string) (string, error) {
 	if harborcluster.Spec.InClusterStorage.MinIOSpec.Image != "" {
 		return harborcluster.Spec.InClusterStorage.MinIOSpec.Image, nil
 	}
@@ -36,11 +36,11 @@ func (m *MinIOController) GetImage(ctx context.Context, harborcluster *goharborv
 	} else {
 		options = append(options,
 			image.WithConfigstore(m.ConfigStore),
-			image.WithConfigImageKey(ConfigImageKey),
+			image.WithConfigImageKey(configImageKey),
 		)
 	}
 
-	image, err := image.GetImage(ctx, ComponentName, options...)
+	image, err := image.GetImage(ctx, componentName, options...)
 	if err != nil {
 		return "", err
 	}

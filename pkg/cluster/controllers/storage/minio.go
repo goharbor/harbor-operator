@@ -88,9 +88,9 @@ func (m *MinIOController) Apply(ctx context.Context, harborcluster *goharborv1.H
 
 	// Init minio
 	// TODO: remove init bucket in the minCR pods as creation by client may meet network connection issue.
-	//if err := m.minioInit(ctx, harborcluster); err != nil {
-	//	return minioNotReadyStatus(CreateDefaultBucketError, err.Error()), err
-	//}
+	// if err := m.minioInit(ctx, harborcluster); err != nil {
+	//	 return minioNotReadyStatus(CreateDefaultBucketError, err.Error()), err
+	// }
 
 	crs, err := m.ProvisionMinIOProperties(ctx, harborcluster, mt)
 	if err != nil {
@@ -119,7 +119,8 @@ func (m *MinIOController) Upgrade(_ context.Context, _ *goharborv1.HarborCluster
 	panic("implement me")
 }
 
-func (m *MinIOController) minioInit(ctx context.Context, harborcluster *goharborv1.HarborCluster) error {
+// TODO zxy deprecated.
+func (m *MinIOController) minioInit(ctx context.Context, harborcluster *goharborv1.HarborCluster) error { // nolint:unused
 	accessKey, secretKey, err := m.getCredsFromSecret(ctx, harborcluster)
 	if err != nil {
 		return err

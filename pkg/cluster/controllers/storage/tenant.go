@@ -186,7 +186,7 @@ func (m *MinIOController) createTenant(ctx context.Context, harborcluster *gohar
 	return minioUnknownStatus(), nil
 }
 
-func (m *MinIOController) generateMinIOCR(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*miniov2.Tenant, error) {
+func (m *MinIOController) generateMinIOCR(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*miniov2.Tenant, error) { // nolint:funlen
 	image, err := m.GetImage(ctx, harborcluster, ComponentName, ConfigImageKey)
 	if err != nil {
 		return nil, err
