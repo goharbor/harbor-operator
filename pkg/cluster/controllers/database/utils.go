@@ -82,15 +82,6 @@ func (p *PostgreSQLController) GetPostgreResource(harborcluster *goharborv1.Harb
 	resources := api.Resources{}
 
 	if harborcluster.Spec.InClusterDatabase.PostgresSQLSpec == nil {
-		resources.ResourceRequests = api.ResourceDescription{
-			CPU:    "1",
-			Memory: "1Gi",
-		}
-		resources.ResourceRequests = api.ResourceDescription{
-			CPU:    "2",
-			Memory: "2Gi",
-		}
-
 		return resources
 	}
 
