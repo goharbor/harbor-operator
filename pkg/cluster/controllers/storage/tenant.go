@@ -9,7 +9,7 @@ import (
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/common"
-	minio "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/api/v1"
+	miniov2 "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/apis/minio.min.io/v2"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	"github.com/goharbor/harbor-operator/pkg/config"
 	"github.com/goharbor/harbor-operator/pkg/resources/checksum"
@@ -25,7 +25,7 @@ var (
 	runAsUser  int64 = 10000
 )
 
-func (m *MinIOController) ProvisionMinIOProperties(ctx context.Context, harborcluster *goharborv1.HarborCluster, minioInstance *minio.Tenant) (*lcm.CRStatus, error) {
+func (m *MinIOController) ProvisionMinIOProperties(ctx context.Context, harborcluster *goharborv1.HarborCluster, minioInstance *miniov2.Tenant) (*lcm.CRStatus, error) {
 	properties := &lcm.Properties{}
 
 	data, err := m.getMinIOProperties(ctx, harborcluster, minioInstance)
@@ -38,7 +38,7 @@ func (m *MinIOController) ProvisionMinIOProperties(ctx context.Context, harborcl
 	return minioReadyStatus(properties), nil
 }
 
-func (m *MinIOController) getMinIOProperties(ctx context.Context, harborcluster *goharborv1.HarborCluster, minioInstance *minio.Tenant) (*goharborv1.HarborStorageImageChartStorageSpec, error) {
+func (m *MinIOController) getMinIOProperties(ctx context.Context, harborcluster *goharborv1.HarborCluster, minioInstance *miniov2.Tenant) (*goharborv1.HarborStorageImageChartStorageSpec, error) {
 	accessKey, secretKey, err := m.getCredsFromSecret(ctx, harborcluster)
 	if err != nil {
 		return nil, err
@@ -85,7 +85,7 @@ func (m *MinIOController) getMinIOProperties(ctx context.Context, harborcluster 
 
 		storageSpec.S3.CertificateRef = certificateRef
 	} else {
-		endpoint = fmt.Sprintf("http://%s.%s.svc:%s", m.getServiceName(harborcluster), harborcluster.Namespace, "9000")
+		endpoint = fmt.Sprintf("http://%s.%s.svc:%d", m.getTenantsServiceName(harborcluster), harborcluster.Namespace, m.getServicePort())
 	}
 
 	storageSpec.S3.RegionEndpoint = strings.ToLower(endpoint)
@@ -96,10 +96,10 @@ func (m *MinIOController) getMinIOProperties(ctx context.Context, harborcluster 
 	return storageSpec, nil
 }
 
-func (m *MinIOController) createSecretKeyRef(secretKey []byte, harborcluster *goharborv1.HarborCluster, minioInstance *minio.Tenant) *corev1.Secret {
+func (m *MinIOController) createSecretKeyRef(secretKey []byte, harborcluster *goharborv1.HarborCluster, minioInstance *miniov2.Tenant) *corev1.Secret {
 	s3KeySecret := &corev1.Secret{
 		TypeMeta: metav1.TypeMeta{
-			APIVersion: "v1",
+			APIVersion: "minio.min.io",
 			Kind:       "Secret",
 		},
 		ObjectMeta: metav1.ObjectMeta{
@@ -123,7 +123,7 @@ func (m *MinIOController) createSecretKeyRef(secretKey []byte, harborcluster *go
 // apply minIO tenant and its related service.
 func (m *MinIOController) applyTenant(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*lcm.CRStatus, error) {
 	// If the expected tenant has been there
-	minioCR := &minio.Tenant{}
+	minioCR := &miniov2.Tenant{}
 
 	err := m.KubeClient.Get(ctx, m.getMinIONamespacedName(harborcluster), minioCR)
 	if k8serror.IsNotFound(err) {
@@ -184,21 +184,16 @@ func (m *MinIOController) createTenant(ctx context.Context, harborcluster *gohar
 	return minioUnknownStatus(), nil
 }
 
-func (m *MinIOController) generateMinIOCR(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*minio.Tenant, error) { // nolint:funlen
+func (m *MinIOController) generateMinIOCR(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*miniov2.Tenant, error) {
 	image, err := m.GetImage(ctx, harborcluster)
 	if err != nil {
 		return nil, err
 	}
 
-	const (
-		LivenessDelay  = 120
-		LivenessPeriod = 60
-	)
-
-	tenant := &minio.Tenant{
+	tenant := &miniov2.Tenant{
 		TypeMeta: metav1.TypeMeta{
-			Kind:       minio.MinIOCRDResourceKind,
-			APIVersion: minio.SchemeGroupVersion.String(),
+			Kind:       miniov2.MinIOCRDResourceKind,
+			APIVersion: miniov2.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        m.getServiceName(harborcluster),
@@ -209,49 +204,40 @@ func (m *MinIOController) generateMinIOCR(ctx context.Context, harborcluster *go
 				*metav1.NewControllerRef(harborcluster, goharborv1.HarborClusterGVK),
 			},
 		},
-		Spec: minio.TenantSpec{
-			SecurityContext: &corev1.PodSecurityContext{
-				FSGroup:    &fsGroup,
-				RunAsGroup: &runAsGroup,
-				RunAsUser:  &runAsUser,
-			},
-			Metadata: &metav1.ObjectMeta{
-				Labels:      m.getLabels(),
-				Annotations: m.generateAnnotations(),
-			},
-			ServiceName:     m.getServiceName(harborcluster),
+		Spec: miniov2.TenantSpec{
+			// TODO soulseen: add sidecar container.
 			Image:           image,
 			ImagePullPolicy: m.getImagePullPolicy(ctx, harborcluster),
 			ImagePullSecret: m.getImagePullSecret(ctx, harborcluster),
-			Zones: []minio.Zone{
+			Pools: []miniov2.Pool{
 				{
 					Name:                DefaultZone,
 					Servers:             harborcluster.Spec.InClusterStorage.MinIOSpec.Replicas,
 					VolumesPerServer:    harborcluster.Spec.InClusterStorage.MinIOSpec.VolumesPerServer,
 					VolumeClaimTemplate: m.getVolumeClaimTemplate(harborcluster),
 					Resources:           *m.getResourceRequirements(harborcluster),
+					SecurityContext: &corev1.PodSecurityContext{
+						FSGroup:    &fsGroup,
+						RunAsGroup: &runAsGroup,
+						RunAsUser:  &runAsUser,
+					},
 				},
 			},
-			Mountpath: minio.MinIOVolumeMountPath,
+			Mountpath: miniov2.MinIOVolumeMountPath,
 			CredsSecret: &corev1.LocalObjectReference{
 				Name: m.getMinIOSecretNamespacedName(harborcluster).Name,
 			},
 			PodManagementPolicy: "Parallel",
-			RequestAutoCert:     false,
-			CertConfig: &minio.CertificateConfig{
-				CommonName:       "",
-				OrganizationName: []string{},
-				DNSNames:         []string{},
-			},
+			RequestAutoCert: func() *bool {
+				b := false
+
+				return &b
+			}(),
 			Env: []corev1.EnvVar{
 				{
 					Name:  "MINIO_BROWSER",
 					Value: "on",
 				},
-			},
-			Liveness: &minio.Liveness{
-				InitialDelaySeconds: LivenessDelay,
-				PeriodSeconds:       LivenessPeriod,
 			},
 		},
 	}
@@ -321,7 +307,7 @@ func (m *MinIOController) generateCredsSecret(harborcluster *goharborv1.HarborCl
 
 	return &corev1.Secret{
 		TypeMeta: metav1.TypeMeta{
-			APIVersion: "v1",
+			APIVersion: "minio.min.io",
 			Kind:       "Secret",
 		},
 		ObjectMeta: metav1.ObjectMeta{

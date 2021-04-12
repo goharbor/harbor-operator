@@ -1,4 +1,4 @@
-package v1
+package v2
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -7,7 +7,7 @@ import (
 )
 
 // Version specifies the API Version.
-const Version = "v1"
+const Version = "v2"
 
 // MinIO Operator group name.
 const (
@@ -16,8 +16,6 @@ const (
 
 // SchemeGroupVersion is group version used to register these objects.
 var SchemeGroupVersion = schema.GroupVersion{Group: GroupName, Version: Version}
-
-// SchemeGroupVersion is group version used to register these objects
 
 // Kind takes an unqualified kind and returns back a Group qualified GroupKind.
 func Kind(kind string) schema.GroupKind {

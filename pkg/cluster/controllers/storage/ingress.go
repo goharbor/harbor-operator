@@ -6,7 +6,7 @@ import (
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/common"
-	minio "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/api/v1"
+	miniov2 "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/apis/minio.min.io/v2"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	"github.com/goharbor/harbor-operator/pkg/resources/checksum"
 	netv1 "k8s.io/api/networking/v1beta1"
@@ -57,7 +57,7 @@ func (m *MinIOController) applyIngress(ctx context.Context, harborcluster *gohar
 
 func (m *MinIOController) createIngress(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*lcm.CRStatus, error) {
 	// Get the existing minIO CR first
-	minioCR := &minio.Tenant{}
+	minioCR := &miniov2.Tenant{}
 	if err := m.KubeClient.Get(ctx, m.getMinIONamespacedName(harborcluster), minioCR); err != nil {
 		return minioNotReadyStatus(GetMinIOError, err.Error()), err
 	}
@@ -150,8 +150,8 @@ func (m *MinIOController) generateIngress(ctx context.Context, harborcluster *go
 								{
 									Path: ingressPath,
 									Backend: netv1.IngressBackend{
-										ServiceName: m.getServiceName(harborcluster),
-										ServicePort: intstr.FromInt((int)(m.getServicePort())),
+										ServiceName: m.getTenantsServiceName(harborcluster),
+										ServicePort: intstr.FromInt(m.getServicePort()),
 									},
 								},
 							},
@@ -169,6 +169,6 @@ func (m *MinIOController) generateIngress(ctx context.Context, harborcluster *go
 	return ingress, err
 }
 
-func (m *MinIOController) getServicePort() int32 {
+func (m *MinIOController) getServicePort() int {
 	return DefaultServicePort
 }
