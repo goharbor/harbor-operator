@@ -459,7 +459,7 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1.Harbor) (*g
 			Redis: goharborv1.CoreRedisSpec{
 				RedisConnection: coreRedis,
 			},
-			Proxy:                harbor.Spec.Proxy,
+			Proxy:                harbor.GetComponentProxySpec(harbormetav1.CoreComponent),
 			CertificateInjection: harbor.Spec.Core.CertificateInjection,
 			Metrics:              harbor.Spec.Core.Metrics,
 		},
