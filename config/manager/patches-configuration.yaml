@@ -11,7 +11,13 @@ spec:
         - mountPath: /etc/harbor-operator/templates
           name: configuration-templates
           readOnly: true
+        - mountPath: /etc/harbor-operator
+          name: configuration
+          readOnly: true
       volumes:
       - name: configuration-templates
         configMap:
           name: config-template
+      - name: configuration
+        configMap:
+          name: config

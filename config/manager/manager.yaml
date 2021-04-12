@@ -48,5 +48,7 @@ spec:
           valueFrom:
             fieldRef:
                 fieldPath: metadata.namespace
+        - name: CONFIGURATION_FROM
+          value: env,file:/etc/harbor-operator/config.yaml
 
       terminationGracePeriodSeconds: 10
