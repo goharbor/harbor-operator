@@ -182,6 +182,7 @@ func (r *Reconciler) GetJobService(ctx context.Context, harbor *goharborv1.Harbo
 			SecretRef:            secretRef,
 			TLS:                  tls,
 			CertificateInjection: harbor.Spec.JobService.CertificateInjection,
+			Proxy:                harbor.GetComponentProxySpec(harbormetav1.JobServiceComponent),
 		},
 	}, nil
 }

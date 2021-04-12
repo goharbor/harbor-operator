@@ -219,6 +219,8 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1.Core) (
 
 	envs = append(envs, metricsEnvs...)
 
+	envs = append(envs, core.Spec.Proxy.GetEnvVars()...)
+
 	envs = append(envs, []corev1.EnvVar{{
 		Name:  "LOG_LEVEL",
 		Value: string(core.Spec.Log.Level),
@@ -289,12 +291,6 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1.Core) (
 	}, {
 		Name:  "CFG_EXPIRATION",
 		Value: fmt.Sprintf("%.0f", core.Spec.ConfigExpiration.Duration.Seconds()),
-	}, {
-		Name:  "HTTP_PROXY",
-		Value: "", // TODO
-	}, {
-		Name:  "HTTPS_PROXY",
-		Value: "", // TODO
 	}, {
 		Name:  "RELOAD_KEY",
 		Value: "true",
