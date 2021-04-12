@@ -33,9 +33,6 @@ func (rc *RedisController) RollingUpgrades(ctx context.Context, cluster *goharbo
 		return cacheNotReadyStatus(ErrorDefaultUnstructuredConverter, err.Error()), err
 	}
 
-	dependencies := checksum.New(rc.Scheme)
-	dependencies.Add(ctx, cluster, true)
-
 	if !common.Equals(ctx, rc.Scheme, cluster, actualObj.(checksum.Dependency)) {
 		rc.Log.Info(
 			"Update Redis resource",
