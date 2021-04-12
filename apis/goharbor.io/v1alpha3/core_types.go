@@ -51,7 +51,7 @@ type CoreSpec struct {
 	Components CoreComponentsSpec `json:"components"`
 
 	// +kubebuilder:validation:Optional
-	Proxy *CoreProxySpec `json:"proxy,omitempty"`
+	Proxy *harbormetav1.ProxySpec `json:"proxy,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	Log CoreLogSpec `json:"log,omitempty"`
@@ -258,18 +258,6 @@ type CoreConfig struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	PublicCertificateRef string `json:"publicCertificateRef,omitempty"`
-}
-
-type CoreProxySpec struct {
-	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Pattern="https?://.+"
-	URL string `json:"url"`
-
-	// +kubebuilder:validation:Optional
-	NoProxy []string `json:"noProxy,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	Components []string `json:"components,omitempty"`
 }
 
 type CoreLogSpec struct {

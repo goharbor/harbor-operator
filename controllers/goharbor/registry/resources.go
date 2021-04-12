@@ -89,13 +89,6 @@ func (r *Reconciler) GetSecrets(ctx context.Context, registry *goharborv1.Regist
 		return nil, errors.Wrap(err, "storage")
 	}
 
-	proxy, err := r.GetProxySecrets(ctx, registry)
-	if err != nil {
-		return nil, errors.Wrap(err, "proxy")
-	}
-
-	secrets = append(secrets, proxy...)
-
 	http, err := r.GetHTTPSecrets(ctx, registry)
 	if err != nil {
 		return nil, errors.Wrap(err, "http")
@@ -111,25 +104,6 @@ func (r *Reconciler) GetSecrets(ctx context.Context, registry *goharborv1.Regist
 	secrets = append(secrets, auth...)
 
 	return secrets, nil
-}
-
-func (r *Reconciler) GetProxySecrets(ctx context.Context, registry *goharborv1.Registry) ([]graph.Resource, error) {
-	if registry.Spec.Proxy == nil {
-		return nil, nil
-	}
-
-	if registry.Spec.Proxy.BasicAuthRef != "" {
-		secret, err := r.Controller.AddExternalTypedSecret(ctx, &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      registry.Spec.Proxy.BasicAuthRef,
-				Namespace: registry.GetNamespace(),
-			},
-		}, harbormetav1.SecretTypeSingle)
-
-		return []graph.Resource{secret}, errors.Wrapf(err, "cannot add external typed secret %s", registry.Spec.Proxy.BasicAuthRef)
-	}
-
-	return nil, nil
 }
 
 func (r *Reconciler) GetHTTPSecrets(ctx context.Context, registry *goharborv1.Registry) ([]graph.Resource, error) {
