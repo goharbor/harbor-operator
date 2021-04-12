@@ -247,19 +247,7 @@ func (m *MinIOController) getResourceRequirements(harborcluster *goharborv1.Harb
 		return &harborcluster.Spec.InClusterStorage.MinIOSpec.Resources
 	}
 
-	limits := map[corev1.ResourceName]resource.Quantity{
-		corev1.ResourceCPU:    resource.MustParse("250m"),
-		corev1.ResourceMemory: resource.MustParse("512Mi"),
-	}
-	requests := map[corev1.ResourceName]resource.Quantity{
-		corev1.ResourceCPU:    resource.MustParse("250m"),
-		corev1.ResourceMemory: resource.MustParse("512Mi"),
-	}
-
-	return &corev1.ResourceRequirements{
-		Limits:   limits,
-		Requests: requests,
-	}
+	return nil
 }
 
 func (m *MinIOController) getVolumeClaimTemplate(harborcluster *goharborv1.HarborCluster) *corev1.PersistentVolumeClaim {
