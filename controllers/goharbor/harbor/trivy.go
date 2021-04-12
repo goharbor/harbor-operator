@@ -162,6 +162,7 @@ func (r *Reconciler) GetTrivy(ctx context.Context, harbor *goharborv1.Harbor, ha
 				GithubTokenRef: githubTokenRef,
 			},
 			CertificateInjection: harbor.Spec.Trivy.CertificateInjection,
+			Proxy:                harbor.GetComponentProxySpec(harbormetav1.TrivyComponent),
 		},
 	}, nil
 }
