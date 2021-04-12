@@ -373,6 +373,7 @@ deploy-rbac: go-generate kustomize
 
 deployment-generate: go-generate kustomize
 	$(KUSTOMIZE) build manifests/cluster > manifests/cluster/deployment.yaml
+	$(KUSTOMIZE) build manifests/harbor > manifests/harbor/deployment.yaml
 
 .PHONY: sample
 sample: sample-harbor

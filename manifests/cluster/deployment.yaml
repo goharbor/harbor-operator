@@ -20920,6 +20920,85 @@ subjects:
 ---
 apiVersion: v1
 data:
+  chartmuseum-ctrl.yaml: |
+    - key: max-reconcile
+      priority: 200
+      value: "1"
+  config.yaml: |
+    - key: controllers-config-directory
+      priority: 100
+      value: /etc/harbor-operator
+
+    - key: classname
+      priority: 100
+      value:
+
+    - key: network-policies
+      priority: 100
+      value: false
+
+    - key: watch-children
+      priority: 100
+      value: true
+  core-ctrl.yaml: |
+    - key: max-reconcile
+      priority: 200
+      value: "1"
+  exporter-ctrl.yaml: |
+    - key: max-reconcile
+      priority: 200
+      value: "1"
+  harbor-ctrl.yaml: |
+    - key: max-reconcile
+      priority: 200
+      value: "1"
+  harborcluster-ctrl.yaml: |
+    - key: max-reconcile
+      priority: 200
+      value: "1"
+  harborconfiguration-ctrl.yaml: |
+    - key: max-reconcile
+      priority: 200
+      value: "1"
+  jobservice-ctrl.yaml: |
+    - key: max-reconcile
+      priority: 200
+      value: "1"
+  notaryserver-ctrl.yaml: |
+    - key: max-reconcile
+      priority: 200
+      value: "1"
+  notarysigner-ctrl.yaml: |
+    - key: max-reconcile
+      priority: 200
+      value: "1"
+  portal-ctrl.yaml: |
+    - key: max-reconcile
+      priority: 200
+      value: "1"
+  registry-ctrl.yaml: |
+    - key: max-reconcile
+      priority: 200
+      value: "1"
+  registryctl-ctrl.yaml: |
+    - key: max-reconcile
+      priority: 200
+      value: "1"
+  trivy-ctrl.yaml: |
+    - key: max-reconcile
+      priority: 200
+      value: "1"
+kind: ConfigMap
+metadata:
+  annotations:
+    goharbor.io/deploy-engine: Kustomization
+    goharbor.io/deploy-mode: cluster
+    goharbor.io/operator-version: v1.0.0
+  name: config
+  namespace: harbor-operator-ns
+---
+apiVersion: v1
+data:
   chartmuseum-config.yaml.tmpl: |
     {{- if .Spec.Server.TLS.Enabled }}
     port: 8443
@@ -21462,6 +21541,8 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
+        - name: CONFIGURATION_FROM
+          value: env,file:/etc/harbor-operator/config.yaml
         image: goharbor/harbor-operator:dev_master
         livenessProbe:
           httpGet:
@@ -21498,6 +21579,9 @@ spec:
         - mountPath: /etc/harbor-operator/templates
           name: configuration-templates
           readOnly: true
+        - mountPath: /etc/harbor-operator
+          name: configuration
+          readOnly: true
       securityContext:
         runAsUser: 65532
       terminationGracePeriodSeconds: 10
@@ -21509,6 +21593,9 @@ spec:
       - configMap:
           name: config-template
         name: configuration-templates
+      - configMap:
+          name: config
+        name: configuration
 ---
 apiVersion: apps/v1
 kind: Deployment
