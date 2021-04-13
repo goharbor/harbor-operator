@@ -18,23 +18,31 @@ func (r *Reconciler) GetService(ctx context.Context, registryCtl *goharborv1.Reg
 	name := r.NormalizeName(ctx, registryCtl.GetName())
 	namespace := registryCtl.GetNamespace()
 
+	var ports []corev1.ServicePort
+
+	if registryCtl.Spec.TLS.Enabled() {
+		ports = append(ports, corev1.ServicePort{
+			Name:       harbormetav1.RegistryControllerHTTPSPortName,
+			Port:       harbormetav1.HTTPSPort,
+			TargetPort: intstr.FromString(harbormetav1.RegistryControllerHTTPSPortName),
+			Protocol:   corev1.ProtocolTCP,
+		})
+	} else {
+		ports = append(ports, corev1.ServicePort{
+			Name:       harbormetav1.RegistryControllerHTTPPortName,
+			Port:       harbormetav1.HTTPPort,
+			TargetPort: intstr.FromString(harbormetav1.RegistryControllerHTTPPortName),
+			Protocol:   corev1.ProtocolTCP,
+		})
+	}
+
 	return &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
 		},
 		Spec: corev1.ServiceSpec{
-			Ports: []corev1.ServicePort{{
-				Name:       harbormetav1.RegistryControllerHTTPPortName,
-				Port:       harbormetav1.HTTPPort,
-				TargetPort: intstr.FromString(harbormetav1.RegistryControllerHTTPPortName),
-				Protocol:   corev1.ProtocolTCP,
-			}, {
-				Name:       harbormetav1.RegistryControllerHTTPSPortName,
-				Port:       harbormetav1.HTTPSPort,
-				TargetPort: intstr.FromString(harbormetav1.RegistryControllerHTTPSPortName),
-				Protocol:   corev1.ProtocolTCP,
-			}},
+			Ports: ports,
 			Selector: map[string]string{
 				r.Label("name"):      name,
 				r.Label("namespace"): namespace,

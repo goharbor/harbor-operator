@@ -14,23 +14,31 @@ func (r *Reconciler) GetService(ctx context.Context, portal *goharborv1.Portal) 
 	name := r.NormalizeName(ctx, portal.GetName())
 	namespace := portal.GetNamespace()
 
+	var ports []corev1.ServicePort
+
+	if portal.Spec.TLS.Enabled() {
+		ports = append(ports, corev1.ServicePort{
+			Name:       harbormetav1.PortalHTTPSPortName,
+			Port:       harbormetav1.HTTPSPort,
+			TargetPort: intstr.FromString(harbormetav1.PortalHTTPSPortName),
+			Protocol:   corev1.ProtocolTCP,
+		})
+	} else {
+		ports = append(ports, corev1.ServicePort{
+			Name:       harbormetav1.PortalHTTPPortName,
+			Port:       harbormetav1.HTTPPort,
+			TargetPort: intstr.FromString(harbormetav1.PortalHTTPPortName),
+			Protocol:   corev1.ProtocolTCP,
+		})
+	}
+
 	return &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
 		},
 		Spec: corev1.ServiceSpec{
-			Ports: []corev1.ServicePort{{
-				Name:       harbormetav1.PortalHTTPPortName,
-				Port:       harbormetav1.HTTPPort,
-				TargetPort: intstr.FromString(harbormetav1.PortalHTTPPortName),
-				Protocol:   corev1.ProtocolTCP,
-			}, {
-				Name:       harbormetav1.PortalHTTPSPortName,
-				Port:       harbormetav1.HTTPSPort,
-				TargetPort: intstr.FromString(harbormetav1.PortalHTTPSPortName),
-				Protocol:   corev1.ProtocolTCP,
-			}},
+			Ports: ports,
 			Selector: map[string]string{
 				r.Label("name"):      name,
 				r.Label("namespace"): namespace,
