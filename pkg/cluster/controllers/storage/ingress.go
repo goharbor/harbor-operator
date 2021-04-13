@@ -8,8 +8,8 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/common"
 	miniov2 "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/apis/minio.min.io/v2"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
+	"github.com/goharbor/harbor-operator/pkg/resources/checksum"
 	netv1 "k8s.io/api/networking/v1beta1"
-	"k8s.io/apimachinery/pkg/api/equality"
 	k8serror "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -36,13 +36,13 @@ func (m *MinIOController) applyIngress(ctx context.Context, harborcluster *gohar
 	}
 
 	// Generate desired ingress object
-	ingress, err := m.generateIngress(harborcluster)
+	ingress, err := m.generateIngress(ctx, harborcluster)
 	if err != nil {
 		return minioNotReadyStatus(CreateMinIOIngressError, err.Error()), err
 	}
 
 	// Update if necessary
-	if !equality.Semantic.DeepDerivative(ingress.DeepCopy().Spec, curIngress.DeepCopy().Spec) {
+	if !common.Equals(ctx, m.Scheme, harborcluster, curIngress) {
 		m.Log.Info("Updating MinIO ingress")
 
 		if err := m.KubeClient.Update(ctx, ingress); err != nil {
@@ -63,7 +63,7 @@ func (m *MinIOController) createIngress(ctx context.Context, harborcluster *goha
 	}
 
 	// Generate desired ingress object
-	ingress, err := m.generateIngress(harborcluster)
+	ingress, err := m.generateIngress(ctx, harborcluster)
 	if err != nil {
 		return minioNotReadyStatus(CreateMinIOIngressError, err.Error()), err
 	}
@@ -107,7 +107,7 @@ func (m *MinIOController) cleanupIngress(ctx context.Context, harborcluster *goh
 	return minioUnknownStatus(), nil
 }
 
-func (m *MinIOController) generateIngress(harborcluster *goharborv1.HarborCluster) (*netv1.Ingress, error) {
+func (m *MinIOController) generateIngress(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*netv1.Ingress, error) {
 	var tls []netv1.IngressTLS
 
 	if harborcluster.Spec.InClusterStorage.MinIOSpec.Redirect.Expose != nil &&
@@ -128,7 +128,7 @@ func (m *MinIOController) generateIngress(harborcluster *goharborv1.HarborCluste
 
 	ingressPath, err := common.GetIngressPath(harborcluster.Spec.Expose.Core.Ingress.Controller)
 
-	return &netv1.Ingress{
+	ingress := &netv1.Ingress{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Ingress",
 			APIVersion: netv1.SchemeGroupVersion.String(),
@@ -160,7 +160,13 @@ func (m *MinIOController) generateIngress(harborcluster *goharborv1.HarborCluste
 				},
 			},
 		},
-	}, err
+	}
+
+	dependencies := checksum.New(m.Scheme)
+	dependencies.Add(ctx, harborcluster, true)
+	dependencies.AddAnnotations(ingress)
+
+	return ingress, err
 }
 
 func (m *MinIOController) getServicePort() int {

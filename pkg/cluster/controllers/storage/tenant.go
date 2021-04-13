@@ -12,8 +12,8 @@ import (
 	miniov2 "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/apis/minio.min.io/v2"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	"github.com/goharbor/harbor-operator/pkg/config"
+	"github.com/goharbor/harbor-operator/pkg/resources/checksum"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/equality"
 	k8serror "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -140,10 +140,12 @@ func (m *MinIOController) applyTenant(ctx context.Context, harborcluster *goharb
 		return minioNotReadyStatus(GenerateMinIOCrError, err.Error()), err
 	}
 
-	if !equality.Semantic.DeepEqual(minioCR.Spec.DeepCopy(), desiredMinIOCR.Spec.DeepCopy()) {
+	if !common.Equals(ctx, m.Scheme, harborcluster, minioCR) {
 		m.Log.Info("Updating minIO tenant")
 
 		minioCR.Spec = *desiredMinIOCR.Spec.DeepCopy()
+		checksum.CopyMarkers(desiredMinIOCR, minioCR)
+
 		if err := m.KubeClient.Update(ctx, minioCR); err != nil {
 			return minioNotReadyStatus(UpdateMinIOError, err.Error()), err
 		}
@@ -182,13 +184,13 @@ func (m *MinIOController) createTenant(ctx context.Context, harborcluster *gohar
 	return minioUnknownStatus(), nil
 }
 
-func (m *MinIOController) generateMinIOCR(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*miniov2.Tenant, error) {
+func (m *MinIOController) generateMinIOCR(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*miniov2.Tenant, error) { // nolint:funlen
 	image, err := m.GetImage(ctx, harborcluster)
 	if err != nil {
 		return nil, err
 	}
 
-	return &miniov2.Tenant{
+	tenant := &miniov2.Tenant{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       miniov2.MinIOCRDResourceKind,
 			APIVersion: miniov2.SchemeGroupVersion.String(),
@@ -238,7 +240,13 @@ func (m *MinIOController) generateMinIOCR(ctx context.Context, harborcluster *go
 				},
 			},
 		},
-	}, nil
+	}
+
+	dependencies := checksum.New(m.Scheme)
+	dependencies.Add(ctx, harborcluster, true)
+	dependencies.AddAnnotations(tenant)
+
+	return tenant, nil
 }
 
 func (m *MinIOController) getResourceRequirements(harborcluster *goharborv1.HarborCluster) *corev1.ResourceRequirements {
