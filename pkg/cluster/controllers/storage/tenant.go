@@ -215,7 +215,7 @@ func (m *MinIOController) generateMinIOCR(ctx context.Context, harborcluster *go
 					Servers:             harborcluster.Spec.InClusterStorage.MinIOSpec.Replicas,
 					VolumesPerServer:    harborcluster.Spec.InClusterStorage.MinIOSpec.VolumesPerServer,
 					VolumeClaimTemplate: m.getVolumeClaimTemplate(harborcluster),
-					Resources:           *m.getResourceRequirements(harborcluster),
+					Resources:           harborcluster.Spec.InClusterStorage.MinIOSpec.Resources,
 					SecurityContext: &corev1.PodSecurityContext{
 						FSGroup:    &fsGroup,
 						RunAsGroup: &runAsGroup,
@@ -247,15 +247,6 @@ func (m *MinIOController) generateMinIOCR(ctx context.Context, harborcluster *go
 	dependencies.AddAnnotations(tenant)
 
 	return tenant, nil
-}
-
-func (m *MinIOController) getResourceRequirements(harborcluster *goharborv1.HarborCluster) *corev1.ResourceRequirements {
-	isEmpty := reflect.DeepEqual(harborcluster.Spec.InClusterStorage.MinIOSpec.Resources, corev1.ResourceRequirements{})
-	if !isEmpty {
-		return &harborcluster.Spec.InClusterStorage.MinIOSpec.Resources
-	}
-
-	return nil
 }
 
 func (m *MinIOController) getVolumeClaimTemplate(harborcluster *goharborv1.HarborCluster) *corev1.PersistentVolumeClaim {
