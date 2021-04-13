@@ -130,19 +130,11 @@ spec:
       volumesPerServer: 2
       volumeClaimTemplate:
         spec:
-          storageClassName: standard
           accessModes:
             - ReadWriteOnce
           resources:
             requests:
               storage: 10Gi
-      resources:
-        limits:
-          cpu: 500m
-          memory: 700Mi
-        requests:
-          cpu: 200m
-          memory: 500Mi
   inClusterCache:
     kind: Redis
     redisSpec:
