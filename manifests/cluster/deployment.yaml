@@ -2225,26 +2225,6 @@ spec:
       jsonPath: .status.status
       name: Status
       type: string
-    - description: The current status of the new Harbor spec
-      jsonPath: .status.conditions[?(@.type=="ServiceReady")].status
-      name: Service Ready
-      priority: 10
-      type: string
-    - description: The current status of the new Cache spec
-      jsonPath: .status.conditions[?(@.type=="CacheReady")].status
-      name: Cache Ready
-      priority: 20
-      type: string
-    - description: The current status of the new Database spec
-      jsonPath: .status.conditions[?(@.type=="DatabaseReady")].status
-      name: Database Ready
-      priority: 20
-      type: string
-    - description: The current status of the new Storage spec
-      jsonPath: .status.conditions[?(@.type=="StorageReady")].status
-      name: Storage Ready
-      priority: 20
-      type: string
     - description: 'The operator version '
       jsonPath: .status.operator.controllerVersion
       name: Operator Version
