@@ -750,15 +750,6 @@ spec:
       sentinel: # Required
         # Replicas of the sentinel service.
         replicas: 3 # Optional, default=3
-
-      # Maximum number of socket connections.
-      # Default is 10 connections per every CPU as reported by runtime.NumCPU.
-      poolSize: 10 # Optional, default=10
-      groupName: group # Optional
-      # Redis hosts.
-      hosts: # Optional
-        - host: redis1.com # Required
-          prot: 6347 # Optional
       # Redis server.
       server: # Required
         # Replicas of the server.
