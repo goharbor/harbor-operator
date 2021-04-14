@@ -3,6 +3,7 @@ before:
   - echo Tag {{ .Tag }}
   - make generate {{ if .Tag }}RELEASE_VERSION={{ .Tag }}{{ end }}
   - git diff
+  - make helm-generate RELEASE_VERSION={{ .Tag }}
 
 builds:
 - env:
