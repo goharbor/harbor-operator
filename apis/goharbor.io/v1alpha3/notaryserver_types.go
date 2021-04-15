@@ -58,11 +58,6 @@ type NotaryServerSpec struct {
 	MigrationEnabled *bool `json:"migrationEnabled,omitempty"`
 }
 
-const (
-	NotaryServerTrustRemoteType = "remote"
-	NotaryServerTrustLocalType  = "local"
-)
-
 type NotaryServerTrustServiceSpec struct {
 	// +kubebuilder:validation:Optional
 	Remote *NotaryServerTrustServiceRemoteSpec `json:"remote,omitempty"`

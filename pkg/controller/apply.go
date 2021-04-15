@@ -2,7 +2,6 @@ package controller
 
 import (
 	"context"
-	"time"
 
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	"github.com/goharbor/harbor-operator/pkg/factories/application"
@@ -11,11 +10,6 @@ import (
 	"github.com/pkg/errors"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-)
-
-const (
-	RetryDuration = 30 * time.Second
-	RetryDelay    = time.Second
 )
 
 var force = true

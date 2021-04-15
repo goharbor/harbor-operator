@@ -38,8 +38,6 @@ func (hc *HarborCluster) SetupWebhookWithManager(ctx context.Context, mgr ctrl.M
 		Complete()
 }
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-
 // +kubebuilder:webhook:path=/mutate-goharbor-io-v1alpha3-harborcluster,mutating=true,failurePolicy=fail,groups=goharbor.io,resources=harborclusters,verbs=create;update,versions=v1alpha3,name=mharborcluster.kb.io,admissionReviewVersions={"v1beta1"},sideEffects=None
 
 var _ webhook.Defaulter = &HarborCluster{}

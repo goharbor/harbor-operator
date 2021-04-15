@@ -16,9 +16,7 @@ import (
 )
 
 const (
-	DefaultIngressAnnotationsEnabled   = true
-	IngressAnnotationsEnabledCOnfigKey = "ingress-annotations-enabled"
-	NCPIngressValueTrue                = "true"
+	NCPIngressValueTrue = "true"
 )
 
 type CoreIngress graph.Resource

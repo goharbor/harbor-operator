@@ -114,10 +114,6 @@ type ExporterCoreSpec struct {
 	URL string `json:"url"`
 }
 
-const (
-	ExporterDatabaseType = "postgresql"
-)
-
 type ExporterDatabaseSpec struct {
 	harbormetav1.PostgresConnectionWithParameters `json:",inline"`
 

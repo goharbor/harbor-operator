@@ -641,8 +641,6 @@ func (r *HarborInternalTLSSpec) IsEnabled() bool {
 	return r != nil && r.Enabled
 }
 
-const CertificateAuthoritySecretConfigKey = "certificate-authority-secret"
-
 func (r *HarborInternalTLSSpec) GetScheme() string {
 	if !r.IsEnabled() {
 		return "http"

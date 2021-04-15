@@ -182,8 +182,8 @@ func (in *ChartMuseumChartRepoSpec) DeepCopy() *ChartMuseumChartRepoSpec {
 func (in *ChartMuseumChartSpec) DeepCopyInto(out *ChartMuseumChartSpec) {
 	*out = *in
 	out.PostFormFieldName = in.PostFormFieldName
-	if in.AllowOvewrite != nil {
-		in, out := &in.AllowOvewrite, &out.AllowOvewrite
+	if in.AllowOverwrite != nil {
+		in, out := &in.AllowOverwrite, &out.AllowOverwrite
 		*out = new(bool)
 		**out = **in
 	}

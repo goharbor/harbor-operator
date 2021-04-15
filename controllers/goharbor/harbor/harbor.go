@@ -3,7 +3,6 @@ package harbor
 import (
 	"context"
 	"net/url"
-	"time"
 
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"github.com/goharbor/harbor-operator/controllers"
@@ -18,10 +17,6 @@ import (
 	netv1beta1 "k8s.io/api/networking/v1beta1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
-)
-
-const (
-	DefaultRequeueWait = 2 * time.Second
 )
 
 // Reconciler reconciles a Harbor object.

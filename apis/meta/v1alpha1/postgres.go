@@ -231,8 +231,6 @@ func (p *PostgresConnectTimeout) Add(query url.Values) {
 // in the client (LC_CTYPE environment variable on Unix systems).
 type PostgresClientEncoding string
 
-const PostgresClientEncodingKey = "client_encoding"
-
 func (p *PostgresClientEncoding) Add(query url.Values) {
 	if p == nil {
 		return
