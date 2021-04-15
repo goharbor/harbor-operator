@@ -12,6 +12,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/ovh/configstore"
+	"github.com/pkg/errors"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
 
@@ -109,7 +110,7 @@ var _ = Describe("Get image", func() {
 		It("Should pass", func() {
 			configStore := configstore.NewStore()
 			configStore.RegisterProvider("foo", func() (configstore.ItemList, error) {
-				return configstore.ItemList{}, fmt.Errorf("failed")
+				return configstore.ItemList{}, errors.Errorf("failed")
 			})
 
 			_, err := GetImage(ctx, "core", WithConfigstore(configStore))

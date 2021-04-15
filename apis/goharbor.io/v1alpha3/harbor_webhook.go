@@ -2,10 +2,10 @@ package v1alpha3
 
 import (
 	"context"
-	"fmt"
 	"net/url"
 
 	"github.com/goharbor/harbor-operator/pkg/version"
+	"github.com/pkg/errors"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -54,7 +54,7 @@ func (h *Harbor) ValidateUpdate(old runtime.Object) error {
 
 	obj, ok := old.(*Harbor)
 	if !ok {
-		return fmt.Errorf("failed type assertion on kind: %s", old.GetObjectKind().GroupVersionKind().String())
+		return errors.Errorf("failed type assertion on kind: %s", old.GetObjectKind().GroupVersionKind().String())
 	}
 
 	return h.Validate(obj)

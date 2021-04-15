@@ -16,12 +16,11 @@ package harborcluster
 
 import (
 	"context"
-	"errors"
-	"fmt"
 
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/harbor"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
+	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 )
 
@@ -119,10 +118,10 @@ func (s *ServiceManager) Apply() error { // nolint:funlen
 		}
 		// Only for wsl check
 	case goharborv1.ComponentHarbor:
-		return fmt.Errorf("%s is not supported", s.component)
+		return errors.Errorf("%s is not supported", s.component)
 	default:
 		// Should not happen, just in case
-		return fmt.Errorf("unrecognized component: %s", s.component)
+		return errors.Errorf("unrecognized component: %s", s.component)
 	}
 
 	if s.ctx == nil {
@@ -152,7 +151,7 @@ func (s *ServiceManager) validate() error {
 	if s.component != goharborv1.ComponentCache &&
 		s.component != goharborv1.ComponentStorage &&
 		s.component != goharborv1.ComponentDatabase {
-		return fmt.Errorf("invalid service component: %s", s.component)
+		return errors.Errorf("invalid service component: %s", s.component)
 	}
 
 	if s.cluster == nil {
