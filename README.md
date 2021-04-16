@@ -3,6 +3,7 @@
 [![CI Pipeline](https://github.com/goharbor/harbor-operator/actions/workflows/tests.yml/badge.svg)](https://github.com/goharbor/harbor-operator/actions/workflows/tests.yml)
 [![CodeQL](https://github.com/goharbor/harbor-operator/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/goharbor/harbor-operator/actions/workflows/codeql-analysis.yml)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/bb3adb454b424e66ae3b9bdf2ab2fce1)](https://www.codacy.com/gh/goharbor/harbor-operator/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=goharbor/harbor-operator&amp;utm_campaign=Badge_Grade)
+[![Go Reference](https://pkg.go.dev/badge/github.com/goharbor/harbor-operator.svg)](https://pkg.go.dev/github.com/goharbor/harbor-operator)
 
 > **ATTENTIONS:** THIS PROJECT IS STILL UNDER DEVELOPMENT AND NOT STABLE YET. THE `MASTER` BRANCH MAY BE IN AN UNSTABLE OR EVEN BROKEN STATE DURING DEVELOPMENT.
 
@@ -15,30 +16,30 @@ The Harbor Operator provides an easy and solid solution to deploy and manage a f
 Harbor deployment stack is controlled by a custom Harbor resource `HarborCluster`. HarborCluster owns the custom resource `Harbor` that represents the Harbor own service stack, and the custom resources of the related dependent services (PostgreSQL, Redis and MinIO) that are required when deploying the full Harbor deployment stack.
 
 * Provides strong flexibility to deploy different stacks of Harbor cluster (identified by `HarborCluster` CR)
-  * **Minimal stack:** only required Harbor components `Core`, `Registry`, `Registry Controller`, `Job Service` and `Portal` are provisioned
-  * **Standard stack:** the optional Harbor components `Notary`, `Trivy`, `ChartMuseum` and `Metrics Exporter` can be selected to enable
-  * **Full stack:** both the Harbor components (required+optional) and also the related dependent services including the database (PostgreSQL), cache (Redis) and storage (MinIO) can be deployed into the Kubernetes cluster together with a scalable and high-available way
+  * **Minimal stack:** only required Harbor components `Core`, `Registry`, `Registry Controller`, `Job Service` and `Portal` are provisioned.
+  * **Standard stack:** the optional Harbor components `Notary`, `Trivy`, `ChartMuseum` and `Metrics Exporter` can be selected to enable.
+  * **Full stack:** both the Harbor components (required+optional) and also the related dependent services including the database (PostgreSQL), cache (Redis) and storage (MinIO) can be deployed into the Kubernetes cluster together with a scalable and high-available way.
 * Supports configuring either external or in-cluster deployed dependent services
 * Supports a variety of backend storage configurations
   * [X] filesystem: A storage driver configured to use a directory tree in the a kubernetes volume.
-  * [X] s3: A driver storing objects in an Amazon Simple Storage Service (S3) bucket.
-  * [X] swift: A driver storing objects in Openstack Swift.
+  * [X] [s3](https://docs.aws.amazon.com/AmazonS3/latest/API/Welcome.html): A driver storing objects in an Amazon Simple Storage Service (S3) bucket.
+  * [X] [swift](https://wiki.openstack.org/wiki/Swift): A driver storing objects in Openstack Swift.
 * Supports updating the deployed Harbor cluster
   * Adjust replicas of components
   * Add or remove the optional Harbor components
 * Support upgrading the managed Harbor registry version
 * Deletes all the linked resources when deleting the Harbor cluster
 * Configures Harbor system settings with ConfigMap in a declarative way
-* Support services exposed with ingress (`default`, `gce` and `ncp`)
+* Support services exposed with [ingress](https://kubernetes.io/fr/docs/concepts/services-networking/ingress/) ([`default`](https://git.k8s.io/ingress-nginx/README.md#readme), [`gce`](https://git.k8s.io/ingress-gce/README.md#readme) and `ncp`)
 
 ## Future features
 
 * [Auto-scaling](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) for each component.
 * Backup/restore data (registry layer, chartmuseum data, databases content).
 * More backend storage configurations supported
-  * [ ] azure: A driver storing objects in Microsoft Azure Blob Storage.
-  * [ ] oss: A driver storing objects in Aliyun OSS.
-  * [ ] gcs: A driver storing objects in a Google Cloud Storage bucket.
+  * [ ] [azure](https://azure.microsoft.com/services/storage/): A driver storing objects in Microsoft Azure Blob Storage.
+  * [ ] [oss](https://www.alibabacloud.com/product/oss): A driver storing objects in Aliyun OSS.
+  * [ ] [gcs](https://cloud.google.com/storage): A driver storing objects in a Google Cloud Storage bucket.
 * CRD based day2 configuration
 * Support services exposed with LoadBalancer
 * More day2 operations (see [PoC project](https://github.com/szlabs/harbor-automation-4k8s))
@@ -106,7 +107,7 @@ NOTES:
 * [Day2 configurations](./docs/configurations/day2-config.md)
 * [Delete Harbor cluster](./docs/LCM/cluster-deletion.md)
 * [Backup data](./docs/LCM/backup-data.md)
-* [Useful Makefile Targets](./docs/makefile.md)  
+* [Useful Makefile Targets](./docs/makefile.md)
 * [Resource configurations](./docs/configurations/resource-configurations.md)
 * [Performance comparison between fs & MinIO](./docs/perf/simple-perf-comprasion.md)
 
