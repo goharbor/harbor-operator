@@ -1,8 +1,6 @@
 # Install Harbor operator by helm chart
 
-The Harbor operator can also be deployed via the operator helm chart provided. What needs to be reminded here is the 
-operator helm chart only deploys Harbor operator itself and does not cover any operator installations of the dependent 
-services (such as PostgreSQL, Redis and Storage(Minio)).
+The Harbor operator can also be deployed via the operator helm chart provided. What needs to be reminded here is the operator helm chart only deploys Harbor operator itself and does not cover any operator installations of the dependent services (such as PostgreSQL, Redis and Storage(Minio)).
 
 ## Prerequisites
 
@@ -26,13 +24,13 @@ There are several ways to get the Harbor operator helm chart:
 helm repo add stable <PLACEHODLER>
 ```
 
-2. Download it from the Harbor operator release page
+1. Download it from the Harbor operator release page
 
 ```shell
 curl -sL -o harbor-operator-x.y.z-build.tgz <PLACEHOLDER>
 ```
 
-3. Generate from the codebase
+1. Generate from the codebase
 
 ```shell
 git clone https://github.com/goharbor/harbor-operator.git && \
@@ -52,8 +50,7 @@ Run the `helm` command to install the harbor operator to your cluster:
 helm upgrade --namespace harbor-operator-ns --install harbor-operator charts/harbor-operator-0.0.0-dev.tgz
 ```
 
-For what settings you can override with `--set`, `--set-string`, `--set-file` or `--values`, you can refer to 
-the [values.yaml](../../charts/harbor-operator/values.yaml) file.
+For what settings you can override with `--set`, `--set-string`, `--set-file` or `--values`, you can refer to the [values.yaml](../../charts/harbor-operator/values.yaml) file.
 
 Once the installation is finished you can check the installation status with either `helm` or `kubectl`.
 
@@ -103,15 +100,13 @@ helm uninstall harbor-operator --namespace harbor-operator-ns
 
 ## Additions
 
-If you selectively decide to install the operators of the dependent services (such as PostgreSQL, Redis and Minio) to 
-achieve the capabilities of deploying full stack Harbor (harbor components + in-cluster dependent services) with helm charts,
+If you selectively decide to install the operators of the dependent services (such as PostgreSQL, Redis and Minio) to achieve the capabilities of deploying full stack Harbor (harbor components + in-cluster dependent services) with helm charts,
 you can check the additional references listed below.
 
 * [Install Minio operator with chart](https://github.com/minio/operator/tree/master/helm/minio-operator)
   * Find archived minio operator charts from [here](https://github.com/minio/operator/tree/master/helm-releases)
-* [Install PostgreSQL operator with chart](https://github.com/zalando/postgres-operator/blob/master/docs/quickstart.md#helm-chart)    
+* [Install PostgreSQL operator with chart](https://github.com/zalando/postgres-operator/blob/master/docs/quickstart.md#helm-chart)
 * [Install Redis operator with chart](https://github.com/spotahome/redis-operator#using-the-helm-chart)
-
 
 ## What's next
 

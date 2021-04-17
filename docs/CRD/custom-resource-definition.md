@@ -1,7 +1,6 @@
 # Custom Resource Definition
 
-This document guides user to learn the related fields defined in the `HarborCluster` CRD and then customize their 
-Harbor cluster deployment stack.
+This document guides user to learn the related fields defined in the `HarborCluster` CRD and then customize their Harbor cluster deployment stack.
 
 **CRD version**: `v1alpha3`
 
@@ -21,6 +20,7 @@ spec:
   # ...
   # ... Skipped fields
 ```
+
 ### Top level general fields
 
 `expose`(required): Expose the access endpoints of Harbor core services as well as notary service (optional).
@@ -71,7 +71,7 @@ spec:
   # ... Skipped fields
 
   internalTLS: # Optional
-    enabled: true # Optional, default = false 
+    enabled: true # Optional, default = false
 
   # ... Skipped fields
 ```
@@ -195,7 +195,7 @@ spec:
   # Besides the common component spec, no extra parts for component 'portal'
   portal:
     # Common component spec
-    
+
     # Image name for the component. It will override the default one.
     image: my-portal # Optional
     # Image pull policy. It will override the global 'imageSource' settings and the default one.
@@ -222,7 +222,7 @@ spec:
     # If specified, the pod's tolerations.
     # More info: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
     tolerations: {} # Optional
-    
+
     # Compute Resources required by this component.
     # Cannot be updated.
     # More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
@@ -235,11 +235,11 @@ spec:
       # otherwise to an implementation-defined value.
       # More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
       requests: {} # Optional
-    
+
   # The following components also includes the common spec shown above.
   # ... Skip duplicated configurations here
   core: {}
-  jobservice: {} 
+  jobservice: {}
   registry: {}
   registryctl: {}
   chartmuseum: {}
@@ -259,9 +259,9 @@ spec:
   
   core:
     # ... Skipped common component spec here
-    
+
     # Extra configurations
-    
+
     # Certificates need to be injected into core
     certificateRefs: # Optional
       - cert1
@@ -280,9 +280,9 @@ spec:
 
   jobservice:
     # ... Skipped common component spec here
-    
+
     # Extra configurations
-    
+
     # Certificates need to be injected into jobservice
     certificateRefs: # Optional
       - cert1
@@ -301,9 +301,9 @@ spec:
 
   registry:
     # ... Skipped common component spec here
-    
+
     # Extra configurations
-    
+
     # Enable relative URLs
     relativeURLs: true # Optional, default = true
     # Middlewares for storage
@@ -322,7 +322,7 @@ spec:
 
   chartmuseum:
     # ... Skipped common component spec here
-    
+
     # Extra configurations
 
     # Certificates need to be injected into chartmuseum
@@ -344,7 +344,7 @@ spec:
 
   trivy:
     # ... Skipped common component spec here
-    
+
     # Extra configurations
 
     # Certificates need to be injected into chartmuseum
@@ -382,9 +382,9 @@ spec:
   notary:
     server: {} # Skipped common component spec here ...
     signer: {} # Skipped common component spec here ...
-    
+
     # Extra configurations
-    
+
     # Inject migration configuration to notary resources
     migrationEnabled: true # Optional, default = true
   
@@ -394,7 +394,6 @@ spec:
 ### Storage related fields
 
 Two alternatives provided to configure the backend storage of the deploying Harbor.
-
 
 #### Standard (`imageChartStorage`)
 
@@ -537,14 +536,13 @@ spec:
       # The endpoint type used when connecting to swift.
       # Supports values ["public","internal","admin"]
       endpointtype: public # Optional, default=public
-      
+
   # ... Skipped fields
 ```
 
 #### in-cluster storage configuration (`inClusterStorage`)
 
-The in-cluster storage configuration can be configured to let the Harbor operator automatically deploy an in-cluster S3 
-compatible Minio service with HA supported as the backend storage service of the deploying Harbor.
+The in-cluster storage configuration can be configured to let the Harbor operator automatically deploy an in-cluster S3 compatible Minio service with HA supported as the backend storage service of the deploying Harbor.
 
 ```yaml
 spec:
@@ -606,7 +604,7 @@ spec:
         # otherwise to an implementation-defined value.
         # More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
         requests: {} # Optional
-    
+
   # ... Skipped fields
 ```
 
@@ -652,8 +650,7 @@ spec:
 
 #### in-cluster database configuration(`inClusterDatabase`)
 
-The in-cluster database configuration can be configured to let the Harbor operator automatically deploy an in-cluster PostgreSQL 
-database service with HA supported as the dependent database of the deploying Harbor.
+The in-cluster database configuration can be configured to let the Harbor operator automatically deploy an in-cluster PostgreSQL database service with HA supported as the dependent database of the deploying Harbor.
 
 ```yaml
 spec:
@@ -689,7 +686,7 @@ spec:
         # otherwise to an implementation-defined value.
         # More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
         requests: {} # Optional
-    
+
 
   # ... Skipped fields
 ```
@@ -726,8 +723,7 @@ spec:
 
 #### in-cluster cache configuration(`inClusterCache`)
 
-The in-cluster cache configuration can be configured to let the Harbor operator automatically deploy an in-cluster Redis 
-service with HA supported as the dependent cache of the deploying Harbor.
+The in-cluster cache configuration can be configured to let the Harbor operator automatically deploy an in-cluster Redis service with HA supported as the dependent cache of the deploying Harbor.
 
 ```yaml
 spec:

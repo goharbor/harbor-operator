@@ -6,9 +6,7 @@ There are some manifest files located under the [./manifests](../manifests) fold
 
 ### manifests/cluster
 
-This folder contains the kustomization templates ,and the deployment manifest yaml for deploying the full Harbor 
-operator stack (including Harbor operator as well as all other operators of the dependent services such as PostgreSQL, 
-Redis and Minio) in an all-in-one way.
+This folder contains the kustomization templates ,and the deployment manifest yaml for deploying the full Harbor operator stack (including Harbor operator as well as all other operators of the dependent services such as PostgreSQL, Redis and Minio) in an all-in-one way.
 
 Use the kustomization template by the following way:
 
@@ -36,8 +34,7 @@ For more info, check [kustomization-all-in-one](./installation/kustomization-all
 
 ### manifests/harbor
 
-This folder contains the kustomization templates ,and the deployment manifest yaml for deploying the Harbor operator 
-itself (no operators of the dependent services such as PostgreSQL, Redis and Minio).
+This folder contains the kustomization templates ,and the deployment manifest yaml for deploying the Harbor operator itself (no operators of the dependent services such as PostgreSQL, Redis and Minio).
 
 Use the kustomization template by the following way:
 

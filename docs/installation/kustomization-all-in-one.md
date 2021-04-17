@@ -1,7 +1,6 @@
 # Install with all-in-one deployment manifest
 
-The installation guide documented here help you deploy Harbor operator stack with an all-in-one deployment manifest, which 
-is the recommended way.
+The installation guide documented here help you deploy Harbor operator stack with an all-in-one deployment manifest, which is the recommended way.
 
 ## Prerequisites
 
@@ -22,8 +21,7 @@ Directly apply the all-in-one deployment manifest to your Kubernetes cluster:
 kubectl apply -f https://raw.githubusercontent.com/goharbor/harbor-operator/master/manifests/cluster/deployment.yaml
 ```
 
->NOTES: Here we use the deployment manifest in the `master` branch as an example, for deploying the released versions, 
-> you can get the deployment manifest in the GitHub release page or find it in the corresponding code branch such as `release-1.0.0`.
+>NOTES: Here we use the deployment manifest in the `master` branch as an example, for deploying the released versions, you can get the deployment manifest in the GitHub release page or find it in the corresponding code branch such as `release-1.0.0`.
 
 Check the installed operators:
 
@@ -43,9 +41,7 @@ redisoperator-6b75fc4555-kldnh      1/1     Running   0          20m
 
 ## Customize deployment manifest
 
-If you want to customize the deployment manifest like editing image settings of operators 
-or [customizing images](../customize-images.md#by-operator-environment-variables) of the deploying Harbor etc., you can 
-clone the code of the specified branch into your computer first.
+If you want to customize the deployment manifest like editing image settings of operators or [customizing images](../customize-images.md#by-operator-environment-variables) of the deploying Harbor etc., you can clone the code of the specified branch into your computer first.
 
 ```shell
 git clone https://github.com/goharbor/harbor-operator.git
@@ -53,12 +49,12 @@ git clone https://github.com/goharbor/harbor-operator.git
 # Checkout to the necessary branch.
 ```
 
-Do necessary modifications to the `manifests/cluster/kustomization.yaml` kustomization template file according to 
-your actual use case and apply the revised deployment manifest to your Kubernetes clusters with command:
+Do necessary modifications to the `manifests/cluster/kustomization.yaml` kustomization template file according to your actual use case and apply the revised deployment manifest to your Kubernetes clusters with command:
 
 ```shell
 kustomize build manifests/cluster | kubectl apply -f -
 ```
+
 Of course, generating the updated deployment manifest first and applying it is also ok:
 
 ```shell
@@ -70,8 +66,7 @@ kustomize build manifests/cluster -o customized_deployment.yaml
 kubectl apply -f customized_deployment.yaml
 ```
 
->NOTES: For editing operator images, you can also try 
-> command `kustomize edit set image goharbor/harbor-operator=ns/my-operator:mytag` under kustomization folder 'manifests/cluster'.
+>NOTES: For editing operator images, you can also try command `kustomize edit set image goharbor/harbor-operator=ns/my-operator:mytag` under kustomization folder 'manifests/cluster'.
 
 ## Delete operator
 
@@ -80,6 +75,7 @@ Delete the harbor operator stack by the deployment manifest:
 ```shell
 kubectl delete -f https://raw.githubusercontent.com/goharbor/harbor-operator/master/manifests/cluster/deployment.yaml
 ```
+
 Or delete the harbor operator stack by the kustomization template:
 
 ```shell
