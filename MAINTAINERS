@@ -4,9 +4,22 @@
 #
 #
 # Names should be added to this file like so:
-# Individual's name <submission email address>
-# Individual's name <submission email address>
+# Individual's name , GitHub ID ,  Affiliation
+# Individual's name , GitHub ID ,  Affiliation
 #
 # Please keep the list sorted.
 #
+
+Pierre PÉRONNET , holyhope , OVHcloud
+Simon Guyennet , sguyennet , OVHcloud
+Jérémie MONSINJON , jMonsinjon , OVHcloud
+Steven Zou , steven-zou , VMware
+Maxime , mhurtrel , OVHcloud
+Weiwei He , heww, VMware
+Ziming Zhang , bitsf , VMware
+Canfeng Wang , wangcanfengxs , Netease
+Huijun Zhu , Ghostbaby , Yunmanman
+Xiaoyang Zhu , soulseen , QingCloud
+Chengyu Zhang , chlins , AlaudaCloud
+Xavier Duthil , XavierDuthil , OVHcloud
 
