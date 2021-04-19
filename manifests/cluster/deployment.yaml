@@ -2890,18 +2890,8 @@ spec:
                     - Redis
                     type: string
                   redisSpec:
+                    description: RedisSpec is the specification of redis.
                     properties:
-                      groupName:
-                        type: string
-                      hosts:
-                        items:
-                          properties:
-                            host:
-                              type: string
-                            port:
-                              type: string
-                          type: object
-                        type: array
                       image:
                         description: Image name for the component.
                         type: string
@@ -2921,20 +2911,23 @@ spec:
                               type: string
                           type: object
                         type: array
-                      poolSize:
-                        description: Maximum number of socket connections. Default is 10 connections per every CPU as reported by runtime.NumCPU.
-                        type: integer
                       sentinel:
+                        description: Sentinel is the configuration of the redis sentinel.
                         properties:
                           replicas:
+                            default: 1
+                            description: Replicas is the instance number of redis sentinel.
                             type: integer
                         type: object
                       server:
+                        description: Server is the configuration of the redis server.
                         properties:
                           replicas:
+                            default: 1
+                            description: Replicas is the instance number of redis server.
                             type: integer
                           resources:
-                            description: ResourceRequirements describes the compute resource requirements.
+                            description: Resources is the resources requests and limits for redis.
                             properties:
                               limits:
                                 additionalProperties:
@@ -2956,9 +2949,10 @@ spec:
                                 type: object
                             type: object
                           storage:
-                            description: the size of storage used in redis.
+                            description: Storage is the size of the redis storage.
                             type: string
                           storageClassName:
+                            description: StorageClassName is the storage class name of the redis storage.
                             type: string
                         type: object
                     type: object
