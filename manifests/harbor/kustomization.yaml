@@ -23,4 +23,4 @@ resources:
 images:
   - name: goharbor/harbor-operator
     newName: goharbor/harbor-operator
-    newTag: latest
+    newTag: dev_master

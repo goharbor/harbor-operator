@@ -97,13 +97,13 @@ type ChartMuseumChartSpec struct {
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Pattern="https?://.*"
-	// The absolute url for .tgzs in index.yaml
+	// The absolute url for .tgz files in index.yaml
 	URL string `json:"url,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
 	// Allow chart versions to be re-uploaded without ?force querystring
-	AllowOvewrite *bool `json:"allowOverwrite,omitempty"`
+	AllowOverwrite *bool `json:"allowOverwrite,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=false

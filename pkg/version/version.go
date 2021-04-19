@@ -9,7 +9,7 @@ const (
 )
 
 var (
-	knowVersions       = []string{}
+	knowVersions       []string
 	knowVersionIndexes = map[string]int{}
 	defaultVersion     = ""
 )
@@ -21,7 +21,7 @@ func init() { // nolint:gochecknoinits
 }
 
 // RegisterKnowVersions register the know versions.
-// NOTE: the paramater versions must be in increasing order.
+// NOTE: the parameter versions must be in increasing order.
 func RegisterKnowVersions(versions ...string) {
 	for i, version := range versions {
 		knowVersions = append(knowVersions, version)

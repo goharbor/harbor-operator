@@ -1151,7 +1151,7 @@ spec:
                         type: object
                     type: object
                   url:
-                    description: The absolute url for .tgzs in index.yaml
+                    description: The absolute url for .tgz files in index.yaml
                     pattern: https?://.*
                     type: string
                 required:
@@ -13414,7 +13414,7 @@ data:
     port: 8080
     {{- end }}
 
-    allow.overwrite: {{ .Spec.Chart.AllowOvewrite }}
+    allow.overwrite: {{ .Spec.Chart.AllowOverwrite }}
 
     auth:
       anonymous.get: {{ .Spec.Authentication.AnonymousGet }}
@@ -13770,7 +13770,7 @@ spec:
               fieldPath: metadata.namespace
         - name: CONFIGURATION_FROM
           value: env,file:/etc/harbor-operator/config.yaml
-        image: goharbor/harbor-operator:latest
+        image: goharbor/harbor-operator:dev_master
         livenessProbe:
           httpGet:
             path: /healthz

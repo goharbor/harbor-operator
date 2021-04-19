@@ -121,7 +121,7 @@ func (r *Reconciler) GetNotarySignerEncryptionKey(ctx context.Context, harbor *g
 	name := r.NormalizeName(ctx, harbor.GetName(), controllers.NotarySigner.String(), "encryption-key")
 	namespace := harbor.GetNamespace()
 
-	secret, err := password.Generate(CoreSecretPasswordLength, CoreSecretPasswordNumDigits, CoreSecretPasswordNumSpecials, false, true)
+	secret, err := password.Generate(NotarySignerEncryptionKeyLength, NotarySignerEncryptionKeyNumDigits, NotarySignerEncryptionKeyNumSpecials, false, true)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot generate secret")
 	}
