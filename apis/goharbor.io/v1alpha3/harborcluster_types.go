@@ -41,6 +41,7 @@ type Cache struct {
 	// +kubebuilder:validation:Enum=Redis
 	Kind string `json:"kind"`
 
+	// RedisSpec is the specification of redis.
 	// +kubebuilder:validation:Required
 	RedisSpec *RedisSpec `json:"redisSpec"`
 }
@@ -48,32 +49,37 @@ type Cache struct {
 type RedisSpec struct {
 	harbormetav1.ImageSpec `json:",inline"`
 
-	Server   *RedisServer   `json:"server,omitempty"`
+	// +kubebuilder:validation:Optional
+	// Server is the configuration of the redis server.
+	Server *RedisServer `json:"server,omitempty"`
+	// +kubebuilder:validation:Optional
+	// Sentinel is the configuration of the redis sentinel.
 	Sentinel *RedisSentinel `json:"sentinel,omitempty"`
-
-	// Maximum number of socket connections.
-	// Default is 10 connections per every CPU as reported by runtime.NumCPU.
-	PoolSize int `json:"poolSize,omitempty"`
-
-	GroupName string `json:"groupName,omitempty"`
-
-	Hosts []RedisHosts `json:"hosts,omitempty"`
-}
-
-type RedisHosts struct {
-	Host string `json:"host,omitempty"`
-	Port string `json:"port,omitempty"`
 }
 
 type RedisSentinel struct {
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=1
+	// Replicas is the instance number of redis sentinel.
 	Replicas int `json:"replicas,omitempty"`
 }
 
 type RedisServer struct {
-	Replicas         int                         `json:"replicas,omitempty"`
-	Resources        corev1.ResourceRequirements `json:"resources,omitempty"`
-	StorageClassName string                      `json:"storageClassName,omitempty"`
-	// the size of storage used in redis.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=1
+	// Replicas is the instance number of redis server.
+	Replicas int `json:"replicas,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Resources is the resources requests and limits for redis.
+	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// StorageClassName is the storage class name of the redis storage.
+	StorageClassName string `json:"storageClassName,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Storage is the size of the redis storage.
 	Storage string `json:"storage,omitempty"`
 }
 
