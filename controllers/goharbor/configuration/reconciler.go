@@ -13,6 +13,7 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/harbor"
 	"github.com/goharbor/harbor-operator/pkg/utils/strings"
 	"github.com/ovh/configstore"
+	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -180,7 +181,7 @@ func (r *Reconciler) assembleConfig(ctx context.Context, cm *corev1.ConfigMap) (
 			// itemValue is secret name.
 			secretName, ok := itemValue.(string)
 			if !ok {
-				return nil, fmt.Errorf("config field %s's value %v, type is invalid, should be string", itemKey, itemValue)
+				return nil, errors.Errorf("config field %s's value %v, type is invalid, should be string", itemKey, itemValue)
 			}
 			// get secret.
 			if err = r.Client.Get(ctx, types.NamespacedName{Namespace: cm.Namespace, Name: secretName}, secret); err != nil {
@@ -197,12 +198,12 @@ func (r *Reconciler) assembleConfig(ctx context.Context, cm *corev1.ConfigMap) (
 // getHarborClient gets harbor client.
 func (r *Reconciler) getHarborClient(ctx context.Context, cluster *goharborv1.HarborCluster) (harbor.Client, error) {
 	if cluster == nil {
-		return nil, fmt.Errorf("harbor cluster can not be nil")
+		return nil, errors.Errorf("harbor cluster can not be nil")
 	}
 
 	url := cluster.Spec.ExternalURL
 	if len(url) == 0 {
-		return nil, fmt.Errorf("harbor url is invalid")
+		return nil, errors.Errorf("harbor url is invalid")
 	}
 
 	var opts []harbor.ClientOption

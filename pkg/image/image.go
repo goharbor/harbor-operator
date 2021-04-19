@@ -9,6 +9,7 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/config"
 	"github.com/goharbor/harbor-operator/pkg/version"
 	"github.com/ovh/configstore"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -261,7 +262,7 @@ func GetImage(ctx context.Context, component string, options ...Option) (string,
 
 	imageName, ok := knowCompoents.GetImageName(component, opts.harborVersion)
 	if !ok {
-		return "", fmt.Errorf("unknow component %s", component)
+		return "", errors.Errorf("unknow component %s", component)
 	}
 
 	repository := opts.repository

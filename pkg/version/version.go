@@ -1,7 +1,7 @@
 package version
 
 import (
-	"fmt"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -41,7 +41,7 @@ func Default() string {
 // Validate returns nil when version is the default version.
 func Validate(version string) error {
 	if version != Default() {
-		return fmt.Errorf("version %s not support, please use version %s", version, Default())
+		return errors.Errorf("version %s not support, please use version %s", version, Default())
 	}
 
 	return nil
@@ -51,16 +51,16 @@ func Validate(version string) error {
 func UpgradeAllowed(from, to string) error {
 	fromIndex, ok := knowVersionIndexes[from]
 	if !ok {
-		return fmt.Errorf("unknow version %s", from)
+		return errors.Errorf("unknow version %s", from)
 	}
 
 	toIndex, ok := knowVersionIndexes[to]
 	if !ok {
-		return fmt.Errorf("unknow version %s", to)
+		return errors.Errorf("unknow version %s", to)
 	}
 
 	if toIndex < fromIndex {
-		return fmt.Errorf("downgrade from version %s to %s is not allowed", from, to)
+		return errors.Errorf("downgrade from version %s to %s is not allowed", from, to)
 	}
 
 	return nil

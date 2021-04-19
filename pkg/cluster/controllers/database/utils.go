@@ -8,6 +8,7 @@ import (
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/database/api"
 	"github.com/goharbor/harbor-operator/pkg/config"
+	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
@@ -136,7 +137,7 @@ func (p *PostgreSQLController) GetPostgreVersion(harborcluster *goharborv1.Harbo
 		}
 	}
 
-	return "", fmt.Errorf("postgresql version not found for harbor %s", harborcluster.Spec.Version)
+	return "", errors.Errorf("postgresql version not found for harbor %s", harborcluster.Spec.Version)
 }
 
 func (p *PostgreSQLController) GetPostgreParameters() map[string]string {

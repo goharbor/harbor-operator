@@ -1,7 +1,7 @@
 package config_test
 
 import (
-	"fmt"
+	"github.com/pkg/errors"
 
 	. "github.com/goharbor/harbor-operator/pkg/config"
 	. "github.com/onsi/ginkgo"
@@ -20,7 +20,7 @@ var _ = Describe("IsNotFound", func() {
 		var err error
 
 		BeforeEach(func() {
-			err = fmt.Errorf("a random error")
+			err = errors.Errorf("a random error")
 		})
 
 		It("Should return false", func() {
@@ -34,7 +34,7 @@ var _ = Describe("IsNotFound", func() {
 
 		BeforeEach(func() {
 			key = "test"
-			err = fmt.Errorf("configstore: get '%s': no item found", key)
+			err = errors.Errorf("configstore: get '%s': no item found", key)
 		})
 
 		It("Should return false", func() {

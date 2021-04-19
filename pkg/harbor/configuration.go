@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 // ApplyConfiguration applies configuration to harbor instance.
@@ -36,7 +38,7 @@ func (c *client) ApplyConfiguration(ctx context.Context, config []byte) error {
 			return fmt.Errorf("read http response body error: %w", err)
 		}
 
-		return fmt.Errorf("response status code is %d, body is %s", code, string(body))
+		return errors.Errorf("response status code is %d, body is %s", code, string(body))
 	}
 
 	return nil
