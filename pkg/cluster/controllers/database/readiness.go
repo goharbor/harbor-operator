@@ -3,6 +3,10 @@ package database
 import (
 	"context"
 	"fmt"
+	acidzalando "github.com/zalando/postgres-operator/pkg/apis/acid.zalan.do"
+	acidzalandov1 "github.com/zalando/postgres-operator/pkg/apis/acid.zalan.do/v1"
+	"os"
+	"strings"
 
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
@@ -161,8 +165,34 @@ func (p *PostgreSQLController) GetInClusterDatabaseConn(ctx context.Context, har
 	return conn, nil
 }
 
+type SecretsTemplate string
+
+func (f *SecretsTemplate) Format(a ...string) string {
+	res := string(*f)
+
+	for i := 0; i < len(a); i += 2 {
+		res = strings.Replace(res, "{"+a[i]+"}", a[i+1], -1)
+	}
+
+	return res
+}
+
+func GetPostgresSecretsTemplate() SecretsTemplate {
+	template := SecretsTemplate(os.Getenv("POSTGRES_SECRETS_TEMPLATE"))
+	if len(template) == 0 {
+		return "{username}.{cluster}.credentials"
+	}
+	return template
+}
+
 func GenInClusterPasswordSecretName(user, crName string) string {
-	return fmt.Sprintf("%s.%s.credentials", user, crName)
+	template := GetPostgresSecretsTemplate()
+
+	return template.Format(
+		"username", strings.Replace(user, "_", "-", -1),
+		"cluster", crName,
+		"tprkind", acidzalandov1.PostgresCRDResourceKind,
+		"tprgroup", acidzalando.GroupName)
 }
 
 // GetInClusterHost returns the Database master pod ip or service name.
