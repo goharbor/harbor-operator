@@ -410,7 +410,7 @@ install-dependencies: certmanager postgresql redis ingress
 .PHONY: redis
 redis: helm sample-redis
 	$(HELM) repo add bitnami https://charts.bitnami.com/bitnami
-	$(HELM) upgrade --install harbor-redis bitnami/redis \
+	$(HELM) upgrade --install harbor-redis bitnami/redis --version 12.10.0 \
 		--set-string existingSecret=harbor-redis \
 		--set-string existingSecretPasswordKey=redis-password \
 		--set usePassword=true
@@ -418,7 +418,7 @@ redis: helm sample-redis
 .PHONY: postgresql
 postgresql: helm sample-database
 	$(HELM) repo add bitnami https://charts.bitnami.com/bitnami
-	$(HELM) upgrade --install harbor-database bitnami/postgresql \
+	$(HELM) upgrade --install harbor-database bitnami/postgresql --version 10.3.17 \
 		--set-string initdbScriptsConfigMap=harbor-init-db \
 		--set-string existingSecret=harbor-database-password
 
