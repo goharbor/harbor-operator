@@ -19,6 +19,9 @@ func (c *client) ApplyConfiguration(ctx context.Context, config []byte) error {
 	if err != nil {
 		return fmt.Errorf("new request error: %w", err)
 	}
+	// with header
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Content-Type", "application/json")
 	// with auth
 	if c.opts.credential != nil {
 		req.SetBasicAuth(c.opts.credential.username, c.opts.credential.password)
