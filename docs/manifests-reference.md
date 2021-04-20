@@ -70,6 +70,9 @@ This folder contains several sample manifests for you to deploy Harbor cluster w
 | [harbor_core_minio.yaml](../manifests/samples/harbor_core_minio.yaml) |Deploy the Harbor cluster with the structure: harbor core components + in-cluster storage(Minio) + in-cluster PostgreSQL + in-cluster Redis |
 | [harbor_full_fs.yaml](../manifests/samples/harbor_full_fs.yaml) |Deploy the Harbor cluster with the structure: harbor all components + filesystem storage(PV) + in-cluster PostgreSQL + in-cluster Redis |
 | [harbor_full_minio.yaml](../manifests/samples/harbor_full_minio.yaml) |Deploy the Harbor cluster with the structure: harbor all components + in-cluster storage(Minio) + in-cluster PostgreSQL + in-cluster Redis |
+| [harborcluster_standard_stack_external.yaml](../manifests/samples/harborcluster_standard_stack_external.yaml) |Deploy the Harbor cluster with the structure: harbor all components + filesystem storage(PV) + external PostgreSQL + external Redis|
+
+> NOTE: `external` means you need to pre-deploy the required services; `in-cluster` means the Harbor operator will create the required services while deploying the Harbor cluster.
 
 ## What's next
 

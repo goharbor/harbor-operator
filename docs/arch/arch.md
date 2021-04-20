@@ -20,7 +20,7 @@ Each component CR has its own controller that will reconcile the component CR to
 
 Multiple level CRDs simplifies the overall stack and bring more clear responsibility boundary. Cascaded ownership is enabled among CRs at different levels, the deletion of top level CR `HarborCluster` will clear all related CRs and resources.
 
-## References``
+## References
 
-* Learn more about the reconcile process, check [reconcile process](./reconciler.md)
+* Learn more about the reconcile process, check [reconcile process](../LCM/controllers.md)
 * Learn more about day2 operations, check [day2 operation design](./day2-op.md)
