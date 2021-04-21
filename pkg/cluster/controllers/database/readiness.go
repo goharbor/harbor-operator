@@ -3,8 +3,6 @@ package database
 import (
 	"context"
 	"fmt"
-	acidzalando "github.com/zalando/postgres-operator/pkg/apis/acid.zalan.do"
-	acidzalandov1 "github.com/zalando/postgres-operator/pkg/apis/acid.zalan.do/v1"
 	"os"
 	"strings"
 
@@ -13,6 +11,8 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/database/api"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	"github.com/pkg/errors"
+	acidzalando "github.com/zalando/postgres-operator/pkg/apis/acid.zalan.do"
+	acidzalandov1 "github.com/zalando/postgres-operator/pkg/apis/acid.zalan.do/v1"
 	corev1 "k8s.io/api/core/v1"
 	kerr "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -171,7 +171,7 @@ func (f *SecretsTemplate) Format(a ...string) string {
 	res := string(*f)
 
 	for i := 0; i < len(a); i += 2 {
-		res = strings.Replace(res, "{"+a[i]+"}", a[i+1], -1)
+		res = strings.ReplaceAll(res, "{"+a[i]+"}", a[i+1])
 	}
 
 	return res
@@ -179,9 +179,11 @@ func (f *SecretsTemplate) Format(a ...string) string {
 
 func GetPostgresSecretsTemplate() SecretsTemplate {
 	template := SecretsTemplate(os.Getenv("POSTGRES_SECRETS_TEMPLATE"))
+
 	if len(template) == 0 {
 		return "{username}.{cluster}.credentials"
 	}
+
 	return template
 }
 
@@ -189,7 +191,7 @@ func GenInClusterPasswordSecretName(user, crName string) string {
 	template := GetPostgresSecretsTemplate()
 
 	return template.Format(
-		"username", strings.Replace(user, "_", "-", -1),
+		"username", strings.ReplaceAll(user, "_", "-"),
 		"cluster", crName,
 		"tprkind", acidzalandov1.PostgresCRDResourceKind,
 		"tprgroup", acidzalando.GroupName)
