@@ -38,8 +38,16 @@ patchesJson6902:
 
 images:
   - name: quay.io/spotahome/redis-operator
-    newName: quay.io/spotahome/redis-operator
+    newName: ghcr.io/goharbor/redis-operator
     newTag: v1.0.0
+  - name: minio/operator
+    newName: ghcr.io/goharbor/minio-operator
+  - name: minio/console
+    newName: ghcr.io/goharbor/minio-console
+  - name: registry.opensource.zalan.do/acid/postgres-operator
+    newName: ghcr.io/goharbor/postgres-operator
+  - name: quay.io/spotahome/redis-operator
+    newName: ghcr.io/goharbor/redis-operator
   - name: goharbor/harbor-operator
-    newName: goharbor/harbor-operator
+    newName: ghcr.io/goharbor/harbor-operator
     newTag: dev_master

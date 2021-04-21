@@ -21490,7 +21490,7 @@ spec:
         env:
         - name: CONSOLE_OPERATOR_MODE
           value: "on"
-        image: minio/console:v0.6.3
+        image: ghcr.io/goharbor/minio-console:v0.6.3
         imagePullPolicy: IfNotPresent
         name: console
         ports:
@@ -21537,7 +21537,7 @@ spec:
               fieldPath: metadata.namespace
         - name: CONFIGURATION_FROM
           value: env,file:/etc/harbor-operator/config.yaml
-        image: goharbor/harbor-operator:dev_master
+        image: ghcr.io/goharbor/harbor-operator:dev_master
         livenessProbe:
           httpGet:
             path: /healthz
@@ -21621,7 +21621,7 @@ spec:
         name: minio-operator
     spec:
       containers:
-      - image: minio/operator:v4.0.6
+      - image: ghcr.io/goharbor/minio-operator:v4.0.6
         imagePullPolicy: IfNotPresent
         name: minio-operator
         resources:
@@ -21662,7 +21662,7 @@ spec:
       - env:
         - name: CONFIG_MAP_NAME
           value: postgres-operator
-        image: registry.opensource.zalan.do/acid/postgres-operator:v1.5.0
+        image: ghcr.io/goharbor/postgres-operator:v1.5.0
         imagePullPolicy: IfNotPresent
         name: postgres-operator
         resources:
@@ -21706,7 +21706,7 @@ spec:
         app: redisoperator
     spec:
       containers:
-      - image: quay.io/spotahome/redis-operator:v1.0.0
+      - image: ghcr.io/goharbor/redis-operator:v1.0.0
         imagePullPolicy: IfNotPresent
         name: app
         resources:
