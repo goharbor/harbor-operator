@@ -86,20 +86,10 @@ func (p *PostgreSQLController) GetPostgreResource(harborcluster *goharborv1.Harb
 		return resources
 	}
 
-	cpu := harborcluster.Spec.InClusterDatabase.PostgresSQLSpec.Resources.Requests.Cpu()
-	mem := harborcluster.Spec.InClusterDatabase.PostgresSQLSpec.Resources.Requests.Memory()
+	spec := harborcluster.Spec.InClusterDatabase.PostgresSQLSpec
 
-	request := api.ResourceDescription{}
-	if cpu != nil {
-		request.CPU = cpu.String()
-	}
-
-	if mem != nil {
-		request.Memory = mem.String()
-	}
-
-	resources.ResourceRequests = request
-	resources.ResourceLimits = request
+	resources.ResourceRequests = getResourceDescription(spec.Resources.Requests)
+	resources.ResourceLimits = getResourceDescription(spec.Resources.Limits)
 
 	return resources
 }
@@ -171,4 +161,18 @@ func (c *Connect) GenDatabaseURL() string {
 	databaseURL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", c.Username, c.Password, c.Host, c.Port, c.Database)
 
 	return databaseURL
+}
+
+func getResourceDescription(res corev1.ResourceList) api.ResourceDescription {
+	var rd api.ResourceDescription
+
+	if cpu := res.Cpu(); cpu != nil {
+		rd.CPU = cpu.String()
+	}
+
+	if mem := res.Memory(); mem != nil {
+		rd.Memory = mem.String()
+	}
+
+	return rd
 }
