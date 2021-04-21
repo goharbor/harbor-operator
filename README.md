@@ -70,17 +70,17 @@ NOTES:
 
 Harbor operator supports two extra Kubernetes versions besides the current latest version (`n-2` pattern):
 
-|    Versions   |         1.18       |        1.19        |        1.20        |
-|---------------|--------------------|--------------------|--------------------|
-| Compatibility | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+|    Versions   |         1.18       |        1.19        |        1.20        | 1.21 |
+|---------------|--------------------|--------------------|--------------------|------|
+| Compatibility | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |  :o: |
 
 ### Cert manager versions
 
 Harbor operator relies on cert manager to manage kinds of certificates used by Harbor cluster components. Table shown below lists the compatibilities of cert manager versions:
 
-|    Versions   |           <0.16          |       1.0.4        |       1.2.0        |
-|---------------|--------------------------|--------------------|--------------------|
-| Compatibility | :heavy_multiplication_x: | :heavy_check_mark: | :heavy_check_mark: |
+|    Versions   |           <0.16          |       1.0.4        |       1.2.0        | 1.3.0 |
+|---------------|--------------------------|--------------------|--------------------|-------|
+| Compatibility | :heavy_multiplication_x: | :heavy_check_mark: | :heavy_check_mark: |  :o:  |
 
 ### Ingress controller types
 
@@ -95,7 +95,7 @@ NOTES:
 
   :heavy_check_mark: : support
   :heavy_multiplication_x: : not support
-  :white_circle: : support with known issues
+  :o: : not verified (probably support)
 
 ## Documentation
 
@@ -105,11 +105,13 @@ NOTES:
 * [Manifests references](./docs/manifests-reference.md)
 * [Customize images](./docs/customize-images.md)
 * [Day2 configurations](./docs/configurations/day2-config.md)
+* [Upgrade Harbor cluster](./docs/LCM/upgrade-cluster.md)
 * [Delete Harbor cluster](./docs/LCM/cluster-deletion.md)
 * [Backup data](./docs/LCM/backup-data.md)
 * [Useful Makefile Targets](./docs/makefile.md)
 * [Resource configurations](./docs/configurations/resource-configurations.md)
 * [Performance comparison between fs & MinIO](./docs/perf/simple-perf-comprasion.md)
+* [Monitor logs with grafana](./docs/LCM/monitor-logs-with-grafana.md)
 
 ## Contributions
 

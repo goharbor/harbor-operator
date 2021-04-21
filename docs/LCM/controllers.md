@@ -1,6 +1,6 @@
 # Controllers
 
-ATM All controllers are based on the same framework except harbor-cluster.
+ATM All controllers are based on the same framework except [harbor-cluster](./cluster-controller.md).
 
 The framework manages basic status fields: `observedGeneration` and `conditions`.
 
@@ -29,7 +29,7 @@ On [Reconciler](#control-loop) side, `unknown` is considered the same way than `
 
 ## Control loop
 
-The control loop is triggered by a kubernetes event when one of the Resource controlled by the operator changes.
+The control loop is triggered by a Kubernetes event when one of the Resource controlled by the operator changes.
 
 ```text
 Event received  +------------ +

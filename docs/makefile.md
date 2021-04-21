@@ -25,3 +25,6 @@ The `Makefile` is in the root dir of the code repository.
 | `install-dependencies` | Install the related dependencies including cert-manager, ingress controller, redis and postgresql |
 | `dev-tools`    | Install kids of the development tools |
 | `sample-%`    | Deploy the related sample CR. `%` can be the name of sub folders under [samples](../config/samples) |
+| `postgresql` | Deploy a PostgreSQL database with bitnami chart|
+| `redis` | Deploy a Redis database with bitnami chart |
+| `sample-github-secret` | Create a secret wrapping the GitHub token read from the env variable `GITHUB_TOKEN`|
