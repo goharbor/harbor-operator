@@ -390,7 +390,7 @@ sample-redis: kustomize
 
 .PHONY: sample-github-secret
 sample-github-secret:
-	! test -z $(GITHUB_TOKEN)
+	test -z "$(GITHUB_TOKEN)" || \
 	kubectl create secret generic \
 		github-credentials \
 			--type=goharbor.io/github \
