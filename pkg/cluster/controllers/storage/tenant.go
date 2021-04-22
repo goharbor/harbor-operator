@@ -26,7 +26,7 @@ var (
 	ComponentName            = "cluster-minio"
 	ConfigImageKey           = "minio-docker-image"
 	MinioInitName            = "cluster-minio-init"
-	InitConfigImageKey       = "minio-docker-image-init"
+	InitConfigImageKey       = "minio-init-docker-image"
 )
 
 func (m *MinIOController) ProvisionMinIOProperties(ctx context.Context, harborcluster *goharborv1.HarborCluster, minioInstance *miniov2.Tenant) (*lcm.CRStatus, error) {
