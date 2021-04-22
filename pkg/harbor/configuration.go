@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 // ApplyConfiguration applies configuration to harbor instance.
@@ -17,6 +19,9 @@ func (c *client) ApplyConfiguration(ctx context.Context, config []byte) error {
 	if err != nil {
 		return fmt.Errorf("new request error: %w", err)
 	}
+	// with header
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Content-Type", "application/json")
 	// with auth
 	if c.opts.credential != nil {
 		req.SetBasicAuth(c.opts.credential.username, c.opts.credential.password)
@@ -36,7 +41,7 @@ func (c *client) ApplyConfiguration(ctx context.Context, config []byte) error {
 			return fmt.Errorf("read http response body error: %w", err)
 		}
 
-		return fmt.Errorf("response status code is %d, body is %s", code, string(body))
+		return errors.Errorf("response status code is %d, body is %s", code, string(body))
 	}
 
 	return nil

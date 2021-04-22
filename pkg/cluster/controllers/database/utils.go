@@ -8,6 +8,7 @@ import (
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/database/api"
 	"github.com/goharbor/harbor-operator/pkg/config"
+	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
@@ -82,32 +83,13 @@ func (p *PostgreSQLController) GetPostgreResource(harborcluster *goharborv1.Harb
 	resources := api.Resources{}
 
 	if harborcluster.Spec.InClusterDatabase.PostgresSQLSpec == nil {
-		resources.ResourceRequests = api.ResourceDescription{
-			CPU:    "1",
-			Memory: "1Gi",
-		}
-		resources.ResourceRequests = api.ResourceDescription{
-			CPU:    "2",
-			Memory: "2Gi",
-		}
-
 		return resources
 	}
 
-	cpu := harborcluster.Spec.InClusterDatabase.PostgresSQLSpec.Resources.Requests.Cpu()
-	mem := harborcluster.Spec.InClusterDatabase.PostgresSQLSpec.Resources.Requests.Memory()
+	spec := harborcluster.Spec.InClusterDatabase.PostgresSQLSpec
 
-	request := api.ResourceDescription{}
-	if cpu != nil {
-		request.CPU = cpu.String()
-	}
-
-	if mem != nil {
-		request.Memory = mem.String()
-	}
-
-	resources.ResourceRequests = request
-	resources.ResourceLimits = request
+	resources.ResourceRequests = getResourceDescription(spec.Resources.Requests)
+	resources.ResourceLimits = getResourceDescription(spec.Resources.Limits)
 
 	return resources
 }
@@ -145,7 +127,7 @@ func (p *PostgreSQLController) GetPostgreVersion(harborcluster *goharborv1.Harbo
 		}
 	}
 
-	return "", fmt.Errorf("postgresql version not found for harbor %s", harborcluster.Spec.Version)
+	return "", errors.Errorf("postgresql version not found for harbor %s", harborcluster.Spec.Version)
 }
 
 func (p *PostgreSQLController) GetPostgreParameters() map[string]string {
@@ -179,4 +161,18 @@ func (c *Connect) GenDatabaseURL() string {
 	databaseURL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", c.Username, c.Password, c.Host, c.Port, c.Database)
 
 	return databaseURL
+}
+
+func getResourceDescription(res corev1.ResourceList) api.ResourceDescription {
+	var rd api.ResourceDescription
+
+	if cpu := res.Cpu(); cpu != nil {
+		rd.CPU = cpu.String()
+	}
+
+	if mem := res.Memory(); mem != nil {
+		rd.Memory = mem.String()
+	}
+
+	return rd
 }

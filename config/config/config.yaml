@@ -1,0 +1,15 @@
+- key: controllers-config-directory
+  priority: 100
+  value: /etc/harbor-operator
+
+- key: classname
+  priority: 100
+  value:
+
+- key: network-policies
+  priority: 100
+  value: false
+
+- key: watch-children
+  priority: 100
+  value: true

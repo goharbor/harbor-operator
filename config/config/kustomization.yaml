@@ -16,3 +16,21 @@ configMapGenerator:
   - assets/portal-config.conf.tmpl
   - assets/registry-config.yaml.tmpl
   - assets/registryctl-config.yaml.tmpl
+
+- name: config
+  behavior: create
+  files:
+  - controllers/core-ctrl.yaml
+  - controllers/chartmuseum-ctrl.yaml
+  - controllers/exporter-ctrl.yaml
+  - controllers/harbor-ctrl.yaml
+  - controllers/harborcluster-ctrl.yaml
+  - controllers/harborconfiguration-ctrl.yaml
+  - controllers/jobservice-ctrl.yaml
+  - controllers/notaryserver-ctrl.yaml
+  - controllers/notarysigner-ctrl.yaml
+  - controllers/portal-ctrl.yaml
+  - controllers/registry-ctrl.yaml
+  - controllers/registryctl-ctrl.yaml
+  - controllers/trivy-ctrl.yaml
+  - config.yaml

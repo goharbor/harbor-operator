@@ -25,7 +25,7 @@ const (
 )
 
 func New(ctx context.Context, scheme *runtime.Scheme) (manager.Manager, error) {
-	var mgrConfig manager.Options = ctrl.Options{
+	mgrConfig := ctrl.Options{
 		MetricsBindAddress:     fmt.Sprintf(":%d", MetricsPort),
 		LeaderElection:         false,
 		Port:                   WebHookPort,
@@ -37,9 +37,9 @@ func New(ctx context.Context, scheme *runtime.Scheme) (manager.Manager, error) {
 		Slice(ManagerConfigKey).
 		Unmarshal(func() interface{} {
 			// Duplicate mgrConfig
-			config := mgrConfig
+			c := mgrConfig
 
-			return &config
+			return &c
 		}).
 		GetFirstItem()
 	if err != nil {
@@ -47,12 +47,12 @@ func New(ctx context.Context, scheme *runtime.Scheme) (manager.Manager, error) {
 			return nil, errors.Wrap(err, "cannot get configuration")
 		}
 	} else {
-		config, err := item.Unmarshaled()
+		c, err := item.Unmarshaled()
 		if err != nil {
 			return nil, errors.Wrap(err, "unable to get configuration")
 		}
 
-		mgrConfig = *config.(*manager.Options)
+		mgrConfig = *c.(*manager.Options)
 	}
 
 	logger.Get(ctx).Info(
@@ -65,16 +65,16 @@ func New(ctx context.Context, scheme *runtime.Scheme) (manager.Manager, error) {
 		"LeaderElection.ID", mgrConfig.LeaderElectionID,
 	)
 
-	config, err := ctrl.GetConfig()
+	c, err := ctrl.GetConfig()
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to get rest configuration")
 	}
 
-	config.WrapTransport = transport.Wrappers(func(rt http.RoundTripper) http.RoundTripper {
+	c.WrapTransport = transport.Wrappers(func(rt http.RoundTripper) http.RoundTripper {
 		return &nettracing.Transport{RoundTripper: rt}
 	})
 
-	mgr, err := ctrl.NewManager(config, mgrConfig)
+	mgr, err := ctrl.NewManager(c, mgrConfig)
 
 	return mgr, errors.Wrap(err, "unable to get the manager")
 }

@@ -16,9 +16,7 @@ import (
 )
 
 const (
-	DefaultIngressAnnotationsEnabled   = true
-	IngressAnnotationsEnabledCOnfigKey = "ingress-annotations-enabled"
-	NCPIngressValueTrue                = "true"
+	NCPIngressValueTrue = "true"
 )
 
 type CoreIngress graph.Resource
@@ -268,7 +266,6 @@ func (err ErrInvalidIngressController) Error() string {
 
 func (r *Reconciler) GetCoreIngressRuleValue(ctx context.Context, harbor *goharborv1.Harbor, core, portal netv1beta1.IngressBackend) (*netv1beta1.IngressRuleValue, error) { // nolint:funlen
 	pathTypePrefix := netv1beta1.PathTypePrefix
-	pathTypeExact := netv1beta1.PathTypeExact
 
 	switch harbor.Spec.Expose.Core.Ingress.Controller {
 	case harbormetav1.IngressControllerDefault:
@@ -336,7 +333,7 @@ func (r *Reconciler) GetCoreIngressRuleValue(ctx context.Context, harbor *goharb
 			HTTP: &netv1beta1.HTTPIngressRuleValue{
 				Paths: []netv1beta1.HTTPIngressPath{{
 					Path:     "/",
-					PathType: &pathTypeExact,
+					PathType: &pathTypePrefix,
 					Backend:  portal,
 				}, {
 					Path:     "/api",

@@ -16,13 +16,13 @@ package harborcluster
 
 import (
 	"context"
-	"errors"
 	"sync"
 	"time"
 
 	"github.com/go-logr/logr"
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
+	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -50,7 +50,7 @@ func newStatus(source *goharborv1.HarborCluster) *status {
 		cr:     source,
 		locker: &sync.Mutex{},
 		data: &goharborv1.HarborClusterStatus{
-			Status:     goharborv1.StatusUnknown,
+			Status:     goharborv1.StatusProvisioning,
 			Revision:   time.Now().UnixNano(),
 			Conditions: make([]goharborv1.HarborClusterCondition, 0),
 		},
@@ -231,12 +231,7 @@ func (s *status) overallStatus() goharborv1.ClusterStatus {
 		return goharborv1.StatusUnHealthy
 	}
 
-	// Not all are completed yet
-	if ready == len(s.data.Conditions) {
-		return goharborv1.StatusCreating
-	}
-
-	return goharborv1.StatusUnknown
+	return goharborv1.StatusProvisioning
 }
 
 func (s *status) validate() error {

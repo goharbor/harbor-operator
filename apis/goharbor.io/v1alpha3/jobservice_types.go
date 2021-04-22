@@ -73,6 +73,9 @@ type JobServiceSpec struct {
 
 	// +kubebuilder:validation:Required
 	Registry RegistryControllerConnectionSpec `json:"registry"`
+
+	// +kubebuilder:validation:Optional
+	Proxy *harbormetav1.ProxySpec `json:"proxy,omitempty"`
 }
 
 type JobServiceTokenSpec struct {

@@ -28,7 +28,7 @@ func Init(ctx context.Context, jaegerConfig *jaeger_cnf.Configuration) (io.Close
 	})
 
 	traceLogger := logger.Get(ctx).WithName("tracing")
-	logger := jaeger_kit.NewLogger(kit_log.LoggerFunc(func(i ...interface{}) error {
+	l := jaeger_kit.NewLogger(kit_log.LoggerFunc(func(i ...interface{}) error {
 		traceLogger.Info("message", i...)
 
 		return nil
@@ -36,7 +36,7 @@ func Init(ctx context.Context, jaegerConfig *jaeger_cnf.Configuration) (io.Close
 
 	tracer, con, err := jaegerConfig.NewTracer(
 		jaeger_cnf.Metrics(jaegerProm),
-		jaeger_cnf.Logger(logger),
+		jaeger_cnf.Logger(l),
 	)
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to create tracing")

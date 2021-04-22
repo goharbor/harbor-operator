@@ -41,6 +41,7 @@ type Cache struct {
 	// +kubebuilder:validation:Enum=Redis
 	Kind string `json:"kind"`
 
+	// RedisSpec is the specification of redis.
 	// +kubebuilder:validation:Required
 	RedisSpec *RedisSpec `json:"redisSpec"`
 }
@@ -48,32 +49,37 @@ type Cache struct {
 type RedisSpec struct {
 	harbormetav1.ImageSpec `json:",inline"`
 
-	Server   *RedisServer   `json:"server,omitempty"`
+	// +kubebuilder:validation:Optional
+	// Server is the configuration of the redis server.
+	Server *RedisServer `json:"server,omitempty"`
+	// +kubebuilder:validation:Optional
+	// Sentinel is the configuration of the redis sentinel.
 	Sentinel *RedisSentinel `json:"sentinel,omitempty"`
-
-	// Maximum number of socket connections.
-	// Default is 10 connections per every CPU as reported by runtime.NumCPU.
-	PoolSize int `json:"poolSize,omitempty"`
-
-	GroupName string `json:"groupName,omitempty"`
-
-	Hosts []RedisHosts `json:"hosts,omitempty"`
-}
-
-type RedisHosts struct {
-	Host string `json:"host,omitempty"`
-	Port string `json:"port,omitempty"`
 }
 
 type RedisSentinel struct {
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=1
+	// Replicas is the instance number of redis sentinel.
 	Replicas int `json:"replicas,omitempty"`
 }
 
 type RedisServer struct {
-	Replicas         int                         `json:"replicas,omitempty"`
-	Resources        corev1.ResourceRequirements `json:"resources,omitempty"`
-	StorageClassName string                      `json:"storageClassName,omitempty"`
-	// the size of storage used in redis.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=1
+	// Replicas is the instance number of redis server.
+	Replicas int `json:"replicas,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Resources is the resources requests and limits for redis.
+	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// StorageClassName is the storage class name of the redis storage.
+	StorageClassName string `json:"storageClassName,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Storage is the size of the redis storage.
 	Storage string `json:"storage,omitempty"`
 }
 
@@ -183,10 +189,8 @@ const (
 	ServiceReady HarborClusterConditionType = "ServiceReady"
 	// ConfigurationReady means the configuration is applied to harbor.
 	ConfigurationReady HarborClusterConditionType = "ConfigurationReady"
-	// StatusUnknown is the status of unknown.
-	StatusUnknown ClusterStatus = "unknown"
-	// StatusCreating is the status of creating.
-	StatusCreating ClusterStatus = "creating"
+	// StatusCreating is the status of provisioning.
+	StatusProvisioning ClusterStatus = "provisioning"
 	// StatusHealthy is the status of healthy.
 	StatusHealthy ClusterStatus = "healthy"
 	// StatusUnHealthy is the status of unhealthy.
@@ -229,10 +233,6 @@ const (
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Public URL",type=string,JSONPath=`.spec.externalURL`,description="The public URL to the Harbor application",priority=0
 // +kubebuilder:printcolumn:name="Status",type=string,JSONPath=`.status.status`,description="The overall status of the Harbor cluster",priority=0
-// +kubebuilder:printcolumn:name="Service Ready",type=string,JSONPath=`.status.conditions[?(@.type=="ServiceReady")].status`,description="The current status of the new Harbor spec",priority=10
-// +kubebuilder:printcolumn:name="Cache Ready",type=string,JSONPath=`.status.conditions[?(@.type=="CacheReady")].status`,description="The current status of the new Cache spec",priority=20
-// +kubebuilder:printcolumn:name="Database Ready",type=string,JSONPath=`.status.conditions[?(@.type=="DatabaseReady")].status`,description="The current status of the new Database spec",priority=20
-// +kubebuilder:printcolumn:name="Storage Ready",type=string,JSONPath=`.status.conditions[?(@.type=="StorageReady")].status`,description="The current status of the new Storage spec",priority=20
 // +kubebuilder:printcolumn:name="Operator Version",type=string,JSONPath=`.status.operator.controllerVersion`,description="The operator version ",priority=30
 // +kubebuilder:printcolumn:name="Operator Git Commit",type=string,JSONPath=`.status.operator.controllerGitCommit`,description="The operator git commit",priority=30
 // HarborCluster is the Schema for the harborclusters API.

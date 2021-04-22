@@ -262,6 +262,8 @@ func (r *Reconciler) GetRegistry(ctx context.Context, harbor *goharborv1.Harbor)
 					RedisConnection: redis,
 				},
 			},
+			CertificateInjection: harbor.Spec.Registry.CertificateInjection,
+			Proxy:                harbor.GetComponentProxySpec(harbormetav1.RegistryComponent),
 		},
 	}, nil
 }

@@ -6,8 +6,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-const NotaryMigrationGithubCredentialsConfigKey = "notary-migration-github-credentials"
-
 const NotaryMigrationGithubSourceConfigKey = "notary-migration-github-source"
 
 type GithubSource struct {
@@ -28,9 +26,9 @@ func (r *Reconciler) GetDefaultNotaryMigrationSource() (*GithubSource, error) {
 	item, err := configstore.Filter().
 		Slice(NotaryMigrationGithubSourceConfigKey).
 		Unmarshal(func() interface{} {
-			copy := defaultSource
+			c := defaultSource
 
-			return &copy
+			return &c
 		}).
 		GetFirstItem()
 	if err != nil {
@@ -41,10 +39,10 @@ func (r *Reconciler) GetDefaultNotaryMigrationSource() (*GithubSource, error) {
 		return nil, err
 	}
 
-	config, err := item.Unmarshaled()
+	c, err := item.Unmarshaled()
 	if err != nil {
 		return nil, errors.Wrap(err, "invalid")
 	}
 
-	return config.(*GithubSource), nil
+	return c.(*GithubSource), nil
 }

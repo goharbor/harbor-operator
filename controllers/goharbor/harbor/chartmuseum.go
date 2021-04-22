@@ -74,7 +74,7 @@ func (r *Reconciler) GetChartMuseum(ctx context.Context, harbor *goharborv1.Harb
 
 	publicURL, err := url.Parse(harbor.Spec.ExternalURL)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot parseexternalURL")
+		return nil, errors.Wrap(err, "cannot parse externalURL")
 	}
 
 	chartServerURL := ""
@@ -109,7 +109,7 @@ func (r *Reconciler) GetChartMuseum(ctx context.Context, harbor *goharborv1.Harb
 				Redis: &redis,
 			},
 			Chart: goharborv1.ChartMuseumChartSpec{
-				AllowOvewrite: &varTrue,
+				AllowOverwrite: &varTrue,
 				Storage: goharborv1.ChartMuseumChartStorageSpec{
 					ChartMuseumChartStorageDriverSpec: r.ChartMuseumStorage(ctx, harbor),
 					MaxStorageObjects:                 &maxStorageObjects,

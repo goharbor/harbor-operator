@@ -116,8 +116,8 @@ func (d *Dependencies) AddAnnotations(object metav1.Object) {
 		annotations = map[string]string{}
 	}
 
-	for object, onlySpec := range d.objects {
-		annotations[d.GetID(object)] = d.ComputeChecksum(object, onlySpec)
+	for obj, onlySpec := range d.objects {
+		annotations[d.GetID(obj)] = d.ComputeChecksum(obj, onlySpec)
 	}
 
 	if ver := version.GetVersion(annotations); ver != "" {
