@@ -29,11 +29,16 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 )
 
+const (
+	// The minimal number of volumes created by minio.
+	minimalVolumeCount = 4
+)
+
 // Log used this webhook.
 var clog = logf.Log.WithName("harborcluster-resource")
 
 // SetupWebhookWithManager sets up validating webhook of HarborCluster.
-func (hc *HarborCluster) SetupWebhookWithManager(ctx context.Context, mgr ctrl.Manager) error {
+func (hc *HarborCluster) SetupWebhookWithManager(_ context.Context, mgr ctrl.Manager) error {
 	return ctrl.NewWebhookManagedBy(mgr).
 		For(hc).
 		Complete()
@@ -142,8 +147,10 @@ func (hc *HarborCluster) validateStorage() *field.Error {
 	// Validate more if incluster storage is configured.
 	if hc.Spec.InClusterStorage != nil {
 		desiredReplicas := hc.Spec.InClusterStorage.MinIOSpec.Replicas
-		if desiredReplicas%2 != 0 || desiredReplicas > 16 {
-			return invalid(fp, desiredReplicas, "minIOSpec.replicas should be even number and no more than 16")
+		volumePerServer := hc.Spec.InClusterStorage.MinIOSpec.VolumesPerServer
+
+		if desiredReplicas*volumePerServer < minimalVolumeCount {
+			return invalid(fp, hc.Spec.InClusterStorage.MinIOSpec, fmt.Sprintf("minIOSpec.replicas * minIOSpec.volumesPerServer should be >=%d", minimalVolumeCount))
 		}
 	}
 
