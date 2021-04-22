@@ -2,12 +2,12 @@ package builder
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"sync"
 	"time"
 
 	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
 	v1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	apiextv1 "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/typed/apiextensions/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -227,7 +227,7 @@ func isCRDReady(getter apiextv1.CustomResourceDefinitionsGetter, name string) bo
 				}
 			case v1.NamesAccepted:
 				if cond.Status == v1.ConditionFalse {
-					return false, fmt.Errorf("name conflict: %v", cond.Reason) // conflicted, poll will return immediately
+					return false, errors.Errorf("name conflict: %v", cond.Reason) // conflicted, poll will return immediately
 				}
 			}
 		}

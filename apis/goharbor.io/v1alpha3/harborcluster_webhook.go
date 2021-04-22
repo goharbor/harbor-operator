@@ -19,6 +19,7 @@ import (
 	"fmt"
 
 	"github.com/goharbor/harbor-operator/pkg/version"
+	"github.com/pkg/errors"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -37,8 +38,6 @@ func (hc *HarborCluster) SetupWebhookWithManager(ctx context.Context, mgr ctrl.M
 		For(hc).
 		Complete()
 }
-
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 
 // +kubebuilder:webhook:path=/mutate-goharbor-io-v1alpha3-harborcluster,mutating=true,failurePolicy=fail,groups=goharbor.io,resources=harborclusters,verbs=create;update,versions=v1alpha3,name=mharborcluster.kb.io,admissionReviewVersions={"v1beta1"},sideEffects=None
 
@@ -66,7 +65,7 @@ func (hc *HarborCluster) ValidateUpdate(old runtime.Object) error {
 
 	obj, ok := old.(*HarborCluster)
 	if !ok {
-		return fmt.Errorf("failed type assertion on kind: %s", old.GetObjectKind().GroupVersionKind().String())
+		return errors.Errorf("failed type assertion on kind: %s", old.GetObjectKind().GroupVersionKind().String())
 	}
 
 	return hc.validate(obj)

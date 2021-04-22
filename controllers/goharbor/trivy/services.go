@@ -29,23 +29,31 @@ func (r *Reconciler) GetService(ctx context.Context, trivy *goharborv1.Trivy) (*
 	name := r.NormalizeName(ctx, trivy.GetName())
 	namespace := trivy.GetNamespace()
 
+	var ports []corev1.ServicePort
+
+	if trivy.Spec.Server.TLS.Enabled() {
+		ports = append(ports, corev1.ServicePort{
+			Name:       harbormetav1.TrivyHTTPSPortName,
+			Port:       harbormetav1.HTTPSPort,
+			TargetPort: intstr.FromString(harbormetav1.TrivyHTTPSPortName),
+			Protocol:   corev1.ProtocolTCP,
+		})
+	} else {
+		ports = append(ports, corev1.ServicePort{
+			Name:       harbormetav1.TrivyHTTPPortName,
+			Port:       harbormetav1.HTTPPort,
+			TargetPort: intstr.FromString(harbormetav1.TrivyHTTPPortName),
+			Protocol:   corev1.ProtocolTCP,
+		})
+	}
+
 	return &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
 		},
 		Spec: corev1.ServiceSpec{
-			Ports: []corev1.ServicePort{{
-				Name:       harbormetav1.TrivyHTTPPortName,
-				Port:       harbormetav1.HTTPPort,
-				TargetPort: intstr.FromString(harbormetav1.TrivyHTTPPortName),
-				Protocol:   corev1.ProtocolTCP,
-			}, {
-				Name:       harbormetav1.TrivyHTTPSPortName,
-				Port:       harbormetav1.HTTPSPort,
-				TargetPort: intstr.FromString(harbormetav1.TrivyHTTPSPortName),
-				Protocol:   corev1.ProtocolTCP,
-			}},
+			Ports: ports,
 			Selector: map[string]string{
 				r.Label("name"):      name,
 				r.Label("namespace"): namespace,

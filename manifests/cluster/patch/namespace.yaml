@@ -1,3 +1,4 @@
-- op: replace
-  path: /metadata/name
-  value: harbor-operator-ns
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: harbor-operator-ns

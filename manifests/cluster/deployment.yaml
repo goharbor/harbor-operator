@@ -5,9 +5,6 @@ metadata:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
     goharbor.io/operator-version: v1.0.0
-    operator.min.io/authors: MinIO, Inc.
-    operator.min.io/license: AGPLv3
-    operator.min.io/support: https://subnet.min.io
   name: harbor-operator-ns
 ---
 apiVersion: apiextensions.k8s.io/v1
@@ -1154,7 +1151,7 @@ spec:
                         type: object
                     type: object
                   url:
-                    description: The absolute url for .tgzs in index.yaml
+                    description: The absolute url for .tgz files in index.yaml
                     pattern: https?://.*
                     type: string
                 required:
@@ -1710,19 +1707,21 @@ spec:
                 type: object
               proxy:
                 properties:
-                  components:
-                    items:
-                      type: string
-                    type: array
-                  noProxy:
-                    items:
-                      type: string
-                    type: array
-                  url:
+                  httpProxy:
                     pattern: https?://.+
                     type: string
-                required:
-                - url
+                  httpsProxy:
+                    pattern: https?://.+
+                    type: string
+                  noProxy:
+                    default:
+                    - 127.0.0.1
+                    - localhost
+                    - .local
+                    - .internal
+                    items:
+                      type: string
+                    type: array
                 type: object
               publicCertificateRef:
                 pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
@@ -2222,26 +2221,6 @@ spec:
     - description: The overall status of the Harbor cluster
       jsonPath: .status.status
       name: Status
-      type: string
-    - description: The current status of the new Harbor spec
-      jsonPath: .status.conditions[?(@.type=="ServiceReady")].status
-      name: Service Ready
-      priority: 10
-      type: string
-    - description: The current status of the new Cache spec
-      jsonPath: .status.conditions[?(@.type=="CacheReady")].status
-      name: Cache Ready
-      priority: 20
-      type: string
-    - description: The current status of the new Database spec
-      jsonPath: .status.conditions[?(@.type=="DatabaseReady")].status
-      name: Database Ready
-      priority: 20
-      type: string
-    - description: The current status of the new Storage spec
-      jsonPath: .status.conditions[?(@.type=="StorageReady")].status
-      name: Storage Ready
-      priority: 20
       type: string
     - description: 'The operator version '
       jsonPath: .status.operator.controllerVersion
@@ -2908,18 +2887,8 @@ spec:
                     - Redis
                     type: string
                   redisSpec:
+                    description: RedisSpec is the specification of redis.
                     properties:
-                      groupName:
-                        type: string
-                      hosts:
-                        items:
-                          properties:
-                            host:
-                              type: string
-                            port:
-                              type: string
-                          type: object
-                        type: array
                       image:
                         description: Image name for the component.
                         type: string
@@ -2939,20 +2908,23 @@ spec:
                               type: string
                           type: object
                         type: array
-                      poolSize:
-                        description: Maximum number of socket connections. Default is 10 connections per every CPU as reported by runtime.NumCPU.
-                        type: integer
                       sentinel:
+                        description: Sentinel is the configuration of the redis sentinel.
                         properties:
                           replicas:
+                            default: 1
+                            description: Replicas is the instance number of redis sentinel.
                             type: integer
                         type: object
                       server:
+                        description: Server is the configuration of the redis server.
                         properties:
                           replicas:
+                            default: 1
+                            description: Replicas is the instance number of redis server.
                             type: integer
                           resources:
-                            description: ResourceRequirements describes the compute resource requirements.
+                            description: Resources is the resources requests and limits for redis.
                             properties:
                               limits:
                                 additionalProperties:
@@ -2974,9 +2946,10 @@ spec:
                                 type: object
                             type: object
                           storage:
-                            description: the size of storage used in redis.
+                            description: Storage is the size of the redis storage.
                             type: string
                           storageClassName:
+                            description: StorageClassName is the storage class name of the redis storage.
                             type: string
                         type: object
                     type: object
@@ -3671,18 +3644,28 @@ spec:
               proxy:
                 properties:
                   components:
+                    default:
+                    - core
+                    - jobservice
+                    - trivy
                     items:
                       type: string
                     type: array
-                  noProxy:
-                    items:
-                      type: string
-                    type: array
-                  url:
+                  httpProxy:
                     pattern: https?://.+
                     type: string
-                required:
-                - url
+                  httpsProxy:
+                    pattern: https?://.+
+                    type: string
+                  noProxy:
+                    default:
+                    - 127.0.0.1
+                    - localhost
+                    - .local
+                    - .internal
+                    items:
+                      type: string
+                    type: array
                 type: object
               redis:
                 description: Skip OpenAPI schema validation Use validating webhook to do verification (field required)
@@ -3713,6 +3696,10 @@ spec:
                 type: object
               registry:
                 properties:
+                  certificateRefs:
+                    items:
+                      type: string
+                    type: array
                   image:
                     description: Image name for the component.
                     type: string
@@ -5158,18 +5145,28 @@ spec:
               proxy:
                 properties:
                   components:
+                    default:
+                    - core
+                    - jobservice
+                    - trivy
                     items:
                       type: string
                     type: array
-                  noProxy:
-                    items:
-                      type: string
-                    type: array
-                  url:
+                  httpProxy:
                     pattern: https?://.+
                     type: string
-                required:
-                - url
+                  httpsProxy:
+                    pattern: https?://.+
+                    type: string
+                  noProxy:
+                    default:
+                    - 127.0.0.1
+                    - localhost
+                    - .local
+                    - .internal
+                    items:
+                      type: string
+                    type: array
                 type: object
               redis:
                 description: Skip OpenAPI schema validation Use validating webhook to do verification (field required)
@@ -5200,6 +5197,10 @@ spec:
                 type: object
               registry:
                 properties:
+                  certificateRefs:
+                    items:
+                      type: string
+                    type: array
                   image:
                     description: Image name for the component.
                     type: string
@@ -7592,6 +7593,24 @@ spec:
                   type: string
                 description: 'NodeSelector is a selector which must be true for the component to fit on a node. Selector which must match a node''s labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/'
                 type: object
+              proxy:
+                properties:
+                  httpProxy:
+                    pattern: https?://.+
+                    type: string
+                  httpsProxy:
+                    pattern: https?://.+
+                    type: string
+                  noProxy:
+                    default:
+                    - 127.0.0.1
+                    - localhost
+                    - .local
+                    - .internal
+                    items:
+                      type: string
+                    type: array
+                type: object
               registry:
                 properties:
                   controllerURL:
@@ -8711,6 +8730,10 @@ spec:
                     - service
                     type: object
                 type: object
+              certificateRefs:
+                items:
+                  type: string
+                type: array
               compatibility:
                 properties:
                   schema1:
@@ -9063,13 +9086,21 @@ spec:
                 type: object
               proxy:
                 properties:
-                  basicAuthRef:
-                    pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                  httpProxy:
+                    pattern: https?://.+
                     type: string
-                  remoteURL:
+                  httpsProxy:
+                    pattern: https?://.+
                     type: string
-                required:
-                - remoteURL
+                  noProxy:
+                    default:
+                    - 127.0.0.1
+                    - localhost
+                    - .local
+                    - .internal
+                    items:
+                      type: string
+                    type: array
                 type: object
               redis:
                 properties:
@@ -17651,6 +17682,24 @@ spec:
                   type: string
                 description: 'NodeSelector is a selector which must be true for the component to fit on a node. Selector which must match a node''s labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/'
                 type: object
+              proxy:
+                properties:
+                  httpProxy:
+                    pattern: https?://.+
+                    type: string
+                  httpsProxy:
+                    pattern: https?://.+
+                    type: string
+                  noProxy:
+                    default:
+                    - 127.0.0.1
+                    - localhost
+                    - .local
+                    - .internal
+                    items:
+                      type: string
+                    type: array
+                type: object
               redis:
                 description: Redis cache store
                 properties:
@@ -19772,19 +19821,6 @@ metadata:
     operator.min.io/authors: MinIO, Inc.
     operator.min.io/license: AGPLv3
     operator.min.io/support: https://subnet.min.io
-  name: console-sa
-  namespace: harbor-operator-ns
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  annotations:
-    goharbor.io/deploy-engine: Kustomization
-    goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
-    operator.min.io/authors: MinIO, Inc.
-    operator.min.io/license: AGPLv3
-    operator.min.io/support: https://subnet.min.io
   name: minio-operator
   namespace: harbor-operator-ns
 ---
@@ -19844,111 +19880,6 @@ rules:
   - events
   verbs:
   - create
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  annotations:
-    goharbor.io/deploy-engine: Kustomization
-    goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
-    operator.min.io/authors: MinIO, Inc.
-    operator.min.io/license: AGPLv3
-    operator.min.io/support: https://subnet.min.io
-  name: console-sa-role
-rules:
-- apiGroups:
-  - ""
-  resources:
-  - secrets
-  verbs:
-  - get
-  - watch
-  - create
-  - list
-  - patch
-  - update
-  - deletecollection
-- apiGroups:
-  - ""
-  resources:
-  - namespaces
-  - pods
-  - services
-  - events
-  - resourcequotas
-  - nodes
-  verbs:
-  - get
-  - watch
-  - create
-  - list
-  - patch
-- apiGroups:
-  - ""
-  resources:
-  - persistentvolumeclaims
-  verbs:
-  - deletecollection
-  - list
-  - get
-- apiGroups:
-  - storage.k8s.io
-  resources:
-  - storageclasses
-  verbs:
-  - get
-  - watch
-  - create
-  - list
-  - patch
-- apiGroups:
-  - apps
-  resources:
-  - statefulsets
-  - deployments
-  verbs:
-  - get
-  - create
-  - list
-  - patch
-  - watch
-  - update
-  - delete
-- apiGroups:
-  - batch
-  resources:
-  - jobs
-  verbs:
-  - get
-  - create
-  - list
-  - patch
-  - watch
-  - update
-  - delete
-- apiGroups:
-  - certificates.k8s.io
-  resources:
-  - certificatesigningrequests
-  - certificatesigningrequests/approval
-  - certificatesigningrequests/status
-  verbs:
-  - update
-  - create
-  - get
-- apiGroups:
-  - minio.min.io
-  resources:
-  - '*'
-  verbs:
-  - '*'
-- apiGroups:
-  - min.io
-  resources:
-  - '*'
-  verbs:
-  - '*'
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -20776,26 +20707,6 @@ metadata:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
     goharbor.io/operator-version: v1.0.0
-    operator.min.io/authors: MinIO, Inc.
-    operator.min.io/license: AGPLv3
-    operator.min.io/support: https://subnet.min.io
-  name: console-sa-binding
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: console-sa-role
-subjects:
-- kind: ServiceAccount
-  name: console-sa
-  namespace: harbor-operator-ns
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  annotations:
-    goharbor.io/deploy-engine: Kustomization
-    goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
   name: harbor-operator-rolebinding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -20862,6 +20773,85 @@ subjects:
 ---
 apiVersion: v1
 data:
+  chartmuseum-ctrl.yaml: |
+    - key: max-reconcile
+      priority: 200
+      value: "1"
+  config.yaml: |
+    - key: controllers-config-directory
+      priority: 100
+      value: /etc/harbor-operator
+
+    - key: classname
+      priority: 100
+      value:
+
+    - key: network-policies
+      priority: 100
+      value: false
+
+    - key: watch-children
+      priority: 100
+      value: true
+  core-ctrl.yaml: |
+    - key: max-reconcile
+      priority: 200
+      value: "1"
+  exporter-ctrl.yaml: |
+    - key: max-reconcile
+      priority: 200
+      value: "1"
+  harbor-ctrl.yaml: |
+    - key: max-reconcile
+      priority: 200
+      value: "1"
+  harborcluster-ctrl.yaml: |
+    - key: max-reconcile
+      priority: 200
+      value: "1"
+  harborconfiguration-ctrl.yaml: |
+    - key: max-reconcile
+      priority: 200
+      value: "1"
+  jobservice-ctrl.yaml: |
+    - key: max-reconcile
+      priority: 200
+      value: "1"
+  notaryserver-ctrl.yaml: |
+    - key: max-reconcile
+      priority: 200
+      value: "1"
+  notarysigner-ctrl.yaml: |
+    - key: max-reconcile
+      priority: 200
+      value: "1"
+  portal-ctrl.yaml: |
+    - key: max-reconcile
+      priority: 200
+      value: "1"
+  registry-ctrl.yaml: |
+    - key: max-reconcile
+      priority: 200
+      value: "1"
+  registryctl-ctrl.yaml: |
+    - key: max-reconcile
+      priority: 200
+      value: "1"
+  trivy-ctrl.yaml: |
+    - key: max-reconcile
+      priority: 200
+      value: "1"
+kind: ConfigMap
+metadata:
+  annotations:
+    goharbor.io/deploy-engine: Kustomization
+    goharbor.io/deploy-mode: cluster
+    goharbor.io/operator-version: v1.0.0
+  name: config
+  namespace: harbor-operator-ns
+---
+apiVersion: v1
+data:
   chartmuseum-config.yaml.tmpl: |
     {{- if .Spec.Server.TLS.Enabled }}
     port: 8443
@@ -20874,7 +20864,7 @@ data:
     port: 8080
     {{- end }}
 
-    allow.overwrite: {{ .Spec.Chart.AllowOvewrite }}
+    allow.overwrite: {{ .Spec.Chart.AllowOverwrite }}
 
     auth:
       anonymous.get: {{ .Spec.Authentication.AnonymousGet }}
@@ -21151,7 +21141,7 @@ data:
             }
         }
     }
-  registry-config.yaml.tmpl: "# https://docs.docker.com/registry/configuration/\nversion: 0.1\nlog:\n  accesslog:\n    disabled: {{ .Spec.Log.AccessLog.Disabled }}\n  level: {{ .Spec.Log.Level | quote }}\n  formatter: {{ .Spec.Log.Formatter | quote }}\n  {{- if .Spec.Log.Fields }}\n  fields: {{ .Spec.Log.Fields | toJson }}\n  {{- end }}\n  {{- if .Spec.Log.Hooks }}\n  hooks:\n    {{- range $index, $element := .Spec.Log.Hooks }}\n    - type: {{ $element.Type | quote }}\n      disabled: {{ $element.Disabled }}\n      {{- if $element.Levels }}\n      levels: {{ $element.Levels | toJson }}\n      {{- end }}\n      {{- if $element.OptionsRef }}\n      {{- with ( secretData $element.OptionsRef) }}\n      {{- if . }}\n      options: {{ toJson . }}\n      {{- end }}\n      {{- end }}\n      {{- end }}\n    {{- end }}\n  {{- end }}\nhttp:\n  # secret: setted through environment variable\n  {{- if .Spec.HTTP.Debug }}\n  debug:\n    addr: :{{ .Spec.HTTP.Debug.Port }}\n    prometheus:\n      enabled: {{ .Spec.HTTP.Debug.Prometheus.Enabled }}\n      path: {{ .Spec.HTTP.Debug.Prometheus.Path | quote }}\n  {{- end }}\n  net: {{ .Spec.HTTP.Net | quote }}\n  addr: :5000\n  {{- if .Spec.HTTP.Prefix }}\n  prefix: {{ .Spec.HTTP.Prefix | quote }}\n  {{- end }}\n  {{- if .Spec.HTTP.Headers }}\n  headers: {{ .Spec.HTTP.Headers | toJson }}\n  {{- end }}\n  http2:\n    disabled: {{ .Spec.HTTP.HTTP2.Disabled }}\n  host: {{ .Spec.HTTP.Host | quote }}\n  relativeurls: {{ .Spec.HTTP.RelativeURLs }}\n  {{- if .Spec.HTTP.DrainTimeout }}\n  draintimeout: {{ .Spec.HTTP.DrainTimeout.Duration }}\n  {{- end }}\n  {{- if .Spec.HTTP.TLS.Enabled }}\n  tls:\n    certificate: /etc/registry/ssl/tls.crt\n    key: /etc/registry/ssl/tls.key\n  {{- end }}\n{{- if .Spec.Reporting }}\nreporting:\n  {{- range $name, $reference := .Spec.Reporting }}\n  {{ $name | quote }}: {{ secretData $reference | toJson }}\n  {{- end }}\n{{- end }}\nstorage:\n  {{- if .Spec.Storage.Delete.Enabled }}\n  delete:\n    {{- if .Spec.Storage.Delete.Enabled }}\n    enabled: {{ .Spec.Storage.Delete.Enabled }}\n    {{- end }}\n  {{- end }}\n  cache:\n    blobdescriptor: {{ default \"inmemory\" .Spec.Storage.Cache.Blobdescriptor | quote }}\n  maintenance:\n    uploadPurging:\n      enabled: {{ .Spec.Storage.Maintenance.UploadPurging.Enabled }}\n      {{- if .Spec.Storage.Maintenance.UploadPurging.Age }}\n      age: {{ .Spec.Storage.Maintenance.UploadPurging.Age.Duration }}\n      {{- end }}\n      {{- if .Spec.Storage.Maintenance.UploadPurging.Interval }}\n      interval: {{ .Spec.Storage.Maintenance.UploadPurging.Interval.Duration }}\n      {{- end }}\n      dryRun: {{ .Spec.Storage.Maintenance.UploadPurging.DryRun }}\n    readOnly:\n      enabled: {{ .Spec.Storage.Maintenance.ReadOnly.Enabled }}\n  redirect: \n    disable: {{ .Spec.Storage.Redirect.Disable }}\n\n  {{- if .Spec.Storage.Driver.InMemory }}\n  inmemory: {}\n  {{- end }}\n\n  {{- if .Spec.Storage.Driver.FileSystem }}\n  filesystem:\n    rootdirectory: /var/lib/registry\n    maxthreads: {{ .Spec.Storage.Driver.FileSystem.MaxThreads }}\n  {{- end }}\n\n  {{- if .Spec.Storage.Driver.S3 }}\n  s3:\n    region: {{ .Spec.Storage.Driver.S3.Region | quote }}\n    bucket: {{ .Spec.Storage.Driver.S3.Bucket | quote }}\n    encrypt: {{ .Spec.Storage.Driver.S3.Encrypt }}\n    skipverify: {{ .Spec.Storage.Driver.S3.SkipVerify }}\n    {{- if .Spec.Storage.Driver.S3.KeyID }}\n    keyid: {{ .Spec.Storage.Driver.S3.KeyID | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.S3.Secure }}\n    secure: {{ .Spec.Storage.Driver.S3.Secure }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.S3.V4Auth }}\n    v4auth: {{ .Spec.Storage.Driver.S3.V4Auth }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.S3.ChunkSize }}\n    chunksize: {{ .Spec.Storage.Driver.S3.ChunkSize }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.S3.StorageClass }}\n    storageclass: {{ .Spec.Storage.Driver.S3.StorageClass | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.S3.RootDirectory }}\n    rootdirectory: {{ .Spec.Storage.Driver.S3.RootDirectory | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.S3.AccessKey }}\n    accesskey: {{ .Spec.Storage.Driver.S3.AccessKey | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.S3.SecretKeyRef }}\n    # secretkey: setted through environment variable\n    {{- end }}\n    {{- if .Spec.Storage.Driver.S3.RegionEndpoint }}\n    regionendpoint: {{ .Spec.Storage.Driver.S3.RegionEndpoint | quote }}\n    {{- end }}\n  {{- end }}\n\n  {{- if .Spec.Storage.Driver.Swift }}\n  swift:\n    username: {{ .Spec.Storage.Driver.Swift.Username | quote }}\n    # password: setted through environment variable\n    authurl: {{ .Spec.Storage.Driver.Swift.AuthURL | quote }}\n    container: {{ .Spec.Storage.Driver.Swift.Container | quote }}\n    insecureskipverify: {{ .Spec.Storage.Driver.Swift.InsecureSkipVerify }}\n    {{- if .Spec.Storage.Driver.Swift.Prefix }}\n    prefix: {{ .Spec.Storage.Driver.Swift.Prefix | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.EndpointType }}\n    endpointtype: {{ .Spec.Storage.Driver.Swift.EndpointType | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.ChunkSize }}\n    chunksize: {{ .Spec.Storage.Driver.Swift.ChunkSize }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.AccessKey }}\n    accesskey: {{ .Spec.Storage.Driver.Swift.AccessKey | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.SecretKeyRef }}\n    # secretkey: setted through environment variable\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.AuthVersion }}\n    authversion: {{ .Spec.Storage.Driver.Swift.AuthVersion | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.Tenant }}\n    tenantid: {{ .Spec.Storage.Driver.Swift.Tenant | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.TenantID }}\n    tenantid: {{ .Spec.Storage.Driver.Swift.TenantID | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.Domain }}\n    domain: {{ .Spec.Storage.Driver.Swift.Domain | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.DomainID }}\n    domainid: {{ .Spec.Storage.Driver.Swift.DomainID | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.TrustID }}\n    trustid: {{ .Spec.Storage.Driver.Swift.TrustID | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.Region }}\n    region: {{ .Spec.Storage.Driver.Swift.Region | quote }}\n    {{- end }}\n  {{- end }}\n\n{{- if ( or .Spec.Middlewares.Registry ( or .Spec.Middlewares.Repository .Spec.Middlewares.Storage ) ) }}\nmiddleware:\n  {{- if .Spec.Middlewares.Registry }}\n  registry:\n    {{- range $index, $middleware := .Spec.Middlewares.Registry }}\n    - name: {{ $middleware.Name | quote }}\n      {{- if $middleware.OptionsRef }}\n      options: {{ secretData $middleware.OptionsRef | toJson }}\n      {{- end }}\n    {{- end }}\n  {{- end }}\n  {{- if .Spec.Middlewares.Repository }}\n  registry:\n    {{- range $index, $middleware := .Spec.Middlewares.Repository }}\n    - name: {{ $middleware.Name | quote }}\n      {{- if $middleware.OptionsRef }}\n      options: {{ secretData $middleware.OptionsRef | toJson }}\n      {{- end }}\n    {{- end }}\n  {{- end }}\n  {{- if .Spec.Middlewares.Storage }}\n  registry:\n    {{- range $index, $middleware := .Spec.Middlewares.Storage }}\n    - name: {{ $middleware.Name | quote }}\n      {{- if $middleware.OptionsRef }}\n      options: {{ secretData $middleware.OptionsRef | toJson }}\n      {{- end }}\n    {{- end }}\n  {{- end }}\n{{- end }}\n{{- if .Spec.Redis }}\nredis:\n  {{- if .Spec.Redis.SentinelMasterSet }}\n  sentinelMasterSet: {{ .Spec.Redis.SentinelMasterSet | quote }}\n  {{- end }}\n  {{- if .Spec.Redis.Port }}\n  addr: {{ printf \"%s:%d\" .Spec.Redis.Host .Spec.Redis.Port | quote }}\n  {{- else }}\n  addr: {{ .Spec.Redis.Host | quote }}\n  {{- end }}\n  # password: setted through environment variable\n  db: {{ .Spec.Redis.Database }}\n  {{- if .Spec.Redis.DialTimeout }}\n  dialtimeout: {{ .Spec.Redis.DialTimeout.Duration }}\n  {{- end }}\n  {{- if .Spec.Redis.ReadTimeout }}\n  readtimeout: {{ .Spec.Redis.ReadTimeout.Duration }}\n  {{- end }}\n  {{- if .Spec.Redis.WriteTimeout }}\n  writetimeout: {{ .Spec.Redis.WriteTimeout.Duration }}\n  {{- end }}\n  {{- if ( or .Spec.Redis.Pool.MaxIdle ( or .Spec.Redis.Pool.MaxActive .Spec.Redis.Pool.IdleTimeout ) ) }}\n  pool:\n    {{- if .Spec.Redis.Pool.MaxIdle }}\n    maxidle: {{ .Spec.Redis.Pool.MaxIdle }}\n    {{- end }}\n    {{- if .Spec.Redis.Pool.MaxActive }}\n    maxactive: {{ .Spec.Redis.Pool.MaxActive }}\n    {{- end }}\n    {{- if .Spec.Redis.Pool.IdleTimeout }}\n    idletimeout: {{ .Spec.Redis.Pool.IdleTimeout.Duration }}\n    {{- end }}\n  {{- end }}\n{{- end }}\n{{- if .Spec.Proxy }}\nproxy:\n  remoteurl: {{ .Spec.Proxy.RemoteURL | quote }}\n  # username: setted through environment variable\n  # password: setted through environment variable\n{{- end }}\ncompatibility:\n  schema1:\n    # signingkeyfile: setted through environment variable\n    enabled: {{ .Spec.Compatibility.Schema1.Enabled }}\nvalidation:\n  disabled: {{ .Spec.Validation.Disabled }}\n  {{- if or .Spec.Validation.Manifests.URLs.Allow .Spec.Validation.Manifests.URLs.Deny }}\n  manifests:\n    urls:\n      {{- if .Spec.Validation.Manifests.URLs.Allow }}\n      allow: {{ .Spec.Validation.Manifests.URLs.Allow | toJson }}\n      {{- end }}\n      {{- if .Spec.Validation.Manifests.URLs.Deny }}\n      deny: {{ .Spec.Validation.Manifests.URLs.Deny | toJson }}\n      {{- end }}\n  {{- end }}\n{{- if ( or .Spec.Authentication.Silly ( or .Spec.Authentication.Token .Spec.Authentication.HTPasswd ) ) }}\nauth:\n  {{- if .Spec.Authentication.Silly }}\n  silly:\n    realm: {{ .Spec.Authentication.Silly.Realm | quote }}\n    service: {{ .Spec.Authentication.Silly.Service | quote }}\n  {{- end }}\n  {{- if .Spec.Authentication.Token }}\n  token:\n    realm: {{ .Spec.Authentication.Token.Realm | quote }}\n    service: {{ .Spec.Authentication.Token.Service | quote }}\n    issuer: registry-token-issuer\n    rootcertbundle: /root/certs/bundle\n    autoredirect: {{ .Spec.Authentication.Token.AutoRedirect }}\n  {{- end }}\n  {{- if .Spec.Authentication.HTPasswd }}\n  htpasswd:\n    realm: {{ .Spec.Authentication.HTPasswd.Realm | quote }}\n    # path: setted through environment variable\n  {{- end }}\n{{- end }}\nnotifications:\n  {{- if .Spec.Notifications.Endpoints }}\n  endpoints:\n    {{- range $_, $endpoint := .Spec.Notifications.Endpoints }}\n    - name: {{ $endpoint.Name | quote }}\n      disabled: {{ $endpoint.Disabled }}\n      url: {{ $endpoint.URL | quote }}\n      {{- if $endpoint.Headers }}\n      headers: {{ $endpoint.Headers | toJson }}\n      {{- end }}\n      {{- if $endpoint.Timeout }}\n      timeout: {{ $endpoint.Timeout.Duration }}\n      {{- end }}\n      {{- if $endpoint.Threshold }}\n      threshold: {{ $endpoint.Threshold }}\n      {{- end }}\n      {{- if $endpoint.Backoff }}\n      backoff: {{ $endpoint.Backoff }}\n      {{- end }}\n      {{- if $endpoint.IgnoredMediaTypes }}\n      ignoredmediatypes: {{ $endpoint.IgnoredMediaTypes | toJson }}\n      {{- end }}\n      {{- if ( or $endpoint.Ignore.MediaTypes $endpoint.Ignore.Actions ) }}\n      ignore:\n        {{- if $endpoint.Ignore.MediaTypes }}\n        mediatypes: {{ $endpoint.Ignore.MediaTypes | toJson }}\n        {{- end }}\n        {{- if $endpoint.Ignore.Actions }}\n        actions: {{ $endpoint.Ignore.Actions | toJson }}\n        {{- end }}\n      {{- end }}\n    {{- end }}\n  {{- end }}\n  events:\n    includereferences: {{ default true .Spec.Notifications.Events.IncludeReferences }}\n\nhealth:\n  storagedriver:\n    enabled: {{ default true .Spec.Health.StorageDriver.Enabled }}\n    {{- if .Spec.Health.StorageDriver.Interval }}\n    interval: {{ .Spec.Health.StorageDriver.Interval.Duration }}\n    {{- end }}\n    {{- if .Spec.Health.StorageDriver.Threshold }}\n    threshold: {{ .Spec.Health.StorageDriver.Threshold }}\n    {{- end }}\n\n  {{- if .Spec.Health.File }}\n  file:\n    {{- range $_, $health := .Spec.Health.File }}\n    - file: {{ $health.File | quote }}\n      {{- if $health.Interval }}\n      interval: {{ $health.Interval.Duration }}\n      {{- end }}\n    {{- end }}\n  {{- end }}\n\n  {{- if .Spec.Health.HTTP }}\n  http:\n    {{- range $_, $health := .Spec.Health.HTTP }}\n    - uri: {{ $health.URI | quote }}\n      headers: {{ $health.Headers | toJson }}\n      {{- if $health.StatusCode }}\n      statuscode: {{ $health.StatusCode }}\n      {{- end }}\n      {{- if $health.Timeout }}\n      timeout: {{ $health.Timeout.Duration }}\n      {{- end }}\n      {{- if $health.Interval }}\n      interval: {{ $health.Interval.Duration }}\n      {{- end }}\n      threshold: {{ $health.Threshold }}\n    {{- end }}\n  {{- end }}\n\n  {{- if .Spec.Health.TCP }}\n  tcp:\n    {{- range $_, $health := .Spec.Health.TCP }}\n    - addr: {{ $health.Address | quote }}\n      {{- if $health.Timeout }}\n      timeout: {{ $health.Timeout.Duration }}\n      {{- end }}\n      {{- if $health.Interval }}\n      interval: {{ $health.Interval.Duration }}\n      {{- end }}\n      threshold: {{ $health.Threshold }}\n    {{- end }}\n  {{- end }}\n"
+  registry-config.yaml.tmpl: "# https://docs.docker.com/registry/configuration/\nversion: 0.1\nlog:\n  accesslog:\n    disabled: {{ .Spec.Log.AccessLog.Disabled }}\n  level: {{ .Spec.Log.Level | quote }}\n  formatter: {{ .Spec.Log.Formatter | quote }}\n  {{- if .Spec.Log.Fields }}\n  fields: {{ .Spec.Log.Fields | toJson }}\n  {{- end }}\n  {{- if .Spec.Log.Hooks }}\n  hooks:\n    {{- range $index, $element := .Spec.Log.Hooks }}\n    - type: {{ $element.Type | quote }}\n      disabled: {{ $element.Disabled }}\n      {{- if $element.Levels }}\n      levels: {{ $element.Levels | toJson }}\n      {{- end }}\n      {{- if $element.OptionsRef }}\n      {{- with ( secretData $element.OptionsRef) }}\n      {{- if . }}\n      options: {{ toJson . }}\n      {{- end }}\n      {{- end }}\n      {{- end }}\n    {{- end }}\n  {{- end }}\nhttp:\n  # secret: setted through environment variable\n  {{- if .Spec.HTTP.Debug }}\n  debug:\n    addr: :{{ .Spec.HTTP.Debug.Port }}\n    prometheus:\n      enabled: {{ .Spec.HTTP.Debug.Prometheus.Enabled }}\n      path: {{ .Spec.HTTP.Debug.Prometheus.Path | quote }}\n  {{- end }}\n  net: {{ .Spec.HTTP.Net | quote }}\n  addr: :5000\n  {{- if .Spec.HTTP.Prefix }}\n  prefix: {{ .Spec.HTTP.Prefix | quote }}\n  {{- end }}\n  {{- if .Spec.HTTP.Headers }}\n  headers: {{ .Spec.HTTP.Headers | toJson }}\n  {{- end }}\n  http2:\n    disabled: {{ .Spec.HTTP.HTTP2.Disabled }}\n  host: {{ .Spec.HTTP.Host | quote }}\n  relativeurls: {{ .Spec.HTTP.RelativeURLs }}\n  {{- if .Spec.HTTP.DrainTimeout }}\n  draintimeout: {{ .Spec.HTTP.DrainTimeout.Duration }}\n  {{- end }}\n  {{- if .Spec.HTTP.TLS.Enabled }}\n  tls:\n    certificate: /etc/registry/ssl/tls.crt\n    key: /etc/registry/ssl/tls.key\n  {{- end }}\n{{- if .Spec.Reporting }}\nreporting:\n  {{- range $name, $reference := .Spec.Reporting }}\n  {{ $name | quote }}: {{ secretData $reference | toJson }}\n  {{- end }}\n{{- end }}\nstorage:\n  {{- if .Spec.Storage.Delete.Enabled }}\n  delete:\n    {{- if .Spec.Storage.Delete.Enabled }}\n    enabled: {{ .Spec.Storage.Delete.Enabled }}\n    {{- end }}\n  {{- end }}\n  cache:\n    blobdescriptor: {{ default \"inmemory\" .Spec.Storage.Cache.Blobdescriptor | quote }}\n  maintenance:\n    uploadPurging:\n      enabled: {{ .Spec.Storage.Maintenance.UploadPurging.Enabled }}\n      {{- if .Spec.Storage.Maintenance.UploadPurging.Age }}\n      age: {{ .Spec.Storage.Maintenance.UploadPurging.Age.Duration }}\n      {{- end }}\n      {{- if .Spec.Storage.Maintenance.UploadPurging.Interval }}\n      interval: {{ .Spec.Storage.Maintenance.UploadPurging.Interval.Duration }}\n      {{- end }}\n      dryRun: {{ .Spec.Storage.Maintenance.UploadPurging.DryRun }}\n    readOnly:\n      enabled: {{ .Spec.Storage.Maintenance.ReadOnly.Enabled }}\n  redirect: \n    disable: {{ .Spec.Storage.Redirect.Disable }}\n\n  {{- if .Spec.Storage.Driver.InMemory }}\n  inmemory: {}\n  {{- end }}\n\n  {{- if .Spec.Storage.Driver.FileSystem }}\n  filesystem:\n    rootdirectory: /var/lib/registry\n    maxthreads: {{ .Spec.Storage.Driver.FileSystem.MaxThreads }}\n  {{- end }}\n\n  {{- if .Spec.Storage.Driver.S3 }}\n  s3:\n    region: {{ .Spec.Storage.Driver.S3.Region | quote }}\n    bucket: {{ .Spec.Storage.Driver.S3.Bucket | quote }}\n    encrypt: {{ .Spec.Storage.Driver.S3.Encrypt }}\n    skipverify: {{ .Spec.Storage.Driver.S3.SkipVerify }}\n    {{- if .Spec.Storage.Driver.S3.KeyID }}\n    keyid: {{ .Spec.Storage.Driver.S3.KeyID | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.S3.Secure }}\n    secure: {{ .Spec.Storage.Driver.S3.Secure }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.S3.V4Auth }}\n    v4auth: {{ .Spec.Storage.Driver.S3.V4Auth }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.S3.ChunkSize }}\n    chunksize: {{ .Spec.Storage.Driver.S3.ChunkSize }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.S3.StorageClass }}\n    storageclass: {{ .Spec.Storage.Driver.S3.StorageClass | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.S3.RootDirectory }}\n    rootdirectory: {{ .Spec.Storage.Driver.S3.RootDirectory | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.S3.AccessKey }}\n    accesskey: {{ .Spec.Storage.Driver.S3.AccessKey | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.S3.SecretKeyRef }}\n    # secretkey: setted through environment variable\n    {{- end }}\n    {{- if .Spec.Storage.Driver.S3.RegionEndpoint }}\n    regionendpoint: {{ .Spec.Storage.Driver.S3.RegionEndpoint | quote }}\n    {{- end }}\n  {{- end }}\n\n  {{- if .Spec.Storage.Driver.Swift }}\n  swift:\n    username: {{ .Spec.Storage.Driver.Swift.Username | quote }}\n    # password: setted through environment variable\n    authurl: {{ .Spec.Storage.Driver.Swift.AuthURL | quote }}\n    container: {{ .Spec.Storage.Driver.Swift.Container | quote }}\n    insecureskipverify: {{ .Spec.Storage.Driver.Swift.InsecureSkipVerify }}\n    {{- if .Spec.Storage.Driver.Swift.Prefix }}\n    prefix: {{ .Spec.Storage.Driver.Swift.Prefix | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.EndpointType }}\n    endpointtype: {{ .Spec.Storage.Driver.Swift.EndpointType | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.ChunkSize }}\n    chunksize: {{ .Spec.Storage.Driver.Swift.ChunkSize }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.AccessKey }}\n    accesskey: {{ .Spec.Storage.Driver.Swift.AccessKey | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.SecretKeyRef }}\n    # secretkey: setted through environment variable\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.AuthVersion }}\n    authversion: {{ .Spec.Storage.Driver.Swift.AuthVersion | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.Tenant }}\n    tenantid: {{ .Spec.Storage.Driver.Swift.Tenant | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.TenantID }}\n    tenantid: {{ .Spec.Storage.Driver.Swift.TenantID | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.Domain }}\n    domain: {{ .Spec.Storage.Driver.Swift.Domain | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.DomainID }}\n    domainid: {{ .Spec.Storage.Driver.Swift.DomainID | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.TrustID }}\n    trustid: {{ .Spec.Storage.Driver.Swift.TrustID | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.Region }}\n    region: {{ .Spec.Storage.Driver.Swift.Region | quote }}\n    {{- end }}\n  {{- end }}\n\n{{- if ( or .Spec.Middlewares.Registry ( or .Spec.Middlewares.Repository .Spec.Middlewares.Storage ) ) }}\nmiddleware:\n  {{- if .Spec.Middlewares.Registry }}\n  registry:\n    {{- range $index, $middleware := .Spec.Middlewares.Registry }}\n    - name: {{ $middleware.Name | quote }}\n      {{- if $middleware.OptionsRef }}\n      options: {{ secretData $middleware.OptionsRef | toJson }}\n      {{- end }}\n    {{- end }}\n  {{- end }}\n  {{- if .Spec.Middlewares.Repository }}\n  registry:\n    {{- range $index, $middleware := .Spec.Middlewares.Repository }}\n    - name: {{ $middleware.Name | quote }}\n      {{- if $middleware.OptionsRef }}\n      options: {{ secretData $middleware.OptionsRef | toJson }}\n      {{- end }}\n    {{- end }}\n  {{- end }}\n  {{- if .Spec.Middlewares.Storage }}\n  registry:\n    {{- range $index, $middleware := .Spec.Middlewares.Storage }}\n    - name: {{ $middleware.Name | quote }}\n      {{- if $middleware.OptionsRef }}\n      options: {{ secretData $middleware.OptionsRef | toJson }}\n      {{- end }}\n    {{- end }}\n  {{- end }}\n{{- end }}\n{{- if .Spec.Redis }}\nredis:\n  {{- if .Spec.Redis.SentinelMasterSet }}\n  sentinelMasterSet: {{ .Spec.Redis.SentinelMasterSet | quote }}\n  {{- end }}\n  {{- if .Spec.Redis.Port }}\n  addr: {{ printf \"%s:%d\" .Spec.Redis.Host .Spec.Redis.Port | quote }}\n  {{- else }}\n  addr: {{ .Spec.Redis.Host | quote }}\n  {{- end }}\n  # password: setted through environment variable\n  db: {{ .Spec.Redis.Database }}\n  {{- if .Spec.Redis.DialTimeout }}\n  dialtimeout: {{ .Spec.Redis.DialTimeout.Duration }}\n  {{- end }}\n  {{- if .Spec.Redis.ReadTimeout }}\n  readtimeout: {{ .Spec.Redis.ReadTimeout.Duration }}\n  {{- end }}\n  {{- if .Spec.Redis.WriteTimeout }}\n  writetimeout: {{ .Spec.Redis.WriteTimeout.Duration }}\n  {{- end }}\n  {{- if ( or .Spec.Redis.Pool.MaxIdle ( or .Spec.Redis.Pool.MaxActive .Spec.Redis.Pool.IdleTimeout ) ) }}\n  pool:\n    {{- if .Spec.Redis.Pool.MaxIdle }}\n    maxidle: {{ .Spec.Redis.Pool.MaxIdle }}\n    {{- end }}\n    {{- if .Spec.Redis.Pool.MaxActive }}\n    maxactive: {{ .Spec.Redis.Pool.MaxActive }}\n    {{- end }}\n    {{- if .Spec.Redis.Pool.IdleTimeout }}\n    idletimeout: {{ .Spec.Redis.Pool.IdleTimeout.Duration }}\n    {{- end }}\n  {{- end }}\n{{- end }}\ncompatibility:\n  schema1:\n    # signingkeyfile: setted through environment variable\n    enabled: {{ .Spec.Compatibility.Schema1.Enabled }}\nvalidation:\n  disabled: {{ .Spec.Validation.Disabled }}\n  {{- if or .Spec.Validation.Manifests.URLs.Allow .Spec.Validation.Manifests.URLs.Deny }}\n  manifests:\n    urls:\n      {{- if .Spec.Validation.Manifests.URLs.Allow }}\n      allow: {{ .Spec.Validation.Manifests.URLs.Allow | toJson }}\n      {{- end }}\n      {{- if .Spec.Validation.Manifests.URLs.Deny }}\n      deny: {{ .Spec.Validation.Manifests.URLs.Deny | toJson }}\n      {{- end }}\n  {{- end }}\n{{- if ( or .Spec.Authentication.Silly ( or .Spec.Authentication.Token .Spec.Authentication.HTPasswd ) ) }}\nauth:\n  {{- if .Spec.Authentication.Silly }}\n  silly:\n    realm: {{ .Spec.Authentication.Silly.Realm | quote }}\n    service: {{ .Spec.Authentication.Silly.Service | quote }}\n  {{- end }}\n  {{- if .Spec.Authentication.Token }}\n  token:\n    realm: {{ .Spec.Authentication.Token.Realm | quote }}\n    service: {{ .Spec.Authentication.Token.Service | quote }}\n    issuer: registry-token-issuer\n    rootcertbundle: /root/certs/bundle\n    autoredirect: {{ .Spec.Authentication.Token.AutoRedirect }}\n  {{- end }}\n  {{- if .Spec.Authentication.HTPasswd }}\n  htpasswd:\n    realm: {{ .Spec.Authentication.HTPasswd.Realm | quote }}\n    # path: setted through environment variable\n  {{- end }}\n{{- end }}\nnotifications:\n  {{- if .Spec.Notifications.Endpoints }}\n  endpoints:\n    {{- range $_, $endpoint := .Spec.Notifications.Endpoints }}\n    - name: {{ $endpoint.Name | quote }}\n      disabled: {{ $endpoint.Disabled }}\n      url: {{ $endpoint.URL | quote }}\n      {{- if $endpoint.Headers }}\n      headers: {{ $endpoint.Headers | toJson }}\n      {{- end }}\n      {{- if $endpoint.Timeout }}\n      timeout: {{ $endpoint.Timeout.Duration }}\n      {{- end }}\n      {{- if $endpoint.Threshold }}\n      threshold: {{ $endpoint.Threshold }}\n      {{- end }}\n      {{- if $endpoint.Backoff }}\n      backoff: {{ $endpoint.Backoff }}\n      {{- end }}\n      {{- if $endpoint.IgnoredMediaTypes }}\n      ignoredmediatypes: {{ $endpoint.IgnoredMediaTypes | toJson }}\n      {{- end }}\n      {{- if ( or $endpoint.Ignore.MediaTypes $endpoint.Ignore.Actions ) }}\n      ignore:\n        {{- if $endpoint.Ignore.MediaTypes }}\n        mediatypes: {{ $endpoint.Ignore.MediaTypes | toJson }}\n        {{- end }}\n        {{- if $endpoint.Ignore.Actions }}\n        actions: {{ $endpoint.Ignore.Actions | toJson }}\n        {{- end }}\n      {{- end }}\n    {{- end }}\n  {{- end }}\n  events:\n    includereferences: {{ default true .Spec.Notifications.Events.IncludeReferences }}\n\nhealth:\n  storagedriver:\n    enabled: {{ default true .Spec.Health.StorageDriver.Enabled }}\n    {{- if .Spec.Health.StorageDriver.Interval }}\n    interval: {{ .Spec.Health.StorageDriver.Interval.Duration }}\n    {{- end }}\n    {{- if .Spec.Health.StorageDriver.Threshold }}\n    threshold: {{ .Spec.Health.StorageDriver.Threshold }}\n    {{- end }}\n\n  {{- if .Spec.Health.File }}\n  file:\n    {{- range $_, $health := .Spec.Health.File }}\n    - file: {{ $health.File | quote }}\n      {{- if $health.Interval }}\n      interval: {{ $health.Interval.Duration }}\n      {{- end }}\n    {{- end }}\n  {{- end }}\n\n  {{- if .Spec.Health.HTTP }}\n  http:\n    {{- range $_, $health := .Spec.Health.HTTP }}\n    - uri: {{ $health.URI | quote }}\n      headers: {{ $health.Headers | toJson }}\n      {{- if $health.StatusCode }}\n      statuscode: {{ $health.StatusCode }}\n      {{- end }}\n      {{- if $health.Timeout }}\n      timeout: {{ $health.Timeout.Duration }}\n      {{- end }}\n      {{- if $health.Interval }}\n      interval: {{ $health.Interval.Duration }}\n      {{- end }}\n      threshold: {{ $health.Threshold }}\n    {{- end }}\n  {{- end }}\n\n  {{- if .Spec.Health.TCP }}\n  tcp:\n    {{- range $_, $health := .Spec.Health.TCP }}\n    - addr: {{ $health.Address | quote }}\n      {{- if $health.Timeout }}\n      timeout: {{ $health.Timeout.Duration }}\n      {{- end }}\n      {{- if $health.Interval }}\n      interval: {{ $health.Interval.Duration }}\n      {{- end }}\n      threshold: {{ $health.Threshold }}\n    {{- end }}\n  {{- end }}\n"
   registryctl-config.yaml.tmpl: |
     {{- if .Spec.TLS.Enabled }}
     protocol: https
@@ -21175,22 +21165,6 @@ metadata:
     goharbor.io/deploy-mode: cluster
     goharbor.io/operator-version: v1.0.0
   name: config-template
-  namespace: harbor-operator-ns
----
-apiVersion: v1
-data:
-  CONSOLE_PORT: "9090"
-  CONSOLE_TLS_PORT: "9443"
-kind: ConfigMap
-metadata:
-  annotations:
-    goharbor.io/deploy-engine: Kustomization
-    goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
-    operator.min.io/authors: MinIO, Inc.
-    operator.min.io/license: AGPLv3
-    operator.min.io/support: https://subnet.min.io
-  name: console-env
   namespace: harbor-operator-ns
 ---
 apiVersion: v1
@@ -21254,29 +21228,6 @@ metadata:
     operator.min.io/license: AGPLv3
     operator.min.io/support: https://subnet.min.io
   labels:
-    name: console
-  name: console
-  namespace: harbor-operator-ns
-spec:
-  ports:
-  - name: http
-    port: 9090
-  - name: https
-    port: 9443
-  selector:
-    app: console
----
-apiVersion: v1
-kind: Service
-metadata:
-  annotations:
-    goharbor.io/deploy-engine: Kustomization
-    goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
-    operator.min.io/authors: MinIO, Inc.
-    operator.min.io/license: AGPLv3
-    operator.min.io/support: https://subnet.min.io
-  labels:
     name: minio-operator
   name: operator
   namespace: harbor-operator-ns
@@ -21328,54 +21279,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
-    goharbor.io/deploy-engine: Kustomization
-    goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
-    operator.min.io/authors: MinIO, Inc.
-    operator.min.io/license: AGPLv3
-    operator.min.io/support: https://subnet.min.io
-  name: console
-  namespace: harbor-operator-ns
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: console
-  template:
-    metadata:
-      annotations:
-        goharbor.io/deploy-engine: Kustomization
-        goharbor.io/deploy-mode: cluster
-        goharbor.io/operator-version: v1.0.0
-        operator.min.io/authors: MinIO, Inc.
-        operator.min.io/license: AGPLv3
-        operator.min.io/support: https://subnet.min.io
-      labels:
-        app: console
-    spec:
-      containers:
-      - args:
-        - server
-        env:
-        - name: CONSOLE_OPERATOR_MODE
-          value: "on"
-        image: minio/console:v0.6.3
-        imagePullPolicy: IfNotPresent
-        name: console
-        ports:
-        - containerPort: 9090
-          name: console-http
-        - containerPort: 9443
-          name: console-https
-      serviceAccountName: console-sa
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  annotations:
     cache.goharbor.io/version: v1.0.0
     database.goharbor.io/version: v1.5.0
-    storage.goharbor.io/version: v3.0.13
+    storage.goharbor.io/version: v4.0.6
   labels:
     control-plane: harbor-operator
   name: harbor-operator
@@ -21404,7 +21310,9 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        image: goharbor/harbor-operator:dev_master
+        - name: CONFIGURATION_FROM
+          value: env,file:/etc/harbor-operator/config.yaml
+        image: ghcr.io/goharbor/harbor-operator:dev_master
         livenessProbe:
           httpGet:
             path: /healthz
@@ -21440,6 +21348,9 @@ spec:
         - mountPath: /etc/harbor-operator/templates
           name: configuration-templates
           readOnly: true
+        - mountPath: /etc/harbor-operator
+          name: configuration
+          readOnly: true
       securityContext:
         runAsUser: 65532
       terminationGracePeriodSeconds: 10
@@ -21451,6 +21362,9 @@ spec:
       - configMap:
           name: config-template
         name: configuration-templates
+      - configMap:
+          name: config
+        name: configuration
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -21482,7 +21396,7 @@ spec:
         name: minio-operator
     spec:
       containers:
-      - image: minio/operator:v4.0.6
+      - image: ghcr.io/goharbor/minio-operator:v4.0.6
         imagePullPolicy: IfNotPresent
         name: minio-operator
         resources:
@@ -21523,7 +21437,7 @@ spec:
       - env:
         - name: CONFIG_MAP_NAME
           value: postgres-operator
-        image: registry.opensource.zalan.do/acid/postgres-operator:v1.5.0
+        image: ghcr.io/goharbor/postgres-operator:v1.5.0
         imagePullPolicy: IfNotPresent
         name: postgres-operator
         resources:
@@ -21567,7 +21481,7 @@ spec:
         app: redisoperator
     spec:
       containers:
-      - image: quay.io/spotahome/redis-operator:v1.0.0
+      - image: ghcr.io/goharbor/redis-operator:v1.0.0
         imagePullPolicy: IfNotPresent
         name: app
         resources:

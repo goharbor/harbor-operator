@@ -2,16 +2,16 @@ package cache
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/go-logr/logr"
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"github.com/goharbor/harbor-operator/pkg/cluster/k8s"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	"github.com/ovh/configstore"
+	"github.com/pkg/errors"
 	redisOp "github.com/spotahome/redis-operator/api/redisfailover/v1"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
@@ -34,7 +34,7 @@ func NewRedisController(opts ...k8s.Option) lcm.Controller {
 		Client:          ctrlOpts.Client,
 		Log:             ctrlOpts.Log,
 		Scheme:          ctrlOpts.Scheme,
-		ResourceManager: NewResourceManager(ctrlOpts.ConfigStore, ctrlOpts.Log),
+		ResourceManager: NewResourceManager(ctrlOpts.ConfigStore, ctrlOpts.Log, ctrlOpts.Scheme),
 		ConfigStore:     ctrlOpts.ConfigStore,
 	}
 }
@@ -57,7 +57,7 @@ func (rc *RedisController) Apply(ctx context.Context, cluster *goharborv1.Harbor
 	crdClient := rc.DClient.DynamicClient(ctx, k8s.WithResource(redisFailoversGVR), k8s.WithNamespace(cluster.Namespace))
 
 	actualCR, err := crdClient.Get(rc.ResourceManager.GetCacheCRName(), metav1.GetOptions{})
-	if errors.IsNotFound(err) {
+	if apierrors.IsNotFound(err) {
 		return rc.Deploy(ctx, cluster)
 	} else if err != nil {
 		return cacheNotReadyStatus(ErrorGetRedisClient, err.Error()), err
@@ -82,11 +82,11 @@ func (rc *RedisController) Apply(ctx context.Context, cluster *goharborv1.Harbor
 
 // Delete...
 func (rc *RedisController) Delete(_ context.Context, _ *goharborv1.HarborCluster) (*lcm.CRStatus, error) {
-	return nil, fmt.Errorf("not implemented")
+	return nil, errors.Errorf("not implemented")
 }
 
 func (rc *RedisController) Upgrade(_ context.Context, _ *goharborv1.HarborCluster) (*lcm.CRStatus, error) {
-	return nil, fmt.Errorf("not implemented")
+	return nil, errors.Errorf("not implemented")
 }
 
 func cacheNotReadyStatus(reason, message string) *lcm.CRStatus {

@@ -373,6 +373,7 @@ deploy-rbac: go-generate kustomize
 
 deployment-generate: go-generate kustomize
 	$(KUSTOMIZE) build manifests/cluster > manifests/cluster/deployment.yaml
+	$(KUSTOMIZE) build manifests/harbor > manifests/harbor/deployment.yaml
 
 .PHONY: sample
 sample: sample-harbor
@@ -389,7 +390,7 @@ sample-redis: kustomize
 
 .PHONY: sample-github-secret
 sample-github-secret:
-	! test -z $(GITHUB_TOKEN)
+	test -z "$(GITHUB_TOKEN)" || \
 	kubectl create secret generic \
 		github-credentials \
 			--type=goharbor.io/github \
@@ -409,7 +410,7 @@ install-dependencies: certmanager postgresql redis ingress
 .PHONY: redis
 redis: helm sample-redis
 	$(HELM) repo add bitnami https://charts.bitnami.com/bitnami
-	$(HELM) upgrade --install harbor-redis bitnami/redis \
+	$(HELM) upgrade --install harbor-redis bitnami/redis --version 12.10.0 \
 		--set-string existingSecret=harbor-redis \
 		--set-string existingSecretPasswordKey=redis-password \
 		--set usePassword=true
@@ -417,7 +418,7 @@ redis: helm sample-redis
 .PHONY: postgresql
 postgresql: helm sample-database
 	$(HELM) repo add bitnami https://charts.bitnami.com/bitnami
-	$(HELM) upgrade --install harbor-database bitnami/postgresql \
+	$(HELM) upgrade --install harbor-database bitnami/postgresql --version 10.3.17 \
 		--set-string initdbScriptsConfigMap=harbor-init-db \
 		--set-string existingSecret=harbor-database-password
 

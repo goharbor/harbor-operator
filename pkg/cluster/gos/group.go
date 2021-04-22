@@ -16,9 +16,10 @@ package gos
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"sync"
+
+	"github.com/pkg/errors"
 )
 
 // Group for running goroutines.
@@ -77,7 +78,7 @@ func (g *Group) Wait() error {
 	}
 
 	if len(errTexts) > 0 {
-		return fmt.Errorf("gos.Group error: %s", strings.Join(errTexts, ":"))
+		return errors.Errorf("gos.Group error: %s", strings.Join(errTexts, ":"))
 	}
 
 	return nil

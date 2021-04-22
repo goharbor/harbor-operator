@@ -238,12 +238,6 @@ redis:
     {{- end }}
   {{- end }}
 {{- end }}
-{{- if .Spec.Proxy }}
-proxy:
-  remoteurl: {{ .Spec.Proxy.RemoteURL | quote }}
-  # username: setted through environment variable
-  # password: setted through environment variable
-{{- end }}
 compatibility:
   schema1:
     # signingkeyfile: setted through environment variable

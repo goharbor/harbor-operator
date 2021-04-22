@@ -108,6 +108,20 @@ func (h *Harbor) deepCopyNodeSelectorAndTolerationsOfRegistryInto(spec *harborme
 	}
 }
 
+func (h *Harbor) GetComponentProxySpec(component harbormetav1.Component) *harbormetav1.ProxySpec {
+	if h.Spec.Proxy == nil {
+		return nil
+	}
+
+	for _, c := range h.Spec.Proxy.Components {
+		if c == component.String() {
+			return &h.Spec.Proxy.ProxySpec
+		}
+	}
+
+	return nil
+}
+
 func (h *Harbor) deepCopyImageSpecInto(ctx context.Context, component harbormetav1.Component, spec *harbormetav1.ComponentSpec) {
 	imageSource := h.Spec.ImageSource
 	if imageSource == nil {
@@ -184,7 +198,7 @@ type HarborSpec struct {
 	UpdateStrategyType appsv1.DeploymentStrategyType `json:"updateStrategyType,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	Proxy *CoreProxySpec `json:"proxy,omitempty"`
+	Proxy *HarborProxySpec `json:"proxy,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// The version of the harbor, eg 2.1.2
@@ -392,6 +406,8 @@ type JobServiceComponentSpec struct {
 
 type RegistryComponentSpec struct {
 	harbormetav1.ComponentSpec `json:",inline"`
+
+	CertificateInjection `json:",inline"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
@@ -625,8 +641,6 @@ func (r *HarborInternalTLSSpec) IsEnabled() bool {
 	return r != nil && r.Enabled
 }
 
-const CertificateAuthoritySecretConfigKey = "certificate-authority-secret"
-
 func (r *HarborInternalTLSSpec) GetScheme() string {
 	if !r.IsEnabled() {
 		return "http"
@@ -755,6 +769,14 @@ func (ci CertificateInjection) GenerateVolumeMounts() []corev1.VolumeMount {
 	}
 
 	return volumeMounts
+}
+
+type HarborProxySpec struct {
+	harbormetav1.ProxySpec `json:",inline"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default={core,jobservice,trivy}
+	Components []string `json:"components,omitempty"`
 }
 
 func init() { // nolint:gochecknoinits

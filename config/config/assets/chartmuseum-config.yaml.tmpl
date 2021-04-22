@@ -9,7 +9,7 @@ tls:
 port: 8080
 {{- end }}
 
-allow.overwrite: {{ .Spec.Chart.AllowOvewrite }}
+allow.overwrite: {{ .Spec.Chart.AllowOverwrite }}
 
 auth:
   anonymous.get: {{ .Spec.Authentication.AnonymousGet }}

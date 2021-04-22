@@ -6,11 +6,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-const (
-	RegistryCorePublicURLKey = "REGISTRY_HTTP_HOST"
-	RegistryAuthURLKey       = "REGISTRY_AUTH_TOKEN_REALM" // RegistryCorePublicURLKey + "/service/token"
-)
-
 // +genclient
 
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
@@ -48,6 +43,11 @@ type RegistryList struct {
 type RegistrySpec struct {
 	harbormetav1.ComponentSpec `json:",inline"`
 	RegistryConfig01           `json:",inline"`
+
+	CertificateInjection `json:",inline"`
+
+	// +kubebuilder:validation:Optional
+	Proxy *harbormetav1.ProxySpec `json:"proxy,omitempty"`
 }
 
 func (r *RegistrySpec) Default() {
@@ -95,18 +95,6 @@ type RegistryConfig01 struct {
 
 	// +kubebuilder:validation:Optional
 	Redis *RegistryRedisSpec `json:"redis,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	Proxy *RegistryProxySpec `json:"proxy,omitempty"`
-}
-
-type RegistryProxySpec struct {
-	// +kubebuilder:validation:Required
-	RemoteURL string `json:"remoteURL"`
-
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
-	BasicAuthRef string `json:"basicAuthRef,omitempty"`
 }
 
 type RegistryRedisSpec struct {

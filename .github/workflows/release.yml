@@ -59,4 +59,16 @@ jobs:
           USERNAME: '${{ secrets.DOCKER_USER }}'
           PASSWORD: '${{ secrets.DOCKER_TOKEN }}'
           IMAGE_NAME: goharbor/harbor-operator
-          LATEST: 'false'
+          LATEST: true
+      - name: Docker Build & Push to GHCR
+        uses: opspresso/action-docker@master
+        with:
+          args: --docker
+        env:
+          BUILD_PATH: dist/harbor-operator_linux_amd64
+          DOCKERFILE: Dockerfile
+          USERNAME: harbor
+          PASSWORD: '${{ secrets.GHCR_TOKEN }}'
+          REGISTRY: ghcr.io
+          IMAGE_NAME: goharbor/harbor-operator
+          LATEST: true
