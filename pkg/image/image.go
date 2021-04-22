@@ -173,9 +173,9 @@ func init() { // nolint:gochecknoinits
 	RegisterImageName("cluster-minio", "minio", "*")
 	RegisterTag("cluster-minio", "RELEASE.2021-04-06T23-11-00Z", "2.2.1")
 
-	RegisterRepository("cluster-minio-init", "s3cmd", "*") // the minio repository of dockerhub
-	RegisterImageName("cluster-minio-init", "s3cmd", "*")
-	RegisterTag("cluster-minio-init", "latest", "2.2.1")
+	RegisterRepository("cluster-minio-init", "minio", "*") // the minio repository of dockerhub
+	RegisterImageName("cluster-minio-init", "mc", "*")
+	RegisterTag("cluster-minio-init", "RELEASE.2021-03-23T05-46-11Z", "2.2.1")
 }
 
 type Options struct {
