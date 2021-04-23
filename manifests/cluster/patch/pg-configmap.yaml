@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-operator
+data:
+  default_cpu_request: 250m
+  default_memory_request: 500Mi
