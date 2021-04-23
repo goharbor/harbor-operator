@@ -7,6 +7,7 @@ import (
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	"github.com/goharbor/harbor-operator/pkg/resources"
 	"github.com/pkg/errors"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -45,6 +46,18 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrap(err, "cannot get configMap")
 	}
 
+	registryConfigMapName := r.Reconciler.Controller.NormalizeName(ctx, registryctl.Spec.RegistryRef)
+
+	registryConfigMapResource, err := r.AddExternalConfigMap(ctx, &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      registryConfigMapName,
+			Namespace: registryctl.GetNamespace(),
+		},
+	})
+	if err != nil {
+		return errors.Wrapf(err, "add registry configMap %s", registryConfigMapName)
+	}
+
 	configMapResource, err := r.AddConfigMapToManage(ctx, cm)
 	if err != nil {
 		return errors.Wrapf(err, "cannot add configMap %s", cm.GetName())
@@ -55,7 +68,7 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrap(err, "cannot get deployment")
 	}
 
-	_, err = r.AddDeploymentToManage(ctx, deployment, registry, configMapResource)
+	_, err = r.AddDeploymentToManage(ctx, deployment, registry, registryConfigMapResource, configMapResource)
 	if err != nil {
 		return errors.Wrapf(err, "cannot add deployment %s", deployment.GetName())
 	}

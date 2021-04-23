@@ -238,6 +238,24 @@ func (c *Controller) AddExternalResource(ctx context.Context, resource resources
 	return res, g.AddResource(ctx, res, dependencies, c.EnsureReady)
 }
 
+func (c *Controller) AddExternalConfigMap(ctx context.Context, configMap *corev1.ConfigMap, dependencies ...graph.Resource) (graph.Resource, error) {
+	if configMap == nil {
+		return nil, nil
+	}
+
+	res := &Resource{
+		checkable: statuscheck.True,
+		resource:  configMap,
+	}
+
+	g := sgraph.Get(ctx)
+	if g == nil {
+		return nil, errors.Errorf("no graph in current context")
+	}
+
+	return res, g.AddResource(ctx, res, dependencies, c.EnsureReady)
+}
+
 func (c *Controller) AddExternalTypedSecret(ctx context.Context, secret *corev1.Secret, secretType corev1.SecretType, dependencies ...graph.Resource) (graph.Resource, error) {
 	if secret == nil {
 		return nil, nil
