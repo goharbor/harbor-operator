@@ -2967,8 +2967,6 @@ spec:
                     type: string
                   postgresSqlSpec:
                     properties:
-                      connectTimeout:
-                        type: integer
                       image:
                         description: Image name for the component.
                         type: string
@@ -2989,9 +2987,11 @@ spec:
                           type: object
                         type: array
                       replicas:
+                        description: Replicas defines database instance replicas
+                        minimum: 1
                         type: integer
                       resources:
-                        description: ResourceRequirements describes the compute resource requirements.
+                        description: Resources defines database pod resource config
                         properties:
                           limits:
                             additionalProperties:
@@ -3012,11 +3012,11 @@ spec:
                             description: 'Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                             type: object
                         type: object
-                      sslConfig:
-                        type: string
                       storage:
+                        description: Storage defines database data store pvc size
                         type: string
                       storageClassName:
+                        description: StorageClassName defines use which StorageClass to create pvc
                         type: string
                     type: object
                 required:

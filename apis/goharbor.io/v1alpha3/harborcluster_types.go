@@ -95,12 +95,19 @@ type Database struct {
 type PostgresSQLSpec struct {
 	harbormetav1.ImageSpec `json:",inline"`
 
-	Storage          string                      `json:"storage,omitempty"`
-	Replicas         int                         `json:"replicas,omitempty"`
-	StorageClassName string                      `json:"storageClassName,omitempty"`
-	Resources        corev1.ResourceRequirements `json:"resources,omitempty"`
-	SslConfig        string                      `json:"sslConfig,omitempty"`
-	ConnectTimeout   int                         `json:"connectTimeout,omitempty"`
+	// Storage defines database data store pvc size
+	// +kubebuilder:validation:Optional
+	Storage string `json:"storage,omitempty"`
+	// Replicas defines database instance replicas
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Minimum:=1
+	Replicas int `json:"replicas,omitempty"`
+	// StorageClassName defines use which StorageClass to create pvc
+	// +kubebuilder:validation:Optional
+	StorageClassName string `json:"storageClassName,omitempty"`
+	// Resources defines database pod resource config
+	// +kubebuilder:validation:Optional
+	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 }
 
 type Storage struct {

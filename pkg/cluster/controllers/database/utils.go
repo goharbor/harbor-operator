@@ -94,7 +94,7 @@ func (p *PostgreSQLController) GetPostgreResource(harborcluster *goharborv1.Harb
 	return resources
 }
 
-// GetRedisServerReplica returns postgres replicas.
+// GetPostgreReplica returns postgres replicas.
 func (p *PostgreSQLController) GetPostgreReplica(harborcluster *goharborv1.HarborCluster) int32 {
 	if harborcluster.Spec.InClusterDatabase.PostgresSQLSpec == nil {
 		return DefaultDatabaseReplica
