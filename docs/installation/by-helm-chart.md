@@ -36,7 +36,7 @@ curl -sL -o harbor-operator-x.y.z-build.tgz <PLACEHOLDER>
 git clone https://github.com/goharbor/harbor-operator.git && \
 cd harbor-operator && \
 git checkout release-v1.0.0 && \
-make helm-generate
+make helm-generate RELEASE_VERSION=v1.0.0 
 
 # chart is generated to `charts/harbor-operator-0.0.0-dev.tgz`
 ```
@@ -47,7 +47,7 @@ Run the `helm` command to install the harbor operator to your cluster:
 
 ```shell
 # Change chart path depends on how do you get the helm chart.
-helm upgrade --namespace harbor-operator-ns --install harbor-operator charts/harbor-operator-0.0.0-dev.tgz
+helm upgrade --namespace harbor-operator-ns --install harbor-operator charts/harbor-operator-0.0.0-dev.tgz --set-string image.repository=ghcr.io/goharbor/harbor-operator --set-string image.tag=latest
 ```
 
 For what settings you can override with `--set`, `--set-string`, `--set-file` or `--values`, you can refer to the [values.yaml](../../charts/harbor-operator/values.yaml) file.
@@ -110,5 +110,16 @@ you can check the additional references listed below.
 
 ## What's next
 
-If the Harbor operator is successfully installed, you can follow the guide
-shown [here](../tutorial.md#deploy-harbor-cluster) to deploy your Harbor cluster to your Kubernetes cluster and try it.
+If the Harbor operator is successfully installed, you can install harbor sample
+
+```shell
+kustomize build --reorder legacy 'config/samples/harborcluster' | kubectl apply -f -
+```
+
+or use
+
+```shell
+make sample-harborcluster
+```
+
+or follow the guide shown [here](../tutorial.md#deploy-harbor-cluster) to deploy your Harbor cluster to your Kubernetes cluster and try it.
