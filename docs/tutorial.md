@@ -399,11 +399,3 @@ kubectl get secret sample-public-certificate -n cluster-sample-ns \
 ```
 
 Of course, you can try other operations of Harbor like scanning etc.
-
-## Spec customizations
-
-For configuring existing services as the dependent services of the deploying Harbor cluster, a few customizations are available:
-
-- [Custom Registry storage](samples/registry-storage-configuration.md)
-- [Database configuration](samples/database-installation.md)
-- [Redis configuration](samples/redis-installation.md)
