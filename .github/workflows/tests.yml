@@ -446,7 +446,7 @@ jobs:
             echo $i
             kubectl get all
           done
-          if ! time kubectl wait --for=condition=Ready pod --all --timeout 600s && ! time kubectl wait --for=condition=Ready pod --all --timeout 60s; then
+          if ! time kubectl wait --for=condition=Ready -l job-type!=minio-init pod --all --timeout 600s && ! time kubectl wait --for=condition=Initialized -l job-type=minio-init pod --all --timeout 600s && ! time kubectl wait --for=condition=Ready -l job-type!=minio-init pod --all --timeout 60s; then
             echo install harbor failed
             kubectl get all
 
@@ -487,7 +487,8 @@ jobs:
           git clone https://github.com/goharbor/harbor -b v2.2.1
           kubectl patch deploy harborcluster-sample-harbor-harbor-core -p '{"spec":{"template":{"spec":{"containers":[{"name":"core","env":[{"name":"GC_TIME_WINDOW_HOURS","value":"0"}]}]}}}}'
           sleep 5
-          kubectl wait --for=condition=Ready pod --all --timeout 600s
+          kubectl wait --for=condition=Ready -l job-type!=minio-init pod --all --timeout 600s
+          kubectl wait --for=condition=Initialized -l job-type=minio-init pod --all --timeout 600s
           docker run --rm -t --privileged -v `pwd`/harbor:/drone -v /etc/docker/certs.d/$CORE_HOST/:/ca -v /etc/docker/certs.d/$CORE_HOST/:/root/.docker/tls/$NOTARY_HOST/ -e NOTARY_URL=https://$NOTARY_HOST -w /drone goharbor/harbor-e2e-engine:2.6.3 \
           python -u -m robot -v DOCKER_USER:${{ secrets.DOCKER_USER }} -v DOCKER_PWD:${{ secrets.DOCKER_TOKEN }} -v ip:$CORE_HOST -v ip1: -v HARBOR_PASSWORD:Harbor12345 -X \
           --exclude gc --exclude metrics --exclude singularity --exclude proxy_cache \
