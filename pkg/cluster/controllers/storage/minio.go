@@ -142,14 +142,14 @@ func (m *MinIOController) createInitJob(ctx context.Context, harborcluster *goha
 			Name:      m.getMinIONamespacedName(harborcluster).Name,
 			Namespace: m.getMinIONamespacedName(harborcluster).Namespace,
 			Labels: map[string]string{
-				"job-type":"minio-init",
+				"job-type": "minio-init",
 			},
 		},
 		Spec: batchv1.JobSpec{
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
-						"job-type":"minio-init",
+						"job-type": "minio-init",
 					},
 				},
 				Spec: corev1.PodSpec{
