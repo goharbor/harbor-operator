@@ -31,6 +31,18 @@ const (
 	DefaultBucket       = "harbor"
 	DefaultServicePort  = 80
 	defaultMinIOService = "minio"
+
+	mcCommand = `
+mc alias set minio %s $MINIO_ACCESS_KEY $MINIO_SECRET_KEY && \
+while true; \
+  do mc mb minio/harbor; \
+  if [ $? -eq 0 ];then \
+    exit 0 ; \
+  else \
+     sleep 3; \
+  fi; \
+done
+`
 )
 
 type MinIOController struct {
@@ -134,7 +146,7 @@ func (m *MinIOController) createInitJob(ctx context.Context, harborcluster *goha
 	}
 
 	endpoint := fmt.Sprintf("http://%s.%s.svc:%d", m.getTenantsServiceName(harborcluster), harborcluster.Namespace, m.getServicePort())
-	mcCmd := fmt.Sprintf("mc alias set minio %s $MINIO_ACCESS_KEY $MINIO_SECRET_KEY && while true; do mc mb minio/harbor; if [ $? -eq 0 ];then exit 0 ;else sleep 3; fi; done", endpoint)
+	mcCmd := fmt.Sprintf(mcCommand, endpoint)
 	initCommand := []string{"bash", "-c", mcCmd}
 
 	job := &batchv1.Job{
@@ -215,35 +227,6 @@ func (m *MinIOController) applyMinIOInitJob(ctx context.Context, harborcluster *
 	}
 
 	return true, err
-}
-
-// TODO zxy deprecated.
-func (m *MinIOController) minioInit(ctx context.Context, harborcluster *goharborv1.HarborCluster) error { // nolint:unused
-	accessKey, secretKey, err := m.getCredsFromSecret(ctx, harborcluster)
-	if err != nil {
-		return err
-	}
-
-	endpoint := m.getTenantsServiceName(harborcluster) + "." + harborcluster.Namespace
-
-	edp := &MinioEndpoint{
-		Endpoint:        endpoint,
-		AccessKeyID:     string(accessKey),
-		SecretAccessKey: string(secretKey),
-		Location:        DefaultRegion,
-	}
-
-	m.MinioClient, err = NewMinioClient(edp)
-	if err != nil {
-		return err
-	}
-
-	exists, err := m.MinioClient.IsBucketExists(ctx, DefaultBucket)
-	if err != nil || exists {
-		return err
-	}
-
-	return m.MinioClient.CreateBucket(ctx, DefaultBucket)
 }
 
 func (m *MinIOController) checkMinIOReady(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*miniov2.Tenant, bool, error) {
