@@ -36,9 +36,9 @@ curl -sL -o harbor-operator-x.y.z-build.tgz <PLACEHOLDER>
 git clone https://github.com/goharbor/harbor-operator.git && \
 cd harbor-operator && \
 git checkout release-v1.0.0 && \
-make helm-generate RELEASE_VERSION=v1.0.0 
+make helm-generate RELEASE_VERSION=v1.0.0
 
-# chart is generated to `charts/harbor-operator-0.0.0-dev.tgz`
+# chart is generated to `charts/harbor-operator-v1.0.0.tgz`
 ```
 
 ## Deploy Harbor operator with chart
@@ -47,7 +47,7 @@ Run the `helm` command to install the harbor operator to your cluster:
 
 ```shell
 # Change chart path depends on how do you get the helm chart.
-helm upgrade --namespace harbor-operator-ns --install harbor-operator charts/harbor-operator-0.0.0-dev.tgz --set-string image.repository=ghcr.io/goharbor/harbor-operator --set-string image.tag=latest
+helm upgrade --namespace harbor-operator-ns --install harbor-operator charts/harbor-operator-v1.0.0.tgz --set-string image.repository=ghcr.io/goharbor/harbor-operator --set-string image.tag=v1.0.0
 ```
 
 For what settings you can override with `--set`, `--set-string`, `--set-file` or `--values`, you can refer to the [values.yaml](../../charts/harbor-operator/values.yaml) file.
@@ -119,6 +119,8 @@ kustomize build --reorder legacy 'config/samples/harborcluster' | kubectl apply 
 or use
 
 ```shell
+kubectl create ns cluster-sample-ns
+kubectl config set-context --current --namespace=cluster-sample-ns
 make sample-harborcluster
 ```
 
