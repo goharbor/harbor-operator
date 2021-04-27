@@ -26,7 +26,7 @@ Harbor deployment stack is controlled by a custom Harbor resource `HarborCluster
   * [X] [swift](https://wiki.openstack.org/wiki/Swift): A driver storing objects in Openstack Swift.
 * Supports updating the deployed Harbor cluster
   * Adjust replicas of components
-  * Add or remove the optional Harbor components
+  * Add the optional Harbor components
 * Support upgrading the managed Harbor registry version
 * Deletes all the linked resources when deleting the Harbor cluster
 * Configures Harbor system settings with ConfigMap in a declarative way
@@ -40,6 +40,8 @@ Harbor deployment stack is controlled by a custom Harbor resource `HarborCluster
   * [ ] [azure](https://azure.microsoft.com/services/storage/): A driver storing objects in Microsoft Azure Blob Storage.
   * [ ] [oss](https://www.alibabacloud.com/product/oss): A driver storing objects in Aliyun OSS.
   * [ ] [gcs](https://cloud.google.com/storage): A driver storing objects in a Google Cloud Storage bucket.
+* Supports updating the deployed Harbor cluster
+  * Remove the optional Harbor components
 * CRD based day2 configuration
 * Support services exposed with LoadBalancer
 * More day2 operations (see [PoC project](https://github.com/szlabs/harbor-automation-4k8s))
