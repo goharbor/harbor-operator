@@ -15,27 +15,23 @@ Before moving on, make sure the harbor operator is successfully deployed in the 
 ```shell
 ~/harbor-operator$ k8s get all -n harbor-operator-ns
 NAME                                    READY   STATUS    RESTARTS   AGE
-pod/console-67d5498b88-zr6h6            1/1     Running   0          59s
 pod/harbor-operator-54454997d-bjkt9     1/1     Running   0          59s
 pod/minio-operator-c4d8f7b4d-dztwl      1/1     Running   0          59s
 pod/postgres-operator-94578ffd5-6kdql   1/1     Running   0          58s
 pod/redisoperator-6b75fc4555-ps5kj      1/1     Running   0          58s
 
 NAME                        TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)             AGE
-service/console             ClusterIP   10.96.53.155    <none>        9090/TCP,9443/TCP   59s
 service/operator            ClusterIP   10.96.114.34    <none>        4222/TCP,4233/TCP   59s
 service/postgres-operator   ClusterIP   10.96.208.57    <none>        8080/TCP            59s
 service/webhook-service     ClusterIP   10.96.234.182   <none>        443/TCP             59s
 
 NAME                                READY   UP-TO-DATE   AVAILABLE   AGE
-deployment.apps/console             1/1     1            1           59s
 deployment.apps/harbor-operator     1/1     1            1           59s
 deployment.apps/minio-operator      1/1     1            1           59s
 deployment.apps/postgres-operator   1/1     1            1           59s
 deployment.apps/redisoperator       1/1     1            1           58s
 
 NAME                                          DESIRED   CURRENT   READY   AGE
-replicaset.apps/console-67d5498b88            1         1         1       59s
 replicaset.apps/harbor-operator-54454997d     1         1         1       59s
 replicaset.apps/minio-operator-c4d8f7b4d      1         1         1       59s
 replicaset.apps/postgres-operator-94578ffd5   1         1         1       58s
