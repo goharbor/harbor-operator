@@ -37,7 +37,7 @@ There are several ways to get the Harbor operator helm chart:
     cd harbor-operator && \
     git checkout release-v1.0.0 && \
     make helm-generate RELEASE_VERSION=v1.0.0
-    
+
     # chart is generated to `charts/harbor-operator-v1.0.0.tgz`
     ```
 
