@@ -188,11 +188,6 @@ type HarborSpec struct {
 	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	HarborAdminPasswordRef string `json:"harborAdminPasswordRef"`
 
-	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
-	// The secret key used for encryption.
-	EncryptionKeyRef string `json:"encryptionKeyRef"`
-
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default="RollingUpdate"
 	UpdateStrategyType appsv1.DeploymentStrategyType `json:"updateStrategyType,omitempty"`

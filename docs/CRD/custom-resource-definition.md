@@ -99,17 +99,6 @@ spec:
   # ... Skipped fields
 ```
 
-`encryptionKeyRef`(required): the secret key used for encryption.
-
-```yaml
-spec:
-  # ... Skipped fields
-
-  encryptionKeyRef: "myEncryption" # Required
-  
-  # ... Skipped fields
-```
-
 `updateStrategyType`(optional): the update strategy.
 
 ```yaml

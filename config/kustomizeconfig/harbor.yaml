@@ -17,9 +17,6 @@ nameReference:
     path: spec/database/passwordRef
   - kind: Harbor
     group: goharbor.io
-    path: spec/encryptionKeyRef
-  - kind: Harbor
-    group: goharbor.io
     path: spec/expose/core/tls/certificateRef
   - kind: Harbor
     group: goharbor.io

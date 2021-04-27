@@ -126,7 +126,6 @@ spec:
     passwordRef: harbor-database-password
     sslMode: disable
     username: postgres
-  encryptionKeyRef: core-database-encryption-dddh7f9gfg
   expose:
     core:
       ingress:

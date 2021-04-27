@@ -141,7 +141,6 @@ spec:
         host: notary.10.10.10.100.xip.io
       tls:
         certificateRef: sample-public-certificate
-  encryptionKeyRef: core-database-encryption
   internalTLS:
     enabled: true
   portal: {}
