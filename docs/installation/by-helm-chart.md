@@ -20,26 +20,26 @@ There are several ways to get the Harbor operator helm chart:
 
 1. From the public helm chart repository
 
-```shell
-helm repo add stable <PLACEHODLER>
-```
+    ```shell
+    helm repo add stable <PLACEHODLER>
+    ```
 
 1. Download it from the Harbor operator release page
 
-```shell
-curl -sL -o harbor-operator-x.y.z-build.tgz <PLACEHOLDER>
-```
+    ```shell
+    curl -sL -o harbor-operator-x.y.z-build.tgz <PLACEHOLDER>
+    ```
 
 1. Generate from the codebase
 
-```shell
-git clone https://github.com/goharbor/harbor-operator.git && \
-cd harbor-operator && \
-git checkout release-v1.0.0 && \
-make helm-generate
+    ```shell
+    git clone https://github.com/goharbor/harbor-operator.git && \
+    cd harbor-operator && \
+    git checkout release-v1.0.0 && \
+    make helm-generate
 
-# chart is generated to `charts/harbor-operator-0.0.0-dev.tgz`
-```
+    # chart is generated to `charts/harbor-operator-0.0.0-dev.tgz`
+    ```
 
 ## Deploy Harbor operator with chart
 

@@ -134,6 +134,9 @@ git clone https://github.com/goharbor/harbor-operator.git
 
 # Checkout to the necessary branch.
 
+# As the resource manifests are not stored in the codebase, then you need to run the following command to generate the related resource manifests before using `kustomize` to build your customized operator deployment manifest:
+make manifests
+
 # Use kustomization template to deploy the Harbor operator.
 kustomize build manifests/harbor | kubectl apply -f -
 
