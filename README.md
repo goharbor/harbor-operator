@@ -84,7 +84,7 @@ Harbor operator relies on cert manager to manage kinds of certificates used by H
 
 ### Ingress controller types
 
-Harbor operator exposes the frontend service with ingress. Table shown below lists the ingress controller types supported.
+Harbor operator exposes the frontend service with ingress (CRD version: `v1beta1`). Table shown below lists the ingress controller types supported.
 
 |  Ingress Controller  |        default      |         gce        |        ncp         |
 |----------------------|---------------------|--------------------|--------------------|
