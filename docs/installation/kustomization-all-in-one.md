@@ -49,6 +49,12 @@ git clone https://github.com/goharbor/harbor-operator.git
 # Checkout to the necessary branch.
 ```
 
+As the resource manifests are not stored in the codebase, then you need to run the following command to generate the related resource manifests before using `kustomize` to build your customized operator deployment manifest:
+
+```shell
+make manifests
+```
+
 Do necessary modifications to the `manifests/cluster/kustomization.yaml` kustomization template file according to your actual use case and apply the revised deployment manifest to your Kubernetes clusters with command:
 
 ```shell
