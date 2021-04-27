@@ -2496,10 +2496,6 @@ spec:
                 required:
                 - hosts
                 type: object
-              encryptionKeyRef:
-                description: The secret key used for encryption.
-                pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
-                type: string
               exporter:
                 properties:
                   cache:
@@ -4021,7 +4017,6 @@ spec:
                 description: The version of the harbor, eg 2.1.2
                 type: string
             required:
-            - encryptionKeyRef
             - expose
             - externalURL
             - harborAdminPasswordRef
@@ -4408,10 +4403,6 @@ spec:
                 required:
                 - hosts
                 type: object
-              encryptionKeyRef:
-                description: The secret key used for encryption.
-                pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
-                type: string
               exporter:
                 properties:
                   cache:
@@ -5522,7 +5513,6 @@ spec:
                 description: The version of the harbor, eg 2.1.2
                 type: string
             required:
-            - encryptionKeyRef
             - expose
             - externalURL
             - harborAdminPasswordRef

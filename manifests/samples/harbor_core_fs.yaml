@@ -79,7 +79,6 @@ spec:
         host: core.harbor.domain
       tls:
         certificateRef: sample-public-certificate
-  encryptionKeyRef: core-database-encryption
   internalTLS:
     enabled: true
   portal: {}
