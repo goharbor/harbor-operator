@@ -5,7 +5,7 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/bb3adb454b424e66ae3b9bdf2ab2fce1)](https://www.codacy.com/gh/goharbor/harbor-operator/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=goharbor/harbor-operator&amp;utm_campaign=Badge_Grade)
 [![Go Reference](https://pkg.go.dev/badge/github.com/goharbor/harbor-operator.svg)](https://pkg.go.dev/github.com/goharbor/harbor-operator)
 
-> **ATTENTIONS:** THIS PROJECT IS STILL UNDER DEVELOPMENT AND NOT STABLE YET. THE `MASTER` BRANCH MAY BE IN AN UNSTABLE OR EVEN BROKEN STATE DURING DEVELOPMENT.
+> **ATTENTIONS:** THE `MASTER` BRANCH MAY BE IN AN UNSTABLE OR EVEN BROKEN STATE DURING DEVELOPMENT.
 
 [Harbor](https://github.com/goharbor/harbor/) is a CNCF hosted open source trusted cloud-native registry project that stores, signs, and scans content. Harbor is composed on numerous stateful and stateless components and dependencies that may be deployed, updated, healed, backuped or scaled respecting some constraints.
 
