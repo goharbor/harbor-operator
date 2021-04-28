@@ -1,4 +1,6 @@
-# Resource configurations
+# Operator configurations
+
+There are some settings for you to configure your Harbor operator deployment.
 
 ## common config
 

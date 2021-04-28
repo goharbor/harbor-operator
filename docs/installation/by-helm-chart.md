@@ -35,8 +35,12 @@ There are several ways to get the Harbor operator helm chart:
     ```shell
     git clone https://github.com/goharbor/harbor-operator.git && \
     cd harbor-operator && \
-    git checkout release-v1.0.0 && \
+    git checkout release-1.0.0 && \
     make helm-generate RELEASE_VERSION=v1.0.0
+
+    # Checkout to the specified branch or the specified tag
+    # To branch: git checkout <branch-name> e.g.: git checkout release-1.0.0
+    # To tag: git checkout tags/<tag> -b <branch-name> e.g: git checkout tags/v1.0.0 -b tag-v1.0.0
 
     # chart is generated to `charts/harbor-operator-v1.0.0.tgz`
     ```
