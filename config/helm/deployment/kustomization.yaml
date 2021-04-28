@@ -6,7 +6,7 @@ generatorOptions:
   disableNameSuffixHash: true
 
 images:
-- name: goharbor/harbor-operator:dev
+- name: goharbor/harbor-operator
   newName: '{{.Values.image.repository}}'
   newTag: '{{.Values.image.tag|default .Chart.AppVersion}}'
 
