@@ -155,9 +155,9 @@ jobs:
         ingress:
         - "0.35.0"
 
-        storage:
-        - "fs"
-        - "minio"
+        samples:
+        - "full_stack.yaml"
+        - "standard_stack_fs.yaml"
 
     steps:
     - uses: actions/checkout@v2
@@ -232,7 +232,7 @@ jobs:
         echo "CORE_HOST=$CORE_HOST" >> $GITHUB_ENV
         echo "NOTARY_HOST=$NOTARY_HOST" >> $GITHUB_ENV
         echo "MINIO_HOST=$MINIO_HOST" >> $GITHUB_ENV
-        samplefile=harbor_full_${{ matrix.storage }}.yaml
+        samplefile=${{ matrix.samples }}
         sed -i "s/core.harbor.domain/$CORE_HOST/g" manifests/samples/$samplefile
         sed -i "s/notary.harbor.domain/$NOTARY_HOST/g" manifests/samples/$samplefile
         sed -i "s/minio.harbor.domain/$MINIO_HOST/g" manifests/samples/$samplefile
@@ -435,11 +435,12 @@ jobs:
           NOTARY_HOST=notary.$IP.nip.io
           echo "CORE_HOST=$CORE_HOST" >> $GITHUB_ENV
           echo "NOTARY_HOST=$NOTARY_HOST" >> $GITHUB_ENV
-          sed -i "s/core.harbor.domain/$CORE_HOST/g" config/samples/harborcluster/*.yaml
-          sed -i "s/notary.harbor.domain/$NOTARY_HOST/g" config/samples/harborcluster/*.yaml
-          sed -i "s/logLevel: info/logLevel: debug/g" config/samples/harborcluster/goharbor_v1alpha3_harborcluster.yaml
+          sed -i "s/core.harbor.domain/$CORE_HOST/g" config/samples/harborcluster-minimal/*.yaml
+          sed -i "s/notary.harbor.domain/$NOTARY_HOST/g" config/samples/harborcluster-minimal/*.yaml
+          sed -i "s/core.harbor.domain/$CORE_HOST/g" config/samples/harborcluster-standard/*.yaml
+          sed -i "s/notary.harbor.domain/$NOTARY_HOST/g" config/samples/harborcluster-standard/*.yaml
 
-          make sample-harborcluster
+          make sample-harborcluster-standard
 
           for i in $(seq 1 7);do
             sleep 30
@@ -566,9 +567,9 @@ jobs:
       fail-fast: false
       matrix:
         path:
-        - harbor
-        - harbor-full
-        - harborcluster
+        - harborcluster-minimal
+        - harborcluster-standard
+        - harborcluster-fullstack
     steps:
     - uses: actions/checkout@v2
     - uses: azure/k8s-bake@v1
