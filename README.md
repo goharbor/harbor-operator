@@ -111,7 +111,8 @@ NOTES:
 * [Delete Harbor cluster](./docs/LCM/cluster-deletion.md)
 * [Backup data](./docs/LCM/backup-data.md)
 * [Useful Makefile Targets](./docs/makefile.md)
-* [Resource configurations](./docs/configurations/resource-configurations.md)
+* [Operator configurations](./docs/configurations/operator-configurations.md)
+* [Enable Minio console](./docs/installation/enable_minio_console.md)
 * [Performance comparison between fs & MinIO](./docs/perf/simple-perf-comprasion.md)
 * [Monitor logs with grafana](./docs/LCM/monitor-logs-with-grafana.md)
 

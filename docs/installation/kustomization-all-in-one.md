@@ -46,7 +46,9 @@ If you want to customize the deployment manifest like editing image settings of 
 ```shell
 git clone https://github.com/goharbor/harbor-operator.git
 
-# Checkout to the necessary branch.
+# Checkout to the specified branch or the specified tag.
+# To branch: git checkout <branch-name> e.g.: git checkout release-1.0.0
+# To tag: git checkout tags/<tag> -b <branch-name> e.g: git checkout tags/v1.0.0 -b tag-v1.0.0
 ```
 
 As the resource manifests are not stored in the codebase, then you need to run the following command to generate the related resource manifests before using `kustomize` to build your customized operator deployment manifest:
