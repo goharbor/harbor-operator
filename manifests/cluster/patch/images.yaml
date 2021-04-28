@@ -32,3 +32,5 @@ spec:
             value: ghcr.io/goharbor/redis:5.0-alpine
           - name: HARBORCLUSTER_POSTGRESQL_DOCKER_IMAGE_2_2_1
             value: ghcr.io/goharbor/spilo-12:1.6-p3
+          - name: HARBORCLUSTER_MINIO_INIT_DOCKER_IMAGE_2_2_1
+            value: ghcr.io/goharbor/mc:RELEASE.2021-03-23T05-46-11Z

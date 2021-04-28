@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/go-logr/logr"
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
@@ -70,12 +71,12 @@ func (m *MinIOController) Apply(ctx context.Context, harborcluster *goharborv1.H
 	}
 
 	// Check readiness
-	mt, ready, err := m.checkMinIOReady(ctx, harborcluster)
+	mt, tenantReady, err := m.checkMinIOReady(ctx, harborcluster)
 	if err != nil {
 		return minioNotReadyStatus(GetMinIOError, err.Error()), err
 	}
 
-	if !ready {
+	if !tenantReady {
 		m.Log.Info("MinIO is not ready yet")
 
 		return minioUnknownStatus(), nil
@@ -86,10 +87,20 @@ func (m *MinIOController) Apply(ctx context.Context, harborcluster *goharborv1.H
 		return crs, err
 	}
 
-	// Init minio
-	// TODO: init bucket in the minCR pods as creation by client may meet network connection issue.
-	if err := m.minioInit(ctx, harborcluster); err != nil {
-		return minioNotReadyStatus(CreateDefaultBucketError, err.Error()), err
+	// Apply minio init job
+	if crs, err := m.applyMinIOInitJob(ctx, harborcluster); err != nil {
+		return crs, err
+	}
+
+	initJobReady, err := m.checkMinIOInitJobReady(ctx, harborcluster)
+	if err != nil {
+		return minioNotReadyStatus(GetInitJobError, err.Error()), err
+	}
+
+	if !initJobReady {
+		m.Log.Info("MinIO init job is not ready yet")
+
+		return minioUnknownStatus(), nil
 	}
 
 	crs, err := m.ProvisionMinIOProperties(ctx, harborcluster, mt)
@@ -119,34 +130,6 @@ func (m *MinIOController) Upgrade(_ context.Context, _ *goharborv1.HarborCluster
 	panic("implement me")
 }
 
-func (m *MinIOController) minioInit(ctx context.Context, harborcluster *goharborv1.HarborCluster) error {
-	accessKey, secretKey, err := m.getCredsFromSecret(ctx, harborcluster)
-	if err != nil {
-		return err
-	}
-
-	endpoint := m.getTenantsServiceName(harborcluster) + "." + harborcluster.Namespace
-
-	edp := &MinioEndpoint{
-		Endpoint:        endpoint,
-		AccessKeyID:     string(accessKey),
-		SecretAccessKey: string(secretKey),
-		Location:        DefaultRegion,
-	}
-
-	m.MinioClient, err = NewMinioClient(edp)
-	if err != nil {
-		return err
-	}
-
-	exists, err := m.MinioClient.IsBucketExists(ctx, DefaultBucket)
-	if err != nil || exists {
-		return err
-	}
-
-	return m.MinioClient.CreateBucket(ctx, DefaultBucket)
-}
-
 func (m *MinIOController) checkMinIOReady(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*miniov2.Tenant, bool, error) {
 	minioCR := &miniov2.Tenant{}
 	if err := m.KubeClient.Get(ctx, m.getMinIONamespacedName(harborcluster), minioCR); err != nil {
@@ -159,8 +142,14 @@ func (m *MinIOController) checkMinIOReady(ctx context.Context, harborcluster *go
 
 	// For different version of minIO have different Status.
 	// Ref https://github.com/minio/operator/commit/d387108ea494cf5cec57628c40d40604ac8d57ec#diff-48972613166d50a2acb9d562e33c5247
-	if minioCR.Status.CurrentState == miniov2.StatusInitialized {
-		return minioCR, true, nil
+	if minioCR.Status.CurrentState == miniov2.StatusInitialized && minioCR.Status.AvailableReplicas == harborcluster.Spec.InClusterStorage.MinIOSpec.Replicas {
+		ssName := fmt.Sprintf("%s-%s", m.getServiceName(harborcluster), DefaultZone)
+
+		for _, pool := range minioCR.Status.Pools {
+			if pool.SSName == ssName && pool.State == miniov2.PoolInitialized {
+				return minioCR, true, nil
+			}
+		}
 	}
 
 	// Not ready
