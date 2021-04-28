@@ -559,34 +559,22 @@ jobs:
         kustomizationPath: './config/rbac'
         kubectl-version: 'latest'
 
-  samples-kubernetes-resources:
-    runs-on: ubuntu-latest
-    name: 'kubernetes_resources: ./config/samples'
-    steps:
-    - uses: actions/checkout@v2
-    - uses: azure/k8s-bake@v1
-      with:
-        renderEngine: 'kustomize'
-        kustomizationPath: './config/samples'
-        kubectl-version: 'latest'
-
   kubernetes-resources:
     runs-on: ubuntu-latest
-    name: 'kubernetes_resources: ./config/${{ matrix.path }}'
-
+    name: 'kubernetes_resources: ./config/samples/${{ matrix.path }}'
     strategy:
       fail-fast: false
       matrix:
-        # https://github.com/jetstack/cert-manager/tags
         path:
-        - samples/harbor
-        - samples/harbor-full
+        - harbor
+        - harbor-full
+        - harborcluster
     steps:
     - uses: actions/checkout@v2
     - uses: azure/k8s-bake@v1
       with:
         renderEngine: 'kustomize'
-        kustomizationPath: './config/${{ matrix.path }}'
+        kustomizationPath: './config/samples/${{ matrix.path }}'
         kubectl-version: 'latest'
 
   # Documentation
