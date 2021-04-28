@@ -7,17 +7,13 @@ resources:
 - https.yaml
 - service_token_issuer.yaml
 - storage.yaml
-- goharbor_v1alpha3_harborcluster.yaml
+- goharbor_v1alpha3_harbor.yaml
 
 secretGenerator:
 - name: admin-core-secret
   literals:
   - secret=Harbor12345
   type: "goharbor.io/single-secret"
-- name: core-database-encryption
-  literals:
-    - secret=1234567890123456
-  type: "goharbor.io/single-secret"
 
 bases:
-  - ../../kustomizeconfig
+- ../../kustomizeconfig
