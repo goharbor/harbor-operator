@@ -16,15 +16,15 @@ The `Makefile` is in the root dir of the code repository.
 
 |     Target     |      Description      |
 |----------------|-----------------------|
+| `helm-generate`| Generate Harbor operator helm chart template files |
 | `helm-install` | Install Harbor operator from chart source |
-| `helm-generate`| Generate Harbor operator helm chart tgz package |
 | `docker-build` | Build operator image from source |
 | `docker-push`  | Push the image built by `docker-build` to the repository |
 | `install`      | Install CRDs into the cluster |
 | `uninstall`    | Uninstall CRDs from the cluster |
 | `install-dependencies` | Install the related dependencies including cert-manager, ingress controller, redis and postgresql |
 | `dev-tools`    | Install kids of the development tools |
-| `sample-%`    | Deploy the related sample CR. `%` can be the name of sub folders under [samples](../config/samples) |
-| `postgresql` | Deploy a PostgreSQL database with bitnami chart|
-| `redis` | Deploy a Redis database with bitnami chart |
-| `sample-github-secret` | Create a secret wrapping the GitHub token read from the env variable `GITHUB_TOKEN`|
+| `sample-%`     | Deploy the related sample CR. `%` can be the name of sub folders under [config/samples/](../config/samples) |
+| `postgresql`   | Deploy a PostgreSQL database with bitnami chart |
+| `redis`        | Deploy a Redis database with bitnami chart |
+| `sample-github-secret` | Create a secret wrapping the GitHub token read from the env variable `GITHUB_TOKEN` |
