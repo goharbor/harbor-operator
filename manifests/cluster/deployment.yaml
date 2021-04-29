@@ -20983,7 +20983,11 @@ data:
       backend: "redis"
 
       redis_pool:
+    {{- if .Spec.WorkerPool.Redis.PasswordRef }}
         redis_url: {{ "redis-password" | secretData .Spec.WorkerPool.Redis.PasswordRef | .Spec.WorkerPool.Redis.GetDSN }}
+    {{- else }}
+        redis_url: {{ "" | .Spec.WorkerPool.Redis.GetDSN }}
+    {{- end }}
         namespace: {{ default ( printf "jobservice::%s::%s" .ObjectMeta.Namespace .ObjectMeta.Name ) .Spec.WorkerPool.Redis.Namespace }}
         idle_timeout_second: {{ .Spec.WorkerPool.Redis.IdleTimeout.Duration.Seconds | int64 }}
 
