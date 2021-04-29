@@ -98,7 +98,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1.Reg
 		})
 	}
 
-	if registry.Spec.Redis != nil {
+	if registry.Spec.Redis != nil && len(registry.Spec.Redis.PasswordRef) > 0 {
 		envs = append(envs, corev1.EnvVar{
 			Name: "REGISTRY_REDIS_PASSWORD",
 			ValueFrom: &corev1.EnvVarSource{
