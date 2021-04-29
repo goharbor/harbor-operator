@@ -105,6 +105,7 @@ NOTES:
 * [Installation](./docs/installation/installation.md)
 * [CRD references](./docs/CRD/custom-resource-definition.md)
 * [Manifests references](./docs/manifests-reference.md)
+* [Customize storage, database and cache services](./docs/installation/customize-storage-db-redis.md)
 * [Customize images](./docs/customize-images.md)
 * [Day2 configurations](./docs/configurations/day2-config.md)
 * [Upgrade Harbor cluster](./docs/LCM/upgrade-cluster.md)
