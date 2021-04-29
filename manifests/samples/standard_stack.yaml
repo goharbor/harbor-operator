@@ -170,7 +170,7 @@ spec:
   selfSigned: {}
 ---
 apiVersion: goharbor.io/v1alpha3
-kind: Harbor
+kind: HarborCluster
 metadata:
   labels:
     sample: "true"
@@ -218,7 +218,6 @@ spec:
     port: 6379
   registry: {}
   trivy:
-    githubTokenRef: github-credentials
     skipUpdate: false
     storage:
       cachePersistentVolume:
