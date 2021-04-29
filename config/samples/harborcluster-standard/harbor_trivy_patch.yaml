@@ -5,7 +5,6 @@ metadata:
 spec:
   trivy:
     skipUpdate: false
-    githubTokenRef: github-credentials
     storage:
       reportsPersistentVolume:
         claimName: sample-harbor-trivy-reports

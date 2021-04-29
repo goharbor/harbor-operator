@@ -17,3 +17,6 @@ secretGenerator:
 
 bases:
 - ../../kustomizeconfig
+
+patchesStrategicMerge:
+  - images_patch.yaml
