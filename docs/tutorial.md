@@ -205,6 +205,8 @@ spec:
 
 ```
 
+>Notes: for using the `inClusterStorage` with `redirect` is `enable(=true)`, make sure the ingress route set in the `redirect.expose.ingress.host` field can be accessed from both inside and outside the cluster.
+
 Apply the above modified deployment manifest to your cluster.
 
 ```shell
