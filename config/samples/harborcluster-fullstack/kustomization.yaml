@@ -1,0 +1,37 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+commonLabels:
+  sample: "true"
+
+bases:
+  - ../../kustomizeconfig
+  - ../harborcluster-standard/
+
+secretGenerator:
+  - name: minio-access-secret
+    literals:
+      - accesskey=admin
+      - secretkey=minio123
+    type: Opaque
+generatorOptions:
+  disableNameSuffixHash: true
+
+patchesStrategicMerge:
+  - incluster_cache_patch.yaml
+  - incluster_database_patch.yaml
+  - incluster_storage_patch.yaml
+  - resources_patch.yaml
+
+patchesJson6902:
+  - target:
+      kind: Certificate
+      name: sample-public-certificate
+      group: cert-manager.io
+      version: v1
+    path: certificate_patch.yaml
+  - target:
+      kind: HarborCluster
+      name: sample
+      group: goharbor.io
+      version: v1alpha3
+    path: spec_patch.yaml

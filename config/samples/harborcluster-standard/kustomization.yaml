@@ -8,7 +8,7 @@ resources:
 
 bases:
 - ../../kustomizeconfig
-- ../harbor
+- ../harborcluster-minimal
 
 patchesStrategicMerge:
 - harbor_chartmuseum_patch.yaml

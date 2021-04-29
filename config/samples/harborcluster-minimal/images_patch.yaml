@@ -1,0 +1,7 @@
+apiVersion: goharbor.io/v1alpha3
+kind: HarborCluster
+metadata:
+  name: sample
+spec:
+  imageSource:
+    repository: ghcr.io/goharbor

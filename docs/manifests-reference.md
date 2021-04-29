@@ -66,11 +66,11 @@ This folder contains several sample manifests for you to deploy Harbor cluster w
 
 |  Manifests   |   Description    |
 |--------------|------------------|
-| [harbor_core_fs.yaml](../manifests/samples/harbor_core_fs.yaml) |Deploy the Harbor cluster with the structure: harbor core components + filesystem storage(PV) + in-cluster PostgreSQL + in-cluster Redis |
-| [harbor_core_minio.yaml](../manifests/samples/harbor_core_minio.yaml) |Deploy the Harbor cluster with the structure: harbor core components + in-cluster storage(Minio) + in-cluster PostgreSQL + in-cluster Redis |
-| [harbor_full_fs.yaml](../manifests/samples/harbor_full_fs.yaml) |Deploy the Harbor cluster with the structure: harbor all components + filesystem storage(PV) + in-cluster PostgreSQL + in-cluster Redis |
-| [harbor_full_minio.yaml](../manifests/samples/harbor_full_minio.yaml) |Deploy the Harbor cluster with the structure: harbor all components + in-cluster storage(Minio) + in-cluster PostgreSQL + in-cluster Redis |
-| [harborcluster_standard_stack_external.yaml](../manifests/samples/harborcluster_standard_stack_external.yaml) |Deploy the Harbor cluster with the structure: harbor all components + filesystem storage(PV) + external PostgreSQL + external Redis|
+| [minimal_stack_fs.yaml](../manifests/samples/minimal_stack_fs.yaml) |Deploy the Harbor cluster with the structure: harbor core components + filesystem storage(PV) + in-cluster PostgreSQL + in-cluster Redis |
+| [minimal_stack_incluster.yaml](../manifests/samples/minimal_stack_incluster.yaml) |Deploy the Harbor cluster with the structure: harbor core components + in-cluster storage(Minio) + in-cluster PostgreSQL + in-cluster Redis |
+| [standard_stack_fs.yaml](../manifests/samples/standard_stack_fs.yaml) |Deploy the Harbor cluster with the structure: harbor all components + filesystem storage(PV) + in-cluster PostgreSQL + in-cluster Redis |
+| [full_stack.yaml](../manifests/samples/full_stack.yaml) |Deploy the Harbor cluster with the structure: harbor all components + in-cluster storage(Minio) + in-cluster PostgreSQL + in-cluster Redis |
+| [standard_stack.yaml](../manifests/samples/standard_stack.yaml) |Deploy the Harbor cluster with the structure: harbor all components + filesystem storage(PV) + external PostgreSQL + external Redis|
 
 > NOTE: `external` means you need to pre-deploy the required services; `in-cluster` means the Harbor operator will create the required services while deploying the Harbor cluster.
 

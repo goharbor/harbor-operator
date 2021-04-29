@@ -47,7 +47,7 @@ Learn more about the sample manifests, you can check [manifests reference](./man
 > NOTES: to allow the deployed Harbor cluster to be accessible outside the Kubenetes cluster, make sure the ingress hosts and host in the `externalURL` should be mapping with accessible IPs in the /etc/hosts (for local development environments) or can be resolved and accessible by DNS resolver.
 >TIPS: for local development, some plan-domain services like `sub-domain.<IP>.xip.io` can be used to provide simple public accessible hosts.
 
-Here we clone the [full stack sample manifest](../manifests/samples/harbor_full_minio.yaml) as an example and modify the external host and ingress hosts with `sub-domain.<IP>.xip.io` pattern. Modified content is shown as below. Please pay attention here, the 'namespace', 'admin password', 'minio access secret' and 'cert-manager issuer' are pre-defined resources and bound to the deploying Harbor cluster.
+Here we clone the [full stack sample manifest](../manifests/samples/full_stack.yaml) as an example and modify the external host and ingress hosts with `sub-domain.<IP>.xip.io` pattern. Modified content is shown as below. Please pay attention here, the 'namespace', 'admin password', 'minio access secret' and 'cert-manager issuer' are pre-defined resources and bound to the deploying Harbor cluster.
 
 `my_full_stack.yaml`:
 

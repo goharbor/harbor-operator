@@ -1,5 +1,5 @@
 apiVersion: goharbor.io/v1alpha3
-kind: Harbor
+kind: HarborCluster
 metadata:
   name: sample
 spec:

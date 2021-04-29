@@ -155,9 +155,9 @@ jobs:
         ingress:
         - "0.35.0"
 
-        storage:
-        - "fs"
-        - "minio"
+        samples:
+        - "full_stack.yaml"
+        - "standard_stack_fs.yaml"
 
     steps:
     - uses: actions/checkout@v2
@@ -232,7 +232,7 @@ jobs:
         echo "CORE_HOST=$CORE_HOST" >> $GITHUB_ENV
         echo "NOTARY_HOST=$NOTARY_HOST" >> $GITHUB_ENV
         echo "MINIO_HOST=$MINIO_HOST" >> $GITHUB_ENV
-        samplefile=harbor_full_${{ matrix.storage }}.yaml
+        samplefile=${{ matrix.samples }}
         sed -i "s/core.harbor.domain/$CORE_HOST/g" manifests/samples/$samplefile
         sed -i "s/notary.harbor.domain/$NOTARY_HOST/g" manifests/samples/$samplefile
         sed -i "s/minio.harbor.domain/$MINIO_HOST/g" manifests/samples/$samplefile
@@ -316,7 +316,7 @@ jobs:
           kubectl -n cluster-sample-ns logs -l "goharbor.io/operator-controller=$name" --all-containers > /tmp/harbor/$name.log ; \
         done
         kubectl -n cluster-sample-ns logs -l "application=spilo" --all-containers > /tmp/harbor/db.log
-        kubectl -n cluster-sample-ns logs -l "app.kubernetes.io/component=redis" > /tmp/harbor/redis.log
+        kubectl -n cluster-sample-ns logs -l "app.kubernetes.io/component=redis" --all-containers > /tmp/harbor/redis.log
 
     - uses: actions/upload-artifact@v2
       if: ${{ failure() }}
@@ -435,11 +435,12 @@ jobs:
           NOTARY_HOST=notary.$IP.nip.io
           echo "CORE_HOST=$CORE_HOST" >> $GITHUB_ENV
           echo "NOTARY_HOST=$NOTARY_HOST" >> $GITHUB_ENV
-          sed -i "s/core.harbor.domain/$CORE_HOST/g" config/samples/harborcluster/*.yaml
-          sed -i "s/notary.harbor.domain/$NOTARY_HOST/g" config/samples/harborcluster/*.yaml
-          sed -i "s/logLevel: info/logLevel: debug/g" config/samples/harborcluster/goharbor_v1alpha3_harborcluster.yaml
+          sed -i "s/core.harbor.domain/$CORE_HOST/g" config/samples/harborcluster-minimal/*.yaml
+          sed -i "s/notary.harbor.domain/$NOTARY_HOST/g" config/samples/harborcluster-minimal/*.yaml
+          sed -i "s/core.harbor.domain/$CORE_HOST/g" config/samples/harborcluster-standard/*.yaml
+          sed -i "s/notary.harbor.domain/$NOTARY_HOST/g" config/samples/harborcluster-standard/*.yaml
 
-          make sample-harborcluster
+          make sample-harborcluster-standard
 
           for i in $(seq 1 7);do
             sleep 30
@@ -485,7 +486,7 @@ jobs:
       - name: apidb test
         run: |
           git clone https://github.com/goharbor/harbor -b v2.2.1
-          kubectl patch deploy harborcluster-sample-harbor-harbor-core -p '{"spec":{"template":{"spec":{"containers":[{"name":"core","env":[{"name":"GC_TIME_WINDOW_HOURS","value":"0"}]}]}}}}'
+          kubectl patch deploy sample-harbor-harbor-core -p '{"spec":{"template":{"spec":{"containers":[{"name":"core","env":[{"name":"GC_TIME_WINDOW_HOURS","value":"0"}]}]}}}}'
           sleep 5
           kubectl wait --for=condition=Ready -l job-type!=minio-init pod --all --timeout 600s
           docker run --rm -t --privileged -v `pwd`/harbor:/drone -v /etc/docker/certs.d/$CORE_HOST/:/ca -v /etc/docker/certs.d/$CORE_HOST/:/root/.docker/tls/$NOTARY_HOST/ -e NOTARY_URL=https://$NOTARY_HOST -w /drone goharbor/harbor-e2e-engine:2.6.3 \
@@ -498,10 +499,10 @@ jobs:
         run: |
           mkdir -p /tmp/harbor
           for name in core jobservice registry registryctl trivy chartmuseum notaryserver notarysigner portal; do \
-            kubectl -n cluster-sample-ns logs -l "goharbor.io/operator-controller=$name" --all-containers > /tmp/harbor/$name.log ; \
+            kubectl logs -l "goharbor.io/operator-controller=$name" --all-containers > /tmp/harbor/$name.log ; \
           done
-          kubectl -n cluster-sample-ns logs -l "application=spilo" --all-containers > /tmp/harbor/db.log
-          kubectl -n cluster-sample-ns logs -l "app.kubernetes.io/component=redis" > /tmp/harbor/redis.log
+          kubectl logs -l "app.kubernetes.io/instance=harbor-database" --all-containers > /tmp/harbor/db.log
+          kubectl logs -l "release=harbor-redis" --all-containers > /tmp/harbor/redis.log
 
       - uses: actions/upload-artifact@v2
         if: ${{ failure() }}
@@ -566,9 +567,9 @@ jobs:
       fail-fast: false
       matrix:
         path:
-        - harbor
-        - harbor-full
-        - harborcluster
+        - harborcluster-minimal
+        - harborcluster-standard
+        - harborcluster-fullstack
     steps:
     - uses: actions/checkout@v2
     - uses: azure/k8s-bake@v1
