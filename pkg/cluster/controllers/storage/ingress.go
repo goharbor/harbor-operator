@@ -122,8 +122,8 @@ func (m *MinIOController) generateIngress(ctx context.Context, harborcluster *go
 	annotations["nginx.ingress.kubernetes.io/proxy-body-size"] = "0"
 
 	if harborcluster.Spec.Expose.Core.Ingress.Controller == v1alpha1.IngressControllerNCP {
-		annotations["ncp/use-regex"] = "true"
-		annotations["ncp/http-redirect"] = "true"
+		annotations["ncp/use-regex"] = varTrueString
+		annotations["ncp/http-redirect"] = varTrueString
 	}
 
 	ingressPath, err := common.GetIngressPath(harborcluster.Spec.Expose.Core.Ingress.Controller)

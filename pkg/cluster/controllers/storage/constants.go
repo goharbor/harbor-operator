@@ -1,5 +1,9 @@
 package storage
 
+const (
+	varTrueString = "true"
+)
+
 // Define error message.
 const (
 	GetMinIOError            = "get minIO error"

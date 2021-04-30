@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/go-logr/logr"
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
@@ -87,20 +88,9 @@ func (m *MinIOController) Apply(ctx context.Context, harborcluster *goharborv1.H
 		return crs, err
 	}
 
-	// Apply minio init job
-	if crs, err := m.applyMinIOInitJob(ctx, harborcluster); err != nil {
+	// initializ bucket if necessary
+	if crs, err := m.initializBucket(ctx, harborcluster, mt); crs != nil || err != nil {
 		return crs, err
-	}
-
-	initJobReady, err := m.checkMinIOInitJobReady(ctx, harborcluster)
-	if err != nil {
-		return minioNotReadyStatus(GetInitJobError, err.Error()), err
-	}
-
-	if !initJobReady {
-		m.Log.Info("MinIO init job is not ready yet")
-
-		return minioUnknownStatus(), nil
 	}
 
 	crs, err := m.ProvisionMinIOProperties(ctx, harborcluster, mt)
@@ -182,6 +172,71 @@ func (m *MinIOController) getServiceName(harborcluster *goharborv1.HarborCluster
 func (m *MinIOController) getTenantsServiceName(harborcluster *goharborv1.HarborCluster) string {
 	// In latest minio operator, The name of the service is forced to be "minio"
 	return defaultMinIOService
+}
+
+const (
+	bucketInitializatedAnnotationKey = "minio.harbor.goharbor.io/bucket-initialized"
+)
+
+func (m *MinIOController) initializBucket(ctx context.Context, harborcluster *goharborv1.HarborCluster, tenant *miniov2.Tenant) (*lcm.CRStatus, error) {
+	if m.isBucketInitialized(ctx, tenant) {
+		return nil, nil
+	}
+
+	// Apply minio init job
+	if crs, err := m.applyMinIOInitJob(ctx, harborcluster); err != nil {
+		return crs, err
+	}
+
+	job, ready, err := m.checkMinIOInitJobReady(ctx, harborcluster)
+	if err != nil {
+		return minioNotReadyStatus(GetInitJobError, err.Error()), err
+	}
+
+	if !ready {
+		m.Log.Info("MinIO init job is not ready yet")
+
+		return minioUnknownStatus(), nil
+	}
+
+	if err := m.setBucketInitialized(ctx, tenant); err != nil {
+		return minioNotReadyStatus(UpdateMinIOError, err.Error()), err
+	}
+
+	if err := m.KubeClient.Delete(ctx, job, client.PropagationPolicy(metav1.DeletePropagationBackground)); err != nil {
+		return minioNotReadyStatus(DeleteInitJobError, err.Error()), err
+	}
+
+	return nil, nil
+}
+
+func (m *MinIOController) isBucketInitialized(_ context.Context, tenant *miniov2.Tenant) bool {
+	annotations := tenant.GetAnnotations()
+	if annotations == nil {
+		return false
+	}
+
+	s, ok := annotations[bucketInitializatedAnnotationKey]
+	if !ok {
+		return false
+	}
+
+	v, _ := strconv.ParseBool(s)
+
+	return v
+}
+
+func (m *MinIOController) setBucketInitialized(ctx context.Context, tenant *miniov2.Tenant) error {
+	annotations := tenant.GetAnnotations()
+	if annotations == nil {
+		annotations = map[string]string{}
+	}
+
+	annotations[bucketInitializatedAnnotationKey] = varTrueString
+
+	tenant.SetAnnotations(annotations)
+
+	return m.KubeClient.Update(ctx, tenant)
 }
 
 func minioNotReadyStatus(reason, message string) *lcm.CRStatus {
