@@ -560,7 +560,7 @@ $(KUBEBUILDER):
 
 # find or download kustomize
 # download kustomize if necessary
-KUSTOMIZE_VERSION := 3.8.8
+KUSTOMIZE_VERSION := 3.8.7
 KUSTOMIZE := $(BIN)/kustomize
 
 .PHONY: kustomize

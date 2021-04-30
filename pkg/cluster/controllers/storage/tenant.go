@@ -11,7 +11,6 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/common"
 	miniov2 "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/apis/minio.min.io/v2"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
-	"github.com/goharbor/harbor-operator/pkg/config"
 	"github.com/goharbor/harbor-operator/pkg/resources/checksum"
 	corev1 "k8s.io/api/core/v1"
 	k8serror "k8s.io/apimachinery/pkg/api/errors"
@@ -185,7 +184,7 @@ func (m *MinIOController) createTenant(ctx context.Context, harborcluster *gohar
 }
 
 func (m *MinIOController) generateMinIOCR(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*miniov2.Tenant, error) { // nolint:funlen
-	image, err := m.GetImage(ctx, harborcluster)
+	image, err := m.getImage(ctx, harborcluster)
 	if err != nil {
 		return nil, err
 	}
@@ -310,28 +309,4 @@ func (m *MinIOController) getCredsFromSecret(ctx context.Context, harborcluster 
 	err := m.KubeClient.Get(ctx, namespaced, &minIOSecret)
 
 	return minIOSecret.Data["accesskey"], minIOSecret.Data["secretkey"], err
-}
-
-func (m *MinIOController) getImagePullPolicy(_ context.Context, harborcluster *goharborv1.HarborCluster) corev1.PullPolicy {
-	if harborcluster.Spec.InClusterStorage.MinIOSpec.ImagePullPolicy != nil {
-		return *harborcluster.Spec.InClusterStorage.MinIOSpec.ImagePullPolicy
-	}
-
-	if harborcluster.Spec.ImageSource != nil && harborcluster.Spec.ImageSource.ImagePullPolicy != nil {
-		return *harborcluster.Spec.ImageSource.ImagePullPolicy
-	}
-
-	return config.DefaultImagePullPolicy
-}
-
-func (m *MinIOController) getImagePullSecret(_ context.Context, harborcluster *goharborv1.HarborCluster) corev1.LocalObjectReference {
-	if len(harborcluster.Spec.InClusterStorage.MinIOSpec.ImagePullSecrets) > 0 {
-		return harborcluster.Spec.InClusterStorage.MinIOSpec.ImagePullSecrets[0]
-	}
-
-	if harborcluster.Spec.ImageSource != nil && len(harborcluster.Spec.ImageSource.ImagePullSecrets) > 0 {
-		return harborcluster.Spec.ImageSource.ImagePullSecrets[0]
-	}
-
-	return corev1.LocalObjectReference{Name: ""} // empty name means not using pull secret in minio
 }

@@ -15,27 +15,23 @@ Before moving on, make sure the harbor operator is successfully deployed in the 
 ```shell
 ~/harbor-operator$ k8s get all -n harbor-operator-ns
 NAME                                    READY   STATUS    RESTARTS   AGE
-pod/console-67d5498b88-zr6h6            1/1     Running   0          59s
 pod/harbor-operator-54454997d-bjkt9     1/1     Running   0          59s
 pod/minio-operator-c4d8f7b4d-dztwl      1/1     Running   0          59s
 pod/postgres-operator-94578ffd5-6kdql   1/1     Running   0          58s
 pod/redisoperator-6b75fc4555-ps5kj      1/1     Running   0          58s
 
 NAME                        TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)             AGE
-service/console             ClusterIP   10.96.53.155    <none>        9090/TCP,9443/TCP   59s
 service/operator            ClusterIP   10.96.114.34    <none>        4222/TCP,4233/TCP   59s
 service/postgres-operator   ClusterIP   10.96.208.57    <none>        8080/TCP            59s
 service/webhook-service     ClusterIP   10.96.234.182   <none>        443/TCP             59s
 
 NAME                                READY   UP-TO-DATE   AVAILABLE   AGE
-deployment.apps/console             1/1     1            1           59s
 deployment.apps/harbor-operator     1/1     1            1           59s
 deployment.apps/minio-operator      1/1     1            1           59s
 deployment.apps/postgres-operator   1/1     1            1           59s
 deployment.apps/redisoperator       1/1     1            1           58s
 
 NAME                                          DESIRED   CURRENT   READY   AGE
-replicaset.apps/console-67d5498b88            1         1         1       59s
 replicaset.apps/harbor-operator-54454997d     1         1         1       59s
 replicaset.apps/minio-operator-c4d8f7b4d      1         1         1       59s
 replicaset.apps/postgres-operator-94578ffd5   1         1         1       58s
@@ -51,7 +47,7 @@ Learn more about the sample manifests, you can check [manifests reference](./man
 > NOTES: to allow the deployed Harbor cluster to be accessible outside the Kubenetes cluster, make sure the ingress hosts and host in the `externalURL` should be mapping with accessible IPs in the /etc/hosts (for local development environments) or can be resolved and accessible by DNS resolver.
 >TIPS: for local development, some plan-domain services like `sub-domain.<IP>.xip.io` can be used to provide simple public accessible hosts.
 
-Here we clone the [full stack sample manifest](../manifests/samples/harbor_full_minio.yaml) as an example and modify the external host and ingress hosts with `sub-domain.<IP>.xip.io` pattern. Modified content is shown as below. Please pay attention here, the 'namespace', 'admin password', 'minio access secret' and 'cert-manager issuer' are pre-defined resources and bound to the deploying Harbor cluster.
+Here we clone the [full stack sample manifest](../manifests/samples/full_stack.yaml) as an example and modify the external host and ingress hosts with `sub-domain.<IP>.xip.io` pattern. Modified content is shown as below. Please pay attention here, the 'namespace', 'admin password', 'minio access secret' and 'cert-manager issuer' are pre-defined resources and bound to the deploying Harbor cluster.
 
 `my_full_stack.yaml`:
 
@@ -141,7 +137,6 @@ spec:
         host: notary.10.10.10.100.xip.io
       tls:
         certificateRef: sample-public-certificate
-  encryptionKeyRef: core-database-encryption
   internalTLS:
     enabled: true
   portal: {}
@@ -209,6 +204,8 @@ spec:
         replicas: 1
 
 ```
+
+>Notes: for using the `inClusterStorage` with `redirect` is `enable(=true)`, make sure the ingress route set in the `redirect.expose.ingress.host` field can be accessed from both inside and outside the cluster.
 
 Apply the above modified deployment manifest to your cluster.
 
@@ -399,11 +396,3 @@ kubectl get secret sample-public-certificate -n cluster-sample-ns \
 ```
 
 Of course, you can try other operations of Harbor like scanning etc.
-
-## Spec customizations
-
-For configuring existing services as the dependent services of the deploying Harbor cluster, a few customizations are available:
-
-- [Custom Registry storage](samples/registry-storage-configuration.md)
-- [Database configuration](samples/database-installation.md)
-- [Redis configuration](samples/redis-installation.md)

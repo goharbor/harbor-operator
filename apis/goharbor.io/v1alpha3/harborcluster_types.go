@@ -153,6 +153,14 @@ type MinIOSpec struct {
 	// If provided, use these requests and limit for cpu/memory resource allocation
 	// +kubebuilder:validation:Optional
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
+
+	// MinIOClientSpec the spec for the mc
+	// +kubebuilder:validation:Optional
+	MinIOClientSpec *MinIOClientSpec `json:"mc,omitempty"`
+}
+
+type MinIOClientSpec struct {
+	harbormetav1.ImageSpec `json:",inline"`
 }
 
 // HarborClusterStatus defines the observed state of HarborCluster.

@@ -1,0 +1,12 @@
+apiVersion: goharbor.io/v1alpha3
+kind: HarborCluster
+metadata:
+  name: sample
+spec:
+  trivy:
+    skipUpdate: false
+    storage:
+      reportsPersistentVolume:
+        claimName: sample-harbor-trivy-reports
+      cachePersistentVolume:
+        claimName: sample-harbor-trivy-cache

@@ -1,0 +1,6 @@
+- op: remove
+  path: "/spec/database"
+- op: remove
+  path: "/spec/imageChartStorage"
+- op: remove
+  path: "/spec/redis"

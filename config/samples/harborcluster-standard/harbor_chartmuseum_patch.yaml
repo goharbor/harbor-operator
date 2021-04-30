@@ -1,0 +1,10 @@
+apiVersion: goharbor.io/v1alpha3
+kind: HarborCluster
+metadata:
+  name: sample
+spec:
+  chartmuseum: {}
+  imageChartStorage:
+    filesystem:
+      chartPersistentVolume:
+        claimName: sample-harbor-chart

@@ -1,0 +1,19 @@
+apiVersion: goharbor.io/v1alpha3
+kind: HarborCluster
+metadata:
+  name: sample
+spec:
+  inClusterCache:
+    kind: Redis
+    redisSpec:
+      server:
+        replicas: 1
+        resources:
+          limits:
+            cpu: 500m
+            memory: 500Mi
+          requests:
+            cpu: 100m
+            memory: 250Mi
+      sentinel:
+        replicas: 1

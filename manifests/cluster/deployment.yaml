@@ -2496,10 +2496,6 @@ spec:
                 required:
                 - hosts
                 type: object
-              encryptionKeyRef:
-                description: The secret key used for encryption.
-                pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
-                type: string
               exporter:
                 properties:
                   cache:
@@ -3053,6 +3049,29 @@ spec:
                               type: string
                           type: object
                         type: array
+                      mc:
+                        description: MinIOClientSpec the spec for the mc
+                        properties:
+                          image:
+                            description: Image name for the component.
+                            type: string
+                          imagePullPolicy:
+                            description: 'Image pull policy. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images'
+                            enum:
+                            - Always
+                            - Never
+                            - IfNotPresent
+                            type: string
+                          imagePullSecrets:
+                            items:
+                              description: LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.
+                              properties:
+                                name:
+                                  description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                                  type: string
+                              type: object
+                            type: array
+                        type: object
                       redirect:
                         description: Determine if the redirection of minio storage is disabled.
                         properties:
@@ -4021,7 +4040,6 @@ spec:
                 description: The version of the harbor, eg 2.1.2
                 type: string
             required:
-            - encryptionKeyRef
             - expose
             - externalURL
             - harborAdminPasswordRef
@@ -4408,10 +4426,6 @@ spec:
                 required:
                 - hosts
                 type: object
-              encryptionKeyRef:
-                description: The secret key used for encryption.
-                pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
-                type: string
               exporter:
                 properties:
                   cache:
@@ -5522,7 +5536,6 @@ spec:
                 description: The version of the harbor, eg 2.1.2
                 type: string
             required:
-            - encryptionKeyRef
             - expose
             - externalURL
             - harborAdminPasswordRef
@@ -10384,9 +10397,6 @@ spec:
     served: true
     storage: true
     subresources:
-      scale:
-        specReplicasPath: .spec.replicas
-        statusReplicasPath: .status.replicas
       status: {}
 status:
   acceptedNames:
@@ -19998,6 +20008,18 @@ rules:
   - update
   - watch
 - apiGroups:
+  - batch
+  resources:
+  - jobs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
   - cert-manager.io
   resources:
   - certificates
@@ -20958,7 +20980,11 @@ data:
       backend: "redis"
 
       redis_pool:
+    {{- if .Spec.WorkerPool.Redis.PasswordRef }}
         redis_url: {{ "redis-password" | secretData .Spec.WorkerPool.Redis.PasswordRef | .Spec.WorkerPool.Redis.GetDSN }}
+    {{- else }}
+        redis_url: {{ "" | .Spec.WorkerPool.Redis.GetDSN }}
+    {{- end }}
         namespace: {{ default ( printf "jobservice::%s::%s" .ObjectMeta.Namespace .ObjectMeta.Name ) .Spec.WorkerPool.Redis.Namespace }}
         idle_timeout_second: {{ .Spec.WorkerPool.Redis.IdleTimeout.Duration.Seconds | int64 }}
 

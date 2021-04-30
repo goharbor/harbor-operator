@@ -1,0 +1,36 @@
+apiVersion: goharbor.io/v1alpha3
+kind: HarborCluster
+metadata:
+  name: sample
+spec:
+  harborAdminPasswordRef: admin-core-secret
+  externalURL: https://core.harbor.domain
+  expose:
+    core:
+      ingress:
+        host: core.harbor.domain
+      tls:
+        certificateRef: sample-public-certificate
+  internalTLS:
+    enabled: true
+  portal: {}
+  registry: {}
+  core:
+    tokenIssuer:
+      name: service-token
+      kind: Issuer
+  redis:
+    host: harbor-redis-master
+    port: 6379
+    passwordRef: harbor-redis
+  database:
+    hosts:
+    - host: harbor-database-postgresql
+      port: 5432
+    username: postgres
+    passwordRef: harbor-database-password
+    sslMode: disable
+  imageChartStorage:
+    filesystem:
+      registryPersistentVolume:
+        claimName: sample-harbor-registry

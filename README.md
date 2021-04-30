@@ -5,7 +5,7 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/bb3adb454b424e66ae3b9bdf2ab2fce1)](https://www.codacy.com/gh/goharbor/harbor-operator/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=goharbor/harbor-operator&amp;utm_campaign=Badge_Grade)
 [![Go Reference](https://pkg.go.dev/badge/github.com/goharbor/harbor-operator.svg)](https://pkg.go.dev/github.com/goharbor/harbor-operator)
 
-> **ATTENTIONS:** THIS PROJECT IS STILL UNDER DEVELOPMENT AND NOT STABLE YET. THE `MASTER` BRANCH MAY BE IN AN UNSTABLE OR EVEN BROKEN STATE DURING DEVELOPMENT.
+> **ATTENTIONS:** THE `MASTER` BRANCH MAY BE IN AN UNSTABLE OR EVEN BROKEN STATE DURING DEVELOPMENT.
 
 [Harbor](https://github.com/goharbor/harbor/) is a CNCF hosted open source trusted cloud-native registry project that stores, signs, and scans content. Harbor is composed on numerous stateful and stateless components and dependencies that may be deployed, updated, healed, backuped or scaled respecting some constraints.
 
@@ -26,7 +26,7 @@ Harbor deployment stack is controlled by a custom Harbor resource `HarborCluster
   * [X] [swift](https://wiki.openstack.org/wiki/Swift): A driver storing objects in Openstack Swift.
 * Supports updating the deployed Harbor cluster
   * Adjust replicas of components
-  * Add or remove the optional Harbor components
+  * Add the optional Harbor components
 * Support upgrading the managed Harbor registry version
 * Deletes all the linked resources when deleting the Harbor cluster
 * Configures Harbor system settings with ConfigMap in a declarative way
@@ -40,6 +40,8 @@ Harbor deployment stack is controlled by a custom Harbor resource `HarborCluster
   * [ ] [azure](https://azure.microsoft.com/services/storage/): A driver storing objects in Microsoft Azure Blob Storage.
   * [ ] [oss](https://www.alibabacloud.com/product/oss): A driver storing objects in Aliyun OSS.
   * [ ] [gcs](https://cloud.google.com/storage): A driver storing objects in a Google Cloud Storage bucket.
+* Supports updating the deployed Harbor cluster
+  * Remove the optional Harbor components
 * CRD based day2 configuration
 * Support services exposed with LoadBalancer
 * More day2 operations (see [PoC project](https://github.com/szlabs/harbor-automation-4k8s))
@@ -84,7 +86,7 @@ Harbor operator relies on cert manager to manage kinds of certificates used by H
 
 ### Ingress controller types
 
-Harbor operator exposes the frontend service with ingress. Table shown below lists the ingress controller types supported.
+Harbor operator exposes the frontend service with ingress (CRD version: `v1beta1`). Table shown below lists the ingress controller types supported.
 
 |  Ingress Controller  |        default      |         gce        |        ncp         |
 |----------------------|---------------------|--------------------|--------------------|
@@ -103,13 +105,15 @@ NOTES:
 * [Installation](./docs/installation/installation.md)
 * [CRD references](./docs/CRD/custom-resource-definition.md)
 * [Manifests references](./docs/manifests-reference.md)
+* [Customize storage, database and cache services](./docs/installation/customize-storage-db-redis.md)
 * [Customize images](./docs/customize-images.md)
 * [Day2 configurations](./docs/configurations/day2-config.md)
 * [Upgrade Harbor cluster](./docs/LCM/upgrade-cluster.md)
 * [Delete Harbor cluster](./docs/LCM/cluster-deletion.md)
 * [Backup data](./docs/LCM/backup-data.md)
 * [Useful Makefile Targets](./docs/makefile.md)
-* [Resource configurations](./docs/configurations/resource-configurations.md)
+* [Operator configurations](./docs/configurations/operator-configurations.md)
+* [Enable Minio console](./docs/installation/enable_minio_console.md)
 * [Performance comparison between fs & MinIO](./docs/perf/simple-perf-comprasion.md)
 * [Monitor logs with grafana](./docs/LCM/monitor-logs-with-grafana.md)
 

@@ -1,0 +1,13 @@
+apiVersion: goharbor.io/v1alpha3
+kind: HarborCluster
+metadata:
+  name: sample
+spec:
+  notary:
+    migrationEnabled: true
+  expose:
+    notary:
+      ingress:
+        host: notary.harbor.domain
+      tls:
+        certificateRef: sample-public-certificate

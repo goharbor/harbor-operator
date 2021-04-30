@@ -1,0 +1,17 @@
+apiVersion: goharbor.io/v1alpha3
+kind: HarborCluster
+metadata:
+  name: sample
+spec:
+  inClusterDatabase:
+    kind: PostgresSQL
+    postgresSqlSpec:
+      storage: 1Gi
+      replicas: 1
+      resources:
+        limits:
+          cpu: 500m
+          memory: 500Mi
+        requests:
+          cpu: 100m
+          memory: 250Mi

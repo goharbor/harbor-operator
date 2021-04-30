@@ -1,0 +1,4 @@
+- op: add
+  path: "/spec/dnsNames/-"
+  value:
+    minio.harbor.domain

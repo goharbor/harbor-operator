@@ -12,4 +12,8 @@ const (
 	GetMinIOProperties       = "get MinIO Properties error"
 	UpdateIngressError       = "update minIO ingress error"
 	GetMinIOIngressError     = "get minIO ingress error"
+	CreateInitJobError       = "create minIO init job error"
+	DeleteInitJobError       = "delete minIO init job error"
+	GetInitJobError          = "get minIO init job error"
+	UpdateInitJobError       = "update minIO init job error"
 )

@@ -1,0 +1,25 @@
+apiVersion: goharbor.io/v1alpha3
+kind: HarborCluster
+metadata:
+  name: sample
+spec:
+  inClusterStorage:
+    kind: MinIO
+    minIOSpec:
+      replicas: 2
+      secretRef: minio-access-secret
+      redirect:
+        enable: true
+        expose:
+          ingress:
+            host: minio.harbor.domain
+          tls:
+            certificateRef: sample-public-certificate
+      volumesPerServer: 2
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 10Gi
