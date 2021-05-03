@@ -5,13 +5,23 @@ Documentation shown here guides you how to backup the Minio data.
 ## Prerequisites
 
 1. You need to install [mc]( https://docs.min.io/docs/minio-client-complete-guide.html) that is the MinIO CLI.
+
 2. Get the `access_key` and `secret_key` of MinIO.
+
+    ```shell
+    $ kubectl get secret minio-access-secret -n cluster-sample-ns -o jsonpath='{.data.accesskey}' | base64 --decode
+    admin
+    $ kubectl get secret minio-access-secret -n cluster-sample-ns -o jsonpath='{.data.secretkey}' | base64 --decode
+    minio123
+    ```
+
+3. Please make sure you have the correct MinIO address to access.
 
 ## Backup
 
 ### Step 1
 
-Create the directory to storage Harbor Data, and please make sure you have the Read/Write Permissions.
+Create the directory to storage Harbor Data in the backup pod, please make sure you have the Read/Write Permissions.
 
 ```shell
 mkdir {minio_backup_directory}
