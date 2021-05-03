@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"fmt"
+	"time"
 
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/common"
@@ -12,6 +13,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const initBucketScript = `
@@ -57,6 +59,8 @@ func (m *MinIOController) generateMinIOInitJob(ctx context.Context, harborcluste
 
 	minioEndpoint := fmt.Sprintf("http://%s.%s.svc:%d", m.getTenantsServiceName(harborcluster), harborcluster.Namespace, m.getServicePort())
 
+	ttlSecondsAfterFinished := int32(time.Minute * 5 / time.Second)
+
 	job := &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      m.getMinIONamespacedName(harborcluster).Name,
@@ -69,6 +73,7 @@ func (m *MinIOController) generateMinIOInitJob(ctx context.Context, harborcluste
 			},
 		},
 		Spec: batchv1.JobSpec{
+			TTLSecondsAfterFinished: &ttlSecondsAfterFinished,
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
@@ -116,6 +121,10 @@ func (m *MinIOController) generateMinIOInitJob(ctx context.Context, harborcluste
 		},
 	}
 
+	job.Spec.Template.ObjectMeta.OwnerReferences = []metav1.OwnerReference{
+		*metav1.NewControllerRef(job, batchv1.SchemeGroupVersion.WithKind("Job")),
+	}
+
 	dependencies := checksum.New(m.Scheme)
 	dependencies.Add(ctx, harborcluster, true)
 	dependencies.AddAnnotations(job)
@@ -156,7 +165,7 @@ func (m *MinIOController) applyMinIOInitJob(ctx context.Context, harborcluster *
 	if !common.Equals(ctx, m.Scheme, harborcluster, initJob) {
 		// can't change the template after the job has been created, so delete it first and the recreate it
 		// https://github.com/kubernetes/kubernetes/issues/89657
-		if err := m.KubeClient.Delete(ctx, initJob); err != nil {
+		if err := m.KubeClient.Delete(ctx, initJob, client.PropagationPolicy(metav1.DeletePropagationBackground)); err != nil {
 			return minioNotReadyStatus(DeleteInitJobError, err.Error()), err
 		}
 
