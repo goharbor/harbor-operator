@@ -1,6 +1,8 @@
 # Backup Postgresql data
 
-Documentation shown here guides you how to backup the psql database data.
+Documentation shown here guides you how to backup the `Postgresql` database data.
+
+>NOTES: The document shown here is for reference only, you can also look for other available data backup alternatives based on your real case.
 
 ## get postgresql username and password from secret
 
