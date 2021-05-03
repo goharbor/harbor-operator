@@ -1,6 +1,8 @@
 # Backup Minio data
 
-Documentation shown here guides you how to backup the Minio data.
+Documentation shown here guides you how to backup the `Minio` data.
+
+>NOTES: The document shown here is for reference only, you can also look for other available data backup alternatives based on your real case.
 
 ## Prerequisites
 

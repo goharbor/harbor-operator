@@ -1,6 +1,8 @@
 # Backup Redis data
 
-Documentation shown here guides you how to backup the Redis data.
+Documentation shown here guides you how to backup the `Redis` data.
+
+>NOTES: The document shown here is for reference only, you can also look for other available data backup alternatives based on your real case.
 
 ## Step 1
 
