@@ -16,7 +16,8 @@ import (
 )
 
 const (
-	NCPIngressValueTrue = "true"
+	NCPIngressValueTrue     = "true"
+	ContourIngressValueTrue = "true"
 )
 
 type CoreIngress graph.Resource
@@ -42,6 +43,7 @@ func (r *Reconciler) GetCoreIngress(ctx context.Context, harbor *goharborv1.Harb
 	if harbor.Spec.Expose.Core.TLS.Enabled() {
 		tls = []netv1beta1.IngressTLS{{
 			SecretName: harbor.Spec.Expose.Core.TLS.CertificateRef,
+			Hosts:      []string{harbor.Spec.Expose.Core.Ingress.Host},
 		}}
 	}
 
@@ -122,6 +124,7 @@ func (r *Reconciler) GetNotaryServerIngress(ctx context.Context, harbor *goharbo
 	if harbor.Spec.Expose.Notary.TLS.Enabled() {
 		tls = []netv1beta1.IngressTLS{{
 			SecretName: harbor.Spec.Expose.Notary.TLS.CertificateRef,
+			Hosts:      []string{harbor.Spec.Expose.Notary.Ingress.Host},
 		}}
 	}
 
@@ -144,8 +147,6 @@ func (r *Reconciler) GetNotaryServerIngress(ctx context.Context, harbor *goharbo
 }
 
 func (r *Reconciler) GetNotaryIngressRules(ctx context.Context, harbor *goharborv1.Harbor) ([]netv1beta1.IngressRule, error) {
-	var ingressRuleValue netv1beta1.IngressRuleValue
-
 	backend := netv1beta1.IngressBackend{
 		ServiceName: r.NormalizeName(ctx, harbor.GetName(), controllers.NotaryServer.String()),
 		ServicePort: intstr.FromInt(notaryserver.PublicPort),
@@ -153,51 +154,20 @@ func (r *Reconciler) GetNotaryIngressRules(ctx context.Context, harbor *goharbor
 
 	pathTypePrefix := netv1beta1.PathTypePrefix
 
-	switch harbor.Spec.Expose.Core.Ingress.Controller {
-	case harbormetav1.IngressControllerDefault:
-		ingressRuleValue = netv1beta1.IngressRuleValue{
-			HTTP: &netv1beta1.HTTPIngressRuleValue{
-				Paths: []netv1beta1.HTTPIngressPath{
-					{
-						Path:     "/",
-						PathType: &pathTypePrefix,
-						Backend:  backend,
-					},
-				},
-			},
-		}
-	case harbormetav1.IngressControllerGCE:
-		ingressRuleValue = netv1beta1.IngressRuleValue{
-			HTTP: &netv1beta1.HTTPIngressRuleValue{
-				Paths: []netv1beta1.HTTPIngressPath{
-					{
-						Path:     "/",
-						PathType: &pathTypePrefix,
-						Backend:  backend,
-					},
-				},
-			},
-		}
-	case harbormetav1.IngressControllerNCP:
-		ingressRuleValue = netv1beta1.IngressRuleValue{
-			HTTP: &netv1beta1.HTTPIngressRuleValue{
-				Paths: []netv1beta1.HTTPIngressPath{
-					{
-						Path:     "/",
-						PathType: &pathTypePrefix,
-						Backend:  backend,
-					},
-				},
-			},
-		}
-	default:
-		return nil, ErrInvalidIngressController{Controller: harbor.Spec.Expose.Core.Ingress.Controller}
-	}
-
 	return []netv1beta1.IngressRule{
 		{
-			Host:             harbor.Spec.Expose.Notary.Ingress.Host,
-			IngressRuleValue: ingressRuleValue,
+			Host: harbor.Spec.Expose.Notary.Ingress.Host,
+			IngressRuleValue: netv1beta1.IngressRuleValue{
+				HTTP: &netv1beta1.HTTPIngressRuleValue{
+					Paths: []netv1beta1.HTTPIngressPath{
+						{
+							Path:     "/",
+							PathType: &pathTypePrefix,
+							Backend:  backend,
+						},
+					},
+				},
+			},
 		},
 	}, nil
 }
@@ -219,6 +189,10 @@ func (r *Reconciler) GetCoreIngressAnnotations(ctx context.Context, harbor *goha
 		annotations["ncp/use-regex"] = NCPIngressValueTrue
 		if harbor.Spec.InternalTLS.IsEnabled() {
 			annotations["ncp/http-redirect"] = NCPIngressValueTrue
+		}
+	} else if harbor.Spec.Expose.Core.Ingress.Controller == harbormetav1.IngressControllerContour {
+		if harbor.Spec.InternalTLS.IsEnabled() {
+			annotations["ingress.kubernetes.io/force-ssl-redirect"] = ContourIngressValueTrue
 		}
 	}
 
@@ -247,6 +221,10 @@ func (r *Reconciler) GetNotaryIngressAnnotations(ctx context.Context, harbor *go
 		if harbor.Spec.InternalTLS.IsEnabled() {
 			annotations["ncp/http-redirect"] = NCPIngressValueTrue
 		}
+	} else if harbor.Spec.Expose.Core.Ingress.Controller == harbormetav1.IngressControllerContour {
+		if harbor.Spec.InternalTLS.IsEnabled() {
+			annotations["ingress.kubernetes.io/force-ssl-redirect"] = ContourIngressValueTrue
+		}
 	}
 
 	for key, value := range harbor.Spec.Expose.Notary.Ingress.Annotations {
@@ -264,101 +242,36 @@ func (err ErrInvalidIngressController) Error() string {
 	return fmt.Sprintf("controller %s unsupported", err.Controller)
 }
 
-func (r *Reconciler) GetCoreIngressRuleValue(ctx context.Context, harbor *goharborv1.Harbor, core, portal netv1beta1.IngressBackend) (*netv1beta1.IngressRuleValue, error) { // nolint:funlen
+func (r *Reconciler) GetCoreIngressRuleValue(ctx context.Context, harbor *goharborv1.Harbor, core, portal netv1beta1.IngressBackend) (*netv1beta1.IngressRuleValue, error) {
 	pathTypePrefix := netv1beta1.PathTypePrefix
 
-	switch harbor.Spec.Expose.Core.Ingress.Controller {
-	case harbormetav1.IngressControllerDefault:
-		return &netv1beta1.IngressRuleValue{
-			HTTP: &netv1beta1.HTTPIngressRuleValue{
-				Paths: []netv1beta1.HTTPIngressPath{{
-					Path:     "/",
-					PathType: &pathTypePrefix,
-					Backend:  portal,
-				}, {
-					Path:     "/api/",
-					PathType: &pathTypePrefix,
-					Backend:  core,
-				}, {
-					Path:     "/service/",
-					PathType: &pathTypePrefix,
-					Backend:  core,
-				}, {
-					Path:     "/v2/",
-					PathType: &pathTypePrefix,
-					Backend:  core,
-				}, {
-					Path:     "/chartrepo/",
-					PathType: &pathTypePrefix,
-					Backend:  core,
-				}, {
-					Path:     "/c/",
-					PathType: &pathTypePrefix,
-					Backend:  core,
-				}},
-			},
-		}, nil
-	case harbormetav1.IngressControllerGCE:
-		return &netv1beta1.IngressRuleValue{
-			HTTP: &netv1beta1.HTTPIngressRuleValue{
-				Paths: []netv1beta1.HTTPIngressPath{{
-					Path:     "/",
-					PathType: &pathTypePrefix,
-					Backend:  portal,
-				}, {
-					Path:     "/api",
-					PathType: &pathTypePrefix,
-					Backend:  core,
-				}, {
-					Path:     "/service",
-					PathType: &pathTypePrefix,
-					Backend:  core,
-				}, {
-					Path:     "/v2",
-					PathType: &pathTypePrefix,
-					Backend:  core,
-				}, {
-					Path:     "/chartrepo",
-					PathType: &pathTypePrefix,
-					Backend:  core,
-				}, {
-					Path:     "/c",
-					PathType: &pathTypePrefix,
-					Backend:  core,
-				}},
-			},
-		}, nil
-	case harbormetav1.IngressControllerNCP:
-		return &netv1beta1.IngressRuleValue{
-			HTTP: &netv1beta1.HTTPIngressRuleValue{
-				Paths: []netv1beta1.HTTPIngressPath{{
-					Path:     "/",
-					PathType: &pathTypePrefix,
-					Backend:  portal,
-				}, {
-					Path:     "/api",
-					PathType: &pathTypePrefix,
-					Backend:  core,
-				}, {
-					Path:     "/service",
-					PathType: &pathTypePrefix,
-					Backend:  core,
-				}, {
-					Path:     "/v2",
-					PathType: &pathTypePrefix,
-					Backend:  core,
-				}, {
-					Path:     "/chartrepo",
-					PathType: &pathTypePrefix,
-					Backend:  core,
-				}, {
-					Path:     "/c",
-					PathType: &pathTypePrefix,
-					Backend:  core,
-				}},
-			},
-		}, nil
-	default:
-		return nil, ErrInvalidIngressController{harbor.Spec.Expose.Core.Ingress.Controller}
-	}
+	return &netv1beta1.IngressRuleValue{
+		HTTP: &netv1beta1.HTTPIngressRuleValue{
+			Paths: []netv1beta1.HTTPIngressPath{{
+				Path:     "/",
+				PathType: &pathTypePrefix,
+				Backend:  portal,
+			}, {
+				Path:     "/api",
+				PathType: &pathTypePrefix,
+				Backend:  core,
+			}, {
+				Path:     "/service",
+				PathType: &pathTypePrefix,
+				Backend:  core,
+			}, {
+				Path:     "/v2",
+				PathType: &pathTypePrefix,
+				Backend:  core,
+			}, {
+				Path:     "/chartrepo",
+				PathType: &pathTypePrefix,
+				Backend:  core,
+			}, {
+				Path:     "/c",
+				PathType: &pathTypePrefix,
+				Backend:  core,
+			}},
+		},
+	}, nil
 }

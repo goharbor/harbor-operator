@@ -51,13 +51,19 @@ func (r *Reconciler) GetPortal(ctx context.Context, harbor *goharborv1.Harbor) (
 
 	tls := harbor.Spec.InternalTLS.GetComponentTLSSpec(r.GetInternalTLSCertificateSecretName(ctx, harbor, harbormetav1.PortalTLS))
 
+	annotation := map[string]string{
+		harbormetav1.NetworkPoliciesAnnotationName: harbormetav1.NetworkPoliciesAnnotationDisabled,
+	}
+
+	if harbor.Spec.Expose.Core.Ingress != nil {
+		annotation[harbormetav1.IngressControllerAnnotationName] = string(harbor.Spec.Expose.Core.Ingress.Controller)
+	}
+
 	return &goharborv1.Portal{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-			Annotations: version.SetVersion(map[string]string{
-				harbormetav1.NetworkPoliciesAnnotationName: harbormetav1.NetworkPoliciesAnnotationDisabled,
-			}, harbor.Spec.Version),
+			Name:        name,
+			Namespace:   namespace,
+			Annotations: version.SetVersion(annotation, harbor.Spec.Version),
 		},
 		Spec: goharborv1.PortalSpec{
 			ComponentSpec: harbor.GetComponentSpec(ctx, harbormetav1.PortalComponent),

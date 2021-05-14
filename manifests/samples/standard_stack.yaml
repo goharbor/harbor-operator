@@ -192,11 +192,13 @@ spec:
     core:
       ingress:
         host: core.harbor.domain
+        controller: default
       tls:
         certificateRef: sample-public-certificate
     notary:
       ingress:
         host: notary.harbor.domain
+        controller: default
       tls:
         certificateRef: sample-public-certificate
   externalURL: https://core.harbor.domain
