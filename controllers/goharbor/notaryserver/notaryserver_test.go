@@ -33,9 +33,9 @@ var _ = Describe("NotaryServer", func() {
 		notaryserver.ObjectMeta = metav1.ObjectMeta{
 			Name:      test.NewName("notaryserver"),
 			Namespace: ns.GetName(),
-			Annotations: map[string]string{
+			Annotations: test.AddVersionAnnotations(map[string]string{
 				goharborv1.HarborClassAnnotation: className,
-			},
+			}),
 		}
 	})
 

@@ -2218,6 +2218,10 @@ spec:
       jsonPath: .spec.externalURL
       name: Public URL
       type: string
+    - description: The version to the Harbor application
+      jsonPath: .spec.version
+      name: Version
+      type: string
     - description: The overall status of the Harbor cluster
       jsonPath: .status.status
       name: Status
@@ -4038,11 +4042,13 @@ spec:
                 type: string
               version:
                 description: The version of the harbor, eg 2.1.2
+                pattern: '[0-9]+\.[0-9]+\.[0-9]+'
                 type: string
             required:
             - expose
             - externalURL
             - harborAdminPasswordRef
+            - version
             type: object
           status:
             description: HarborClusterStatus defines the observed state of HarborCluster.
@@ -4150,6 +4156,11 @@ spec:
     - description: The public URL to the Harbor application
       jsonPath: .spec.externalURL
       name: Public URL
+      priority: 5
+      type: string
+    - description: The version to the Harbor application
+      jsonPath: .spec.version
+      name: Version
       priority: 5
       type: string
     - description: Timestamp representing the server time when this object was created. It is not guaranteed to be set in happens-before order across separate operations. Clients may not set this value. It is represented in RFC3339 form and is in UTC.
@@ -5534,11 +5545,13 @@ spec:
                 type: string
               version:
                 description: The version of the harbor, eg 2.1.2
+                pattern: '[0-9]+\.[0-9]+\.[0-9]+'
                 type: string
             required:
             - expose
             - externalURL
             - harborAdminPasswordRef
+            - version
             type: object
           status:
             description: ComponentStatus represents the current status of the resource. https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md#typical-status-properties

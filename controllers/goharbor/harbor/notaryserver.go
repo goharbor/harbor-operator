@@ -105,9 +105,8 @@ func (r *Reconciler) GetNotaryServerCertificate(ctx context.Context, harbor *goh
 
 	return &certv1.Certificate{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        r.NormalizeName(ctx, harbor.GetName(), controllers.NotaryServer.String(), "authentication"),
-			Namespace:   harbor.GetNamespace(),
-			Annotations: version.SetVersion(nil, harbor.Spec.Version),
+			Name:      r.NormalizeName(ctx, harbor.GetName(), controllers.NotaryServer.String(), "authentication"),
+			Namespace: harbor.GetNamespace(),
 		},
 		Spec: certv1.CertificateSpec{
 			SecretName: secretName,
@@ -196,9 +195,9 @@ func (r *Reconciler) GetNotaryServer(ctx context.Context, harbor *goharborv1.Har
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
-			Annotations: map[string]string{
+			Annotations: version.SetVersion(map[string]string{
 				harbormetav1.NetworkPoliciesAnnotationName: harbormetav1.NetworkPoliciesAnnotationDisabled,
-			},
+			}, harbor.Spec.Version),
 		},
 		Spec: goharborv1.NotaryServerSpec{
 			ComponentSpec: harbor.GetComponentSpec(ctx, harbormetav1.NotaryServerComponent),
