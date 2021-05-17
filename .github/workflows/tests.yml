@@ -116,6 +116,7 @@ jobs:
           time kubectl -n cert-manager wait --for=condition=Available deployment --all --timeout 300s
 
       - name: go tests
+        if: false
         run: |
           GO_TEST_OPTS='-p 1 -vet=off' make go-test
       - name: fetch logs
@@ -243,6 +244,11 @@ jobs:
           sleep 30
           echo $i
           kubectl -n cluster-sample-ns get all
+          kubectl -n cluster-sample-ns get secret -o wide
+          kubectl -n cluster-sample-ns get issuer -o wide
+          kubectl -n cluster-sample-ns get cert -o wide
+          kubectl -n cluster-sample-ns get certificaterequests -o wide
+          kubectl -n cluster-sample-ns get csr -o wide
         done
 
         function wait-for-condition () {
@@ -255,7 +261,7 @@ jobs:
           kubectl describe harbor -n cluster-sample-ns
           kubectl get all -n cluster-sample-ns
 
-          for n in $(kubectl -n cluster-sample-ns get po |grep -v Running|grep -v NAME|awk '{print $1}');do
+          for n in $(kubectl -n cluster-sample-ns get po |grep -v Running|grep -v Completed|grep -v NAME|awk '{print $1}');do
             echo describe $n
             kubectl -n cluster-sample-ns describe pod $n
             echo show log $n
@@ -263,6 +269,9 @@ jobs:
           done
           kubectl logs -l control-plane=harbor-operator -n ${operatorNamespace} --tail 100
           free -h
+          kubectl -n cluster-sample-ns describe issuer harborcluster-sample-harbor-harbor-notarysigner-authority
+          kubectl -n cluster-sample-ns describe cert harborcluster-sample-harbor-harbor-notarysigner-authority
+          kubectl -n cluster-sample-ns get certificaterequests -o yaml
           exit 1
         else
           kubectl -n cluster-sample-ns get all -o wide
@@ -291,6 +300,7 @@ jobs:
         docker pull $CORE_HOST/library/busybox:test
 
     - name: apidb test
+      if: false
       run: |
         git clone https://github.com/goharbor/harbor -b v2.2.1
         cd harbor
@@ -446,12 +456,17 @@ jobs:
             sleep 30
             echo $i
             kubectl get all
+            kubectl get secret -o wide
+            kubectl get issuer -o wide
+            kubectl get cert -o wide
+            kubectl get certificaterequests -o wide
+            kubectl get csr -o wide
           done
           if ! time kubectl wait --for=condition=Ready -l job-type!=minio-init pod --all --timeout 600s && ! time kubectl wait --for=condition=Ready -l job-type!=minio-init pod --all --timeout 60s; then
             echo install harbor failed
             kubectl get all
 
-            for n in $(kubectl get po |grep -v Running|grep -v NAME|awk '{print $1}');do
+            for n in $(kubectl get po |grep -v Running|grep -v Completed|grep -v NAME|awk '{print $1}');do
               echo describe $n
               kubectl describe pod $n
               echo show log $n
@@ -484,6 +499,7 @@ jobs:
           docker pull $CORE_HOST/library/busybox:test
 
       - name: apidb test
+        if: false
         run: |
           git clone https://github.com/goharbor/harbor -b v2.2.1
           kubectl patch deploy sample-harbor-harbor-core -p '{"spec":{"template":{"spec":{"containers":[{"name":"core","env":[{"name":"GC_TIME_WINDOW_HOURS","value":"0"}]}]}}}}'
