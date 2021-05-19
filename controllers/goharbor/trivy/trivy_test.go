@@ -33,9 +33,9 @@ var _ = Describe("Trivy", func() {
 		trivy.ObjectMeta = metav1.ObjectMeta{
 			Name:      test.NewName("trivy"),
 			Namespace: ns.GetName(),
-			Annotations: map[string]string{
+			Annotations: test.AddVersionAnnotations(map[string]string{
 				goharborv1.HarborClassAnnotation: className,
-			},
+			}),
 		}
 	})
 

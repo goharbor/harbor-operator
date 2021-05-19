@@ -32,9 +32,9 @@ var _ = Describe("Portal", func() {
 		portal.ObjectMeta = metav1.ObjectMeta{
 			Name:      test.NewName("portal"),
 			Namespace: ns.GetName(),
-			Annotations: map[string]string{
+			Annotations: test.AddVersionAnnotations(map[string]string{
 				goharborv1.HarborClassAnnotation: className,
-			},
+			}),
 		}
 	})
 

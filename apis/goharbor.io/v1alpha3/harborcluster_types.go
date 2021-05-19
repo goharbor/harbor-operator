@@ -247,6 +247,7 @@ const (
 // +resource:path=harborcluster
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Public URL",type=string,JSONPath=`.spec.externalURL`,description="The public URL to the Harbor application",priority=0
+// +kubebuilder:printcolumn:name="Version",type=string,JSONPath=`.spec.version`,description="The version to the Harbor application",priority=0
 // +kubebuilder:printcolumn:name="Status",type=string,JSONPath=`.status.status`,description="The overall status of the Harbor cluster",priority=0
 // +kubebuilder:printcolumn:name="Operator Version",type=string,JSONPath=`.status.operator.controllerVersion`,description="The operator version ",priority=30
 // +kubebuilder:printcolumn:name="Operator Git Commit",type=string,JSONPath=`.status.operator.controllerGitCommit`,description="The operator git commit",priority=30
