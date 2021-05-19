@@ -32,9 +32,6 @@ var _ webhook.Defaulter = &Harbor{}
 
 // Default implements webhook.Defaulter so a webhook will be registered for the type.
 func (h *Harbor) Default() {
-	if h.Spec.Version == "" {
-		h.Spec.Version = version.Default()
-	}
 }
 
 // +kubebuilder:webhook:verbs=create;update,path=/validate-goharbor-io-v1alpha3-harbor,mutating=false,failurePolicy=fail,groups=goharbor.io,resources=harbors,versions=v1alpha3,name=vharbor.kb.io,admissionReviewVersions={"v1beta1"},sideEffects=None

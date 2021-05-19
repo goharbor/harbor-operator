@@ -8,6 +8,7 @@ import (
 
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/redis"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -50,8 +51,9 @@ func setupValidJobService(ctx context.Context, ns string) (Resource, client.Obje
 	name := newName("jobservice")
 	jobService := &goharborv1.JobService{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: ns,
+			Name:        name,
+			Namespace:   ns,
+			Annotations: test.AddVersionAnnotations(nil),
 		},
 		Spec: goharborv1.JobServiceSpec{
 			Core: goharborv1.JobServiceCoreSpec{

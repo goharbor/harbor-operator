@@ -32,9 +32,9 @@ var _ = Describe("RegistryController", func() {
 		registryCtl.ObjectMeta = metav1.ObjectMeta{
 			Name:      test.NewName("registryctl"),
 			Namespace: ns.GetName(),
-			Annotations: map[string]string{
+			Annotations: test.AddVersionAnnotations(map[string]string{
 				goharborv1.HarborClassAnnotation: className,
-			},
+			}),
 		}
 	})
 
@@ -54,9 +54,9 @@ var _ = Describe("RegistryController", func() {
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      test.NewName("registry"),
 					Namespace: registryCtl.GetNamespace(),
-					Annotations: map[string]string{
+					Annotations: test.AddVersionAnnotations(map[string]string{
 						goharborv1.HarborClassAnnotation: className,
-					},
+					}),
 				},
 				Spec: goharborv1.RegistrySpec{
 					RegistryConfig01: goharborv1.RegistryConfig01{

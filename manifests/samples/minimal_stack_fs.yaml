@@ -68,6 +68,7 @@ metadata:
   name: harborcluster-sample
   namespace: cluster-sample-ns
 spec:
+  version: 2.2.1
   logLevel: info
   imageSource:
     repository: ghcr.io/goharbor

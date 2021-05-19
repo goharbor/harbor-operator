@@ -32,9 +32,9 @@ var _ = Describe("Registry", func() {
 		registry.ObjectMeta = metav1.ObjectMeta{
 			Name:      test.NewName("registry"),
 			Namespace: ns.GetName(),
-			Annotations: map[string]string{
+			Annotations: test.AddVersionAnnotations(map[string]string{
 				goharborv1.HarborClassAnnotation: className,
-			},
+			}),
 		}
 	})
 

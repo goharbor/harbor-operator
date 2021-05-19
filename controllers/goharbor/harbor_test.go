@@ -6,10 +6,10 @@ import (
 
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/postgresql"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/redis"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
-	harborversion "github.com/goharbor/harbor-operator/pkg/version"
 	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1"
 	cmmeta "github.com/jetstack/cert-manager/pkg/apis/meta/v1"
 	. "github.com/onsi/ginkgo"
@@ -146,7 +146,7 @@ func setupValidHarbor(ctx context.Context, ns string) (Resource, client.ObjectKe
 		Spec: goharborv1.HarborSpec{
 			ExternalURL:            publicURL.String(),
 			HarborAdminPasswordRef: adminSecretName,
-			Version:                harborversion.Default(),
+			Version:                test.GetVersion(),
 			ImageChartStorage: &goharborv1.HarborStorageImageChartStorageSpec{
 				FileSystem: &goharborv1.HarborStorageImageChartStorageFileSystemSpec{
 					RegistryPersistentVolume: goharborv1.HarborStorageRegistryPersistentVolumeSpec{

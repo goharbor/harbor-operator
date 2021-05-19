@@ -1,6 +1,7 @@
 package version
 
 import (
+	"github.com/Masterminds/semver"
 	"github.com/pkg/errors"
 )
 
@@ -9,39 +10,59 @@ const (
 )
 
 var (
-	knowVersions       []string
-	knowVersionIndexes = map[string]int{}
-	defaultVersion     = ""
+	knownConstraints []*semver.Constraints
+	latestConstraint *semver.Constraints
 )
 
 func init() { // nolint:gochecknoinits
-	RegisterKnowVersions(
-		"2.2.1",
+	RegisterKnownConstraints(
+		"~2.2.x",
 	)
 }
 
-// RegisterKnowVersions register the know versions.
-// NOTE: the parameter versions must be in increasing order.
-func RegisterKnowVersions(versions ...string) {
-	for i, version := range versions {
-		knowVersions = append(knowVersions, version)
-		knowVersionIndexes[version] = i
+func parseVersion(version string) (*semver.Version, error) {
+	v, err := semver.NewVersion(version)
+	if err != nil {
+		return nil, err
 	}
 
-	if len(knowVersions) > 0 {
-		defaultVersion = knowVersions[len(knowVersions)-1]
+	for _, knownConstraint := range knownConstraints {
+		if knownConstraint.Check(v) {
+			return v, nil
+		}
 	}
+
+	return nil, errors.Errorf("unknow version %s", version)
 }
 
-// Default returns the default version.
-func Default() string {
-	return defaultVersion
+// RegisterKnownConstraints register the know constraints.
+// NOTE: the parameter constraints must be in increasing order.
+func RegisterKnownConstraints(versions ...string) {
+	knownConstraints = []*semver.Constraints{}
+
+	for _, version := range versions {
+		c, err := semver.NewConstraint(version)
+		if err != nil {
+			panic(c)
+		}
+
+		knownConstraints = append(knownConstraints, c)
+	}
+
+	if len(knownConstraints) > 0 {
+		latestConstraint = knownConstraints[len(knownConstraints)-1]
+	}
 }
 
 // Validate returns nil when version is the default version.
 func Validate(version string) error {
-	if version != Default() {
-		return errors.Errorf("version %s not support, please use version %s", version, Default())
+	v, err := semver.NewVersion(version)
+	if err != nil {
+		return err
+	}
+
+	if valid, errs := latestConstraint.Validate(v); !valid {
+		return errs[0]
 	}
 
 	return nil
@@ -49,18 +70,25 @@ func Validate(version string) error {
 
 // UpgradeAllowed returns nil when upgrade allowed.
 func UpgradeAllowed(from, to string) error {
-	fromIndex, ok := knowVersionIndexes[from]
-	if !ok {
-		return errors.Errorf("unknow version %s", from)
+	fromVersion, err := parseVersion(from)
+	if err != nil {
+		return err
 	}
 
-	toIndex, ok := knowVersionIndexes[to]
-	if !ok {
-		return errors.Errorf("unknow version %s", to)
+	// only allowed to upgrade to latest major and minor version
+	toVersion, err := parseVersion(to)
+	if err != nil {
+		return err
 	}
 
-	if toIndex < fromIndex {
-		return errors.Errorf("downgrade from version %s to %s is not allowed", from, to)
+	if !fromVersion.Equal(toVersion) {
+		if valid, errs := latestConstraint.Validate(toVersion); !valid {
+			return errors.Errorf("upgrade from %s to %s is not allowed, error: %v", from, to, errs[0])
+		}
+
+		if fromVersion.GreaterThan(toVersion) {
+			return errors.Errorf("downgrade from %s to %s is not allowed", from, to)
+		}
 	}
 
 	return nil

@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	cloud.google.com/go v0.58.0 // indirect
-	github.com/Masterminds/semver v1.5.0 // indirect
+	github.com/Masterminds/semver v1.5.0
 	github.com/Masterminds/sprig v2.22.0+incompatible
 	github.com/go-kit/kit v0.10.0
 	github.com/go-logr/logr v0.3.0

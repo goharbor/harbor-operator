@@ -7,6 +7,7 @@ import (
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/certificate"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/redis"
 	. "github.com/onsi/gomega"
@@ -60,8 +61,9 @@ func setupValidTrivy(ctx context.Context, ns string) (Resource, client.ObjectKey
 
 	trivy := &goharborv1.Trivy{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: ns,
+			Name:        name,
+			Namespace:   ns,
+			Annotations: test.AddVersionAnnotations(nil),
 		},
 
 		Spec: goharborv1.TrivySpec{

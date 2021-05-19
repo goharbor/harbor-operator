@@ -3,7 +3,7 @@ kind: JobService
 metadata:
   annotations:
     goharbor.io/network-policies: "false"
-    harbor.goharbor.io/version: ""
+    harbor.goharbor.io/version: 2.2.1
   creationTimestamp: null
   name: example-harbor
   namespace: default
