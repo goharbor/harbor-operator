@@ -9,6 +9,7 @@ import (
 
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -43,8 +44,9 @@ func setupValidRegistryCtl(ctx context.Context, ns string) (Resource, client.Obj
 	name := newName("registryctl")
 	registryctl := &goharborv1.RegistryController{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: ns,
+			Name:        name,
+			Namespace:   ns,
+			Annotations: test.AddVersionAnnotations(nil),
 		},
 		Spec: goharborv1.RegistryControllerSpec{
 			RegistryRef: registry.GetName(),

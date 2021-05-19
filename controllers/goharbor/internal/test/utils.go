@@ -3,6 +3,7 @@ package test
 import (
 	"context"
 
+	"github.com/goharbor/harbor-operator/pkg/version"
 	"github.com/onsi/gomega"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -10,6 +11,14 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 )
+
+func AddVersionAnnotations(annotations map[string]string) map[string]string {
+	return version.SetVersion(annotations, GetVersion())
+}
+
+func GetVersion() string {
+	return "2.2.1"
+}
 
 func GetGVK(ctx context.Context, object runtime.Object) schema.GroupVersionKind {
 	gvks, _, err := GetScheme(ctx).ObjectKinds(object)

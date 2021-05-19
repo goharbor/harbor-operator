@@ -7,6 +7,7 @@ import (
 
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/certificate"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/postgresql"
 	corev1 "k8s.io/api/core/v1"
@@ -56,8 +57,9 @@ func setupValidNotarySigner(ctx context.Context, ns string) (Resource, client.Ob
 	name := newName("notary-signer")
 	notarySigner := &goharborv1.NotarySigner{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: ns,
+			Name:        name,
+			Namespace:   ns,
+			Annotations: test.AddVersionAnnotations(nil),
 		},
 		Spec: goharborv1.NotarySignerSpec{
 			Storage: goharborv1.NotarySignerStorageSpec{

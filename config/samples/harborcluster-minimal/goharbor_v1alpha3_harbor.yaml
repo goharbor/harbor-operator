@@ -3,6 +3,7 @@ kind: HarborCluster
 metadata:
   name: sample
 spec:
+  version: 2.2.1
   harborAdminPasswordRef: admin-core-secret
   externalURL: https://core.harbor.domain
   expose:

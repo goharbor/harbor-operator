@@ -27,6 +27,7 @@ import (
 // +kubebuilder:subresource:status
 // +kubebuilder:resource:categories="goharbor",shortName="h"
 // +kubebuilder:printcolumn:name="Public URL",type=string,JSONPath=`.spec.externalURL`,description="The public URL to the Harbor application",priority=5
+// +kubebuilder:printcolumn:name="Version",type=string,JSONPath=`.spec.version`,description="The version to the Harbor application",priority=5
 // +kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`,description="Timestamp representing the server time when this object was created. It is not guaranteed to be set in happens-before order across separate operations. Clients may not set this value. It is represented in RFC3339 form and is in UTC.",priority=1
 // +kubebuilder:printcolumn:name="Failure",type=string,JSONPath=`.status.conditions[?(@.type=="Failed")].message`,description="Human readable message describing the failure",priority=5
 // Harbor is the Schema for the harbors API.
@@ -195,9 +196,10 @@ type HarborSpec struct {
 	// +kubebuilder:validation:Optional
 	Proxy *HarborProxySpec `json:"proxy,omitempty"`
 
-	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Pattern="[0-9]+\\.[0-9]+\\.[0-9]+"
 	// The version of the harbor, eg 2.1.2
-	Version string `json:"version,omitempty"`
+	Version string `json:"version"`
 }
 
 func (spec *HarborSpec) ValidateNotary() *field.Error {

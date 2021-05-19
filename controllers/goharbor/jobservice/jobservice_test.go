@@ -39,9 +39,9 @@ var _ = Describe("JobService", func() {
 		jobservice.ObjectMeta = metav1.ObjectMeta{
 			Name:      test.NewName("jobservice"),
 			Namespace: ns.GetName(),
-			Annotations: map[string]string{
+			Annotations: test.AddVersionAnnotations(map[string]string{
 				goharborv1.HarborClassAnnotation: className,
-			},
+			}),
 		}
 	})
 

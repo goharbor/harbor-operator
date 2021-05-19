@@ -6,8 +6,8 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/Masterminds/semver"
 	"github.com/goharbor/harbor-operator/pkg/config"
-	"github.com/goharbor/harbor-operator/pkg/version"
 	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
 )
@@ -16,18 +16,58 @@ const (
 	ConfigImageKey = "docker-image"
 )
 
+type metadataKind int
+
+const (
+	repositoryKind metadataKind = iota
+	imageNameKind
+	tagKind
+)
+
 type metadata struct {
-	Repositories map[string]string // key is the harbor version, value is the repository
-	ImageNames   map[string]string // key is the harbor version, value is the image name
-	Tags         map[string]string // key is the harbor version, value is the image tag
+	values map[metadataKind]map[*semver.Constraints]string
+}
+
+func (md *metadata) Add(kind metadataKind, value string, harborVersions ...string) {
+	for _, harborVersion := range harborVersions {
+		md.values[kind][mustConstraint(harborVersion)] = value
+	}
+}
+
+func (md *metadata) Get(kind metadataKind, harborVersion string, defaultValues ...string) string {
+	v, err := semver.NewVersion(harborVersion)
+	if err == nil {
+		for c, imageName := range md.values[kind] {
+			if c.Check(v) {
+				return imageName
+			}
+		}
+	}
+
+	if len(defaultValues) > 0 {
+		return defaultValues[0]
+	}
+
+	return ""
 }
 
 func makeMetadata() *metadata {
 	return &metadata{
-		Repositories: map[string]string{},
-		ImageNames:   map[string]string{},
-		Tags:         map[string]string{},
+		values: map[metadataKind]map[*semver.Constraints]string{
+			repositoryKind: {},
+			imageNameKind:  {},
+			tagKind:        {},
+		},
 	}
+}
+
+func mustConstraint(c string) *semver.Constraints {
+	o, err := semver.NewConstraint(c)
+	if err != nil {
+		panic(err)
+	}
+
+	return o
 }
 
 type components struct {
@@ -35,111 +75,42 @@ type components struct {
 	mds  map[string]*metadata // key is the component name
 }
 
-func (cs *components) GetImageName(component string, harborVersion string) (string, bool) {
-	cs.lock.RLock()
-	defer cs.lock.RUnlock()
-
-	md, ok := cs.mds[component]
-	if ok {
-		for _, version := range []string{harborVersion, "*"} {
-			if imageName, ok := md.ImageNames[version]; ok {
-				return imageName, true
-			}
-		}
-	}
-
-	return "", false
-}
-
-func (cs *components) GetRepository(component string, harborVersion string) string {
-	cs.lock.RLock()
-	defer cs.lock.RUnlock()
-
-	md, ok := cs.mds[component]
-	if ok {
-		for _, version := range []string{harborVersion, "*"} {
-			if repository, ok := md.Repositories[version]; ok {
-				return repository
-			}
-		}
-	}
-
-	return ""
-}
-
-func (cs *components) GetTag(component string, harborVersion string) string {
-	cs.lock.RLock()
-	defer cs.lock.RUnlock()
-
-	md, ok := cs.mds[component]
-	if ok {
-		for _, version := range []string{harborVersion, "*"} {
-			if tag, ok := md.Tags[version]; ok {
-				return tag
-			}
-		}
-	}
-
-	return "v" + harborVersion
-}
-
-func (cs *components) RegisterImageName(component string, imageName string, harborVersions ...string) {
-	cs.lock.Lock()
-	defer cs.lock.Unlock()
-
+func (cs *components) metadata(component string) *metadata {
 	md, ok := cs.mds[component]
 	if !ok {
 		md = makeMetadata()
 		cs.mds[component] = md
 	}
 
-	for _, harborVersion := range harborVersions {
-		md.ImageNames[harborVersion] = imageName
-	}
+	return md
 }
 
-func (cs *components) RegisterRepository(component, repository string, harborVersions ...string) {
+func (cs *components) Get(component string, kind metadataKind, harborVersion string, defaultValues ...string) string {
+	cs.lock.RLock()
+	defer cs.lock.RUnlock()
+
+	return cs.metadata(component).Get(kind, harborVersion, defaultValues...)
+}
+
+func (cs *components) Register(component string, kind metadataKind, value string, harborVersions ...string) {
 	cs.lock.Lock()
 	defer cs.lock.Unlock()
 
-	md, ok := cs.mds[component]
-	if !ok {
-		md = makeMetadata()
-		cs.mds[component] = md
-	}
-
-	for _, harborVersion := range harborVersions {
-		md.Repositories[harborVersion] = repository
-	}
+	cs.metadata(component).Add(kind, value, harborVersions...)
 }
 
-func (cs *components) RegisterTag(component string, tag string, harborVersions ...string) {
-	cs.lock.Lock()
-	defer cs.lock.Unlock()
-
-	md, ok := cs.mds[component]
-	if !ok {
-		md = makeMetadata()
-		cs.mds[component] = md
-	}
-
-	for _, harborVersion := range harborVersions {
-		md.Tags[harborVersion] = tag
-	}
-}
-
-var knowCompoents = components{mds: map[string]*metadata{}}
+var knownCompoents = components{mds: map[string]*metadata{}}
 
 func RegisterImageName(component, imageName string, harborVersions ...string) {
-	knowCompoents.RegisterImageName(component, imageName, harborVersions...)
+	knownCompoents.Register(component, imageNameKind, imageName, harborVersions...)
 }
 
 func RegisterRepository(component, repository string, harborVersions ...string) {
-	knowCompoents.RegisterRepository(component, repository, harborVersions...)
+	knownCompoents.Register(component, repositoryKind, repository, harborVersions...)
 }
 
 func RegisterTag(component, tag string, harborVersions ...string) {
-	knowCompoents.RegisterTag(component, tag, harborVersions...)
+	knownCompoents.Register(component, tagKind, tag, harborVersions...)
 }
 
 func init() { // nolint:gochecknoinits
@@ -164,19 +135,19 @@ func init() { // nolint:gochecknoinits
 	// Register the cluster service components
 	RegisterRepository("cluster-redis", "", "*") // the - repository of dockerhub
 	RegisterImageName("cluster-redis", "redis", "*")
-	RegisterTag("cluster-redis", "5.0-alpine", "2.2.1")
+	RegisterTag("cluster-redis", "5.0-alpine", "~2.2.0")
 
 	RegisterRepository("cluster-postgresql", "registry.opensource.zalan.do/acid", "*")
 	RegisterImageName("cluster-postgresql", "spilo-12", "*")
-	RegisterTag("cluster-postgresql", "1.6-p3", "2.2.1")
+	RegisterTag("cluster-postgresql", "1.6-p3", "~2.2.0")
 
 	RegisterRepository("cluster-minio", "minio", "*") // the minio repository of dockerhub
 	RegisterImageName("cluster-minio", "minio", "*")
-	RegisterTag("cluster-minio", "RELEASE.2021-04-06T23-11-00Z", "2.2.1")
+	RegisterTag("cluster-minio", "RELEASE.2021-04-06T23-11-00Z", "~2.2.0")
 
 	RegisterRepository("cluster-minio-init", "minio", "*") // the minio repository of dockerhub
 	RegisterImageName("cluster-minio-init", "mc", "*")
-	RegisterTag("cluster-minio-init", "RELEASE.2021-03-23T05-46-11Z", "2.2.1")
+	RegisterTag("cluster-minio-init", "RELEASE.2021-03-23T05-46-11Z", "~2.2.0")
 }
 
 type Options struct {
@@ -233,12 +204,8 @@ func GetImage(ctx context.Context, component string, options ...Option) (string,
 		o(opts)
 	}
 
-	if opts.harborVersion == "" {
-		opts.harborVersion = version.Default()
-	}
-
 	if opts.repository == "" {
-		opts.repository = knowCompoents.GetRepository(component, opts.harborVersion)
+		opts.repository = knownCompoents.Get(component, repositoryKind, opts.harborVersion)
 	}
 
 	if opts.configImageKey == "" {
@@ -264,9 +231,13 @@ func GetImage(ctx context.Context, component string, options ...Option) (string,
 		}
 	}
 
-	imageName, ok := knowCompoents.GetImageName(component, opts.harborVersion)
-	if !ok {
+	imageName := knownCompoents.Get(component, imageNameKind, opts.harborVersion)
+	if imageName == "" {
 		return "", errors.Errorf("unknow component %s", component)
+	}
+
+	if opts.harborVersion == "" {
+		return "", errors.Errorf("missing harbor version in component %s", component)
 	}
 
 	repository := opts.repository
@@ -274,5 +245,7 @@ func GetImage(ctx context.Context, component string, options ...Option) (string,
 		repository += "/"
 	}
 
-	return fmt.Sprintf("%s%s:%s%s", repository, imageName, knowCompoents.GetTag(component, opts.harborVersion), opts.tagSuffix), nil
+	tag := knownCompoents.Get(component, tagKind, opts.harborVersion, "v"+opts.harborVersion)
+
+	return fmt.Sprintf("%s%s:%s%s", repository, imageName, tag, opts.tagSuffix), nil
 }

@@ -38,9 +38,9 @@ var _ = Describe("Core", func() {
 		core.ObjectMeta = metav1.ObjectMeta{
 			Name:      test.NewName("core"),
 			Namespace: ns.GetName(),
-			Annotations: map[string]string{
+			Annotations: test.AddVersionAnnotations(map[string]string{
 				goharborv1.HarborClassAnnotation: className,
-			},
+			}),
 		}
 	})
 
