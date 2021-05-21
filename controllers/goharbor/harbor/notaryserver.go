@@ -167,7 +167,7 @@ const (
 	NotaryServerAuthenticationService = "harbor-notary"
 )
 
-func (r *Reconciler) GetNotaryServer(ctx context.Context, harbor *goharborv1.Harbor) (*goharborv1.NotaryServer, error) {
+func (r *Reconciler) GetNotaryServer(ctx context.Context, harbor *goharborv1.Harbor) (*goharborv1.NotaryServer, error) { // nolint:funlen
 	name := r.NormalizeName(ctx, harbor.GetName())
 	namespace := harbor.GetNamespace()
 
@@ -191,13 +191,19 @@ func (r *Reconciler) GetNotaryServer(ctx context.Context, harbor *goharborv1.Har
 
 	migrationEnabled := harbor.Spec.Notary.IsMigrationEnabled()
 
+	annotation := map[string]string{
+		harbormetav1.NetworkPoliciesAnnotationName: harbormetav1.NetworkPoliciesAnnotationDisabled,
+	}
+
+	if harbor.Spec.Expose.Core.Ingress != nil {
+		annotation[harbormetav1.IngressControllerAnnotationName] = string(harbor.Spec.Expose.Core.Ingress.Controller)
+	}
+
 	return &goharborv1.NotaryServer{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-			Annotations: version.SetVersion(map[string]string{
-				harbormetav1.NetworkPoliciesAnnotationName: harbormetav1.NetworkPoliciesAnnotationDisabled,
-			}, harbor.Spec.Version),
+			Name:        name,
+			Namespace:   namespace,
+			Annotations: version.SetVersion(annotation, harbor.Spec.Version),
 		},
 		Spec: goharborv1.NotaryServerSpec{
 			ComponentSpec: harbor.GetComponentSpec(ctx, harbormetav1.NotaryServerComponent),

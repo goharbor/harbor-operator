@@ -78,6 +78,7 @@ spec:
     core:
       ingress:
         host: core.harbor.domain
+        controller: default
       tls:
         certificateRef: sample-public-certificate
   internalTLS:

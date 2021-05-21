@@ -716,8 +716,6 @@ type HarborExposeIngressSpec struct {
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default="default"
-	// +kubebuilder:validation:Type="string"
-	// +kubebuilder:validation:Enum={"gce","ncp","default"}
 	// Set to the type of ingress controller.
 	Controller harbormetav1.IngressController `json:"controller,omitempty"`
 
