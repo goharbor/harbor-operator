@@ -13,6 +13,7 @@ import (
 func (r *Reconciler) GetService(ctx context.Context, portal *goharborv1.Portal) (*corev1.Service, error) {
 	name := r.NormalizeName(ctx, portal.GetName())
 	namespace := portal.GetNamespace()
+	annotations := map[string]string{}
 
 	var ports []corev1.ServicePort
 
@@ -23,6 +24,10 @@ func (r *Reconciler) GetService(ctx context.Context, portal *goharborv1.Portal) 
 			TargetPort: intstr.FromString(harbormetav1.PortalHTTPSPortName),
 			Protocol:   corev1.ProtocolTCP,
 		})
+
+		if v, ok := portal.Annotations[harbormetav1.IngressControllerAnnotationName]; ok && v == string(harbormetav1.IngressControllerContour) {
+			annotations["projectcontour.io/upstream-protocol.tls"] = harbormetav1.PortalHTTPSPortName
+		}
 	} else {
 		ports = append(ports, corev1.ServicePort{
 			Name:       harbormetav1.PortalHTTPPortName,
@@ -34,8 +39,9 @@ func (r *Reconciler) GetService(ctx context.Context, portal *goharborv1.Portal) 
 
 	return &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
+			Name:        name,
+			Namespace:   namespace,
+			Annotations: annotations,
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: ports,

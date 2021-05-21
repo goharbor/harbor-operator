@@ -15,6 +15,11 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
+const (
+	NCPIngressValueTrue     = "true"
+	ContourIngressValueTrue = "true"
+)
+
 func (m *MinIOController) applyIngress(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*lcm.CRStatus, error) {
 	// expose minIO access endpoint by ingress if necessary.
 	if !harborcluster.Spec.InClusterStorage.MinIOSpec.Redirect.Enable {
@@ -36,10 +41,7 @@ func (m *MinIOController) applyIngress(ctx context.Context, harborcluster *gohar
 	}
 
 	// Generate desired ingress object
-	ingress, err := m.generateIngress(ctx, harborcluster)
-	if err != nil {
-		return minioNotReadyStatus(CreateMinIOIngressError, err.Error()), err
-	}
+	ingress := m.generateIngress(ctx, harborcluster)
 
 	// Update if necessary
 	if !common.Equals(ctx, m.Scheme, harborcluster, curIngress) {
@@ -63,10 +65,7 @@ func (m *MinIOController) createIngress(ctx context.Context, harborcluster *goha
 	}
 
 	// Generate desired ingress object
-	ingress, err := m.generateIngress(ctx, harborcluster)
-	if err != nil {
-		return minioNotReadyStatus(CreateMinIOIngressError, err.Error()), err
-	}
+	ingress := m.generateIngress(ctx, harborcluster)
 
 	ingress.OwnerReferences = []metav1.OwnerReference{
 		*metav1.NewControllerRef(minioCR, HarborClusterMinIOGVK),
@@ -107,7 +106,7 @@ func (m *MinIOController) cleanupIngress(ctx context.Context, harborcluster *goh
 	return minioUnknownStatus(), nil
 }
 
-func (m *MinIOController) generateIngress(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*netv1.Ingress, error) {
+func (m *MinIOController) generateIngress(ctx context.Context, harborcluster *goharborv1.HarborCluster) *netv1.Ingress { // nolint:funlen
 	var tls []netv1.IngressTLS
 
 	if harborcluster.Spec.InClusterStorage.MinIOSpec.Redirect.Expose != nil &&
@@ -122,11 +121,17 @@ func (m *MinIOController) generateIngress(ctx context.Context, harborcluster *go
 	annotations["nginx.ingress.kubernetes.io/proxy-body-size"] = "0"
 
 	if harborcluster.Spec.Expose.Core.Ingress.Controller == v1alpha1.IngressControllerNCP {
-		annotations["ncp/use-regex"] = "true"
-		annotations["ncp/http-redirect"] = "true"
+		annotations["ncp/use-regex"] = NCPIngressValueTrue
+		if tls != nil {
+			annotations["ncp/http-redirect"] = NCPIngressValueTrue
+		}
+	} else if harborcluster.Spec.Expose.Core.Ingress.Controller == v1alpha1.IngressControllerContour {
+		if tls != nil {
+			annotations["ingress.kubernetes.io/force-ssl-redirect"] = ContourIngressValueTrue
+		}
 	}
 
-	ingressPath, err := common.GetIngressPath(harborcluster.Spec.Expose.Core.Ingress.Controller)
+	pathTypePrefix := netv1.PathTypePrefix
 
 	ingress := &netv1.Ingress{
 		TypeMeta: metav1.TypeMeta{
@@ -148,7 +153,8 @@ func (m *MinIOController) generateIngress(ctx context.Context, harborcluster *go
 						HTTP: &netv1.HTTPIngressRuleValue{
 							Paths: []netv1.HTTPIngressPath{
 								{
-									Path: ingressPath,
+									Path:     "/",
+									PathType: &pathTypePrefix,
 									Backend: netv1.IngressBackend{
 										ServiceName: m.getTenantsServiceName(harborcluster),
 										ServicePort: intstr.FromInt(m.getServicePort()),
@@ -166,7 +172,7 @@ func (m *MinIOController) generateIngress(ctx context.Context, harborcluster *go
 	dependencies.Add(ctx, harborcluster, true)
 	dependencies.AddAnnotations(ingress)
 
-	return ingress, err
+	return ingress
 }
 
 func (m *MinIOController) getServicePort() int {

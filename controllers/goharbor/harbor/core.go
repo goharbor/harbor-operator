@@ -406,13 +406,19 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1.Harbor) (*g
 		return nil, errors.Wrap(err, "cannot get database configuration")
 	}
 
+	annotation := map[string]string{
+		harbormetav1.NetworkPoliciesAnnotationName: harbormetav1.NetworkPoliciesAnnotationDisabled,
+	}
+
+	if harbor.Spec.Expose.Core.Ingress != nil {
+		annotation[harbormetav1.IngressControllerAnnotationName] = string(harbor.Spec.Expose.Core.Ingress.Controller)
+	}
+
 	return &goharborv1.Core{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-			Annotations: version.SetVersion(map[string]string{
-				harbormetav1.NetworkPoliciesAnnotationName: harbormetav1.NetworkPoliciesAnnotationDisabled,
-			}, harbor.Spec.Version),
+			Name:        name,
+			Namespace:   namespace,
+			Annotations: version.SetVersion(annotation, harbor.Spec.Version),
 		},
 		Spec: goharborv1.CoreSpec{
 			ComponentSpec: harbor.GetComponentSpec(ctx, harbormetav1.CoreComponent),

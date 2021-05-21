@@ -2611,17 +2611,13 @@ spec:
                               type: string
                             type: object
                           controller:
-                            allOf:
-                            - enum:
-                              - default
-                              - gce
-                              - ncp
-                            - enum:
-                              - gce
-                              - ncp
-                              - default
                             default: default
                             description: Set to the type of ingress controller.
+                            enum:
+                            - default
+                            - gce
+                            - ncp
+                            - contour
                             type: string
                           host:
                             type: string
@@ -2645,17 +2641,13 @@ spec:
                               type: string
                             type: object
                           controller:
-                            allOf:
-                            - enum:
-                              - default
-                              - gce
-                              - ncp
-                            - enum:
-                              - gce
-                              - ncp
-                              - default
                             default: default
                             description: Set to the type of ingress controller.
+                            enum:
+                            - default
+                            - gce
+                            - ncp
+                            - contour
                             type: string
                           host:
                             type: string
@@ -3088,17 +3080,13 @@ spec:
                                       type: string
                                     type: object
                                   controller:
-                                    allOf:
-                                    - enum:
-                                      - default
-                                      - gce
-                                      - ncp
-                                    - enum:
-                                      - gce
-                                      - ncp
-                                      - default
                                     default: default
                                     description: Set to the type of ingress controller.
+                                    enum:
+                                    - default
+                                    - gce
+                                    - ncp
+                                    - contour
                                     type: string
                                   host:
                                     type: string
@@ -4541,17 +4529,13 @@ spec:
                               type: string
                             type: object
                           controller:
-                            allOf:
-                            - enum:
-                              - default
-                              - gce
-                              - ncp
-                            - enum:
-                              - gce
-                              - ncp
-                              - default
                             default: default
                             description: Set to the type of ingress controller.
+                            enum:
+                            - default
+                            - gce
+                            - ncp
+                            - contour
                             type: string
                           host:
                             type: string
@@ -4575,17 +4559,13 @@ spec:
                               type: string
                             type: object
                           controller:
-                            allOf:
-                            - enum:
-                              - default
-                              - gce
-                              - ncp
-                            - enum:
-                              - gce
-                              - ncp
-                              - default
                             default: default
                             description: Set to the type of ingress controller.
+                            enum:
+                            - default
+                            - gce
+                            - ncp
+                            - contour
                             type: string
                           host:
                             type: string

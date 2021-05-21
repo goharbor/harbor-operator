@@ -17,11 +17,17 @@ const (
 func (r *Reconciler) GetService(ctx context.Context, notary *goharborv1.NotaryServer) (*corev1.Service, error) {
 	name := r.NormalizeName(ctx, notary.GetName())
 	namespace := notary.GetNamespace()
+	annotations := map[string]string{}
+
+	if v, ok := notary.Annotations[harbormetav1.IngressControllerAnnotationName]; ok && v == string(harbormetav1.IngressControllerContour) {
+		annotations["projectcontour.io/upstream-protocol.tls"] = harbormetav1.NotaryServerAPIPortName
+	}
 
 	return &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
+			Name:        name,
+			Namespace:   namespace,
+			Annotations: annotations,
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{{
