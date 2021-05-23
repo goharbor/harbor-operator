@@ -67,6 +67,14 @@ func (p *PostgreSQLController) Readiness(ctx context.Context, harborcluster *goh
 		return nil, err
 	}
 
+	if err := p.SetRefSecretOwner(ctx, "postgres", harborcluster); err != nil {
+		return nil, err
+	}
+
+	if err := p.SetRefSecretOwner(ctx, "standby", harborcluster); err != nil {
+		return nil, err
+	}
+
 	p.Log.Info("Database is ready.", "namespace", harborcluster.Namespace, "name", name)
 
 	properties := &lcm.Properties{}
@@ -102,6 +110,31 @@ func getHarborDatabaseSpec(name string, conn *Connect) *goharborv1.HarborDatabas
 
 func getDatabasePasswordRefName(name string) string {
 	return fmt.Sprintf("%s-%s-%s", name, "database", "password")
+}
+
+// SetRefSecretOwner set owner to pg operator created secrets.
+func (p *PostgreSQLController) SetRefSecretOwner(ctx context.Context, dbName string, harborcluster *goharborv1.HarborCluster) error {
+	ns := harborcluster.Namespace
+	secretName := GenInClusterPasswordSecretName(dbName, p.resourceName(harborcluster.Namespace, harborcluster.Name))
+
+	secret := &corev1.Secret{}
+	if err := p.Client.Get(ctx, types.NamespacedName{Name: secretName, Namespace: ns}, secret); err != nil {
+		if kerr.IsNotFound(err) {
+			return nil
+		}
+
+		return err
+	}
+
+	if err := controllerutil.SetControllerReference(harborcluster, secret, p.Scheme); err != nil {
+		return err
+	}
+
+	if err := p.Client.Update(ctx, secret); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // DeployComponentSecret deploy harbor component database secret.
