@@ -2,8 +2,13 @@ package main
 
 import (
 	"context"
+	"os"
 
 	"github.com/go-logr/logr"
+	"github.com/ovh/configstore"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	ctrl "sigs.k8s.io/controller-runtime"
+
 	"github.com/goharbor/harbor-operator/pkg/exit"
 	"github.com/goharbor/harbor-operator/pkg/factories/application"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
@@ -11,9 +16,6 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/scheme"
 	"github.com/goharbor/harbor-operator/pkg/setup"
 	"github.com/goharbor/harbor-operator/pkg/tracing"
-	"github.com/ovh/configstore"
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 var (
@@ -92,6 +94,14 @@ func main() {
 		return
 	}
 
+	if err = (&goharborv1alpha3.HarborCluster{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "HarborCluster")
+		os.Exit(1)
+	}
+	if err = (&goharboriov1beta1.HarborCluster{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "HarborCluster")
+		os.Exit(1)
+	}
 	// +kubebuilder:scaffold:builder
 
 	setupLog.Info("starting manager", "version", version, "commit", gitCommit)
