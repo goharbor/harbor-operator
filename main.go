@@ -2,8 +2,11 @@ package main
 
 import (
 	"context"
-
 	"github.com/go-logr/logr"
+	"github.com/ovh/configstore"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	ctrl "sigs.k8s.io/controller-runtime"
+
 	"github.com/goharbor/harbor-operator/pkg/exit"
 	"github.com/goharbor/harbor-operator/pkg/factories/application"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
@@ -11,9 +14,6 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/scheme"
 	"github.com/goharbor/harbor-operator/pkg/setup"
 	"github.com/goharbor/harbor-operator/pkg/tracing"
-	"github.com/ovh/configstore"
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 var (
@@ -91,7 +91,6 @@ func main() {
 
 		return
 	}
-
 	// +kubebuilder:scaffold:builder
 
 	setupLog.Info("starting manager", "version", version, "commit", gitCommit)
