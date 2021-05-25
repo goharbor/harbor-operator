@@ -59,7 +59,7 @@ var _ webhook.Validator = &HarborCluster{}
 func (hc *HarborCluster) ValidateCreate() error {
 	clog.Info("validate creation", "name", hc.Name, "namespace", hc.Namespace)
 
-	return hc.validate(nil)
+	return hc.validate(hc)
 }
 
 func (hc *HarborCluster) ValidateUpdate(old runtime.Object) error {
@@ -81,6 +81,8 @@ func (hc *HarborCluster) ValidateDelete() error {
 
 func (hc *HarborCluster) validate(old *HarborCluster) error {
 	var allErrs field.ErrorList
+
+	clog.Info("harbor cluster", "value", hc)
 
 	// For database(psql), cache(Redis) and storage, either external services or in-cluster services MUST be configured
 	if err := hc.validateStorage(); err != nil {
