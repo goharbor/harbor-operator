@@ -35,4 +35,37 @@ resources:
 - group: goharbor
   kind: HarborCluster
   version: v1alpha3
+- group: goharbor
+  kind: Harbor
+  version: v1beta1
+- group: goharbor
+  kind: Portal
+  version: v1beta1
+- group: goharbor
+  kind: Registry
+  version: v1beta1
+- group: goharbor
+  kind: RegistryController
+  version: v1beta1
+- group: goharbor
+  kind: NotaryServer
+  version: v1beta1
+- group: goharbor
+  kind: NotarySigner
+  version: v1beta1
+- group: goharbor
+  kind: Clair
+  version: v1beta1
+- group: goharbor
+  kind: Trivy
+  version: v1beta1
+- group: goharbor
+  kind: Core
+  version: v1beta1
+- group: goharbor
+  kind: Exporter
+  version: v1beta1
+- group: goharbor
+  kind: HarborCluster
+  version: v1beta1  
 version: "2"

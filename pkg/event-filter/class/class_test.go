@@ -14,7 +14,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/event"
 )
 
-// These tests use Ginkgo (BDD-style Go testing framework). Rcfer to
+// These tests use Ginkgo (BDD-style Go testing framework). Refer to
 // http://onsi.github.io/ginkgo/ to learn more about Ginkgo.
 
 var _ = Describe("class-filter", func() {
@@ -44,7 +44,7 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should match", func() {
-						ok := cf.Create(event.CreateEvent{Meta: h.GetObjectMeta(), Object: h})
+						ok := cf.Create(event.CreateEvent{Object: h})
 						Expect(ok).To(BeTrue())
 					})
 				})
@@ -57,7 +57,7 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should match", func() {
-						ok := cf.Create(event.CreateEvent{Meta: h.GetObjectMeta(), Object: h})
+						ok := cf.Create(event.CreateEvent{Object: h})
 						Expect(ok).To(BeTrue())
 					})
 				})
@@ -70,7 +70,7 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should match", func() {
-						ok := cf.Create(event.CreateEvent{Meta: h.GetObjectMeta(), Object: h})
+						ok := cf.Create(event.CreateEvent{Object: h})
 						Expect(ok).To(BeTrue())
 					})
 				})
@@ -83,7 +83,7 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should not match", func() {
-						ok := cf.Create(event.CreateEvent{Meta: h.GetObjectMeta(), Object: h})
+						ok := cf.Create(event.CreateEvent{Object: h})
 						Expect(ok).To(BeFalse())
 					})
 				})
@@ -104,7 +104,7 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should match", func() {
-						ok := cf.Delete(event.DeleteEvent{Meta: h.GetObjectMeta(), Object: h})
+						ok := cf.Delete(event.DeleteEvent{Object: h})
 						Expect(ok).To(BeTrue())
 					})
 				})
@@ -117,7 +117,7 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should match", func() {
-						ok := cf.Delete(event.DeleteEvent{Meta: h.GetObjectMeta(), Object: h})
+						ok := cf.Delete(event.DeleteEvent{Object: h})
 						Expect(ok).To(BeTrue())
 					})
 				})
@@ -130,7 +130,7 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should match", func() {
-						ok := cf.Delete(event.DeleteEvent{Meta: h.GetObjectMeta(), Object: h})
+						ok := cf.Delete(event.DeleteEvent{Object: h})
 						Expect(ok).To(BeTrue())
 					})
 				})
@@ -143,7 +143,7 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should not match", func() {
-						ok := cf.Delete(event.DeleteEvent{Meta: h.GetObjectMeta(), Object: h})
+						ok := cf.Delete(event.DeleteEvent{Object: h})
 						Expect(ok).To(BeFalse())
 					})
 				})
@@ -156,7 +156,7 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should match", func() {
-						ok := cf.Delete(event.DeleteEvent{Meta: h.GetObjectMeta(), Object: h})
+						ok := cf.Delete(event.DeleteEvent{Object: h})
 						Expect(ok).To(BeTrue())
 					})
 				})
@@ -177,7 +177,7 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should match", func() {
-						ok := cf.Generic(event.GenericEvent{Meta: h.GetObjectMeta(), Object: h})
+						ok := cf.Generic(event.GenericEvent{Object: h})
 						Expect(ok).To(BeTrue())
 					})
 				})
@@ -190,7 +190,7 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should match", func() {
-						ok := cf.Generic(event.GenericEvent{Meta: h.GetObjectMeta(), Object: h})
+						ok := cf.Generic(event.GenericEvent{Object: h})
 						Expect(ok).To(BeTrue())
 					})
 				})
@@ -203,7 +203,7 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should match", func() {
-						ok := cf.Generic(event.GenericEvent{Meta: h.GetObjectMeta(), Object: h})
+						ok := cf.Generic(event.GenericEvent{Object: h})
 						Expect(ok).To(BeTrue())
 					})
 				})
@@ -216,7 +216,7 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should not match", func() {
-						ok := cf.Generic(event.GenericEvent{Meta: h.GetObjectMeta(), Object: h})
+						ok := cf.Generic(event.GenericEvent{Object: h})
 						Expect(ok).To(BeFalse())
 					})
 				})
@@ -229,7 +229,7 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should match", func() {
-						ok := cf.Generic(event.GenericEvent{Meta: h.GetObjectMeta(), Object: h})
+						ok := cf.Generic(event.GenericEvent{Object: h})
 						Expect(ok).To(BeTrue())
 					})
 				})
@@ -262,7 +262,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeTrue())
 							})
 						})
@@ -275,7 +275,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeTrue())
 							})
 						})
@@ -288,7 +288,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeTrue())
 							})
 						})
@@ -301,7 +301,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeTrue())
 							})
 						})
@@ -328,7 +328,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1.Harbor{}})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeTrue())
 							})
 						})
@@ -341,7 +341,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1.Harbor{}})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeTrue())
 							})
 						})
@@ -354,7 +354,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1.Harbor{}})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeTrue())
 							})
 						})
@@ -367,7 +367,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1.Harbor{}})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeTrue())
 							})
 						})
@@ -394,7 +394,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1.Harbor{}})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeTrue())
 							})
 						})
@@ -407,7 +407,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1.Harbor{}})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeTrue())
 							})
 						})
@@ -420,7 +420,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1.Harbor{}})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeTrue())
 							})
 						})
@@ -433,7 +433,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1.Harbor{}})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeTrue())
 							})
 						})
@@ -460,7 +460,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1.Harbor{}})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeTrue())
 							})
 						})
@@ -473,7 +473,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1.Harbor{}})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeTrue())
 							})
 						})
@@ -486,7 +486,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1.Harbor{}})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeTrue())
 							})
 						})
@@ -499,7 +499,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should not match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: &goharborv1.Harbor{}})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeFalse())
 							})
 						})
@@ -531,7 +531,7 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should match", func() {
-						ok := cf.Create(event.CreateEvent{Meta: h.GetObjectMeta(), Object: h})
+						ok := cf.Create(event.CreateEvent{Object: h})
 						Expect(ok).To(BeFalse())
 					})
 				})
@@ -544,7 +544,7 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should match", func() {
-						ok := cf.Create(event.CreateEvent{Meta: h.GetObjectMeta(), Object: h})
+						ok := cf.Create(event.CreateEvent{Object: h})
 						Expect(ok).To(BeFalse())
 					})
 				})
@@ -557,7 +557,7 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should match", func() {
-						ok := cf.Create(event.CreateEvent{Meta: h.GetObjectMeta(), Object: h})
+						ok := cf.Create(event.CreateEvent{Object: h})
 						Expect(ok).To(BeFalse())
 					})
 				})
@@ -570,7 +570,7 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should match", func() {
-						ok := cf.Create(event.CreateEvent{Meta: h.GetObjectMeta(), Object: h})
+						ok := cf.Create(event.CreateEvent{Object: h})
 						Expect(ok).To(BeFalse())
 					})
 				})
@@ -583,7 +583,7 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should match", func() {
-						ok := cf.Create(event.CreateEvent{Meta: h.GetObjectMeta(), Object: h})
+						ok := cf.Create(event.CreateEvent{Object: h})
 						Expect(ok).To(BeTrue())
 					})
 				})
@@ -604,7 +604,7 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should match", func() {
-						ok := cf.Delete(event.DeleteEvent{Meta: h.GetObjectMeta(), Object: h})
+						ok := cf.Delete(event.DeleteEvent{Object: h})
 						Expect(ok).To(BeFalse())
 					})
 				})
@@ -617,7 +617,7 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should match", func() {
-						ok := cf.Delete(event.DeleteEvent{Meta: h.GetObjectMeta(), Object: h})
+						ok := cf.Delete(event.DeleteEvent{Object: h})
 						Expect(ok).To(BeFalse())
 					})
 				})
@@ -630,7 +630,7 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should match", func() {
-						ok := cf.Delete(event.DeleteEvent{Meta: h.GetObjectMeta(), Object: h})
+						ok := cf.Delete(event.DeleteEvent{Object: h})
 						Expect(ok).To(BeFalse())
 					})
 				})
@@ -643,7 +643,7 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should not match", func() {
-						ok := cf.Delete(event.DeleteEvent{Meta: h.GetObjectMeta(), Object: h})
+						ok := cf.Delete(event.DeleteEvent{Object: h})
 						Expect(ok).To(BeFalse())
 					})
 				})
@@ -656,7 +656,7 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should match", func() {
-						ok := cf.Delete(event.DeleteEvent{Meta: h.GetObjectMeta(), Object: h})
+						ok := cf.Delete(event.DeleteEvent{Object: h})
 						Expect(ok).To(BeTrue())
 					})
 				})
@@ -677,7 +677,7 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should not match", func() {
-						ok := cf.Generic(event.GenericEvent{Meta: h.GetObjectMeta(), Object: h})
+						ok := cf.Generic(event.GenericEvent{Object: h})
 						Expect(ok).To(BeFalse())
 					})
 				})
@@ -690,7 +690,7 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should not match", func() {
-						ok := cf.Generic(event.GenericEvent{Meta: h.GetObjectMeta(), Object: h})
+						ok := cf.Generic(event.GenericEvent{Object: h})
 						Expect(ok).To(BeFalse())
 					})
 				})
@@ -703,7 +703,7 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should not match", func() {
-						ok := cf.Generic(event.GenericEvent{Meta: h.GetObjectMeta(), Object: h})
+						ok := cf.Generic(event.GenericEvent{Object: h})
 						Expect(ok).To(BeFalse())
 					})
 				})
@@ -716,7 +716,7 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should not match", func() {
-						ok := cf.Generic(event.GenericEvent{Meta: h.GetObjectMeta(), Object: h})
+						ok := cf.Generic(event.GenericEvent{Object: h})
 						Expect(ok).To(BeFalse())
 					})
 				})
@@ -729,7 +729,7 @@ var _ = Describe("class-filter", func() {
 					})
 
 					It("Should match", func() {
-						ok := cf.Generic(event.GenericEvent{Meta: h.GetObjectMeta(), Object: h})
+						ok := cf.Generic(event.GenericEvent{Object: h})
 						Expect(ok).To(BeTrue())
 					})
 				})
@@ -762,7 +762,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should not match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeFalse())
 							})
 						})
@@ -775,7 +775,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should not match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeFalse())
 							})
 						})
@@ -788,7 +788,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should not match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeFalse())
 							})
 						})
@@ -801,7 +801,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should not match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeFalse())
 							})
 						})
@@ -814,7 +814,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeTrue())
 							})
 						})
@@ -841,7 +841,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should not match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeFalse())
 							})
 						})
@@ -854,7 +854,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should not match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeFalse())
 							})
 						})
@@ -867,7 +867,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should not match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeFalse())
 							})
 						})
@@ -880,7 +880,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should not match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeFalse())
 							})
 						})
@@ -893,7 +893,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeTrue())
 							})
 						})
@@ -920,7 +920,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should not match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeFalse())
 							})
 						})
@@ -933,7 +933,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should not match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeFalse())
 							})
 						})
@@ -946,7 +946,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should not match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeFalse())
 							})
 						})
@@ -959,7 +959,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should not match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeFalse())
 							})
 						})
@@ -972,7 +972,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeTrue())
 							})
 						})
@@ -999,7 +999,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should not match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeFalse())
 							})
 						})
@@ -1012,7 +1012,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should not match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeFalse())
 							})
 						})
@@ -1025,7 +1025,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should not match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeFalse())
 							})
 						})
@@ -1038,7 +1038,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should not match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeFalse())
 							})
 						})
@@ -1051,7 +1051,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeTrue())
 							})
 						})
@@ -1078,7 +1078,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeTrue())
 							})
 						})
@@ -1091,7 +1091,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeTrue())
 							})
 						})
@@ -1104,7 +1104,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeTrue())
 							})
 						})
@@ -1117,7 +1117,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeTrue())
 							})
 						})
@@ -1130,7 +1130,7 @@ var _ = Describe("class-filter", func() {
 							})
 
 							It("Should match", func() {
-								ok := cf.Update(event.UpdateEvent{MetaOld: oldResource.GetObjectMeta(), ObjectOld: oldResource, MetaNew: newResource.GetObjectMeta(), ObjectNew: newResource})
+								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
 								Expect(ok).To(BeTrue())
 							})
 						})

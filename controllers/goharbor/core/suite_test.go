@@ -27,7 +27,6 @@ import (
 )
 
 var (
-	stopCh     chan struct{}
 	ctx        context.Context
 	reconciler *core.Reconciler
 )
@@ -47,7 +46,7 @@ var _ = BeforeSuite(func(done Done) {
 
 	reconciler = controllers.NewCore(ctx, className)
 
-	ctx, stopCh = test.StartManager(ctx)
+	test.StartManager(ctx)
 
 	close(done)
 }, 60)
@@ -55,7 +54,5 @@ var _ = BeforeSuite(func(done Done) {
 var _ = AfterSuite(func() {
 	defer test.AfterSuite(ctx)
 
-	if stopCh != nil {
-		close(stopCh)
-	}
+	ctx.Done()
 })

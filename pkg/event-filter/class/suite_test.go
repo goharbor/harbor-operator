@@ -24,7 +24,7 @@ func TestSuite(t *testing.T) {
 }
 
 func setupTest(ctx context.Context) (*Filter, context.Context) {
-	logger.Set(&ctx, zap.LoggerTo(GinkgoWriter, true))
+	logger.Set(&ctx, zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
 
 	return &Filter{}, ctx
 }

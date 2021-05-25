@@ -23,7 +23,7 @@ var _ = Describe("Get image", func() {
 	)
 
 	BeforeEach(func() {
-		ctx = logger.Context(zap.LoggerTo(GinkgoWriter, true))
+		ctx = logger.Context(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
 		harborVersion = "2.2.1"
 		getImage = func(ctx context.Context, component string, options ...Option) (string, error) {
 			options = append([]Option{WithHarborVersion(harborVersion)}, options...)
