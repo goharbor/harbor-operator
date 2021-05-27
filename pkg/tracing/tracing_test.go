@@ -32,7 +32,7 @@ var _ = Describe("Intializing tracing", func() {
 	var i int32
 
 	BeforeEach(func() {
-		ctx = logger.Context(zap.Logger(true))
+		ctx = logger.Context(zap.New(zap.UseDevMode(true)))
 
 		application.SetName(&ctx, fmt.Sprintf("test-default-service-%d", atomic.AddInt32(&i, 1)))
 		application.SetVersion(&ctx, "test-version")

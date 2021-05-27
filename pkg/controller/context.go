@@ -9,8 +9,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
-func (c *Controller) NewContext(req ctrl.Request) context.Context {
-	ctx := context.TODO()
+func (c *Controller) PopulateContext(ctx context.Context, req ctrl.Request) context.Context {
 	application.SetName(&ctx, c.GetName())
 	application.SetVersion(&ctx, c.GetVersion())
 	application.SetGitCommit(&ctx, c.GetGitCommit())

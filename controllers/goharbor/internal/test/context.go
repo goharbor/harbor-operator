@@ -68,7 +68,7 @@ func WithRestConfig(ctx context.Context, cfg *rest.Config) context.Context {
 }
 
 func NewContext() context.Context {
-	log := zap.LoggerTo(ginkgo.GinkgoWriter, true)
+	log := zap.New(zap.WriteTo(ginkgo.GinkgoWriter), zap.UseDevMode(true))
 	logf.SetLogger(log)
 
 	ctx := logger.Context(log)

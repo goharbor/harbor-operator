@@ -13,7 +13,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func EnsureReady(ctx context.Context, object runtime.Object, timeouts ...interface{}) {
+func EnsureReady(ctx context.Context, object client.Object, timeouts ...interface{}) {
 	matchReadyStatus, f := getStatusCheckFunc(ctx, object)
 
 	gomega.Eventually(f, timeouts...).
@@ -26,7 +26,7 @@ func EnsureReady(ctx context.Context, object runtime.Object, timeouts ...interfa
 		Should(matchReadyStatus, "once ready, status should be constant")
 }
 
-func getStatusCheckFunc(ctx context.Context, object runtime.Object) (gomega.OmegaMatcher, func() (interface{}, error)) {
+func getStatusCheckFunc(ctx context.Context, object client.Object) (gomega.OmegaMatcher, func() (interface{}, error)) {
 	k8sClient := GetClient(ctx)
 
 	return gomega.BeTrue(), func() (interface{}, error) {
@@ -39,7 +39,7 @@ func getStatusCheckFunc(ctx context.Context, object runtime.Object) (gomega.Omeg
 	}
 }
 
-func ScaleUp(ctx context.Context, object runtime.Object) {
+func ScaleUp(ctx context.Context, object client.Object) {
 	data, err := runtime.DefaultUnstructuredConverter.ToUnstructured(object)
 	gomega.Expect(err).ToNot(gomega.HaveOccurred())
 

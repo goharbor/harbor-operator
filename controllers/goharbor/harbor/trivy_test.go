@@ -41,7 +41,7 @@ var _ = Describe("Trivy", func() {
 
 				h := getSpec("./manifests/trivy/default.yaml")
 
-				c := r.NewContext(ctrl.Request{}) // this ctx has resource manager
+				c := r.PopulateContext(context.TODO(), ctrl.Request{}) // this ctx has resource manager
 				owner.Set(&c, h)
 
 				_, trivyUpdateSecret, err := r.AddTrivyConfigurations(c, h, nil)
@@ -60,7 +60,7 @@ var _ = Describe("Trivy", func() {
 
 				h := getSpec("./manifests/trivy/default.yaml")
 
-				c := r.NewContext(ctrl.Request{}) // this ctx has resource manager
+				c := r.PopulateContext(context.TODO(), ctrl.Request{}) // this ctx has resource manager
 				owner.Set(&c, h)
 
 				_, trivyUpdateSecret, err := r.AddTrivyConfigurations(c, h, nil)
@@ -82,7 +82,7 @@ var _ = Describe("Trivy", func() {
 
 					h := getSpec("./manifests/trivy/default.yaml")
 
-					c := r.NewContext(ctrl.Request{}) // this ctx has resource manager
+					c := r.PopulateContext(context.TODO(), ctrl.Request{}) // this ctx has resource manager
 					owner.Set(&c, h)
 
 					trivy, err := r.AddTrivy(c, h, nil, nil)
@@ -104,7 +104,7 @@ var _ = Describe("Trivy", func() {
 
 					h := getSpec("./manifests/trivy/default.yaml")
 
-					c := r.NewContext(ctrl.Request{}) // this ctx has resource manager
+					c := r.PopulateContext(context.TODO(), ctrl.Request{}) // this ctx has resource manager
 					owner.Set(&c, h)
 
 					trivyUpdateSecret, err := r.AddTrivyUpdateSecret(c, h)
@@ -130,7 +130,7 @@ var _ = Describe("Trivy", func() {
 
 				h := getSpec("./manifests/trivy/github-token.yaml")
 
-				c := r.NewContext(ctrl.Request{}) // this ctx has resource manager
+				c := r.PopulateContext(context.TODO(), ctrl.Request{}) // this ctx has resource manager
 				owner.Set(&c, h)
 
 				trivy, err := r.AddTrivy(c, h, nil, nil)
