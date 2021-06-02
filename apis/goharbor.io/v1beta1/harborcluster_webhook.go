@@ -7,9 +7,9 @@ import (
 )
 
 // log is for logging in this package.
-var notarysignerlog = logf.Log.WithName("notarysigner-resource")
+var harborclusterlog = logf.Log.WithName("harborcluster-resource")
 
-func (r *NotarySigner) SetupWebhookWithManager(_ context.Context, mgr ctrl.Manager) error {
+func (r *HarborCluster) SetupWebhookWithManager(_ context.Context, mgr ctrl.Manager) error {
 	return ctrl.NewWebhookManagedBy(mgr).
 		For(r).
 		Complete()
