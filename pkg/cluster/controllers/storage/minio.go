@@ -13,6 +13,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
@@ -70,6 +71,10 @@ func (m *MinIOController) Apply(ctx context.Context, harborcluster *goharborv1.H
 		return crs, err
 	}
 
+	// Set ownerReferences to MinIO PVS
+	if err := m.SetOwnerReferencesWithPVC(ctx, harborcluster); err != nil {
+		return minioUnknownStatus(), err
+	}
 	// Check readiness
 	mt, tenantReady, err := m.checkMinIOReady(ctx, harborcluster)
 	if err != nil {
@@ -111,6 +116,44 @@ func (m *MinIOController) Apply(ctx context.Context, harborcluster *goharborv1.H
 	m.Log.Info("MinIO is ready")
 
 	return crs, nil
+}
+
+func (m *MinIOController) SetOwnerReferencesWithPVC(ctx context.Context, harborcluster *goharborv1.HarborCluster) (err error) {
+	// Get the existing minIO CR first
+	minioCR := &miniov2.Tenant{}
+	if err = m.KubeClient.Get(ctx, m.getMinIONamespacedName(harborcluster), minioCR); err != nil {
+		return err
+	}
+
+	minioPVCs := &corev1.PersistentVolumeClaimList{}
+	label := map[string]string{
+		"v1.min.io/tenant": m.getServiceName(harborcluster),
+	}
+
+	opts := &client.ListOptions{}
+	labelSelector := labels.SelectorFromSet(label)
+	opts.LabelSelector = labelSelector
+
+	if err = m.KubeClient.List(ctx, minioPVCs, opts); err != nil {
+		if errors.IsNotFound(err) {
+			return nil
+		}
+
+		return err
+	}
+
+	for i := range minioPVCs.Items {
+		minioPVCs.Items[i].OwnerReferences = []metav1.OwnerReference{
+			*metav1.NewControllerRef(minioCR, HarborClusterMinIOGVK),
+		}
+
+		err = m.KubeClient.Update(ctx, &minioPVCs.Items[i])
+		if err != nil {
+			m.Log.Error(err, "set pvc:", minioPVCs.Items[i].Name, "OwnerReferences error")
+		}
+	}
+
+	return err
 }
 
 func (m *MinIOController) Delete(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*lcm.CRStatus, error) {
