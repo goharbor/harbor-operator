@@ -2,8 +2,6 @@ package v1beta1
 
 import (
 	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
-	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
-	cmmeta "github.com/jetstack/cert-manager/pkg/apis/meta/v1"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/conversion"
 )
@@ -15,14 +13,9 @@ func (src *HarborCluster) ConvertTo(dstRaw conversion.Hub) error {
 
 	dst.ObjectMeta = src.ObjectMeta
 
-	dst.Spec.HarborSpec.LogLevel = src.Spec.HarborSpec.LogLevel
-	dst.Spec.HarborSpec.Version = src.Spec.HarborSpec.Version
-	dst.Spec.HarborSpec.Core = v1alpha3.CoreComponentSpec{
-		ComponentSpec:        harbormetav1.ComponentSpec{},
-		CertificateInjection: v1alpha3.CertificateInjection{},
-		TokenIssuer:          cmmeta.ObjectReference{},
-		Metrics:              nil,
-	}
+	Convert_v1beta1_HarborClusterSpec_To_v1alpha3_HarborClusterSpec(&src.Spec, &dst.Spec)
+
+	Convert_v1beta1_HarborClusterStatus_To_v1alpha3_HarborClusterStatus(&src.Status, &dst.Status)
 
 	return nil
 }
@@ -32,31 +25,31 @@ func (dst *HarborCluster) ConvertFrom(srcRaw conversion.Hub) error {
 
 	dst.ObjectMeta = src.ObjectMeta
 
-	Convert_v1alph3_HarborClusterSpec_To_v1beta1_HarborClusterSpec(&src.Spec, &dst.Spec)
+	Convert_v1alpha3_HarborClusterSpec_To_v1beta1_HarborClusterSpec(&src.Spec, &dst.Spec)
 
-	Convert_v1alph3_HarborClusterStatus_To_v1beta1_HarborClusterStatus(&src.Status, &dst.Status)
+	Convert_v1alpha3_HarborClusterStatus_To_v1beta1_HarborClusterStatus(&src.Status, &dst.Status)
 
 	return nil
 
 }
 
-func Convert_v1alph3_HarborClusterSpec_To_v1beta1_HarborClusterSpec(src *v1alpha3.HarborClusterSpec, dst *HarborClusterSpec) {
+func Convert_v1alpha3_HarborClusterSpec_To_v1beta1_HarborClusterSpec(src *v1alpha3.HarborClusterSpec, dst *HarborClusterSpec) {
 	if src.InClusterCache != nil {
-		Convert_v1alph3_Cache_To_v1beta1_Cache(src.InClusterCache, dst.Cache)
+		Convert_v1alpha3_Cache_To_v1beta1_Cache(src.InClusterCache, dst.Cache)
 	}
 
 	if src.InClusterStorage != nil {
-		Convert_v1alph3_Storage_To_v1beta1_Storage(src.InClusterStorage, dst.Storage)
+		Convert_v1alpha3_Storage_To_v1beta1_Storage(src.InClusterStorage, dst.Storage)
 	}
 
 	if src.InClusterDatabase != nil {
-		Convert_v1alph3_Database_To_v1beta1_Database(src.InClusterDatabase, dst.Database)
+		Convert_v1alpha3_Database_To_v1beta1_Database(src.InClusterDatabase, dst.Database)
 	}
 
-	Convert_v1alph3_HarborSpec_To_v1beta1_HarborSpec(&src.HarborSpec, &dst.HarborSpec)
+	Convert_v1alpha3_HarborSpec_To_v1beta1_HarborSpec(&src.HarborSpec, &dst.HarborSpec)
 }
 
-func Convert_v1alph3_HarborSpec_To_v1beta1_HarborSpec(src *v1alpha3.HarborSpec, dst *HarborSpec) {
+func Convert_v1alpha3_HarborSpec_To_v1beta1_HarborSpec(src *v1alpha3.HarborSpec, dst *HarborSpec) {
 	if src == nil {
 		return
 	}
@@ -82,15 +75,15 @@ func Convert_v1alph3_HarborSpec_To_v1beta1_HarborSpec(src *v1alpha3.HarborSpec, 
 		}
 	}
 
-	Convert_v1alph3_ImageSourceSpec_To_v1beta1_ImageSourceSpec(src.ImageSource, dst.ImageSource)
+	Convert_v1alpha3_ImageSourceSpec_To_v1beta1_ImageSourceSpec(src.ImageSource, dst.ImageSource)
 
-	Convert_v1alph3_HarborExposeSpec_To_v1beta1_HarborExposeSpec(&src.Expose, &dst.Expose)
+	Convert_v1alpha3_HarborExposeSpec_To_v1beta1_HarborExposeSpec(&src.Expose, &dst.Expose)
 
-	Convert_v1alph3_HarborComponentSpec_To_v1beta1_HarborComponentSpec(&src.HarborComponentsSpec, &dst.HarborComponentsSpec)
+	Convert_v1alpha3_HarborComponentSpec_To_v1beta1_HarborComponentSpec(&src.HarborComponentsSpec, &dst.HarborComponentsSpec)
 
 }
 
-func Convert_v1alph3_HarborComponentSpec_To_v1beta1_HarborComponentSpec(src *v1alpha3.HarborComponentsSpec, dst *HarborComponentsSpec) {
+func Convert_v1alpha3_HarborComponentSpec_To_v1beta1_HarborComponentSpec(src *v1alpha3.HarborComponentsSpec, dst *HarborComponentsSpec) {
 	if src == nil {
 		return
 	}
@@ -99,22 +92,22 @@ func Convert_v1alph3_HarborComponentSpec_To_v1beta1_HarborComponentSpec(src *v1a
 		dst = &HarborComponentsSpec{}
 	}
 
-	Convert_v1alph3_CoreComponentSpec_To_v1beta1_CoreComponentSpec(&src.Core, &dst.Core)
+	Convert_v1alpha3_CoreComponentSpec_To_v1beta1_CoreComponentSpec(&src.Core, &dst.Core)
 
-	Convert_v1alph3_RegistryComponentSpec_To_v1beta1_RegistryComponentSpec(&src.Registry, &dst.Registry)
+	Convert_v1alpha3_RegistryComponentSpec_To_v1beta1_RegistryComponentSpec(&src.Registry, &dst.Registry)
 
-	Convert_v1alph3_JobServiceComponentSpec_To_v1beta1_JobServiceComponentSpec(&src.JobService, &dst.JobService)
+	Convert_v1alpha3_JobServiceComponentSpec_To_v1beta1_JobServiceComponentSpec(&src.JobService, &dst.JobService)
 
-	Convert_v1alph3_ChartMuseumComponentSpec_To_v1beta1_ChartMuseumComponentSpec(src.ChartMuseum, dst.ChartMuseum)
+	Convert_v1alpha3_ChartMuseumComponentSpec_To_v1beta1_ChartMuseumComponentSpec(src.ChartMuseum, dst.ChartMuseum)
 
-	Convert_v1alph3_NotaryComponentSpec_To_v1beta1_NotaryComponentSpec(src.Notary, dst.Notary)
+	Convert_v1alpha3_NotaryComponentSpec_To_v1beta1_NotaryComponentSpec(src.Notary, dst.Notary)
 
-	Convert_v1alph3_TrivyComponentSpec_To_v1beta1_TrivyComponentSpec(src.Trivy, dst.Trivy)
+	Convert_v1alpha3_TrivyComponentSpec_To_v1beta1_TrivyComponentSpec(src.Trivy, dst.Trivy)
 
-	Convert_v1alph3_ExporterComponentSpec_To_v1beta1_ExporterComponentSpec(src.Exporter, dst.Exporter)
+	Convert_v1alpha3_ExporterComponentSpec_To_v1beta1_ExporterComponentSpec(src.Exporter, dst.Exporter)
 }
 
-func Convert_v1alph3_CoreComponentSpec_To_v1beta1_CoreComponentSpec(src *v1alpha3.CoreComponentSpec, dst *CoreComponentSpec) {
+func Convert_v1alpha3_CoreComponentSpec_To_v1beta1_CoreComponentSpec(src *v1alpha3.CoreComponentSpec, dst *CoreComponentSpec) {
 	if dst == nil {
 		dst = &CoreComponentSpec{}
 	}
@@ -130,7 +123,7 @@ func Convert_v1alph3_CoreComponentSpec_To_v1beta1_CoreComponentSpec(src *v1alpha
 
 }
 
-func Convert_v1alph3_RegistryComponentSpec_To_v1beta1_RegistryComponentSpec(src *v1alpha3.RegistryComponentSpec, dst *RegistryComponentSpec) {
+func Convert_v1alpha3_RegistryComponentSpec_To_v1beta1_RegistryComponentSpec(src *v1alpha3.RegistryComponentSpec, dst *RegistryComponentSpec) {
 	if src == nil {
 		return
 	}
@@ -155,7 +148,7 @@ func Convert_v1alph3_RegistryComponentSpec_To_v1beta1_RegistryComponentSpec(src 
 	}
 }
 
-func Convert_v1alph3_JobServiceComponentSpec_To_v1beta1_JobServiceComponentSpec(src *v1alpha3.JobServiceComponentSpec, dst *JobServiceComponentSpec) {
+func Convert_v1alpha3_JobServiceComponentSpec_To_v1beta1_JobServiceComponentSpec(src *v1alpha3.JobServiceComponentSpec, dst *JobServiceComponentSpec) {
 	if src == nil {
 		return
 	}
@@ -169,7 +162,7 @@ func Convert_v1alph3_JobServiceComponentSpec_To_v1beta1_JobServiceComponentSpec(
 	dst.CertificateInjection = CertificateInjection{src.CertificateInjection.CertificateRefs}
 }
 
-func Convert_v1alph3_ChartMuseumComponentSpec_To_v1beta1_ChartMuseumComponentSpec(src *v1alpha3.ChartMuseumComponentSpec, dst *ChartMuseumComponentSpec) {
+func Convert_v1alpha3_ChartMuseumComponentSpec_To_v1beta1_ChartMuseumComponentSpec(src *v1alpha3.ChartMuseumComponentSpec, dst *ChartMuseumComponentSpec) {
 	if src == nil {
 		return
 	}
@@ -183,7 +176,7 @@ func Convert_v1alph3_ChartMuseumComponentSpec_To_v1beta1_ChartMuseumComponentSpe
 	dst.CertificateInjection = CertificateInjection{src.CertificateInjection.CertificateRefs}
 }
 
-func Convert_v1alph3_ExporterComponentSpec_To_v1beta1_ExporterComponentSpec(src *v1alpha3.ExporterComponentSpec, dst *ExporterComponentSpec) {
+func Convert_v1alpha3_ExporterComponentSpec_To_v1beta1_ExporterComponentSpec(src *v1alpha3.ExporterComponentSpec, dst *ExporterComponentSpec) {
 	if src == nil {
 		return
 	}
@@ -196,10 +189,10 @@ func Convert_v1alph3_ExporterComponentSpec_To_v1beta1_ExporterComponentSpec(src 
 	dst.Port = src.Port
 	dst.Path = src.Path
 
-	Convert_v1alph3_HarborExporterCacheSpec_To_v1beta1_HarborExporterCacheSpec(&src.Cache, &dst.Cache)
+	Convert_v1alpha3_HarborExporterCacheSpec_To_v1beta1_HarborExporterCacheSpec(&src.Cache, &dst.Cache)
 }
 
-func Convert_v1alph3_HarborExporterCacheSpec_To_v1beta1_HarborExporterCacheSpec(src *v1alpha3.HarborExporterCacheSpec, dst *HarborExporterCacheSpec) {
+func Convert_v1alpha3_HarborExporterCacheSpec_To_v1beta1_HarborExporterCacheSpec(src *v1alpha3.HarborExporterCacheSpec, dst *HarborExporterCacheSpec) {
 	if src == nil {
 		return
 	}
@@ -212,7 +205,7 @@ func Convert_v1alph3_HarborExporterCacheSpec_To_v1beta1_HarborExporterCacheSpec(
 	dst.CleanInterval = src.CleanInterval
 }
 
-func Convert_v1alph3_TrivyComponentSpec_To_v1beta1_TrivyComponentSpec(src *v1alpha3.TrivyComponentSpec, dst *TrivyComponentSpec) {
+func Convert_v1alpha3_TrivyComponentSpec_To_v1beta1_TrivyComponentSpec(src *v1alpha3.TrivyComponentSpec, dst *TrivyComponentSpec) {
 	if src == nil {
 		return
 	}
@@ -226,11 +219,11 @@ func Convert_v1alph3_TrivyComponentSpec_To_v1beta1_TrivyComponentSpec(src *v1alp
 	dst.GithubTokenRef = src.GithubTokenRef
 	dst.SkipUpdate = src.SkipUpdate
 
-	Convert_v1alph3_HarborStorageTrivyStorageSpec_To_v1beta1_HarborStorageTrivyStorageSpec(&src.Storage, &dst.Storage)
+	Convert_v1alpha3_HarborStorageTrivyStorageSpec_To_v1beta1_HarborStorageTrivyStorageSpec(&src.Storage, &dst.Storage)
 
 }
 
-func Convert_v1alph3_HarborStorageTrivyStorageSpec_To_v1beta1_HarborStorageTrivyStorageSpec(src *v1alpha3.HarborStorageTrivyStorageSpec, dst *HarborStorageTrivyStorageSpec) {
+func Convert_v1alpha3_HarborStorageTrivyStorageSpec_To_v1beta1_HarborStorageTrivyStorageSpec(src *v1alpha3.HarborStorageTrivyStorageSpec, dst *HarborStorageTrivyStorageSpec) {
 	if src == nil {
 		return
 	}
@@ -252,7 +245,7 @@ func Convert_v1alph3_HarborStorageTrivyStorageSpec_To_v1beta1_HarborStorageTrivy
 	}
 }
 
-func Convert_v1alph3_NotaryComponentSpec_To_v1beta1_NotaryComponentSpec(src *v1alpha3.NotaryComponentSpec, dst *NotaryComponentSpec) {
+func Convert_v1alpha3_NotaryComponentSpec_To_v1beta1_NotaryComponentSpec(src *v1alpha3.NotaryComponentSpec, dst *NotaryComponentSpec) {
 	if src == nil {
 		return
 	}
@@ -266,7 +259,7 @@ func Convert_v1alph3_NotaryComponentSpec_To_v1beta1_NotaryComponentSpec(src *v1a
 	dst.MigrationEnabled = src.MigrationEnabled
 }
 
-func Convert_v1alph3_ImageSourceSpec_To_v1beta1_ImageSourceSpec(src *v1alpha3.ImageSourceSpec, dst *ImageSourceSpec) {
+func Convert_v1alpha3_ImageSourceSpec_To_v1beta1_ImageSourceSpec(src *v1alpha3.ImageSourceSpec, dst *ImageSourceSpec) {
 	if dst == nil {
 		dst = &ImageSourceSpec{}
 	}
@@ -281,15 +274,15 @@ func Convert_v1alph3_ImageSourceSpec_To_v1beta1_ImageSourceSpec(src *v1alpha3.Im
 	dst.TagSuffix = src.TagSuffix
 }
 
-func Convert_v1alph3_Cache_To_v1beta1_Cache(src *v1alpha3.Cache, dst *Cache) {
+func Convert_v1alpha3_Cache_To_v1beta1_Cache(src *v1alpha3.Cache, dst *Cache) {
 	dst.Kind = src.Kind
 
 	if src.RedisSpec != nil {
-		Convert_v1alph3_RedisSpec_To_v1beta1_CacheSpec(src.RedisSpec, dst.Spec)
+		Convert_v1alpha3_RedisSpec_To_v1beta1_CacheSpec(src.RedisSpec, dst.Spec)
 	}
 }
 
-func Convert_v1alph3_RedisSpec_To_v1beta1_CacheSpec(src *v1alpha3.RedisSpec, dst *CacheSpec) {
+func Convert_v1alpha3_RedisSpec_To_v1beta1_CacheSpec(src *v1alpha3.RedisSpec, dst *CacheSpec) {
 	dst = &CacheSpec{
 		RedisFailover: &RedisFailoverSpec{},
 	}
@@ -317,16 +310,16 @@ func Convert_v1alph3_RedisSpec_To_v1beta1_CacheSpec(src *v1alpha3.RedisSpec, dst
 	dst.RedisFailover.ImageSpec = src.ImageSpec
 }
 
-func Convert_v1alph3_Storage_To_v1beta1_Storage(src *v1alpha3.Storage, dst *Storage) {
+func Convert_v1alpha3_Storage_To_v1beta1_Storage(src *v1alpha3.Storage, dst *Storage) {
 	dst.Kind = src.Kind
 	dst.Spec = StorageSpec{}
 
 	if src.MinIOSpec != nil {
-		Convert_v1alph3_MinIOSpec_to_v1beta1_MinIOSpec(src.MinIOSpec, dst.Spec.MinIO)
+		Convert_v1alpha3_MinIOSpec_to_v1beta1_MinIOSpec(src.MinIOSpec, dst.Spec.MinIO)
 	}
 }
 
-func Convert_v1alph3_MinIOSpec_to_v1beta1_MinIOSpec(src *v1alpha3.MinIOSpec, dst *MinIOSpec) {
+func Convert_v1alpha3_MinIOSpec_to_v1beta1_MinIOSpec(src *v1alpha3.MinIOSpec, dst *MinIOSpec) {
 	dst = &MinIOSpec{}
 
 	dst.OperatorVersion = ""
@@ -342,21 +335,21 @@ func Convert_v1alph3_MinIOSpec_to_v1beta1_MinIOSpec(src *v1alpha3.MinIOSpec, dst
 
 	dst.Redirect.Enable = src.Redirect.Enable
 	if src.Redirect.Expose != nil {
-		Convert_v1alph3_HarborExposeComponentSpec_To_v1beta1_HarborExposeComponentSpec(src.Redirect.Expose, dst.Redirect.Expose)
+		Convert_v1alpha3_HarborExposeComponentSpec_To_v1beta1_HarborExposeComponentSpec(src.Redirect.Expose, dst.Redirect.Expose)
 	}
 }
 
-func Convert_v1alph3_HarborExposeSpec_To_v1beta1_HarborExposeSpec(src *v1alpha3.HarborExposeSpec, dst *HarborExposeSpec) {
+func Convert_v1alpha3_HarborExposeSpec_To_v1beta1_HarborExposeSpec(src *v1alpha3.HarborExposeSpec, dst *HarborExposeSpec) {
 	if dst == nil {
 		dst = &HarborExposeSpec{}
 	}
 
-	Convert_v1alph3_HarborExposeComponentSpec_To_v1beta1_HarborExposeComponentSpec(&src.Core, &dst.Core)
+	Convert_v1alpha3_HarborExposeComponentSpec_To_v1beta1_HarborExposeComponentSpec(&src.Core, &dst.Core)
 
-	Convert_v1alph3_HarborExposeComponentSpec_To_v1beta1_HarborExposeComponentSpec(src.Notary, dst.Notary)
+	Convert_v1alpha3_HarborExposeComponentSpec_To_v1beta1_HarborExposeComponentSpec(src.Notary, dst.Notary)
 }
 
-func Convert_v1alph3_HarborExposeComponentSpec_To_v1beta1_HarborExposeComponentSpec(src *v1alpha3.HarborExposeComponentSpec, dst *HarborExposeComponentSpec) {
+func Convert_v1alpha3_HarborExposeComponentSpec_To_v1beta1_HarborExposeComponentSpec(src *v1alpha3.HarborExposeComponentSpec, dst *HarborExposeComponentSpec) {
 	if dst == nil {
 		dst = &HarborExposeComponentSpec{}
 	}
@@ -366,7 +359,7 @@ func Convert_v1alph3_HarborExposeComponentSpec_To_v1beta1_HarborExposeComponentS
 	}
 
 	if src.Ingress != nil {
-		Convert_v1alph3_HarborExposeIngressSpec_To_v1beta1_HarborExposeIngressSpec(src.Ingress, dst.Ingress)
+		Convert_v1alpha3_HarborExposeIngressSpec_To_v1beta1_HarborExposeIngressSpec(src.Ingress, dst.Ingress)
 	}
 
 	if src.TLS != nil {
@@ -374,7 +367,7 @@ func Convert_v1alph3_HarborExposeComponentSpec_To_v1beta1_HarborExposeComponentS
 	}
 }
 
-func Convert_v1alph3_HarborExposeIngressSpec_To_v1beta1_HarborExposeIngressSpec(src *v1alpha3.HarborExposeIngressSpec, dst *HarborExposeIngressSpec) {
+func Convert_v1alpha3_HarborExposeIngressSpec_To_v1beta1_HarborExposeIngressSpec(src *v1alpha3.HarborExposeIngressSpec, dst *HarborExposeIngressSpec) {
 	if dst == nil {
 		dst = &HarborExposeIngressSpec{}
 	}
@@ -388,18 +381,18 @@ func Convert_v1alph3_HarborExposeIngressSpec_To_v1beta1_HarborExposeIngressSpec(
 	dst.Annotations = src.Annotations
 }
 
-func Convert_v1alph3_Database_To_v1beta1_Database(src *v1alpha3.Database, dst *Database) {
+func Convert_v1alpha3_Database_To_v1beta1_Database(src *v1alpha3.Database, dst *Database) {
 	dst = &Database{}
 
 	dst.Kind = src.Kind
 
 	if src.PostgresSQLSpec != nil {
 		dst.Spec.ZlandoPostgreSQL = &ZlandoPostgreSQLSpec{}
-		Convert_v1alph3_PostgresSQLSpec_To_v1beta1_ZlandoPostgresSQLSpec(src.PostgresSQLSpec, dst.Spec.ZlandoPostgreSQL)
+		Convert_v1alpha3_PostgresSQLSpec_To_v1beta1_ZlandoPostgresSQLSpec(src.PostgresSQLSpec, dst.Spec.ZlandoPostgreSQL)
 	}
 }
 
-func Convert_v1alph3_PostgresSQLSpec_To_v1beta1_ZlandoPostgresSQLSpec(src *v1alpha3.PostgresSQLSpec, dst *ZlandoPostgreSQLSpec) {
+func Convert_v1alpha3_PostgresSQLSpec_To_v1beta1_ZlandoPostgresSQLSpec(src *v1alpha3.PostgresSQLSpec, dst *ZlandoPostgreSQLSpec) {
 	dst.OperatorVersion = ""
 	dst.Storage = src.Storage
 	dst.Resources = src.Resources
@@ -409,7 +402,7 @@ func Convert_v1alph3_PostgresSQLSpec_To_v1beta1_ZlandoPostgresSQLSpec(src *v1alp
 	dst.StorageClassName = src.StorageClassName
 }
 
-func Convert_v1alph3_HarborClusterStatus_To_v1beta1_HarborClusterStatus(src *v1alpha3.HarborClusterStatus, dst *HarborClusterStatus) {
+func Convert_v1alpha3_HarborClusterStatus_To_v1beta1_HarborClusterStatus(src *v1alpha3.HarborClusterStatus, dst *HarborClusterStatus) {
 	dst.Operator = src.Operator
 	dst.Status = ClusterStatus(src.Status)
 	dst.ObservedGeneration = src.ObservedGeneration
