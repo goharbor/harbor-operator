@@ -2,8 +2,6 @@ package main
 
 import (
 	"context"
-	"os"
-
 	"github.com/go-logr/logr"
 	"github.com/ovh/configstore"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -92,15 +90,6 @@ func main() {
 		exit.SetCode(ControllersExitCode)
 
 		return
-	}
-
-	if err = (&goharborv1alpha3.HarborCluster{}).SetupWebhookWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create webhook", "webhook", "HarborCluster")
-		os.Exit(1)
-	}
-	if err = (&goharboriov1beta1.HarborCluster{}).SetupWebhookWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create webhook", "webhook", "HarborCluster")
-		os.Exit(1)
 	}
 	// +kubebuilder:scaffold:builder
 
