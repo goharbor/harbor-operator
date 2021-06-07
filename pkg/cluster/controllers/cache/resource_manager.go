@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/go-logr/logr"
-	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/common"
 	"github.com/goharbor/harbor-operator/pkg/config"
 	"github.com/goharbor/harbor-operator/pkg/resources/checksum"
@@ -165,54 +165,54 @@ func (rm *redisResourceManager) GetLabels() map[string]string {
 func (rm *redisResourceManager) GetResources() corev1.ResourceRequirements {
 	resources := corev1.ResourceRequirements{}
 
-	if rm.cluster.Spec.InClusterCache.RedisSpec.Server == nil {
+	if rm.cluster.Spec.Cache.Spec.RedisFailover.Server == nil {
 		resourcesList, _ := GenerateResourceList(defaultResourceCPU, defaultResourceMemory)
 		resources.Limits = resourcesList
 		resources.Requests = resourcesList
 	}
 
-	return rm.cluster.Spec.InClusterCache.RedisSpec.Server.Resources
+	return rm.cluster.Spec.Cache.Spec.RedisFailover.Server.Resources
 }
 
 // GetServerReplica gets deployment replica.
 func (rm *redisResourceManager) GetServerReplica() int {
-	if rm.cluster.Spec.InClusterCache.RedisSpec.Server == nil || rm.cluster.Spec.InClusterCache.RedisSpec.Server.Replicas == 0 {
+	if rm.cluster.Spec.Cache.Spec.RedisFailover.Server == nil || rm.cluster.Spec.Cache.Spec.RedisFailover.Server.Replicas == 0 {
 		return defaultResourceReplica
 	}
 
-	return rm.cluster.Spec.InClusterCache.RedisSpec.Server.Replicas
+	return rm.cluster.Spec.Cache.Spec.RedisFailover.Server.Replicas
 }
 
 // GetClusterServerReplica gets deployment replica of sentinel mode.
 func (rm *redisResourceManager) GetClusterServerReplica() int {
-	if rm.cluster.Spec.InClusterCache.RedisSpec.Sentinel == nil || rm.cluster.Spec.InClusterCache.RedisSpec.Sentinel.Replicas == 0 {
+	if rm.cluster.Spec.Cache.Spec.RedisFailover.Sentinel == nil || rm.cluster.Spec.Cache.Spec.RedisFailover.Sentinel.Replicas == 0 {
 		return defaultResourceReplica
 	}
 
-	return rm.cluster.Spec.InClusterCache.RedisSpec.Sentinel.Replicas
+	return rm.cluster.Spec.Cache.Spec.RedisFailover.Sentinel.Replicas
 }
 
 // GetStorageSize gets storage size.
 func (rm *redisResourceManager) GetStorageSize() string {
-	if rm.cluster.Spec.InClusterCache.RedisSpec.Server == nil || rm.cluster.Spec.InClusterCache.RedisSpec.Server.Storage == "" {
+	if rm.cluster.Spec.Cache.Spec.RedisFailover.Server == nil || rm.cluster.Spec.Cache.Spec.RedisFailover.Server.Storage == "" {
 		return defaultStorageSize
 	}
 
-	return rm.cluster.Spec.InClusterCache.RedisSpec.Server.Storage
+	return rm.cluster.Spec.Cache.Spec.RedisFailover.Server.Storage
 }
 
 // GetStorageClass gets the storage class name.
 func (rm *redisResourceManager) GetStorageClass() string {
-	if rm.cluster.Spec.InClusterCache.RedisSpec != nil && rm.cluster.Spec.InClusterCache.RedisSpec.Server != nil {
-		return rm.cluster.Spec.InClusterCache.RedisSpec.Server.StorageClassName
+	if rm.cluster.Spec.Cache.Spec.RedisFailover != nil && rm.cluster.Spec.Cache.Spec.RedisFailover.Server != nil {
+		return rm.cluster.Spec.Cache.Spec.RedisFailover.Server.StorageClassName
 	}
 
 	return ""
 }
 
 func (rm *redisResourceManager) getImagePullPolicy(_ context.Context, harborcluster *goharborv1.HarborCluster) corev1.PullPolicy {
-	if harborcluster.Spec.InClusterCache.RedisSpec.ImagePullPolicy != nil {
-		return *harborcluster.Spec.InClusterCache.RedisSpec.ImagePullPolicy
+	if harborcluster.Spec.Cache.Spec.RedisFailover.ImagePullPolicy != nil {
+		return *harborcluster.Spec.Cache.Spec.RedisFailover.ImagePullPolicy
 	}
 
 	if harborcluster.Spec.ImageSource != nil && harborcluster.Spec.ImageSource.ImagePullPolicy != nil {
@@ -223,8 +223,8 @@ func (rm *redisResourceManager) getImagePullPolicy(_ context.Context, harborclus
 }
 
 func (rm *redisResourceManager) getImagePullSecrets(_ context.Context, harborcluster *goharborv1.HarborCluster) []corev1.LocalObjectReference {
-	if len(harborcluster.Spec.InClusterCache.RedisSpec.ImagePullSecrets) > 0 {
-		return harborcluster.Spec.InClusterCache.RedisSpec.ImagePullSecrets
+	if len(harborcluster.Spec.Cache.Spec.RedisFailover.ImagePullSecrets) > 0 {
+		return harborcluster.Spec.Cache.Spec.RedisFailover.ImagePullSecrets
 	}
 
 	if harborcluster.Spec.ImageSource != nil {

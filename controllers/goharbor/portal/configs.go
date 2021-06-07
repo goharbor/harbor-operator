@@ -5,7 +5,7 @@ import (
 	"crypto/sha256"
 	"fmt"
 
-	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
 	conftemplate "github.com/goharbor/harbor-operator/pkg/config/template"
 	"github.com/goharbor/harbor-operator/pkg/resources/checksum"
 	"github.com/pkg/errors"

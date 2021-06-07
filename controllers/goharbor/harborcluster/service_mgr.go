@@ -17,7 +17,7 @@ package harborcluster
 import (
 	"context"
 
-	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/harbor"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	"github.com/pkg/errors"
@@ -105,15 +105,15 @@ func (s *ServiceManager) Apply() error { // nolint:funlen
 
 	switch s.component {
 	case goharborv1.ComponentCache:
-		if s.cluster.Spec.InClusterCache == nil {
+		if s.cluster.Spec.Cache.Spec.RedisFailover == nil {
 			useInCluster = false
 		}
 	case goharborv1.ComponentDatabase:
-		if s.cluster.Spec.InClusterDatabase == nil {
+		if s.cluster.Spec.Database.Spec.ZlandoPostgreSQL == nil {
 			useInCluster = false
 		}
 	case goharborv1.ComponentStorage:
-		if s.cluster.Spec.InClusterStorage == nil {
+		if s.cluster.Spec.Storage.Spec.MinIO == nil {
 			useInCluster = false
 		}
 		// Only for wsl check

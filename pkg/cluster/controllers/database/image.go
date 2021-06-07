@@ -17,7 +17,7 @@ package database
 import (
 	"context"
 
-	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
 	"github.com/goharbor/harbor-operator/pkg/image"
 )
 
@@ -28,8 +28,8 @@ const (
 
 // GetImage returns the configured image via configstore or default one.
 func (p *PostgreSQLController) GetImage(ctx context.Context, harborcluster *goharborv1.HarborCluster) (string, error) {
-	if harborcluster.Spec.InClusterDatabase.PostgresSQLSpec.Image != "" {
-		return harborcluster.Spec.InClusterDatabase.PostgresSQLSpec.Image, nil
+	if harborcluster.Spec.Database.Spec.ZlandoPostgreSQL.Image != "" {
+		return harborcluster.Spec.Database.Spec.ZlandoPostgreSQL.Image, nil
 	}
 
 	options := []image.Option{image.WithHarborVersion(harborcluster.Spec.Version)}

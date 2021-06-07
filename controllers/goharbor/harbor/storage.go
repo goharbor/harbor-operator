@@ -3,7 +3,7 @@ package harbor
 import (
 	"context"
 
-	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 )
 
