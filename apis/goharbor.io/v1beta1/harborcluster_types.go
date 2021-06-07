@@ -21,7 +21,7 @@ type HarborClusterSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	HarborSpec `json:",inline"`
+	HarborSpec `json:"harbor"`
 
 	// Cache configuration for in-cluster cache services
 	// +kubebuilder:validation:Optional
