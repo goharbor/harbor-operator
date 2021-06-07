@@ -85,14 +85,14 @@ type RedisServer struct {
 
 type Database struct {
 	// Set the kind of which database service to be used, Only support PostgresSQL now.
-	// +kubebuilder:validation:Enum=PostgresSQL
+	// +kubebuilder:validation:Enum=PostgreSQL
 	Kind string `json:"kind"`
 
 	// +kubebuilder:validation:Required
-	PostgresSQLSpec *PostgresSQLSpec `json:"postgresSqlSpec"`
+	PostgreSQLSpec *PostgreSQLSpec `json:"postgreSqlSpec"`
 }
 
-type PostgresSQLSpec struct {
+type PostgreSQLSpec struct {
 	harbormetav1.ImageSpec `json:",inline"`
 
 	// Storage defines database data store pvc size
