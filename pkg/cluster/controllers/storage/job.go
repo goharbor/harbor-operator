@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/common"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	"github.com/goharbor/harbor-operator/pkg/resources/checksum"

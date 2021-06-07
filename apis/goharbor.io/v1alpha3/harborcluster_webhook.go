@@ -59,7 +59,7 @@ var _ webhook.Validator = &HarborCluster{}
 func (hc *HarborCluster) ValidateCreate() error {
 	clog.Info("validate creation", "name", hc.Name, "namespace", hc.Namespace)
 
-	return hc.validate(nil)
+	return hc.validate(hc)
 }
 
 func (hc *HarborCluster) ValidateUpdate(old runtime.Object) error {
@@ -156,7 +156,7 @@ func (hc *HarborCluster) validateStorage() *field.Error {
 
 func (hc *HarborCluster) validateDatabase() *field.Error {
 	// in cluster database has high priority
-	fp := field.NewPath("spec").Child("database", "inClusterDatabase")
+	fp := field.NewPath("spec").Child("inClusterDatabase")
 
 	// Database
 	// External is not configured

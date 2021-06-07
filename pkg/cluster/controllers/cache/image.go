@@ -17,7 +17,7 @@ package cache
 import (
 	"context"
 
-	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
 	"github.com/goharbor/harbor-operator/pkg/image"
 )
 
@@ -28,8 +28,8 @@ const (
 
 // GetImage returns the configured image via configstore or default one.
 func (rm *redisResourceManager) GetImage(ctx context.Context, harborcluster *goharborv1.HarborCluster) (string, error) {
-	if harborcluster.Spec.InClusterCache.RedisSpec.Image != "" {
-		return harborcluster.Spec.InClusterCache.RedisSpec.Image, nil
+	if harborcluster.Spec.Cache.Spec.RedisFailover.Image != "" {
+		return harborcluster.Spec.Cache.Spec.RedisFailover.Image, nil
 	}
 
 	options := []image.Option{image.WithHarborVersion(harborcluster.Spec.Version)}

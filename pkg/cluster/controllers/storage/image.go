@@ -17,7 +17,7 @@ package storage
 import (
 	"context"
 
-	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
 	"github.com/goharbor/harbor-operator/pkg/config"
 	"github.com/goharbor/harbor-operator/pkg/image"
 	corev1 "k8s.io/api/core/v1"
@@ -33,8 +33,8 @@ const (
 
 // getImage returns the configured image via configstore or default one.
 func (m *MinIOController) getImage(ctx context.Context, harborcluster *goharborv1.HarborCluster) (string, error) {
-	if harborcluster.Spec.InClusterStorage.MinIOSpec.Image != "" {
-		return harborcluster.Spec.InClusterStorage.MinIOSpec.Image, nil
+	if harborcluster.Spec.Storage.Spec.MinIO.Image != "" {
+		return harborcluster.Spec.Storage.Spec.MinIO.Image, nil
 	}
 
 	options := []image.Option{image.WithHarborVersion(harborcluster.Spec.Version)}
@@ -59,8 +59,8 @@ func (m *MinIOController) getImage(ctx context.Context, harborcluster *goharborv
 }
 
 func (m *MinIOController) getImagePullPolicy(_ context.Context, harborcluster *goharborv1.HarborCluster) corev1.PullPolicy {
-	if harborcluster.Spec.InClusterStorage.MinIOSpec.ImagePullPolicy != nil {
-		return *harborcluster.Spec.InClusterStorage.MinIOSpec.ImagePullPolicy
+	if harborcluster.Spec.Storage.Spec.MinIO.ImagePullPolicy != nil {
+		return *harborcluster.Spec.Storage.Spec.MinIO.ImagePullPolicy
 	}
 
 	if harborcluster.Spec.ImageSource != nil && harborcluster.Spec.ImageSource.ImagePullPolicy != nil {
@@ -71,8 +71,8 @@ func (m *MinIOController) getImagePullPolicy(_ context.Context, harborcluster *g
 }
 
 func (m *MinIOController) getImagePullSecret(_ context.Context, harborcluster *goharborv1.HarborCluster) corev1.LocalObjectReference {
-	if len(harborcluster.Spec.InClusterStorage.MinIOSpec.ImagePullSecrets) > 0 {
-		return harborcluster.Spec.InClusterStorage.MinIOSpec.ImagePullSecrets[0]
+	if len(harborcluster.Spec.Storage.Spec.MinIO.ImagePullSecrets) > 0 {
+		return harborcluster.Spec.Storage.Spec.MinIO.ImagePullSecrets[0]
 	}
 
 	if harborcluster.Spec.ImageSource != nil && len(harborcluster.Spec.ImageSource.ImagePullSecrets) > 0 {
@@ -83,7 +83,7 @@ func (m *MinIOController) getImagePullSecret(_ context.Context, harborcluster *g
 }
 
 func (m *MinIOController) getMinIOClientImage(ctx context.Context, harborcluster *goharborv1.HarborCluster) (string, error) {
-	spec := harborcluster.Spec.InClusterStorage.MinIOSpec.MinIOClientSpec
+	spec := harborcluster.Spec.Storage.Spec.MinIO
 	if spec != nil && spec.Image != "" {
 		return spec.Image, nil
 	}
@@ -110,7 +110,7 @@ func (m *MinIOController) getMinIOClientImage(ctx context.Context, harborcluster
 }
 
 func (m *MinIOController) getMinIOClientImagePullPolicy(_ context.Context, harborcluster *goharborv1.HarborCluster) corev1.PullPolicy {
-	spec := harborcluster.Spec.InClusterStorage.MinIOSpec.MinIOClientSpec
+	spec := harborcluster.Spec.Storage.Spec.MinIO
 	if spec != nil && spec.ImagePullPolicy != nil {
 		return *spec.ImagePullPolicy
 	}
@@ -123,7 +123,7 @@ func (m *MinIOController) getMinIOClientImagePullPolicy(_ context.Context, harbo
 }
 
 func (m *MinIOController) getMinIOClientImagePullSecrets(_ context.Context, harborcluster *goharborv1.HarborCluster) []corev1.LocalObjectReference {
-	spec := harborcluster.Spec.InClusterStorage.MinIOSpec.MinIOClientSpec
+	spec := harborcluster.Spec.Storage.Spec.MinIO
 	if spec != nil && len(spec.ImagePullSecrets) > 0 {
 		return spec.ImagePullSecrets
 	}

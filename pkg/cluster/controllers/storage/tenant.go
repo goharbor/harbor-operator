@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"strings"
 
-	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
 	"github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/common"
 	miniov2 "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/apis/minio.min.io/v2"
@@ -71,8 +71,8 @@ func (m *MinIOController) getMinIOProperties(ctx context.Context, harborcluster 
 		skipVerify = true
 	)
 
-	if harborcluster.Spec.InClusterStorage.MinIOSpec.Redirect.Enable {
-		tls := harborcluster.Spec.InClusterStorage.MinIOSpec.Redirect.Expose.TLS
+	if harborcluster.Spec.Storage.Kind == "MinIO" && harborcluster.Spec.Storage.Spec.MinIO != nil {
+		tls := harborcluster.Spec.Storage.Spec.MinIO.Redirect.Expose.TLS
 		if tls.Enabled() {
 			secure = true
 			skipVerify = false
@@ -80,7 +80,7 @@ func (m *MinIOController) getMinIOProperties(ctx context.Context, harborcluster 
 			certificateRef = tls.CertificateRef
 		}
 
-		endpoint = fmt.Sprintf("%s://%s", scheme, harborcluster.Spec.InClusterStorage.MinIOSpec.Redirect.Expose.Ingress.Host)
+		endpoint = fmt.Sprintf("%s://%s", scheme, harborcluster.Spec.Storage.Spec.MinIO.Redirect.Expose.Ingress.Host)
 
 		storageSpec.S3.CertificateRef = certificateRef
 	} else {
@@ -158,7 +158,7 @@ func (m *MinIOController) applyTenant(ctx context.Context, harborcluster *goharb
 // createTenant creates a new minio tenant.
 func (m *MinIOController) createTenant(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*lcm.CRStatus, error) {
 	// If minio access secret is not specified, then create a random one.
-	if harborcluster.Spec.InClusterStorage.MinIOSpec.SecretRef == "" {
+	if harborcluster.Spec.Storage.Spec.MinIO.SecretRef == "" {
 		credsSecret := m.generateCredsSecret(harborcluster)
 
 		err := m.KubeClient.Create(ctx, credsSecret)
@@ -211,10 +211,10 @@ func (m *MinIOController) generateMinIOCR(ctx context.Context, harborcluster *go
 			Pools: []miniov2.Pool{
 				{
 					Name:                DefaultZone,
-					Servers:             harborcluster.Spec.InClusterStorage.MinIOSpec.Replicas,
-					VolumesPerServer:    harborcluster.Spec.InClusterStorage.MinIOSpec.VolumesPerServer,
+					Servers:             harborcluster.Spec.Storage.Spec.MinIO.Replicas,
+					VolumesPerServer:    harborcluster.Spec.Storage.Spec.MinIO.VolumesPerServer,
 					VolumeClaimTemplate: m.getVolumeClaimTemplate(harborcluster),
-					Resources:           harborcluster.Spec.InClusterStorage.MinIOSpec.Resources,
+					Resources:           harborcluster.Spec.Storage.Spec.MinIO.Resources,
 					SecurityContext: &corev1.PodSecurityContext{
 						FSGroup:    &fsGroup,
 						RunAsGroup: &runAsGroup,
@@ -249,9 +249,9 @@ func (m *MinIOController) generateMinIOCR(ctx context.Context, harborcluster *go
 }
 
 func (m *MinIOController) getVolumeClaimTemplate(harborcluster *goharborv1.HarborCluster) *corev1.PersistentVolumeClaim {
-	isEmpty := reflect.DeepEqual(harborcluster.Spec.InClusterStorage.MinIOSpec.VolumeClaimTemplate, corev1.PersistentVolumeClaim{})
+	isEmpty := reflect.DeepEqual(harborcluster.Spec.Storage.Spec.MinIO.VolumeClaimTemplate, corev1.PersistentVolumeClaim{})
 	if !isEmpty {
-		return &harborcluster.Spec.InClusterStorage.MinIOSpec.VolumeClaimTemplate
+		return &harborcluster.Spec.Storage.Spec.MinIO.VolumeClaimTemplate
 	}
 
 	defaultStorageClass := "default"
