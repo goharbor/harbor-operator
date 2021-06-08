@@ -28,14 +28,6 @@ func (dst *NotarySigner) ConvertFrom(srcRaw conversion.Hub) error {
 }
 
 func Convert_v1beta1_NotarySignerSpec_To_v1alpha3_NotarySignerSpec(src *NotarySignerSpec, dst *v1alpha3.NotarySignerSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &v1alpha3.NotarySignerSpec{}
-	}
-
 	dst.ComponentSpec = src.ComponentSpec
 	dst.MigrationEnabled = src.MigrationEnabled
 
@@ -48,26 +40,10 @@ func Convert_v1beta1_NotarySignerSpec_To_v1alpha3_NotarySignerSpec(src *NotarySi
 }
 
 func Convert_v1beta1_NotarySignerAuthenticationSpec_To_v1alpha3_NotarySignerAuthenticationSpec(src *NotarySignerAuthenticationSpec, dst *v1alpha3.NotarySignerAuthenticationSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &v1alpha3.NotarySignerAuthenticationSpec{}
-	}
-
 	dst.CertificateRef = src.CertificateRef
 }
 
 func Convert_v1beta1_NotarySignerStorageSpec_To_v1alpha3_NotarySignerStorageSpec(src *NotarySignerStorageSpec, dst *v1alpha3.NotarySignerStorageSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &v1alpha3.NotarySignerStorageSpec{}
-	}
-
 	dst.AliasesRef = src.AliasesRef
 
 	Convert_v1beta1_NotaryStorageSpec_To_v1alpha3_NotaryStorageSpec(&src.NotaryStorageSpec, &dst.NotaryStorageSpec)
@@ -75,14 +51,6 @@ func Convert_v1beta1_NotarySignerStorageSpec_To_v1alpha3_NotarySignerStorageSpec
 }
 
 func Convert_v1alpha3_NotarySignerSpec_To_v1beta1_NotarySignerSpec(src *v1alpha3.NotarySignerSpec, dst *NotarySignerSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &NotarySignerSpec{}
-	}
-
 	dst.ComponentSpec = src.ComponentSpec
 	dst.MigrationEnabled = src.MigrationEnabled
 
@@ -95,26 +63,10 @@ func Convert_v1alpha3_NotarySignerSpec_To_v1beta1_NotarySignerSpec(src *v1alpha3
 }
 
 func Convert_v1alpha3_NotarySignerAuthenticationSpec_To_v1beta1_NotarySignerAuthenticationSpec(src *v1alpha3.NotarySignerAuthenticationSpec, dst *NotarySignerAuthenticationSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &NotarySignerAuthenticationSpec{}
-	}
-
 	dst.CertificateRef = src.CertificateRef
 }
 
 func Convert_v1alpha3_NotarySignerStorageSpec_To_v1beta1_NotarySignerStorageSpec(src *v1alpha3.NotarySignerStorageSpec, dst *NotarySignerStorageSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &NotarySignerStorageSpec{}
-	}
-
 	dst.AliasesRef = src.AliasesRef
 
 	Convert_v1alpha3_NotaryStorageSpec_To_v1beta1_NotaryStorageSpec(&src.NotaryStorageSpec, &dst.NotaryStorageSpec)

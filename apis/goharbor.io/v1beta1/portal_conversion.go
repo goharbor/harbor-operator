@@ -28,28 +28,12 @@ func (dst *Portal) ConvertFrom(srcRaw conversion.Hub) error {
 }
 
 func Convert_v1beta1_PortalSpec_To_v1alpha3_PortalSpec(src *PortalSpec, dst *v1alpha3.PortalSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &v1alpha3.PortalSpec{}
-	}
-
 	dst.ComponentSpec = src.ComponentSpec
 	dst.MaxConnections = src.MaxConnections
 	dst.TLS = src.TLS
 }
 
 func Convert_v1alpha3_PortalSpec_To_v1beta1_PortalSpec(src *v1alpha3.PortalSpec, dst *PortalSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &PortalSpec{}
-	}
-
 	dst.ComponentSpec = src.ComponentSpec
 	dst.MaxConnections = src.MaxConnections
 	dst.TLS = src.TLS
