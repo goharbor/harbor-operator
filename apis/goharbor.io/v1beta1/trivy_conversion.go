@@ -28,14 +28,6 @@ func (dst *Trivy) ConvertFrom(srcRaw conversion.Hub) error {
 }
 
 func Convert_v1beta1_TrivySpec_To_v1alpha3_TrivySpec(src *TrivySpec, dst *v1alpha3.TrivySpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &v1alpha3.TrivySpec{}
-	}
-
 	dst.ComponentSpec = src.ComponentSpec
 	dst.TrivyVulnerabilityTypes = src.TrivyVulnerabilityTypes
 	dst.TrivySeverityTypes = src.TrivySeverityTypes
@@ -63,14 +55,6 @@ func Convert_v1beta1_TrivySpec_To_v1alpha3_TrivySpec(src *TrivySpec, dst *v1alph
 }
 
 func Convert_v1beta1_TrivyServerSpec_To_v1alpha3_TrivyServerSpec(src *TrivyServerSpec, dst *v1alpha3.TrivyServerSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &v1alpha3.TrivyServerSpec{}
-	}
-
 	dst.TLS = src.TLS
 	dst.ClientCertificateAuthorityRefs = src.ClientCertificateAuthorityRefs
 	dst.TokenServiceCertificateAuthorityRefs = src.TokenServiceCertificateAuthorityRefs
@@ -90,14 +74,6 @@ func Convert_v1beta1_TrivyServerSpec_To_v1alpha3_TrivyServerSpec(src *TrivyServe
 }
 
 func Convert_v1beta1_TrivyRedisSpec_To_v1alpha3_TrivyRedisSpec(src *TrivyRedisSpec, dst *v1alpha3.TrivyRedisSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &v1alpha3.TrivyRedisSpec{}
-	}
-
 	dst.RedisConnection = src.RedisConnection
 	dst.Namespace = src.Namespace
 
@@ -117,14 +93,6 @@ func Convert_v1beta1_TrivyRedisSpec_To_v1alpha3_TrivyRedisSpec(src *TrivyRedisSp
 }
 
 func Convert_v1beta1_TrivyStorageSpec_To_v1alpha3_TrivyStorageSpec(src *TrivyStorageSpec, dst *v1alpha3.TrivyStorageSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &v1alpha3.TrivyStorageSpec{}
-	}
-
 	dst.Reports = v1alpha3.TrivyStorageVolumeSpec{
 		VolumeSource: src.Reports.VolumeSource,
 		Prefix:       src.Reports.Prefix,
@@ -137,14 +105,6 @@ func Convert_v1beta1_TrivyStorageSpec_To_v1alpha3_TrivyStorageSpec(src *TrivySto
 }
 
 func Convert_v1alpha3_TrivySpec_To_v1beta1_TrivySpec(src *v1alpha3.TrivySpec, dst *TrivySpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &TrivySpec{}
-	}
-
 	dst.ComponentSpec = src.ComponentSpec
 	dst.TrivyVulnerabilityTypes = src.TrivyVulnerabilityTypes
 	dst.TrivySeverityTypes = src.TrivySeverityTypes
@@ -172,14 +132,6 @@ func Convert_v1alpha3_TrivySpec_To_v1beta1_TrivySpec(src *v1alpha3.TrivySpec, ds
 }
 
 func Convert_v1alpha3_TrivyServerSpec_To_v1beta1_TrivyServerSpec(src *v1alpha3.TrivyServerSpec, dst *TrivyServerSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &TrivyServerSpec{}
-	}
-
 	dst.TLS = src.TLS
 	dst.ClientCertificateAuthorityRefs = src.ClientCertificateAuthorityRefs
 	dst.TokenServiceCertificateAuthorityRefs = src.TokenServiceCertificateAuthorityRefs
@@ -199,14 +151,6 @@ func Convert_v1alpha3_TrivyServerSpec_To_v1beta1_TrivyServerSpec(src *v1alpha3.T
 }
 
 func Convert_v1alpha3_TrivyRedisSpec_To_v1beta1_TrivyRedisSpec(src *v1alpha3.TrivyRedisSpec, dst *TrivyRedisSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &TrivyRedisSpec{}
-	}
-
 	dst.RedisConnection = src.RedisConnection
 	dst.Namespace = src.Namespace
 
@@ -226,14 +170,6 @@ func Convert_v1alpha3_TrivyRedisSpec_To_v1beta1_TrivyRedisSpec(src *v1alpha3.Tri
 }
 
 func Convert_v1alpha3_TrivyStorageSpec_To_v1beta1_TrivyStorageSpec(src *v1alpha3.TrivyStorageSpec, dst *TrivyStorageSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &TrivyStorageSpec{}
-	}
-
 	dst.Reports = TrivyStorageVolumeSpec{
 		VolumeSource: src.Reports.VolumeSource,
 		Prefix:       src.Reports.Prefix,

@@ -28,14 +28,6 @@ func (dst *Registry) ConvertFrom(srcRaw conversion.Hub) error {
 }
 
 func Convert_v1beta1_RegistrySpec_To_v1alpha3_RegistrySpec(src *RegistrySpec, dst *v1alpha3.RegistrySpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &v1alpha3.RegistrySpec{}
-	}
-
 	dst.ComponentSpec = src.ComponentSpec
 	dst.Proxy = src.Proxy
 
@@ -47,14 +39,6 @@ func Convert_v1beta1_RegistrySpec_To_v1alpha3_RegistrySpec(src *RegistrySpec, ds
 }
 
 func Convert_v1beta1_RegistryConfig01_To_v1alpha3_RegistryConfig01(src *RegistryConfig01, dst *v1alpha3.RegistryConfig01) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &v1alpha3.RegistryConfig01{}
-	}
-
 	Convert_v1beta1_RegistryLogSpec_To_v1alpha3_RegistryLogSpec(&src.Log, &dst.Log)
 
 	Convert_v1beta1_RegistryHTTPSpec_To_v1alpha3_RegistryHTTPSpec(&src.HTTP, &dst.HTTP)
@@ -73,7 +57,10 @@ func Convert_v1beta1_RegistryConfig01_To_v1alpha3_RegistryConfig01(src *Registry
 
 	Convert_v1beta1_RegistryMiddlewaresSpec_To_v1alpha3_RegistryMiddlewaresSpec(&src.Middlewares, &dst.Middlewares)
 
-	Convert_v1beta1_RegistryRedisSpec_To_v1alpha3_RegistryRedisSpec(src.Redis, dst.Redis)
+	if src.Redis != nil {
+		dst.Redis = &v1alpha3.RegistryRedisSpec{}
+		Convert_v1beta1_RegistryRedisSpec_To_v1alpha3_RegistryRedisSpec(src.Redis, dst.Redis)
+	}
 
 	dst.Reporting = map[string]string{}
 	for key, value := range src.Reporting {
@@ -82,14 +69,6 @@ func Convert_v1beta1_RegistryConfig01_To_v1alpha3_RegistryConfig01(src *Registry
 }
 
 func Convert_v1beta1_RegistryLogSpec_To_v1alpha3_RegistryLogSpec(src *RegistryLogSpec, dst *v1alpha3.RegistryLogSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &v1alpha3.RegistryLogSpec{}
-	}
-
 	dst.Level = src.Level
 	dst.Formatter = src.Formatter
 
@@ -113,14 +92,6 @@ func Convert_v1beta1_RegistryLogSpec_To_v1alpha3_RegistryLogSpec(src *RegistryLo
 }
 
 func Convert_v1beta1_RegistryHTTPSpec_To_v1alpha3_RegistryHTTPSpec(src *RegistryHTTPSpec, dst *v1alpha3.RegistryHTTPSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &v1alpha3.RegistryHTTPSpec{}
-	}
-
 	dst.SecretRef = src.SecretRef
 	dst.Host = src.Host
 	dst.Net = src.Net
@@ -133,18 +104,13 @@ func Convert_v1beta1_RegistryHTTPSpec_To_v1alpha3_RegistryHTTPSpec(src *Registry
 		Disabled: src.HTTP2.Disabled,
 	}
 
-	Convert_v1beta1_RegistryHTTPDebugSpec_To_v1alpha3_RegistryHTTPDebugSpec(src.Debug, dst.Debug)
+	if src.Debug != nil {
+		dst.Debug = &v1alpha3.RegistryHTTPDebugSpec{}
+		Convert_v1beta1_RegistryHTTPDebugSpec_To_v1alpha3_RegistryHTTPDebugSpec(src.Debug, dst.Debug)
+	}
 }
 
 func Convert_v1beta1_RegistryHTTPDebugSpec_To_v1alpha3_RegistryHTTPDebugSpec(src *RegistryHTTPDebugSpec, dst *v1alpha3.RegistryHTTPDebugSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &v1alpha3.RegistryHTTPDebugSpec{}
-	}
-
 	dst.Port = src.Port
 	dst.Prometheus = v1alpha3.RegistryHTTPDebugPrometheusSpec{
 		Enabled: src.Prometheus.Enabled,
@@ -153,14 +119,6 @@ func Convert_v1beta1_RegistryHTTPDebugSpec_To_v1alpha3_RegistryHTTPDebugSpec(src
 }
 
 func Convert_v1beta1_RegistryHealthSpec_To_v1alpha3_RegistryHealthSpec(src *RegistryHealthSpec, dst *v1alpha3.RegistryHealthSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &v1alpha3.RegistryHealthSpec{}
-	}
-
 	dst.StorageDriver = v1alpha3.RegistryHealthStorageDriverSpec{
 		Enabled:   src.StorageDriver.Enabled,
 		Threshold: src.StorageDriver.Threshold,
@@ -196,14 +154,6 @@ func Convert_v1beta1_RegistryHealthSpec_To_v1alpha3_RegistryHealthSpec(src *Regi
 }
 
 func Convert_v1beta1_RegistryHealthHTTPSpec_To_v1alpha3_RegistryHealthHTTPSpec(src *RegistryHealthHTTPSpec, dst *v1alpha3.RegistryHealthHTTPSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &v1alpha3.RegistryHealthHTTPSpec{}
-	}
-
 	dst.URI = src.URI
 	dst.Interval = src.Interval
 	dst.Threshold = src.Threshold
@@ -214,27 +164,11 @@ func Convert_v1beta1_RegistryHealthHTTPSpec_To_v1alpha3_RegistryHealthHTTPSpec(s
 }
 
 func Convert_v1beta1_RegistryHealthFileSpec_To_v1alpha3_RegistryHealthFileSpec(src *RegistryHealthFileSpec, dst *v1alpha3.RegistryHealthFileSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &v1alpha3.RegistryHealthFileSpec{}
-	}
-
 	dst.File = src.File
 	dst.Interval = src.Interval
 }
 
 func Convert_v1beta1_RegistryHealthTCPSpec_To_v1alpha3_RegistryHealthTCPSpec(src *RegistryHealthTCPSpec, dst *v1alpha3.RegistryHealthTCPSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &v1alpha3.RegistryHealthTCPSpec{}
-	}
-
 	dst.Interval = src.Interval
 	dst.Timeout = src.Timeout
 	dst.Threshold = src.Threshold
@@ -242,14 +176,6 @@ func Convert_v1beta1_RegistryHealthTCPSpec_To_v1alpha3_RegistryHealthTCPSpec(src
 }
 
 func Convert_v1beta1_RegistryNotificationsSpec_To_v1alpha3_RegistryNotificationsSpec(src *RegistryNotificationsSpec, dst *v1alpha3.RegistryNotificationsSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &v1alpha3.RegistryNotificationsSpec{}
-	}
-
 	dst.Endpoints = make([]v1alpha3.RegistryNotificationEndpointSpec, len(src.Endpoints))
 	for _, ep := range src.Endpoints {
 		dst.Endpoints = append(dst.Endpoints, v1alpha3.RegistryNotificationEndpointSpec{
@@ -274,14 +200,6 @@ func Convert_v1beta1_RegistryNotificationsSpec_To_v1alpha3_RegistryNotifications
 }
 
 func Convert_v1beta1_RegistryAuthenticationSpec_To_v1alpha3_RegistryAuthenticationSpec(src *RegistryAuthenticationSpec, dst *v1alpha3.RegistryAuthenticationSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &v1alpha3.RegistryAuthenticationSpec{}
-	}
-
 	if src.Silly != nil {
 		dst.Silly = &v1alpha3.RegistryAuthenticationSillySpec{
 			Realm:   src.Silly.Realm,
@@ -308,14 +226,6 @@ func Convert_v1beta1_RegistryAuthenticationSpec_To_v1alpha3_RegistryAuthenticati
 }
 
 func Convert_v1beta1_RegistryValidationSpec_To_v1alpha3_RegistryValidationSpec(src *RegistryValidationSpec, dst *v1alpha3.RegistryValidationSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &v1alpha3.RegistryValidationSpec{}
-	}
-
 	dst.Disabled = src.Disabled
 	dst.Manifests = v1alpha3.RegistryValidationManifestSpec{
 		URLs: v1alpha3.RegistryValidationManifestURLsSpec{
@@ -326,14 +236,6 @@ func Convert_v1beta1_RegistryValidationSpec_To_v1alpha3_RegistryValidationSpec(s
 }
 
 func Convert_v1beta1_RegistryCompatibilitySpec_To_v1alpha3_RegistryCompatibilitySpec(src *RegistryCompatibilitySpec, dst *v1alpha3.RegistryCompatibilitySpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &v1alpha3.RegistryCompatibilitySpec{}
-	}
-
 	dst.Schema1 = v1alpha3.RegistryCompatibilitySchemaSpec{
 		Enabled:        src.Schema1.Enabled,
 		CertificateRef: src.Schema1.CertificateRef,
@@ -341,14 +243,6 @@ func Convert_v1beta1_RegistryCompatibilitySpec_To_v1alpha3_RegistryCompatibility
 }
 
 func Convert_v1beta1_RegistryStorageSpec_To_v1alpha3_RegistryStorageSpec(src *RegistryStorageSpec, dst *v1alpha3.RegistryStorageSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &v1alpha3.RegistryStorageSpec{}
-	}
-
 	dst.Cache = v1alpha3.RegistryStorageCacheSpec{
 		Blobdescriptor: src.Cache.Blobdescriptor,
 	}
@@ -440,14 +334,6 @@ func Convert_v1beta1_RegistryStorageDriverSpec_To_v1alpha3_RegistryStorageDriver
 }
 
 func Convert_v1beta1_RegistryMiddlewaresSpec_To_v1alpha3_RegistryMiddlewaresSpec(src *RegistryMiddlewaresSpec, dst *v1alpha3.RegistryMiddlewaresSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &v1alpha3.RegistryMiddlewaresSpec{}
-	}
-
 	if len(src.Storage) > 0 {
 		dst.Storage = make([]v1alpha3.RegistryMiddlewareSpec, len(src.Storage))
 		for _, storage := range src.Storage {
@@ -477,27 +363,11 @@ func Convert_v1beta1_RegistryMiddlewaresSpec_To_v1alpha3_RegistryMiddlewaresSpec
 }
 
 func Convert_v1beta1_RegistryMiddlewareSpec_To_v1alpha3_RegistryMiddlewareSpec(src *RegistryMiddlewareSpec, dst *v1alpha3.RegistryMiddlewareSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &v1alpha3.RegistryMiddlewareSpec{}
-	}
-
 	dst.Name = src.Name
 	dst.OptionsRef = src.OptionsRef
 }
 
 func Convert_v1beta1_RegistryRedisSpec_To_v1alpha3_RegistryRedisSpec(src *RegistryRedisSpec, dst *v1alpha3.RegistryRedisSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &v1alpha3.RegistryRedisSpec{}
-	}
-
 	dst.RedisConnection = src.RedisConnection
 	dst.ReadTimeout = src.ReadTimeout
 	dst.WriteTimeout = src.WriteTimeout
@@ -511,14 +381,6 @@ func Convert_v1beta1_RegistryRedisSpec_To_v1alpha3_RegistryRedisSpec(src *Regist
 }
 
 func Convert_v1alpha3_RegistrySpec_To_v1beta1_RegistrySpec(src *v1alpha3.RegistrySpec, dst *RegistrySpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &RegistrySpec{}
-	}
-
 	dst.ComponentSpec = src.ComponentSpec
 	dst.Proxy = src.Proxy
 
@@ -530,14 +392,6 @@ func Convert_v1alpha3_RegistrySpec_To_v1beta1_RegistrySpec(src *v1alpha3.Registr
 }
 
 func Convert_v1alpha3_RegistryConfig01_To_v1beta1_RegistryConfig01(src *v1alpha3.RegistryConfig01, dst *RegistryConfig01) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &RegistryConfig01{}
-	}
-
 	Convert_v1alpha3_RegistryLogSpec_To_v1beta1_RegistryLogSpec(&src.Log, &dst.Log)
 
 	Convert_v1alpha3_RegistryHTTPSpec_To_v1beta1_RegistryHTTPSpec(&src.HTTP, &dst.HTTP)
@@ -556,7 +410,10 @@ func Convert_v1alpha3_RegistryConfig01_To_v1beta1_RegistryConfig01(src *v1alpha3
 
 	Convert_v1alpha3_RegistryMiddlewaresSpec_To_v1beta1_RegistryMiddlewaresSpec(&src.Middlewares, &dst.Middlewares)
 
-	Convert_v1alpha3_RegistryRedisSpec_To_v1beta1_RegistryRedisSpec(src.Redis, dst.Redis)
+	if src.Redis != nil {
+		dst.Redis = &RegistryRedisSpec{}
+		Convert_v1alpha3_RegistryRedisSpec_To_v1beta1_RegistryRedisSpec(src.Redis, dst.Redis)
+	}
 
 	dst.Reporting = map[string]string{}
 	for key, value := range src.Reporting {
@@ -565,14 +422,6 @@ func Convert_v1alpha3_RegistryConfig01_To_v1beta1_RegistryConfig01(src *v1alpha3
 }
 
 func Convert_v1alpha3_RegistryLogSpec_To_v1beta1_RegistryLogSpec(src *v1alpha3.RegistryLogSpec, dst *RegistryLogSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &RegistryLogSpec{}
-	}
-
 	dst.Level = src.Level
 	dst.Formatter = src.Formatter
 
@@ -596,14 +445,6 @@ func Convert_v1alpha3_RegistryLogSpec_To_v1beta1_RegistryLogSpec(src *v1alpha3.R
 }
 
 func Convert_v1alpha3_RegistryHTTPSpec_To_v1beta1_RegistryHTTPSpec(src *v1alpha3.RegistryHTTPSpec, dst *RegistryHTTPSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &RegistryHTTPSpec{}
-	}
-
 	dst.SecretRef = src.SecretRef
 	dst.Host = src.Host
 	dst.Net = src.Net
@@ -616,18 +457,13 @@ func Convert_v1alpha3_RegistryHTTPSpec_To_v1beta1_RegistryHTTPSpec(src *v1alpha3
 		Disabled: src.HTTP2.Disabled,
 	}
 
-	Convert_v1alpha3_RegistryHTTPDebugSpec_To_v1beta1_RegistryHTTPDebugSpec(src.Debug, dst.Debug)
+	if src.Debug != nil {
+		dst.Debug = &RegistryHTTPDebugSpec{}
+		Convert_v1alpha3_RegistryHTTPDebugSpec_To_v1beta1_RegistryHTTPDebugSpec(src.Debug, dst.Debug)
+	}
 }
 
 func Convert_v1alpha3_RegistryHTTPDebugSpec_To_v1beta1_RegistryHTTPDebugSpec(src *v1alpha3.RegistryHTTPDebugSpec, dst *RegistryHTTPDebugSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &RegistryHTTPDebugSpec{}
-	}
-
 	dst.Port = src.Port
 	dst.Prometheus = RegistryHTTPDebugPrometheusSpec{
 		Enabled: src.Prometheus.Enabled,
@@ -636,13 +472,6 @@ func Convert_v1alpha3_RegistryHTTPDebugSpec_To_v1beta1_RegistryHTTPDebugSpec(src
 }
 
 func Convert_v1alpha3_RegistryHealthSpec_To_v1beta1_RegistryHealthSpec(src *v1alpha3.RegistryHealthSpec, dst *RegistryHealthSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &RegistryHealthSpec{}
-	}
 
 	dst.StorageDriver = RegistryHealthStorageDriverSpec{
 		Enabled:   src.StorageDriver.Enabled,
@@ -679,13 +508,6 @@ func Convert_v1alpha3_RegistryHealthSpec_To_v1beta1_RegistryHealthSpec(src *v1al
 }
 
 func Convert_v1alpha3_RegistryHealthHTTPSpec_To_v1beta1_RegistryHealthHTTPSpec(src *v1alpha3.RegistryHealthHTTPSpec, dst *RegistryHealthHTTPSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &RegistryHealthHTTPSpec{}
-	}
 
 	dst.URI = src.URI
 	dst.Interval = src.Interval
@@ -697,26 +519,12 @@ func Convert_v1alpha3_RegistryHealthHTTPSpec_To_v1beta1_RegistryHealthHTTPSpec(s
 }
 
 func Convert_v1alpha3_RegistryHealthFileSpec_To_v1beta1_RegistryHealthFileSpec(src *v1alpha3.RegistryHealthFileSpec, dst *RegistryHealthFileSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &RegistryHealthFileSpec{}
-	}
 
 	dst.File = src.File
 	dst.Interval = src.Interval
 }
 
 func Convert_v1alpha3_RegistryHealthTCPSpec_To_v1beta1_RegistryHealthTCPSpec(src *v1alpha3.RegistryHealthTCPSpec, dst *RegistryHealthTCPSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &RegistryHealthTCPSpec{}
-	}
 
 	dst.Interval = src.Interval
 	dst.Timeout = src.Timeout
@@ -725,13 +533,6 @@ func Convert_v1alpha3_RegistryHealthTCPSpec_To_v1beta1_RegistryHealthTCPSpec(src
 }
 
 func Convert_v1alpha3_RegistryNotificationsSpec_To_v1beta1_RegistryNotificationsSpec(src *v1alpha3.RegistryNotificationsSpec, dst *RegistryNotificationsSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &RegistryNotificationsSpec{}
-	}
 
 	dst.Endpoints = make([]RegistryNotificationEndpointSpec, len(src.Endpoints))
 	for _, ep := range src.Endpoints {
@@ -757,13 +558,6 @@ func Convert_v1alpha3_RegistryNotificationsSpec_To_v1beta1_RegistryNotifications
 }
 
 func Convert_v1alpha3_RegistryAuthenticationSpec_To_v1beta1_RegistryAuthenticationSpec(src *v1alpha3.RegistryAuthenticationSpec, dst *RegistryAuthenticationSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &RegistryAuthenticationSpec{}
-	}
 
 	if src.Silly != nil {
 		dst.Silly = &RegistryAuthenticationSillySpec{
@@ -791,13 +585,6 @@ func Convert_v1alpha3_RegistryAuthenticationSpec_To_v1beta1_RegistryAuthenticati
 }
 
 func Convert_v1alpha3_RegistryValidationSpec_To_v1beta1_RegistryValidationSpec(src *v1alpha3.RegistryValidationSpec, dst *RegistryValidationSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &RegistryValidationSpec{}
-	}
 
 	dst.Disabled = src.Disabled
 	dst.Manifests = RegistryValidationManifestSpec{
@@ -809,13 +596,6 @@ func Convert_v1alpha3_RegistryValidationSpec_To_v1beta1_RegistryValidationSpec(s
 }
 
 func Convert_v1alpha3_RegistryCompatibilitySpec_To_v1beta1_RegistryCompatibilitySpec(src *v1alpha3.RegistryCompatibilitySpec, dst *RegistryCompatibilitySpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &RegistryCompatibilitySpec{}
-	}
 
 	dst.Schema1 = RegistryCompatibilitySchemaSpec{
 		Enabled:        src.Schema1.Enabled,
@@ -824,13 +604,6 @@ func Convert_v1alpha3_RegistryCompatibilitySpec_To_v1beta1_RegistryCompatibility
 }
 
 func Convert_v1alpha3_RegistryStorageSpec_To_v1beta1_RegistryStorageSpec(src *v1alpha3.RegistryStorageSpec, dst *RegistryStorageSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &RegistryStorageSpec{}
-	}
 
 	dst.Cache = RegistryStorageCacheSpec{
 		Blobdescriptor: src.Cache.Blobdescriptor,
@@ -860,13 +633,6 @@ func Convert_v1alpha3_RegistryStorageSpec_To_v1beta1_RegistryStorageSpec(src *v1
 }
 
 func Convert_v1alpha3_RegistryStorageDriverSpec_To_v1beta1_RegistryStorageDriverSpec(src *v1alpha3.RegistryStorageDriverSpec, dst *RegistryStorageDriverSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &RegistryStorageDriverSpec{}
-	}
 
 	if src.InMemory != nil {
 		dst.InMemory = &RegistryStorageDriverInmemorySpec{}
@@ -923,13 +689,6 @@ func Convert_v1alpha3_RegistryStorageDriverSpec_To_v1beta1_RegistryStorageDriver
 }
 
 func Convert_v1alpha3_RegistryMiddlewaresSpec_To_v1beta1_RegistryMiddlewaresSpec(src *v1alpha3.RegistryMiddlewaresSpec, dst *RegistryMiddlewaresSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &RegistryMiddlewaresSpec{}
-	}
 
 	if len(src.Storage) > 0 {
 		dst.Storage = make([]RegistryMiddlewareSpec, len(src.Storage))
@@ -960,27 +719,11 @@ func Convert_v1alpha3_RegistryMiddlewaresSpec_To_v1beta1_RegistryMiddlewaresSpec
 }
 
 func Convert_v1alpha3_RegistryMiddlewareSpec_To_v1beta1_RegistryMiddlewareSpec(src *v1alpha3.RegistryMiddlewareSpec, dst *RegistryMiddlewareSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &RegistryMiddlewareSpec{}
-	}
-
 	dst.Name = src.Name
 	dst.OptionsRef = src.OptionsRef
 }
 
 func Convert_v1alpha3_RegistryRedisSpec_To_v1beta1_RegistryRedisSpec(src *v1alpha3.RegistryRedisSpec, dst *RegistryRedisSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &RegistryRedisSpec{}
-	}
-
 	dst.RedisConnection = src.RedisConnection
 	dst.ReadTimeout = src.ReadTimeout
 	dst.WriteTimeout = src.WriteTimeout

@@ -28,14 +28,6 @@ func (dst *JobService) ConvertFrom(srcRaw conversion.Hub) error {
 }
 
 func Convert_v1beta1_JobServiceSpec_To_v1alpha3_JobServiceSpec(src *JobServiceSpec, dst *v1alpha3.JobServiceSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &v1alpha3.JobServiceSpec{}
-	}
-
 	dst.ComponentSpec = src.ComponentSpec
 	dst.SecretRef = src.SecretRef
 	dst.TLS = src.TLS
@@ -56,40 +48,16 @@ func Convert_v1beta1_JobServiceSpec_To_v1alpha3_JobServiceSpec(src *JobServiceSp
 }
 
 func Convert_v1beta1_JobServiceTokenSpec_To_v1alpha3_JobServiceTokenSpec(src *JobServiceTokenSpec, dst *v1alpha3.JobServiceTokenSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &v1alpha3.JobServiceTokenSpec{}
-	}
-
 	dst.URL = src.URL
 }
 
 func Convert_v1beta1_JobServiceCoreSpec_To_v1alpha3_JobServiceCoreSpec(src *JobServiceCoreSpec, dst *v1alpha3.JobServiceCoreSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &v1alpha3.JobServiceCoreSpec{}
-	}
-
 	dst.SecretRef = src.SecretRef
 	dst.URL = src.URL
 
 }
 
 func Convert_v1beta1_JobServicePoolSpec_To_v1alpha3_JobServicePoolSpec(src *JobServicePoolSpec, dst *v1alpha3.JobServicePoolSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &v1alpha3.JobServicePoolSpec{}
-	}
-
 	dst.WorkerCount = src.WorkerCount
 	dst.Backend = src.Backend
 	dst.Redis = v1alpha3.JobServicePoolRedisSpec{
@@ -100,14 +68,6 @@ func Convert_v1beta1_JobServicePoolSpec_To_v1alpha3_JobServicePoolSpec(src *JobS
 }
 
 func Convert_v1beta1_JobServiceLoggerConfigSpec_To_v1alpha3_JobServiceLoggerConfigSpec(src *JobServiceLoggerConfigSpec, dst *v1alpha3.JobServiceLoggerConfigSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &v1alpha3.JobServiceLoggerConfigSpec{}
-	}
-
 	if src.Database != nil {
 		dst.Database = &v1alpha3.JobServiceLoggerConfigDatabaseSpec{
 			Level:   src.Database.Level,
@@ -134,14 +94,6 @@ func Convert_v1beta1_JobServiceLoggerConfigSpec_To_v1alpha3_JobServiceLoggerConf
 }
 
 func Convert_v1beta1_RegistryControllerConnectionSpec_To_v1alpha3_RegistryControllerConnectionSpec(src *RegistryControllerConnectionSpec, dst *v1alpha3.RegistryControllerConnectionSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &v1alpha3.RegistryControllerConnectionSpec{}
-	}
-
 	dst.RegistryURL = src.RegistryURL
 	dst.ControllerURL = src.ControllerURL
 	dst.Credentials = v1alpha3.CoreComponentsRegistryCredentialsSpec{
@@ -151,14 +103,6 @@ func Convert_v1beta1_RegistryControllerConnectionSpec_To_v1alpha3_RegistryContro
 }
 
 func Convert_v1alpha3_JobServiceSpec_To_v1beta1_JobServiceSpec(src *v1alpha3.JobServiceSpec, dst *JobServiceSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &JobServiceSpec{}
-	}
-
 	dst.ComponentSpec = src.ComponentSpec
 	dst.SecretRef = src.SecretRef
 	dst.TLS = src.TLS
@@ -179,40 +123,16 @@ func Convert_v1alpha3_JobServiceSpec_To_v1beta1_JobServiceSpec(src *v1alpha3.Job
 }
 
 func Convert_v1alpha3_JobServiceTokenSpec_To_v1beta1_JobServiceTokenSpec(src *v1alpha3.JobServiceTokenSpec, dst *JobServiceTokenSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &JobServiceTokenSpec{}
-	}
-
 	dst.URL = src.URL
 }
 
 func Convert_v1alpha3_JobServiceCoreSpec_To_v1beta1_JobServiceCoreSpec(src *v1alpha3.JobServiceCoreSpec, dst *JobServiceCoreSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &JobServiceCoreSpec{}
-	}
-
 	dst.SecretRef = src.SecretRef
 	dst.URL = src.URL
 
 }
 
 func Convert_v1alpha3_JobServicePoolSpec_To_v1beta1_JobServicePoolSpec(src *v1alpha3.JobServicePoolSpec, dst *JobServicePoolSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &JobServicePoolSpec{}
-	}
-
 	dst.WorkerCount = src.WorkerCount
 	dst.Backend = src.Backend
 	dst.Redis = JobServicePoolRedisSpec{
@@ -223,14 +143,6 @@ func Convert_v1alpha3_JobServicePoolSpec_To_v1beta1_JobServicePoolSpec(src *v1al
 }
 
 func Convert_v1alpha3_JobServiceLoggerConfigSpec_To_v1beta1_JobServiceLoggerConfigSpec(src *v1alpha3.JobServiceLoggerConfigSpec, dst *JobServiceLoggerConfigSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &JobServiceLoggerConfigSpec{}
-	}
-
 	if src.Database != nil {
 		dst.Database = &JobServiceLoggerConfigDatabaseSpec{
 			Level:   src.Database.Level,
@@ -257,14 +169,6 @@ func Convert_v1alpha3_JobServiceLoggerConfigSpec_To_v1beta1_JobServiceLoggerConf
 }
 
 func Convert_v1alpha3_RegistryControllerConnectionSpec_To_v1beta1_RegistryControllerConnectionSpec(src *v1alpha3.RegistryControllerConnectionSpec, dst *RegistryControllerConnectionSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &RegistryControllerConnectionSpec{}
-	}
-
 	dst.RegistryURL = src.RegistryURL
 	dst.ControllerURL = src.ControllerURL
 	dst.Credentials = CoreComponentsRegistryCredentialsSpec{

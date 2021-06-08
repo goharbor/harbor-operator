@@ -28,14 +28,6 @@ func (dst *NotaryServer) ConvertFrom(srcRaw conversion.Hub) error {
 }
 
 func Convert_v1beta1_NotaryServerSpec_To_v1alpha3_NotaryServerSpec(src *NotaryServerSpec, dst *v1alpha3.NotaryServerSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &v1alpha3.NotaryServerSpec{}
-	}
-
 	dst.ComponentSpec = src.ComponentSpec
 	dst.TLS = src.TLS
 	dst.MigrationEnabled = src.MigrationEnabled
@@ -46,19 +38,14 @@ func Convert_v1beta1_NotaryServerSpec_To_v1alpha3_NotaryServerSpec(src *NotarySe
 
 	Convert_v1beta1_NotaryStorageSpec_To_v1alpha3_NotaryStorageSpec(&src.Storage, &dst.Storage)
 
-	Convert_v1beta1_NotaryServerAuthSpec_To_v1alpha3_NotaryServerAuthSpec(src.Authentication, dst.Authentication)
+	if src.Authentication != nil {
+		dst.Authentication = &v1alpha3.NotaryServerAuthSpec{}
+		Convert_v1beta1_NotaryServerAuthSpec_To_v1alpha3_NotaryServerAuthSpec(src.Authentication, dst.Authentication)
+	}
 
 }
 
 func Convert_v1beta1_NotaryServerTrustServiceSpec_To_v1alpha3_NotaryServerTrustServiceSpec(src *NotaryServerTrustServiceSpec, dst *v1alpha3.NotaryServerTrustServiceSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &v1alpha3.NotaryServerTrustServiceSpec{}
-	}
-
 	dst.Remote = &v1alpha3.NotaryServerTrustServiceRemoteSpec{
 		Host:           src.Remote.Host,
 		Port:           src.Remote.Port,
@@ -68,14 +55,6 @@ func Convert_v1beta1_NotaryServerTrustServiceSpec_To_v1alpha3_NotaryServerTrustS
 }
 
 func Convert_v1beta1_NotaryServerAuthSpec_To_v1alpha3_NotaryServerAuthSpec(src *NotaryServerAuthSpec, dst *v1alpha3.NotaryServerAuthSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &v1alpha3.NotaryServerAuthSpec{}
-	}
-
 	dst.Token = v1alpha3.NotaryServerAuthTokenSpec{
 		Realm:          src.Token.Realm,
 		Service:        src.Token.Service,
@@ -86,14 +65,6 @@ func Convert_v1beta1_NotaryServerAuthSpec_To_v1alpha3_NotaryServerAuthSpec(src *
 }
 
 func Convert_v1alpha3_NotaryServerSpec_To_v1beta1_NotaryServerSpec(src *v1alpha3.NotaryServerSpec, dst *NotaryServerSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &NotaryServerSpec{}
-	}
-
 	dst.ComponentSpec = src.ComponentSpec
 	dst.TLS = src.TLS
 	dst.MigrationEnabled = src.MigrationEnabled
@@ -104,19 +75,13 @@ func Convert_v1alpha3_NotaryServerSpec_To_v1beta1_NotaryServerSpec(src *v1alpha3
 
 	Convert_v1alpha3_NotaryStorageSpec_To_v1beta1_NotaryStorageSpec(&src.Storage, &dst.Storage)
 
-	Convert_v1alpha3_NotaryServerAuthSpec_To_v1beta1_NotaryServerAuthSpec(src.Authentication, dst.Authentication)
-
+	if src.Authentication != nil {
+		dst.Authentication = &NotaryServerAuthSpec{}
+		Convert_v1alpha3_NotaryServerAuthSpec_To_v1beta1_NotaryServerAuthSpec(src.Authentication, dst.Authentication)
+	}
 }
 
 func Convert_v1alpha3_NotaryServerTrustServiceSpec_To_v1beta1_NotaryServerTrustServiceSpec(src *v1alpha3.NotaryServerTrustServiceSpec, dst *NotaryServerTrustServiceSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &NotaryServerTrustServiceSpec{}
-	}
-
 	dst.Remote = &NotaryServerTrustServiceRemoteSpec{
 		Host:           src.Remote.Host,
 		Port:           src.Remote.Port,
@@ -126,14 +91,6 @@ func Convert_v1alpha3_NotaryServerTrustServiceSpec_To_v1beta1_NotaryServerTrustS
 }
 
 func Convert_v1alpha3_NotaryServerAuthSpec_To_v1beta1_NotaryServerAuthSpec(src *v1alpha3.NotaryServerAuthSpec, dst *NotaryServerAuthSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &NotaryServerAuthSpec{}
-	}
-
 	dst.Token = NotaryServerAuthTokenSpec{
 		Realm:          src.Token.Realm,
 		Service:        src.Token.Service,

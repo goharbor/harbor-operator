@@ -28,13 +28,6 @@ func (dst *RegistryController) ConvertFrom(srcRaw conversion.Hub) error {
 }
 
 func Convert_v1beta1_RegistryControllerSpec_To_v1alpha3_RegistryControllerSpec(src *RegistryControllerSpec, dst *v1alpha3.RegistryControllerSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &v1alpha3.RegistryControllerSpec{}
-	}
 
 	dst.ComponentSpec = src.ComponentSpec
 	dst.RegistryRef = src.RegistryRef
@@ -51,13 +44,6 @@ func Convert_v1beta1_RegistryControllerSpec_To_v1alpha3_RegistryControllerSpec(s
 }
 
 func Convert_v1alpha3_RegistryControllerSpec_To_v1beta1_RegistryControllerSpec(src *v1alpha3.RegistryControllerSpec, dst *RegistryControllerSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &RegistryControllerSpec{}
-	}
 
 	dst.ComponentSpec = src.ComponentSpec
 	dst.RegistryRef = src.RegistryRef
