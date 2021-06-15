@@ -49,4 +49,3 @@ images:
     newName: ghcr.io/goharbor/redis-operator
   - name: goharbor/harbor-operator
     newName: ghcr.io/goharbor/harbor-operator
-    newTag: v1.0.0
