@@ -6,7 +6,6 @@ import (
 
 	goharborv1alpha3 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	goharborv1beta1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
-
 	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/pkg/config"
 	"github.com/ovh/configstore"

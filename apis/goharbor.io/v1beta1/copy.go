@@ -7,5 +7,6 @@ func CopyViaJSON(src, dest interface{}) error {
 	if err != nil {
 		return err
 	}
+
 	return json.Unmarshal(b, dest)
 }

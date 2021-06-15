@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+
 	"github.com/go-logr/logr"
 	"github.com/ovh/configstore"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"

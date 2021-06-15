@@ -5,12 +5,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/conversion"
 )
 
-func (src *NotaryServer) ConvertTo(dstRaw conversion.Hub) error {
+func (n *NotaryServer) ConvertTo(dstRaw conversion.Hub) error {
 	dst := dstRaw.(*v1alpha3.NotaryServer)
-	return CopyViaJSON(dst, src)
+
+	return CopyViaJSON(dst, n)
 }
 
-func (dst *NotaryServer) ConvertFrom(srcRaw conversion.Hub) error {
+func (n *NotaryServer) ConvertFrom(srcRaw conversion.Hub) error {
 	src := srcRaw.(*v1alpha3.NotaryServer)
-	return CopyViaJSON(dst, src)
+
+	return CopyViaJSON(n, src)
 }

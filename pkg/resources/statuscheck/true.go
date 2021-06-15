@@ -3,9 +3,9 @@ package statuscheck
 import (
 	"context"
 
-	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func True(context.Context, runtime.Object) (bool, error) {
+func True(context.Context, client.Object) (bool, error) {
 	return true, nil
 }

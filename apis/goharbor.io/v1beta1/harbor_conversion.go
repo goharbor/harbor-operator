@@ -7,12 +7,14 @@ import (
 
 var _ conversion.Convertible = &Harbor{}
 
-func (src *Harbor) ConvertTo(dstRaw conversion.Hub) error {
+func (h *Harbor) ConvertTo(dstRaw conversion.Hub) error {
 	dst := dstRaw.(*v1alpha3.Harbor)
-	return CopyViaJSON(dst, src)
+
+	return CopyViaJSON(dst, h)
 }
 
-func (dst *Harbor) ConvertFrom(srcRaw conversion.Hub) error {
+func (h *Harbor) ConvertFrom(srcRaw conversion.Hub) error {
 	src := srcRaw.(*v1alpha3.Harbor)
-	return CopyViaJSON(dst, src)
+
+	return CopyViaJSON(h, src)
 }
