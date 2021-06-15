@@ -11,11 +11,11 @@ import (
 	v1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	apiextv1 "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/typed/apiextensions/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/util/workqueue"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -46,7 +46,7 @@ type Builder struct {
 
 	ctrl             controller.Controller
 	crdGetter        apiextv1.CustomResourceDefinitionsGetter
-	forObject        runtime.Object
+	forObject        client.Object
 	log              logr.Logger
 	globalPredicates []predicate.Predicate
 	tryOwnsInputs    []tryOwnsInput
@@ -59,14 +59,14 @@ func (blder *Builder) WithLogger(log logr.Logger) *Builder {
 	return blder
 }
 
-func (blder *Builder) For(object runtime.Object, opts ...builder.ForOption) *Builder {
+func (blder *Builder) For(object client.Object, opts ...builder.ForOption) *Builder {
 	blder.blder.For(object, opts...)
 	blder.forObject = object
 
 	return blder
 }
 
-func (blder *Builder) Owns(object runtime.Object, opts ...builder.OwnsOption) *Builder {
+func (blder *Builder) Owns(object client.Object, opts ...builder.OwnsOption) *Builder {
 	blder.blder.Owns(object, opts...)
 
 	return blder
@@ -86,7 +86,7 @@ func (blder *Builder) WithOptions(options controller.Options) *Builder {
 }
 
 // TryOwns owns the object when the crdDependency ready, otherwise try owns it after the crdDependency ready.
-func (blder *Builder) TryOwns(object runtime.Object, crdDependency string, predicates ...predicate.Predicate) *Builder {
+func (blder *Builder) TryOwns(object client.Object, crdDependency string, predicates ...predicate.Predicate) *Builder {
 	if isCRDReady(blder.crdGetter, crdDependency) {
 		blder.log.Info("Owns the object directly because the CRD is ready", "crd", crdDependency)
 
@@ -147,20 +147,20 @@ func (blder *Builder) Complete(r reconcile.Reconciler) error {
 }
 
 type tryOwnsInput struct {
-	object        runtime.Object
+	object        client.Object
 	predicates    []predicate.Predicate
 	crdDependency string
 }
 
 type tryWatcher struct {
 	sync.Mutex
-	watched map[runtime.Object]bool
+	watched map[client.Object]bool
 
 	ctrl      controller.Controller
 	crdGetter apiextv1.CustomResourceDefinitionsGetter
 	log       logr.Logger
 
-	forObject        runtime.Object
+	forObject        client.Object
 	globalPredicates []predicate.Predicate
 	tryOwnsInputs    []tryOwnsInput
 }
@@ -180,7 +180,7 @@ func (w *tryWatcher) TryWatch() {
 	}
 
 	if w.watched == nil {
-		w.watched = make(map[runtime.Object]bool, len(w.tryOwnsInputs))
+		w.watched = make(map[client.Object]bool, len(w.tryOwnsInputs))
 	}
 
 	for _, own := range w.tryOwnsInputs {
@@ -207,7 +207,7 @@ func (w *tryWatcher) TryWatch() {
 }
 
 func isCRDReady(getter apiextv1.CustomResourceDefinitionsGetter, name string) bool {
-	log := ctrl.Log.Logger.WithName("builder")
+	log := ctrl.Log.WithName("builder")
 
 	crdReadyWaitInterval := time.Second * 10 // nolint:gomnd
 	crdReadyWaitTimeout := time.Minute * 5   // nolint:gomnd

@@ -9,21 +9,17 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
 
-func StartManager(ctx context.Context) (context.Context, chan struct{}) {
+func StartManager(ctx context.Context) {
 	ginkgo.By("Starting controller")
-
-	stopCh := make(chan struct{})
 
 	go func() {
 		defer ginkgo.GinkgoRecover()
 
 		ginkgo.By("Starting manager")
 
-		gomega.Expect(GetManager(ctx).Start(stopCh)).
+		gomega.Expect(GetManager(ctx).Start(ctx)).
 			To(gomega.Succeed(), "failed to start manager")
 	}()
-
-	return ctx, stopCh
 }
 
 func NewManager(ctx context.Context) manager.Manager {

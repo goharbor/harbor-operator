@@ -4,7 +4,6 @@ import (
 	"context"
 
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
-	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
@@ -25,10 +24,7 @@ func (c *Controller) EnsureSecretType(ctx context.Context, node graph.Resource) 
 
 	gvk := c.AddGVKToSpan(ctx, span, res.resource)
 
-	objectKey, err := client.ObjectKeyFromObject(res.resource)
-	if err != nil {
-		return serrors.UnrecoverrableError(err, serrors.OperatorReason, "cannot get object key")
-	}
+	objectKey := client.ObjectKeyFromObject(res.resource)
 
 	span.
 		SetTag("Resource.Name", objectKey.Name).
@@ -36,7 +32,7 @@ func (c *Controller) EnsureSecretType(ctx context.Context, node graph.Resource) 
 
 	secret := &corev1.Secret{}
 
-	err = c.Client.Get(ctx, objectKey, secret)
+	err := c.Client.Get(ctx, objectKey, secret)
 	if err != nil {
 		// TODO Check if the error is a temporary error or a unrecoverrable one
 		return errors.Wrapf(err, "cannot get %s %s/%s", gvk, res.resource.GetNamespace(), res.resource.GetName())

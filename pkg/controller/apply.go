@@ -18,7 +18,7 @@ func (c *Controller) Apply(ctx context.Context, res *Resource) error {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "apply")
 	defer span.Finish()
 
-	l := logger.Get(ctx)
+	l := logger.Get(ctx).WithName("resource_applier")
 
 	l.V(1).Info("Deploying resource")
 
@@ -28,12 +28,30 @@ func (c *Controller) Apply(ctx context.Context, res *Resource) error {
 		return errors.Wrap(err, "mutate")
 	}
 
-	err := c.Client.Patch(ctx, resource, client.Apply, &client.PatchOptions{
+	key := client.ObjectKeyFromObject(resource)
+
+	existing := resource.DeepCopyObject().(client.Object)
+	if err := c.Get(ctx, key, existing); err != nil {
+		if !apierrs.IsNotFound(err) {
+			return err
+		}
+
+		l.Info("apply creating", "key", key, "kind", resource.GetObjectKind().GroupVersionKind())
+
+		if err := c.Create(ctx, resource); err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	l.Info("apply changing", "key", key, "kind", resource.GetObjectKind().GroupVersionKind())
+
+	if err := c.Client.Patch(ctx, resource, client.Apply, &client.PatchOptions{
 		Force:        &force,
 		FieldManager: application.GetName(ctx),
-	})
-	if err != nil {
-		l.Error(err, "Cannot deploy resource")
+	}); err != nil {
+		l.Error(err, "Cannot deploy resource", "key", key, "kind", resource.GetObjectKind().GroupVersionKind())
 
 		if apierrs.IsForbidden(err) {
 			return serrors.RetryLaterError(err, "dependencyStatus", err.Error())

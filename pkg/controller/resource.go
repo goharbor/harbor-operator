@@ -3,7 +3,6 @@ package controller
 import (
 	"context"
 
-	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	sgraph "github.com/goharbor/harbor-operator/pkg/controller/internal/graph"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	"github.com/goharbor/harbor-operator/pkg/factories/owner"
@@ -36,16 +35,13 @@ func (res *Resource) GetResource() resources.Resource {
 }
 
 func (c *Controller) Changed(ctx context.Context, depManager *checksum.Dependencies, resource resources.Resource) (bool, error) {
-	objectKey, err := client.ObjectKeyFromObject(resource)
-	if err != nil {
-		return false, serrors.UnrecoverrableError(err, serrors.OperatorReason, "cannot get object key")
-	}
+	objectKey := client.ObjectKeyFromObject(resource)
 
 	result := resource.DeepCopyObject()
 
-	// nolint:go-golangci-lint,nestif
+	// nolint:nestif
 	if result, ok := result.(resources.Resource); ok {
-		err = c.Client.Get(ctx, objectKey, result)
+		err := c.Client.Get(ctx, objectKey, result)
 		if err != nil {
 			if !apierrors.IsNotFound(err) {
 				return false, errors.Wrap(err, "cannot get resource")

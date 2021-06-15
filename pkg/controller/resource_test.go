@@ -63,7 +63,7 @@ var _ = Context("Adding", func() {
 
 		c.Scheme = scheme
 
-		ctx = c.NewContext(controllerruntime.Request{
+		ctx = c.PopulateContext(context.TODO(), controllerruntime.Request{
 			NamespacedName: types.NamespacedName{
 				Name:      "resource-name",
 				Namespace: "namespace",
@@ -102,7 +102,7 @@ var _ = Context("Adding", func() {
 
 						c.Scheme = scheme
 
-						context := c.NewContext(controllerruntime.Request{
+						context := c.PopulateContext(context.TODO(), controllerruntime.Request{
 							NamespacedName: types.NamespacedName{
 								Name:      "resource-name",
 								Namespace: "namespace",
