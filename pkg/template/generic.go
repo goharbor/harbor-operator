@@ -6,7 +6,6 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -20,7 +19,7 @@ func (err *ErrKeyNotFound) Error() string {
 	return fmt.Sprintf("%s not found for reference %s", err.Key, err.Reference)
 }
 
-func GetK8SNamespacedDataFunc(ctx context.Context, c client.Client, namespace string, object runtime.Object, getData func(context.Context, runtime.Object) (map[string]interface{}, error), ignoreNotFound bool) interface{} {
+func GetK8SNamespacedDataFunc(ctx context.Context, c client.Client, namespace string, object client.Object, getData func(context.Context, client.Object) (map[string]interface{}, error), ignoreNotFound bool) interface{} {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "getK8SNamespacedDataFunc")
 	defer span.Finish()
 

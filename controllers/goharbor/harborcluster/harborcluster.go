@@ -1,6 +1,7 @@
 package harborcluster
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -15,8 +16,8 @@ import (
 )
 
 // Reconcile logic of the HarborCluster.
-func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) { // nolint:funlen
-	ctx := r.ctrl.NewContext(req)
+func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (res ctrl.Result, err error) { // nolint:funlen
+	ctx = r.ctrl.PopulateContext(ctx, req)
 	log := logger.Get(ctx)
 
 	// Get the harborcluster first
