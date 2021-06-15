@@ -20,7 +20,7 @@ spec:
         - /manager
         args:
         - --enable-leader-election
-        image: goharbor/harbor-operator:v1.0.0
+        image: goharbor/harbor-operator:v1.0.1
         name: manager
         securityContext:
           allowPrivilegeEscalation: false

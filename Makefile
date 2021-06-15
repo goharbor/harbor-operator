@@ -1,7 +1,7 @@
 
 # Image URL to use all building/pushing image targets
-IMG ?= goharbor/harbor-operator:v1.0.0
-RELEASE_VERSION ?= v1.0.0
+IMG ?= goharbor/harbor-operator:v1.0.1
+RELEASE_VERSION ?= v1.0.1
 GIT_COMMIT ?= none
 
 CONFIGURATION_FROM ?= env,file:$(CURDIR)/config-dev.yml
