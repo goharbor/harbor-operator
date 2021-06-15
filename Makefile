@@ -486,13 +486,13 @@ clean:
 
 # find or download controller-gen
 # download controller-gen if necessary
-CONTROLLER_GEN_VERSION := 0.4.1
+CONTROLLER_GEN_VERSION := 0.5.0
 CONTROLLER_GEN := $(BIN)/controller-gen
 
 .PHONY: controller-gen
 controller-gen:
 	@$(CONTROLLER_GEN) --version 2>&1 \
-		| grep 'v$(CONTROLLER_GEN_VERSION)' > /dev/null \
+		| grep 'v$(CONTROLLER_GEN_VERSION)' \
 	|| rm -f $(CONTROLLER_GEN)
 	@$(MAKE) $(CONTROLLER_GEN)
 
@@ -541,13 +541,13 @@ $(GOLANGCI_LINT):
 
 # find or download kubebuilder
 # download kubebuilder if necessary
-KUBEBUIDER_VERSION := 2.0.1
+KUBEBUIDER_VERSION := 3.1.0
 KUBEBUILDER=$(BIN)/kubebuilder
 
 .PHONY: kubebuilder
 kubebuilder:
 	@$(KUBEBUILDER) version 2>&1 \
-		| grep 'KubeBuilderVersion:"$(KUBEBUIDER_VERSION)"' > /dev/null \
+		| grep 'KubeBuilderVersion:"$(KUBEBUIDER_VERSION)"' \
 	|| rm -f $(KUBEBUILDER)
 	@$(MAKE) $(KUBEBUILDER)
 
@@ -606,7 +606,7 @@ $(GORELEASER):
 
 # find or download stringer
 # download stringer if necessary
-STRINGER_VERSION := v0.0.0-20201223010750-3fa0e8f87c1a
+STRINGER_VERSION := v0.1.2
 STRINGER := $(BIN)/stringer
 
 .PHONY: stringer

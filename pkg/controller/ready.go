@@ -7,6 +7,7 @@ import (
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	"github.com/goharbor/harbor-operator/pkg/graph"
+	"github.com/goharbor/harbor-operator/pkg/resources"
 	"github.com/goharbor/harbor-operator/pkg/resources/checksum"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
@@ -20,17 +21,14 @@ func (c *Controller) ensureResourceReady(ctx context.Context, res *Resource) err
 	span, ctx := opentracing.StartSpanFromContext(ctx, "checkReady")
 	defer span.Finish()
 
-	objectKey, err := client.ObjectKeyFromObject(res.resource)
-	if err != nil {
-		return serrors.UnrecoverrableError(err, serrors.OperatorReason, "cannot get object key")
-	}
+	objectKey := client.ObjectKeyFromObject(res.resource)
 
 	gvk := c.AddGVKToSpan(ctx, span, res.resource)
 	l := logger.Get(ctx)
 
-	result := res.resource.DeepCopyObject()
+	result := res.resource.DeepCopyObject().(resources.Resource)
 
-	err = c.Client.Get(ctx, objectKey, result)
+	err := c.Client.Get(ctx, objectKey, result)
 	if err != nil {
 		// TODO Check if the error is a temporary error or a unrecoverrable one
 		return errors.Wrapf(err, "cannot get %s %s/%s", gvk, res.resource.GetNamespace(), res.resource.GetName())

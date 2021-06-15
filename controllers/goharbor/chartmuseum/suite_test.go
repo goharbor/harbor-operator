@@ -14,7 +14,6 @@ import (
 )
 
 var (
-	stopCh     chan struct{}
 	ctx        context.Context
 	reconciler *chartmuseum.Reconciler
 )
@@ -34,7 +33,7 @@ var _ = BeforeSuite(func(done Done) {
 
 	reconciler = controllers.NewChartMuseum(ctx, className)
 
-	ctx, stopCh = test.StartManager(ctx)
+	test.StartManager(ctx)
 
 	close(done)
 }, 60)
@@ -42,7 +41,5 @@ var _ = BeforeSuite(func(done Done) {
 var _ = AfterSuite(func() {
 	defer test.AfterSuite(ctx)
 
-	if stopCh != nil {
-		close(stopCh)
-	}
+	ctx.Done()
 })
