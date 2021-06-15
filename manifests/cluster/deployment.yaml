@@ -4,7 +4,7 @@ metadata:
   annotations:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
   name: harbor-operator-ns
 ---
 apiVersion: apiextensions.k8s.io/v1
@@ -14,7 +14,7 @@ metadata:
     controller-gen.kubebuilder.io/version: v0.4.1
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
   creationTimestamp: null
   name: chartmuseums.goharbor.io
 spec:
@@ -1375,7 +1375,7 @@ metadata:
     controller-gen.kubebuilder.io/version: v0.4.1
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
   name: cores.goharbor.io
 spec:
   conversion:
@@ -1897,7 +1897,7 @@ metadata:
     controller-gen.kubebuilder.io/version: v0.4.1
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
   creationTimestamp: null
   name: exporters.goharbor.io
 spec:
@@ -2191,7 +2191,7 @@ metadata:
     controller-gen.kubebuilder.io/version: v0.4.1
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
   name: harborclusters.goharbor.io
 spec:
   conversion:
@@ -4114,7 +4114,7 @@ metadata:
     controller-gen.kubebuilder.io/version: v0.4.1
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
   name: harbors.goharbor.io
 spec:
   conversion:
@@ -5602,7 +5602,7 @@ metadata:
     controller-gen.kubebuilder.io/version: v0.4.1
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
   name: jobservices.goharbor.io
 spec:
   conversion:
@@ -7844,7 +7844,7 @@ metadata:
     controller-gen.kubebuilder.io/version: v0.4.1
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
   name: notaryservers.goharbor.io
 spec:
   conversion:
@@ -8160,7 +8160,7 @@ metadata:
     controller-gen.kubebuilder.io/version: v0.4.1
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
   name: notarysigners.goharbor.io
 spec:
   conversion:
@@ -8432,7 +8432,7 @@ metadata:
     controller-gen.kubebuilder.io/version: v0.4.1
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
   name: portals.goharbor.io
 spec:
   conversion:
@@ -8642,7 +8642,7 @@ metadata:
     controller-gen.kubebuilder.io/version: v0.4.1
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
   name: registries.goharbor.io
 spec:
   conversion:
@@ -10406,7 +10406,7 @@ metadata:
     controller-gen.kubebuilder.io/version: v0.4.1
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
   name: registrycontrollers.goharbor.io
 spec:
   conversion:
@@ -10637,7 +10637,7 @@ metadata:
     controller-gen.kubebuilder.io/version: v0.4.7
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
     operator.min.io/authors: MinIO, Inc.
     operator.min.io/license: AGPLv3
     operator.min.io/support: https://subnet.min.io
@@ -17600,7 +17600,7 @@ metadata:
     controller-gen.kubebuilder.io/version: v0.4.1
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
   creationTimestamp: null
   name: trivies.goharbor.io
 spec:
@@ -19820,7 +19820,7 @@ metadata:
   annotations:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
     operator.min.io/authors: MinIO, Inc.
     operator.min.io/license: AGPLv3
     operator.min.io/support: https://subnet.min.io
@@ -19833,7 +19833,7 @@ metadata:
   annotations:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
   name: postgres-operator
   namespace: harbor-operator-ns
 ---
@@ -19843,7 +19843,7 @@ metadata:
   annotations:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
   name: redisoperator
   namespace: harbor-operator-ns
 ---
@@ -19853,7 +19853,7 @@ metadata:
   annotations:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
   name: leader-election-role
   namespace: harbor-operator-ns
 rules:
@@ -19890,7 +19890,7 @@ metadata:
   annotations:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
   creationTimestamp: null
   name: harbor-operator-role
 rules:
@@ -20309,7 +20309,7 @@ metadata:
   annotations:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
     operator.min.io/authors: MinIO, Inc.
     operator.min.io/license: AGPLv3
     operator.min.io/support: https://subnet.min.io
@@ -20435,7 +20435,7 @@ metadata:
   annotations:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
   name: postgres-operator
 rules:
 - apiGroups:
@@ -20617,7 +20617,7 @@ metadata:
   annotations:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
   name: postgres-pod
 rules:
 - apiGroups:
@@ -20664,7 +20664,7 @@ metadata:
   annotations:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
   name: redisoperator
 rules:
 - apiGroups:
@@ -20715,7 +20715,7 @@ metadata:
   annotations:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
   name: leader-election-rolebinding
   namespace: harbor-operator-ns
 roleRef:
@@ -20733,7 +20733,7 @@ metadata:
   annotations:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
   name: harbor-operator-rolebinding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -20750,7 +20750,7 @@ metadata:
   annotations:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
     operator.min.io/authors: MinIO, Inc.
     operator.min.io/license: AGPLv3
     operator.min.io/support: https://subnet.min.io
@@ -20770,7 +20770,7 @@ metadata:
   annotations:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
   name: postgres-operator
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -20787,7 +20787,7 @@ metadata:
   annotations:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
   name: redisoperator
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -20873,7 +20873,7 @@ metadata:
   annotations:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
   name: config
   namespace: harbor-operator-ns
 ---
@@ -21194,7 +21194,7 @@ metadata:
   annotations:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
   name: config-template
   namespace: harbor-operator-ns
 ---
@@ -21246,7 +21246,7 @@ metadata:
   annotations:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
   name: postgres-operator
   namespace: harbor-operator-ns
 ---
@@ -21256,7 +21256,7 @@ metadata:
   annotations:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
     operator.min.io/authors: MinIO, Inc.
     operator.min.io/license: AGPLv3
     operator.min.io/support: https://subnet.min.io
@@ -21280,7 +21280,7 @@ metadata:
   annotations:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
   name: postgres-operator
   namespace: harbor-operator-ns
 spec:
@@ -21298,7 +21298,7 @@ metadata:
   annotations:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
   name: webhook-service
   namespace: harbor-operator-ns
 spec:
@@ -21328,7 +21328,7 @@ spec:
       annotations:
         goharbor.io/deploy-engine: Kustomization
         goharbor.io/deploy-mode: cluster
-        goharbor.io/operator-version: v1.0.0
+        goharbor.io/operator-version: v1.0.1
       labels:
         control-plane: harbor-operator
     spec:
@@ -21405,7 +21405,7 @@ metadata:
   annotations:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
     operator.min.io/authors: MinIO, Inc.
     operator.min.io/license: AGPLv3
     operator.min.io/support: https://subnet.min.io
@@ -21421,7 +21421,7 @@ spec:
       annotations:
         goharbor.io/deploy-engine: Kustomization
         goharbor.io/deploy-mode: cluster
-        goharbor.io/operator-version: v1.0.0
+        goharbor.io/operator-version: v1.0.1
         operator.min.io/authors: MinIO, Inc.
         operator.min.io/license: AGPLv3
         operator.min.io/support: https://subnet.min.io
@@ -21449,7 +21449,7 @@ metadata:
   annotations:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
   name: postgres-operator
   namespace: harbor-operator-ns
 spec:
@@ -21462,7 +21462,7 @@ spec:
       annotations:
         goharbor.io/deploy-engine: Kustomization
         goharbor.io/deploy-mode: cluster
-        goharbor.io/operator-version: v1.0.0
+        goharbor.io/operator-version: v1.0.1
       labels:
         name: postgres-operator
     spec:
@@ -21492,7 +21492,7 @@ metadata:
   annotations:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
   labels:
     app: redisoperator
   name: redisoperator
@@ -21509,7 +21509,7 @@ spec:
       annotations:
         goharbor.io/deploy-engine: Kustomization
         goharbor.io/deploy-mode: cluster
-        goharbor.io/operator-version: v1.0.0
+        goharbor.io/operator-version: v1.0.1
       labels:
         app: redisoperator
     spec:
@@ -21537,7 +21537,7 @@ metadata:
   annotations:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
   name: serving-cert
   namespace: harbor-operator-ns
 spec:
@@ -21555,7 +21555,7 @@ metadata:
   annotations:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
   name: selfsigned-issuer
   namespace: harbor-operator-ns
 spec:
@@ -21568,7 +21568,7 @@ metadata:
     cert-manager.io/inject-ca-from: harbor-operator-ns/serving-cert
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
   name: mutating-webhook-configuration
 webhooks:
 - admissionReviewVersions:
@@ -21619,7 +21619,7 @@ metadata:
     cert-manager.io/inject-ca-from: harbor-operator-ns/serving-cert
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
-    goharbor.io/operator-version: v1.0.0
+    goharbor.io/operator-version: v1.0.1
   name: validating-webhook-configuration
 webhooks:
 - admissionReviewVersions:
