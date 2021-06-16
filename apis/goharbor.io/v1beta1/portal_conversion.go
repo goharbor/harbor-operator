@@ -7,34 +7,10 @@ import (
 
 func (src *Portal) ConvertTo(dstRaw conversion.Hub) error {
 	dst := dstRaw.(*v1alpha3.Portal)
-
-	dst.ObjectMeta = src.ObjectMeta
-	dst.Status = src.Status
-
-	Convert_v1beta1_PortalSpec_To_v1alpha3_PortalSpec(&src.Spec, &dst.Spec)
-
-	return nil
+	return CopyViaJSON(dst, src)
 }
 
 func (dst *Portal) ConvertFrom(srcRaw conversion.Hub) error {
 	src := srcRaw.(*v1alpha3.Portal)
-
-	dst.ObjectMeta = src.ObjectMeta
-	dst.Status = src.Status
-
-	Convert_v1alpha3_PortalSpec_To_v1beta1_PortalSpec(&src.Spec, &dst.Spec)
-
-	return nil
-}
-
-func Convert_v1beta1_PortalSpec_To_v1alpha3_PortalSpec(src *PortalSpec, dst *v1alpha3.PortalSpec) {
-	dst.ComponentSpec = src.ComponentSpec
-	dst.MaxConnections = src.MaxConnections
-	dst.TLS = src.TLS
-}
-
-func Convert_v1alpha3_PortalSpec_To_v1beta1_PortalSpec(src *v1alpha3.PortalSpec, dst *PortalSpec) {
-	dst.ComponentSpec = src.ComponentSpec
-	dst.MaxConnections = src.MaxConnections
-	dst.TLS = src.TLS
+	return CopyViaJSON(dst, src)
 }

@@ -5036,9 +5036,9 @@ spec:
                   kind:
                     description: Set the kind of which database service to be used, Only support PostgresSQL now.
                     enum:
-                    - PostgreSQL
+                    - PostgresSQL
                     type: string
-                  postgreSqlSpec:
+                  postgresSqlSpec:
                     properties:
                       image:
                         description: Image name for the component.
@@ -5094,7 +5094,7 @@ spec:
                     type: object
                 required:
                 - kind
-                - postgreSqlSpec
+                - postgresSqlSpec
                 type: object
               inClusterStorage:
                 description: Storage configuration for in-cluster storage service
