@@ -20,9 +20,6 @@ func (src *HarborCluster) ConvertTo(dstRaw conversion.Hub) error {
 
 	Convert_v1beta1_HarborClusterStatus_To_v1alpha3_HarborClusterStatus(&src.Status, &dst.Status)
 
-	clog.Info("src", "src", src)
-	clog.Info("dst", "dst", dst)
-
 	return nil
 }
 
@@ -40,11 +37,11 @@ func (dst *HarborCluster) ConvertFrom(srcRaw conversion.Hub) error {
 }
 
 func Convert_v1alpha3_HarborClusterSpec_To_v1beta1_HarborClusterSpec(src *v1alpha3.HarborClusterSpec, dst *HarborClusterSpec) {
+
 	if src.InClusterCache != nil {
-		dst.Cache = &Cache{}
-		Convert_v1alpha3_Cache_To_v1beta1_Cache(src.InClusterCache, dst.Cache)
+		Convert_v1alpha3_Cache_To_v1beta1_Cache(src.InClusterCache, &dst.Cache)
 	} else if src.Redis != nil {
-		dst.Cache = &Cache{
+		dst.Cache = Cache{
 			Kind: "Redis",
 			Spec: &CacheSpec{
 				Redis: &ExternalRedisSpec{
@@ -56,25 +53,25 @@ func Convert_v1alpha3_HarborClusterSpec_To_v1beta1_HarborClusterSpec(src *v1alph
 	}
 
 	if src.InClusterStorage != nil {
-		dst.Storage = &Storage{}
-		Convert_v1alpha3_Storage_To_v1beta1_Storage(src.InClusterStorage, dst.Storage)
+		dst.Storage = Storage{}
+		Convert_v1alpha3_Storage_To_v1beta1_Storage(src.InClusterStorage, &dst.Storage)
 	} else if src.ImageChartStorage != nil {
-		dst.Storage = &Storage{}
-		Convert_v1alpha3_HarborStorageImageChartStorageSpec_To_v1beta1_Storage(src.ImageChartStorage, dst.Storage)
+		dst.Storage = Storage{}
+		Convert_v1alpha3_HarborStorageImageChartStorageSpec_To_v1beta1_Storage(src.ImageChartStorage, &dst.Storage)
 	}
 
 	if src.InClusterDatabase != nil {
-		dst.Database = &Database{}
-		Convert_v1alpha3_Database_To_v1beta1_Database(src.InClusterDatabase, dst.Database)
+		dst.Database = Database{}
+		Convert_v1alpha3_Database_To_v1beta1_Database(src.InClusterDatabase, &dst.Database)
 	} else if src.Database != nil {
-		dst.Database = &Database{}
-		Convert_v1alpha3_HarborDatabaseSpec_To_v1beta1_Database(src.Database, dst.Database)
+		dst.Database = Database{}
+		Convert_v1alpha3_HarborDatabaseSpec_To_v1beta1_Database(src.Database, &dst.Database)
 	}
 
-	Convert_v1alpha3_HarborSpec_To_v1beta1_HarborSpec(&src.HarborSpec, &dst.HarborSpec)
+	Convert_v1alpha3_HarborSpec_To_v1beta1_HarborSpec(&src.HarborSpec, &dst.EmbeddedHarborSpec)
 }
 
-func Convert_v1alpha3_HarborSpec_To_v1beta1_HarborSpec(src *v1alpha3.HarborSpec, dst *HarborSpec) {
+func Convert_v1alpha3_HarborSpec_To_v1beta1_HarborSpec(src *v1alpha3.HarborSpec, dst *EmbeddedHarborSpec) {
 	dst.ExternalURL = src.ExternalURL
 	dst.InternalTLS = HarborInternalTLSSpec{
 		Enabled: src.InternalTLS.Enabled,
@@ -247,8 +244,7 @@ func Convert_v1alpha3_RedisSpec_To_v1beta1_CacheSpec(src *v1alpha3.RedisSpec, ds
 		}
 	}
 
-	// TODO
-	dst.RedisFailover.OperatorVersion = ""
+	dst.RedisFailover.OperatorVersion = "1.0.0"
 	dst.RedisFailover.ImageSpec = src.ImageSpec
 }
 
@@ -279,17 +275,15 @@ func Convert_v1alpha3_HarborStorageImageChartStorageSpec_To_v1beta1_Storage(src 
 }
 
 func Convert_v1alpha3_Storage_To_v1beta1_Storage(src *v1alpha3.Storage, dst *Storage) {
-	dst.Kind = src.Kind
-	dst.Spec = StorageSpec{}
-
 	if src.MinIOSpec != nil {
+		dst.Kind = "MinIO"
 		dst.Spec.MinIO = &MinIOSpec{}
 		Convert_v1alpha3_MinIOSpec_to_v1beta1_MinIOSpec(src.MinIOSpec, dst.Spec.MinIO)
 	}
 }
 
 func Convert_v1alpha3_MinIOSpec_to_v1beta1_MinIOSpec(src *v1alpha3.MinIOSpec, dst *MinIOSpec) {
-	dst.OperatorVersion = ""
+	dst.OperatorVersion = "4.0.6"
 
 	dst.SecretRef = src.SecretRef
 	dst.VolumeClaimTemplate = src.VolumeClaimTemplate
@@ -356,7 +350,7 @@ func Convert_v1alpha3_Database_To_v1beta1_Database(src *v1alpha3.Database, dst *
 }
 
 func Convert_v1alpha3_PostgresSQLSpec_To_v1beta1_ZlandoPostgresSQLSpec(src *v1alpha3.PostgresSQLSpec, dst *ZlandoPostgreSQLSpec) {
-	dst.OperatorVersion = ""
+	dst.OperatorVersion = "1.5.0"
 	dst.Storage = src.Storage
 	dst.Resources = src.Resources
 	dst.Replicas = src.Replicas
@@ -389,65 +383,53 @@ func Convert_v1alpha3_HarborClusterStatus_To_v1beta1_HarborClusterStatus(src *v1
 //-----------------------------------------------------------
 
 func Convert_v1beta1_HarborClusterSpec_To_v1alpha3_HarborClusterSpec(src *HarborClusterSpec, dst *v1alpha3.HarborClusterSpec) {
-	if src.Cache != nil {
-		if src.Cache.Kind == "Redis" {
-			if dst.Redis == nil {
-				dst.Redis = &v1alpha3.ExternalRedisSpec{}
-			}
-			Convert_v1beta1_ExternalRedisSpec_To_v1alpha3_ExternalRedisSpec(src.Cache.Spec.Redis, dst.Redis)
-		} else {
-			if dst.InClusterCache == nil {
-				dst.InClusterCache = &v1alpha3.Cache{}
-			}
-			Convert_v1beta1_Cache_To_v1alpha3_Cache(src.Cache, dst.InClusterCache)
+
+	if src.Cache.Kind == "Redis" {
+		if dst.Redis == nil {
+			dst.Redis = &v1alpha3.ExternalRedisSpec{}
 		}
+		Convert_v1beta1_ExternalRedisSpec_To_v1alpha3_ExternalRedisSpec(src.Cache.Spec.Redis, dst.Redis)
+	} else {
+		if dst.InClusterCache == nil {
+			dst.InClusterCache = &v1alpha3.Cache{}
+		}
+		Convert_v1beta1_Cache_To_v1alpha3_Cache(&src.Cache, dst.InClusterCache)
 	}
 
-	if src.Storage != nil {
-		if src.Storage.Kind == "FileSystem" {
-			if dst.ImageChartStorage == nil {
-				dst.ImageChartStorage = &v1alpha3.HarborStorageImageChartStorageSpec{}
-			}
-			Convert_v1beta1_FileSystemSpec_To_v1alpha3_HarborStorageImageChartStorage(src.Storage.Spec.FileSystem, dst.ImageChartStorage)
-		} else {
-			if dst.InClusterStorage == nil {
-				dst.InClusterStorage = &v1alpha3.Storage{}
-			}
-			Convert_v1beta1_Storage_To_v1alpha3_Storage(src.Storage, dst.InClusterStorage)
+	if src.Storage.Kind == "FileSystem" {
+		if dst.ImageChartStorage == nil {
+			dst.ImageChartStorage = &v1alpha3.HarborStorageImageChartStorageSpec{}
 		}
+		Convert_v1beta1_FileSystemSpec_To_v1alpha3_HarborStorageImageChartStorage(src.Storage.Spec.FileSystem, dst.ImageChartStorage)
+	} else {
+		if dst.InClusterStorage == nil {
+			dst.InClusterStorage = &v1alpha3.Storage{}
+		}
+		Convert_v1beta1_Storage_To_v1alpha3_Storage(&src.Storage, dst.InClusterStorage)
 	}
 
-	if src.Database != nil {
-		if src.Database.Kind == "PostgreSQL" && src.Database.Spec.PostgreSQL != nil {
-			if dst.Database == nil {
-				dst.Database = &v1alpha3.HarborDatabaseSpec{}
-			}
-			Convert_v1beta1_PostgreSQLSpec_To_v1alpha3_HarborDatabaseSpec(src.Database.Spec.PostgreSQL, dst.Database)
-		} else {
-			if dst.InClusterDatabase == nil {
-				dst.InClusterDatabase = &v1alpha3.Database{}
-			}
-			Convert_v1beta1_Database_To_v1alpha3_Database(src.Database, dst.InClusterDatabase)
+	if src.Database.Kind == "PostgreSQL" && src.Database.Spec.PostgreSQL != nil {
+		if dst.Database == nil {
+			dst.Database = &v1alpha3.HarborDatabaseSpec{}
 		}
+		Convert_v1beta1_PostgreSQLSpec_To_v1alpha3_HarborDatabaseSpec(src.Database.Spec.PostgreSQL, dst.Database)
+	} else {
+		if dst.InClusterDatabase == nil {
+			dst.InClusterDatabase = &v1alpha3.Database{}
+		}
+		Convert_v1beta1_Database_To_v1alpha3_Database(&src.Database, dst.InClusterDatabase)
 	}
 
-	Convert_v1beta1_HarborSpec_To_v1alpha3_HarborSpec(&src.HarborSpec, &dst.HarborSpec)
+	Convert_v1beta1_EmbeddedHarborSpec_To_v1alpha3_HarborSpec(&src.EmbeddedHarborSpec, &dst.HarborSpec)
 }
 
-func Convert_v1beta1_HarborSpec_To_v1alpha3_HarborSpec(src *HarborSpec, dst *v1alpha3.HarborSpec) {
-	if src == nil {
-		return
-	}
-
-	if dst == nil {
-		dst = &v1alpha3.HarborSpec{}
-	}
+func Convert_v1beta1_EmbeddedHarborSpec_To_v1alpha3_HarborSpec(src *EmbeddedHarborSpec, dst *v1alpha3.HarborSpec) {
 
 	dst.ExternalURL = src.ExternalURL
 	dst.InternalTLS = v1alpha3.HarborInternalTLSSpec{
 		Enabled: src.InternalTLS.Enabled,
 	}
-	//dst.ImageChartStorage
+
 	dst.LogLevel = src.LogLevel
 	dst.HarborAdminPasswordRef = src.HarborAdminPasswordRef
 	dst.UpdateStrategyType = src.UpdateStrategyType
