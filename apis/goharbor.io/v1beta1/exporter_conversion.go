@@ -5,12 +5,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/conversion"
 )
 
-func (src *Exporter) ConvertTo(dstRaw conversion.Hub) error {
+func (e *Exporter) ConvertTo(dstRaw conversion.Hub) error {
 	dst := dstRaw.(*v1alpha3.Exporter)
-	return CopyViaJSON(dst, src)
+
+	return CopyViaJSON(dst, e)
 }
 
-func (dst *Exporter) ConvertFrom(srcRaw conversion.Hub) error {
+func (e *Exporter) ConvertFrom(srcRaw conversion.Hub) error {
 	src := srcRaw.(*v1alpha3.Exporter)
-	return CopyViaJSON(dst, src)
+
+	return CopyViaJSON(e, src)
 }

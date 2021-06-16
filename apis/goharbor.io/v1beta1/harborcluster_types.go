@@ -2,6 +2,7 @@ package v1beta1
 
 import (
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -21,19 +22,84 @@ type HarborClusterSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	HarborSpec `json:"harbor"`
+	EmbeddedHarborSpec `json:"harbor"`
 
 	// Cache configuration for in-cluster cache services
-	// +kubebuilder:validation:Optional
-	Cache *Cache `json:"cache,omitempty"`
+	// +kubebuilder:validation:Required
+	Cache Cache `json:"cache"`
 
 	// Database configuration for in-cluster database service
-	// +kubebuilder:validation:Optional
-	Database *Database `json:"database,omitempty"`
+	// +kubebuilder:validation:Required
+	Database Database `json:"database"`
 
 	// Storage configuration for in-cluster storage service
+	// +kubebuilder:validation:Required
+	Storage Storage `json:"storage"`
+}
+
+type EmbeddedHarborSpec struct {
+	HarborComponentsSpec `json:",inline"`
+
+	ImageSource *ImageSourceSpec `json:"imageSource,omitempty"`
+
+	// +kubebuilder:validation:Required
+	Expose HarborExposeSpec `json:"expose"`
+
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Pattern="https?://.*"
+	ExternalURL string `json:"externalURL"`
+
 	// +kubebuilder:validation:Optional
-	Storage *Storage `json:"storage,omitempty"`
+	InternalTLS HarborInternalTLSSpec `json:"internalTLS"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default="info"
+	LogLevel harbormetav1.HarborLogLevel `json:"logLevel,omitempty"`
+
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
+	HarborAdminPasswordRef string `json:"harborAdminPasswordRef"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default="RollingUpdate"
+	UpdateStrategyType appsv1.DeploymentStrategyType `json:"updateStrategyType,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	Proxy *HarborProxySpec `json:"proxy,omitempty"`
+
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Pattern="[0-9]+\\.[0-9]+\\.[0-9]+"
+	// The version of the harbor, eg 2.1.2
+	Version string `json:"version"`
+}
+
+type EmbeddedHarborComponentsSpec struct {
+	// +kubebuilder:validation:Required
+	Portal harbormetav1.ComponentSpec `json:"portal,omitempty"`
+
+	// +kubebuilder:validation:Required
+	Core CoreComponentSpec `json:"core,omitempty"`
+
+	// +kubebuilder:validation:Required
+	JobService JobServiceComponentSpec `json:"jobservice,omitempty"`
+
+	// +kubebuilder:validation:Required
+	Registry RegistryComponentSpec `json:"registry,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	RegistryController *harbormetav1.ComponentSpec `json:"registryctl,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	ChartMuseum *ChartMuseumComponentSpec `json:"chartmuseum,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	Exporter *ExporterComponentSpec `json:"exporter,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	Trivy *TrivyComponentSpec `json:"trivy,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	Notary *NotaryComponentSpec `json:"notary,omitempty"`
 }
 
 type Cache struct {
@@ -136,7 +202,7 @@ type Storage struct {
 	Spec StorageSpec `json:"spec"`
 }
 
-// the spec of Storage
+// the spec of Storage.
 type StorageSpec struct {
 	// inCluster options.
 	// +kubebuilder:validation:Optional
