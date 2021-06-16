@@ -10,9 +10,8 @@ import (
 	"github.com/goharbor/harbor-operator/controllers/goharbor/notaryserver"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 	"github.com/pkg/errors"
-	netv1beta1 "k8s.io/api/networking/v1beta1"
+	netv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 const (
@@ -33,15 +32,15 @@ func (r *Reconciler) AddCoreIngress(ctx context.Context, harbor *goharborv1.Harb
 	return CoreIngress(ingressRes), errors.Wrap(err, "cannot add core ingress")
 }
 
-func (r *Reconciler) GetCoreIngress(ctx context.Context, harbor *goharborv1.Harbor) (*netv1beta1.Ingress, error) {
+func (r *Reconciler) GetCoreIngress(ctx context.Context, harbor *goharborv1.Harbor) (*netv1.Ingress, error) {
 	if harbor.Spec.Expose.Core.Ingress == nil {
 		return nil, nil
 	}
 
-	var tls []netv1beta1.IngressTLS
+	var tls []netv1.IngressTLS
 
 	if harbor.Spec.Expose.Core.TLS.Enabled() {
-		tls = []netv1beta1.IngressTLS{{
+		tls = []netv1.IngressTLS{{
 			SecretName: harbor.Spec.Expose.Core.TLS.CertificateRef,
 			Hosts:      []string{harbor.Spec.Expose.Core.Ingress.Host},
 		}}
@@ -52,38 +51,37 @@ func (r *Reconciler) GetCoreIngress(ctx context.Context, harbor *goharborv1.Harb
 		return nil, errors.Wrap(err, "ingress rules")
 	}
 
-	return &netv1beta1.Ingress{
+	return &netv1.Ingress{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        r.NormalizeName(ctx, harbor.GetName()),
 			Namespace:   harbor.GetNamespace(),
 			Annotations: r.GetCoreIngressAnnotations(ctx, harbor),
 		},
-		Spec: netv1beta1.IngressSpec{
+		Spec: netv1.IngressSpec{
 			TLS:   tls,
 			Rules: rules,
 		},
 	}, nil
 }
 
-func (r *Reconciler) GetCoreIngressRules(ctx context.Context, harbor *goharborv1.Harbor) ([]netv1beta1.IngressRule, error) {
-	corePort, err := harbor.Spec.InternalTLS.GetInternalPort(harbormetav1.CoreTLS)
-	if err != nil {
-		return nil, errors.Wrapf(err, "%s internal port", harbormetav1.CoreTLS)
+func (r *Reconciler) GetCoreIngressRules(ctx context.Context, harbor *goharborv1.Harbor) ([]netv1.IngressRule, error) {
+	coreBackend := netv1.IngressBackend{
+		Service: &netv1.IngressServiceBackend{
+			Name: r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String()),
+			Port: netv1.ServiceBackendPort{
+				Number: harbor.Spec.InternalTLS.GetInternalPort(harbormetav1.CoreTLS),
+			},
+		},
+		Resource: nil,
 	}
 
-	coreBackend := netv1beta1.IngressBackend{
-		ServiceName: r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String()),
-		ServicePort: intstr.FromInt(int(corePort)),
-	}
-
-	portalPort, err := harbor.Spec.InternalTLS.GetInternalPort(harbormetav1.PortalTLS)
-	if err != nil {
-		return nil, errors.Wrapf(err, "%s internal port", harbormetav1.PortalTLS)
-	}
-
-	portalBackend := netv1beta1.IngressBackend{
-		ServiceName: r.NormalizeName(ctx, harbor.GetName(), "portal"),
-		ServicePort: intstr.FromInt(int(portalPort)),
+	portalBackend := netv1.IngressBackend{
+		Service: &netv1.IngressServiceBackend{
+			Name: r.NormalizeName(ctx, harbor.GetName(), "portal"),
+			Port: netv1.ServiceBackendPort{
+				Number: harbor.Spec.InternalTLS.GetInternalPort(harbormetav1.PortalTLS),
+			},
+		},
 	}
 
 	ruleValue, err := r.GetCoreIngressRuleValue(ctx, harbor, coreBackend, portalBackend)
@@ -91,7 +89,7 @@ func (r *Reconciler) GetCoreIngressRules(ctx context.Context, harbor *goharborv1
 		return nil, errors.Wrap(err, "rule value")
 	}
 
-	return []netv1beta1.IngressRule{{
+	return []netv1.IngressRule{{
 		Host:             harbor.Spec.Expose.Core.Ingress.Host,
 		IngressRuleValue: *ruleValue,
 	}}, nil
@@ -110,7 +108,7 @@ func (r *Reconciler) AddNotaryIngress(ctx context.Context, harbor *goharborv1.Ha
 	return NotaryIngress(ingressRes), errors.Wrapf(err, "cannot add notary ingress")
 }
 
-func (r *Reconciler) GetNotaryServerIngress(ctx context.Context, harbor *goharborv1.Harbor) (*netv1beta1.Ingress, error) {
+func (r *Reconciler) GetNotaryServerIngress(ctx context.Context, harbor *goharborv1.Harbor) (*netv1.Ingress, error) {
 	if harbor.Spec.Notary == nil {
 		return nil, nil
 	}
@@ -119,10 +117,10 @@ func (r *Reconciler) GetNotaryServerIngress(ctx context.Context, harbor *goharbo
 		return nil, nil
 	}
 
-	var tls []netv1beta1.IngressTLS
+	var tls []netv1.IngressTLS
 
 	if harbor.Spec.Expose.Notary.TLS.Enabled() {
-		tls = []netv1beta1.IngressTLS{{
+		tls = []netv1.IngressTLS{{
 			SecretName: harbor.Spec.Expose.Notary.TLS.CertificateRef,
 			Hosts:      []string{harbor.Spec.Expose.Notary.Ingress.Host},
 		}}
@@ -133,33 +131,37 @@ func (r *Reconciler) GetNotaryServerIngress(ctx context.Context, harbor *goharbo
 		return nil, errors.Wrap(err, "cannot get notary ingress rules")
 	}
 
-	return &netv1beta1.Ingress{
+	return &netv1.Ingress{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        r.NormalizeName(ctx, harbor.GetName(), controllers.NotaryServer.String()),
 			Namespace:   harbor.GetNamespace(),
 			Annotations: r.GetNotaryIngressAnnotations(ctx, harbor),
 		},
-		Spec: netv1beta1.IngressSpec{
+		Spec: netv1.IngressSpec{
 			TLS:   tls,
 			Rules: ingressRules,
 		},
 	}, nil
 }
 
-func (r *Reconciler) GetNotaryIngressRules(ctx context.Context, harbor *goharborv1.Harbor) ([]netv1beta1.IngressRule, error) {
-	backend := netv1beta1.IngressBackend{
-		ServiceName: r.NormalizeName(ctx, harbor.GetName(), controllers.NotaryServer.String()),
-		ServicePort: intstr.FromInt(notaryserver.PublicPort),
+func (r *Reconciler) GetNotaryIngressRules(ctx context.Context, harbor *goharborv1.Harbor) ([]netv1.IngressRule, error) {
+	backend := netv1.IngressBackend{
+		Service: &netv1.IngressServiceBackend{
+			Name: r.NormalizeName(ctx, harbor.GetName(), controllers.NotaryServer.String()),
+			Port: netv1.ServiceBackendPort{
+				Number: notaryserver.PublicPort,
+			},
+		},
 	}
 
-	pathTypePrefix := netv1beta1.PathTypePrefix
+	pathTypePrefix := netv1.PathTypePrefix
 
-	return []netv1beta1.IngressRule{
+	return []netv1.IngressRule{
 		{
 			Host: harbor.Spec.Expose.Notary.Ingress.Host,
-			IngressRuleValue: netv1beta1.IngressRuleValue{
-				HTTP: &netv1beta1.HTTPIngressRuleValue{
-					Paths: []netv1beta1.HTTPIngressPath{
+			IngressRuleValue: netv1.IngressRuleValue{
+				HTTP: &netv1.HTTPIngressRuleValue{
+					Paths: []netv1.HTTPIngressPath{
 						{
 							Path:     "/",
 							PathType: &pathTypePrefix,
@@ -242,12 +244,12 @@ func (err ErrInvalidIngressController) Error() string {
 	return fmt.Sprintf("controller %s unsupported", err.Controller)
 }
 
-func (r *Reconciler) GetCoreIngressRuleValue(ctx context.Context, harbor *goharborv1.Harbor, core, portal netv1beta1.IngressBackend) (*netv1beta1.IngressRuleValue, error) {
-	pathTypePrefix := netv1beta1.PathTypePrefix
+func (r *Reconciler) GetCoreIngressRuleValue(ctx context.Context, harbor *goharborv1.Harbor, core, portal netv1.IngressBackend) (*netv1.IngressRuleValue, error) {
+	pathTypePrefix := netv1.PathTypePrefix
 
-	return &netv1beta1.IngressRuleValue{
-		HTTP: &netv1beta1.HTTPIngressRuleValue{
-			Paths: []netv1beta1.HTTPIngressPath{{
+	return &netv1.IngressRuleValue{
+		HTTP: &netv1.HTTPIngressRuleValue{
+			Paths: []netv1.HTTPIngressPath{{
 				Path:     "/",
 				PathType: &pathTypePrefix,
 				Backend:  portal,

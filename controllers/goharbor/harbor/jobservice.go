@@ -9,7 +9,6 @@ import (
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers"
-	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 	"github.com/goharbor/harbor-operator/pkg/version"
 	"github.com/pkg/errors"
@@ -121,10 +120,7 @@ func (r *Reconciler) GetJobService(ctx context.Context, harbor *goharborv1.Harbo
 		Path:   "/service/token",
 	}).String()
 
-	registryctlPort, err := harbor.Spec.InternalTLS.GetInternalPort(harbormetav1.RegistryControllerTLS)
-	if err != nil {
-		return nil, serrors.UnrecoverrableError(errors.Wrap(err, "cannot get registryController port"), serrors.OperatorReason, "unable to configure registry controller url")
-	}
+	registryctlPort := harbor.Spec.InternalTLS.GetInternalPort(harbormetav1.RegistryControllerTLS)
 
 	registryControllerURL := (&url.URL{
 		Scheme: harbor.Spec.InternalTLS.GetScheme(),

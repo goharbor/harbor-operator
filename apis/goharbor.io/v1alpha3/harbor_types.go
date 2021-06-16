@@ -652,12 +652,12 @@ func (err ErrUnsupportedComponent) Error() string {
 	return fmt.Sprintf("%s is not supported", harbormetav1.ComponentWithTLS(err).String())
 }
 
-func (r *HarborInternalTLSSpec) GetInternalPort(component harbormetav1.ComponentWithTLS) (int32, error) {
+func (r *HarborInternalTLSSpec) GetInternalPort(component harbormetav1.ComponentWithTLS) int32 {
 	if !r.IsEnabled() {
-		return harbormetav1.HTTPPort, nil
+		return harbormetav1.HTTPPort
 	}
 
-	return harbormetav1.HTTPSPort, nil
+	return harbormetav1.HTTPSPort
 }
 
 func (r *HarborInternalTLSSpec) GetComponentTLSSpec(certificateRef string) *harbormetav1.ComponentsTLSSpec {
