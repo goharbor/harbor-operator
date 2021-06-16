@@ -5,12 +5,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/conversion"
 )
 
-func (src *ChartMuseum) ConvertTo(dstRaw conversion.Hub) error {
+func (c *ChartMuseum) ConvertTo(dstRaw conversion.Hub) error {
 	dst := dstRaw.(*v1alpha3.ChartMuseum)
-	return CopyViaJSON(dst, src)
+
+	return CopyViaJSON(dst, c)
 }
 
-func (dst *ChartMuseum) ConvertFrom(srcRaw conversion.Hub) error {
+func (c *ChartMuseum) ConvertFrom(srcRaw conversion.Hub) error {
 	src := srcRaw.(*v1alpha3.ChartMuseum)
-	return CopyViaJSON(dst, src)
+
+	return CopyViaJSON(c, src)
 }

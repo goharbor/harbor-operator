@@ -2,16 +2,13 @@ package v1beta1
 
 import (
 	"context"
+
 	ctrl "sigs.k8s.io/controller-runtime"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-// log is for logging in this package.
-var chartmuseumlog = logf.Log.WithName("chartmuseum-resource")
-
-func (r *ChartMuseum) SetupWebhookWithManager(_ context.Context, mgr ctrl.Manager) error {
+func (c *ChartMuseum) SetupWebhookWithManager(_ context.Context, mgr ctrl.Manager) error {
 	return ctrl.NewWebhookManagedBy(mgr).
-		For(r).
+		For(c).
 		Complete()
 }
 
