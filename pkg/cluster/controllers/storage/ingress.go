@@ -9,10 +9,9 @@ import (
 	miniov2 "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/apis/minio.min.io/v2"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	"github.com/goharbor/harbor-operator/pkg/resources/checksum"
-	netv1 "k8s.io/api/networking/v1beta1"
+	netv1 "k8s.io/api/networking/v1"
 	k8serror "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 const (
@@ -156,8 +155,12 @@ func (m *MinIOController) generateIngress(ctx context.Context, harborcluster *go
 									Path:     "/",
 									PathType: &pathTypePrefix,
 									Backend: netv1.IngressBackend{
-										ServiceName: m.getTenantsServiceName(harborcluster),
-										ServicePort: intstr.FromInt(m.getServicePort()),
+										Service: &netv1.IngressServiceBackend{
+											Name: m.getTenantsServiceName(harborcluster),
+											Port: netv1.ServiceBackendPort{
+												Number: m.getServicePort(),
+											},
+										},
 									},
 								},
 							},
@@ -175,6 +178,6 @@ func (m *MinIOController) generateIngress(ctx context.Context, harborcluster *go
 	return ingress
 }
 
-func (m *MinIOController) getServicePort() int {
+func (m *MinIOController) getServicePort() int32 {
 	return DefaultServicePort
 }
