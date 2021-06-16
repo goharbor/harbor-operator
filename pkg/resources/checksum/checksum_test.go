@@ -27,7 +27,7 @@ var _ = Describe("Checksum", func() {
 	)
 
 	BeforeEach(func() {
-		ctx = logger.Context(zap.LoggerTo(GinkgoWriter, true))
+		ctx = logger.Context(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
 
 		scheme, _ := scheme.New(ctx)
 
