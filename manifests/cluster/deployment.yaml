@@ -2625,6 +2625,12 @@ spec:
                         required:
                         - host
                         type: object
+                      loadbalancer:
+                        description: TODO Add supports to ClusterIP, LoadBalancer and NodePort by deploying the nginx component
+                        properties:
+                          enable:
+                            type: boolean
+                        type: object
                       tls:
                         properties:
                           certificateRef:
@@ -2654,6 +2660,47 @@ spec:
                             type: string
                         required:
                         - host
+                        type: object
+                      loadbalancer:
+                        description: TODO Add supports to ClusterIP, LoadBalancer and NodePort by deploying the nginx component
+                        properties:
+                          enable:
+                            type: boolean
+                        type: object
+                      tls:
+                        properties:
+                          certificateRef:
+                            pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                            type: string
+                        type: object
+                    type: object
+                  portal:
+                    properties:
+                      ingress:
+                        properties:
+                          annotations:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          controller:
+                            default: default
+                            description: Set to the type of ingress controller.
+                            enum:
+                            - default
+                            - gce
+                            - ncp
+                            - contour
+                            type: string
+                          host:
+                            type: string
+                        required:
+                        - host
+                        type: object
+                      loadbalancer:
+                        description: TODO Add supports to ClusterIP, LoadBalancer and NodePort by deploying the nginx component
+                        properties:
+                          enable:
+                            type: boolean
                         type: object
                       tls:
                         properties:
@@ -3093,6 +3140,12 @@ spec:
                                     type: string
                                 required:
                                 - host
+                                type: object
+                              loadbalancer:
+                                description: TODO Add supports to ClusterIP, LoadBalancer and NodePort by deploying the nginx component
+                                properties:
+                                  enable:
+                                    type: boolean
                                 type: object
                               tls:
                                 properties:
@@ -4550,6 +4603,12 @@ spec:
                         required:
                         - host
                         type: object
+                      loadbalancer:
+                        description: TODO Add supports to ClusterIP, LoadBalancer and NodePort by deploying the nginx component
+                        properties:
+                          enable:
+                            type: boolean
+                        type: object
                       tls:
                         properties:
                           certificateRef:
@@ -4579,6 +4638,47 @@ spec:
                             type: string
                         required:
                         - host
+                        type: object
+                      loadbalancer:
+                        description: TODO Add supports to ClusterIP, LoadBalancer and NodePort by deploying the nginx component
+                        properties:
+                          enable:
+                            type: boolean
+                        type: object
+                      tls:
+                        properties:
+                          certificateRef:
+                            pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                            type: string
+                        type: object
+                    type: object
+                  portal:
+                    properties:
+                      ingress:
+                        properties:
+                          annotations:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          controller:
+                            default: default
+                            description: Set to the type of ingress controller.
+                            enum:
+                            - default
+                            - gce
+                            - ncp
+                            - contour
+                            type: string
+                          host:
+                            type: string
+                        required:
+                        - host
+                        type: object
+                      loadbalancer:
+                        description: TODO Add supports to ClusterIP, LoadBalancer and NodePort by deploying the nginx component
+                        properties:
+                          enable:
+                            type: boolean
                         type: object
                       tls:
                         properties:
