@@ -158,7 +158,7 @@ func (hc *HarborCluster) validateStorage() *field.Error {
 
 func (hc *HarborCluster) validateDatabase() *field.Error {
 	// in cluster database has high priority
-	fp := field.NewPath("spec").Child("database", "inClusterDatabase")
+	fp := field.NewPath("spec").Child("inClusterDatabase")
 
 	// Database
 	// External is not configured

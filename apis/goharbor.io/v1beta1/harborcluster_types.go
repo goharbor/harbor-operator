@@ -202,7 +202,7 @@ type Storage struct {
 	Spec StorageSpec `json:"spec"`
 }
 
-// the spec of Storage
+// the spec of Storage.
 type StorageSpec struct {
 	// inCluster options.
 	// +kubebuilder:validation:Optional

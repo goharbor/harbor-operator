@@ -2,16 +2,13 @@ package v1beta1
 
 import (
 	"context"
+
 	ctrl "sigs.k8s.io/controller-runtime"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-// log is for logging in this package.
-var trivylog = logf.Log.WithName("trivy-resource")
-
-func (r *Trivy) SetupWebhookWithManager(_ context.Context, mgr ctrl.Manager) error {
+func (t *Trivy) SetupWebhookWithManager(_ context.Context, mgr ctrl.Manager) error {
 	return ctrl.NewWebhookManagedBy(mgr).
-		For(r).
+		For(t).
 		Complete()
 }
 
