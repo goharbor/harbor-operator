@@ -7637,7 +7637,7 @@ spec:
                     - FileSystem
                     type: string
                   spec:
-                    description: the spec of Storage
+                    description: the spec of Storage.
                     properties:
                       fileSystem:
                         properties:
@@ -25223,18 +25223,6 @@ rules:
   - configmaps
   - secrets
   - services
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - persistentvolumeclaims
   verbs:
   - create
   - delete
