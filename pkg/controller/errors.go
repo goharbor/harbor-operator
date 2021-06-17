@@ -24,7 +24,7 @@ func IsOptimisticLockError(err error) bool {
 	return strings.Contains(err.Error(), optimisticLockErrorMsg)
 }
 
-func (c *Controller) HandleError(ctx context.Context, resource runtime.Object, resultError error) (ctrl.Result, error) {
+func (c *Controller) HandleError(ctx context.Context, resource client.Object, resultError error) (ctrl.Result, error) {
 	if resultError == nil {
 		return ctrl.Result{}, c.SetSuccessStatus(ctx, resource)
 	}
@@ -41,12 +41,9 @@ func (c *Controller) HandleError(ctx context.Context, resource runtime.Object, r
 	})
 	defer span.Finish()
 
-	objectKey, err := client.ObjectKeyFromObject(resource)
-	if err != nil {
-		return ctrl.Result{}, errors.Wrap(resultError, errors.Wrap(err, "cannot get object key").Error())
-	}
+	objectKey := client.ObjectKeyFromObject(resource)
 
-	err = c.Client.Get(ctx, objectKey, resource)
+	err := c.Client.Get(ctx, objectKey, resource)
 	if err != nil {
 		return ctrl.Result{}, errors.Wrap(resultError, errors.Wrap(err, "cannot get object").Error())
 	}

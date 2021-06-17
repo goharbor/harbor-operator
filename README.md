@@ -60,11 +60,11 @@ Versions of the underlying components are listed below:
 
 |  Components   |       Harbor      | MinIO operator | PostgreSQL operator | Redis operator |
 |---------------|-------------------|----------------|---------------------|----------------|
-|  Versions     | 2.2.1 `[1]`       | 4.0.6          | 1.5.0               | 1.0.0          |
+|  Versions     | 2.2.x `[1]`       | 4.0.6          | 1.5.0               | 1.0.0          |
 
 NOTES:
 
-[1] Only one given Harbor version is supported in one operator version
+[1] `.x` means all the patch releases of Harbor can be naturally supported in one operator version.
 
 ## Compatibility
 
@@ -72,26 +72,26 @@ NOTES:
 
 Harbor operator supports two extra Kubernetes versions besides the current latest version (`n-2` pattern):
 
-|    Versions   |         1.18       |        1.19        |        1.20        | 1.21 |
-|---------------|--------------------|--------------------|--------------------|------|
-| Compatibility | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |  :o: |
+|    Versions   |         1.18       |        1.19        |        1.20        |           1.21            |
+|---------------|--------------------|--------------------|--------------------|---------------------------|
+| Compatibility | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |  :heavy_multiplication_x: |
 
 ### Cert manager versions
 
 Harbor operator relies on cert manager to manage kinds of certificates used by Harbor cluster components. Table shown below lists the compatibilities of cert manager versions:
 
-|    Versions   |           <0.16          |       1.0.4        |       1.2.0        | 1.3.0 |
-|---------------|--------------------------|--------------------|--------------------|-------|
-| Compatibility | :heavy_multiplication_x: | :heavy_check_mark: | :heavy_check_mark: |  :o:  |
+|    Versions   |       1.0.4        |       1.2.0        |         1.3.1        |
+|---------------|--------------------|--------------------|----------------------|
+| Compatibility | :heavy_check_mark: | :heavy_check_mark: |  :heavy_check_mark:  |
 
 ### Ingress controller types
 
 Harbor operator exposes the frontend service with ingress (CRD version: `v1beta1`). Table shown below lists the ingress controller types supported.
 
-|  Ingress Controller  |        default      |         gce        |        ncp         |
-|----------------------|---------------------|--------------------|--------------------|
-|  Compatibility       |  :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-|  Description         | Default ingress controller like NGINX | Google Cloud Engine ingress controller | NSX-T Container plugin ingress controller |
+|  Ingress Controller  |        default      |         gce        |        ncp         |        contour      |
+|----------------------|---------------------|--------------------|--------------------|---------------------|
+|  Compatibility       |  :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |  :heavy_check_mark: |
+|  Description         | Default ingress controller like NGINX | Google Cloud Engine ingress controller | NSX-T Container plugin ingress controller | Ingress controller that works by deploying the Envoy proxy |
 
 NOTES:
 

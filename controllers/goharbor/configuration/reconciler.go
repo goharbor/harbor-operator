@@ -56,10 +56,10 @@ var configMapPredicate = predicate.Funcs{
 	// configuration reconciler only watch create and update events, ignore
 	// delete and generic events.
 	CreateFunc: func(event event.CreateEvent) bool {
-		return isConfiguration(event.Meta)
+		return isConfiguration(event.Object)
 	},
 	UpdateFunc: func(event event.UpdateEvent) bool {
-		return isConfiguration(event.MetaNew)
+		return isConfiguration(event.ObjectNew)
 	},
 	DeleteFunc: func(event event.DeleteEvent) bool {
 		return false
@@ -95,8 +95,7 @@ func (r *Reconciler) NormalizeName(ctx context.Context, name string, suffixes ..
 }
 
 // Reconcile does configuration reconcile.
-func (r *Reconciler) Reconcile(req ctrl.Request) (res ctrl.Result, err error) {
-	ctx := context.TODO()
+func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (res ctrl.Result, err error) {
 	log := r.Log.WithValues("resource", req.NamespacedName)
 
 	// get the configmap firstly

@@ -6,10 +6,10 @@ import (
 	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1"
 	cmmeta "github.com/jetstack/cert-manager/pkg/apis/meta/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func CertificateCheck(ctx context.Context, object runtime.Object) (bool, error) {
+func CertificateCheck(ctx context.Context, object client.Object) (bool, error) {
 	cert := object.(*certv1.Certificate)
 
 	expiration := cert.Status.NotAfter
@@ -27,7 +27,7 @@ func CertificateCheck(ctx context.Context, object runtime.Object) (bool, error) 
 	return false, nil
 }
 
-func IssuerCheck(ctx context.Context, object runtime.Object) (bool, error) {
+func IssuerCheck(ctx context.Context, object client.Object) (bool, error) {
 	issuer := object.(*certv1.Issuer)
 
 	for _, condition := range issuer.Status.Conditions {
