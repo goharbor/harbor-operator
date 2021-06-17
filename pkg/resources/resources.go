@@ -3,13 +3,11 @@ package resources
 import (
 	"context"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type Resource interface {
-	runtime.Object
-	metav1.Object
+	client.Object
 }
 
-type Checkable func(context.Context, runtime.Object) (bool, error)
+type Checkable func(context.Context, client.Object) (bool, error)

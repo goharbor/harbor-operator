@@ -57,32 +57,34 @@ func ControllersWithManager(ctx context.Context, mgr manager.Manager) error {
 }
 
 func WebhooksWithManager(ctx context.Context, mgr manager.Manager) error {
-	for name, object := range webhooksBuilder {
+	for name, webhooks := range webhooksBuilder {
 		ctx := ctx
 
-		logger.Set(&ctx, logger.Get(ctx).WithName(name.String()))
+		for _, webhook := range webhooks {
+			logger.Set(&ctx, logger.Get(ctx).WithName(name.String()))
 
-		wh := &webHook{
-			Name:    name,
-			webhook: object,
-		}
+			wh := &webHook{
+				Name:    name,
+				webhook: webhook,
+			}
 
-		ok, err := wh.IsEnabled(ctx)
-		if err != nil {
-			return errors.Wrap(err, "cannot check if webhook is enabled")
-		}
+			ok, err := wh.IsEnabled(ctx)
+			if err != nil {
+				return errors.Wrap(err, "cannot check if webhook is enabled")
+			}
 
-		if !ok {
-			logger.Get(ctx).Info("Webhook disabled")
+			if !ok {
+				logger.Get(ctx).Info("Webhook disabled")
 
-			continue
-		}
+				continue
+			}
 
-		// Fail earlier.
-		// 'controller-runtime' does not support webhook registrations concurrently.
-		// Check issue: https://github.com/kubernetes-sigs/controller-runtime/issues/1285.
-		if err := wh.WithManager(ctx, mgr); err != nil {
-			return errors.Wrap(err, name.String())
+			// Fail earlier.
+			// 'controller-runtime' does not support webhook registrations concurrently.
+			// Check issue: https://github.com/kubernetes-sigs/controller-runtime/issues/1285.
+			if err := wh.WithManager(ctx, mgr); err != nil {
+				return errors.Wrap(err, name.String())
+			}
 		}
 	}
 

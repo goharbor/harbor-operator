@@ -47,9 +47,8 @@ var (
 	cfg       *rest.Config
 	k8sClient client.Client
 	testEnv   *envtest.Environment
-	stopCh    chan struct{}
 	version   string
-	log       = zap.LoggerTo(GinkgoWriter, true)
+	log       = zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true))
 )
 
 const configDirectory = "../../config/config"
@@ -69,7 +68,6 @@ var _ = BeforeSuite(func(done Done) {
 
 	version = newName("version")
 
-	log := zap.LoggerTo(GinkgoWriter, true)
 	logf.SetLogger(log)
 	ctx := logger.Context(log)
 
@@ -109,7 +107,7 @@ var _ = BeforeSuite(func(done Done) {
 	go func() {
 		defer GinkgoRecover()
 
-		err := mgr.Start(stopCh)
+		err := mgr.Start(ctx)
 		Expect(err).NotTo(HaveOccurred(), "failed to start manager")
 	}()
 
@@ -117,7 +115,7 @@ var _ = BeforeSuite(func(done Done) {
 }, 60)
 
 var _ = AfterSuite(func() {
-	close(stopCh)
+	ctx.Done()
 
 	By("tearing down the test environment")
 	err := testEnv.Stop()
@@ -135,7 +133,6 @@ func SetupTest() *core.Namespace {
 	ns := &core.Namespace{}
 
 	BeforeEach(func() {
-		stopCh = make(chan struct{})
 		*ns = core.Namespace{
 			ObjectMeta: metav1.ObjectMeta{Name: newName("testns")},
 		}
