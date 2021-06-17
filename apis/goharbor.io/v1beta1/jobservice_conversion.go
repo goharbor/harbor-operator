@@ -5,12 +5,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/conversion"
 )
 
-func (src *JobService) ConvertTo(dstRaw conversion.Hub) error {
+func (j *JobService) ConvertTo(dstRaw conversion.Hub) error {
 	dst := dstRaw.(*v1alpha3.JobService)
-	return CopyViaJSON(dst, src)
+
+	return CopyViaJSON(dst, j)
 }
 
-func (dst *JobService) ConvertFrom(srcRaw conversion.Hub) error {
+func (j *JobService) ConvertFrom(srcRaw conversion.Hub) error {
 	src := srcRaw.(*v1alpha3.JobService)
-	return CopyViaJSON(dst, src)
+
+	return CopyViaJSON(j, src)
 }
