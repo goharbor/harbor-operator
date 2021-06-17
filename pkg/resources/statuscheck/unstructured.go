@@ -8,11 +8,11 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/kustomize/kstatus/status"
 )
 
-func UnstructuredCheck(ctx context.Context, object runtime.Object) (bool, error) {
+func UnstructuredCheck(ctx context.Context, object client.Object) (bool, error) {
 	uResource := object.(*unstructured.Unstructured)
 
 	err := status.Augment(uResource)

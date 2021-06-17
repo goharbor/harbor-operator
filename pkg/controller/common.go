@@ -80,7 +80,7 @@ func (c *Controller) GetName() string {
 	return c.BaseController.String()
 }
 
-func (c *Controller) GetAndFilter(ctx context.Context, key client.ObjectKey, obj runtime.Object) (bool, error) {
+func (c *Controller) GetAndFilter(ctx context.Context, key client.ObjectKey, obj client.Object) (bool, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "getAndFilter")
 	defer span.Finish()
 
@@ -108,8 +108,8 @@ func (c *Controller) AreNetworkPoliciesEnabled(ctx context.Context, resource res
 	return networkPoliciesEnabled, errors.Wrap(err, "get boolean config")
 }
 
-func (c *Controller) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	ctx := c.NewContext(req)
+func (c *Controller) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	ctx = c.PopulateContext(ctx, req)
 
 	span, ctx := opentracing.StartSpanFromContext(ctx, "reconcile", opentracing.Tags{
 		"resource.namespace": req.Namespace,
