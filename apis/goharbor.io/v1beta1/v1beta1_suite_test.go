@@ -7,9 +7,9 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestV1alpha3(t *testing.T) {
+func TestV1beta1(t *testing.T) {
 	t.Parallel()
 
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "V1alpha3 Suite")
+	RunSpecs(t, "V1beta1 Suite")
 }
