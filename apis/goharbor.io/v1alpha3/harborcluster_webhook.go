@@ -82,8 +82,6 @@ func (hc *HarborCluster) ValidateDelete() error {
 func (hc *HarborCluster) validate(old *HarborCluster) error {
 	var allErrs field.ErrorList
 
-	clog.Info("harbor cluster", "value", hc)
-
 	// For database(psql), cache(Redis) and storage, either external services or in-cluster services MUST be configured
 	if err := hc.validateStorage(); err != nil {
 		allErrs = append(allErrs, err)
