@@ -1,13 +1,14 @@
 package v1beta1
 
 import (
+	"github.com/goharbor/harbor-operator/pkg/convert"
 	"sigs.k8s.io/controller-runtime/pkg/conversion"
 )
 
 func (p *Portal) ConvertTo(dstRaw conversion.Hub) error {
-	return ConvertViaUnstructuredCopy(p, dstRaw)
+	return convert.ConverterObject(p).To(dstRaw)
 }
 
 func (p *Portal) ConvertFrom(srcRaw conversion.Hub) error {
-	return ConvertViaUnstructuredCopy(srcRaw, p)
+	return convert.ConverterObject(p).From(srcRaw)
 }

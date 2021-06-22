@@ -1,13 +1,14 @@
 package v1beta1
 
 import (
+	"github.com/goharbor/harbor-operator/pkg/convert"
 	"sigs.k8s.io/controller-runtime/pkg/conversion"
 )
 
 func (n *NotaryServer) ConvertTo(dstRaw conversion.Hub) error {
-	return ConvertViaUnstructuredCopy(n, dstRaw)
+	return convert.ConverterObject(n).To(dstRaw)
 }
 
 func (n *NotaryServer) ConvertFrom(srcRaw conversion.Hub) error {
-	return ConvertViaUnstructuredCopy(srcRaw, n)
+	return convert.ConverterObject(n).From(srcRaw)
 }
