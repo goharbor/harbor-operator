@@ -99,7 +99,7 @@ func NewHarborController(options ...k8s.Option) *Controller {
 }
 
 // getHarborCR will get a Harbor CR from the harborcluster definition.
-func (harbor *Controller) getHarborCR(ctx context.Context, harborcluster *goharborv1.HarborCluster, dependencies *lcm.CRStatusCollection) *goharborv1.Harbor {
+func (harbor *Controller) getHarborCR(ctx context.Context, harborcluster *goharborv1.HarborCluster, dependencies *lcm.CRStatusCollection) *goharborv1.Harbor { // nolint:funlen
 	namespacedName := harbor.getHarborCRNamespacedName(harborcluster)
 
 	spec := harborcluster.Spec.EmbeddedHarborSpec.DeepCopy()
@@ -130,6 +130,11 @@ func (harbor *Controller) getHarborCR(ctx context.Context, harborcluster *goharb
 		},
 	}
 
+	if harborcluster.Spec.Storage.Spec.FileSystem != nil {
+		harborCR.Spec.ImageChartStorage = &goharborv1.HarborStorageImageChartStorageSpec{
+			FileSystem: harborCR.Spec.ImageChartStorage.FileSystem,
+		}
+	}
 	// Use incluster spec in first priority.
 	// Check based on the case that if the related dependent services are created
 	if db := harbor.getDatabaseSpec(dependencies); db != nil {
