@@ -253,16 +253,14 @@ func Convert_v1alpha3_RedisSpec_To_v1beta1_CacheSpec(src *RedisSpec, dst *v1beta
 func Convert_v1alpha3_HarborStorageImageChartStorageSpec_To_v1beta1_Storage(src *HarborStorageImageChartStorageSpec, dst *v1beta1.Storage) { // nolint
 	if src.FileSystem != nil {
 		dst.Kind = "FileSystem"
-		dst.Spec = v1beta1.StorageSpec{
-			FileSystem: &v1beta1.FileSystemSpec{
-				HarborStorageImageChartStorageFileSystemSpec: v1beta1.HarborStorageImageChartStorageFileSystemSpec{
-					RegistryPersistentVolume: v1beta1.HarborStorageRegistryPersistentVolumeSpec{
-						HarborStoragePersistentVolumeSpec: v1beta1.HarborStoragePersistentVolumeSpec{
-							PersistentVolumeClaimVolumeSource: src.FileSystem.RegistryPersistentVolume.PersistentVolumeClaimVolumeSource,
-							Prefix:                            src.FileSystem.RegistryPersistentVolume.Prefix,
-						},
-						MaxThreads: src.FileSystem.RegistryPersistentVolume.MaxThreads,
+		dst.Spec.FileSystem = &v1beta1.FileSystemSpec{
+			HarborStorageImageChartStorageFileSystemSpec: v1beta1.HarborStorageImageChartStorageFileSystemSpec{
+				RegistryPersistentVolume: v1beta1.HarborStorageRegistryPersistentVolumeSpec{
+					HarborStoragePersistentVolumeSpec: v1beta1.HarborStoragePersistentVolumeSpec{
+						PersistentVolumeClaimVolumeSource: src.FileSystem.RegistryPersistentVolume.PersistentVolumeClaimVolumeSource,
+						Prefix:                            src.FileSystem.RegistryPersistentVolume.Prefix,
 					},
+					MaxThreads: src.FileSystem.RegistryPersistentVolume.MaxThreads,
 				},
 			},
 		}
@@ -272,6 +270,57 @@ func Convert_v1alpha3_HarborStorageImageChartStorageSpec_To_v1beta1_Storage(src 
 				PersistentVolumeClaimVolumeSource: src.FileSystem.ChartPersistentVolume.PersistentVolumeClaimVolumeSource,
 				Prefix:                            src.FileSystem.ChartPersistentVolume.Prefix,
 			}
+		}
+	}
+
+	if src.S3 != nil {
+		dst.Kind = "S3"
+		dst.Spec.S3 = &v1beta1.S3Spec{
+			HarborStorageImageChartStorageS3Spec: v1beta1.HarborStorageImageChartStorageS3Spec{
+				RegistryStorageDriverS3Spec: v1beta1.RegistryStorageDriverS3Spec{
+					AccessKey:      src.S3.AccessKey,
+					SecretKeyRef:   src.S3.SecretKeyRef,
+					Region:         src.S3.Region,
+					RegionEndpoint: src.S3.RegionEndpoint,
+					Bucket:         src.S3.Bucket,
+					RootDirectory:  src.S3.RootDirectory,
+					StorageClass:   src.S3.StorageClass,
+					KeyID:          src.S3.KeyID,
+					Encrypt:        src.S3.Encrypt,
+					SkipVerify:     src.S3.SkipVerify,
+					CertificateRef: src.S3.CertificateRef,
+					Secure:         src.S3.Secure,
+					V4Auth:         src.S3.V4Auth,
+					ChunkSize:      src.S3.ChunkSize,
+				},
+			},
+		}
+	}
+
+	if src.Swift != nil {
+		dst.Kind = "Swift"
+		dst.Spec.Swift = &v1beta1.SwiftSpec{
+			HarborStorageImageChartStorageSwiftSpec: v1beta1.HarborStorageImageChartStorageSwiftSpec{
+				RegistryStorageDriverSwiftSpec: v1beta1.RegistryStorageDriverSwiftSpec{
+					AuthURL:            src.Swift.AuthURL,
+					Username:           src.Swift.Username,
+					PasswordRef:        src.Swift.PasswordRef,
+					Region:             src.Swift.Region,
+					Container:          src.Swift.Container,
+					Tenant:             src.Swift.Tenant,
+					TenantID:           src.Swift.TenantID,
+					Domain:             src.Swift.Domain,
+					DomainID:           src.Swift.DomainID,
+					TrustID:            src.Swift.TrustID,
+					InsecureSkipVerify: src.Swift.InsecureSkipVerify,
+					ChunkSize:          src.Swift.ChunkSize,
+					Prefix:             src.Swift.Prefix,
+					SecretKeyRef:       src.Swift.SecretKeyRef,
+					AccessKey:          src.Swift.AccessKey,
+					AuthVersion:        src.Swift.AuthVersion,
+					EndpointType:       src.Swift.EndpointType,
+				},
+			},
 		}
 	}
 }
@@ -400,13 +449,24 @@ func Convert_v1beta1_HarborClusterSpec_To_v1alpha3_HarborClusterSpec(src *v1beta
 		Convert_v1beta1_Cache_To_v1alpha3_Cache(&src.Cache, dst.InClusterCache)
 	}
 
-	if src.Storage.Kind == "FileSystem" && src.Storage.Spec.FileSystem != nil {
-		if dst.ImageChartStorage == nil {
-			dst.ImageChartStorage = &HarborStorageImageChartStorageSpec{}
-		}
+	if dst.ImageChartStorage == nil {
+		dst.ImageChartStorage = &HarborStorageImageChartStorageSpec{}
+	}
 
-		Convert_v1beta1_FileSystemSpec_To_v1alpha3_HarborStorageImageChartStorage(src.Storage.Spec.FileSystem, dst.ImageChartStorage)
-	} else if src.Storage.Kind == "MinIO" {
+	switch src.Storage.Kind {
+	case "FileSystem":
+		if src.Storage.Spec.FileSystem != nil {
+			Convert_v1beta1_FileSystemSpec_To_v1alpha3_HarborStorageImageChartStorage(src.Storage.Spec.FileSystem, dst.ImageChartStorage)
+		}
+	case "S3":
+		if src.Storage.Spec.S3 != nil {
+			Convert_v1beta1_S3Spec_To_v1alpha3_HarborStorageImageChartStorage(src.Storage.Spec.S3, dst.ImageChartStorage)
+		}
+	case "Swift":
+		if src.Storage.Spec.Swift != nil {
+			Convert_v1beta1_SwiftSpec_To_v1alpha3_HarborStorageImageChartStorage(src.Storage.Spec.Swift, dst.ImageChartStorage)
+		}
+	case "MinIO":
 		if dst.InClusterStorage == nil {
 			dst.InClusterStorage = &Storage{}
 		}
@@ -429,6 +489,51 @@ func Convert_v1beta1_HarborClusterSpec_To_v1alpha3_HarborClusterSpec(src *v1beta
 	}
 
 	Convert_v1beta1_EmbeddedHarborSpec_To_v1alpha3_HarborSpec(&src.EmbeddedHarborSpec, &dst.HarborSpec)
+}
+
+func Convert_v1beta1_S3Spec_To_v1alpha3_HarborStorageImageChartStorage(src *v1beta1.S3Spec, dst *HarborStorageImageChartStorageSpec) { // nolint
+	dst.S3 = &HarborStorageImageChartStorageS3Spec{
+		RegistryStorageDriverS3Spec: RegistryStorageDriverS3Spec{
+			AccessKey:      src.AccessKey,
+			SecretKeyRef:   src.SecretKeyRef,
+			Region:         src.Region,
+			RegionEndpoint: src.RegionEndpoint,
+			Bucket:         src.Bucket,
+			RootDirectory:  src.RootDirectory,
+			StorageClass:   src.StorageClass,
+			KeyID:          src.KeyID,
+			Encrypt:        src.Encrypt,
+			SkipVerify:     src.SkipVerify,
+			CertificateRef: src.CertificateRef,
+			Secure:         src.Secure,
+			V4Auth:         src.V4Auth,
+			ChunkSize:      src.ChunkSize,
+		},
+	}
+}
+
+func Convert_v1beta1_SwiftSpec_To_v1alpha3_HarborStorageImageChartStorage(src *v1beta1.SwiftSpec, dst *HarborStorageImageChartStorageSpec) { // nolint
+	dst.Swift = &HarborStorageImageChartStorageSwiftSpec{
+		RegistryStorageDriverSwiftSpec: RegistryStorageDriverSwiftSpec{
+			AuthURL:            src.AuthURL,
+			Username:           src.Username,
+			PasswordRef:        src.PasswordRef,
+			Region:             src.Region,
+			Container:          src.Container,
+			Tenant:             src.Tenant,
+			TenantID:           src.TenantID,
+			Domain:             src.Domain,
+			DomainID:           src.DomainID,
+			TrustID:            src.TrustID,
+			InsecureSkipVerify: src.InsecureSkipVerify,
+			ChunkSize:          src.ChunkSize,
+			Prefix:             src.Prefix,
+			SecretKeyRef:       src.SecretKeyRef,
+			AccessKey:          src.AccessKey,
+			AuthVersion:        src.AuthVersion,
+			EndpointType:       src.EndpointType,
+		},
+	}
 }
 
 func Convert_v1beta1_EmbeddedHarborSpec_To_v1alpha3_HarborSpec(src *v1beta1.EmbeddedHarborSpec, dst *HarborSpec) { // nolint

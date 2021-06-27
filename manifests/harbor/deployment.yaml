@@ -7634,6 +7634,8 @@ spec:
                     description: Kind of which storage service to be used. Only support MinIO now.
                     enum:
                     - MinIO
+                    - S3
+                    - Swift
                     - FileSystem
                     type: string
                   spec:
@@ -7930,6 +7932,128 @@ spec:
                         - redirect
                         - replicas
                         - volumesPerServer
+                        type: object
+                      s3:
+                        properties:
+                          accesskey:
+                            description: The AWS Access Key. If you use IAM roles, omit to fetch temporary credentials from IAM.
+                            type: string
+                          bucket:
+                            description: The bucket name in which you want to store the registry’s data.
+                            type: string
+                          certificateRef:
+                            pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                            type: string
+                          chunksize:
+                            description: The S3 API requires multipart upload chunks to be at least 5MB.
+                            format: int64
+                            minimum: 5242880
+                            type: integer
+                          encrypt:
+                            default: false
+                            description: Specifies whether the registry stores the image in encrypted format or not. A boolean value.
+                            type: boolean
+                          keyid:
+                            description: KMS key ID to use for encryption (encrypt must be true, or this parameter is ignored).
+                            type: string
+                          region:
+                            description: The AWS region in which your bucket exists. For the moment, the Go AWS library in use does not use the newer DNS based bucket routing. For a list of regions, see http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html
+                            type: string
+                          regionendpoint:
+                            description: Endpoint for S3 compatible storage services (Minio, etc).
+                            type: string
+                          rootdirectory:
+                            description: This is a prefix that is applied to all S3 keys to allow you to segment data in your bucket if necessary.
+                            type: string
+                          secretkeyRef:
+                            description: Reference to the secret containing the AWS Secret Key. If you use IAM roles, omit to fetch temporary credentials from IAM.
+                            pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                            type: string
+                          secure:
+                            default: true
+                            type: boolean
+                          skipverify:
+                            default: false
+                            description: Skips TLS verification when the value is set to true.
+                            type: boolean
+                          storageclass:
+                            default: STANDARD
+                            description: The S3 storage class applied to each registry file.
+                            type: string
+                          v4auth:
+                            default: true
+                            description: Indicates whether the registry uses Version 4 of AWS’s authentication.
+                            type: boolean
+                        required:
+                        - bucket
+                        - region
+                        type: object
+                      swift:
+                        properties:
+                          accesskey:
+                            description: The access key to generate temporary URLs. It is used by HP Cloud Object Storage in addition to the secretkey parameter.
+                            type: string
+                          authurl:
+                            description: URL for obtaining an auth token. https://storage.myprovider.com/v2.0 or https://storage.myprovider.com/v3/auth
+                            type: string
+                          authversion:
+                            description: Specify the OpenStack Auth’s version, for example 3. By default the driver autodetects the auth’s version from the authurl.
+                            type: string
+                          chunksize:
+                            description: Size of the data segments for the Swift Dynamic Large Objects. This value should be a number.
+                            format: int64
+                            minimum: 5242880
+                            type: integer
+                          container:
+                            description: The name of your Swift container where you wish to store the registry’s data. The driver creates the named container during its initialization.
+                            type: string
+                          domain:
+                            description: Your Openstack domain name for Identity v3 API. You can either use domain or domainid.
+                            type: string
+                          domainID:
+                            description: Your Openstack domain ID for Identity v3 API. You can either use domain or domainid.
+                            type: string
+                          endpointtype:
+                            default: public
+                            description: The endpoint type used when connecting to swift.
+                            enum:
+                            - public
+                            - internal
+                            - admin
+                            type: string
+                          insecureskipverify:
+                            default: false
+                            description: Skips TLS verification if the value is set to true.
+                            type: boolean
+                          passwordRef:
+                            description: Secret name containing the Openstack password.
+                            pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                            type: string
+                          prefix:
+                            description: This is a prefix that is applied to all Swift keys to allow you to segment data in your container if necessary. Defaults to the container’s root.
+                            type: string
+                          region:
+                            description: The Openstack region in which your container exists.
+                            type: string
+                          secretkeyRef:
+                            description: The secret key used to generate temporary URLs.
+                            pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                            type: string
+                          tenant:
+                            description: Your Openstack tenant name. You can either use tenant or tenantid.
+                            type: string
+                          tenantID:
+                            description: Your Openstack tenant ID. You can either use tenant or tenantid.
+                            type: string
+                          trustid:
+                            description: Your Openstack trust ID for Identity v3 API.
+                            type: string
+                          username:
+                            description: The Openstack user name.
+                            type: string
+                        required:
+                        - authurl
+                        - container
                         type: object
                     type: object
                 required:

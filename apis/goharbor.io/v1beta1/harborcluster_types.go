@@ -196,7 +196,7 @@ type ZlandoPostgreSQLSpec struct {
 
 type Storage struct {
 	// Kind of which storage service to be used. Only support MinIO now.
-	// +kubebuilder:validation:Enum={MinIO,FileSystem}
+	// +kubebuilder:validation:Enum={MinIO,S3,Swift,FileSystem}
 	Kind string `json:"kind"`
 
 	Spec StorageSpec `json:"spec"`
@@ -207,8 +207,12 @@ type StorageSpec struct {
 	// inCluster options.
 	// +kubebuilder:validation:Optional
 	MinIO *MinIOSpec `json:"minIO,omitempty"`
-
+	// +kubebuilder:validation:Optional
 	FileSystem *FileSystemSpec `json:"fileSystem,omitempty"`
+	// +kubebuilder:validation:Optional
+	S3 *S3Spec `json:"s3,omitempty"`
+	// +kubebuilder:validation:Optional
+	Swift *SwiftSpec `json:"swift,omitempty"`
 }
 
 // StorageRedirectSpec defines if the redirection is disabled.
@@ -222,6 +226,14 @@ type StorageRedirectSpec struct {
 
 type FileSystemSpec struct {
 	HarborStorageImageChartStorageFileSystemSpec `json:",inline"`
+}
+
+type S3Spec struct {
+	HarborStorageImageChartStorageS3Spec `json:",inline"`
+}
+
+type SwiftSpec struct {
+	HarborStorageImageChartStorageSwiftSpec `json:",inline"`
 }
 
 type MinIOSpec struct {
