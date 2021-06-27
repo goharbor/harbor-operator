@@ -119,6 +119,7 @@ func (harbor *Controller) getHarborCR(ctx context.Context, harborcluster *goharb
 			InternalTLS: goharborv1.HarborInternalTLSSpec{
 				Enabled: spec.InternalTLS.Enabled,
 			},
+			ImageChartStorage:      &goharborv1.HarborStorageImageChartStorageSpec{},
 			LogLevel:               spec.LogLevel,
 			HarborAdminPasswordRef: spec.HarborAdminPasswordRef,
 			UpdateStrategyType:     spec.UpdateStrategyType,
@@ -131,10 +132,20 @@ func (harbor *Controller) getHarborCR(ctx context.Context, harborcluster *goharb
 	}
 
 	if harborcluster.Spec.Storage.Spec.FileSystem != nil {
-		harborCR.Spec.ImageChartStorage = &goharborv1.HarborStorageImageChartStorageSpec{
-			FileSystem: harborCR.Spec.ImageChartStorage.FileSystem,
-		}
+		harborCR.Spec.ImageChartStorage.FileSystem =
+			harborcluster.Spec.Storage.Spec.FileSystem.HarborStorageImageChartStorageFileSystemSpec.DeepCopy()
 	}
+
+	if harborcluster.Spec.Storage.Spec.S3 != nil {
+		harborCR.Spec.ImageChartStorage.S3 =
+			harborcluster.Spec.Storage.Spec.S3.HarborStorageImageChartStorageS3Spec.DeepCopy()
+	}
+
+	if harborcluster.Spec.Storage.Spec.Swift != nil {
+		harborCR.Spec.ImageChartStorage.Swift =
+			harborcluster.Spec.Storage.Spec.Swift.HarborStorageImageChartStorageSwiftSpec.DeepCopy()
+	}
+
 	// Use incluster spec in first priority.
 	// Check based on the case that if the related dependent services are created
 	if db := harbor.getDatabaseSpec(dependencies); db != nil {
