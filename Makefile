@@ -254,7 +254,7 @@ $(CHARTS_DIRECTORY)/harbor-operator-$(RELEASE_VERSION).tgz: $(CHART_HARBOR_OPERA
 		--app-version $(RELEASE_VERSION) \
 		--destination $(CHARTS_DIRECTORY)
 
-$(CHART_HARBOR_OPERATOR)/crds: config/crd/bases
+$(CHART_HARBOR_OPERATOR)/crds: kustomize config/crd/bases
 	rm -rf '$@'
 	mkdir '$@'
 	$(KUSTOMIZE) build config/helm/crds/ -o '$@'
