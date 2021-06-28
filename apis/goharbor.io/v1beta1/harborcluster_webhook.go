@@ -31,6 +31,45 @@ const (
 // Log used this webhook.
 var clog = logf.Log.WithName("harborcluster-resource")
 
+// +kubebuilder:webhook:verbs=create;update,path=/mutate-goharbor-io-v1beta1-harborcluster,mutating=true,failurePolicy=fail,groups=goharbor.io,resources=harborclusters,versions=v1beta1,name=mharborcluster.kb.io.v1beta1,admissionReviewVersions={"v1beta1"},sideEffects=None
+
+var _ webhook.Defaulter = &HarborCluster{}
+
+func (harborcluster *HarborCluster) Default() {
+	switch harborcluster.Spec.Cache.Kind {
+	case KindCacheRedis:
+		harborcluster.Spec.Cache.Spec.RedisFailover = nil
+	case KindCacheRedisFailover:
+		harborcluster.Spec.Cache.Spec.Redis = nil
+	}
+
+	switch harborcluster.Spec.Database.Kind {
+	case KindDatabasePostgreSQL:
+		harborcluster.Spec.Database.Spec.ZlandoPostgreSQL = nil
+	case KindDatabaseZlandoPostgreSQL:
+		harborcluster.Spec.Database.Spec.PostgreSQL = nil
+	}
+
+	switch harborcluster.Spec.Storage.Kind {
+	case KindStorageFileSystem:
+		harborcluster.Spec.Storage.Spec.S3 = nil
+		harborcluster.Spec.Storage.Spec.Swift = nil
+		harborcluster.Spec.Storage.Spec.MinIO = nil
+	case KindStorageS3:
+		harborcluster.Spec.Storage.Spec.FileSystem = nil
+		harborcluster.Spec.Storage.Spec.Swift = nil
+		harborcluster.Spec.Storage.Spec.MinIO = nil
+	case KindStorageSwift:
+		harborcluster.Spec.Storage.Spec.S3 = nil
+		harborcluster.Spec.Storage.Spec.FileSystem = nil
+		harborcluster.Spec.Storage.Spec.MinIO = nil
+	case KindStorageMinIO:
+		harborcluster.Spec.Storage.Spec.S3 = nil
+		harborcluster.Spec.Storage.Spec.Swift = nil
+		harborcluster.Spec.Storage.Spec.FileSystem = nil
+	}
+}
+
 // +kubebuilder:webhook:verbs=create;update,path=/validate-goharbor-io-v1beta1-harborcluster,mutating=false,failurePolicy=fail,groups=goharbor.io,resources=harborclusters,versions=v1beta1,name=vharborcluster.kb.io.v1beta1,admissionReviewVersions={"v1beta1"},sideEffects=None
 
 var _ webhook.Validator = &HarborCluster{}

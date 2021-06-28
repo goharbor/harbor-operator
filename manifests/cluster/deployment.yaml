@@ -34053,6 +34053,26 @@ webhooks:
     service:
       name: webhook-service
       namespace: harbor-operator-ns
+      path: /mutate-goharbor-io-v1beta1-harborcluster
+  failurePolicy: Fail
+  name: mharborcluster.kb.io.v1beta1
+  rules:
+  - apiGroups:
+    - goharbor.io
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - harborclusters
+  sideEffects: None
+- admissionReviewVersions:
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: harbor-operator-ns
       path: /mutate-goharbor-io-v1alpha3-harbor
   failurePolicy: Fail
   name: mharbor.kb.io
