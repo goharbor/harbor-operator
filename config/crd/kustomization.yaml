@@ -19,7 +19,9 @@ resources:
 patchesStrategicMerge:
 # [WEBHOOK] To enable webhook, uncomment all the sections with [WEBHOOK] prefix.
 # patches here are for enabling the conversion webhook for each CRD
+- patches/webhook_in_chartmuseums.yaml
 - patches/webhook_in_cores.yaml
+- patches/webhook_in_exporters.yaml
 - patches/webhook_in_harbors.yaml
 - patches/webhook_in_jobservices.yaml
 - patches/webhook_in_notaryservers.yaml
@@ -28,11 +30,14 @@ patchesStrategicMerge:
 - patches/webhook_in_registries.yaml
 - patches/webhook_in_registrycontrollers.yaml
 - patches/webhook_in_harborclusters.yaml
+- patches/webhook_in_trivies.yaml
 # +kubebuilder:scaffold:crdkustomizewebhookpatch
 
 # [CERTMANAGER] To enable webhook, uncomment all the sections with [CERTMANAGER] prefix.
 # patches here are for enabling the CA injection for each CRD
+- patches/cainjection_in_chartmuseums.yaml
 - patches/cainjection_in_cores.yaml
+- patches/cainjection_in_exporters.yaml
 - patches/cainjection_in_harbors.yaml
 - patches/cainjection_in_jobservices.yaml
 - patches/cainjection_in_notaryservers.yaml
@@ -41,6 +46,7 @@ patchesStrategicMerge:
 - patches/cainjection_in_registries.yaml
 - patches/cainjection_in_registrycontrollers.yaml
 - patches/cainjection_in_harborclusters.yaml
+- patches/cainjection_in_trivies.yaml
 # +kubebuilder:scaffold:crdkustomizecainjectionpatch
 
 # the following config is for teaching kustomize how to do kustomization for CRDs.

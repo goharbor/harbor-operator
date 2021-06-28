@@ -37,7 +37,7 @@ func Convert_v1alpha3_HarborClusterSpec_To_v1beta1_HarborClusterSpec(src *Harbor
 		Convert_v1alpha3_Cache_To_v1beta1_Cache(src.InClusterCache, &dst.Cache)
 	} else if src.Redis != nil {
 		dst.Cache = v1beta1.Cache{
-			Kind: "Redis",
+			Kind: v1beta1.KindCacheRedis,
 			Spec: &v1beta1.CacheSpec{
 				Redis: &v1beta1.ExternalRedisSpec{
 					RedisHostSpec:    src.Redis.RedisHostSpec,
@@ -219,7 +219,7 @@ func Convert_v1alpha3_ImageSourceSpec_To_v1beta1_ImageSourceSpec(src *ImageSourc
 
 func Convert_v1alpha3_Cache_To_v1beta1_Cache(src *Cache, dst *v1beta1.Cache) { // nolint
 	if src.RedisSpec != nil {
-		dst.Kind = "RedisFailover"
+		dst.Kind = v1beta1.KindCacheRedisFailover
 		dst.Spec = &v1beta1.CacheSpec{}
 		Convert_v1alpha3_RedisSpec_To_v1beta1_CacheSpec(src.RedisSpec, dst.Spec)
 	}
@@ -252,7 +252,7 @@ func Convert_v1alpha3_RedisSpec_To_v1beta1_CacheSpec(src *RedisSpec, dst *v1beta
 
 func Convert_v1alpha3_HarborStorageImageChartStorageSpec_To_v1beta1_Storage(src *HarborStorageImageChartStorageSpec, dst *v1beta1.Storage) { // nolint
 	if src.FileSystem != nil {
-		dst.Kind = "FileSystem"
+		dst.Kind = v1beta1.KindStorageFileSystem
 		dst.Spec.FileSystem = &v1beta1.FileSystemSpec{
 			HarborStorageImageChartStorageFileSystemSpec: v1beta1.HarborStorageImageChartStorageFileSystemSpec{
 				RegistryPersistentVolume: v1beta1.HarborStorageRegistryPersistentVolumeSpec{
@@ -274,7 +274,7 @@ func Convert_v1alpha3_HarborStorageImageChartStorageSpec_To_v1beta1_Storage(src 
 	}
 
 	if src.S3 != nil {
-		dst.Kind = "S3"
+		dst.Kind = v1beta1.KindStorageS3
 		dst.Spec.S3 = &v1beta1.S3Spec{
 			HarborStorageImageChartStorageS3Spec: v1beta1.HarborStorageImageChartStorageS3Spec{
 				RegistryStorageDriverS3Spec: v1beta1.RegistryStorageDriverS3Spec{
@@ -298,7 +298,7 @@ func Convert_v1alpha3_HarborStorageImageChartStorageSpec_To_v1beta1_Storage(src 
 	}
 
 	if src.Swift != nil {
-		dst.Kind = "Swift"
+		dst.Kind = v1beta1.KindStorageSwift
 		dst.Spec.Swift = &v1beta1.SwiftSpec{
 			HarborStorageImageChartStorageSwiftSpec: v1beta1.HarborStorageImageChartStorageSwiftSpec{
 				RegistryStorageDriverSwiftSpec: v1beta1.RegistryStorageDriverSwiftSpec{
@@ -327,7 +327,7 @@ func Convert_v1alpha3_HarborStorageImageChartStorageSpec_To_v1beta1_Storage(src 
 
 func Convert_v1alpha3_Storage_To_v1beta1_Storage(src *Storage, dst *v1beta1.Storage) { // nolint
 	if src.MinIOSpec != nil {
-		dst.Kind = "MinIO"
+		dst.Kind = v1beta1.KindStorageMinIO
 		dst.Spec.MinIO = &v1beta1.MinIOSpec{}
 		Convert_v1alpha3_MinIOSpec_to_v1beta1_MinIOSpec(src.MinIOSpec, dst.Spec.MinIO)
 	}
@@ -379,7 +379,7 @@ func Convert_v1alpha3_HarborExposeIngressSpec_To_v1beta1_HarborExposeIngressSpec
 }
 
 func Convert_v1alpha3_HarborDatabaseSpec_To_v1beta1_Database(src *HarborDatabaseSpec, dst *v1beta1.Database) { // nolint
-	dst.Kind = "PostgreSQL"
+	dst.Kind = v1beta1.KindDatabasePostgreSQL
 	dst.Spec = v1beta1.DatabaseSpec{
 		PostgreSQL: &v1beta1.PostgreSQLSpec{
 			HarborDatabaseSpec: v1beta1.HarborDatabaseSpec{
@@ -394,7 +394,7 @@ func Convert_v1alpha3_HarborDatabaseSpec_To_v1beta1_Database(src *HarborDatabase
 
 func Convert_v1alpha3_Database_To_v1beta1_Database(src *Database, dst *v1beta1.Database) { // nolint
 	if src.PostgresSQLSpec != nil {
-		dst.Kind = "Zlando/PostgreSQL"
+		dst.Kind = v1beta1.KindDatabaseZlandoPostgreSQL
 		dst.Spec.ZlandoPostgreSQL = &v1beta1.ZlandoPostgreSQLSpec{}
 		Convert_v1alpha3_PostgresSQLSpec_To_v1beta1_ZlandoPostgresSQLSpec(src.PostgresSQLSpec, dst.Spec.ZlandoPostgreSQL)
 	}
@@ -435,13 +435,13 @@ func Convert_v1alpha3_HarborClusterStatus_To_v1beta1_HarborClusterStatus(src *Ha
 //-----------------------------------------------------------
 
 func Convert_v1beta1_HarborClusterSpec_To_v1alpha3_HarborClusterSpec(src *v1beta1.HarborClusterSpec, dst *HarborClusterSpec) { // nolint
-	if src.Cache.Kind == "Redis" && src.Cache.Spec.Redis != nil {
+	if src.Cache.Kind == v1beta1.KindCacheRedis && src.Cache.Spec.Redis != nil {
 		if dst.Redis == nil {
 			dst.Redis = &ExternalRedisSpec{}
 		}
 
 		Convert_v1beta1_ExternalRedisSpec_To_v1alpha3_ExternalRedisSpec(src.Cache.Spec.Redis, dst.Redis)
-	} else if src.Cache.Kind == "RedisFailover" {
+	} else if src.Cache.Kind == v1beta1.KindCacheRedisFailover {
 		if dst.InClusterCache == nil {
 			dst.InClusterCache = &Cache{}
 		}
@@ -454,19 +454,19 @@ func Convert_v1beta1_HarborClusterSpec_To_v1alpha3_HarborClusterSpec(src *v1beta
 	}
 
 	switch src.Storage.Kind {
-	case "FileSystem":
+	case v1beta1.KindStorageFileSystem:
 		if src.Storage.Spec.FileSystem != nil {
 			Convert_v1beta1_FileSystemSpec_To_v1alpha3_HarborStorageImageChartStorage(src.Storage.Spec.FileSystem, dst.ImageChartStorage)
 		}
-	case "S3":
+	case v1beta1.KindStorageS3:
 		if src.Storage.Spec.S3 != nil {
 			Convert_v1beta1_S3Spec_To_v1alpha3_HarborStorageImageChartStorage(src.Storage.Spec.S3, dst.ImageChartStorage)
 		}
-	case "Swift":
+	case v1beta1.KindStorageSwift:
 		if src.Storage.Spec.Swift != nil {
 			Convert_v1beta1_SwiftSpec_To_v1alpha3_HarborStorageImageChartStorage(src.Storage.Spec.Swift, dst.ImageChartStorage)
 		}
-	case "MinIO":
+	case v1beta1.KindStorageMinIO:
 		if dst.InClusterStorage == nil {
 			dst.InClusterStorage = &Storage{}
 		}
@@ -474,13 +474,13 @@ func Convert_v1beta1_HarborClusterSpec_To_v1alpha3_HarborClusterSpec(src *v1beta
 		Convert_v1beta1_Storage_To_v1alpha3_Storage(&src.Storage, dst.InClusterStorage)
 	}
 
-	if src.Database.Kind == "PostgreSQL" && src.Database.Spec.PostgreSQL != nil {
+	if src.Database.Kind == v1beta1.KindDatabasePostgreSQL && src.Database.Spec.PostgreSQL != nil {
 		if dst.Database == nil {
 			dst.Database = &HarborDatabaseSpec{}
 		}
 
 		Convert_v1beta1_PostgreSQLSpec_To_v1alpha3_HarborDatabaseSpec(src.Database.Spec.PostgreSQL, dst.Database)
-	} else if src.Database.Kind == "Zlando/PostgreSQL" {
+	} else if src.Database.Kind == v1beta1.KindDatabaseZlandoPostgreSQL {
 		if dst.InClusterDatabase == nil {
 			dst.InClusterDatabase = &Database{}
 		}
@@ -685,7 +685,7 @@ func Convert_v1beta1_ExternalRedisSpec_To_v1alpha3_ExternalRedisSpec(src *v1beta
 }
 
 func Convert_v1beta1_Cache_To_v1alpha3_Cache(src *v1beta1.Cache, dst *Cache) { // nolint
-	dst.Kind = "Redis"
+	dst.Kind = v1beta1.KindCacheRedis
 	if src.Spec != nil {
 		dst.RedisSpec = &RedisSpec{}
 		Convert_v1beta1_RedisSpec_To_v1alpha3_CacheSpec(src.Spec, dst.RedisSpec)
@@ -792,7 +792,7 @@ func Convert_v1beta1_PostgreSQLSpec_To_v1alpha3_HarborDatabaseSpec(src *v1beta1.
 }
 
 func Convert_v1beta1_Database_To_v1alpha3_Database(src *v1beta1.Database, dst *Database) { // nolint
-	dst.Kind = "PostgresSQL"
+	dst.Kind = v1beta1.KindDatabasePostgreSQL
 
 	if src.Spec.ZlandoPostgreSQL != nil {
 		dst.PostgresSQLSpec = &PostgresSQLSpec{}

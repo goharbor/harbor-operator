@@ -1,0 +1,1003 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    cert-manager.io/inject-ca-from: '{{.Release.Namespace}}/{{. | include "chart.fullname"}}'
+    controller-gen.kubebuilder.io/version: v0.5.0
+  name: cores.goharbor.io
+spec:
+  conversion:
+    strategy: Webhook
+    webhook:
+      clientConfig:
+        caBundle: Cg==
+        service:
+          name: '{{ include "chart.fullname" . | quote }}'
+          namespace: '{{ .Release.Namespace | quote }}'
+          path: /convert
+      conversionReviewVersions:
+      - v1
+  group: goharbor.io
+  names:
+    categories:
+    - goharbor
+    kind: Core
+    listKind: CoreList
+    plural: cores
+    singular: core
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: Timestamp representing the server time when this object was created. It is not guaranteed to be set in happens-before order across separate operations. Clients may not set this value. It is represented in RFC3339 form and is in UTC.
+      jsonPath: .metadata.creationTimestamp
+      name: Age
+      priority: 1
+      type: date
+    - description: Human readable message describing the failure
+      jsonPath: .status.conditions[?(@.type=="Failed")].message
+      name: Failure
+      priority: 5
+      type: string
+    name: v1alpha3
+    schema:
+      openAPIV3Schema:
+        description: Core is the Schema for the Core API.
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: CoreSpec defines the desired state of Core.
+            properties:
+              adminInitialPasswordRef:
+                pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                type: string
+              authMode:
+                default: db_auth
+                enum:
+                - db_auth
+                type: string
+              certificateRefs:
+                items:
+                  type: string
+                type: array
+              components:
+                properties:
+                  chartRepository:
+                    properties:
+                      absoluteURL:
+                        default: false
+                        type: boolean
+                      cacheDriver:
+                        default: redis
+                        enum:
+                        - redis
+                        type: string
+                      url:
+                        pattern: https?://.+
+                        type: string
+                    required:
+                    - url
+                    type: object
+                  jobService:
+                    properties:
+                      secretRef:
+                        pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                        type: string
+                      url:
+                        pattern: https?://.+
+                        type: string
+                    required:
+                    - secretRef
+                    - url
+                    type: object
+                  notaryServer:
+                    properties:
+                      url:
+                        pattern: https?://.+
+                        type: string
+                    required:
+                    - url
+                    type: object
+                  portal:
+                    properties:
+                      url:
+                        pattern: https?://.+
+                        type: string
+                    required:
+                    - url
+                    type: object
+                  registry:
+                    properties:
+                      controllerURL:
+                        pattern: https?://.+
+                        type: string
+                      credentials:
+                        properties:
+                          passwordRef:
+                            pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                            type: string
+                          username:
+                            type: string
+                        required:
+                        - passwordRef
+                        - username
+                        type: object
+                      redis:
+                        properties:
+                          certificateRef:
+                            description: Secret containing the client certificate to authenticate with.
+                            pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                            type: string
+                          database:
+                            default: 0
+                            description: The database number.
+                            format: int32
+                            maximum: 8
+                            minimum: 0
+                            type: integer
+                          host:
+                            description: Server hostname.
+                            minLength: 1
+                            type: string
+                          passwordRef:
+                            description: Secret containing the password to use when connecting to the server.
+                            pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                            type: string
+                          port:
+                            description: Server port.
+                            exclusiveMinimum: true
+                            format: int32
+                            minimum: 0
+                            type: integer
+                          sentinelMasterSet:
+                            description: for Sentinel MasterSet.
+                            type: string
+                        required:
+                        - host
+                        type: object
+                      storageProviderName:
+                        minLength: 1
+                        type: string
+                      sync:
+                        default: false
+                        type: boolean
+                      url:
+                        pattern: https?://.+
+                        type: string
+                    required:
+                    - controllerURL
+                    - credentials
+                    - url
+                    type: object
+                  tls:
+                    properties:
+                      certificateRef:
+                        pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                        type: string
+                    type: object
+                  tokenService:
+                    properties:
+                      certificateRef:
+                        pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                        type: string
+                      url:
+                        pattern: https?://.+
+                        type: string
+                    required:
+                    - certificateRef
+                    - url
+                    type: object
+                  trivy:
+                    properties:
+                      adapterURL:
+                        pattern: https?://.+
+                        type: string
+                      url:
+                        pattern: https?://.+
+                        type: string
+                    required:
+                    - adapterURL
+                    - url
+                    type: object
+                required:
+                - jobService
+                - portal
+                - registry
+                - tokenService
+                type: object
+              configExpiration:
+                default: 5s
+                pattern: ([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?
+                type: string
+              csrfKeyRef:
+                pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                type: string
+              database:
+                properties:
+                  database:
+                    description: The database name. Defaults to be the same as the user name. In certain contexts, the value is checked for extended formats.
+                    minLength: 1
+                    type: string
+                  encryptionKeyRef:
+                    pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                    type: string
+                  hosts:
+                    items:
+                      properties:
+                        host:
+                          description: Name of host to connect to. If a host name begins with a slash, it specifies Unix-domain communication rather than TCP/IP communication; the value is the name of the directory in which the socket file is stored.
+                          minLength: 1
+                          type: string
+                        port:
+                          description: Port number to connect to at the server host, or socket file name extension for Unix-domain connections. Zero, specifies the default port number established when PostgreSQL was built.
+                          exclusiveMinimum: true
+                          format: int32
+                          minimum: 0
+                          type: integer
+                      required:
+                      - host
+                      type: object
+                    minItems: 1
+                    type: array
+                  maxIdleConnections:
+                    default: 50
+                    format: int32
+                    minimum: 0
+                    type: integer
+                  maxOpenConnections:
+                    default: 1000
+                    format: int32
+                    minimum: 0
+                    type: integer
+                  parameters:
+                    additionalProperties:
+                      type: string
+                    description: libpq parameters.
+                    type: object
+                  passwordRef:
+                    description: Secret containing the password to be used if the server demands password authentication.
+                    pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                    type: string
+                  username:
+                    description: PostgreSQL user name to connect as. Defaults to be the same as the operating system name of the user running the application.
+                    minLength: 1
+                    type: string
+                required:
+                - encryptionKeyRef
+                type: object
+              externalEndpoint:
+                pattern: https?://.+
+                type: string
+              http:
+                properties:
+                  enableGzip:
+                    default: true
+                    type: boolean
+                type: object
+              image:
+                description: Image name for the component.
+                type: string
+              imagePullPolicy:
+                description: 'Image pull policy. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images'
+                enum:
+                - Always
+                - Never
+                - IfNotPresent
+                type: string
+              imagePullSecrets:
+                items:
+                  description: LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.
+                  properties:
+                    name:
+                      description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                      type: string
+                  type: object
+                type: array
+              log:
+                properties:
+                  level:
+                    default: info
+                    description: CoreLogLevel is the log level for Core.
+                    enum:
+                    - debug
+                    - info
+                    - warn
+                    - error
+                    type: string
+                type: object
+              metrics:
+                properties:
+                  enabled:
+                    default: false
+                    type: boolean
+                  path:
+                    default: /metrics
+                    description: The path of the metrics.
+                    pattern: /.+
+                    type: string
+                  port:
+                    default: 8001
+                    description: The port of the metrics.
+                    format: int32
+                    minimum: 1
+                    type: integer
+                type: object
+              nodeSelector:
+                additionalProperties:
+                  type: string
+                description: 'NodeSelector is a selector which must be true for the component to fit on a node. Selector which must match a node''s labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/'
+                type: object
+              proxy:
+                properties:
+                  httpProxy:
+                    pattern: https?://.+
+                    type: string
+                  httpsProxy:
+                    pattern: https?://.+
+                    type: string
+                  noProxy:
+                    default:
+                    - 127.0.0.1
+                    - localhost
+                    - .local
+                    - .internal
+                    items:
+                      type: string
+                    type: array
+                type: object
+              publicCertificateRef:
+                pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                type: string
+              redis:
+                properties:
+                  certificateRef:
+                    description: Secret containing the client certificate to authenticate with.
+                    pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                    type: string
+                  database:
+                    default: 0
+                    description: The database number.
+                    format: int32
+                    maximum: 8
+                    minimum: 0
+                    type: integer
+                  host:
+                    description: Server hostname.
+                    minLength: 1
+                    type: string
+                  idleTimeout:
+                    default: 30s
+                    description: IdleTimeoutSecond closes connections after remaining idle for this duration. If the value is zero, then idle connections are not closed. Applications should set the timeout to a value less than the server's timeout.
+                    pattern: ([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?
+                    type: string
+                  passwordRef:
+                    description: Secret containing the password to use when connecting to the server.
+                    pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                    type: string
+                  port:
+                    description: Server port.
+                    exclusiveMinimum: true
+                    format: int32
+                    minimum: 0
+                    type: integer
+                  sentinelMasterSet:
+                    description: for Sentinel MasterSet.
+                    type: string
+                required:
+                - host
+                type: object
+              replicas:
+                description: 'Replicas is the number of desired replicas. This is a pointer to distinguish between explicit zero and unspecified. More info: https://kubernetes.io/docs/concepts/workloads/controllers/replicationcontroller#what-is-a-replicationcontroller'
+                format: int32
+                minimum: 0
+                type: integer
+              resources:
+                description: 'Compute Resources required by this component. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                properties:
+                  limits:
+                    additionalProperties:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                    description: 'Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                    type: object
+                  requests:
+                    additionalProperties:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                    description: 'Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                    type: object
+                type: object
+              secretRef:
+                pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                type: string
+              serviceAccountName:
+                description: 'ServiceAccountName is the name of the ServiceAccount to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
+                type: string
+              tolerations:
+                description: If specified, the pod's tolerations.
+                items:
+                  description: The pod this Toleration is attached to tolerates any taint that matches the triple <key,value,effect> using the matching operator <operator>.
+                  properties:
+                    effect:
+                      description: Effect indicates the taint effect to match. Empty means match all taint effects. When specified, allowed values are NoSchedule, PreferNoSchedule and NoExecute.
+                      type: string
+                    key:
+                      description: Key is the taint key that the toleration applies to. Empty means match all taint keys. If the key is empty, operator must be Exists; this combination means to match all values and all keys.
+                      type: string
+                    operator:
+                      description: Operator represents a key's relationship to the value. Valid operators are Exists and Equal. Defaults to Equal. Exists is equivalent to wildcard for value, so that a pod can tolerate all taints of a particular category.
+                      type: string
+                    tolerationSeconds:
+                      description: TolerationSeconds represents the period of time the toleration (which must be of effect NoExecute, otherwise this field is ignored) tolerates the taint. By default, it is not set, which means tolerate the taint forever (do not evict). Zero and negative values will be treated as 0 (evict immediately) by the system.
+                      format: int64
+                      type: integer
+                    value:
+                      description: Value is the taint value the toleration matches to. If the operator is Exists, the value should be empty, otherwise just a regular string.
+                      type: string
+                  type: object
+                type: array
+            required:
+            - adminInitialPasswordRef
+            - components
+            - csrfKeyRef
+            - database
+            - externalEndpoint
+            - redis
+            - secretRef
+            type: object
+          status:
+            description: ComponentStatus represents the current status of the resource. https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md#typical-status-properties
+            properties:
+              conditions:
+                description: Conditions list of extracted conditions from Resource
+                items:
+                  description: Condition defines the general format for conditions on Kubernetes resources. In practice, each kubernetes resource defines their own format for conditions, but most (maybe all) follows this structure.
+                  properties:
+                    message:
+                      description: Message Human readable reason string
+                      type: string
+                    reason:
+                      description: Reason one work CamelCase reason
+                      type: string
+                    status:
+                      description: Status String that describes the condition status
+                      type: string
+                    type:
+                      description: Type condition type
+                      type: string
+                  required:
+                  - status
+                  - type
+                  type: object
+                type: array
+              observedGeneration:
+                format: int64
+                type: integer
+              operator:
+                description: ControllerStatus represents the current status of the operator.
+                properties:
+                  controllerGitCommit:
+                    minLength: 1
+                    type: string
+                  controllerName:
+                    minLength: 1
+                    type: string
+                  controllerVersion:
+                    minLength: 1
+                    type: string
+                type: object
+              replicas:
+                description: Current number of pods.
+                format: int32
+                minimum: 0
+                type: integer
+            required:
+            - conditions
+            type: object
+        type: object
+    served: true
+    storage: false
+    subresources:
+      status: {}
+  - additionalPrinterColumns:
+    - description: Timestamp representing the server time when this object was created. It is not guaranteed to be set in happens-before order across separate operations. Clients may not set this value. It is represented in RFC3339 form and is in UTC.
+      jsonPath: .metadata.creationTimestamp
+      name: Age
+      priority: 1
+      type: date
+    - description: Human readable message describing the failure
+      jsonPath: .status.conditions[?(@.type=="Failed")].message
+      name: Failure
+      priority: 5
+      type: string
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Core is the Schema for the Core API.
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: CoreSpec defines the desired state of Core.
+            properties:
+              adminInitialPasswordRef:
+                pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                type: string
+              authMode:
+                default: db_auth
+                enum:
+                - db_auth
+                type: string
+              certificateRefs:
+                items:
+                  type: string
+                type: array
+              components:
+                properties:
+                  chartRepository:
+                    properties:
+                      absoluteURL:
+                        default: false
+                        type: boolean
+                      cacheDriver:
+                        default: redis
+                        enum:
+                        - redis
+                        type: string
+                      url:
+                        pattern: https?://.+
+                        type: string
+                    required:
+                    - url
+                    type: object
+                  jobService:
+                    properties:
+                      secretRef:
+                        pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                        type: string
+                      url:
+                        pattern: https?://.+
+                        type: string
+                    required:
+                    - secretRef
+                    - url
+                    type: object
+                  notaryServer:
+                    properties:
+                      url:
+                        pattern: https?://.+
+                        type: string
+                    required:
+                    - url
+                    type: object
+                  portal:
+                    properties:
+                      url:
+                        pattern: https?://.+
+                        type: string
+                    required:
+                    - url
+                    type: object
+                  registry:
+                    properties:
+                      controllerURL:
+                        pattern: https?://.+
+                        type: string
+                      credentials:
+                        properties:
+                          passwordRef:
+                            pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                            type: string
+                          username:
+                            type: string
+                        required:
+                        - passwordRef
+                        - username
+                        type: object
+                      redis:
+                        properties:
+                          certificateRef:
+                            description: Secret containing the client certificate to authenticate with.
+                            pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                            type: string
+                          database:
+                            default: 0
+                            description: The database number.
+                            format: int32
+                            maximum: 8
+                            minimum: 0
+                            type: integer
+                          host:
+                            description: Server hostname.
+                            minLength: 1
+                            type: string
+                          passwordRef:
+                            description: Secret containing the password to use when connecting to the server.
+                            pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                            type: string
+                          port:
+                            description: Server port.
+                            exclusiveMinimum: true
+                            format: int32
+                            minimum: 0
+                            type: integer
+                          sentinelMasterSet:
+                            description: for Sentinel MasterSet.
+                            type: string
+                        required:
+                        - host
+                        type: object
+                      storageProviderName:
+                        minLength: 1
+                        type: string
+                      sync:
+                        default: false
+                        type: boolean
+                      url:
+                        pattern: https?://.+
+                        type: string
+                    required:
+                    - controllerURL
+                    - credentials
+                    - url
+                    type: object
+                  tls:
+                    properties:
+                      certificateRef:
+                        pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                        type: string
+                    type: object
+                  tokenService:
+                    properties:
+                      certificateRef:
+                        pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                        type: string
+                      url:
+                        pattern: https?://.+
+                        type: string
+                    required:
+                    - certificateRef
+                    - url
+                    type: object
+                  trivy:
+                    properties:
+                      adapterURL:
+                        pattern: https?://.+
+                        type: string
+                      url:
+                        pattern: https?://.+
+                        type: string
+                    required:
+                    - adapterURL
+                    - url
+                    type: object
+                required:
+                - jobService
+                - portal
+                - registry
+                - tokenService
+                type: object
+              configExpiration:
+                default: 5s
+                pattern: ([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?
+                type: string
+              csrfKeyRef:
+                pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                type: string
+              database:
+                properties:
+                  database:
+                    description: The database name. Defaults to be the same as the user name. In certain contexts, the value is checked for extended formats.
+                    minLength: 1
+                    type: string
+                  encryptionKeyRef:
+                    pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                    type: string
+                  hosts:
+                    items:
+                      properties:
+                        host:
+                          description: Name of host to connect to. If a host name begins with a slash, it specifies Unix-domain communication rather than TCP/IP communication; the value is the name of the directory in which the socket file is stored.
+                          minLength: 1
+                          type: string
+                        port:
+                          description: Port number to connect to at the server host, or socket file name extension for Unix-domain connections. Zero, specifies the default port number established when PostgreSQL was built.
+                          exclusiveMinimum: true
+                          format: int32
+                          minimum: 0
+                          type: integer
+                      required:
+                      - host
+                      type: object
+                    minItems: 1
+                    type: array
+                  maxIdleConnections:
+                    default: 50
+                    format: int32
+                    minimum: 0
+                    type: integer
+                  maxOpenConnections:
+                    default: 1000
+                    format: int32
+                    minimum: 0
+                    type: integer
+                  parameters:
+                    additionalProperties:
+                      type: string
+                    description: libpq parameters.
+                    type: object
+                  passwordRef:
+                    description: Secret containing the password to be used if the server demands password authentication.
+                    pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                    type: string
+                  username:
+                    description: PostgreSQL user name to connect as. Defaults to be the same as the operating system name of the user running the application.
+                    minLength: 1
+                    type: string
+                required:
+                - encryptionKeyRef
+                type: object
+              externalEndpoint:
+                pattern: https?://.+
+                type: string
+              http:
+                properties:
+                  enableGzip:
+                    default: true
+                    type: boolean
+                type: object
+              image:
+                description: Image name for the component.
+                type: string
+              imagePullPolicy:
+                description: 'Image pull policy. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images'
+                enum:
+                - Always
+                - Never
+                - IfNotPresent
+                type: string
+              imagePullSecrets:
+                items:
+                  description: LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.
+                  properties:
+                    name:
+                      description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                      type: string
+                  type: object
+                type: array
+              log:
+                properties:
+                  level:
+                    default: info
+                    description: CoreLogLevel is the log level for Core.
+                    enum:
+                    - debug
+                    - info
+                    - warn
+                    - error
+                    type: string
+                type: object
+              metrics:
+                properties:
+                  enabled:
+                    default: false
+                    type: boolean
+                  path:
+                    default: /metrics
+                    description: The path of the metrics.
+                    pattern: /.+
+                    type: string
+                  port:
+                    default: 8001
+                    description: The port of the metrics.
+                    format: int32
+                    minimum: 1
+                    type: integer
+                type: object
+              nodeSelector:
+                additionalProperties:
+                  type: string
+                description: 'NodeSelector is a selector which must be true for the component to fit on a node. Selector which must match a node''s labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/'
+                type: object
+              proxy:
+                properties:
+                  httpProxy:
+                    pattern: https?://.+
+                    type: string
+                  httpsProxy:
+                    pattern: https?://.+
+                    type: string
+                  noProxy:
+                    default:
+                    - 127.0.0.1
+                    - localhost
+                    - .local
+                    - .internal
+                    items:
+                      type: string
+                    type: array
+                type: object
+              publicCertificateRef:
+                pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                type: string
+              redis:
+                properties:
+                  certificateRef:
+                    description: Secret containing the client certificate to authenticate with.
+                    pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                    type: string
+                  database:
+                    default: 0
+                    description: The database number.
+                    format: int32
+                    maximum: 8
+                    minimum: 0
+                    type: integer
+                  host:
+                    description: Server hostname.
+                    minLength: 1
+                    type: string
+                  idleTimeout:
+                    default: 30s
+                    description: IdleTimeoutSecond closes connections after remaining idle for this duration. If the value is zero, then idle connections are not closed. Applications should set the timeout to a value less than the server's timeout.
+                    pattern: ([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?
+                    type: string
+                  passwordRef:
+                    description: Secret containing the password to use when connecting to the server.
+                    pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                    type: string
+                  port:
+                    description: Server port.
+                    exclusiveMinimum: true
+                    format: int32
+                    minimum: 0
+                    type: integer
+                  sentinelMasterSet:
+                    description: for Sentinel MasterSet.
+                    type: string
+                required:
+                - host
+                type: object
+              replicas:
+                description: 'Replicas is the number of desired replicas. This is a pointer to distinguish between explicit zero and unspecified. More info: https://kubernetes.io/docs/concepts/workloads/controllers/replicationcontroller#what-is-a-replicationcontroller'
+                format: int32
+                minimum: 0
+                type: integer
+              resources:
+                description: 'Compute Resources required by this component. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                properties:
+                  limits:
+                    additionalProperties:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                    description: 'Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                    type: object
+                  requests:
+                    additionalProperties:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                    description: 'Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                    type: object
+                type: object
+              secretRef:
+                pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                type: string
+              serviceAccountName:
+                description: 'ServiceAccountName is the name of the ServiceAccount to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
+                type: string
+              tolerations:
+                description: If specified, the pod's tolerations.
+                items:
+                  description: The pod this Toleration is attached to tolerates any taint that matches the triple <key,value,effect> using the matching operator <operator>.
+                  properties:
+                    effect:
+                      description: Effect indicates the taint effect to match. Empty means match all taint effects. When specified, allowed values are NoSchedule, PreferNoSchedule and NoExecute.
+                      type: string
+                    key:
+                      description: Key is the taint key that the toleration applies to. Empty means match all taint keys. If the key is empty, operator must be Exists; this combination means to match all values and all keys.
+                      type: string
+                    operator:
+                      description: Operator represents a key's relationship to the value. Valid operators are Exists and Equal. Defaults to Equal. Exists is equivalent to wildcard for value, so that a pod can tolerate all taints of a particular category.
+                      type: string
+                    tolerationSeconds:
+                      description: TolerationSeconds represents the period of time the toleration (which must be of effect NoExecute, otherwise this field is ignored) tolerates the taint. By default, it is not set, which means tolerate the taint forever (do not evict). Zero and negative values will be treated as 0 (evict immediately) by the system.
+                      format: int64
+                      type: integer
+                    value:
+                      description: Value is the taint value the toleration matches to. If the operator is Exists, the value should be empty, otherwise just a regular string.
+                      type: string
+                  type: object
+                type: array
+            required:
+            - adminInitialPasswordRef
+            - components
+            - csrfKeyRef
+            - database
+            - externalEndpoint
+            - redis
+            - secretRef
+            type: object
+          status:
+            description: ComponentStatus represents the current status of the resource. https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md#typical-status-properties
+            properties:
+              conditions:
+                description: Conditions list of extracted conditions from Resource
+                items:
+                  description: Condition defines the general format for conditions on Kubernetes resources. In practice, each kubernetes resource defines their own format for conditions, but most (maybe all) follows this structure.
+                  properties:
+                    message:
+                      description: Message Human readable reason string
+                      type: string
+                    reason:
+                      description: Reason one work CamelCase reason
+                      type: string
+                    status:
+                      description: Status String that describes the condition status
+                      type: string
+                    type:
+                      description: Type condition type
+                      type: string
+                  required:
+                  - status
+                  - type
+                  type: object
+                type: array
+              observedGeneration:
+                format: int64
+                type: integer
+              operator:
+                description: ControllerStatus represents the current status of the operator.
+                properties:
+                  controllerGitCommit:
+                    minLength: 1
+                    type: string
+                  controllerName:
+                    minLength: 1
+                    type: string
+                  controllerVersion:
+                    minLength: 1
+                    type: string
+                type: object
+              replicas:
+                description: Current number of pods.
+                format: int32
+                minimum: 0
+                type: integer
+            required:
+            - conditions
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

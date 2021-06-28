@@ -71,7 +71,7 @@ func (m *MinIOController) getMinIOProperties(ctx context.Context, harborcluster 
 		skipVerify = true
 	)
 
-	if harborcluster.Spec.Storage.Kind == "MinIO" && harborcluster.Spec.Storage.Spec.MinIO != nil {
+	if harborcluster.Spec.Storage.Kind == goharborv1.KindStorageMinIO && harborcluster.Spec.Storage.Spec.MinIO != nil {
 		tls := harborcluster.Spec.Storage.Spec.MinIO.Redirect.Expose.TLS
 		if tls.Enabled() {
 			secure = true

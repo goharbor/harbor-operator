@@ -18,6 +18,9 @@ patchesStrategicMerge:
 - patches/portals_service.yaml
 - patches/registries_service.yaml
 - patches/registrycontrollers_service.yaml
+- patches/exporters_service.yaml
+- patches/harborclusters_service.yaml
+- patches/trivies_service.yaml
 
 bases:
 - ../../crd

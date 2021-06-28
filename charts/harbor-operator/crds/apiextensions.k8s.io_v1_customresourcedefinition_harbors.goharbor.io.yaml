@@ -1,0 +1,2931 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    cert-manager.io/inject-ca-from: '{{.Release.Namespace}}/{{. | include "chart.fullname"}}'
+    controller-gen.kubebuilder.io/version: v0.5.0
+  name: harbors.goharbor.io
+spec:
+  conversion:
+    strategy: Webhook
+    webhook:
+      clientConfig:
+        caBundle: Cg==
+        service:
+          name: '{{ include "chart.fullname" . | quote }}'
+          namespace: '{{ .Release.Namespace | quote }}'
+          path: /convert
+      conversionReviewVersions:
+      - v1
+  group: goharbor.io
+  names:
+    categories:
+    - goharbor
+    kind: Harbor
+    listKind: HarborList
+    plural: harbors
+    shortNames:
+    - h
+    singular: harbor
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: The public URL to the Harbor application
+      jsonPath: .spec.externalURL
+      name: Public URL
+      priority: 5
+      type: string
+    - description: The version to the Harbor application
+      jsonPath: .spec.version
+      name: Version
+      priority: 5
+      type: string
+    - description: Timestamp representing the server time when this object was created. It is not guaranteed to be set in happens-before order across separate operations. Clients may not set this value. It is represented in RFC3339 form and is in UTC.
+      jsonPath: .metadata.creationTimestamp
+      name: Age
+      priority: 1
+      type: date
+    - description: Human readable message describing the failure
+      jsonPath: .status.conditions[?(@.type=="Failed")].message
+      name: Failure
+      priority: 5
+      type: string
+    name: v1alpha3
+    schema:
+      openAPIV3Schema:
+        description: Harbor is the Schema for the harbors API.
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: HarborSpec defines the desired state of Harbor.
+            properties:
+              chartmuseum:
+                properties:
+                  absoluteUrl:
+                    default: false
+                    description: Harbor defaults ChartMuseum to returning relative urls, if you want using absolute url you should enable it
+                    type: boolean
+                  certificateRefs:
+                    items:
+                      type: string
+                    type: array
+                  image:
+                    description: Image name for the component.
+                    type: string
+                  imagePullPolicy:
+                    description: 'Image pull policy. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images'
+                    enum:
+                    - Always
+                    - Never
+                    - IfNotPresent
+                    type: string
+                  imagePullSecrets:
+                    items:
+                      description: LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.
+                      properties:
+                        name:
+                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                          type: string
+                      type: object
+                    type: array
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    description: 'NodeSelector is a selector which must be true for the component to fit on a node. Selector which must match a node''s labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/'
+                    type: object
+                  replicas:
+                    description: 'Replicas is the number of desired replicas. This is a pointer to distinguish between explicit zero and unspecified. More info: https://kubernetes.io/docs/concepts/workloads/controllers/replicationcontroller#what-is-a-replicationcontroller'
+                    format: int32
+                    minimum: 0
+                    type: integer
+                  resources:
+                    description: 'Compute Resources required by this component. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                    properties:
+                      limits:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                      requests:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                    type: object
+                  serviceAccountName:
+                    description: 'ServiceAccountName is the name of the ServiceAccount to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
+                    type: string
+                  tolerations:
+                    description: If specified, the pod's tolerations.
+                    items:
+                      description: The pod this Toleration is attached to tolerates any taint that matches the triple <key,value,effect> using the matching operator <operator>.
+                      properties:
+                        effect:
+                          description: Effect indicates the taint effect to match. Empty means match all taint effects. When specified, allowed values are NoSchedule, PreferNoSchedule and NoExecute.
+                          type: string
+                        key:
+                          description: Key is the taint key that the toleration applies to. Empty means match all taint keys. If the key is empty, operator must be Exists; this combination means to match all values and all keys.
+                          type: string
+                        operator:
+                          description: Operator represents a key's relationship to the value. Valid operators are Exists and Equal. Defaults to Equal. Exists is equivalent to wildcard for value, so that a pod can tolerate all taints of a particular category.
+                          type: string
+                        tolerationSeconds:
+                          description: TolerationSeconds represents the period of time the toleration (which must be of effect NoExecute, otherwise this field is ignored) tolerates the taint. By default, it is not set, which means tolerate the taint forever (do not evict). Zero and negative values will be treated as 0 (evict immediately) by the system.
+                          format: int64
+                          type: integer
+                        value:
+                          description: Value is the taint value the toleration matches to. If the operator is Exists, the value should be empty, otherwise just a regular string.
+                          type: string
+                      type: object
+                    type: array
+                type: object
+              core:
+                properties:
+                  certificateRefs:
+                    items:
+                      type: string
+                    type: array
+                  image:
+                    description: Image name for the component.
+                    type: string
+                  imagePullPolicy:
+                    description: 'Image pull policy. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images'
+                    enum:
+                    - Always
+                    - Never
+                    - IfNotPresent
+                    type: string
+                  imagePullSecrets:
+                    items:
+                      description: LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.
+                      properties:
+                        name:
+                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                          type: string
+                      type: object
+                    type: array
+                  metrics:
+                    properties:
+                      enabled:
+                        default: false
+                        type: boolean
+                      path:
+                        default: /metrics
+                        description: The path of the metrics.
+                        pattern: /.+
+                        type: string
+                      port:
+                        default: 8001
+                        description: The port of the metrics.
+                        format: int32
+                        minimum: 1
+                        type: integer
+                    type: object
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    description: 'NodeSelector is a selector which must be true for the component to fit on a node. Selector which must match a node''s labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/'
+                    type: object
+                  replicas:
+                    description: 'Replicas is the number of desired replicas. This is a pointer to distinguish between explicit zero and unspecified. More info: https://kubernetes.io/docs/concepts/workloads/controllers/replicationcontroller#what-is-a-replicationcontroller'
+                    format: int32
+                    minimum: 0
+                    type: integer
+                  resources:
+                    description: 'Compute Resources required by this component. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                    properties:
+                      limits:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                      requests:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                    type: object
+                  serviceAccountName:
+                    description: 'ServiceAccountName is the name of the ServiceAccount to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
+                    type: string
+                  tokenIssuer:
+                    description: ObjectReference is a reference to an object with a given name, kind and group.
+                    properties:
+                      group:
+                        description: Group of the resource being referred to.
+                        type: string
+                      kind:
+                        description: Kind of the resource being referred to.
+                        type: string
+                      name:
+                        description: Name of the resource being referred to.
+                        type: string
+                    required:
+                    - name
+                    type: object
+                  tolerations:
+                    description: If specified, the pod's tolerations.
+                    items:
+                      description: The pod this Toleration is attached to tolerates any taint that matches the triple <key,value,effect> using the matching operator <operator>.
+                      properties:
+                        effect:
+                          description: Effect indicates the taint effect to match. Empty means match all taint effects. When specified, allowed values are NoSchedule, PreferNoSchedule and NoExecute.
+                          type: string
+                        key:
+                          description: Key is the taint key that the toleration applies to. Empty means match all taint keys. If the key is empty, operator must be Exists; this combination means to match all values and all keys.
+                          type: string
+                        operator:
+                          description: Operator represents a key's relationship to the value. Valid operators are Exists and Equal. Defaults to Equal. Exists is equivalent to wildcard for value, so that a pod can tolerate all taints of a particular category.
+                          type: string
+                        tolerationSeconds:
+                          description: TolerationSeconds represents the period of time the toleration (which must be of effect NoExecute, otherwise this field is ignored) tolerates the taint. By default, it is not set, which means tolerate the taint forever (do not evict). Zero and negative values will be treated as 0 (evict immediately) by the system.
+                          format: int64
+                          type: integer
+                        value:
+                          description: Value is the taint value the toleration matches to. If the operator is Exists, the value should be empty, otherwise just a regular string.
+                          type: string
+                      type: object
+                    type: array
+                type: object
+              database:
+                description: Skip OpenAPI schema validation Use validating webhook to do verification (field required)
+                properties:
+                  hosts:
+                    items:
+                      properties:
+                        host:
+                          description: Name of host to connect to. If a host name begins with a slash, it specifies Unix-domain communication rather than TCP/IP communication; the value is the name of the directory in which the socket file is stored.
+                          minLength: 1
+                          type: string
+                        port:
+                          description: Port number to connect to at the server host, or socket file name extension for Unix-domain connections. Zero, specifies the default port number established when PostgreSQL was built.
+                          exclusiveMinimum: true
+                          format: int32
+                          minimum: 0
+                          type: integer
+                      required:
+                      - host
+                      type: object
+                    minItems: 1
+                    type: array
+                  passwordRef:
+                    description: Secret containing the password to be used if the server demands password authentication.
+                    pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                    type: string
+                  prefix:
+                    type: string
+                  sslMode:
+                    description: PostgreSQL has native support for using SSL connections to encrypt client/server communications for increased security.
+                    enum:
+                    - disable
+                    - allow
+                    - prefer
+                    - require
+                    - verify-ca
+                    - verify-full
+                    type: string
+                  username:
+                    description: PostgreSQL user name to connect as. Defaults to be the same as the operating system name of the user running the application.
+                    minLength: 1
+                    type: string
+                required:
+                - hosts
+                type: object
+              exporter:
+                properties:
+                  cache:
+                    properties:
+                      cleanInterval:
+                        default: 4h
+                        description: The interval to clean the cache info from the database and core.
+                        pattern: ([0-9]+h)?([0-9]+m)?([0-9]+s)?
+                        type: string
+                      duration:
+                        default: 30s
+                        description: The duration to cache info from the database and core.
+                        pattern: ([0-9]+h)?([0-9]+m)?([0-9]+s)?
+                        type: string
+                    type: object
+                  image:
+                    description: Image name for the component.
+                    type: string
+                  imagePullPolicy:
+                    description: 'Image pull policy. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images'
+                    enum:
+                    - Always
+                    - Never
+                    - IfNotPresent
+                    type: string
+                  imagePullSecrets:
+                    items:
+                      description: LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.
+                      properties:
+                        name:
+                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                          type: string
+                      type: object
+                    type: array
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    description: 'NodeSelector is a selector which must be true for the component to fit on a node. Selector which must match a node''s labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/'
+                    type: object
+                  path:
+                    default: /metrics
+                    description: The metrics path of the exporter.
+                    pattern: /.+
+                    type: string
+                  port:
+                    default: 8001
+                    description: The port of the exporter.
+                    format: int32
+                    minimum: 1
+                    type: integer
+                  replicas:
+                    description: 'Replicas is the number of desired replicas. This is a pointer to distinguish between explicit zero and unspecified. More info: https://kubernetes.io/docs/concepts/workloads/controllers/replicationcontroller#what-is-a-replicationcontroller'
+                    format: int32
+                    minimum: 0
+                    type: integer
+                  resources:
+                    description: 'Compute Resources required by this component. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                    properties:
+                      limits:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                      requests:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                    type: object
+                  serviceAccountName:
+                    description: 'ServiceAccountName is the name of the ServiceAccount to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
+                    type: string
+                  tolerations:
+                    description: If specified, the pod's tolerations.
+                    items:
+                      description: The pod this Toleration is attached to tolerates any taint that matches the triple <key,value,effect> using the matching operator <operator>.
+                      properties:
+                        effect:
+                          description: Effect indicates the taint effect to match. Empty means match all taint effects. When specified, allowed values are NoSchedule, PreferNoSchedule and NoExecute.
+                          type: string
+                        key:
+                          description: Key is the taint key that the toleration applies to. Empty means match all taint keys. If the key is empty, operator must be Exists; this combination means to match all values and all keys.
+                          type: string
+                        operator:
+                          description: Operator represents a key's relationship to the value. Valid operators are Exists and Equal. Defaults to Equal. Exists is equivalent to wildcard for value, so that a pod can tolerate all taints of a particular category.
+                          type: string
+                        tolerationSeconds:
+                          description: TolerationSeconds represents the period of time the toleration (which must be of effect NoExecute, otherwise this field is ignored) tolerates the taint. By default, it is not set, which means tolerate the taint forever (do not evict). Zero and negative values will be treated as 0 (evict immediately) by the system.
+                          format: int64
+                          type: integer
+                        value:
+                          description: Value is the taint value the toleration matches to. If the operator is Exists, the value should be empty, otherwise just a regular string.
+                          type: string
+                      type: object
+                    type: array
+                type: object
+              expose:
+                properties:
+                  core:
+                    properties:
+                      ingress:
+                        properties:
+                          annotations:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          controller:
+                            default: default
+                            description: Set to the type of ingress controller.
+                            enum:
+                            - default
+                            - gce
+                            - ncp
+                            - contour
+                            type: string
+                          host:
+                            type: string
+                        required:
+                        - host
+                        type: object
+                      tls:
+                        properties:
+                          certificateRef:
+                            pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                            type: string
+                        type: object
+                    type: object
+                  notary:
+                    description: The ingress of the notary, required when notary component enabled.
+                    properties:
+                      ingress:
+                        properties:
+                          annotations:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          controller:
+                            default: default
+                            description: Set to the type of ingress controller.
+                            enum:
+                            - default
+                            - gce
+                            - ncp
+                            - contour
+                            type: string
+                          host:
+                            type: string
+                        required:
+                        - host
+                        type: object
+                      tls:
+                        properties:
+                          certificateRef:
+                            pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                            type: string
+                        type: object
+                    type: object
+                required:
+                - core
+                type: object
+              externalURL:
+                pattern: https?://.*
+                type: string
+              harborAdminPasswordRef:
+                pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                type: string
+              imageChartStorage:
+                description: Skip OpenAPI schema validation Use validating webhook to do verification (field required)
+                properties:
+                  filesystem:
+                    description: 'FileSystem is an implementation of the storagedriver.StorageDriver interface which uses the local filesystem. The local filesystem can be a remote volume. See: https://docs.docker.com/registry/storage-drivers/filesystem/'
+                    properties:
+                      chartPersistentVolume:
+                        properties:
+                          claimName:
+                            description: 'ClaimName is the name of a PersistentVolumeClaim in the same namespace as the pod using this volume. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#persistentvolumeclaims'
+                            type: string
+                          prefix:
+                            type: string
+                          readOnly:
+                            description: Will force the ReadOnly setting in VolumeMounts. Default false.
+                            type: boolean
+                        required:
+                        - claimName
+                        type: object
+                      registryPersistentVolume:
+                        properties:
+                          claimName:
+                            description: 'ClaimName is the name of a PersistentVolumeClaim in the same namespace as the pod using this volume. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#persistentvolumeclaims'
+                            type: string
+                          maxthreads:
+                            default: 100
+                            format: int32
+                            minimum: 25
+                            type: integer
+                          prefix:
+                            type: string
+                          readOnly:
+                            description: Will force the ReadOnly setting in VolumeMounts. Default false.
+                            type: boolean
+                        required:
+                        - claimName
+                        type: object
+                    required:
+                    - registryPersistentVolume
+                    type: object
+                  redirect:
+                    properties:
+                      disable:
+                        default: false
+                        type: boolean
+                    type: object
+                  s3:
+                    description: 'An implementation of the storagedriver.StorageDriver interface which uses Amazon S3 or S3 compatible services for object storage. See: https://docs.docker.com/registry/storage-drivers/s3/'
+                    properties:
+                      accesskey:
+                        description: The AWS Access Key. If you use IAM roles, omit to fetch temporary credentials from IAM.
+                        type: string
+                      bucket:
+                        description: The bucket name in which you want to store the registry’s data.
+                        type: string
+                      certificateRef:
+                        pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                        type: string
+                      chunksize:
+                        description: The S3 API requires multipart upload chunks to be at least 5MB.
+                        format: int64
+                        minimum: 5242880
+                        type: integer
+                      encrypt:
+                        default: false
+                        description: Specifies whether the registry stores the image in encrypted format or not. A boolean value.
+                        type: boolean
+                      keyid:
+                        description: KMS key ID to use for encryption (encrypt must be true, or this parameter is ignored).
+                        type: string
+                      region:
+                        description: The AWS region in which your bucket exists. For the moment, the Go AWS library in use does not use the newer DNS based bucket routing. For a list of regions, see http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html
+                        type: string
+                      regionendpoint:
+                        description: Endpoint for S3 compatible storage services (Minio, etc).
+                        type: string
+                      rootdirectory:
+                        description: This is a prefix that is applied to all S3 keys to allow you to segment data in your bucket if necessary.
+                        type: string
+                      secretkeyRef:
+                        description: Reference to the secret containing the AWS Secret Key. If you use IAM roles, omit to fetch temporary credentials from IAM.
+                        pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                        type: string
+                      secure:
+                        default: true
+                        type: boolean
+                      skipverify:
+                        default: false
+                        description: Skips TLS verification when the value is set to true.
+                        type: boolean
+                      storageclass:
+                        default: STANDARD
+                        description: The S3 storage class applied to each registry file.
+                        type: string
+                      v4auth:
+                        default: true
+                        description: Indicates whether the registry uses Version 4 of AWS’s authentication.
+                        type: boolean
+                    required:
+                    - bucket
+                    - region
+                    type: object
+                  swift:
+                    description: 'An implementation of the storagedriver.StorageDriver interface that uses OpenStack Swift for object storage. See: https://docs.docker.com/registry/storage-drivers/swift/'
+                    properties:
+                      accesskey:
+                        description: The access key to generate temporary URLs. It is used by HP Cloud Object Storage in addition to the secretkey parameter.
+                        type: string
+                      authurl:
+                        description: URL for obtaining an auth token. https://storage.myprovider.com/v2.0 or https://storage.myprovider.com/v3/auth
+                        type: string
+                      authversion:
+                        description: Specify the OpenStack Auth’s version, for example 3. By default the driver autodetects the auth’s version from the authurl.
+                        type: string
+                      chunksize:
+                        description: Size of the data segments for the Swift Dynamic Large Objects. This value should be a number.
+                        format: int64
+                        minimum: 5242880
+                        type: integer
+                      container:
+                        description: The name of your Swift container where you wish to store the registry’s data. The driver creates the named container during its initialization.
+                        type: string
+                      domain:
+                        description: Your Openstack domain name for Identity v3 API. You can either use domain or domainid.
+                        type: string
+                      domainID:
+                        description: Your Openstack domain ID for Identity v3 API. You can either use domain or domainid.
+                        type: string
+                      endpointtype:
+                        default: public
+                        description: The endpoint type used when connecting to swift.
+                        enum:
+                        - public
+                        - internal
+                        - admin
+                        type: string
+                      insecureskipverify:
+                        default: false
+                        description: Skips TLS verification if the value is set to true.
+                        type: boolean
+                      passwordRef:
+                        description: Secret name containing the Openstack password.
+                        pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                        type: string
+                      prefix:
+                        description: This is a prefix that is applied to all Swift keys to allow you to segment data in your container if necessary. Defaults to the container’s root.
+                        type: string
+                      region:
+                        description: The Openstack region in which your container exists.
+                        type: string
+                      secretkeyRef:
+                        description: The secret key used to generate temporary URLs.
+                        pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                        type: string
+                      tenant:
+                        description: Your Openstack tenant name. You can either use tenant or tenantid.
+                        type: string
+                      tenantID:
+                        description: Your Openstack tenant ID. You can either use tenant or tenantid.
+                        type: string
+                      trustid:
+                        description: Your Openstack trust ID for Identity v3 API.
+                        type: string
+                      username:
+                        description: The Openstack user name.
+                        type: string
+                    required:
+                    - authurl
+                    - container
+                    type: object
+                type: object
+              imageSource:
+                properties:
+                  imagePullPolicy:
+                    description: 'Image pull policy. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images'
+                    enum:
+                    - Always
+                    - Never
+                    - IfNotPresent
+                    type: string
+                  imagePullSecrets:
+                    items:
+                      description: LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.
+                      properties:
+                        name:
+                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                          type: string
+                      type: object
+                    type: array
+                  repository:
+                    description: The default repository for the images of the components. eg docker.io/goharbor/
+                    type: string
+                  tagSuffix:
+                    description: The tag suffix for the images of the images of the components. eg '-patch1'
+                    type: string
+                type: object
+              internalTLS:
+                properties:
+                  enabled:
+                    default: false
+                    type: boolean
+                type: object
+              jobservice:
+                properties:
+                  certificateRefs:
+                    items:
+                      type: string
+                    type: array
+                  image:
+                    description: Image name for the component.
+                    type: string
+                  imagePullPolicy:
+                    description: 'Image pull policy. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images'
+                    enum:
+                    - Always
+                    - Never
+                    - IfNotPresent
+                    type: string
+                  imagePullSecrets:
+                    items:
+                      description: LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.
+                      properties:
+                        name:
+                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                          type: string
+                      type: object
+                    type: array
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    description: 'NodeSelector is a selector which must be true for the component to fit on a node. Selector which must match a node''s labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/'
+                    type: object
+                  replicas:
+                    description: 'Replicas is the number of desired replicas. This is a pointer to distinguish between explicit zero and unspecified. More info: https://kubernetes.io/docs/concepts/workloads/controllers/replicationcontroller#what-is-a-replicationcontroller'
+                    format: int32
+                    minimum: 0
+                    type: integer
+                  resources:
+                    description: 'Compute Resources required by this component. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                    properties:
+                      limits:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                      requests:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                    type: object
+                  serviceAccountName:
+                    description: 'ServiceAccountName is the name of the ServiceAccount to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
+                    type: string
+                  tolerations:
+                    description: If specified, the pod's tolerations.
+                    items:
+                      description: The pod this Toleration is attached to tolerates any taint that matches the triple <key,value,effect> using the matching operator <operator>.
+                      properties:
+                        effect:
+                          description: Effect indicates the taint effect to match. Empty means match all taint effects. When specified, allowed values are NoSchedule, PreferNoSchedule and NoExecute.
+                          type: string
+                        key:
+                          description: Key is the taint key that the toleration applies to. Empty means match all taint keys. If the key is empty, operator must be Exists; this combination means to match all values and all keys.
+                          type: string
+                        operator:
+                          description: Operator represents a key's relationship to the value. Valid operators are Exists and Equal. Defaults to Equal. Exists is equivalent to wildcard for value, so that a pod can tolerate all taints of a particular category.
+                          type: string
+                        tolerationSeconds:
+                          description: TolerationSeconds represents the period of time the toleration (which must be of effect NoExecute, otherwise this field is ignored) tolerates the taint. By default, it is not set, which means tolerate the taint forever (do not evict). Zero and negative values will be treated as 0 (evict immediately) by the system.
+                          format: int64
+                          type: integer
+                        value:
+                          description: Value is the taint value the toleration matches to. If the operator is Exists, the value should be empty, otherwise just a regular string.
+                          type: string
+                      type: object
+                    type: array
+                  workerCount:
+                    default: 10
+                    format: int32
+                    minimum: 1
+                    type: integer
+                type: object
+              logLevel:
+                default: info
+                description: HarborLogLevel is the log level for Harbor.
+                enum:
+                - debug
+                - info
+                - warning
+                - error
+                - fatal
+                type: string
+              notary:
+                properties:
+                  migrationEnabled:
+                    default: true
+                    description: Inject migration configuration to notary resources
+                    type: boolean
+                  server:
+                    properties:
+                      image:
+                        description: Image name for the component.
+                        type: string
+                      imagePullPolicy:
+                        description: 'Image pull policy. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images'
+                        enum:
+                        - Always
+                        - Never
+                        - IfNotPresent
+                        type: string
+                      imagePullSecrets:
+                        items:
+                          description: LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.
+                          properties:
+                            name:
+                              description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                              type: string
+                          type: object
+                        type: array
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        description: 'NodeSelector is a selector which must be true for the component to fit on a node. Selector which must match a node''s labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/'
+                        type: object
+                      replicas:
+                        description: 'Replicas is the number of desired replicas. This is a pointer to distinguish between explicit zero and unspecified. More info: https://kubernetes.io/docs/concepts/workloads/controllers/replicationcontroller#what-is-a-replicationcontroller'
+                        format: int32
+                        minimum: 0
+                        type: integer
+                      resources:
+                        description: 'Compute Resources required by this component. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                        properties:
+                          limits:
+                            additionalProperties:
+                              anyOf:
+                              - type: integer
+                              - type: string
+                              pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                              x-kubernetes-int-or-string: true
+                            description: 'Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                            type: object
+                          requests:
+                            additionalProperties:
+                              anyOf:
+                              - type: integer
+                              - type: string
+                              pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                              x-kubernetes-int-or-string: true
+                            description: 'Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                            type: object
+                        type: object
+                      serviceAccountName:
+                        description: 'ServiceAccountName is the name of the ServiceAccount to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
+                        type: string
+                      tolerations:
+                        description: If specified, the pod's tolerations.
+                        items:
+                          description: The pod this Toleration is attached to tolerates any taint that matches the triple <key,value,effect> using the matching operator <operator>.
+                          properties:
+                            effect:
+                              description: Effect indicates the taint effect to match. Empty means match all taint effects. When specified, allowed values are NoSchedule, PreferNoSchedule and NoExecute.
+                              type: string
+                            key:
+                              description: Key is the taint key that the toleration applies to. Empty means match all taint keys. If the key is empty, operator must be Exists; this combination means to match all values and all keys.
+                              type: string
+                            operator:
+                              description: Operator represents a key's relationship to the value. Valid operators are Exists and Equal. Defaults to Equal. Exists is equivalent to wildcard for value, so that a pod can tolerate all taints of a particular category.
+                              type: string
+                            tolerationSeconds:
+                              description: TolerationSeconds represents the period of time the toleration (which must be of effect NoExecute, otherwise this field is ignored) tolerates the taint. By default, it is not set, which means tolerate the taint forever (do not evict). Zero and negative values will be treated as 0 (evict immediately) by the system.
+                              format: int64
+                              type: integer
+                            value:
+                              description: Value is the taint value the toleration matches to. If the operator is Exists, the value should be empty, otherwise just a regular string.
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  signer:
+                    properties:
+                      image:
+                        description: Image name for the component.
+                        type: string
+                      imagePullPolicy:
+                        description: 'Image pull policy. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images'
+                        enum:
+                        - Always
+                        - Never
+                        - IfNotPresent
+                        type: string
+                      imagePullSecrets:
+                        items:
+                          description: LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.
+                          properties:
+                            name:
+                              description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                              type: string
+                          type: object
+                        type: array
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        description: 'NodeSelector is a selector which must be true for the component to fit on a node. Selector which must match a node''s labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/'
+                        type: object
+                      replicas:
+                        description: 'Replicas is the number of desired replicas. This is a pointer to distinguish between explicit zero and unspecified. More info: https://kubernetes.io/docs/concepts/workloads/controllers/replicationcontroller#what-is-a-replicationcontroller'
+                        format: int32
+                        minimum: 0
+                        type: integer
+                      resources:
+                        description: 'Compute Resources required by this component. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                        properties:
+                          limits:
+                            additionalProperties:
+                              anyOf:
+                              - type: integer
+                              - type: string
+                              pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                              x-kubernetes-int-or-string: true
+                            description: 'Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                            type: object
+                          requests:
+                            additionalProperties:
+                              anyOf:
+                              - type: integer
+                              - type: string
+                              pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                              x-kubernetes-int-or-string: true
+                            description: 'Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                            type: object
+                        type: object
+                      serviceAccountName:
+                        description: 'ServiceAccountName is the name of the ServiceAccount to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
+                        type: string
+                      tolerations:
+                        description: If specified, the pod's tolerations.
+                        items:
+                          description: The pod this Toleration is attached to tolerates any taint that matches the triple <key,value,effect> using the matching operator <operator>.
+                          properties:
+                            effect:
+                              description: Effect indicates the taint effect to match. Empty means match all taint effects. When specified, allowed values are NoSchedule, PreferNoSchedule and NoExecute.
+                              type: string
+                            key:
+                              description: Key is the taint key that the toleration applies to. Empty means match all taint keys. If the key is empty, operator must be Exists; this combination means to match all values and all keys.
+                              type: string
+                            operator:
+                              description: Operator represents a key's relationship to the value. Valid operators are Exists and Equal. Defaults to Equal. Exists is equivalent to wildcard for value, so that a pod can tolerate all taints of a particular category.
+                              type: string
+                            tolerationSeconds:
+                              description: TolerationSeconds represents the period of time the toleration (which must be of effect NoExecute, otherwise this field is ignored) tolerates the taint. By default, it is not set, which means tolerate the taint forever (do not evict). Zero and negative values will be treated as 0 (evict immediately) by the system.
+                              format: int64
+                              type: integer
+                            value:
+                              description: Value is the taint value the toleration matches to. If the operator is Exists, the value should be empty, otherwise just a regular string.
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                type: object
+              portal:
+                properties:
+                  image:
+                    description: Image name for the component.
+                    type: string
+                  imagePullPolicy:
+                    description: 'Image pull policy. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images'
+                    enum:
+                    - Always
+                    - Never
+                    - IfNotPresent
+                    type: string
+                  imagePullSecrets:
+                    items:
+                      description: LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.
+                      properties:
+                        name:
+                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                          type: string
+                      type: object
+                    type: array
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    description: 'NodeSelector is a selector which must be true for the component to fit on a node. Selector which must match a node''s labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/'
+                    type: object
+                  replicas:
+                    description: 'Replicas is the number of desired replicas. This is a pointer to distinguish between explicit zero and unspecified. More info: https://kubernetes.io/docs/concepts/workloads/controllers/replicationcontroller#what-is-a-replicationcontroller'
+                    format: int32
+                    minimum: 0
+                    type: integer
+                  resources:
+                    description: 'Compute Resources required by this component. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                    properties:
+                      limits:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                      requests:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                    type: object
+                  serviceAccountName:
+                    description: 'ServiceAccountName is the name of the ServiceAccount to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
+                    type: string
+                  tolerations:
+                    description: If specified, the pod's tolerations.
+                    items:
+                      description: The pod this Toleration is attached to tolerates any taint that matches the triple <key,value,effect> using the matching operator <operator>.
+                      properties:
+                        effect:
+                          description: Effect indicates the taint effect to match. Empty means match all taint effects. When specified, allowed values are NoSchedule, PreferNoSchedule and NoExecute.
+                          type: string
+                        key:
+                          description: Key is the taint key that the toleration applies to. Empty means match all taint keys. If the key is empty, operator must be Exists; this combination means to match all values and all keys.
+                          type: string
+                        operator:
+                          description: Operator represents a key's relationship to the value. Valid operators are Exists and Equal. Defaults to Equal. Exists is equivalent to wildcard for value, so that a pod can tolerate all taints of a particular category.
+                          type: string
+                        tolerationSeconds:
+                          description: TolerationSeconds represents the period of time the toleration (which must be of effect NoExecute, otherwise this field is ignored) tolerates the taint. By default, it is not set, which means tolerate the taint forever (do not evict). Zero and negative values will be treated as 0 (evict immediately) by the system.
+                          format: int64
+                          type: integer
+                        value:
+                          description: Value is the taint value the toleration matches to. If the operator is Exists, the value should be empty, otherwise just a regular string.
+                          type: string
+                      type: object
+                    type: array
+                type: object
+              proxy:
+                properties:
+                  components:
+                    default:
+                    - core
+                    - jobservice
+                    - trivy
+                    items:
+                      type: string
+                    type: array
+                  httpProxy:
+                    pattern: https?://.+
+                    type: string
+                  httpsProxy:
+                    pattern: https?://.+
+                    type: string
+                  noProxy:
+                    default:
+                    - 127.0.0.1
+                    - localhost
+                    - .local
+                    - .internal
+                    items:
+                      type: string
+                    type: array
+                type: object
+              redis:
+                description: Skip OpenAPI schema validation Use validating webhook to do verification (field required)
+                properties:
+                  certificateRef:
+                    description: Secret containing the client certificate to authenticate with.
+                    pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                    type: string
+                  host:
+                    description: Server hostname.
+                    minLength: 1
+                    type: string
+                  passwordRef:
+                    description: Secret containing the password to use when connecting to the server.
+                    pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                    type: string
+                  port:
+                    description: Server port.
+                    exclusiveMinimum: true
+                    format: int32
+                    minimum: 0
+                    type: integer
+                  sentinelMasterSet:
+                    description: for Sentinel MasterSet.
+                    type: string
+                required:
+                - host
+                type: object
+              registry:
+                properties:
+                  certificateRefs:
+                    items:
+                      type: string
+                    type: array
+                  image:
+                    description: Image name for the component.
+                    type: string
+                  imagePullPolicy:
+                    description: 'Image pull policy. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images'
+                    enum:
+                    - Always
+                    - Never
+                    - IfNotPresent
+                    type: string
+                  imagePullSecrets:
+                    items:
+                      description: LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.
+                      properties:
+                        name:
+                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                          type: string
+                      type: object
+                    type: array
+                  metrics:
+                    properties:
+                      enabled:
+                        default: false
+                        type: boolean
+                      path:
+                        default: /metrics
+                        description: The path of the metrics.
+                        pattern: /.+
+                        type: string
+                      port:
+                        default: 8001
+                        description: The port of the metrics.
+                        format: int32
+                        minimum: 1
+                        type: integer
+                    type: object
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    description: 'NodeSelector is a selector which must be true for the component to fit on a node. Selector which must match a node''s labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/'
+                    type: object
+                  relativeURLs:
+                    default: true
+                    type: boolean
+                  replicas:
+                    description: 'Replicas is the number of desired replicas. This is a pointer to distinguish between explicit zero and unspecified. More info: https://kubernetes.io/docs/concepts/workloads/controllers/replicationcontroller#what-is-a-replicationcontroller'
+                    format: int32
+                    minimum: 0
+                    type: integer
+                  resources:
+                    description: 'Compute Resources required by this component. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                    properties:
+                      limits:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                      requests:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                    type: object
+                  serviceAccountName:
+                    description: 'ServiceAccountName is the name of the ServiceAccount to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
+                    type: string
+                  storageMiddlewares:
+                    items:
+                      properties:
+                        name:
+                          type: string
+                        optionsRef:
+                          pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                          type: string
+                      required:
+                      - name
+                      type: object
+                    type: array
+                  tolerations:
+                    description: If specified, the pod's tolerations.
+                    items:
+                      description: The pod this Toleration is attached to tolerates any taint that matches the triple <key,value,effect> using the matching operator <operator>.
+                      properties:
+                        effect:
+                          description: Effect indicates the taint effect to match. Empty means match all taint effects. When specified, allowed values are NoSchedule, PreferNoSchedule and NoExecute.
+                          type: string
+                        key:
+                          description: Key is the taint key that the toleration applies to. Empty means match all taint keys. If the key is empty, operator must be Exists; this combination means to match all values and all keys.
+                          type: string
+                        operator:
+                          description: Operator represents a key's relationship to the value. Valid operators are Exists and Equal. Defaults to Equal. Exists is equivalent to wildcard for value, so that a pod can tolerate all taints of a particular category.
+                          type: string
+                        tolerationSeconds:
+                          description: TolerationSeconds represents the period of time the toleration (which must be of effect NoExecute, otherwise this field is ignored) tolerates the taint. By default, it is not set, which means tolerate the taint forever (do not evict). Zero and negative values will be treated as 0 (evict immediately) by the system.
+                          format: int64
+                          type: integer
+                        value:
+                          description: Value is the taint value the toleration matches to. If the operator is Exists, the value should be empty, otherwise just a regular string.
+                          type: string
+                      type: object
+                    type: array
+                type: object
+              registryctl:
+                properties:
+                  image:
+                    description: Image name for the component.
+                    type: string
+                  imagePullPolicy:
+                    description: 'Image pull policy. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images'
+                    enum:
+                    - Always
+                    - Never
+                    - IfNotPresent
+                    type: string
+                  imagePullSecrets:
+                    items:
+                      description: LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.
+                      properties:
+                        name:
+                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                          type: string
+                      type: object
+                    type: array
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    description: 'NodeSelector is a selector which must be true for the component to fit on a node. Selector which must match a node''s labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/'
+                    type: object
+                  replicas:
+                    description: 'Replicas is the number of desired replicas. This is a pointer to distinguish between explicit zero and unspecified. More info: https://kubernetes.io/docs/concepts/workloads/controllers/replicationcontroller#what-is-a-replicationcontroller'
+                    format: int32
+                    minimum: 0
+                    type: integer
+                  resources:
+                    description: 'Compute Resources required by this component. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                    properties:
+                      limits:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                      requests:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                    type: object
+                  serviceAccountName:
+                    description: 'ServiceAccountName is the name of the ServiceAccount to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
+                    type: string
+                  tolerations:
+                    description: If specified, the pod's tolerations.
+                    items:
+                      description: The pod this Toleration is attached to tolerates any taint that matches the triple <key,value,effect> using the matching operator <operator>.
+                      properties:
+                        effect:
+                          description: Effect indicates the taint effect to match. Empty means match all taint effects. When specified, allowed values are NoSchedule, PreferNoSchedule and NoExecute.
+                          type: string
+                        key:
+                          description: Key is the taint key that the toleration applies to. Empty means match all taint keys. If the key is empty, operator must be Exists; this combination means to match all values and all keys.
+                          type: string
+                        operator:
+                          description: Operator represents a key's relationship to the value. Valid operators are Exists and Equal. Defaults to Equal. Exists is equivalent to wildcard for value, so that a pod can tolerate all taints of a particular category.
+                          type: string
+                        tolerationSeconds:
+                          description: TolerationSeconds represents the period of time the toleration (which must be of effect NoExecute, otherwise this field is ignored) tolerates the taint. By default, it is not set, which means tolerate the taint forever (do not evict). Zero and negative values will be treated as 0 (evict immediately) by the system.
+                          format: int64
+                          type: integer
+                        value:
+                          description: Value is the taint value the toleration matches to. If the operator is Exists, the value should be empty, otherwise just a regular string.
+                          type: string
+                      type: object
+                    type: array
+                type: object
+              trivy:
+                properties:
+                  certificateRefs:
+                    items:
+                      type: string
+                    type: array
+                  githubTokenRef:
+                    description: The name of the secret containing the token to connect to GitHub API.
+                    type: string
+                  image:
+                    description: Image name for the component.
+                    type: string
+                  imagePullPolicy:
+                    description: 'Image pull policy. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images'
+                    enum:
+                    - Always
+                    - Never
+                    - IfNotPresent
+                    type: string
+                  imagePullSecrets:
+                    items:
+                      description: LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.
+                      properties:
+                        name:
+                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                          type: string
+                      type: object
+                    type: array
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    description: 'NodeSelector is a selector which must be true for the component to fit on a node. Selector which must match a node''s labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/'
+                    type: object
+                  replicas:
+                    description: 'Replicas is the number of desired replicas. This is a pointer to distinguish between explicit zero and unspecified. More info: https://kubernetes.io/docs/concepts/workloads/controllers/replicationcontroller#what-is-a-replicationcontroller'
+                    format: int32
+                    minimum: 0
+                    type: integer
+                  resources:
+                    description: 'Compute Resources required by this component. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                    properties:
+                      limits:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                      requests:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                    type: object
+                  serviceAccountName:
+                    description: 'ServiceAccountName is the name of the ServiceAccount to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
+                    type: string
+                  skipUpdate:
+                    default: false
+                    description: The flag to enable or disable Trivy DB downloads from GitHub
+                    type: boolean
+                  storage:
+                    properties:
+                      cachePersistentVolume:
+                        description: CachePersistentVolume specify the persistent volume used to store Trivy cache. If empty, empty dir will be used.
+                        properties:
+                          claimName:
+                            description: 'ClaimName is the name of a PersistentVolumeClaim in the same namespace as the pod using this volume. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#persistentvolumeclaims'
+                            type: string
+                          prefix:
+                            type: string
+                          readOnly:
+                            description: Will force the ReadOnly setting in VolumeMounts. Default false.
+                            type: boolean
+                        required:
+                        - claimName
+                        type: object
+                      reportsPersistentVolume:
+                        description: ReportsPersistentVolume specify the persistent volume used to store Trivy reports. If empty, empty dir will be used.
+                        properties:
+                          claimName:
+                            description: 'ClaimName is the name of a PersistentVolumeClaim in the same namespace as the pod using this volume. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#persistentvolumeclaims'
+                            type: string
+                          prefix:
+                            type: string
+                          readOnly:
+                            description: Will force the ReadOnly setting in VolumeMounts. Default false.
+                            type: boolean
+                        required:
+                        - claimName
+                        type: object
+                    type: object
+                  tolerations:
+                    description: If specified, the pod's tolerations.
+                    items:
+                      description: The pod this Toleration is attached to tolerates any taint that matches the triple <key,value,effect> using the matching operator <operator>.
+                      properties:
+                        effect:
+                          description: Effect indicates the taint effect to match. Empty means match all taint effects. When specified, allowed values are NoSchedule, PreferNoSchedule and NoExecute.
+                          type: string
+                        key:
+                          description: Key is the taint key that the toleration applies to. Empty means match all taint keys. If the key is empty, operator must be Exists; this combination means to match all values and all keys.
+                          type: string
+                        operator:
+                          description: Operator represents a key's relationship to the value. Valid operators are Exists and Equal. Defaults to Equal. Exists is equivalent to wildcard for value, so that a pod can tolerate all taints of a particular category.
+                          type: string
+                        tolerationSeconds:
+                          description: TolerationSeconds represents the period of time the toleration (which must be of effect NoExecute, otherwise this field is ignored) tolerates the taint. By default, it is not set, which means tolerate the taint forever (do not evict). Zero and negative values will be treated as 0 (evict immediately) by the system.
+                          format: int64
+                          type: integer
+                        value:
+                          description: Value is the taint value the toleration matches to. If the operator is Exists, the value should be empty, otherwise just a regular string.
+                          type: string
+                      type: object
+                    type: array
+                required:
+                - storage
+                type: object
+              updateStrategyType:
+                default: RollingUpdate
+                type: string
+              version:
+                description: The version of the harbor, eg 2.1.2
+                pattern: '[0-9]+\.[0-9]+\.[0-9]+'
+                type: string
+            required:
+            - expose
+            - externalURL
+            - harborAdminPasswordRef
+            - version
+            type: object
+          status:
+            description: ComponentStatus represents the current status of the resource. https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md#typical-status-properties
+            properties:
+              conditions:
+                description: Conditions list of extracted conditions from Resource
+                items:
+                  description: Condition defines the general format for conditions on Kubernetes resources. In practice, each kubernetes resource defines their own format for conditions, but most (maybe all) follows this structure.
+                  properties:
+                    message:
+                      description: Message Human readable reason string
+                      type: string
+                    reason:
+                      description: Reason one work CamelCase reason
+                      type: string
+                    status:
+                      description: Status String that describes the condition status
+                      type: string
+                    type:
+                      description: Type condition type
+                      type: string
+                  required:
+                  - status
+                  - type
+                  type: object
+                type: array
+              observedGeneration:
+                format: int64
+                type: integer
+              operator:
+                description: ControllerStatus represents the current status of the operator.
+                properties:
+                  controllerGitCommit:
+                    minLength: 1
+                    type: string
+                  controllerName:
+                    minLength: 1
+                    type: string
+                  controllerVersion:
+                    minLength: 1
+                    type: string
+                type: object
+              replicas:
+                description: Current number of pods.
+                format: int32
+                minimum: 0
+                type: integer
+            required:
+            - conditions
+            type: object
+        type: object
+    served: true
+    storage: false
+    subresources:
+      status: {}
+  - additionalPrinterColumns:
+    - description: The public URL to the Harbor application
+      jsonPath: .spec.externalURL
+      name: Public URL
+      priority: 5
+      type: string
+    - description: The version to the Harbor application
+      jsonPath: .spec.version
+      name: Version
+      priority: 5
+      type: string
+    - description: Timestamp representing the server time when this object was created. It is not guaranteed to be set in happens-before order across separate operations. Clients may not set this value. It is represented in RFC3339 form and is in UTC.
+      jsonPath: .metadata.creationTimestamp
+      name: Age
+      priority: 1
+      type: date
+    - description: Human readable message describing the failure
+      jsonPath: .status.conditions[?(@.type=="Failed")].message
+      name: Failure
+      priority: 5
+      type: string
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Harbor is the Schema for the harbors API.
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: HarborSpec defines the desired state of Harbor.
+            properties:
+              chartmuseum:
+                properties:
+                  absoluteUrl:
+                    default: false
+                    description: Harbor defaults ChartMuseum to returning relative urls, if you want using absolute url you should enable it
+                    type: boolean
+                  certificateRefs:
+                    items:
+                      type: string
+                    type: array
+                  image:
+                    description: Image name for the component.
+                    type: string
+                  imagePullPolicy:
+                    description: 'Image pull policy. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images'
+                    enum:
+                    - Always
+                    - Never
+                    - IfNotPresent
+                    type: string
+                  imagePullSecrets:
+                    items:
+                      description: LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.
+                      properties:
+                        name:
+                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                          type: string
+                      type: object
+                    type: array
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    description: 'NodeSelector is a selector which must be true for the component to fit on a node. Selector which must match a node''s labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/'
+                    type: object
+                  replicas:
+                    description: 'Replicas is the number of desired replicas. This is a pointer to distinguish between explicit zero and unspecified. More info: https://kubernetes.io/docs/concepts/workloads/controllers/replicationcontroller#what-is-a-replicationcontroller'
+                    format: int32
+                    minimum: 0
+                    type: integer
+                  resources:
+                    description: 'Compute Resources required by this component. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                    properties:
+                      limits:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                      requests:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                    type: object
+                  serviceAccountName:
+                    description: 'ServiceAccountName is the name of the ServiceAccount to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
+                    type: string
+                  tolerations:
+                    description: If specified, the pod's tolerations.
+                    items:
+                      description: The pod this Toleration is attached to tolerates any taint that matches the triple <key,value,effect> using the matching operator <operator>.
+                      properties:
+                        effect:
+                          description: Effect indicates the taint effect to match. Empty means match all taint effects. When specified, allowed values are NoSchedule, PreferNoSchedule and NoExecute.
+                          type: string
+                        key:
+                          description: Key is the taint key that the toleration applies to. Empty means match all taint keys. If the key is empty, operator must be Exists; this combination means to match all values and all keys.
+                          type: string
+                        operator:
+                          description: Operator represents a key's relationship to the value. Valid operators are Exists and Equal. Defaults to Equal. Exists is equivalent to wildcard for value, so that a pod can tolerate all taints of a particular category.
+                          type: string
+                        tolerationSeconds:
+                          description: TolerationSeconds represents the period of time the toleration (which must be of effect NoExecute, otherwise this field is ignored) tolerates the taint. By default, it is not set, which means tolerate the taint forever (do not evict). Zero and negative values will be treated as 0 (evict immediately) by the system.
+                          format: int64
+                          type: integer
+                        value:
+                          description: Value is the taint value the toleration matches to. If the operator is Exists, the value should be empty, otherwise just a regular string.
+                          type: string
+                      type: object
+                    type: array
+                type: object
+              core:
+                properties:
+                  certificateRefs:
+                    items:
+                      type: string
+                    type: array
+                  image:
+                    description: Image name for the component.
+                    type: string
+                  imagePullPolicy:
+                    description: 'Image pull policy. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images'
+                    enum:
+                    - Always
+                    - Never
+                    - IfNotPresent
+                    type: string
+                  imagePullSecrets:
+                    items:
+                      description: LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.
+                      properties:
+                        name:
+                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                          type: string
+                      type: object
+                    type: array
+                  metrics:
+                    properties:
+                      enabled:
+                        default: false
+                        type: boolean
+                      path:
+                        default: /metrics
+                        description: The path of the metrics.
+                        pattern: /.+
+                        type: string
+                      port:
+                        default: 8001
+                        description: The port of the metrics.
+                        format: int32
+                        minimum: 1
+                        type: integer
+                    type: object
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    description: 'NodeSelector is a selector which must be true for the component to fit on a node. Selector which must match a node''s labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/'
+                    type: object
+                  replicas:
+                    description: 'Replicas is the number of desired replicas. This is a pointer to distinguish between explicit zero and unspecified. More info: https://kubernetes.io/docs/concepts/workloads/controllers/replicationcontroller#what-is-a-replicationcontroller'
+                    format: int32
+                    minimum: 0
+                    type: integer
+                  resources:
+                    description: 'Compute Resources required by this component. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                    properties:
+                      limits:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                      requests:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                    type: object
+                  serviceAccountName:
+                    description: 'ServiceAccountName is the name of the ServiceAccount to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
+                    type: string
+                  tokenIssuer:
+                    description: ObjectReference is a reference to an object with a given name, kind and group.
+                    properties:
+                      group:
+                        description: Group of the resource being referred to.
+                        type: string
+                      kind:
+                        description: Kind of the resource being referred to.
+                        type: string
+                      name:
+                        description: Name of the resource being referred to.
+                        type: string
+                    required:
+                    - name
+                    type: object
+                  tolerations:
+                    description: If specified, the pod's tolerations.
+                    items:
+                      description: The pod this Toleration is attached to tolerates any taint that matches the triple <key,value,effect> using the matching operator <operator>.
+                      properties:
+                        effect:
+                          description: Effect indicates the taint effect to match. Empty means match all taint effects. When specified, allowed values are NoSchedule, PreferNoSchedule and NoExecute.
+                          type: string
+                        key:
+                          description: Key is the taint key that the toleration applies to. Empty means match all taint keys. If the key is empty, operator must be Exists; this combination means to match all values and all keys.
+                          type: string
+                        operator:
+                          description: Operator represents a key's relationship to the value. Valid operators are Exists and Equal. Defaults to Equal. Exists is equivalent to wildcard for value, so that a pod can tolerate all taints of a particular category.
+                          type: string
+                        tolerationSeconds:
+                          description: TolerationSeconds represents the period of time the toleration (which must be of effect NoExecute, otherwise this field is ignored) tolerates the taint. By default, it is not set, which means tolerate the taint forever (do not evict). Zero and negative values will be treated as 0 (evict immediately) by the system.
+                          format: int64
+                          type: integer
+                        value:
+                          description: Value is the taint value the toleration matches to. If the operator is Exists, the value should be empty, otherwise just a regular string.
+                          type: string
+                      type: object
+                    type: array
+                type: object
+              database:
+                description: Skip OpenAPI schema validation Use validating webhook to do verification (field required)
+                properties:
+                  hosts:
+                    items:
+                      properties:
+                        host:
+                          description: Name of host to connect to. If a host name begins with a slash, it specifies Unix-domain communication rather than TCP/IP communication; the value is the name of the directory in which the socket file is stored.
+                          minLength: 1
+                          type: string
+                        port:
+                          description: Port number to connect to at the server host, or socket file name extension for Unix-domain connections. Zero, specifies the default port number established when PostgreSQL was built.
+                          exclusiveMinimum: true
+                          format: int32
+                          minimum: 0
+                          type: integer
+                      required:
+                      - host
+                      type: object
+                    minItems: 1
+                    type: array
+                  passwordRef:
+                    description: Secret containing the password to be used if the server demands password authentication.
+                    pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                    type: string
+                  prefix:
+                    type: string
+                  sslMode:
+                    description: PostgreSQL has native support for using SSL connections to encrypt client/server communications for increased security.
+                    enum:
+                    - disable
+                    - allow
+                    - prefer
+                    - require
+                    - verify-ca
+                    - verify-full
+                    type: string
+                  username:
+                    description: PostgreSQL user name to connect as. Defaults to be the same as the operating system name of the user running the application.
+                    minLength: 1
+                    type: string
+                required:
+                - hosts
+                type: object
+              exporter:
+                properties:
+                  cache:
+                    properties:
+                      cleanInterval:
+                        default: 4h
+                        description: The interval to clean the cache info from the database and core.
+                        pattern: ([0-9]+h)?([0-9]+m)?([0-9]+s)?
+                        type: string
+                      duration:
+                        default: 30s
+                        description: The duration to cache info from the database and core.
+                        pattern: ([0-9]+h)?([0-9]+m)?([0-9]+s)?
+                        type: string
+                    type: object
+                  image:
+                    description: Image name for the component.
+                    type: string
+                  imagePullPolicy:
+                    description: 'Image pull policy. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images'
+                    enum:
+                    - Always
+                    - Never
+                    - IfNotPresent
+                    type: string
+                  imagePullSecrets:
+                    items:
+                      description: LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.
+                      properties:
+                        name:
+                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                          type: string
+                      type: object
+                    type: array
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    description: 'NodeSelector is a selector which must be true for the component to fit on a node. Selector which must match a node''s labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/'
+                    type: object
+                  path:
+                    default: /metrics
+                    description: The metrics path of the exporter.
+                    pattern: /.+
+                    type: string
+                  port:
+                    default: 8001
+                    description: The port of the exporter.
+                    format: int32
+                    minimum: 1
+                    type: integer
+                  replicas:
+                    description: 'Replicas is the number of desired replicas. This is a pointer to distinguish between explicit zero and unspecified. More info: https://kubernetes.io/docs/concepts/workloads/controllers/replicationcontroller#what-is-a-replicationcontroller'
+                    format: int32
+                    minimum: 0
+                    type: integer
+                  resources:
+                    description: 'Compute Resources required by this component. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                    properties:
+                      limits:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                      requests:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                    type: object
+                  serviceAccountName:
+                    description: 'ServiceAccountName is the name of the ServiceAccount to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
+                    type: string
+                  tolerations:
+                    description: If specified, the pod's tolerations.
+                    items:
+                      description: The pod this Toleration is attached to tolerates any taint that matches the triple <key,value,effect> using the matching operator <operator>.
+                      properties:
+                        effect:
+                          description: Effect indicates the taint effect to match. Empty means match all taint effects. When specified, allowed values are NoSchedule, PreferNoSchedule and NoExecute.
+                          type: string
+                        key:
+                          description: Key is the taint key that the toleration applies to. Empty means match all taint keys. If the key is empty, operator must be Exists; this combination means to match all values and all keys.
+                          type: string
+                        operator:
+                          description: Operator represents a key's relationship to the value. Valid operators are Exists and Equal. Defaults to Equal. Exists is equivalent to wildcard for value, so that a pod can tolerate all taints of a particular category.
+                          type: string
+                        tolerationSeconds:
+                          description: TolerationSeconds represents the period of time the toleration (which must be of effect NoExecute, otherwise this field is ignored) tolerates the taint. By default, it is not set, which means tolerate the taint forever (do not evict). Zero and negative values will be treated as 0 (evict immediately) by the system.
+                          format: int64
+                          type: integer
+                        value:
+                          description: Value is the taint value the toleration matches to. If the operator is Exists, the value should be empty, otherwise just a regular string.
+                          type: string
+                      type: object
+                    type: array
+                type: object
+              expose:
+                properties:
+                  core:
+                    properties:
+                      ingress:
+                        properties:
+                          annotations:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          controller:
+                            default: default
+                            description: Set to the type of ingress controller.
+                            enum:
+                            - default
+                            - gce
+                            - ncp
+                            - contour
+                            type: string
+                          host:
+                            type: string
+                        required:
+                        - host
+                        type: object
+                      tls:
+                        properties:
+                          certificateRef:
+                            pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                            type: string
+                        type: object
+                    type: object
+                  notary:
+                    description: The ingress of the notary, required when notary component enabled.
+                    properties:
+                      ingress:
+                        properties:
+                          annotations:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          controller:
+                            default: default
+                            description: Set to the type of ingress controller.
+                            enum:
+                            - default
+                            - gce
+                            - ncp
+                            - contour
+                            type: string
+                          host:
+                            type: string
+                        required:
+                        - host
+                        type: object
+                      tls:
+                        properties:
+                          certificateRef:
+                            pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                            type: string
+                        type: object
+                    type: object
+                required:
+                - core
+                type: object
+              externalURL:
+                pattern: https?://.*
+                type: string
+              harborAdminPasswordRef:
+                pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                type: string
+              imageChartStorage:
+                description: Skip OpenAPI schema validation Use validating webhook to do verification (field required)
+                properties:
+                  filesystem:
+                    description: 'FileSystem is an implementation of the storagedriver.StorageDriver interface which uses the local filesystem. The local filesystem can be a remote volume. See: https://docs.docker.com/registry/storage-drivers/filesystem/'
+                    properties:
+                      chartPersistentVolume:
+                        properties:
+                          claimName:
+                            description: 'ClaimName is the name of a PersistentVolumeClaim in the same namespace as the pod using this volume. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#persistentvolumeclaims'
+                            type: string
+                          prefix:
+                            type: string
+                          readOnly:
+                            description: Will force the ReadOnly setting in VolumeMounts. Default false.
+                            type: boolean
+                        required:
+                        - claimName
+                        type: object
+                      registryPersistentVolume:
+                        properties:
+                          claimName:
+                            description: 'ClaimName is the name of a PersistentVolumeClaim in the same namespace as the pod using this volume. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#persistentvolumeclaims'
+                            type: string
+                          maxthreads:
+                            default: 100
+                            format: int32
+                            minimum: 25
+                            type: integer
+                          prefix:
+                            type: string
+                          readOnly:
+                            description: Will force the ReadOnly setting in VolumeMounts. Default false.
+                            type: boolean
+                        required:
+                        - claimName
+                        type: object
+                    required:
+                    - registryPersistentVolume
+                    type: object
+                  redirect:
+                    properties:
+                      disable:
+                        default: false
+                        type: boolean
+                    type: object
+                  s3:
+                    description: 'An implementation of the storagedriver.StorageDriver interface which uses Amazon S3 or S3 compatible services for object storage. See: https://docs.docker.com/registry/storage-drivers/s3/'
+                    properties:
+                      accesskey:
+                        description: The AWS Access Key. If you use IAM roles, omit to fetch temporary credentials from IAM.
+                        type: string
+                      bucket:
+                        description: The bucket name in which you want to store the registry’s data.
+                        type: string
+                      certificateRef:
+                        pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                        type: string
+                      chunksize:
+                        description: The S3 API requires multipart upload chunks to be at least 5MB.
+                        format: int64
+                        minimum: 5242880
+                        type: integer
+                      encrypt:
+                        default: false
+                        description: Specifies whether the registry stores the image in encrypted format or not. A boolean value.
+                        type: boolean
+                      keyid:
+                        description: KMS key ID to use for encryption (encrypt must be true, or this parameter is ignored).
+                        type: string
+                      region:
+                        description: The AWS region in which your bucket exists. For the moment, the Go AWS library in use does not use the newer DNS based bucket routing. For a list of regions, see http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html
+                        type: string
+                      regionendpoint:
+                        description: Endpoint for S3 compatible storage services (Minio, etc).
+                        type: string
+                      rootdirectory:
+                        description: This is a prefix that is applied to all S3 keys to allow you to segment data in your bucket if necessary.
+                        type: string
+                      secretkeyRef:
+                        description: Reference to the secret containing the AWS Secret Key. If you use IAM roles, omit to fetch temporary credentials from IAM.
+                        pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                        type: string
+                      secure:
+                        default: true
+                        type: boolean
+                      skipverify:
+                        default: false
+                        description: Skips TLS verification when the value is set to true.
+                        type: boolean
+                      storageclass:
+                        default: STANDARD
+                        description: The S3 storage class applied to each registry file.
+                        type: string
+                      v4auth:
+                        default: true
+                        description: Indicates whether the registry uses Version 4 of AWS’s authentication.
+                        type: boolean
+                    required:
+                    - bucket
+                    - region
+                    type: object
+                  swift:
+                    description: 'An implementation of the storagedriver.StorageDriver interface that uses OpenStack Swift for object storage. See: https://docs.docker.com/registry/storage-drivers/swift/'
+                    properties:
+                      accesskey:
+                        description: The access key to generate temporary URLs. It is used by HP Cloud Object Storage in addition to the secretkey parameter.
+                        type: string
+                      authurl:
+                        description: URL for obtaining an auth token. https://storage.myprovider.com/v2.0 or https://storage.myprovider.com/v3/auth
+                        type: string
+                      authversion:
+                        description: Specify the OpenStack Auth’s version, for example 3. By default the driver autodetects the auth’s version from the authurl.
+                        type: string
+                      chunksize:
+                        description: Size of the data segments for the Swift Dynamic Large Objects. This value should be a number.
+                        format: int64
+                        minimum: 5242880
+                        type: integer
+                      container:
+                        description: The name of your Swift container where you wish to store the registry’s data. The driver creates the named container during its initialization.
+                        type: string
+                      domain:
+                        description: Your Openstack domain name for Identity v3 API. You can either use domain or domainid.
+                        type: string
+                      domainID:
+                        description: Your Openstack domain ID for Identity v3 API. You can either use domain or domainid.
+                        type: string
+                      endpointtype:
+                        default: public
+                        description: The endpoint type used when connecting to swift.
+                        enum:
+                        - public
+                        - internal
+                        - admin
+                        type: string
+                      insecureskipverify:
+                        default: false
+                        description: Skips TLS verification if the value is set to true.
+                        type: boolean
+                      passwordRef:
+                        description: Secret name containing the Openstack password.
+                        pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                        type: string
+                      prefix:
+                        description: This is a prefix that is applied to all Swift keys to allow you to segment data in your container if necessary. Defaults to the container’s root.
+                        type: string
+                      region:
+                        description: The Openstack region in which your container exists.
+                        type: string
+                      secretkeyRef:
+                        description: The secret key used to generate temporary URLs.
+                        pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                        type: string
+                      tenant:
+                        description: Your Openstack tenant name. You can either use tenant or tenantid.
+                        type: string
+                      tenantID:
+                        description: Your Openstack tenant ID. You can either use tenant or tenantid.
+                        type: string
+                      trustid:
+                        description: Your Openstack trust ID for Identity v3 API.
+                        type: string
+                      username:
+                        description: The Openstack user name.
+                        type: string
+                    required:
+                    - authurl
+                    - container
+                    type: object
+                type: object
+              imageSource:
+                properties:
+                  imagePullPolicy:
+                    description: 'Image pull policy. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images'
+                    enum:
+                    - Always
+                    - Never
+                    - IfNotPresent
+                    type: string
+                  imagePullSecrets:
+                    items:
+                      description: LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.
+                      properties:
+                        name:
+                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                          type: string
+                      type: object
+                    type: array
+                  repository:
+                    description: The default repository for the images of the components. eg docker.io/goharbor/
+                    type: string
+                  tagSuffix:
+                    description: The tag suffix for the images of the images of the components. eg '-patch1'
+                    type: string
+                type: object
+              internalTLS:
+                properties:
+                  enabled:
+                    default: false
+                    type: boolean
+                type: object
+              jobservice:
+                properties:
+                  certificateRefs:
+                    items:
+                      type: string
+                    type: array
+                  image:
+                    description: Image name for the component.
+                    type: string
+                  imagePullPolicy:
+                    description: 'Image pull policy. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images'
+                    enum:
+                    - Always
+                    - Never
+                    - IfNotPresent
+                    type: string
+                  imagePullSecrets:
+                    items:
+                      description: LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.
+                      properties:
+                        name:
+                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                          type: string
+                      type: object
+                    type: array
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    description: 'NodeSelector is a selector which must be true for the component to fit on a node. Selector which must match a node''s labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/'
+                    type: object
+                  replicas:
+                    description: 'Replicas is the number of desired replicas. This is a pointer to distinguish between explicit zero and unspecified. More info: https://kubernetes.io/docs/concepts/workloads/controllers/replicationcontroller#what-is-a-replicationcontroller'
+                    format: int32
+                    minimum: 0
+                    type: integer
+                  resources:
+                    description: 'Compute Resources required by this component. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                    properties:
+                      limits:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                      requests:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                    type: object
+                  serviceAccountName:
+                    description: 'ServiceAccountName is the name of the ServiceAccount to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
+                    type: string
+                  tolerations:
+                    description: If specified, the pod's tolerations.
+                    items:
+                      description: The pod this Toleration is attached to tolerates any taint that matches the triple <key,value,effect> using the matching operator <operator>.
+                      properties:
+                        effect:
+                          description: Effect indicates the taint effect to match. Empty means match all taint effects. When specified, allowed values are NoSchedule, PreferNoSchedule and NoExecute.
+                          type: string
+                        key:
+                          description: Key is the taint key that the toleration applies to. Empty means match all taint keys. If the key is empty, operator must be Exists; this combination means to match all values and all keys.
+                          type: string
+                        operator:
+                          description: Operator represents a key's relationship to the value. Valid operators are Exists and Equal. Defaults to Equal. Exists is equivalent to wildcard for value, so that a pod can tolerate all taints of a particular category.
+                          type: string
+                        tolerationSeconds:
+                          description: TolerationSeconds represents the period of time the toleration (which must be of effect NoExecute, otherwise this field is ignored) tolerates the taint. By default, it is not set, which means tolerate the taint forever (do not evict). Zero and negative values will be treated as 0 (evict immediately) by the system.
+                          format: int64
+                          type: integer
+                        value:
+                          description: Value is the taint value the toleration matches to. If the operator is Exists, the value should be empty, otherwise just a regular string.
+                          type: string
+                      type: object
+                    type: array
+                  workerCount:
+                    default: 10
+                    format: int32
+                    minimum: 1
+                    type: integer
+                type: object
+              logLevel:
+                default: info
+                description: HarborLogLevel is the log level for Harbor.
+                enum:
+                - debug
+                - info
+                - warning
+                - error
+                - fatal
+                type: string
+              notary:
+                properties:
+                  migrationEnabled:
+                    default: true
+                    description: Inject migration configuration to notary resources
+                    type: boolean
+                  server:
+                    properties:
+                      image:
+                        description: Image name for the component.
+                        type: string
+                      imagePullPolicy:
+                        description: 'Image pull policy. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images'
+                        enum:
+                        - Always
+                        - Never
+                        - IfNotPresent
+                        type: string
+                      imagePullSecrets:
+                        items:
+                          description: LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.
+                          properties:
+                            name:
+                              description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                              type: string
+                          type: object
+                        type: array
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        description: 'NodeSelector is a selector which must be true for the component to fit on a node. Selector which must match a node''s labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/'
+                        type: object
+                      replicas:
+                        description: 'Replicas is the number of desired replicas. This is a pointer to distinguish between explicit zero and unspecified. More info: https://kubernetes.io/docs/concepts/workloads/controllers/replicationcontroller#what-is-a-replicationcontroller'
+                        format: int32
+                        minimum: 0
+                        type: integer
+                      resources:
+                        description: 'Compute Resources required by this component. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                        properties:
+                          limits:
+                            additionalProperties:
+                              anyOf:
+                              - type: integer
+                              - type: string
+                              pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                              x-kubernetes-int-or-string: true
+                            description: 'Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                            type: object
+                          requests:
+                            additionalProperties:
+                              anyOf:
+                              - type: integer
+                              - type: string
+                              pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                              x-kubernetes-int-or-string: true
+                            description: 'Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                            type: object
+                        type: object
+                      serviceAccountName:
+                        description: 'ServiceAccountName is the name of the ServiceAccount to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
+                        type: string
+                      tolerations:
+                        description: If specified, the pod's tolerations.
+                        items:
+                          description: The pod this Toleration is attached to tolerates any taint that matches the triple <key,value,effect> using the matching operator <operator>.
+                          properties:
+                            effect:
+                              description: Effect indicates the taint effect to match. Empty means match all taint effects. When specified, allowed values are NoSchedule, PreferNoSchedule and NoExecute.
+                              type: string
+                            key:
+                              description: Key is the taint key that the toleration applies to. Empty means match all taint keys. If the key is empty, operator must be Exists; this combination means to match all values and all keys.
+                              type: string
+                            operator:
+                              description: Operator represents a key's relationship to the value. Valid operators are Exists and Equal. Defaults to Equal. Exists is equivalent to wildcard for value, so that a pod can tolerate all taints of a particular category.
+                              type: string
+                            tolerationSeconds:
+                              description: TolerationSeconds represents the period of time the toleration (which must be of effect NoExecute, otherwise this field is ignored) tolerates the taint. By default, it is not set, which means tolerate the taint forever (do not evict). Zero and negative values will be treated as 0 (evict immediately) by the system.
+                              format: int64
+                              type: integer
+                            value:
+                              description: Value is the taint value the toleration matches to. If the operator is Exists, the value should be empty, otherwise just a regular string.
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  signer:
+                    properties:
+                      image:
+                        description: Image name for the component.
+                        type: string
+                      imagePullPolicy:
+                        description: 'Image pull policy. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images'
+                        enum:
+                        - Always
+                        - Never
+                        - IfNotPresent
+                        type: string
+                      imagePullSecrets:
+                        items:
+                          description: LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.
+                          properties:
+                            name:
+                              description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                              type: string
+                          type: object
+                        type: array
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        description: 'NodeSelector is a selector which must be true for the component to fit on a node. Selector which must match a node''s labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/'
+                        type: object
+                      replicas:
+                        description: 'Replicas is the number of desired replicas. This is a pointer to distinguish between explicit zero and unspecified. More info: https://kubernetes.io/docs/concepts/workloads/controllers/replicationcontroller#what-is-a-replicationcontroller'
+                        format: int32
+                        minimum: 0
+                        type: integer
+                      resources:
+                        description: 'Compute Resources required by this component. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                        properties:
+                          limits:
+                            additionalProperties:
+                              anyOf:
+                              - type: integer
+                              - type: string
+                              pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                              x-kubernetes-int-or-string: true
+                            description: 'Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                            type: object
+                          requests:
+                            additionalProperties:
+                              anyOf:
+                              - type: integer
+                              - type: string
+                              pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                              x-kubernetes-int-or-string: true
+                            description: 'Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                            type: object
+                        type: object
+                      serviceAccountName:
+                        description: 'ServiceAccountName is the name of the ServiceAccount to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
+                        type: string
+                      tolerations:
+                        description: If specified, the pod's tolerations.
+                        items:
+                          description: The pod this Toleration is attached to tolerates any taint that matches the triple <key,value,effect> using the matching operator <operator>.
+                          properties:
+                            effect:
+                              description: Effect indicates the taint effect to match. Empty means match all taint effects. When specified, allowed values are NoSchedule, PreferNoSchedule and NoExecute.
+                              type: string
+                            key:
+                              description: Key is the taint key that the toleration applies to. Empty means match all taint keys. If the key is empty, operator must be Exists; this combination means to match all values and all keys.
+                              type: string
+                            operator:
+                              description: Operator represents a key's relationship to the value. Valid operators are Exists and Equal. Defaults to Equal. Exists is equivalent to wildcard for value, so that a pod can tolerate all taints of a particular category.
+                              type: string
+                            tolerationSeconds:
+                              description: TolerationSeconds represents the period of time the toleration (which must be of effect NoExecute, otherwise this field is ignored) tolerates the taint. By default, it is not set, which means tolerate the taint forever (do not evict). Zero and negative values will be treated as 0 (evict immediately) by the system.
+                              format: int64
+                              type: integer
+                            value:
+                              description: Value is the taint value the toleration matches to. If the operator is Exists, the value should be empty, otherwise just a regular string.
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                type: object
+              portal:
+                properties:
+                  image:
+                    description: Image name for the component.
+                    type: string
+                  imagePullPolicy:
+                    description: 'Image pull policy. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images'
+                    enum:
+                    - Always
+                    - Never
+                    - IfNotPresent
+                    type: string
+                  imagePullSecrets:
+                    items:
+                      description: LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.
+                      properties:
+                        name:
+                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                          type: string
+                      type: object
+                    type: array
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    description: 'NodeSelector is a selector which must be true for the component to fit on a node. Selector which must match a node''s labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/'
+                    type: object
+                  replicas:
+                    description: 'Replicas is the number of desired replicas. This is a pointer to distinguish between explicit zero and unspecified. More info: https://kubernetes.io/docs/concepts/workloads/controllers/replicationcontroller#what-is-a-replicationcontroller'
+                    format: int32
+                    minimum: 0
+                    type: integer
+                  resources:
+                    description: 'Compute Resources required by this component. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                    properties:
+                      limits:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                      requests:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                    type: object
+                  serviceAccountName:
+                    description: 'ServiceAccountName is the name of the ServiceAccount to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
+                    type: string
+                  tolerations:
+                    description: If specified, the pod's tolerations.
+                    items:
+                      description: The pod this Toleration is attached to tolerates any taint that matches the triple <key,value,effect> using the matching operator <operator>.
+                      properties:
+                        effect:
+                          description: Effect indicates the taint effect to match. Empty means match all taint effects. When specified, allowed values are NoSchedule, PreferNoSchedule and NoExecute.
+                          type: string
+                        key:
+                          description: Key is the taint key that the toleration applies to. Empty means match all taint keys. If the key is empty, operator must be Exists; this combination means to match all values and all keys.
+                          type: string
+                        operator:
+                          description: Operator represents a key's relationship to the value. Valid operators are Exists and Equal. Defaults to Equal. Exists is equivalent to wildcard for value, so that a pod can tolerate all taints of a particular category.
+                          type: string
+                        tolerationSeconds:
+                          description: TolerationSeconds represents the period of time the toleration (which must be of effect NoExecute, otherwise this field is ignored) tolerates the taint. By default, it is not set, which means tolerate the taint forever (do not evict). Zero and negative values will be treated as 0 (evict immediately) by the system.
+                          format: int64
+                          type: integer
+                        value:
+                          description: Value is the taint value the toleration matches to. If the operator is Exists, the value should be empty, otherwise just a regular string.
+                          type: string
+                      type: object
+                    type: array
+                type: object
+              proxy:
+                properties:
+                  components:
+                    default:
+                    - core
+                    - jobservice
+                    - trivy
+                    items:
+                      type: string
+                    type: array
+                  httpProxy:
+                    pattern: https?://.+
+                    type: string
+                  httpsProxy:
+                    pattern: https?://.+
+                    type: string
+                  noProxy:
+                    default:
+                    - 127.0.0.1
+                    - localhost
+                    - .local
+                    - .internal
+                    items:
+                      type: string
+                    type: array
+                type: object
+              redis:
+                description: Skip OpenAPI schema validation Use validating webhook to do verification (field required)
+                properties:
+                  certificateRef:
+                    description: Secret containing the client certificate to authenticate with.
+                    pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                    type: string
+                  host:
+                    description: Server hostname.
+                    minLength: 1
+                    type: string
+                  passwordRef:
+                    description: Secret containing the password to use when connecting to the server.
+                    pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                    type: string
+                  port:
+                    description: Server port.
+                    exclusiveMinimum: true
+                    format: int32
+                    minimum: 0
+                    type: integer
+                  sentinelMasterSet:
+                    description: for Sentinel MasterSet.
+                    type: string
+                required:
+                - host
+                type: object
+              registry:
+                properties:
+                  certificateRefs:
+                    items:
+                      type: string
+                    type: array
+                  image:
+                    description: Image name for the component.
+                    type: string
+                  imagePullPolicy:
+                    description: 'Image pull policy. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images'
+                    enum:
+                    - Always
+                    - Never
+                    - IfNotPresent
+                    type: string
+                  imagePullSecrets:
+                    items:
+                      description: LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.
+                      properties:
+                        name:
+                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                          type: string
+                      type: object
+                    type: array
+                  metrics:
+                    properties:
+                      enabled:
+                        default: false
+                        type: boolean
+                      path:
+                        default: /metrics
+                        description: The path of the metrics.
+                        pattern: /.+
+                        type: string
+                      port:
+                        default: 8001
+                        description: The port of the metrics.
+                        format: int32
+                        minimum: 1
+                        type: integer
+                    type: object
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    description: 'NodeSelector is a selector which must be true for the component to fit on a node. Selector which must match a node''s labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/'
+                    type: object
+                  relativeURLs:
+                    default: true
+                    type: boolean
+                  replicas:
+                    description: 'Replicas is the number of desired replicas. This is a pointer to distinguish between explicit zero and unspecified. More info: https://kubernetes.io/docs/concepts/workloads/controllers/replicationcontroller#what-is-a-replicationcontroller'
+                    format: int32
+                    minimum: 0
+                    type: integer
+                  resources:
+                    description: 'Compute Resources required by this component. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                    properties:
+                      limits:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                      requests:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                    type: object
+                  serviceAccountName:
+                    description: 'ServiceAccountName is the name of the ServiceAccount to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
+                    type: string
+                  storageMiddlewares:
+                    items:
+                      properties:
+                        name:
+                          type: string
+                        optionsRef:
+                          pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                          type: string
+                      required:
+                      - name
+                      type: object
+                    type: array
+                  tolerations:
+                    description: If specified, the pod's tolerations.
+                    items:
+                      description: The pod this Toleration is attached to tolerates any taint that matches the triple <key,value,effect> using the matching operator <operator>.
+                      properties:
+                        effect:
+                          description: Effect indicates the taint effect to match. Empty means match all taint effects. When specified, allowed values are NoSchedule, PreferNoSchedule and NoExecute.
+                          type: string
+                        key:
+                          description: Key is the taint key that the toleration applies to. Empty means match all taint keys. If the key is empty, operator must be Exists; this combination means to match all values and all keys.
+                          type: string
+                        operator:
+                          description: Operator represents a key's relationship to the value. Valid operators are Exists and Equal. Defaults to Equal. Exists is equivalent to wildcard for value, so that a pod can tolerate all taints of a particular category.
+                          type: string
+                        tolerationSeconds:
+                          description: TolerationSeconds represents the period of time the toleration (which must be of effect NoExecute, otherwise this field is ignored) tolerates the taint. By default, it is not set, which means tolerate the taint forever (do not evict). Zero and negative values will be treated as 0 (evict immediately) by the system.
+                          format: int64
+                          type: integer
+                        value:
+                          description: Value is the taint value the toleration matches to. If the operator is Exists, the value should be empty, otherwise just a regular string.
+                          type: string
+                      type: object
+                    type: array
+                type: object
+              registryctl:
+                properties:
+                  image:
+                    description: Image name for the component.
+                    type: string
+                  imagePullPolicy:
+                    description: 'Image pull policy. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images'
+                    enum:
+                    - Always
+                    - Never
+                    - IfNotPresent
+                    type: string
+                  imagePullSecrets:
+                    items:
+                      description: LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.
+                      properties:
+                        name:
+                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                          type: string
+                      type: object
+                    type: array
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    description: 'NodeSelector is a selector which must be true for the component to fit on a node. Selector which must match a node''s labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/'
+                    type: object
+                  replicas:
+                    description: 'Replicas is the number of desired replicas. This is a pointer to distinguish between explicit zero and unspecified. More info: https://kubernetes.io/docs/concepts/workloads/controllers/replicationcontroller#what-is-a-replicationcontroller'
+                    format: int32
+                    minimum: 0
+                    type: integer
+                  resources:
+                    description: 'Compute Resources required by this component. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                    properties:
+                      limits:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                      requests:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                    type: object
+                  serviceAccountName:
+                    description: 'ServiceAccountName is the name of the ServiceAccount to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
+                    type: string
+                  tolerations:
+                    description: If specified, the pod's tolerations.
+                    items:
+                      description: The pod this Toleration is attached to tolerates any taint that matches the triple <key,value,effect> using the matching operator <operator>.
+                      properties:
+                        effect:
+                          description: Effect indicates the taint effect to match. Empty means match all taint effects. When specified, allowed values are NoSchedule, PreferNoSchedule and NoExecute.
+                          type: string
+                        key:
+                          description: Key is the taint key that the toleration applies to. Empty means match all taint keys. If the key is empty, operator must be Exists; this combination means to match all values and all keys.
+                          type: string
+                        operator:
+                          description: Operator represents a key's relationship to the value. Valid operators are Exists and Equal. Defaults to Equal. Exists is equivalent to wildcard for value, so that a pod can tolerate all taints of a particular category.
+                          type: string
+                        tolerationSeconds:
+                          description: TolerationSeconds represents the period of time the toleration (which must be of effect NoExecute, otherwise this field is ignored) tolerates the taint. By default, it is not set, which means tolerate the taint forever (do not evict). Zero and negative values will be treated as 0 (evict immediately) by the system.
+                          format: int64
+                          type: integer
+                        value:
+                          description: Value is the taint value the toleration matches to. If the operator is Exists, the value should be empty, otherwise just a regular string.
+                          type: string
+                      type: object
+                    type: array
+                type: object
+              trivy:
+                properties:
+                  certificateRefs:
+                    items:
+                      type: string
+                    type: array
+                  githubTokenRef:
+                    description: The name of the secret containing the token to connect to GitHub API.
+                    type: string
+                  image:
+                    description: Image name for the component.
+                    type: string
+                  imagePullPolicy:
+                    description: 'Image pull policy. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images'
+                    enum:
+                    - Always
+                    - Never
+                    - IfNotPresent
+                    type: string
+                  imagePullSecrets:
+                    items:
+                      description: LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.
+                      properties:
+                        name:
+                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                          type: string
+                      type: object
+                    type: array
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    description: 'NodeSelector is a selector which must be true for the component to fit on a node. Selector which must match a node''s labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/'
+                    type: object
+                  replicas:
+                    description: 'Replicas is the number of desired replicas. This is a pointer to distinguish between explicit zero and unspecified. More info: https://kubernetes.io/docs/concepts/workloads/controllers/replicationcontroller#what-is-a-replicationcontroller'
+                    format: int32
+                    minimum: 0
+                    type: integer
+                  resources:
+                    description: 'Compute Resources required by this component. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                    properties:
+                      limits:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                      requests:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                    type: object
+                  serviceAccountName:
+                    description: 'ServiceAccountName is the name of the ServiceAccount to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
+                    type: string
+                  skipUpdate:
+                    default: false
+                    description: The flag to enable or disable Trivy DB downloads from GitHub
+                    type: boolean
+                  storage:
+                    properties:
+                      cachePersistentVolume:
+                        description: CachePersistentVolume specify the persistent volume used to store Trivy cache. If empty, empty dir will be used.
+                        properties:
+                          claimName:
+                            description: 'ClaimName is the name of a PersistentVolumeClaim in the same namespace as the pod using this volume. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#persistentvolumeclaims'
+                            type: string
+                          prefix:
+                            type: string
+                          readOnly:
+                            description: Will force the ReadOnly setting in VolumeMounts. Default false.
+                            type: boolean
+                        required:
+                        - claimName
+                        type: object
+                      reportsPersistentVolume:
+                        description: ReportsPersistentVolume specify the persistent volume used to store Trivy reports. If empty, empty dir will be used.
+                        properties:
+                          claimName:
+                            description: 'ClaimName is the name of a PersistentVolumeClaim in the same namespace as the pod using this volume. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#persistentvolumeclaims'
+                            type: string
+                          prefix:
+                            type: string
+                          readOnly:
+                            description: Will force the ReadOnly setting in VolumeMounts. Default false.
+                            type: boolean
+                        required:
+                        - claimName
+                        type: object
+                    type: object
+                  tolerations:
+                    description: If specified, the pod's tolerations.
+                    items:
+                      description: The pod this Toleration is attached to tolerates any taint that matches the triple <key,value,effect> using the matching operator <operator>.
+                      properties:
+                        effect:
+                          description: Effect indicates the taint effect to match. Empty means match all taint effects. When specified, allowed values are NoSchedule, PreferNoSchedule and NoExecute.
+                          type: string
+                        key:
+                          description: Key is the taint key that the toleration applies to. Empty means match all taint keys. If the key is empty, operator must be Exists; this combination means to match all values and all keys.
+                          type: string
+                        operator:
+                          description: Operator represents a key's relationship to the value. Valid operators are Exists and Equal. Defaults to Equal. Exists is equivalent to wildcard for value, so that a pod can tolerate all taints of a particular category.
+                          type: string
+                        tolerationSeconds:
+                          description: TolerationSeconds represents the period of time the toleration (which must be of effect NoExecute, otherwise this field is ignored) tolerates the taint. By default, it is not set, which means tolerate the taint forever (do not evict). Zero and negative values will be treated as 0 (evict immediately) by the system.
+                          format: int64
+                          type: integer
+                        value:
+                          description: Value is the taint value the toleration matches to. If the operator is Exists, the value should be empty, otherwise just a regular string.
+                          type: string
+                      type: object
+                    type: array
+                required:
+                - storage
+                type: object
+              updateStrategyType:
+                default: RollingUpdate
+                type: string
+              version:
+                description: The version of the harbor, eg 2.1.2
+                pattern: '[0-9]+\.[0-9]+\.[0-9]+'
+                type: string
+            required:
+            - expose
+            - externalURL
+            - harborAdminPasswordRef
+            - version
+            type: object
+          status:
+            description: ComponentStatus represents the current status of the resource. https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md#typical-status-properties
+            properties:
+              conditions:
+                description: Conditions list of extracted conditions from Resource
+                items:
+                  description: Condition defines the general format for conditions on Kubernetes resources. In practice, each kubernetes resource defines their own format for conditions, but most (maybe all) follows this structure.
+                  properties:
+                    message:
+                      description: Message Human readable reason string
+                      type: string
+                    reason:
+                      description: Reason one work CamelCase reason
+                      type: string
+                    status:
+                      description: Status String that describes the condition status
+                      type: string
+                    type:
+                      description: Type condition type
+                      type: string
+                  required:
+                  - status
+                  - type
+                  type: object
+                type: array
+              observedGeneration:
+                format: int64
+                type: integer
+              operator:
+                description: ControllerStatus represents the current status of the operator.
+                properties:
+                  controllerGitCommit:
+                    minLength: 1
+                    type: string
+                  controllerName:
+                    minLength: 1
+                    type: string
+                  controllerVersion:
+                    minLength: 1
+                    type: string
+                type: object
+              replicas:
+                description: Current number of pods.
+                format: int32
+                minimum: 0
+                type: integer
+            required:
+            - conditions
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

@@ -57,7 +57,7 @@ func (p *PostgreSQLController) GetDatabaseConn(ctx context.Context, ns, secretNa
 
 // GetStorageClass returns the storage class name.
 func (p *PostgreSQLController) GetStorageClass(harborcluster *goharborv1.HarborCluster) string {
-	if harborcluster.Spec.Database.Kind == "Zlando/PostgreSQL" && harborcluster.Spec.Database.Spec.ZlandoPostgreSQL != nil {
+	if harborcluster.Spec.Database.Kind == goharborv1.KindDatabaseZlandoPostgreSQL && harborcluster.Spec.Database.Spec.ZlandoPostgreSQL != nil {
 		return harborcluster.Spec.Database.Spec.ZlandoPostgreSQL.StorageClassName
 	}
 
