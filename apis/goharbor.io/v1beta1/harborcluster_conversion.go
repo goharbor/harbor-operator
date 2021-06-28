@@ -6,5 +6,4 @@ import (
 
 var _ conversion.Hub = &HarborCluster{}
 
-func (h *HarborCluster) Hub() {
-}
+func (harborcluster *HarborCluster) Hub() {}

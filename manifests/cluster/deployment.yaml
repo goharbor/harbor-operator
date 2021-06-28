@@ -11,13 +11,24 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
+    cert-manager.io/inject-ca-from: harbor-operator-ns/serving-cert
     controller-gen.kubebuilder.io/version: v0.5.0
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
     goharbor.io/operator-version: v1.0.0
-  creationTimestamp: null
   name: chartmuseums.goharbor.io
 spec:
+  conversion:
+    strategy: Webhook
+    webhook:
+      clientConfig:
+        caBundle: Cg==
+        service:
+          name: webhook-service
+          namespace: harbor-operator-ns
+          path: /convert
+      conversionReviewVersions:
+      - v1
   group: goharbor.io
   names:
     categories:
@@ -3704,13 +3715,24 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
+    cert-manager.io/inject-ca-from: harbor-operator-ns/serving-cert
     controller-gen.kubebuilder.io/version: v0.5.0
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
     goharbor.io/operator-version: v1.0.0
-  creationTimestamp: null
   name: exporters.goharbor.io
 spec:
+  conversion:
+    strategy: Webhook
+    webhook:
+      clientConfig:
+        caBundle: Cg==
+        service:
+          name: webhook-service
+          namespace: harbor-operator-ns
+          path: /convert
+      conversionReviewVersions:
+      - v1
   group: goharbor.io
   names:
     categories:
@@ -27859,13 +27881,24 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
+    cert-manager.io/inject-ca-from: harbor-operator-ns/serving-cert
     controller-gen.kubebuilder.io/version: v0.5.0
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
     goharbor.io/operator-version: v1.0.0
-  creationTimestamp: null
   name: trivies.goharbor.io
 spec:
+  conversion:
+    strategy: Webhook
+    webhook:
+      clientConfig:
+        caBundle: Cg==
+        service:
+          name: webhook-service
+          namespace: harbor-operator-ns
+          path: /convert
+      conversionReviewVersions:
+      - v1
   group: goharbor.io
   names:
     categories:
@@ -34071,26 +34104,6 @@ webhooks:
     service:
       name: webhook-service
       namespace: harbor-operator-ns
-      path: /validate-goharbor-io-v1alpha3-harbor
-  failurePolicy: Fail
-  name: vharbor.kb.io
-  rules:
-  - apiGroups:
-    - goharbor.io
-    apiVersions:
-    - v1alpha3
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - harbors
-  sideEffects: None
-- admissionReviewVersions:
-  - v1beta1
-  clientConfig:
-    service:
-      name: webhook-service
-      namespace: harbor-operator-ns
       path: /validate-goharbor-io-v1alpha3-harborcluster
   failurePolicy: Fail
   name: vharborcluster.kb.io
@@ -34104,6 +34117,26 @@ webhooks:
     - UPDATE
     resources:
     - harborclusters
+  sideEffects: None
+- admissionReviewVersions:
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: harbor-operator-ns
+      path: /validate-goharbor-io-v1alpha3-harbor
+  failurePolicy: Fail
+  name: vharbor.kb.io
+  rules:
+  - apiGroups:
+    - goharbor.io
+    apiVersions:
+    - v1alpha3
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - harbors
   sideEffects: None
 - admissionReviewVersions:
   - v1beta1
