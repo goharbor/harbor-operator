@@ -8,7 +8,6 @@ import (
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
 	"github.com/goharbor/harbor-operator/pkg/cluster/gos"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
-	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -17,8 +16,7 @@ import (
 
 // Reconcile logic of the HarborCluster.
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (res ctrl.Result, err error) { // nolint:funlen
-	ctx = r.ctrl.PopulateContext(ctx, req)
-	log := logger.Get(ctx)
+	ctx = r.PopulateContext(ctx, req)
 
 	// Get the harborcluster first
 	harborcluster := &goharborv1.HarborCluster{}
@@ -34,20 +32,20 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (res ctrl.
 
 	// Check if it is being deleted
 	if !harborcluster.ObjectMeta.DeletionTimestamp.IsZero() {
-		log.Info("harbor cluster is being deleted", "name", req.NamespacedName)
+		r.Log.Info("harbor cluster is being deleted", "name", req.NamespacedName)
 
 		return ctrl.Result{}, nil
 	}
 
-	if err := r.ctrl.PrepareStatus(ctx, harborcluster); err != nil {
-		return r.ctrl.HandleError(ctx, harborcluster, errors.Wrap(err, "cannot prepare owner status"))
+	if err := r.PrepareStatus(ctx, harborcluster); err != nil {
+		return r.HandleError(ctx, harborcluster, errors.Wrap(err, "cannot prepare owner status"))
 	}
 
 	// For tracking status
 	st := newStatus(harborcluster).
 		WithContext(ctx).
 		WithClient(r.Client).
-		WithLog(log)
+		WithLog(r.Log)
 
 	defer func() {
 		// Execute the status update operation
@@ -130,7 +128,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (res ctrl.
 	r.Log.Info("Reconcile is completed")
 
 	if harborStatus.Condition.Status == corev1.ConditionTrue {
-		return ctrl.Result{}, r.ctrl.SetSuccessStatus(ctx, harborcluster)
+		return ctrl.Result{}, r.SetSuccessStatus(ctx, harborcluster)
 	}
 
 	return ctrl.Result{}, nil

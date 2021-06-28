@@ -8,8 +8,8 @@ import (
 
 	"github.com/go-logr/logr"
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
+	"github.com/goharbor/harbor-operator/controllers"
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
-	"github.com/goharbor/harbor-operator/pkg/factories/application"
 	"github.com/goharbor/harbor-operator/pkg/harbor"
 	"github.com/goharbor/harbor-operator/pkg/utils/strings"
 	"github.com/ovh/configstore"
@@ -31,9 +31,9 @@ var pwdFields = []string{"email_password", "ldap_search_password", "uaa_client_s
 
 // New HarborConfiguration reconciler.
 func New(ctx context.Context, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
-	return &Reconciler{
-		Log: ctrl.Log.WithName(application.GetName(ctx)).WithName("configuration-controller").WithValues("controller", "HarborConfiguration"),
-	}, nil
+	r := &Reconciler{}
+	r.Controller = commonCtrl.NewController(ctx, controllers.HarborCluster, nil, configStore)
+	return r, nil
 }
 
 const (
@@ -47,6 +47,7 @@ const (
 
 // Reconciler reconciles a configuration configmap.
 type Reconciler struct {
+	*commonCtrl.Controller
 	client.Client
 	Log    logr.Logger
 	Scheme *runtime.Scheme
