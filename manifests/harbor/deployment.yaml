@@ -26422,14 +26422,14 @@ webhooks:
     service:
       name: webhook-service
       namespace: harbor-operator-ns
-      path: /validate-goharbor-io-v1alpha3-harborcluster
+      path: /validate-goharbor-io-v1beta1-harborcluster
   failurePolicy: Fail
-  name: vharborcluster.kb.io
+  name: vharborcluster.kb.io.v1beta1
   rules:
   - apiGroups:
     - goharbor.io
     apiVersions:
-    - v1alpha3
+    - v1beta1
     operations:
     - CREATE
     - UPDATE
@@ -26455,6 +26455,26 @@ webhooks:
     - UPDATE
     resources:
     - harbors
+  sideEffects: None
+- admissionReviewVersions:
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: harbor-operator-ns
+      path: /validate-goharbor-io-v1alpha3-harborcluster
+  failurePolicy: Fail
+  name: vharborcluster.kb.io
+  rules:
+  - apiGroups:
+    - goharbor.io
+    apiVersions:
+    - v1alpha3
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - harborclusters
   sideEffects: None
 - admissionReviewVersions:
   - v1beta1
