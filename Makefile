@@ -362,7 +362,7 @@ install: go-generate
 uninstall: go-generate
 	kubectl delete -f config/crd/bases
 
-go-generate: controller-gen stringer
+go-generate: controller-gen stringer manifests
 	export PATH="$(BIN):$${PATH}" ; \
 	go generate ./...
 

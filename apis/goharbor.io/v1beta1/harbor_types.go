@@ -226,10 +226,6 @@ func (spec *HarborSpec) ValidateNotary() *field.Error {
 	return nil
 }
 
-func required(mainPath *field.Path) *field.Error {
-	return field.Required(mainPath, fmt.Sprintf("%s should be configured", mainPath.String()))
-}
-
 func (spec *HarborSpec) ValidateRegistryController() *field.Error {
 	if spec.RegistryController == nil {
 		return nil
