@@ -242,7 +242,6 @@ const (
 )
 
 // +kubebuilder:object:root=true
-// +kubebuilder:storageversion
 // +k8s:openapi-gen=true
 // +resource:path=harborcluster
 // +kubebuilder:subresource:status

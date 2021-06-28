@@ -10,7 +10,6 @@ import (
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 // +kubebuilder:object:root=true
-// +kubebuilder:storageversion
 // +k8s:openapi-gen=true
 // +resource:path=portal
 // +kubebuilder:subresource:status

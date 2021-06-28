@@ -8,6 +8,17 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
+const (
+	KindDatabaseZlandoPostgreSQL = "Zlando/PostgreSQL"
+	KindDatabasePostgreSQL       = "PostgreSQL"
+	KindStorageMinIO             = "MinIO"
+	KindStorageSwift             = "Swift"
+	KindStorageS3                = "S3"
+	KindStorageFileSystem        = "FileSystem"
+	KindCacheRedisFailover       = "RedisFailover"
+	KindCacheRedis               = "Redis"
+)
+
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
@@ -345,6 +356,7 @@ const (
 )
 
 // +kubebuilder:object:root=true
+// +kubebuilder:storageversion
 // +k8s:openapi-gen=true
 // +resource:path=harborcluster
 // +kubebuilder:subresource:status
