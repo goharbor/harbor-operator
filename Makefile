@@ -122,7 +122,8 @@ helm-install: helm helm-generate
 	$(HELM) upgrade --namespace "$(NAMESPACE)" --install $(CHART_RELEASE_NAME) $(CHARTS_DIRECTORY)/harbor-operator-$(RELEASE_VERSION).tgz \
 		--set-string image.repository="$$(echo $(IMG) | sed 's/:.*//')" \
 		--set-string image.tag="$$(echo $(IMG) | sed 's/.*://')" \
-		--set-string harborClass='$(CHART_HARBOR_CLASS)'
+		--set-string harborClass='$(CHART_HARBOR_CLASS)' \
+		--set installCRDs=true
 
 #####################
 #     Packaging     #
@@ -241,7 +242,7 @@ CHART_TEMPLATE_PATH := $(CHART_HARBOR_OPERATOR)/templates
 
 CRD_GROUP := goharbor.io
 
-$(CHARTS_DIRECTORY)/harbor-operator-$(RELEASE_VERSION).tgz: $(CHART_HARBOR_OPERATOR)/README.md $(CHART_HARBOR_OPERATOR)/crds \
+$(CHARTS_DIRECTORY)/harbor-operator-$(RELEASE_VERSION).tgz: $(CHART_HARBOR_OPERATOR)/README.md $(CHART_HARBOR_OPERATOR)/templates/crds.yaml \
 	$(CHART_HARBOR_OPERATOR)/assets $(wildcard $(CHART_HARBOR_OPERATOR)/assets/*) \
 	$(CHART_HARBOR_OPERATOR)/charts $(CHART_HARBOR_OPERATOR)/Chart.lock \
 	$(CHART_TEMPLATE_PATH)/role.yaml $(CHART_TEMPLATE_PATH)/clusterrole.yaml \
@@ -254,10 +255,11 @@ $(CHARTS_DIRECTORY)/harbor-operator-$(RELEASE_VERSION).tgz: $(CHART_HARBOR_OPERA
 		--app-version $(RELEASE_VERSION) \
 		--destination $(CHARTS_DIRECTORY)
 
-$(CHART_HARBOR_OPERATOR)/crds: kustomize config/crd/bases
-	rm -rf '$@'
-	mkdir '$@'
-	$(KUSTOMIZE) build config/helm/crds/ -o '$@'
+$(CHART_HARBOR_OPERATOR)/templates/crds.yaml: kustomize config/crd/bases
+	echo '{{- /* $(DO_NOT_EDIT) */ -}}' > '$@'
+	echo '{{- if .Values.installCRDs }}' >> '$@'
+	$(KUSTOMIZE) build config/helm/crds/ >> '$@'
+	echo '{{- end -}}' >> '$@'
 
 $(CHART_HARBOR_OPERATOR)/assets:
 	rm -f '$@'
