@@ -113,34 +113,15 @@ webhooks:
   sideEffects: None
 - admissionReviewVersions:
   - v1beta1
+  - v1
   clientConfig:
     service:
       name: {{ include "chart.fullname" . | quote }}
       namespace: {{ .Release.Namespace | quote }}
-      path: /validate-goharbor-io-v1alpha3-harborcluster
+      path: /validate-goharbor-io-v1beta1-harborcluster
       port: {{ .Values.service.port }}
   failurePolicy: Fail
   name: vharborcluster.kb.io
-  rules:
-  - apiGroups:
-    - goharbor.io
-    apiVersions:
-    - v1alpha3
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - harborclusters
-  sideEffects: None
-- admissionReviewVersions:
-  - v1beta1
-  clientConfig:
-    service:
-      name: '{{ include "chart.fullname" . }}-webhook-service'
-      namespace: {{ .Release.Namespace | quote }}
-      path: /validate-goharbor-io-v1beta1-harborcluster
-  failurePolicy: Fail
-  name: vharborcluster.kb.io.v1beta1
   rules:
   - apiGroups:
     - goharbor.io

@@ -34049,13 +34049,14 @@ metadata:
 webhooks:
 - admissionReviewVersions:
   - v1beta1
+  - v1
   clientConfig:
     service:
       name: webhook-service
       namespace: harbor-operator-ns
       path: /mutate-goharbor-io-v1beta1-harborcluster
   failurePolicy: Fail
-  name: mharborcluster.kb.io.v1beta1
+  name: mharborcluster.kb.io
   rules:
   - apiGroups:
     - goharbor.io
@@ -34087,26 +34088,6 @@ webhooks:
     resources:
     - harbors
   sideEffects: None
-- admissionReviewVersions:
-  - v1beta1
-  clientConfig:
-    service:
-      name: webhook-service
-      namespace: harbor-operator-ns
-      path: /mutate-goharbor-io-v1alpha3-harborcluster
-  failurePolicy: Fail
-  name: mharborcluster.kb.io
-  rules:
-  - apiGroups:
-    - goharbor.io
-    apiVersions:
-    - v1alpha3
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - harborclusters
-  sideEffects: None
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
@@ -34120,13 +34101,14 @@ metadata:
 webhooks:
 - admissionReviewVersions:
   - v1beta1
+  - v1
   clientConfig:
     service:
       name: webhook-service
       namespace: harbor-operator-ns
       path: /validate-goharbor-io-v1beta1-harborcluster
   failurePolicy: Fail
-  name: vharborcluster.kb.io.v1beta1
+  name: vharborcluster.kb.io
   rules:
   - apiGroups:
     - goharbor.io
@@ -34157,26 +34139,6 @@ webhooks:
     - UPDATE
     resources:
     - harbors
-  sideEffects: None
-- admissionReviewVersions:
-  - v1beta1
-  clientConfig:
-    service:
-      name: webhook-service
-      namespace: harbor-operator-ns
-      path: /validate-goharbor-io-v1alpha3-harborcluster
-  failurePolicy: Fail
-  name: vharborcluster.kb.io
-  rules:
-  - apiGroups:
-    - goharbor.io
-    apiVersions:
-    - v1alpha3
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - harborclusters
   sideEffects: None
 - admissionReviewVersions:
   - v1beta1

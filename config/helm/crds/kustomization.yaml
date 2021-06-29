@@ -1,12 +1,12 @@
 namePrefix: '{{ include "chart.fullname" . }}-'
 
-namespace: '{{ .Release.Namespace | quote }}'
+namespace: '{{ .Release.Namespace }}'
 
 generatorOptions:
   disableNameSuffixHash: true
 
 commonAnnotations:
-  cert-manager.io/inject-ca-from: '{{.Release.Namespace}}/{{. | include "chart.fullname"}}'
+  cert-manager.io/inject-ca-from: '{{.Release.Namespace}}/{{. | include "chart.fullname"}}-serving-cert'
 
 patchesStrategicMerge:
 - patches/chartmuseums_service.yaml
