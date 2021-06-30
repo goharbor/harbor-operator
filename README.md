@@ -50,6 +50,11 @@ Harbor deployment stack is controlled by a custom Harbor resource `HarborCluster
   * Container image path rewriting
   * Transparent proxy cache settings
 
+## Replease plans
+
+* [Release 1.1](https://github.com/goharbor/harbor-operator/projects/8)
+* [Release 1.2](https://github.com/goharbor/harbor-operator/projects/7)
+
 ## Getting started
 
 For a quick first try follow the instructions of this [tutorial](./docs/tutorial.md).
