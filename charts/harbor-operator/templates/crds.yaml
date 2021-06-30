@@ -14,8 +14,8 @@ spec:
       clientConfig:
         caBundle: Cg==
         service:
-          name: '{{ include "chart.fullname" . }}'
-          namespace: '{{ .Release.Namespace }}'
+          name: {{ include "chart.fullname" . | quote }}
+          namespace: {{ .Release.Namespace }}
           path: /convert
       conversionReviewVersions:
       - v1
@@ -2708,8 +2708,8 @@ spec:
       clientConfig:
         caBundle: Cg==
         service:
-          name: '{{ include "chart.fullname" . }}'
-          namespace: '{{ .Release.Namespace }}'
+          name: {{ include "chart.fullname" . | quote }}
+          namespace: {{ .Release.Namespace }}
           path: /convert
       conversionReviewVersions:
       - v1
@@ -3712,8 +3712,8 @@ spec:
       clientConfig:
         caBundle: Cg==
         service:
-          name: '{{ include "chart.fullname" . }}'
-          namespace: '{{ .Release.Namespace }}'
+          name: {{ include "chart.fullname" . | quote }}
+          namespace: {{ .Release.Namespace }}
           path: /convert
       conversionReviewVersions:
       - v1
@@ -4278,8 +4278,8 @@ spec:
       clientConfig:
         caBundle: Cg==
         service:
-          name: '{{ include "chart.fullname" . }}'
-          namespace: '{{ .Release.Namespace }}'
+          name: {{ include "chart.fullname" . | quote }}
+          namespace: {{ .Release.Namespace }}
           path: /convert
       conversionReviewVersions:
       - v1
@@ -8075,8 +8075,8 @@ spec:
       clientConfig:
         caBundle: Cg==
         service:
-          name: '{{ include "chart.fullname" . }}'
-          namespace: '{{ .Release.Namespace }}'
+          name: {{ include "chart.fullname" . | quote }}
+          namespace: {{ .Release.Namespace }}
           path: /convert
       conversionReviewVersions:
       - v1
@@ -11007,8 +11007,8 @@ spec:
       clientConfig:
         caBundle: Cg==
         service:
-          name: '{{ include "chart.fullname" . }}'
-          namespace: '{{ .Release.Namespace }}'
+          name: {{ include "chart.fullname" . | quote }}
+          namespace: {{ .Release.Namespace }}
           path: /convert
       conversionReviewVersions:
       - v1
@@ -15437,8 +15437,8 @@ spec:
       clientConfig:
         caBundle: Cg==
         service:
-          name: '{{ include "chart.fullname" . }}'
-          namespace: '{{ .Release.Namespace }}'
+          name: {{ include "chart.fullname" . | quote }}
+          namespace: {{ .Release.Namespace }}
           path: /convert
       conversionReviewVersions:
       - v1
@@ -16027,8 +16027,8 @@ spec:
       clientConfig:
         caBundle: Cg==
         service:
-          name: '{{ include "chart.fullname" . }}'
-          namespace: '{{ .Release.Namespace }}'
+          name: {{ include "chart.fullname" . | quote }}
+          namespace: {{ .Release.Namespace }}
           path: /convert
       conversionReviewVersions:
       - v1
@@ -16529,8 +16529,8 @@ spec:
       clientConfig:
         caBundle: Cg==
         service:
-          name: '{{ include "chart.fullname" . }}'
-          namespace: '{{ .Release.Namespace }}'
+          name: {{ include "chart.fullname" . | quote }}
+          namespace: {{ .Release.Namespace }}
           path: /convert
       conversionReviewVersions:
       - v1
@@ -16907,8 +16907,8 @@ spec:
       clientConfig:
         caBundle: Cg==
         service:
-          name: '{{ include "chart.fullname" . }}'
-          namespace: '{{ .Release.Namespace }}'
+          name: {{ include "chart.fullname" . | quote }}
+          namespace: {{ .Release.Namespace }}
           path: /convert
       conversionReviewVersions:
       - v1
@@ -20390,8 +20390,8 @@ spec:
       clientConfig:
         caBundle: Cg==
         service:
-          name: '{{ include "chart.fullname" . }}'
-          namespace: '{{ .Release.Namespace }}'
+          name: {{ include "chart.fullname" . | quote }}
+          namespace: {{ .Release.Namespace }}
           path: /convert
       conversionReviewVersions:
       - v1
@@ -20812,8 +20812,8 @@ spec:
       clientConfig:
         caBundle: Cg==
         service:
-          name: '{{ include "chart.fullname" . }}'
-          namespace: '{{ .Release.Namespace }}'
+          name: {{ include "chart.fullname" . | quote }}
+          namespace: {{ .Release.Namespace }}
           path: /convert
       conversionReviewVersions:
       - v1
