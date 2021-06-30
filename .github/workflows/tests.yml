@@ -104,14 +104,14 @@ jobs:
       - name: Install Kubernetes
         uses: helm/kind-action@v1.1.0
         with:
-          version: v0.10.0
+          version: v0.11.0
           cluster_name: harbor
           config: .github/kind.yaml
 
       - name: Install CertManager
         run: |
           # Try the recet way to install crd or fallback to the old one
-          kubectl apply -f "https://github.com/jetstack/cert-manager/releases/download/v1.1.0/cert-manager.yaml"
+          kubectl apply -f "https://github.com/jetstack/cert-manager/releases/download/v1.3.1/cert-manager.yaml"
           sleep 5
           time kubectl -n cert-manager wait --for=condition=Available deployment --all --timeout 300s
 
@@ -144,7 +144,7 @@ jobs:
         certManager:
         - "1.1.1"
 #        - "1.2.0"
-        - "1.3.1"
+        - "1.4.0"
 
         # https://snapcraft.io/microk8s
         k8sVersion:
