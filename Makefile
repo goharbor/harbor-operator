@@ -258,7 +258,8 @@ $(CHARTS_DIRECTORY)/harbor-operator-$(RELEASE_VERSION).tgz: $(CHART_HARBOR_OPERA
 $(CHART_HARBOR_OPERATOR)/templates/crds.yaml: kustomize config/crd/bases
 	echo '{{- /* $(DO_NOT_EDIT) */ -}}' > '$@'
 	echo '{{- if .Values.installCRDs }}' >> '$@'
-	$(KUSTOMIZE) build config/helm/crds/ >> '$@'
+	$(KUSTOMIZE) build config/helm/crds/ | \
+	sed "s/'\({{[^}}]*}}\)'/\1/g">> '$@'
 	echo '{{- end -}}' >> '$@'
 
 $(CHART_HARBOR_OPERATOR)/assets:
