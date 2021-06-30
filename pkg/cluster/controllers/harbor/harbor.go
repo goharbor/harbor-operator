@@ -125,9 +125,19 @@ func (harbor *Controller) getHarborCR(ctx context.Context, harborcluster *goharb
 			UpdateStrategyType:     spec.UpdateStrategyType,
 			Version:                spec.Version,
 			Expose:                 spec.Expose,
-			HarborComponentsSpec:   spec.HarborComponentsSpec,
-			ImageSource:            spec.ImageSource,
-			Proxy:                  spec.Proxy,
+			HarborComponentsSpec: goharborv1.HarborComponentsSpec{
+				Portal:             spec.Portal,
+				Core:               spec.Core,
+				JobService:         spec.JobService,
+				Registry:           spec.Registry,
+				RegistryController: spec.RegistryController,
+				ChartMuseum:        spec.ChartMuseum,
+				Exporter:           spec.Exporter,
+				Trivy:              spec.Trivy,
+				Notary:             spec.Notary,
+			},
+			ImageSource: spec.ImageSource,
+			Proxy:       spec.Proxy,
 		},
 	}
 
@@ -144,6 +154,16 @@ func (harbor *Controller) getHarborCR(ctx context.Context, harborcluster *goharb
 	if harborcluster.Spec.Storage.Spec.Swift != nil {
 		harborCR.Spec.ImageChartStorage.Swift =
 			harborcluster.Spec.Storage.Spec.Swift.HarborStorageImageChartStorageSwiftSpec.DeepCopy()
+	}
+
+	if harborcluster.Spec.Database.Spec.PostgreSQL != nil {
+		harborCR.Spec.Database =
+			harborcluster.Spec.Database.Spec.PostgreSQL.HarborDatabaseSpec.DeepCopy()
+	}
+
+	if harborcluster.Spec.Cache.Spec.Redis != nil {
+		harborCR.Spec.Redis =
+			harborcluster.Spec.Cache.Spec.Redis.DeepCopy()
 	}
 
 	// Use incluster spec in first priority.
