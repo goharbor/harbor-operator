@@ -176,10 +176,8 @@ type HarborSpec struct {
 	// +kubebuilder:validation:Optional
 	InternalTLS HarborInternalTLSSpec `json:"internalTLS"`
 
-	// Skip OpenAPI schema validation
-	// Use validating webhook to do verification (field required)
-	// +kubebuilder:validation:Optional
-	ImageChartStorage *HarborStorageImageChartStorageSpec `json:"imageChartStorage,omitempty"`
+	// +kubebuilder:validation:Required
+	ImageChartStorage *HarborStorageImageChartStorageSpec `json:"imageChartStorage"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default="info"
@@ -281,15 +279,10 @@ type HarborComponentsSpec struct {
 	// +kubebuilder:validation:Optional
 	Notary *NotaryComponentSpec `json:"notary,omitempty"`
 
-	// Skip OpenAPI schema validation
-	// Use validating webhook to do verification (field required)
-	// +kubebuilder:validation:Optional
-	Redis *ExternalRedisSpec `json:"redis,omitempty"`
+	// +kubebuilder:validation:Required
+	Redis *ExternalRedisSpec `json:"redis"`
 
-	// Skip OpenAPI schema validation
-	// Use validating webhook to do verification (field required)
-	// +kubebuilder:validation:Optional
-	Database *HarborDatabaseSpec `json:"database,omitempty"`
+	Database *HarborDatabaseSpec `json:"database"`
 }
 
 type HarborDatabaseSpec struct {

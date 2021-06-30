@@ -67,45 +67,44 @@ metadata:
   name: harborcluster-sample
   namespace: cluster-sample-ns
 spec:
-  harbor:
-    version: 2.2.1
-    logLevel: info
-    imageSource:
-      repository: ghcr.io/goharbor
-    harborAdminPasswordRef: admin-core-secret
-    externalURL: https://core.harbor.domain
-    expose:
-      core:
-        ingress:
-          host: core.harbor.domain
-          controller: default
-        tls:
-          certificateRef: sample-public-certificate
-      notary:
-        ingress:
-          host: notary.harbor.domain
-          controller: default
-        tls:
-          certificateRef: sample-public-certificate
-    internalTLS:
-      enabled: true
-    portal: {}
-    registry:
-      metrics:
-        enabled: true
+  version: 2.2.1
+  logLevel: info
+  imageSource:
+    repository: ghcr.io/goharbor
+  harborAdminPasswordRef: admin-core-secret
+  externalURL: https://core.harbor.domain
+  expose:
     core:
-      tokenIssuer:
-        name: selfsigned-issuer
-        kind: Issuer
-      metrics:
-        enabled: true
-    chartmuseum: {}
-    exporter: {}
-    trivy:
-      skipUpdate: false
-      storage: {}
+      ingress:
+        host: core.harbor.domain
+        controller: default
+      tls:
+        certificateRef: sample-public-certificate
     notary:
-      migrationEnabled: true
+      ingress:
+        host: notary.harbor.domain
+        controller: default
+      tls:
+        certificateRef: sample-public-certificate
+  internalTLS:
+    enabled: true
+  portal: {}
+  registry:
+    metrics:
+      enabled: true
+  core:
+    tokenIssuer:
+      name: selfsigned-issuer
+      kind: Issuer
+    metrics:
+      enabled: true
+  chartmuseum: {}
+  exporter: {}
+  trivy:
+    skipUpdate: false
+    storage: {}
+  notary:
+    migrationEnabled: true
   database:
     kind: Zlando/PostgreSQL
     spec:

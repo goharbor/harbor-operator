@@ -201,38 +201,37 @@ spec:
         host: harbor-redis-master
         passwordRef: harbor-redis
         port: 6379
-  harbor:
-    version: 2.2.1
-    chartmuseum: {}
+  version: 2.2.1
+  chartmuseum: {}
+  core:
+    tokenIssuer:
+      kind: Issuer
+      name: service-token
+  expose:
     core:
-      tokenIssuer:
-        kind: Issuer
-        name: service-token
-    expose:
-      core:
-        ingress:
-          host: core.harbor.domain
-          controller: default
-        tls:
-          certificateRef: sample-public-certificate
-      notary:
-        ingress:
-          host: notary.harbor.domain
-          controller: default
-        tls:
-          certificateRef: sample-public-certificate
-    externalURL: https://core.harbor.domain
-    harborAdminPasswordRef: admin-core-secret-7274ck5bh5
-    internalTLS:
-      enabled: true
+      ingress:
+        host: core.harbor.domain
+        controller: default
+      tls:
+        certificateRef: sample-public-certificate
     notary:
-      migrationEnabled: true
-    portal: {}
-    registry: {}
-    trivy:
-      skipUpdate: false
-      storage:
-        cachePersistentVolume:
-          claimName: sample-harbor-trivy-cache
-        reportsPersistentVolume:
-          claimName: sample-harbor-trivy-reports
+      ingress:
+        host: notary.harbor.domain
+        controller: default
+      tls:
+        certificateRef: sample-public-certificate
+  externalURL: https://core.harbor.domain
+  harborAdminPasswordRef: admin-core-secret-7274ck5bh5
+  internalTLS:
+    enabled: true
+  notary:
+    migrationEnabled: true
+  portal: {}
+  registry: {}
+  trivy:
+    skipUpdate: false
+    storage:
+      cachePersistentVolume:
+        claimName: sample-harbor-trivy-cache
+      reportsPersistentVolume:
+        claimName: sample-harbor-trivy-reports

@@ -33,7 +33,7 @@ type HarborClusterSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	EmbeddedHarborSpec `json:"harbor"`
+	EmbeddedHarborSpec `json:",inline"`
 
 	// Cache configuration for in-cluster cache services
 	// +kubebuilder:validation:Required
@@ -49,7 +49,7 @@ type HarborClusterSpec struct {
 }
 
 type EmbeddedHarborSpec struct {
-	HarborComponentsSpec `json:",inline"`
+	EmbeddedHarborComponentsSpec `json:",inline"`
 
 	ImageSource *ImageSourceSpec `json:"imageSource,omitempty"`
 

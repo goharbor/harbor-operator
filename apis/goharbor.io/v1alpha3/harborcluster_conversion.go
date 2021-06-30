@@ -91,10 +91,10 @@ func Convert_v1alpha3_HarborSpec_To_v1beta1_HarborSpec(src *HarborSpec, dst *v1b
 
 	Convert_v1alpha3_HarborExposeSpec_To_v1beta1_HarborExposeSpec(&src.Expose, &dst.Expose)
 
-	Convert_v1alpha3_HarborComponentSpec_To_v1beta1_HarborComponentSpec(&src.HarborComponentsSpec, &dst.HarborComponentsSpec)
+	Convert_v1alpha3_HarborComponentSpec_To_v1beta1_EmbeddedHarborComponentsSpec(&src.HarborComponentsSpec, &dst.EmbeddedHarborComponentsSpec)
 }
 
-func Convert_v1alpha3_HarborComponentSpec_To_v1beta1_HarborComponentSpec(src *HarborComponentsSpec, dst *v1beta1.HarborComponentsSpec) { // nolint
+func Convert_v1alpha3_HarborComponentSpec_To_v1beta1_EmbeddedHarborComponentsSpec(src *HarborComponentsSpec, dst *v1beta1.EmbeddedHarborComponentsSpec) { // nolint
 	Convert_v1alpha3_CoreComponentSpec_To_v1beta1_CoreComponentSpec(&src.Core, &dst.Core)
 
 	Convert_v1alpha3_RegistryComponentSpec_To_v1beta1_RegistryComponentSpec(&src.Registry, &dst.Registry)
@@ -561,10 +561,10 @@ func Convert_v1beta1_EmbeddedHarborSpec_To_v1alpha3_HarborSpec(src *v1beta1.Embe
 
 	Convert_v1beta1_HarborExposeSpec_To_v1alpha3_HarborExposeSpec(&src.Expose, &dst.Expose)
 
-	Convert_v1beta1_HarborComponentSpec_To_v1alpha3_HarborComponentSpec(&src.HarborComponentsSpec, &dst.HarborComponentsSpec)
+	Convert_v1beta1_EmbeddedHarborComponentsSpec_To_v1alpha3_HarborComponentSpec(&src.EmbeddedHarborComponentsSpec, &dst.HarborComponentsSpec)
 }
 
-func Convert_v1beta1_HarborComponentSpec_To_v1alpha3_HarborComponentSpec(src *v1beta1.HarborComponentsSpec, dst *HarborComponentsSpec) { // nolint
+func Convert_v1beta1_EmbeddedHarborComponentsSpec_To_v1alpha3_HarborComponentSpec(src *v1beta1.EmbeddedHarborComponentsSpec, dst *HarborComponentsSpec) { // nolint
 	Convert_v1beta1_CoreComponentSpec_To_v1alpha3_CoreComponentSpec(&src.Core, &dst.Core)
 
 	Convert_v1beta1_RegistryComponentSpec_To_v1alpha3_RegistryComponentSpec(&src.Registry, &dst.Registry)
