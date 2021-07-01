@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strconv"
 
-	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/database/api"
 	"github.com/goharbor/harbor-operator/pkg/config"
 	"github.com/pkg/errors"
@@ -57,8 +57,8 @@ func (p *PostgreSQLController) GetDatabaseConn(ctx context.Context, ns, secretNa
 
 // GetStorageClass returns the storage class name.
 func (p *PostgreSQLController) GetStorageClass(harborcluster *goharborv1.HarborCluster) string {
-	if harborcluster.Spec.InClusterDatabase != nil && harborcluster.Spec.InClusterDatabase.PostgresSQLSpec != nil {
-		return harborcluster.Spec.InClusterDatabase.PostgresSQLSpec.StorageClassName
+	if harborcluster.Spec.Database.Kind == goharborv1.KindDatabaseZlandoPostgreSQL && harborcluster.Spec.Database.Spec.ZlandoPostgreSQL != nil {
+		return harborcluster.Spec.Database.Spec.ZlandoPostgreSQL.StorageClassName
 	}
 
 	return ""
@@ -82,11 +82,11 @@ func (p *PostgreSQLController) GetSecret(ctx context.Context, ns, secretName str
 func (p *PostgreSQLController) GetPostgreResource(harborcluster *goharborv1.HarborCluster) api.Resources {
 	resources := api.Resources{}
 
-	if harborcluster.Spec.InClusterDatabase.PostgresSQLSpec == nil {
+	if harborcluster.Spec.Database.Spec.ZlandoPostgreSQL == nil {
 		return resources
 	}
 
-	spec := harborcluster.Spec.InClusterDatabase.PostgresSQLSpec
+	spec := harborcluster.Spec.Database.Spec.ZlandoPostgreSQL
 
 	resources.ResourceRequests = getResourceDescription(spec.Resources.Requests)
 	resources.ResourceLimits = getResourceDescription(spec.Resources.Limits)
@@ -96,28 +96,28 @@ func (p *PostgreSQLController) GetPostgreResource(harborcluster *goharborv1.Harb
 
 // GetPostgreReplica returns postgres replicas.
 func (p *PostgreSQLController) GetPostgreReplica(harborcluster *goharborv1.HarborCluster) int32 {
-	if harborcluster.Spec.InClusterDatabase.PostgresSQLSpec == nil {
+	if harborcluster.Spec.Database.Spec.ZlandoPostgreSQL == nil {
 		return DefaultDatabaseReplica
 	}
 
-	if harborcluster.Spec.InClusterDatabase.PostgresSQLSpec.Replicas == 0 {
+	if harborcluster.Spec.Database.Spec.ZlandoPostgreSQL.Replicas == 0 {
 		return DefaultDatabaseReplica
 	}
 
-	return int32(harborcluster.Spec.InClusterDatabase.PostgresSQLSpec.Replicas)
+	return int32(harborcluster.Spec.Database.Spec.ZlandoPostgreSQL.Replicas)
 }
 
 // GetPostgreStorageSize returns Postgre storage size.
 func (p *PostgreSQLController) GetPostgreStorageSize(harborcluster *goharborv1.HarborCluster) string {
-	if harborcluster.Spec.InClusterDatabase.PostgresSQLSpec == nil {
+	if harborcluster.Spec.Database.Spec.ZlandoPostgreSQL == nil {
 		return DefaultDatabaseMemory
 	}
 
-	if harborcluster.Spec.InClusterDatabase.PostgresSQLSpec.Storage == "" {
+	if harborcluster.Spec.Database.Spec.ZlandoPostgreSQL.Storage == "" {
 		return DefaultDatabaseMemory
 	}
 
-	return harborcluster.Spec.InClusterDatabase.PostgresSQLSpec.Storage
+	return harborcluster.Spec.Database.Spec.ZlandoPostgreSQL.Storage
 }
 
 func (p *PostgreSQLController) GetPostgreVersion(harborcluster *goharborv1.HarborCluster) (string, error) {

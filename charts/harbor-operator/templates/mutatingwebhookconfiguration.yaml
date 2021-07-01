@@ -29,11 +29,12 @@ webhooks:
   sideEffects: None
 - admissionReviewVersions:
   - v1beta1
+  - v1
   clientConfig:
     service:
       name: {{ include "chart.fullname" . | quote }}
       namespace: {{ .Release.Namespace | quote }}
-      path: /mutate-goharbor-io-v1alpha3-harborcluster
+      path: /mutate-goharbor-io-v1beta1-harborcluster
       port: {{ .Values.service.port }}
   failurePolicy: Fail
   name: mharborcluster.kb.io
@@ -41,7 +42,7 @@ webhooks:
   - apiGroups:
     - goharbor.io
     apiVersions:
-    - v1alpha3
+    - v1beta1
     operations:
     - CREATE
     - UPDATE

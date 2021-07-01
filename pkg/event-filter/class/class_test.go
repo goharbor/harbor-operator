@@ -8,7 +8,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/event"

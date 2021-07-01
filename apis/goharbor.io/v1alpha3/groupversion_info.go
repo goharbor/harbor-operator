@@ -19,6 +19,4 @@ var (
 	AddToScheme = SchemeBuilder.AddToScheme
 )
 
-//go:generate controller-gen crd:crdVersions="v1" output:artifacts:config="../../../config/crd/bases" paths="./..."
-//go:generate controller-gen webhook output:artifacts:config="../../../config/webhook" paths="./..."
 //go:generate controller-gen object paths="./..."

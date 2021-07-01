@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/go-logr/logr"
-	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
 	miniov2 "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/apis/minio.min.io/v2"
 	"github.com/goharbor/harbor-operator/pkg/cluster/k8s"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
@@ -185,7 +185,7 @@ func (m *MinIOController) checkMinIOReady(ctx context.Context, harborcluster *go
 
 	// For different version of minIO have different Status.
 	// Ref https://github.com/minio/operator/commit/d387108ea494cf5cec57628c40d40604ac8d57ec#diff-48972613166d50a2acb9d562e33c5247
-	if minioCR.Status.CurrentState == miniov2.StatusInitialized && minioCR.Status.AvailableReplicas == harborcluster.Spec.InClusterStorage.MinIOSpec.Replicas {
+	if minioCR.Status.CurrentState == miniov2.StatusInitialized && minioCR.Status.AvailableReplicas == harborcluster.Spec.Storage.Spec.MinIO.Replicas {
 		ssName := fmt.Sprintf("%s-%s", m.getServiceName(harborcluster), DefaultZone)
 
 		for _, pool := range minioCR.Status.Pools {
@@ -207,7 +207,7 @@ func (m *MinIOController) getMinIONamespacedName(harborcluster *goharborv1.Harbo
 }
 
 func (m *MinIOController) getMinIOSecretNamespacedName(harborcluster *goharborv1.HarborCluster) types.NamespacedName {
-	secretName := harborcluster.Spec.InClusterStorage.MinIOSpec.SecretRef
+	secretName := harborcluster.Spec.Storage.Spec.MinIO.SecretRef
 	if secretName == "" {
 		secretName = DefaultPrefix + harborcluster.Name + "-" + DefaultCredsSecret
 	}

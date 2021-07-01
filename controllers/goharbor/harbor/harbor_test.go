@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/harbor"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
 	. "github.com/onsi/ginkgo"
@@ -60,7 +60,7 @@ var _ = Describe("Harbor", func() {
 				j, err := r.GetJobService(ctx, h)
 				Expect(err).NotTo(HaveOccurred())
 
-				j.SetGroupVersionKind(schema.FromAPIVersionAndKind("goharbor.io/v1alpha3", "JobService"))
+				j.SetGroupVersionKind(schema.FromAPIVersionAndKind("goharbor.io/v1beta1", "JobService"))
 
 				return j
 			}
@@ -97,7 +97,7 @@ var _ = Describe("Harbor", func() {
 				t, err := r.GetTrivy(ctx, h, false)
 				Expect(err).NotTo(HaveOccurred())
 
-				t.SetGroupVersionKind(schema.FromAPIVersionAndKind("goharbor.io/v1alpha3", "Trivy"))
+				t.SetGroupVersionKind(schema.FromAPIVersionAndKind("goharbor.io/v1beta1", "Trivy"))
 
 				return t
 			}

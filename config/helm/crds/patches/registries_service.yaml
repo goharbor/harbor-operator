@@ -16,5 +16,5 @@ spec:
         caBundle: Cg==
         service:
           namespace: system
-          name: webhook-service
+          name: '{{ include "chart.fullname" . | quote }}'
           path: /convert

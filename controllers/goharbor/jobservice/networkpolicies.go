@@ -3,7 +3,7 @@ package jobservice
 import (
 	"context"
 
-	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 	"github.com/pkg/errors"
 	netv1 "k8s.io/api/networking/v1"

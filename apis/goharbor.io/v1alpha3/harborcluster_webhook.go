@@ -44,22 +44,14 @@ func (hc *HarborCluster) SetupWebhookWithManager(_ context.Context, mgr ctrl.Man
 		Complete()
 }
 
-// +kubebuilder:webhook:path=/mutate-goharbor-io-v1alpha3-harborcluster,mutating=true,failurePolicy=fail,groups=goharbor.io,resources=harborclusters,verbs=create;update,versions=v1alpha3,name=mharborcluster.kb.io,admissionReviewVersions={"v1beta1"},sideEffects=None
-
-var _ webhook.Defaulter = &HarborCluster{}
-
-// Default implements webhook.Defaulter so a webhook will be registered for the type.
-func (hc *HarborCluster) Default() {
-}
-
-// +kubebuilder:webhook:verbs=create;update,path=/validate-goharbor-io-v1alpha3-harborcluster,mutating=false,failurePolicy=fail,groups=goharbor.io,resources=harborclusters,versions=v1alpha3,name=vharborcluster.kb.io,admissionReviewVersions={"v1beta1"},sideEffects=None
+// TODO: needs to be cleaned up.
 
 var _ webhook.Validator = &HarborCluster{}
 
 func (hc *HarborCluster) ValidateCreate() error {
 	clog.Info("validate creation", "name", hc.Name, "namespace", hc.Namespace)
 
-	return hc.validate(nil)
+	return hc.validate(hc)
 }
 
 func (hc *HarborCluster) ValidateUpdate(old runtime.Object) error {
@@ -156,7 +148,7 @@ func (hc *HarborCluster) validateStorage() *field.Error {
 
 func (hc *HarborCluster) validateDatabase() *field.Error {
 	// in cluster database has high priority
-	fp := field.NewPath("spec").Child("database", "inClusterDatabase")
+	fp := field.NewPath("spec").Child("inClusterDatabase")
 
 	// Database
 	// External is not configured

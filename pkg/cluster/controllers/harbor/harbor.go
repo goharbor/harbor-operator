@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/go-logr/logr"
-	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
 	"github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/common"
 	"github.com/goharbor/harbor-operator/pkg/cluster/k8s"
@@ -99,13 +99,10 @@ func NewHarborController(options ...k8s.Option) *Controller {
 }
 
 // getHarborCR will get a Harbor CR from the harborcluster definition.
-func (harbor *Controller) getHarborCR(ctx context.Context, harborcluster *goharborv1.HarborCluster, dependencies *lcm.CRStatusCollection) *goharborv1.Harbor {
+func (harbor *Controller) getHarborCR(ctx context.Context, harborcluster *goharborv1.HarborCluster, dependencies *lcm.CRStatusCollection) *goharborv1.Harbor { // nolint:funlen
 	namespacedName := harbor.getHarborCRNamespacedName(harborcluster)
 
-	var spec goharborv1.HarborSpec
-
-	harborcluster.Spec.HarborSpec.DeepCopyInto(&spec)
-
+	spec := harborcluster.Spec.EmbeddedHarborSpec.DeepCopy()
 	harborCR := &goharborv1.Harbor{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      namespacedName.Name,
@@ -117,7 +114,56 @@ func (harbor *Controller) getHarborCR(ctx context.Context, harborcluster *goharb
 				*metav1.NewControllerRef(harborcluster, goharborv1.HarborClusterGVK),
 			},
 		},
-		Spec: spec,
+		Spec: goharborv1.HarborSpec{
+			ExternalURL: spec.ExternalURL,
+			InternalTLS: goharborv1.HarborInternalTLSSpec{
+				Enabled: spec.InternalTLS.Enabled,
+			},
+			ImageChartStorage:      &goharborv1.HarborStorageImageChartStorageSpec{},
+			LogLevel:               spec.LogLevel,
+			HarborAdminPasswordRef: spec.HarborAdminPasswordRef,
+			UpdateStrategyType:     spec.UpdateStrategyType,
+			Version:                spec.Version,
+			Expose:                 spec.Expose,
+			HarborComponentsSpec: goharborv1.HarborComponentsSpec{
+				Portal:             spec.Portal,
+				Core:               spec.Core,
+				JobService:         spec.JobService,
+				Registry:           spec.Registry,
+				RegistryController: spec.RegistryController,
+				ChartMuseum:        spec.ChartMuseum,
+				Exporter:           spec.Exporter,
+				Trivy:              spec.Trivy,
+				Notary:             spec.Notary,
+			},
+			ImageSource: spec.ImageSource,
+			Proxy:       spec.Proxy,
+		},
+	}
+
+	if harborcluster.Spec.Storage.Spec.FileSystem != nil {
+		harborCR.Spec.ImageChartStorage.FileSystem =
+			harborcluster.Spec.Storage.Spec.FileSystem.HarborStorageImageChartStorageFileSystemSpec.DeepCopy()
+	}
+
+	if harborcluster.Spec.Storage.Spec.S3 != nil {
+		harborCR.Spec.ImageChartStorage.S3 =
+			harborcluster.Spec.Storage.Spec.S3.HarborStorageImageChartStorageS3Spec.DeepCopy()
+	}
+
+	if harborcluster.Spec.Storage.Spec.Swift != nil {
+		harborCR.Spec.ImageChartStorage.Swift =
+			harborcluster.Spec.Storage.Spec.Swift.HarborStorageImageChartStorageSwiftSpec.DeepCopy()
+	}
+
+	if harborcluster.Spec.Database.Spec.PostgreSQL != nil {
+		harborCR.Spec.Database =
+			harborcluster.Spec.Database.Spec.PostgreSQL.HarborDatabaseSpec.DeepCopy()
+	}
+
+	if harborcluster.Spec.Cache.Spec.Redis != nil {
+		harborCR.Spec.Redis =
+			harborcluster.Spec.Cache.Spec.Redis.DeepCopy()
 	}
 
 	// Use incluster spec in first priority.
@@ -135,7 +181,7 @@ func (harbor *Controller) getHarborCR(ctx context.Context, harborcluster *goharb
 	if storage := harbor.getStorageSpec(dependencies); storage != nil {
 		harbor.Log.Info("use incluster storage", "storage", storage.S3.RegionEndpoint)
 		harborCR.Spec.ImageChartStorage = storage
-		harborCR.Spec.ImageChartStorage.Redirect.Disable = !harborcluster.Spec.InClusterStorage.MinIOSpec.Redirect.Enable
+		harborCR.Spec.ImageChartStorage.Redirect.Disable = !harborcluster.Spec.Storage.Spec.MinIO.Redirect.Enable
 	}
 
 	// inject cert to harbor comps

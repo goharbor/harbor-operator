@@ -4,7 +4,7 @@ import (
 	"context"
 	"os"
 
-	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
 	"github.com/goharbor/harbor-operator/pkg/controller"
 	"github.com/goharbor/harbor-operator/pkg/factories/owner"

@@ -1,4 +1,4 @@
-apiVersion: goharbor.io/v1alpha3
+apiVersion: goharbor.io/v1beta1
 kind: Harbor
 metadata:
   name: example
@@ -10,3 +10,6 @@ spec:
     host: 127.0.0.1
     port: 3306
   version: 2.2.1
+  database:
+    hosts:
+      - host: 127.0.0.1

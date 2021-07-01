@@ -91,7 +91,6 @@ func main() {
 
 		return
 	}
-
 	// +kubebuilder:scaffold:builder
 
 	setupLog.Info("starting manager", "version", version, "commit", gitCommit)

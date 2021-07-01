@@ -4,7 +4,7 @@ import (
 	"context"
 	"text/template"
 
-	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
