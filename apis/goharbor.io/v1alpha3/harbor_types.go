@@ -684,8 +684,6 @@ type HarborExposeComponentSpec struct {
 
 	// +kubebuilder:validation:Optional
 	Ingress *HarborExposeIngressSpec `json:"ingress,omitempty"`
-
-	// TODO Add supports to ClusterIP, LoadBalancer and NodePort by deploying the nginx component
 }
 
 type HarborExposeIngressSpec struct {
