@@ -3,7 +3,6 @@ package storage
 import (
 	"context"
 	"fmt"
-	"time"
 
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/common"
@@ -59,8 +58,6 @@ func (m *MinIOController) generateMinIOInitJob(ctx context.Context, harborcluste
 
 	minioEndpoint := fmt.Sprintf("http://%s.%s.svc:%d", m.getTenantsServiceName(harborcluster), harborcluster.Namespace, m.getServicePort())
 
-	ttlSecondsAfterFinished := int32(time.Minute * 5 / time.Second)
-
 	job := &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      m.getMinIONamespacedName(harborcluster).Name,
@@ -73,7 +70,6 @@ func (m *MinIOController) generateMinIOInitJob(ctx context.Context, harborcluste
 			},
 		},
 		Spec: batchv1.JobSpec{
-			TTLSecondsAfterFinished: &ttlSecondsAfterFinished,
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
