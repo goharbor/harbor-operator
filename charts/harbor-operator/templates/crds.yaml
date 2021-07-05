@@ -7749,6 +7749,15 @@ spec:
                           keyid:
                             description: KMS key ID to use for encryption (encrypt must be true, or this parameter is ignored).
                             type: string
+                          multipartcopychunksize:
+                            format: int64
+                            type: integer
+                          multipartcopymaxconcurrency:
+                            format: int64
+                            type: integer
+                          multipartcopythresholdsize:
+                            format: int64
+                            type: integer
                           region:
                             description: The AWS region in which your bucket exists. For the moment, the Go AWS library in use does not use the newer DNS based bucket routing. For a list of regions, see http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html
                             type: string
@@ -10066,6 +10075,15 @@ spec:
                       keyid:
                         description: KMS key ID to use for encryption (encrypt must be true, or this parameter is ignored).
                         type: string
+                      multipartcopychunksize:
+                        format: int64
+                        type: integer
+                      multipartcopymaxconcurrency:
+                        format: int64
+                        type: integer
+                      multipartcopythresholdsize:
+                        format: int64
+                        type: integer
                       region:
                         description: The AWS region in which your bucket exists. For the moment, the Go AWS library in use does not use the newer DNS based bucket routing. For a list of regions, see http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html
                         type: string
@@ -20129,6 +20147,15 @@ spec:
                           keyid:
                             description: KMS key ID to use for encryption (encrypt must be true, or this parameter is ignored).
                             type: string
+                          multipartcopychunksize:
+                            format: int64
+                            type: integer
+                          multipartcopymaxconcurrency:
+                            format: int64
+                            type: integer
+                          multipartcopythresholdsize:
+                            format: int64
+                            type: integer
                           region:
                             description: The AWS region in which your bucket exists. For the moment, the Go AWS library in use does not use the newer DNS based bucket routing. For a list of regions, see http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html
                             type: string

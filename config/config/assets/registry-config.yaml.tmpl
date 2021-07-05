@@ -127,6 +127,15 @@ storage:
     {{- if .Spec.Storage.Driver.S3.RegionEndpoint }}
     regionendpoint: {{ .Spec.Storage.Driver.S3.RegionEndpoint | quote }}
     {{- end }}
+    {{- if .Spec.Storage.Driver.S3.MultipartCopyChunkSize }}
+    multipartcopychunksize: {{ .Spec.Storage.Driver.S3.MultipartCopyChunkSize | quote }}
+    {{- end }}
+    {{- if .Spec.Storage.Driver.S3.MultipartCopyMaxConcurrency }}
+    multipartcopymaxconcurrency: {{ .Spec.Storage.Driver.S3.MultipartCopyMaxConcurrency | quote }}
+    {{- end }}
+    {{- if .Spec.Storage.Driver.S3.MultipartCopyThresholdSize }}
+    multipartcopythresholdsize: {{ .Spec.Storage.Driver.S3.MultipartCopyThresholdSize | quote }}
+    {{- end }}
   {{- end }}
 
   {{- if .Spec.Storage.Driver.Swift }}
