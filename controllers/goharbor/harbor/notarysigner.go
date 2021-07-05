@@ -82,7 +82,7 @@ func (r *Reconciler) GetNotarySignerCertificateAuthority(ctx context.Context, ha
 			Duration: &metav1.Duration{
 				Duration: duration,
 			},
-			CommonName: r.NormalizeName(ctx, harbor.GetName(), controllers.NotarySigner.String()),
+			CommonName: r.NormalizeName(ctx, harbor.GetName(), controllers.NotarySigner.String(), "CA"),
 			IsCA:       true,
 			Usages: []certv1.KeyUsage{
 				certv1.UsageClientAuth,

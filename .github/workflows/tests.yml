@@ -144,7 +144,7 @@ jobs:
         certManager:
         - "1.1.1"
 #        - "1.2.0"
-        - "1.3.1"
+        - "1.4.0"
 
         # https://snapcraft.io/microk8s
         k8sVersion:
@@ -220,6 +220,8 @@ jobs:
           kubectl get all -n ${operatorNamespace}
           exit 1
         fi
+
+        sleep 10
 
     - name: install harbor
       run: |
