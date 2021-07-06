@@ -11,19 +11,20 @@ import (
 type Controller int
 
 const (
-	Core                Controller = iota // core
-	JobService                            // jobservice
-	Portal                                // portal
-	Registry                              // registry
-	RegistryController                    // registryctl
-	ChartMuseum                           // chartmuseum
-	Exporter                              // exporter
-	NotaryServer                          // notaryserver
-	NotarySigner                          // notarysigner
-	Trivy                                 // trivy
-	Harbor                                // harbor
-	HarborCluster                         // harborcluster
-	HarborConfiguration                   // harborconfiguration
+	Core                  Controller = iota // core
+	JobService                              // jobservice
+	Portal                                  // portal
+	Registry                                // registry
+	RegistryController                      // registryctl
+	ChartMuseum                             // chartmuseum
+	Exporter                                // exporter
+	NotaryServer                            // notaryserver
+	NotarySigner                            // notarysigner
+	Trivy                                   // trivy
+	Harbor                                  // harbor
+	HarborCluster                           // harborcluster
+	HarborConfigurationCm                   // harborconfigurationcm
+	HarborConfiguration                     // harborconfiguration
 )
 
 func (c Controller) GetFQDN() string {
