@@ -176,7 +176,7 @@ metadata:
     sample: "true"
   name: sample
 spec:
-  version: 2.2.1
+  version: 2.3.0
   chartmuseum: {}
   core:
     tokenIssuer:

@@ -24,7 +24,7 @@ var _ = Describe("Get image", func() {
 
 	BeforeEach(func() {
 		ctx = logger.Context(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
-		harborVersion = "2.2.1"
+		harborVersion = "2.3.0"
 		getImage = func(ctx context.Context, component string, options ...Option) (string, error) {
 			options = append([]Option{WithHarborVersion(harborVersion)}, options...)
 
@@ -135,11 +135,42 @@ var _ = Describe("Get image", func() {
 		})
 	})
 
+	Describe("Get image without harbor version", func() {
+		It("Should fail", func() {
+			_, err := getImage(ctx, "core", WithHarborVersion(""))
+			Expect(err).To(HaveOccurred())
+		})
+	})
+
 	Describe("Get image for in cluster redis", func() {
 		It("Should pass", func() {
 			image, err := getImage(ctx, "cluster-redis")
 			Expect(err).ToNot(HaveOccurred())
 			Expect(image).To(Equal("redis:5.0-alpine"))
+		})
+	})
+
+	Describe("Get image for in cluster redis with repository", func() {
+		It("Should pass", func() {
+			image, err := getImage(ctx, "cluster-redis", WithRepository("ghcr.io/goharbor"))
+			Expect(err).ToNot(HaveOccurred())
+			Expect(image).To(Equal("ghcr.io/goharbor/redis:5.0-alpine"))
+		})
+	})
+
+	Describe("Get image for in cluster postgresql", func() {
+		It("Should pass", func() {
+			image, err := getImage(ctx, "cluster-postgresql")
+			Expect(err).ToNot(HaveOccurred())
+			Expect(image).To(Equal("registry.opensource.zalan.do/acid/spilo-12:1.6-p3"))
+		})
+	})
+
+	Describe("Get image for in cluster postgresql with repository", func() {
+		It("Should pass", func() {
+			image, err := getImage(ctx, "cluster-postgresql", WithRepository("ghcr.io/goharbor"))
+			Expect(err).ToNot(HaveOccurred())
+			Expect(image).To(Equal("ghcr.io/goharbor/spilo-12:1.6-p3"))
 		})
 	})
 })

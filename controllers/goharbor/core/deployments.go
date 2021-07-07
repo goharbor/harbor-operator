@@ -32,8 +32,7 @@ var (
 	runAsGroup int64 = 10000
 	runAsUser  int64 = 10000
 
-	metricNamespace = "harbor"
-	metricSubsystem = "core"
+	terminationGracePeriodSeconds int64 = 120
 )
 
 const (
@@ -60,6 +59,7 @@ const (
 )
 
 func getDefaultAllowedRegistryTypesForProxyCache() string {
+	// TODO: only enable docker registry in harbor 2.3.x
 	return strings.Join([]string{
 		registry.RegistryTypeDockerHub,
 		registry.RegistryTypeHarbor,
@@ -67,6 +67,7 @@ func getDefaultAllowedRegistryTypesForProxyCache() string {
 		registry.RegistryTypeAwsEcr,
 		registry.RegistryTypeGoogleGcr,
 		registry.RegistryTypeQuay,
+		registry.RegistryTypeDockerRegistry,
 	}, ",")
 }
 
@@ -212,7 +213,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1.Core) (
 		return nil, errors.Wrap(err, "cannot configure environment variables")
 	}
 
-	metricsEnvs, err := r.getMetricsEnvVars(core)
+	metricsEnvs, err := core.Spec.Metrics.GetEnvVars(harbormetav1.CoreComponent.String())
 	if err != nil {
 		return nil, errors.Wrap(err, "get metrics environment variables")
 	}
@@ -489,8 +490,9 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1.Core) (
 					},
 				},
 				Spec: corev1.PodSpec{
-					AutomountServiceAccountToken: &varFalse,
-					Volumes:                      volumes,
+					AutomountServiceAccountToken:  &varFalse,
+					TerminationGracePeriodSeconds: &terminationGracePeriodSeconds,
+					Volumes:                       volumes,
 					SecurityContext: &corev1.PodSecurityContext{
 						FSGroup:    &fsGroup,
 						RunAsGroup: &runAsGroup,
@@ -523,36 +525,4 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1.Core) (
 	core.Spec.ComponentSpec.ApplyToDeployment(deploy)
 
 	return deploy, nil
-}
-
-func (r *Reconciler) getMetricsEnvVars(core *goharborv1.Core) ([]corev1.EnvVar, error) {
-	if !core.Spec.Metrics.IsEnabled() {
-		envs, err := harbor.EnvVars(map[string]harbor.ConfigValue{
-			common.MetricEnable: harbor.Value(strconv.FormatBool(false)),
-		})
-		if err != nil {
-			return nil, err
-		}
-
-		return envs, nil
-	}
-
-	envs, err := harbor.EnvVars(map[string]harbor.ConfigValue{
-		common.MetricEnable: harbor.Value(strconv.FormatBool(core.Spec.Metrics.Enabled)),
-		common.MetricPort:   harbor.Value(fmt.Sprintf("%d", core.Spec.Metrics.Port)),
-		common.MetricPath:   harbor.Value(core.Spec.Metrics.Path),
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	envs = append(envs, []corev1.EnvVar{{
-		Name:  "METRIC_NAMESPACE",
-		Value: metricNamespace,
-	}, {
-		Name:  "METRIC_SUBSYSTEM",
-		Value: metricSubsystem,
-	}}...)
-
-	return envs, nil
 }

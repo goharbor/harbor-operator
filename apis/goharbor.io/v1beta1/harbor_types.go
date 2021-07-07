@@ -392,6 +392,9 @@ type JobServiceComponentSpec struct {
 	// +kubebuilder:validation:Minimum=1
 	// +kubebuilder:default=10
 	WorkerCount int32 `json:"workerCount,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	Metrics *harbormetav1.MetricsSpec `json:"metrics,omitempty"`
 }
 
 type RegistryComponentSpec struct {

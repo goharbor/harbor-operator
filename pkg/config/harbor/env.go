@@ -3,7 +3,7 @@ package harbor
 import (
 	"sync"
 
-	"github.com/goharbor/harbor/src/common/config/metadata"
+	"github.com/goharbor/harbor/src/lib/config/metadata"
 	corev1 "k8s.io/api/core/v1"
 )
 

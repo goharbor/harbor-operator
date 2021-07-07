@@ -2,6 +2,7 @@ package exporter
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 	"path"
 	"strconv"
@@ -11,13 +12,16 @@ import (
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers"
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
+	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	"github.com/goharbor/harbor-operator/pkg/image"
 	"github.com/goharbor/harbor-operator/pkg/version"
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	apierrs "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const (
@@ -37,6 +41,10 @@ var (
 
 	metricNamespace = "harbor"
 	metricSubsytem  = "exporter"
+
+	jobserivceRedisPasswordKey = "redis-password"
+	jobserivceRedisTimeout     = 3600
+	jobserviceRedisNamespace   = "harbor_job_service_namespace"
 )
 
 func (r *Reconciler) GetDeployment(ctx context.Context, exporter *goharborv1.Exporter) (*appsv1.Deployment, error) { // nolint:funlen
@@ -67,6 +75,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, exporter *goharborv1.Exp
 	dbHost := exporter.Spec.Database.Hosts[0]
 
 	envs := []corev1.EnvVar{
+		{Name: "LOG_LEVEL", Value: exporter.Spec.Log.Level.String()},
 		{Name: "HARBOR_EXPORTER_PORT", Value: strconv.Itoa(int(exporter.Spec.Port))},
 		{Name: "HARBOR_EXPORTER_METRICS_PATH", Value: exporter.Spec.Path},
 		{Name: "HARBOR_EXPORTER_METRICS_ENABLED", Value: "true"},
@@ -103,6 +112,29 @@ func (r *Reconciler) GetDeployment(ctx context.Context, exporter *goharborv1.Exp
 			Name:  "HARBOR_DATABASE_MAX_OPEN_CONNS",
 			Value: strconv.Itoa(int(*exporter.Spec.Database.MaxOpenConnections)),
 		})
+	}
+
+	if exporter.Spec.JobService.Redis != nil {
+		redisURL, err := r.getJobServiceRedisURL(ctx, exporter)
+		if err != nil {
+			return nil, errors.Wrap(err, "get redis url of jobservice")
+		}
+
+		redisNamespace := jobserviceRedisNamespace
+		if exporter.Spec.JobService.Redis.Namespace != "" {
+			redisNamespace = exporter.Spec.JobService.Redis.Namespace
+		}
+
+		redisTimeout := jobserivceRedisTimeout
+		if exporter.Spec.JobService.Redis.IdleTimeout != nil {
+			redisTimeout = int(exporter.Spec.JobService.Redis.IdleTimeout.Seconds())
+		}
+
+		envs = append(envs, []corev1.EnvVar{
+			{Name: "HARBOR_REDIS_URL", Value: redisURL},
+			{Name: "HARBOR_REDIS_NAMESPACE", Value: redisNamespace},
+			{Name: "HARBOR_REDIS_TIMEOUT", Value: fmt.Sprintf("%d", redisTimeout)},
+		}...)
 	}
 
 	volumes := []corev1.Volume{}
@@ -184,7 +216,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, exporter *goharborv1.Exp
 						Image: image,
 						Args: []string{
 							"-log-level",
-							string(exporter.Spec.Log.Level),
+							exporter.Spec.Log.Level.String(),
 						},
 						Ports: []corev1.ContainerPort{{
 							Name:          harbormetav1.ExporterMetricsPortName,
@@ -215,6 +247,50 @@ func (r *Reconciler) GetDeployment(ctx context.Context, exporter *goharborv1.Exp
 	exporter.Spec.ComponentSpec.ApplyToDeployment(deploy)
 
 	return deploy, nil
+}
+
+func (r *Reconciler) getJobServiceRedisURL(ctx context.Context, exporter *goharborv1.Exporter) (string, error) {
+	if exporter.Spec.JobService.Redis == nil {
+		return "", nil
+	}
+
+	var redisPassword string
+
+	if exporter.Spec.JobService.Redis.PasswordRef != "" {
+		var err error
+
+		redisPassword, err = r.getValueFromSecret(ctx, exporter.GetNamespace(), exporter.Spec.JobService.Redis.PasswordRef, jobserivceRedisPasswordKey)
+		if err != nil {
+			return "", errors.Wrap(err, "get redis password of jobservice")
+		}
+
+		if redisPassword == "" {
+			logger.Get(ctx).Info("redis password secret of jobservice not found", "secret", exporter.Spec.JobService.Redis.PasswordRef)
+		}
+	}
+
+	return exporter.Spec.JobService.Redis.GetDSNStringWithRawPassword(redisPassword), nil
+}
+
+func (r *Reconciler) getValueFromSecret(ctx context.Context, namespace, name, key string) (string, error) {
+	var secret corev1.Secret
+
+	err := r.Client.Get(ctx, client.ObjectKey{Namespace: namespace, Name: name}, &secret)
+	if err != nil {
+		if apierrs.IsNotFound(err) {
+			return "", nil
+		}
+
+		return "", err
+	}
+
+	for k, d := range secret.Data {
+		if k == key {
+			return string(d), nil
+		}
+	}
+
+	return "", nil
 }
 
 func parseServiceInfo(coreURL string) (scheme string, host string, port string, err error) {

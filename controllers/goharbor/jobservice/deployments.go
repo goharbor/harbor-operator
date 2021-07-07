@@ -38,6 +38,8 @@ var (
 	fsGroup    int64 = 10000
 	runAsGroup int64 = 10000
 	runAsUser  int64 = 10000
+
+	terminationGracePeriodSeconds int64 = 120
 )
 
 const (
@@ -69,6 +71,13 @@ func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1.J
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot configure environment variables")
 	}
+
+	metricsEnvs, err := jobservice.Spec.Metrics.GetEnvVars(harbormetav1.JobServiceComponent.String())
+	if err != nil {
+		return nil, errors.Wrap(err, "get metrics environment variables")
+	}
+
+	envs = append(envs, metricsEnvs...)
 
 	envs = append(envs, jobservice.Spec.Proxy.GetEnvVars()...)
 
@@ -232,14 +241,31 @@ func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1.J
 		})
 	}
 
-	port := harbormetav1.JobServiceHTTPPortName
+	port := httpPort
+	portName := harbormetav1.JobServiceHTTPPortName
+
 	if jobservice.Spec.TLS.Enabled() {
-		port = harbormetav1.JobServiceHTTPSPortName
+		port = httpsPort
+		portName = harbormetav1.JobServiceHTTPSPortName
+	}
+
+	containerPorts := []corev1.ContainerPort{{
+		Name:          portName,
+		ContainerPort: int32(port),
+		Protocol:      corev1.ProtocolTCP,
+	}}
+
+	if jobservice.Spec.Metrics.IsEnabled() {
+		containerPorts = append(containerPorts, corev1.ContainerPort{
+			Name:          harbormetav1.JobServiceMetricsPortName,
+			ContainerPort: jobservice.Spec.Metrics.Port,
+			Protocol:      corev1.ProtocolTCP,
+		})
 	}
 
 	httpGET := &corev1.HTTPGetAction{
 		Path:   HealthPath,
-		Port:   intstr.FromString(port),
+		Port:   intstr.FromString(portName),
 		Scheme: jobservice.Spec.TLS.GetScheme(),
 	}
 
@@ -265,8 +291,9 @@ func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1.J
 					},
 				},
 				Spec: corev1.PodSpec{
-					AutomountServiceAccountToken: &varFalse,
-					Volumes:                      volumes,
+					AutomountServiceAccountToken:  &varFalse,
+					TerminationGracePeriodSeconds: &terminationGracePeriodSeconds,
+					Volumes:                       volumes,
 					SecurityContext: &corev1.PodSecurityContext{
 						FSGroup:    &fsGroup,
 						RunAsGroup: &runAsGroup,
@@ -275,15 +302,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1.J
 					Containers: []corev1.Container{{
 						Name:  controllers.JobService.String(),
 						Image: image,
-						Ports: []corev1.ContainerPort{{
-							Name:          harbormetav1.JobServiceHTTPPortName,
-							ContainerPort: httpPort,
-							Protocol:      corev1.ProtocolTCP,
-						}, {
-							Name:          harbormetav1.JobServiceHTTPSPortName,
-							ContainerPort: httpsPort,
-							Protocol:      corev1.ProtocolTCP,
-						}},
+						Ports: containerPorts,
 
 						// https://github.com/goharbor/harbor/blob/master/make/photon/prepare/templates/jobservice/env.jinja
 						Env: envs,
