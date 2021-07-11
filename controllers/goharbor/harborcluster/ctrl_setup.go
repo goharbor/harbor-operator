@@ -23,7 +23,6 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 )
 
@@ -36,17 +35,15 @@ const (
 // TODO: Refactor to inherit the common reconciler in future
 // Reconciler reconciles a HarborCluster object.
 type Reconciler struct {
-	client.Client
 	Scheme *runtime.Scheme
 
 	// In case
 	Name string
 
-	CacheCtrl    lcm.Controller
-	DatabaseCtrl lcm.Controller
-	StorageCtrl  lcm.Controller
-	HarborCtrl   *harbor.Controller
-
+	CacheCtrl              lcm.Controller
+	DatabaseCtrl           lcm.Controller
+	StorageCtrl            lcm.Controller
+	HarborCtrl             *harbor.Controller
 	*commonCtrl.Controller // TODO: move the Reconcile to pkg/controller.Controller
 }
 
@@ -64,10 +61,6 @@ type Reconciler struct {
 // +kubebuilder:rbac:groups="",resources=persistentvolumeclaims,verbs=get;list;watch;create;update;patch;delete
 
 func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) error {
-	if err := r.SetupWithManager(ctx, mgr); err != nil {
-		return err
-	}
-
 	concurrentReconcile, err := config.GetInt(r.ConfigStore, config.ReconciliationKey, config.DefaultConcurrentReconcile)
 	if err != nil {
 		return errors.Wrap(err, "cannot get concurrent reconcile")

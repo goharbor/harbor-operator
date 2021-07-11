@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
-	"github.com/goharbor/harbor-operator/controllers"
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
+	"github.com/goharbor/harbor-operator/controllers"
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
 	"github.com/goharbor/harbor-operator/pkg/harbor"
 	"github.com/goharbor/harbor-operator/pkg/utils/strings"
@@ -20,7 +20,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/yaml"
@@ -48,7 +47,6 @@ const (
 // Reconciler reconciles a configuration configmap.
 type Reconciler struct {
 	*commonCtrl.Controller
-	client.Client
 	Log    logr.Logger
 	Scheme *runtime.Scheme
 }
