@@ -3,7 +3,6 @@ package trivy
 import (
 	"context"
 	"fmt"
-	"net/url"
 	"path"
 	"strings"
 
@@ -248,35 +247,18 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1.Trivy)
 	return deploy, nil
 }
 
-func (r *Reconciler) getProbe(ctx context.Context, trivy *goharborv1.Trivy, probePath string) *corev1.Probe {
+func (r *Reconciler) getProbe(_ context.Context, trivy *goharborv1.Trivy, probePath string) *corev1.Probe {
+	port := httpPort
 	if trivy.Spec.Server.TLS.Enabled() {
-		hostname := r.NormalizeName(ctx, trivy.GetName())
-
-		return &corev1.Probe{
-			Handler: corev1.Handler{
-				Exec: &corev1.ExecAction{
-					Command: []string{
-						"curl", "-sSL",
-						"--resolve", fmt.Sprintf("%s:%d:%s", hostname, httpsPort, "127.0.0.1"),
-						"--cacert", path.Join(InternalCertificatesPath, corev1.ServiceAccountRootCAKey),
-						"--key", path.Join(InternalCertificatesPath, corev1.TLSPrivateKeyKey),
-						"--cert", path.Join(InternalCertificatesPath, corev1.TLSCertKey),
-						(&url.URL{
-							Scheme: "https",
-							Host:   fmt.Sprintf("%s:%d", hostname, httpsPort),
-							Path:   probePath,
-						}).String(),
-					},
-				},
-			},
-		}
+		port = httpsPort
 	}
 
 	return &corev1.Probe{
 		Handler: corev1.Handler{
 			HTTPGet: &corev1.HTTPGetAction{
-				Path: probePath,
-				Port: intstr.FromInt(httpPort),
+				Path:   probePath,
+				Port:   intstr.FromInt(port),
+				Scheme: trivy.Spec.Server.TLS.GetScheme(),
 			},
 		},
 	}

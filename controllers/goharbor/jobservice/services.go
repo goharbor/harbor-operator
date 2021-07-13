@@ -32,10 +32,20 @@ func (r *Reconciler) GetService(ctx context.Context, jobservice *goharborv1.JobS
 		})
 	}
 
+	if jobservice.Spec.Metrics.IsEnabled() {
+		ports = append(ports, corev1.ServicePort{
+			Name:       harbormetav1.JobServiceMetricsPortName,
+			Port:       jobservice.Spec.Metrics.Port,
+			TargetPort: intstr.FromString(harbormetav1.JobServiceMetricsPortName),
+			Protocol:   corev1.ProtocolTCP,
+		})
+	}
+
 	return &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
+			Name:        name,
+			Namespace:   namespace,
+			Annotations: jobservice.Spec.Metrics.AddPrometheusAnnotations(nil),
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: ports,

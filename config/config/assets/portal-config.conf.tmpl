@@ -15,6 +15,7 @@ http {
     server {
 {{- if .Spec.TLS.Enabled }}
         listen 8443 ssl;
+        listen [::]:8443 ssl;
         # SSL
         ssl_certificate /etc/portal/ssl/tls.crt;
         ssl_certificate_key /etc/portal/ssl/tls.key;
@@ -26,6 +27,7 @@ http {
         ssl_session_cache shared:SSL:10m;
 {{- else }}
         listen 8080;
+        listen [::]:8080;
 {{- end }}
         server_name  localhost;
 

@@ -48,6 +48,15 @@ job_loggers:
       work_dir: /mnt/joblogs/{{ $i }}
 {{- end }}
 
+metric:
+{{- if .Spec.Metrics }}
+  enabled: {{ .Spec.Metrics.Enabled }}
+  path: {{ .Spec.Metrics.Path | quote }}
+  port: {{ .Spec.Metrics.Port }}
+{{- else }}
+  enabled: false
+{{- end }}
+
 loggers:
 {{- if .Spec.Loggers.Database }}
 - name: DB

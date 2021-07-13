@@ -4129,6 +4129,50 @@ spec:
                       type: string
                   type: object
                 type: array
+              jobservice:
+                properties:
+                  redisPool:
+                    description: RedisPoolConfig keeps redis worker info.
+                    properties:
+                      certificateRef:
+                        description: Secret containing the client certificate to authenticate with.
+                        pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                        type: string
+                      database:
+                        default: 0
+                        description: The database number.
+                        format: int32
+                        maximum: 8
+                        minimum: 0
+                        type: integer
+                      host:
+                        description: Server hostname.
+                        minLength: 1
+                        type: string
+                      idleTimeout:
+                        default: 30s
+                        description: IdleTimeoutSecond closes connections after remaining idle for this duration. If the value is zero, then idle connections are not closed. Applications should set the timeout to a value less than the server's timeout.
+                        pattern: ([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?
+                        type: string
+                      namespace:
+                        type: string
+                      passwordRef:
+                        description: Secret containing the password to use when connecting to the server.
+                        pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                        type: string
+                      port:
+                        description: Server port.
+                        exclusiveMinimum: true
+                        format: int32
+                        minimum: 0
+                        type: integer
+                      sentinelMasterSet:
+                        description: for Sentinel MasterSet.
+                        type: string
+                    required:
+                    - host
+                    type: object
+                type: object
               log:
                 properties:
                   level:
@@ -4218,6 +4262,7 @@ spec:
             required:
             - core
             - database
+            - jobservice
             type: object
           status:
             description: ComponentStatus represents the current status of the resource. https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md#typical-status-properties
@@ -6896,6 +6941,23 @@ spec:
                           type: string
                       type: object
                     type: array
+                  metrics:
+                    properties:
+                      enabled:
+                        default: false
+                        type: boolean
+                      path:
+                        default: /metrics
+                        description: The path of the metrics.
+                        pattern: /.+
+                        type: string
+                      port:
+                        default: 8001
+                        description: The port of the metrics.
+                        format: int32
+                        minimum: 1
+                        type: integer
+                    type: object
                   nodeSelector:
                     additionalProperties:
                       type: string
@@ -7768,6 +7830,15 @@ spec:
                           keyid:
                             description: KMS key ID to use for encryption (encrypt must be true, or this parameter is ignored).
                             type: string
+                          multipartcopychunksize:
+                            format: int64
+                            type: integer
+                          multipartcopymaxconcurrency:
+                            format: int64
+                            type: integer
+                          multipartcopythresholdsize:
+                            format: int64
+                            type: integer
                           region:
                             description: The AWS region in which your bucket exists. For the moment, the Go AWS library in use does not use the newer DNS based bucket routing. For a list of regions, see http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html
                             type: string
@@ -10088,6 +10159,15 @@ spec:
                       keyid:
                         description: KMS key ID to use for encryption (encrypt must be true, or this parameter is ignored).
                         type: string
+                      multipartcopychunksize:
+                        format: int64
+                        type: integer
+                      multipartcopymaxconcurrency:
+                        format: int64
+                        type: integer
+                      multipartcopythresholdsize:
+                        format: int64
+                        type: integer
                       region:
                         description: The AWS region in which your bucket exists. For the moment, the Go AWS library in use does not use the newer DNS based bucket routing. For a list of regions, see http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html
                         type: string
@@ -10245,6 +10325,23 @@ spec:
                           type: string
                       type: object
                     type: array
+                  metrics:
+                    properties:
+                      enabled:
+                        default: false
+                        type: boolean
+                      path:
+                        default: /metrics
+                        description: The path of the metrics.
+                        pattern: /.+
+                        type: string
+                      port:
+                        default: 8001
+                        description: The port of the metrics.
+                        format: int32
+                        minimum: 1
+                        type: integer
+                    type: object
                   nodeSelector:
                     additionalProperties:
                       type: string
@@ -15206,6 +15303,23 @@ spec:
                         type: string
                     type: object
                 type: object
+              metrics:
+                properties:
+                  enabled:
+                    default: false
+                    type: boolean
+                  path:
+                    default: /metrics
+                    description: The path of the metrics.
+                    pattern: /.+
+                    type: string
+                  port:
+                    default: 8001
+                    description: The port of the metrics.
+                    format: int32
+                    minimum: 1
+                    type: integer
+                type: object
               nodeSelector:
                 additionalProperties:
                   type: string
@@ -20166,6 +20280,15 @@ spec:
                           keyid:
                             description: KMS key ID to use for encryption (encrypt must be true, or this parameter is ignored).
                             type: string
+                          multipartcopychunksize:
+                            format: int64
+                            type: integer
+                          multipartcopymaxconcurrency:
+                            format: int64
+                            type: integer
+                          multipartcopythresholdsize:
+                            format: int64
+                            type: integer
                           region:
                             description: The AWS region in which your bucket exists. For the moment, the Go AWS library in use does not use the newer DNS based bucket routing. For a list of regions, see http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html
                             type: string
@@ -25959,6 +26082,15 @@ data:
           work_dir: /mnt/joblogs/{{ $i }}
     {{- end }}
 
+    metric:
+    {{- if .Spec.Metrics }}
+      enabled: {{ .Spec.Metrics.Enabled }}
+      path: {{ .Spec.Metrics.Path | quote }}
+      port: {{ .Spec.Metrics.Port }}
+    {{- else }}
+      enabled: false
+    {{- end }}
+
     loggers:
     {{- if .Spec.Loggers.Database }}
     - name: DB
@@ -26083,6 +26215,7 @@ data:
         server {
     {{- if .Spec.TLS.Enabled }}
             listen 8443 ssl;
+            listen [::]:8443 ssl;
             # SSL
             ssl_certificate /etc/portal/ssl/tls.crt;
             ssl_certificate_key /etc/portal/ssl/tls.key;
@@ -26094,6 +26227,7 @@ data:
             ssl_session_cache shared:SSL:10m;
     {{- else }}
             listen 8080;
+            listen [::]:8080;
     {{- end }}
             server_name  localhost;
 
@@ -26116,7 +26250,7 @@ data:
             }
         }
     }
-  registry-config.yaml.tmpl: "# https://docs.docker.com/registry/configuration/\nversion: 0.1\nlog:\n  accesslog:\n    disabled: {{ .Spec.Log.AccessLog.Disabled }}\n  level: {{ .Spec.Log.Level | quote }}\n  formatter: {{ .Spec.Log.Formatter | quote }}\n  {{- if .Spec.Log.Fields }}\n  fields: {{ .Spec.Log.Fields | toJson }}\n  {{- end }}\n  {{- if .Spec.Log.Hooks }}\n  hooks:\n    {{- range $index, $element := .Spec.Log.Hooks }}\n    - type: {{ $element.Type | quote }}\n      disabled: {{ $element.Disabled }}\n      {{- if $element.Levels }}\n      levels: {{ $element.Levels | toJson }}\n      {{- end }}\n      {{- if $element.OptionsRef }}\n      {{- with ( secretData $element.OptionsRef) }}\n      {{- if . }}\n      options: {{ toJson . }}\n      {{- end }}\n      {{- end }}\n      {{- end }}\n    {{- end }}\n  {{- end }}\nhttp:\n  # secret: setted through environment variable\n  {{- if .Spec.HTTP.Debug }}\n  debug:\n    addr: :{{ .Spec.HTTP.Debug.Port }}\n    prometheus:\n      enabled: {{ .Spec.HTTP.Debug.Prometheus.Enabled }}\n      path: {{ .Spec.HTTP.Debug.Prometheus.Path | quote }}\n  {{- end }}\n  net: {{ .Spec.HTTP.Net | quote }}\n  addr: :5000\n  {{- if .Spec.HTTP.Prefix }}\n  prefix: {{ .Spec.HTTP.Prefix | quote }}\n  {{- end }}\n  {{- if .Spec.HTTP.Headers }}\n  headers: {{ .Spec.HTTP.Headers | toJson }}\n  {{- end }}\n  http2:\n    disabled: {{ .Spec.HTTP.HTTP2.Disabled }}\n  host: {{ .Spec.HTTP.Host | quote }}\n  relativeurls: {{ .Spec.HTTP.RelativeURLs }}\n  {{- if .Spec.HTTP.DrainTimeout }}\n  draintimeout: {{ .Spec.HTTP.DrainTimeout.Duration }}\n  {{- end }}\n  {{- if .Spec.HTTP.TLS.Enabled }}\n  tls:\n    certificate: /etc/registry/ssl/tls.crt\n    key: /etc/registry/ssl/tls.key\n  {{- end }}\n{{- if .Spec.Reporting }}\nreporting:\n  {{- range $name, $reference := .Spec.Reporting }}\n  {{ $name | quote }}: {{ secretData $reference | toJson }}\n  {{- end }}\n{{- end }}\nstorage:\n  {{- if .Spec.Storage.Delete.Enabled }}\n  delete:\n    {{- if .Spec.Storage.Delete.Enabled }}\n    enabled: {{ .Spec.Storage.Delete.Enabled }}\n    {{- end }}\n  {{- end }}\n  cache:\n    blobdescriptor: {{ default \"inmemory\" .Spec.Storage.Cache.Blobdescriptor | quote }}\n  maintenance:\n    uploadPurging:\n      enabled: {{ .Spec.Storage.Maintenance.UploadPurging.Enabled }}\n      {{- if .Spec.Storage.Maintenance.UploadPurging.Age }}\n      age: {{ .Spec.Storage.Maintenance.UploadPurging.Age.Duration }}\n      {{- end }}\n      {{- if .Spec.Storage.Maintenance.UploadPurging.Interval }}\n      interval: {{ .Spec.Storage.Maintenance.UploadPurging.Interval.Duration }}\n      {{- end }}\n      dryRun: {{ .Spec.Storage.Maintenance.UploadPurging.DryRun }}\n    readOnly:\n      enabled: {{ .Spec.Storage.Maintenance.ReadOnly.Enabled }}\n  redirect: \n    disable: {{ .Spec.Storage.Redirect.Disable }}\n\n  {{- if .Spec.Storage.Driver.InMemory }}\n  inmemory: {}\n  {{- end }}\n\n  {{- if .Spec.Storage.Driver.FileSystem }}\n  filesystem:\n    rootdirectory: /var/lib/registry\n    maxthreads: {{ .Spec.Storage.Driver.FileSystem.MaxThreads }}\n  {{- end }}\n\n  {{- if .Spec.Storage.Driver.S3 }}\n  s3:\n    region: {{ .Spec.Storage.Driver.S3.Region | quote }}\n    bucket: {{ .Spec.Storage.Driver.S3.Bucket | quote }}\n    encrypt: {{ .Spec.Storage.Driver.S3.Encrypt }}\n    skipverify: {{ .Spec.Storage.Driver.S3.SkipVerify }}\n    {{- if .Spec.Storage.Driver.S3.KeyID }}\n    keyid: {{ .Spec.Storage.Driver.S3.KeyID | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.S3.Secure }}\n    secure: {{ .Spec.Storage.Driver.S3.Secure }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.S3.V4Auth }}\n    v4auth: {{ .Spec.Storage.Driver.S3.V4Auth }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.S3.ChunkSize }}\n    chunksize: {{ .Spec.Storage.Driver.S3.ChunkSize }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.S3.StorageClass }}\n    storageclass: {{ .Spec.Storage.Driver.S3.StorageClass | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.S3.RootDirectory }}\n    rootdirectory: {{ .Spec.Storage.Driver.S3.RootDirectory | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.S3.AccessKey }}\n    accesskey: {{ .Spec.Storage.Driver.S3.AccessKey | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.S3.SecretKeyRef }}\n    # secretkey: setted through environment variable\n    {{- end }}\n    {{- if .Spec.Storage.Driver.S3.RegionEndpoint }}\n    regionendpoint: {{ .Spec.Storage.Driver.S3.RegionEndpoint | quote }}\n    {{- end }}\n  {{- end }}\n\n  {{- if .Spec.Storage.Driver.Swift }}\n  swift:\n    username: {{ .Spec.Storage.Driver.Swift.Username | quote }}\n    # password: setted through environment variable\n    authurl: {{ .Spec.Storage.Driver.Swift.AuthURL | quote }}\n    container: {{ .Spec.Storage.Driver.Swift.Container | quote }}\n    insecureskipverify: {{ .Spec.Storage.Driver.Swift.InsecureSkipVerify }}\n    {{- if .Spec.Storage.Driver.Swift.Prefix }}\n    prefix: {{ .Spec.Storage.Driver.Swift.Prefix | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.EndpointType }}\n    endpointtype: {{ .Spec.Storage.Driver.Swift.EndpointType | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.ChunkSize }}\n    chunksize: {{ .Spec.Storage.Driver.Swift.ChunkSize }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.AccessKey }}\n    accesskey: {{ .Spec.Storage.Driver.Swift.AccessKey | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.SecretKeyRef }}\n    # secretkey: setted through environment variable\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.AuthVersion }}\n    authversion: {{ .Spec.Storage.Driver.Swift.AuthVersion | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.Tenant }}\n    tenantid: {{ .Spec.Storage.Driver.Swift.Tenant | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.TenantID }}\n    tenantid: {{ .Spec.Storage.Driver.Swift.TenantID | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.Domain }}\n    domain: {{ .Spec.Storage.Driver.Swift.Domain | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.DomainID }}\n    domainid: {{ .Spec.Storage.Driver.Swift.DomainID | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.TrustID }}\n    trustid: {{ .Spec.Storage.Driver.Swift.TrustID | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.Region }}\n    region: {{ .Spec.Storage.Driver.Swift.Region | quote }}\n    {{- end }}\n  {{- end }}\n\n{{- if ( or .Spec.Middlewares.Registry ( or .Spec.Middlewares.Repository .Spec.Middlewares.Storage ) ) }}\nmiddleware:\n  {{- if .Spec.Middlewares.Registry }}\n  registry:\n    {{- range $index, $middleware := .Spec.Middlewares.Registry }}\n    - name: {{ $middleware.Name | quote }}\n      {{- if $middleware.OptionsRef }}\n      options: {{ secretData $middleware.OptionsRef | toJson }}\n      {{- end }}\n    {{- end }}\n  {{- end }}\n  {{- if .Spec.Middlewares.Repository }}\n  registry:\n    {{- range $index, $middleware := .Spec.Middlewares.Repository }}\n    - name: {{ $middleware.Name | quote }}\n      {{- if $middleware.OptionsRef }}\n      options: {{ secretData $middleware.OptionsRef | toJson }}\n      {{- end }}\n    {{- end }}\n  {{- end }}\n  {{- if .Spec.Middlewares.Storage }}\n  registry:\n    {{- range $index, $middleware := .Spec.Middlewares.Storage }}\n    - name: {{ $middleware.Name | quote }}\n      {{- if $middleware.OptionsRef }}\n      options: {{ secretData $middleware.OptionsRef | toJson }}\n      {{- end }}\n    {{- end }}\n  {{- end }}\n{{- end }}\n{{- if .Spec.Redis }}\nredis:\n  {{- if .Spec.Redis.SentinelMasterSet }}\n  sentinelMasterSet: {{ .Spec.Redis.SentinelMasterSet | quote }}\n  {{- end }}\n  {{- if .Spec.Redis.Port }}\n  addr: {{ printf \"%s:%d\" .Spec.Redis.Host .Spec.Redis.Port | quote }}\n  {{- else }}\n  addr: {{ .Spec.Redis.Host | quote }}\n  {{- end }}\n  # password: setted through environment variable\n  db: {{ .Spec.Redis.Database }}\n  {{- if .Spec.Redis.DialTimeout }}\n  dialtimeout: {{ .Spec.Redis.DialTimeout.Duration }}\n  {{- end }}\n  {{- if .Spec.Redis.ReadTimeout }}\n  readtimeout: {{ .Spec.Redis.ReadTimeout.Duration }}\n  {{- end }}\n  {{- if .Spec.Redis.WriteTimeout }}\n  writetimeout: {{ .Spec.Redis.WriteTimeout.Duration }}\n  {{- end }}\n  {{- if ( or .Spec.Redis.Pool.MaxIdle ( or .Spec.Redis.Pool.MaxActive .Spec.Redis.Pool.IdleTimeout ) ) }}\n  pool:\n    {{- if .Spec.Redis.Pool.MaxIdle }}\n    maxidle: {{ .Spec.Redis.Pool.MaxIdle }}\n    {{- end }}\n    {{- if .Spec.Redis.Pool.MaxActive }}\n    maxactive: {{ .Spec.Redis.Pool.MaxActive }}\n    {{- end }}\n    {{- if .Spec.Redis.Pool.IdleTimeout }}\n    idletimeout: {{ .Spec.Redis.Pool.IdleTimeout.Duration }}\n    {{- end }}\n  {{- end }}\n{{- end }}\ncompatibility:\n  schema1:\n    # signingkeyfile: setted through environment variable\n    enabled: {{ .Spec.Compatibility.Schema1.Enabled }}\nvalidation:\n  disabled: {{ .Spec.Validation.Disabled }}\n  {{- if or .Spec.Validation.Manifests.URLs.Allow .Spec.Validation.Manifests.URLs.Deny }}\n  manifests:\n    urls:\n      {{- if .Spec.Validation.Manifests.URLs.Allow }}\n      allow: {{ .Spec.Validation.Manifests.URLs.Allow | toJson }}\n      {{- end }}\n      {{- if .Spec.Validation.Manifests.URLs.Deny }}\n      deny: {{ .Spec.Validation.Manifests.URLs.Deny | toJson }}\n      {{- end }}\n  {{- end }}\n{{- if ( or .Spec.Authentication.Silly ( or .Spec.Authentication.Token .Spec.Authentication.HTPasswd ) ) }}\nauth:\n  {{- if .Spec.Authentication.Silly }}\n  silly:\n    realm: {{ .Spec.Authentication.Silly.Realm | quote }}\n    service: {{ .Spec.Authentication.Silly.Service | quote }}\n  {{- end }}\n  {{- if .Spec.Authentication.Token }}\n  token:\n    realm: {{ .Spec.Authentication.Token.Realm | quote }}\n    service: {{ .Spec.Authentication.Token.Service | quote }}\n    issuer: registry-token-issuer\n    rootcertbundle: /root/certs/bundle\n    autoredirect: {{ .Spec.Authentication.Token.AutoRedirect }}\n  {{- end }}\n  {{- if .Spec.Authentication.HTPasswd }}\n  htpasswd:\n    realm: {{ .Spec.Authentication.HTPasswd.Realm | quote }}\n    # path: setted through environment variable\n  {{- end }}\n{{- end }}\nnotifications:\n  {{- if .Spec.Notifications.Endpoints }}\n  endpoints:\n    {{- range $_, $endpoint := .Spec.Notifications.Endpoints }}\n    - name: {{ $endpoint.Name | quote }}\n      disabled: {{ $endpoint.Disabled }}\n      url: {{ $endpoint.URL | quote }}\n      {{- if $endpoint.Headers }}\n      headers: {{ $endpoint.Headers | toJson }}\n      {{- end }}\n      {{- if $endpoint.Timeout }}\n      timeout: {{ $endpoint.Timeout.Duration }}\n      {{- end }}\n      {{- if $endpoint.Threshold }}\n      threshold: {{ $endpoint.Threshold }}\n      {{- end }}\n      {{- if $endpoint.Backoff }}\n      backoff: {{ $endpoint.Backoff }}\n      {{- end }}\n      {{- if $endpoint.IgnoredMediaTypes }}\n      ignoredmediatypes: {{ $endpoint.IgnoredMediaTypes | toJson }}\n      {{- end }}\n      {{- if ( or $endpoint.Ignore.MediaTypes $endpoint.Ignore.Actions ) }}\n      ignore:\n        {{- if $endpoint.Ignore.MediaTypes }}\n        mediatypes: {{ $endpoint.Ignore.MediaTypes | toJson }}\n        {{- end }}\n        {{- if $endpoint.Ignore.Actions }}\n        actions: {{ $endpoint.Ignore.Actions | toJson }}\n        {{- end }}\n      {{- end }}\n    {{- end }}\n  {{- end }}\n  events:\n    includereferences: {{ default true .Spec.Notifications.Events.IncludeReferences }}\n\nhealth:\n  storagedriver:\n    enabled: {{ default true .Spec.Health.StorageDriver.Enabled }}\n    {{- if .Spec.Health.StorageDriver.Interval }}\n    interval: {{ .Spec.Health.StorageDriver.Interval.Duration }}\n    {{- end }}\n    {{- if .Spec.Health.StorageDriver.Threshold }}\n    threshold: {{ .Spec.Health.StorageDriver.Threshold }}\n    {{- end }}\n\n  {{- if .Spec.Health.File }}\n  file:\n    {{- range $_, $health := .Spec.Health.File }}\n    - file: {{ $health.File | quote }}\n      {{- if $health.Interval }}\n      interval: {{ $health.Interval.Duration }}\n      {{- end }}\n    {{- end }}\n  {{- end }}\n\n  {{- if .Spec.Health.HTTP }}\n  http:\n    {{- range $_, $health := .Spec.Health.HTTP }}\n    - uri: {{ $health.URI | quote }}\n      headers: {{ $health.Headers | toJson }}\n      {{- if $health.StatusCode }}\n      statuscode: {{ $health.StatusCode }}\n      {{- end }}\n      {{- if $health.Timeout }}\n      timeout: {{ $health.Timeout.Duration }}\n      {{- end }}\n      {{- if $health.Interval }}\n      interval: {{ $health.Interval.Duration }}\n      {{- end }}\n      threshold: {{ $health.Threshold }}\n    {{- end }}\n  {{- end }}\n\n  {{- if .Spec.Health.TCP }}\n  tcp:\n    {{- range $_, $health := .Spec.Health.TCP }}\n    - addr: {{ $health.Address | quote }}\n      {{- if $health.Timeout }}\n      timeout: {{ $health.Timeout.Duration }}\n      {{- end }}\n      {{- if $health.Interval }}\n      interval: {{ $health.Interval.Duration }}\n      {{- end }}\n      threshold: {{ $health.Threshold }}\n    {{- end }}\n  {{- end }}\n"
+  registry-config.yaml.tmpl: "# https://docs.docker.com/registry/configuration/\nversion: 0.1\nlog:\n  accesslog:\n    disabled: {{ .Spec.Log.AccessLog.Disabled }}\n  level: {{ .Spec.Log.Level | quote }}\n  formatter: {{ .Spec.Log.Formatter | quote }}\n  {{- if .Spec.Log.Fields }}\n  fields: {{ .Spec.Log.Fields | toJson }}\n  {{- end }}\n  {{- if .Spec.Log.Hooks }}\n  hooks:\n    {{- range $index, $element := .Spec.Log.Hooks }}\n    - type: {{ $element.Type | quote }}\n      disabled: {{ $element.Disabled }}\n      {{- if $element.Levels }}\n      levels: {{ $element.Levels | toJson }}\n      {{- end }}\n      {{- if $element.OptionsRef }}\n      {{- with ( secretData $element.OptionsRef) }}\n      {{- if . }}\n      options: {{ toJson . }}\n      {{- end }}\n      {{- end }}\n      {{- end }}\n    {{- end }}\n  {{- end }}\nhttp:\n  # secret: setted through environment variable\n  {{- if .Spec.HTTP.Debug }}\n  debug:\n    addr: :{{ .Spec.HTTP.Debug.Port }}\n    prometheus:\n      enabled: {{ .Spec.HTTP.Debug.Prometheus.Enabled }}\n      path: {{ .Spec.HTTP.Debug.Prometheus.Path | quote }}\n  {{- end }}\n  net: {{ .Spec.HTTP.Net | quote }}\n  addr: :5000\n  {{- if .Spec.HTTP.Prefix }}\n  prefix: {{ .Spec.HTTP.Prefix | quote }}\n  {{- end }}\n  {{- if .Spec.HTTP.Headers }}\n  headers: {{ .Spec.HTTP.Headers | toJson }}\n  {{- end }}\n  http2:\n    disabled: {{ .Spec.HTTP.HTTP2.Disabled }}\n  host: {{ .Spec.HTTP.Host | quote }}\n  relativeurls: {{ .Spec.HTTP.RelativeURLs }}\n  {{- if .Spec.HTTP.DrainTimeout }}\n  draintimeout: {{ .Spec.HTTP.DrainTimeout.Duration }}\n  {{- end }}\n  {{- if .Spec.HTTP.TLS.Enabled }}\n  tls:\n    certificate: /etc/registry/ssl/tls.crt\n    key: /etc/registry/ssl/tls.key\n  {{- end }}\n{{- if .Spec.Reporting }}\nreporting:\n  {{- range $name, $reference := .Spec.Reporting }}\n  {{ $name | quote }}: {{ secretData $reference | toJson }}\n  {{- end }}\n{{- end }}\nstorage:\n  {{- if .Spec.Storage.Delete.Enabled }}\n  delete:\n    {{- if .Spec.Storage.Delete.Enabled }}\n    enabled: {{ .Spec.Storage.Delete.Enabled }}\n    {{- end }}\n  {{- end }}\n  cache:\n    blobdescriptor: {{ default \"inmemory\" .Spec.Storage.Cache.Blobdescriptor | quote }}\n  maintenance:\n    uploadPurging:\n      enabled: {{ .Spec.Storage.Maintenance.UploadPurging.Enabled }}\n      {{- if .Spec.Storage.Maintenance.UploadPurging.Age }}\n      age: {{ .Spec.Storage.Maintenance.UploadPurging.Age.Duration }}\n      {{- end }}\n      {{- if .Spec.Storage.Maintenance.UploadPurging.Interval }}\n      interval: {{ .Spec.Storage.Maintenance.UploadPurging.Interval.Duration }}\n      {{- end }}\n      dryRun: {{ .Spec.Storage.Maintenance.UploadPurging.DryRun }}\n    readOnly:\n      enabled: {{ .Spec.Storage.Maintenance.ReadOnly.Enabled }}\n  redirect: \n    disable: {{ .Spec.Storage.Redirect.Disable }}\n\n  {{- if .Spec.Storage.Driver.InMemory }}\n  inmemory: {}\n  {{- end }}\n\n  {{- if .Spec.Storage.Driver.FileSystem }}\n  filesystem:\n    rootdirectory: /var/lib/registry\n    maxthreads: {{ .Spec.Storage.Driver.FileSystem.MaxThreads }}\n  {{- end }}\n\n  {{- if .Spec.Storage.Driver.S3 }}\n  s3:\n    region: {{ .Spec.Storage.Driver.S3.Region | quote }}\n    bucket: {{ .Spec.Storage.Driver.S3.Bucket | quote }}\n    encrypt: {{ .Spec.Storage.Driver.S3.Encrypt }}\n    skipverify: {{ .Spec.Storage.Driver.S3.SkipVerify }}\n    {{- if .Spec.Storage.Driver.S3.KeyID }}\n    keyid: {{ .Spec.Storage.Driver.S3.KeyID | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.S3.Secure }}\n    secure: {{ .Spec.Storage.Driver.S3.Secure }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.S3.V4Auth }}\n    v4auth: {{ .Spec.Storage.Driver.S3.V4Auth }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.S3.ChunkSize }}\n    chunksize: {{ .Spec.Storage.Driver.S3.ChunkSize }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.S3.StorageClass }}\n    storageclass: {{ .Spec.Storage.Driver.S3.StorageClass | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.S3.RootDirectory }}\n    rootdirectory: {{ .Spec.Storage.Driver.S3.RootDirectory | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.S3.AccessKey }}\n    accesskey: {{ .Spec.Storage.Driver.S3.AccessKey | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.S3.SecretKeyRef }}\n    # secretkey: setted through environment variable\n    {{- end }}\n    {{- if .Spec.Storage.Driver.S3.RegionEndpoint }}\n    regionendpoint: {{ .Spec.Storage.Driver.S3.RegionEndpoint | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.S3.MultipartCopyChunkSize }}\n    multipartcopychunksize: {{ .Spec.Storage.Driver.S3.MultipartCopyChunkSize | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.S3.MultipartCopyMaxConcurrency }}\n    multipartcopymaxconcurrency: {{ .Spec.Storage.Driver.S3.MultipartCopyMaxConcurrency | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.S3.MultipartCopyThresholdSize }}\n    multipartcopythresholdsize: {{ .Spec.Storage.Driver.S3.MultipartCopyThresholdSize | quote }}\n    {{- end }}\n  {{- end }}\n\n  {{- if .Spec.Storage.Driver.Swift }}\n  swift:\n    username: {{ .Spec.Storage.Driver.Swift.Username | quote }}\n    # password: setted through environment variable\n    authurl: {{ .Spec.Storage.Driver.Swift.AuthURL | quote }}\n    container: {{ .Spec.Storage.Driver.Swift.Container | quote }}\n    insecureskipverify: {{ .Spec.Storage.Driver.Swift.InsecureSkipVerify }}\n    {{- if .Spec.Storage.Driver.Swift.Prefix }}\n    prefix: {{ .Spec.Storage.Driver.Swift.Prefix | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.EndpointType }}\n    endpointtype: {{ .Spec.Storage.Driver.Swift.EndpointType | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.ChunkSize }}\n    chunksize: {{ .Spec.Storage.Driver.Swift.ChunkSize }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.AccessKey }}\n    accesskey: {{ .Spec.Storage.Driver.Swift.AccessKey | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.SecretKeyRef }}\n    # secretkey: setted through environment variable\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.AuthVersion }}\n    authversion: {{ .Spec.Storage.Driver.Swift.AuthVersion | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.Tenant }}\n    tenantid: {{ .Spec.Storage.Driver.Swift.Tenant | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.TenantID }}\n    tenantid: {{ .Spec.Storage.Driver.Swift.TenantID | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.Domain }}\n    domain: {{ .Spec.Storage.Driver.Swift.Domain | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.DomainID }}\n    domainid: {{ .Spec.Storage.Driver.Swift.DomainID | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.TrustID }}\n    trustid: {{ .Spec.Storage.Driver.Swift.TrustID | quote }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Swift.Region }}\n    region: {{ .Spec.Storage.Driver.Swift.Region | quote }}\n    {{- end }}\n  {{- end }}\n\n{{- if ( or .Spec.Middlewares.Registry ( or .Spec.Middlewares.Repository .Spec.Middlewares.Storage ) ) }}\nmiddleware:\n  {{- if .Spec.Middlewares.Registry }}\n  registry:\n    {{- range $index, $middleware := .Spec.Middlewares.Registry }}\n    - name: {{ $middleware.Name | quote }}\n      {{- if $middleware.OptionsRef }}\n      options: {{ secretData $middleware.OptionsRef | toJson }}\n      {{- end }}\n    {{- end }}\n  {{- end }}\n  {{- if .Spec.Middlewares.Repository }}\n  registry:\n    {{- range $index, $middleware := .Spec.Middlewares.Repository }}\n    - name: {{ $middleware.Name | quote }}\n      {{- if $middleware.OptionsRef }}\n      options: {{ secretData $middleware.OptionsRef | toJson }}\n      {{- end }}\n    {{- end }}\n  {{- end }}\n  {{- if .Spec.Middlewares.Storage }}\n  registry:\n    {{- range $index, $middleware := .Spec.Middlewares.Storage }}\n    - name: {{ $middleware.Name | quote }}\n      {{- if $middleware.OptionsRef }}\n      options: {{ secretData $middleware.OptionsRef | toJson }}\n      {{- end }}\n    {{- end }}\n  {{- end }}\n{{- end }}\n{{- if .Spec.Redis }}\nredis:\n  {{- if .Spec.Redis.SentinelMasterSet }}\n  sentinelMasterSet: {{ .Spec.Redis.SentinelMasterSet | quote }}\n  {{- end }}\n  {{- if .Spec.Redis.Port }}\n  addr: {{ printf \"%s:%d\" .Spec.Redis.Host .Spec.Redis.Port | quote }}\n  {{- else }}\n  addr: {{ .Spec.Redis.Host | quote }}\n  {{- end }}\n  # password: setted through environment variable\n  db: {{ .Spec.Redis.Database }}\n  {{- if .Spec.Redis.DialTimeout }}\n  dialtimeout: {{ .Spec.Redis.DialTimeout.Duration }}\n  {{- end }}\n  {{- if .Spec.Redis.ReadTimeout }}\n  readtimeout: {{ .Spec.Redis.ReadTimeout.Duration }}\n  {{- end }}\n  {{- if .Spec.Redis.WriteTimeout }}\n  writetimeout: {{ .Spec.Redis.WriteTimeout.Duration }}\n  {{- end }}\n  {{- if ( or .Spec.Redis.Pool.MaxIdle ( or .Spec.Redis.Pool.MaxActive .Spec.Redis.Pool.IdleTimeout ) ) }}\n  pool:\n    {{- if .Spec.Redis.Pool.MaxIdle }}\n    maxidle: {{ .Spec.Redis.Pool.MaxIdle }}\n    {{- end }}\n    {{- if .Spec.Redis.Pool.MaxActive }}\n    maxactive: {{ .Spec.Redis.Pool.MaxActive }}\n    {{- end }}\n    {{- if .Spec.Redis.Pool.IdleTimeout }}\n    idletimeout: {{ .Spec.Redis.Pool.IdleTimeout.Duration }}\n    {{- end }}\n  {{- end }}\n{{- end }}\ncompatibility:\n  schema1:\n    # signingkeyfile: setted through environment variable\n    enabled: {{ .Spec.Compatibility.Schema1.Enabled }}\nvalidation:\n  disabled: {{ .Spec.Validation.Disabled }}\n  {{- if or .Spec.Validation.Manifests.URLs.Allow .Spec.Validation.Manifests.URLs.Deny }}\n  manifests:\n    urls:\n      {{- if .Spec.Validation.Manifests.URLs.Allow }}\n      allow: {{ .Spec.Validation.Manifests.URLs.Allow | toJson }}\n      {{- end }}\n      {{- if .Spec.Validation.Manifests.URLs.Deny }}\n      deny: {{ .Spec.Validation.Manifests.URLs.Deny | toJson }}\n      {{- end }}\n  {{- end }}\n{{- if ( or .Spec.Authentication.Silly ( or .Spec.Authentication.Token .Spec.Authentication.HTPasswd ) ) }}\nauth:\n  {{- if .Spec.Authentication.Silly }}\n  silly:\n    realm: {{ .Spec.Authentication.Silly.Realm | quote }}\n    service: {{ .Spec.Authentication.Silly.Service | quote }}\n  {{- end }}\n  {{- if .Spec.Authentication.Token }}\n  token:\n    realm: {{ .Spec.Authentication.Token.Realm | quote }}\n    service: {{ .Spec.Authentication.Token.Service | quote }}\n    issuer: registry-token-issuer\n    rootcertbundle: /root/certs/bundle\n    autoredirect: {{ .Spec.Authentication.Token.AutoRedirect }}\n  {{- end }}\n  {{- if .Spec.Authentication.HTPasswd }}\n  htpasswd:\n    realm: {{ .Spec.Authentication.HTPasswd.Realm | quote }}\n    # path: setted through environment variable\n  {{- end }}\n{{- end }}\nnotifications:\n  {{- if .Spec.Notifications.Endpoints }}\n  endpoints:\n    {{- range $_, $endpoint := .Spec.Notifications.Endpoints }}\n    - name: {{ $endpoint.Name | quote }}\n      disabled: {{ $endpoint.Disabled }}\n      url: {{ $endpoint.URL | quote }}\n      {{- if $endpoint.Headers }}\n      headers: {{ $endpoint.Headers | toJson }}\n      {{- end }}\n      {{- if $endpoint.Timeout }}\n      timeout: {{ $endpoint.Timeout.Duration }}\n      {{- end }}\n      {{- if $endpoint.Threshold }}\n      threshold: {{ $endpoint.Threshold }}\n      {{- end }}\n      {{- if $endpoint.Backoff }}\n      backoff: {{ $endpoint.Backoff }}\n      {{- end }}\n      {{- if $endpoint.IgnoredMediaTypes }}\n      ignoredmediatypes: {{ $endpoint.IgnoredMediaTypes | toJson }}\n      {{- end }}\n      {{- if ( or $endpoint.Ignore.MediaTypes $endpoint.Ignore.Actions ) }}\n      ignore:\n        {{- if $endpoint.Ignore.MediaTypes }}\n        mediatypes: {{ $endpoint.Ignore.MediaTypes | toJson }}\n        {{- end }}\n        {{- if $endpoint.Ignore.Actions }}\n        actions: {{ $endpoint.Ignore.Actions | toJson }}\n        {{- end }}\n      {{- end }}\n    {{- end }}\n  {{- end }}\n  events:\n    includereferences: {{ default true .Spec.Notifications.Events.IncludeReferences }}\n\nhealth:\n  storagedriver:\n    enabled: {{ default true .Spec.Health.StorageDriver.Enabled }}\n    {{- if .Spec.Health.StorageDriver.Interval }}\n    interval: {{ .Spec.Health.StorageDriver.Interval.Duration }}\n    {{- end }}\n    {{- if .Spec.Health.StorageDriver.Threshold }}\n    threshold: {{ .Spec.Health.StorageDriver.Threshold }}\n    {{- end }}\n\n  {{- if .Spec.Health.File }}\n  file:\n    {{- range $_, $health := .Spec.Health.File }}\n    - file: {{ $health.File | quote }}\n      {{- if $health.Interval }}\n      interval: {{ $health.Interval.Duration }}\n      {{- end }}\n    {{- end }}\n  {{- end }}\n\n  {{- if .Spec.Health.HTTP }}\n  http:\n    {{- range $_, $health := .Spec.Health.HTTP }}\n    - uri: {{ $health.URI | quote }}\n      headers: {{ $health.Headers | toJson }}\n      {{- if $health.StatusCode }}\n      statuscode: {{ $health.StatusCode }}\n      {{- end }}\n      {{- if $health.Timeout }}\n      timeout: {{ $health.Timeout.Duration }}\n      {{- end }}\n      {{- if $health.Interval }}\n      interval: {{ $health.Interval.Duration }}\n      {{- end }}\n      threshold: {{ $health.Threshold }}\n    {{- end }}\n  {{- end }}\n\n  {{- if .Spec.Health.TCP }}\n  tcp:\n    {{- range $_, $health := .Spec.Health.TCP }}\n    - addr: {{ $health.Address | quote }}\n      {{- if $health.Timeout }}\n      timeout: {{ $health.Timeout.Duration }}\n      {{- end }}\n      {{- if $health.Interval }}\n      interval: {{ $health.Interval.Duration }}\n      {{- end }}\n      threshold: {{ $health.Threshold }}\n    {{- end }}\n  {{- end }}\n"
   registryctl-config.yaml.tmpl: |
     {{- if .Spec.TLS.Enabled }}
     protocol: https

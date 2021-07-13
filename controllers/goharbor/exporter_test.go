@@ -7,6 +7,7 @@ import (
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/redis"
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -23,6 +24,8 @@ func newExporterController() controllerTest {
 func setupValidExporter(ctx context.Context, ns string) (Resource, client.ObjectKey) {
 	coreRes, _ := setupValidCore(ctx, ns)
 	core := coreRes.(*goharborv1.Core)
+
+	redis := redis.New(ctx, ns)
 
 	var replicas int32 = 1
 
@@ -45,6 +48,11 @@ func setupValidExporter(ctx context.Context, ns string) (Resource, client.Object
 			Database: goharborv1.ExporterDatabaseSpec{
 				PostgresConnectionWithParameters: core.Spec.Database.PostgresConnectionWithParameters,
 				EncryptionKeyRef:                 core.Spec.Database.EncryptionKeyRef,
+			},
+			JobService: goharborv1.ExporterJobServiceSpec{
+				Redis: &goharborv1.JobServicePoolRedisSpec{
+					RedisConnection: redis,
+				},
 			},
 		},
 	}

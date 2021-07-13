@@ -8,27 +8,27 @@ spec:
       containers:
       - name: manager
         env:
-          - name: CORE_DOCKER_IMAGE_2_2_1
-            value: ghcr.io/goharbor/harbor-core:v2.2.1
-          - name: JOBSERVICE_DOCKER_IMAGE_2_2_1
-            value: ghcr.io/goharbor/harbor-jobservice:v2.2.1
-          - name: PORTAL_DOCKER_IMAGE_2_2_1
-            value: ghcr.io/goharbor/harbor-portal:v2.2.1
-          - name: REGISTRYCTL_DOCKER_IMAGE_2_2_1
-            value: ghcr.io/goharbor/harbor-registryctl:v2.2.1
-          - name: REGISTRY_DOCKER_IMAGE_2_2_1
-            value: ghcr.io/goharbor/registry-photon:v2.2.1
-          - name: CHARTMUSEUM_DOCKER_IMAGE_2_2_1
-            value: ghcr.io/goharbor/chartmuseum-photon:v2.2.1
-          - name: NOTARYSERVER_DOCKER_IMAGE_2_2_1
-            value: ghcr.io/goharbor/notary-server-photon:v2.2.1
-          - name: NOTARYSIGNER_DOCKER_IMAGE_2_2_1
-            value: ghcr.io/goharbor/notary-signer-photon:v2.2.1
-          - name: TRIVY_DOCKER_IMAGE_2_2_1
-            value: ghcr.io/goharbor/trivy-adapter-photon:v2.2.1
-          - name: HARBORCLUSTER_MINIO_DOCKER_IMAGE_2_2_1
+          - name: CORE_DOCKER_IMAGE_2_3_0
+            value: ghcr.io/goharbor/harbor-core:v2.3.0
+          - name: JOBSERVICE_DOCKER_IMAGE_2_3_0
+            value: ghcr.io/goharbor/harbor-jobservice:v2.3.0
+          - name: PORTAL_DOCKER_IMAGE_2_3_0
+            value: ghcr.io/goharbor/harbor-portal:v2.3.0
+          - name: REGISTRYCTL_DOCKER_IMAGE_2_3_0
+            value: ghcr.io/goharbor/harbor-registryctl:v2.3.0
+          - name: REGISTRY_DOCKER_IMAGE_2_3_0
+            value: ghcr.io/goharbor/registry-photon:v2.3.0
+          - name: CHARTMUSEUM_DOCKER_IMAGE_2_3_0
+            value: ghcr.io/goharbor/chartmuseum-photon:v2.3.0
+          - name: NOTARYSERVER_DOCKER_IMAGE_2_3_0
+            value: ghcr.io/goharbor/notary-server-photon:v2.3.0
+          - name: NOTARYSIGNER_DOCKER_IMAGE_2_3_0
+            value: ghcr.io/goharbor/notary-signer-photon:v2.3.0
+          - name: TRIVY_DOCKER_IMAGE_2_3_0
+            value: ghcr.io/goharbor/trivy-adapter-photon:v2.3.0
+          - name: HARBORCLUSTER_MINIO_DOCKER_IMAGE_2_3_0
             value: ghcr.io/goharbor/minio:RELEASE.2020-08-13T02-39-50Z
-          - name: HARBORCLUSTER_REDIS_DOCKER_IMAGE_2_2_1
+          - name: HARBORCLUSTER_REDIS_DOCKER_IMAGE_2_3_0
             value: ghcr.io/goharbor/redis:5.0-alpine
-          - name: HARBORCLUSTER_POSTGRESQL_DOCKER_IMAGE_2_2_1
+          - name: HARBORCLUSTER_POSTGRESQL_DOCKER_IMAGE_2_3_0
             value: ghcr.io/goharbor/spilo-12:1.6-p3

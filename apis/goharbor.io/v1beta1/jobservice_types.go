@@ -76,6 +76,9 @@ type JobServiceSpec struct {
 
 	// +kubebuilder:validation:Optional
 	Proxy *harbormetav1.ProxySpec `json:"proxy,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	Metrics *harbormetav1.MetricsSpec `json:"metrics,omitempty"`
 }
 
 type JobServiceTokenSpec struct {

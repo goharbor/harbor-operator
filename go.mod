@@ -9,7 +9,7 @@ require (
 	github.com/go-kit/kit v0.10.0
 	github.com/go-logr/logr v0.4.0
 	github.com/go-redis/redis v6.15.9+incompatible
-	github.com/goharbor/harbor/src v0.0.0-20210402093914-fbf2409c78c4
+	github.com/goharbor/harbor/src v0.0.0-20210705083811-ddb66197697f
 	github.com/huandu/xstrings v1.3.2 // indirect
 	github.com/jaegertracing/jaeger-lib v2.2.0+incompatible
 	github.com/jetstack/cert-manager v1.1.0

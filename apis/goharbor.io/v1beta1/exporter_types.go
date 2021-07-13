@@ -56,6 +56,9 @@ type ExporterSpec struct {
 	// +kubebuilder:validation:Required
 	Database ExporterDatabaseSpec `json:"database"`
 
+	// +kubebuilder:validation:Required
+	JobService ExporterJobServiceSpec `json:"jobservice"`
+
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=8001
 	// +kubebuilder:validation:Minimum=1
@@ -130,6 +133,11 @@ type ExporterDatabaseSpec struct {
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	EncryptionKeyRef string `json:"encryptionKeyRef"`
+}
+
+type ExporterJobServiceSpec struct {
+	// +kubebuilder:validation:Optional
+	Redis *JobServicePoolRedisSpec `json:"redisPool,omitempty"`
 }
 
 type ExporterLogSpec struct {

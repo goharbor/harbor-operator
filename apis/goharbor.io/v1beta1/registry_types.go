@@ -713,6 +713,15 @@ type RegistryStorageDriverS3Spec struct {
 	// +kubebuilder:validation:Minimum=5242880
 	// The S3 API requires multipart upload chunks to be at least 5MB.
 	ChunkSize int64 `json:"chunksize,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	MultipartCopyChunkSize int64 `json:"multipartcopychunksize,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	MultipartCopyMaxConcurrency int64 `json:"multipartcopymaxconcurrency,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	MultipartCopyThresholdSize int64 `json:"multipartcopythresholdsize,omitempty"`
 }
 
 type RegistryStorageDriverSwiftSpec struct {

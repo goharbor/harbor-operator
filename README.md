@@ -50,6 +50,11 @@ Harbor deployment stack is controlled by a custom Harbor resource `HarborCluster
   * Container image path rewriting
   * Transparent proxy cache settings
 
+## Replease plans
+
+* [Release 1.1](https://github.com/goharbor/harbor-operator/projects/8)
+* [Release 1.2](https://github.com/goharbor/harbor-operator/projects/7)
+
 ## Getting started
 
 For a quick first try follow the instructions of this [tutorial](./docs/tutorial.md).
@@ -80,9 +85,9 @@ Harbor operator supports two extra Kubernetes versions besides the current lates
 
 Harbor operator relies on cert manager to manage kinds of certificates used by Harbor cluster components. Table shown below lists the compatibilities of cert manager versions:
 
-|    Versions   |       1.0.4        |       1.2.0        |         1.3.1        |
-|---------------|--------------------|--------------------|----------------------|
-| Compatibility | :heavy_check_mark: | :heavy_check_mark: |  :heavy_check_mark:  |
+|    Versions   |       1.1.1        |       1.2.0        |         1.3.1        |         1.4.0        |
+|---------------|--------------------|--------------------|----------------------|----------------------|
+| Compatibility | :heavy_check_mark: | :heavy_check_mark: |  :heavy_check_mark:  |  :heavy_check_mark:  |
 
 ### Ingress controller types
 
