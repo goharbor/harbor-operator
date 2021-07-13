@@ -32,6 +32,7 @@ var pwdFields = []string{"email_password", "ldap_search_password", "uaa_client_s
 func New(ctx context.Context, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
 	r := &Reconciler{}
 	r.Controller = commonCtrl.NewController(ctx, controllers.HarborCluster, nil, configStore)
+	
 	return r, nil
 }
 
