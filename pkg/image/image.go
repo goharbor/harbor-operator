@@ -37,9 +37,9 @@ func (md *metadata) Add(kind metadataKind, value string, harborVersions ...strin
 func (md *metadata) Get(kind metadataKind, harborVersion string, defaultValues ...string) string {
 	v, err := semver.NewVersion(harborVersion)
 	if err == nil {
-		for c, imageName := range md.values[kind] {
+		for c, value := range md.values[kind] {
 			if c.Check(v) {
-				return imageName
+				return value
 			}
 		}
 	}
@@ -135,19 +135,19 @@ func init() { // nolint:gochecknoinits
 	// Register the cluster service components
 	RegisterRepository("cluster-redis", "", "*") // the - repository of dockerhub
 	RegisterImageName("cluster-redis", "redis", "*")
-	RegisterTag("cluster-redis", "5.0-alpine", "~2.2.0")
+	RegisterTag("cluster-redis", "5.0-alpine", "~2.2.0", "~2.3.0")
 
 	RegisterRepository("cluster-postgresql", "registry.opensource.zalan.do/acid", "*")
 	RegisterImageName("cluster-postgresql", "spilo-12", "*")
-	RegisterTag("cluster-postgresql", "1.6-p3", "~2.2.0")
+	RegisterTag("cluster-postgresql", "1.6-p3", "~2.2.0", "~2.3.0")
 
 	RegisterRepository("cluster-minio", "minio", "*") // the minio repository of dockerhub
 	RegisterImageName("cluster-minio", "minio", "*")
-	RegisterTag("cluster-minio", "RELEASE.2021-04-06T23-11-00Z", "~2.2.0")
+	RegisterTag("cluster-minio", "RELEASE.2021-04-06T23-11-00Z", "~2.2.0", "~2.3.0")
 
 	RegisterRepository("cluster-minio-init", "minio", "*") // the minio repository of dockerhub
 	RegisterImageName("cluster-minio-init", "mc", "*")
-	RegisterTag("cluster-minio-init", "RELEASE.2021-03-23T05-46-11Z", "~2.2.0")
+	RegisterTag("cluster-minio-init", "RELEASE.2021-03-23T05-46-11Z", "~2.2.0", "~2.3.0")
 }
 
 type Options struct {

@@ -21,8 +21,9 @@ const (
 )
 
 const (
-	JobServiceHTTPPortName  = "http"
-	JobServiceHTTPSPortName = "https"
+	JobServiceHTTPPortName    = "http"
+	JobServiceHTTPSPortName   = "https"
+	JobServiceMetricsPortName = "metrics"
 )
 
 const (

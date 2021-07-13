@@ -66,19 +66,19 @@ jobs:
     name: Go tests
     env:
       USE_EXISTING_CLUSTER: true
-      CORE_DOCKER_IMAGE_2_2_1: ghcr.io/goharbor/harbor-core:v2.2.1
-      EXPORTER_DOCKER_IMAGE_2_2_1: ghcr.io/goharbor/harbor-exporter:v2.2.1
-      JOBSERVICE_DOCKER_IMAGE_2_2_1: ghcr.io/goharbor/harbor-jobservice:v2.2.1
-      PORTAL_DOCKER_IMAGE_2_2_1: ghcr.io/goharbor/harbor-portal:v2.2.1
-      REGISTRYCTL_DOCKER_IMAGE_2_2_1: ghcr.io/goharbor/harbor-registryctl:v2.2.1
-      REGISTRY_DOCKER_IMAGE_2_2_1: ghcr.io/goharbor/registry-photon:v2.2.1
-      CHARTMUSEUM_DOCKER_IMAGE_2_2_1: ghcr.io/goharbor/chartmuseum-photon:v2.2.1
-      NOTARYSERVER_DOCKER_IMAGE_2_2_1: ghcr.io/goharbor/notary-server-photon:v2.2.1
-      NOTARYSIGNER_DOCKER_IMAGE_2_2_1: ghcr.io/goharbor/notary-signer-photon:v2.2.1
-      TRIVY_DOCKER_IMAGE_2_2_1: ghcr.io/goharbor/trivy-adapter-photon:v2.2.1
-      HARBORCLUSTER_MINIO_DOCKER_IMAGE_2_2_1: ghcr.io/goharbor/minio:2021-04-06T23-11-00Z
-      HARBORCLUSTER_REDIS_DOCKER_IMAGE_2_2_1: ghcr.io/goharbor/redis:5.0-alpine
-      HARBORCLUSTER_POSTGRESQL_DOCKER_IMAGE_2_2_1: ghcr.io/goharbor/spilo-12:1.6-p3
+      CORE_DOCKER_IMAGE_2_3_0: ghcr.io/goharbor/harbor-core:v2.3.0
+      EXPORTER_DOCKER_IMAGE_2_3_0: ghcr.io/goharbor/harbor-exporter:v2.3.0
+      JOBSERVICE_DOCKER_IMAGE_2_3_0: ghcr.io/goharbor/harbor-jobservice:v2.3.0
+      PORTAL_DOCKER_IMAGE_2_3_0: ghcr.io/goharbor/harbor-portal:v2.3.0
+      REGISTRYCTL_DOCKER_IMAGE_2_3_0: ghcr.io/goharbor/harbor-registryctl:v2.3.0
+      REGISTRY_DOCKER_IMAGE_2_3_0: ghcr.io/goharbor/registry-photon:v2.3.0
+      CHARTMUSEUM_DOCKER_IMAGE_2_3_0: ghcr.io/goharbor/chartmuseum-photon:v2.3.0
+      NOTARYSERVER_DOCKER_IMAGE_2_3_0: ghcr.io/goharbor/notary-server-photon:v2.3.0
+      NOTARYSIGNER_DOCKER_IMAGE_2_3_0: ghcr.io/goharbor/notary-signer-photon:v2.3.0
+      TRIVY_DOCKER_IMAGE_2_3_0: ghcr.io/goharbor/trivy-adapter-photon:v2.3.0
+      HARBORCLUSTER_MINIO_DOCKER_IMAGE_2_3_0: ghcr.io/goharbor/minio:2021-04-06T23-11-00Z
+      HARBORCLUSTER_REDIS_DOCKER_IMAGE_2_3_0: ghcr.io/goharbor/redis:5.0-alpine
+      HARBORCLUSTER_POSTGRESQL_DOCKER_IMAGE_2_3_0: ghcr.io/goharbor/spilo-12:1.6-p3
       dockerImage: harbor-operator:dev_test
     steps:
       - uses: actions/checkout@v2
@@ -291,20 +291,12 @@ jobs:
         docker pull $CORE_HOST/library/busybox:test
 
     - name: apidb test
-      run: |
-        git clone https://github.com/goharbor/harbor -b v2.2.1
-        cd harbor
-        sed -i '15i\    ${dfout}=  Run  df -h\n    Log To Console  ${dfout}' tests/resources/APITest-Util.robot
-        cd ..
-        kubectl -n cluster-sample-ns patch deploy harborcluster-sample-harbor-harbor-core -p '{"spec":{"template":{"spec":{"containers":[{"name":"core","env":[{"name":"GC_TIME_WINDOW_HOURS","value":"0"}]}]}}}}'
-        sleep 5
-        kubectl -n cluster-sample-ns wait --for=condition=Ready -l job-type!=minio-init pod --all --timeout 600s
-        docker run --rm -t --privileged -v `pwd`/harbor:/drone -v /etc/docker/certs.d/$CORE_HOST/:/ca -v /etc/docker/certs.d/$CORE_HOST/:/root/.docker/tls/$NOTARY_HOST/ -e NOTARY_URL=https://$NOTARY_HOST -w /drone goharbor/harbor-e2e-engine:2.6.3 \
-          python -u -m robot -v DOCKER_USER:${{ secrets.DOCKER_USER }} -v DOCKER_PWD:${{ secrets.DOCKER_TOKEN }} -v ip:$CORE_HOST -v ip1: -v HARBOR_PASSWORD:Harbor12345 -X \
-          --exclude gc --exclude metrics --exclude singularity --exclude proxy_cache \
-          /drone/tests/robot-cases/Group1-Nightly/Setup.robot /drone/tests/robot-cases/Group0-BAT/API_DB.robot
-        free -m
-        df -h
+      run: bash .github/scripts/apidb_test.sh
+      env:
+        DOCKER_USER: ${{ secrets.DOCKER_USER }}
+        DOCKER_PWD: ${{ secrets.DOCKER_TOKEN }}
+        CORE_DEPLOYMENT: harborcluster-sample-harbor-harbor-core
+        NAMESPACE: cluster-sample-ns
 
     - name: fetch harbor logs
       if: ${{ failure() }}
@@ -503,20 +495,12 @@ jobs:
           docker pull $CORE_HOST/library/busybox:test
 
       - name: apidb test
-        run: |
-          git clone https://github.com/goharbor/harbor -b v2.2.1
-          cd harbor
-          sed -i '15i\    ${dfout}=  Run  df -h\n    Log To Console  ${dfout}' tests/resources/APITest-Util.robot
-          cd ..
-          kubectl -n cluster-sample-ns patch deploy harborcluster-sample-harbor-harbor-core -p '{"spec":{"template":{"spec":{"containers":[{"name":"core","env":[{"name":"GC_TIME_WINDOW_HOURS","value":"0"}]}]}}}}'
-          sleep 5
-          kubectl -n cluster-sample-ns wait --for=condition=Ready -l job-type!=minio-init pod --all --timeout 600s
-          docker run --rm -t --privileged -v `pwd`/harbor:/drone -v /etc/docker/certs.d/$CORE_HOST/:/ca -v /etc/docker/certs.d/$CORE_HOST/:/root/.docker/tls/$NOTARY_HOST/ -e NOTARY_URL=https://$NOTARY_HOST -w /drone goharbor/harbor-e2e-engine:2.6.3 \
-            python -u -m robot -v DOCKER_USER:${{ secrets.DOCKER_USER }} -v DOCKER_PWD:${{ secrets.DOCKER_TOKEN }} -v ip:$CORE_HOST -v ip1: -v HARBOR_PASSWORD:Harbor12345 -X \
-            --exclude gc --exclude metrics --exclude singularity --exclude proxy_cache \
-            /drone/tests/robot-cases/Group1-Nightly/Setup.robot /drone/tests/robot-cases/Group0-BAT/API_DB.robot
-          free -m
-          df -h
+        run: bash .github/scripts/apidb_test.sh
+        env:
+          DOCKER_USER: ${{ secrets.DOCKER_USER }}
+          DOCKER_PWD: ${{ secrets.DOCKER_TOKEN }}
+          CORE_DEPLOYMENT: harborcluster-sample-harbor-harbor-core
+          NAMESPACE: cluster-sample-ns
 
       - name: fetch harbor logs
         if: ${{ failure() }}
@@ -696,15 +680,11 @@ jobs:
           docker pull $CORE_HOST/library/busybox:test
 
       - name: apidb test
-        run: |
-          git clone https://github.com/goharbor/harbor -b v2.2.1
-          kubectl patch deploy sample-harbor-harbor-core -p '{"spec":{"template":{"spec":{"containers":[{"name":"core","env":[{"name":"GC_TIME_WINDOW_HOURS","value":"0"}]}]}}}}'
-          sleep 5
-          kubectl wait --for=condition=Ready -l job-type!=minio-init pod --all --timeout 600s
-          docker run --rm -t --privileged -v `pwd`/harbor:/drone -v /etc/docker/certs.d/$CORE_HOST/:/ca -v /etc/docker/certs.d/$CORE_HOST/:/root/.docker/tls/$NOTARY_HOST/ -e NOTARY_URL=https://$NOTARY_HOST -w /drone goharbor/harbor-e2e-engine:2.6.3 \
-          python -u -m robot -v DOCKER_USER:${{ secrets.DOCKER_USER }} -v DOCKER_PWD:${{ secrets.DOCKER_TOKEN }} -v ip:$CORE_HOST -v ip1: -v HARBOR_PASSWORD:Harbor12345 -X \
-          --exclude gc --exclude metrics --exclude singularity --exclude proxy_cache \
-          /drone/tests/robot-cases/Group1-Nightly/Setup.robot /drone/tests/robot-cases/Group0-BAT/API_DB.robot
+        run: bash .github/scripts/apidb_test.sh
+        env:
+          DOCKER_USER: ${{ secrets.DOCKER_USER }}
+          DOCKER_PWD: ${{ secrets.DOCKER_TOKEN }}
+          CORE_DEPLOYMENT: sample-harbor-harbor-core
 
       - name: fetch harbor logs
         if: ${{ failure() }}

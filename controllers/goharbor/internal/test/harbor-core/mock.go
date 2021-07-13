@@ -11,7 +11,9 @@ import (
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/postgresql"
 	"github.com/goharbor/harbor/src/common"
-	"github.com/goharbor/harbor/src/common/config"
+	"github.com/goharbor/harbor/src/lib/config/metadata"
+	"github.com/goharbor/harbor/src/lib/config/models"
+	"github.com/goharbor/harbor/src/pkg/config"
 	"github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -21,22 +23,21 @@ import (
 )
 
 const (
-	nginxRootPath   = "/usr/share/nginx/html"
-	internalAPIPath = "/api/internal"
-	v2APIPath       = "/api/v2.0"
-	port            = 80
+	nginxRootPath = "/usr/share/nginx/html"
+	v2APIPath     = "/api/v2.0"
+	port          = 80
 )
 
 func DeployDatabase(ctx context.Context, ns string, coreConfig *config.CfgManager) harbormetav1.PostgresConnectionWithParameters {
 	pg := postgresql.New(ctx, ns)
 
-	coreConfig.Set(common.PostGreSQLHOST, pg.Hosts[0].Host)
-	coreConfig.Set(common.PostGreSQLPassword, pg.Hosts[0].Port)
-	coreConfig.Set(common.PostGreSQLDatabase, pg.Database)
-	coreConfig.Set(common.DatabaseType, "postgresql")
+	coreConfig.Set(context.TODO(), common.PostGreSQLHOST, pg.Hosts[0].Host)
+	coreConfig.Set(context.TODO(), common.PostGreSQLPassword, pg.Hosts[0].Port)
+	coreConfig.Set(context.TODO(), common.PostGreSQLDatabase, pg.Database)
+	coreConfig.Set(context.TODO(), common.DatabaseType, "postgresql")
 
 	if sslMode, ok := pg.Parameters[harbormetav1.PostgresSSLModeKey]; ok {
-		coreConfig.Set(common.PostGreSQLSSLMode, sslMode)
+		coreConfig.Set(context.TODO(), common.PostGreSQLSSLMode, sslMode)
 	}
 
 	pgPassword := &corev1.Secret{}
@@ -44,8 +45,8 @@ func DeployDatabase(ctx context.Context, ns string, coreConfig *config.CfgManage
 		Namespace: ns,
 		Name:      pg.PasswordRef,
 	}, pgPassword)).To(gomega.Succeed())
-	coreConfig.Set(common.PostGreSQLPassword, string(pgPassword.Data[harbormetav1.PostgresqlPasswordKey]))
-	coreConfig.Set(common.PostGreSQLUsername, pg.Username)
+	coreConfig.Set(context.TODO(), common.PostGreSQLPassword, string(pgPassword.Data[harbormetav1.PostgresqlPasswordKey]))
+	coreConfig.Set(context.TODO(), common.PostGreSQLUsername, pg.Username)
 
 	return pg
 }
@@ -54,10 +55,9 @@ func New(ctx context.Context, ns string, coreConfig *config.CfgManager) *url.URL
 	k8sClient := test.GetClient(ctx)
 
 	coreName := test.NewName("core")
-	internalAPIMock := test.NewName("core-internal-api")
 	v2APIMock := test.NewName("core-api-v2")
 
-	localURL := coreConfig.Get(common.CoreLocalURL).GetString()
+	localURL := coreConfig.Get(context.TODO(), common.CoreLocalURL).GetString()
 	if localURL == "" {
 		localURL = fmt.Sprintf("http://%s:%d", coreName, port)
 	}
@@ -91,20 +91,10 @@ func New(ctx context.Context, ns string, coreConfig *config.CfgManager) *url.URL
 		},
 	})).To(gomega.Succeed())
 
-	gomega.Expect(coreConfig.Save()).To(gomega.Succeed())
+	gomega.Expect(coreConfig.Save(context.TODO())).To(gomega.Succeed())
 
-	internalConfigurations, err := json.Marshal(coreConfig.GetAll())
+	internalConfigurations, err := getInternalConfigurations(coreConfig.GetAll(context.TODO()))
 	gomega.Expect(err).ToNot(gomega.HaveOccurred())
-
-	gomega.Expect(k8sClient.Create(ctx, &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      internalAPIMock,
-			Namespace: ns,
-		},
-		BinaryData: map[string][]byte{
-			"configurations": internalConfigurations,
-		},
-	})).To(gomega.Succeed())
 
 	gomega.Expect(k8sClient.Create(ctx, &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
@@ -112,7 +102,8 @@ func New(ctx context.Context, ns string, coreConfig *config.CfgManager) *url.URL
 			Namespace: ns,
 		},
 		Data: map[string]string{
-			"health": `{"status":"healthy","components":[]}`,
+			"health":         `{"status":"healthy","components":[]}`,
+			"internalconfig": string(internalConfigurations),
 		},
 	})).To(gomega.Succeed())
 
@@ -135,15 +126,6 @@ func New(ctx context.Context, ns string, coreConfig *config.CfgManager) *url.URL
 				},
 				Spec: corev1.PodSpec{
 					Volumes: []corev1.Volume{{
-						Name: "internal-api",
-						VolumeSource: corev1.VolumeSource{
-							ConfigMap: &corev1.ConfigMapVolumeSource{
-								LocalObjectReference: corev1.LocalObjectReference{
-									Name: internalAPIMock,
-								},
-							},
-						},
-					}, {
 						Name: "api-v2",
 						VolumeSource: corev1.VolumeSource{
 							ConfigMap: &corev1.ConfigMapVolumeSource{
@@ -160,9 +142,6 @@ func New(ctx context.Context, ns string, coreConfig *config.CfgManager) *url.URL
 							ContainerPort: port,
 						}},
 						VolumeMounts: []corev1.VolumeMount{{
-							MountPath: nginxRootPath + internalAPIPath,
-							Name:      "internal-api",
-						}, {
 							MountPath: nginxRootPath + v2APIPath,
 							Name:      "api-v2",
 						}},
@@ -173,4 +152,36 @@ func New(ctx context.Context, ns string, coreConfig *config.CfgManager) *url.URL
 	})).To(gomega.Succeed())
 
 	return u
+}
+
+func getInternalConfigurations(cfg map[string]interface{}) ([]byte, error) {
+	result := map[string]*models.Value{}
+
+	mList := metadata.Instance().GetAll()
+
+	for _, item := range mList {
+		val, exist := cfg[item.Name]
+		// skip undefined items
+		if !exist {
+			continue
+		}
+
+		switch item.ItemType.(type) {
+		case *metadata.MapType, *metadata.StringToStringMapType:
+			// convert to string for map type
+			valByte, err := json.Marshal(val)
+			if err != nil {
+				return nil, err
+			}
+
+			val = string(valByte)
+		}
+
+		result[item.Name] = &models.Value{
+			Val:      val,
+			Editable: false,
+		}
+	}
+
+	return json.Marshal(result)
 }

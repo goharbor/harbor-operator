@@ -17,7 +17,7 @@ import (
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/pods"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/redis"
 	"github.com/goharbor/harbor/src/common"
-	"github.com/goharbor/harbor/src/common/config"
+	"github.com/goharbor/harbor/src/pkg/config/inmemory"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -60,15 +60,15 @@ var _ = Describe("JobService", func() {
 			registryName := test.NewName("registry")
 			registryControllerName := test.NewName("registryctl")
 
-			coreConfig := config.NewInMemoryManager()
+			coreConfig := inmemory.NewInMemoryManager()
 
-			coreConfig.Set(common.AUTHMode, common.DBAuth)
+			coreConfig.Set(context.TODO(), common.AUTHMode, common.DBAuth)
 			harborcore.DeployDatabase(ctx, namespace, coreConfig)
 
-			coreConfig.Set(common.CoreLocalURL, fmt.Sprintf("http://%s", test.NewName("core")))
-			coreConfig.Set(common.MetricPath, "/metrics")
-			coreConfig.Set(common.MetricPort, 8080)
-			coreConfig.Set(common.MetricEnable, false)
+			coreConfig.Set(context.TODO(), common.CoreLocalURL, fmt.Sprintf("http://%s", test.NewName("core")))
+			coreConfig.Set(context.TODO(), common.MetricPath, "/metrics")
+			coreConfig.Set(context.TODO(), common.MetricPort, 8080)
+			coreConfig.Set(context.TODO(), common.MetricEnable, false)
 
 			jobservice.Spec = goharborv1.JobServiceSpec{
 				SecretRef: test.NewName("secret"),

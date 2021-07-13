@@ -2,6 +2,15 @@ package v1alpha1
 
 import (
 	"fmt"
+	"strconv"
+
+	"github.com/goharbor/harbor-operator/pkg/config/harbor"
+	"github.com/goharbor/harbor/src/common"
+	corev1 "k8s.io/api/core/v1"
+)
+
+const (
+	metricNamespace = "harbor"
 )
 
 const (
@@ -30,6 +39,38 @@ type MetricsSpec struct {
 
 func (spec *MetricsSpec) IsEnabled() bool {
 	return spec != nil && spec.Enabled
+}
+
+func (spec *MetricsSpec) GetEnvVars(component string) ([]corev1.EnvVar, error) {
+	if !spec.IsEnabled() {
+		envs, err := harbor.EnvVars(map[string]harbor.ConfigValue{
+			common.MetricEnable: harbor.Value(strconv.FormatBool(false)),
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		return envs, nil
+	}
+
+	envs, err := harbor.EnvVars(map[string]harbor.ConfigValue{
+		common.MetricEnable: harbor.Value(strconv.FormatBool(spec.Enabled)),
+		common.MetricPort:   harbor.Value(fmt.Sprintf("%d", spec.Port)),
+		common.MetricPath:   harbor.Value(spec.Path),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	envs = append(envs, []corev1.EnvVar{{
+		Name:  "METRIC_NAMESPACE",
+		Value: metricNamespace,
+	}, {
+		Name:  "METRIC_SUBSYSTEM",
+		Value: component,
+	}}...)
+
+	return envs, nil
 }
 
 func (spec *MetricsSpec) AddPrometheusAnnotations(annotations map[string]string) map[string]string {

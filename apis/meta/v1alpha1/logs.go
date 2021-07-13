@@ -46,6 +46,10 @@ func (l HarborLogLevel) Core() CoreLogLevel {
 // ExporterLogLevel is the log level for Exporter.
 type ExporterLogLevel string
 
+func (l ExporterLogLevel) String() string {
+	return string(l)
+}
+
 const (
 	ExporterDebug   ExporterLogLevel = "debug"
 	ExporterInfo    ExporterLogLevel = "info"
