@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-logr/logr"
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
 	"github.com/goharbor/harbor-operator/controllers"
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
@@ -48,7 +47,6 @@ const (
 // Reconciler reconciles a configuration configmap.
 type Reconciler struct {
 	*commonCtrl.Controller
-	Log    logr.Logger
 	Scheme *runtime.Scheme
 }
 
