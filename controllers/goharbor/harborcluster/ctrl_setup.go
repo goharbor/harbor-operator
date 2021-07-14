@@ -3,7 +3,6 @@ package harborcluster
 import (
 	"context"
 
-	"github.com/go-logr/logr"
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
 	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/pkg/builder"
@@ -16,7 +15,6 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	"github.com/goharbor/harbor-operator/pkg/config"
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
-	"github.com/goharbor/harbor-operator/pkg/factories/application"
 	"github.com/goharbor/harbor-operator/pkg/utils/strings"
 	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
@@ -25,7 +23,6 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 )
 
@@ -38,21 +35,16 @@ const (
 // TODO: Refactor to inherit the common reconciler in future
 // Reconciler reconciles a HarborCluster object.
 type Reconciler struct {
-	client.Client
-	Log    logr.Logger
 	Scheme *runtime.Scheme
 
 	// In case
-	ConfigStore *configstore.Store
-	Name        string
-	Version     string
+	Name string
 
-	CacheCtrl    lcm.Controller
-	DatabaseCtrl lcm.Controller
-	StorageCtrl  lcm.Controller
-	HarborCtrl   *harbor.Controller
-
-	ctrl *commonCtrl.Controller // TODO: move the Reconcile to pkg/controller.Controller
+	CacheCtrl              lcm.Controller
+	DatabaseCtrl           lcm.Controller
+	StorageCtrl            lcm.Controller
+	HarborCtrl             *harbor.Controller
+	*commonCtrl.Controller // TODO: move the Reconcile to pkg/controller.Controller
 }
 
 // +kubebuilder:rbac:groups=goharbor.io,resources=harborclusters,verbs=get;list;watch
@@ -69,10 +61,6 @@ type Reconciler struct {
 // +kubebuilder:rbac:groups="",resources=persistentvolumeclaims,verbs=get;list;watch;create;update;patch;delete
 
 func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) error {
-	if err := r.ctrl.SetupWithManager(ctx, mgr); err != nil {
-		return err
-	}
-
 	concurrentReconcile, err := config.GetInt(r.ConfigStore, config.ReconciliationKey, config.DefaultConcurrentReconcile)
 	if err != nil {
 		return errors.Wrap(err, "cannot get concurrent reconcile")
@@ -134,10 +122,8 @@ func (r *Reconciler) NormalizeName(ctx context.Context, name string, suffixes ..
 
 // New HarborCluster reconciler.
 func New(ctx context.Context, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
-	return &Reconciler{
-		Version:     application.GetVersion(ctx),
-		ConfigStore: configStore,
-		Log:         ctrl.Log.WithName(application.GetName(ctx)).WithName("controller").WithValues("controller", "HarborCluster"),
-		ctrl:        commonCtrl.NewController(ctx, controllers.HarborCluster, nil, configStore),
-	}, nil
+	r := &Reconciler{}
+	r.Controller = commonCtrl.NewController(ctx, controllers.HarborCluster, nil, configStore)
+
+	return r, nil
 }
