@@ -254,23 +254,23 @@ func (r *Reconciler) GetCoreIngressRuleValue(ctx context.Context, harbor *goharb
 				PathType: &pathTypePrefix,
 				Backend:  portal,
 			}, {
-				Path:     "/api",
+				Path:     "/api/",
 				PathType: &pathTypePrefix,
 				Backend:  core,
 			}, {
-				Path:     "/service",
+				Path:     "/service/",
 				PathType: &pathTypePrefix,
 				Backend:  core,
 			}, {
-				Path:     "/v2",
+				Path:     "/v2", // distribution APIs will request to `/v2` so don't append slash for this ingress path
 				PathType: &pathTypePrefix,
 				Backend:  core,
 			}, {
-				Path:     "/chartrepo",
+				Path:     "/chartrepo/",
 				PathType: &pathTypePrefix,
 				Backend:  core,
 			}, {
-				Path:     "/c",
+				Path:     "/c/",
 				PathType: &pathTypePrefix,
 				Backend:  core,
 			}},
