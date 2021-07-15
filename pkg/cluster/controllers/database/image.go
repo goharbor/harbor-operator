@@ -22,28 +22,15 @@ import (
 )
 
 const (
-	ComponentName  = "cluster-postgresql"
-	ConfigImageKey = "postgresql-docker-image"
+	ComponentName = "cluster-postgresql"
 )
 
 // GetImage returns the configured image via configstore or default one.
 func (p *PostgreSQLController) GetImage(ctx context.Context, harborcluster *goharborv1.HarborCluster) (string, error) {
-	if harborcluster.Spec.Database.Spec.ZlandoPostgreSQL.Image != "" {
-		return harborcluster.Spec.Database.Spec.ZlandoPostgreSQL.Image, nil
-	}
-
-	options := []image.Option{image.WithHarborVersion(harborcluster.Spec.Version)}
-	if harborcluster.Spec.ImageSource != nil && (harborcluster.Spec.ImageSource.Repository != "" || harborcluster.Spec.ImageSource.TagSuffix != "") {
-		options = append(options,
-			image.WithRepository(harborcluster.Spec.ImageSource.Repository),
-			image.WithTagSuffix(harborcluster.Spec.ImageSource.TagSuffix),
-		)
-	} else {
-		options = append(options,
-			image.WithConfigstore(p.ConfigStore),
-			image.WithConfigImageKey(ConfigImageKey),
-		)
-	}
+	options := harborcluster.Spec.ImageSource.AddRepositoryAndTagSuffixOptions(
+		image.WithImageFromSpec(harborcluster.Spec.Database.Spec.ZlandoPostgreSQL.Image),
+		image.WithHarborVersion(harborcluster.Spec.Version),
+	)
 
 	return image.GetImage(ctx, ComponentName, options...)
 }

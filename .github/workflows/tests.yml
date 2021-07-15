@@ -66,19 +66,7 @@ jobs:
     name: Go tests
     env:
       USE_EXISTING_CLUSTER: true
-      CORE_DOCKER_IMAGE_2_3_0: ghcr.io/goharbor/harbor-core:v2.3.0
-      EXPORTER_DOCKER_IMAGE_2_3_0: ghcr.io/goharbor/harbor-exporter:v2.3.0
-      JOBSERVICE_DOCKER_IMAGE_2_3_0: ghcr.io/goharbor/harbor-jobservice:v2.3.0
-      PORTAL_DOCKER_IMAGE_2_3_0: ghcr.io/goharbor/harbor-portal:v2.3.0
-      REGISTRYCTL_DOCKER_IMAGE_2_3_0: ghcr.io/goharbor/harbor-registryctl:v2.3.0
-      REGISTRY_DOCKER_IMAGE_2_3_0: ghcr.io/goharbor/registry-photon:v2.3.0
-      CHARTMUSEUM_DOCKER_IMAGE_2_3_0: ghcr.io/goharbor/chartmuseum-photon:v2.3.0
-      NOTARYSERVER_DOCKER_IMAGE_2_3_0: ghcr.io/goharbor/notary-server-photon:v2.3.0
-      NOTARYSIGNER_DOCKER_IMAGE_2_3_0: ghcr.io/goharbor/notary-signer-photon:v2.3.0
-      TRIVY_DOCKER_IMAGE_2_3_0: ghcr.io/goharbor/trivy-adapter-photon:v2.3.0
-      HARBORCLUSTER_MINIO_DOCKER_IMAGE_2_3_0: ghcr.io/goharbor/minio:2021-04-06T23-11-00Z
-      HARBORCLUSTER_REDIS_DOCKER_IMAGE_2_3_0: ghcr.io/goharbor/redis:5.0-alpine
-      HARBORCLUSTER_POSTGRESQL_DOCKER_IMAGE_2_3_0: ghcr.io/goharbor/spilo-12:1.6-p3
+      IMAGE_SOURCE_REPOSITORY: ghcr.io/goharbor
       dockerImage: harbor-operator:dev_test
     steps:
       - uses: actions/checkout@v2

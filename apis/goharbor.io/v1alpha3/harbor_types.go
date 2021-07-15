@@ -163,7 +163,7 @@ type HarborList struct {
 type HarborSpec struct {
 	HarborComponentsSpec `json:",inline"`
 
-	ImageSource *ImageSourceSpec `json:"imageSource,omitempty"`
+	ImageSource *harbormetav1.ImageSourceSpec `json:"imageSource,omitempty"`
 
 	// +kubebuilder:validation:Required
 	Expose HarborExposeSpec `json:"expose"`
@@ -667,27 +667,6 @@ func (r *HarborInternalTLSSpec) GetComponentTLSSpec(certificateRef string) *harb
 	return &harbormetav1.ComponentsTLSSpec{
 		CertificateRef: certificateRef,
 	}
-}
-
-type ImageSourceSpec struct {
-	// +kubebuilder:validation:Required
-	// The default repository for the images of the components. eg docker.io/goharbor/
-	Repository string `json:"repository,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	// The tag suffix for the images of the images of the components. eg '-patch1'
-	TagSuffix string `json:"tagSuffix,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Enum={"Always","Never","IfNotPresent"}
-	// Image pull policy.
-	// More info: https://kubernetes.io/docs/concepts/containers/images#updating-images
-	ImagePullPolicy *corev1.PullPolicy `json:"imagePullPolicy,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	// +listType:map
-	// +listMapKey:name
-	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets,omitempty" patchStrategy:"merge" patchMergeKey:"name"`
 }
 
 type HarborExposeSpec struct {

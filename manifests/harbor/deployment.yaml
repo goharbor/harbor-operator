@@ -7573,6 +7573,29 @@ spec:
                                   type: string
                               type: object
                             type: array
+                          mc:
+                            description: MinIOClientSpec the spec for the mc
+                            properties:
+                              image:
+                                description: Image name for the component.
+                                type: string
+                              imagePullPolicy:
+                                description: 'Image pull policy. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images'
+                                enum:
+                                - Always
+                                - Never
+                                - IfNotPresent
+                                type: string
+                              imagePullSecrets:
+                                items:
+                                  description: LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.
+                                  properties:
+                                    name:
+                                      description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                                      type: string
+                                  type: object
+                                type: array
+                            type: object
                           operatorVersion:
                             default: 4.0.6
                             description: the version of minIO operator

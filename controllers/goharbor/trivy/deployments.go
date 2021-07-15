@@ -66,7 +66,6 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1.Trivy)
 	namespace := trivy.GetNamespace()
 
 	getImageOptions := []image.Option{
-		image.WithConfigstore(r.ConfigStore),
 		image.WithImageFromSpec(trivy.Spec.Image),
 		image.WithHarborVersion(version.GetVersion(trivy.Annotations)),
 	}
