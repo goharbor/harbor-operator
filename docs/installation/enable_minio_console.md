@@ -25,10 +25,10 @@ git clone https://github.com/goharbor/harbor-operator.git
 Then open the [all-in-one](./kustomization-all-in-one.md) kustomization manifest and locate the `patchesStrategicMerge` section. Comment the patch `- patch/delete-minio-console.yaml`.
 
 ```yaml
-# If you have to override the image path, uncomment this patch and also change the image paths in the patch/patches-images.yaml file.
+# If you have to override the image path, uncomment this patch and also change the image paths in the patch/image-source.yaml file.
 # Then rebuild.
 patchesStrategicMerge:
-#   - patch/images.yaml
+#   - patch/image-source.yaml
 #  - patch/delete-minio-console.yaml
   - patch/delete-duplicated-ns.yaml
   - patch/pg-configmap.yaml

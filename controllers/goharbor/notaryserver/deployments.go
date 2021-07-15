@@ -39,7 +39,6 @@ const apiPort = 4443
 
 func (r *Reconciler) GetDeployment(ctx context.Context, notary *goharborv1.NotaryServer) (*appsv1.Deployment, error) { // nolint:funlen
 	getImageOptions := []image.Option{
-		image.WithConfigstore(r.ConfigStore),
 		image.WithImageFromSpec(notary.Spec.Image),
 		image.WithHarborVersion(version.GetVersion(notary.Annotations)),
 	}

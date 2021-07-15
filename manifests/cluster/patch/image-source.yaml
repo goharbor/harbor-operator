@@ -1,0 +1,15 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: harbor-operator
+spec:
+  template:
+    spec:
+      containers:
+      - name: manager
+        env:
+          - name: IMAGE_SOURCE_REPOSITORY
+            value: ghcr.io/goharbor
+          # # Uncomment the following when want append a suffix to the tag of the image
+          # - name: IMAGE_SOURCE_TAG_SUFFIX
+          #   value: the-suffix

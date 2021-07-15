@@ -73,7 +73,6 @@ func getDefaultAllowedRegistryTypesForProxyCache() string {
 
 func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1.Core) (*appsv1.Deployment, error) { // nolint:funlen
 	getImageOptions := []image.Option{
-		image.WithConfigstore(r.ConfigStore),
 		image.WithImageFromSpec(core.Spec.Image),
 		image.WithHarborVersion(version.GetVersion(core.Annotations)),
 	}

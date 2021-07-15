@@ -4,14 +4,11 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	. "github.com/goharbor/harbor-operator/pkg/image"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/ovh/configstore"
-	"github.com/pkg/errors"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
 
@@ -30,6 +27,9 @@ var _ = Describe("Get image", func() {
 
 			return GetImage(ctx, component, options...)
 		}
+
+		os.Unsetenv(ImageSourceRepositoryEnvKey)
+		os.Unsetenv(ImageSourceTagSuffixEnvKey)
 	})
 
 	Describe("Get image for unknow component", func() {
@@ -79,51 +79,23 @@ var _ = Describe("Get image", func() {
 		})
 	})
 
-	Describe("Get image from config store", func() {
+	Describe("Get image with repository from env", func() {
 		It("Should pass", func() {
-			os.Setenv(configstore.ConfigEnvVar, "env")
-			os.Setenv(ConfigImageKey+"_"+strings.ReplaceAll(harborVersion, ".", "_"), "goharbor/harbor-core:latest")
-			configStore := configstore.NewStore()
-			configStore.InitFromEnvironment()
+			os.Setenv(ImageSourceRepositoryEnvKey, "ghcr.io/goharbor")
 
-			image, err := getImage(ctx, "core", WithConfigstore(configStore))
+			image, err := getImage(ctx, "core")
 			Expect(err).ToNot(HaveOccurred())
-			Expect(image).To(Equal("goharbor/harbor-core:latest"))
+			Expect(image).To(Equal(fmt.Sprintf("ghcr.io/goharbor/harbor-core:v%s", harborVersion)))
 		})
 	})
 
-	Describe("Get image from config store with image key", func() {
+	Describe("Get image with tag suffix from env", func() {
 		It("Should pass", func() {
-			os.Setenv(configstore.ConfigEnvVar, "env")
-			os.Setenv("key"+"_"+strings.ReplaceAll(harborVersion, ".", "_"), "goharbor/harbor-core:latest")
-			configStore := configstore.NewStore()
-			configStore.InitFromEnvironment()
+			os.Setenv(ImageSourceTagSuffixEnvKey, "-suffix")
 
-			image, err := getImage(ctx, "core", WithConfigstore(configStore), WithConfigImageKey("key"))
+			image, err := getImage(ctx, "core")
 			Expect(err).ToNot(HaveOccurred())
-			Expect(image).To(Equal("goharbor/harbor-core:latest"))
-		})
-	})
-
-	Describe("Get image from config store but not found", func() {
-		It("Should pass", func() {
-			configStore := configstore.NewStore()
-
-			image, err := getImage(ctx, "core", WithConfigstore(configStore))
-			Expect(err).ToNot(HaveOccurred())
-			Expect(image).To(Equal(fmt.Sprintf("goharbor/harbor-core:v%s", harborVersion)))
-		})
-	})
-
-	Describe("Get image from config store but failed", func() {
-		It("Should pass", func() {
-			configStore := configstore.NewStore()
-			configStore.RegisterProvider("foo", func() (configstore.ItemList, error) {
-				return configstore.ItemList{}, errors.Errorf("failed")
-			})
-
-			_, err := getImage(ctx, "core", WithConfigstore(configStore))
-			Expect(err).To(HaveOccurred())
+			Expect(image).To(Equal(fmt.Sprintf("goharbor/harbor-core:v%s-suffix", harborVersion)))
 		})
 	})
 

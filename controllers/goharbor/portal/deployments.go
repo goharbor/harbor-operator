@@ -43,7 +43,6 @@ var (
 
 func (r *Reconciler) GetDeployment(ctx context.Context, portal *goharborv1.Portal) (*appsv1.Deployment, error) { // nolint:funlen
 	getImageOptions := []image.Option{
-		image.WithConfigstore(r.ConfigStore),
 		image.WithImageFromSpec(portal.Spec.Image),
 		image.WithHarborVersion(version.GetVersion(portal.Annotations)),
 	}

@@ -15,10 +15,10 @@ resources:
   - namespace.yaml
   - ../../config/default # harbor operator
 
-# If you have to override the image path, uncomment this patch and also change the image paths in the patch/patches-images.yaml file.
+# If you have to override the image path, uncomment this patch and also change the image paths in the patch/image-source.yaml file.
 # Then rebuild.
 # patchesStrategicMerge:
-#  - patch/images.yaml
+#  - patch/image-source.yaml
 
 images:
   - name: goharbor/harbor-operator

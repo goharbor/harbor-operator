@@ -11,10 +11,7 @@ By default, the environment variables settings of the image pulling paths are no
 1. Uncomment the following content section in the [full stack](../manifests/cluster/kustomization.yaml) or [Harbor operator only](../manifests/harbor/kustomization.yaml) kustomization yaml file.
 
   ```yaml
-  # If you have to override the image path, uncomment this patch and also change the image paths in the patch/patches-images.yaml file.
-  # Then rebuild.
-  # patchesStrategicMerge:
-  # - patch/images.yaml
+  # - patch/image-source.yaml
   ```
 
 1. Regenerate the deployment manifest with the updated kustomization file and apply it

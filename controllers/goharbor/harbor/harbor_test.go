@@ -2,11 +2,13 @@ package harbor_test
 
 import (
 	"context"
+	"os"
 	"strings"
 
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/harbor"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
+	"github.com/goharbor/harbor-operator/pkg/image"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -39,6 +41,9 @@ var _ = Describe("Harbor", func() {
 		input = ""
 		getComponent = nil
 		output = ""
+
+		os.Unsetenv(image.ImageSourceRepositoryEnvKey)
+		os.Unsetenv(image.ImageSourceTagSuffixEnvKey)
 	})
 
 	JustBeforeEach(func() {

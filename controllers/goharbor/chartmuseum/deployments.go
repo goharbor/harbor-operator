@@ -45,7 +45,6 @@ const (
 
 func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1.ChartMuseum) (*appsv1.Deployment, error) { // nolint:funlen
 	getImageOptions := []image.Option{
-		image.WithConfigstore(r.ConfigStore),
 		image.WithImageFromSpec(chartMuseum.Spec.Image),
 		image.WithHarborVersion(version.GetVersion(chartMuseum.Annotations)),
 	}

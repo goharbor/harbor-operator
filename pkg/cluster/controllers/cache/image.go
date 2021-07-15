@@ -22,28 +22,15 @@ import (
 )
 
 const (
-	ComponentName  = "cluster-redis"
-	ConfigImageKey = "redis-docker-image"
+	ComponentName = "cluster-redis"
 )
 
 // GetImage returns the configured image via configstore or default one.
 func (rm *redisResourceManager) GetImage(ctx context.Context, harborcluster *goharborv1.HarborCluster) (string, error) {
-	if harborcluster.Spec.Cache.Spec.RedisFailover.Image != "" {
-		return harborcluster.Spec.Cache.Spec.RedisFailover.Image, nil
-	}
-
-	options := []image.Option{image.WithHarborVersion(harborcluster.Spec.Version)}
-	if harborcluster.Spec.ImageSource != nil && (harborcluster.Spec.ImageSource.Repository != "" || harborcluster.Spec.ImageSource.TagSuffix != "") {
-		options = append(options,
-			image.WithRepository(harborcluster.Spec.ImageSource.Repository),
-			image.WithTagSuffix(harborcluster.Spec.ImageSource.TagSuffix),
-		)
-	} else {
-		options = append(options,
-			image.WithConfigstore(rm.configStore),
-			image.WithConfigImageKey(ConfigImageKey),
-		)
-	}
+	options := harborcluster.Spec.ImageSource.AddRepositoryAndTagSuffixOptions(
+		image.WithImageFromSpec(harborcluster.Spec.Cache.Spec.RedisFailover.Image),
+		image.WithHarborVersion(harborcluster.Spec.Version),
+	)
 
 	return image.GetImage(ctx, ComponentName, options...)
 }
