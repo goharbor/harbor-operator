@@ -24,31 +24,16 @@ import (
 )
 
 const (
-	ComponentName  = "cluster-minio"
-	ConfigImageKey = "minio-docker-image"
-
-	MinIOClientComponentName  = "cluster-minio-init"
-	MinIOClientConfigImageKey = "minio-init-docker-image"
+	ComponentName            = "cluster-minio"
+	MinIOClientComponentName = "cluster-minio-init"
 )
 
 // getImage returns the configured image via configstore or default one.
 func (m *MinIOController) getImage(ctx context.Context, harborcluster *goharborv1.HarborCluster) (string, error) {
-	if harborcluster.Spec.Storage.Spec.MinIO.Image != "" {
-		return harborcluster.Spec.Storage.Spec.MinIO.Image, nil
-	}
-
-	options := []image.Option{image.WithHarborVersion(harborcluster.Spec.Version)}
-	if harborcluster.Spec.ImageSource != nil && (harborcluster.Spec.ImageSource.Repository != "" || harborcluster.Spec.ImageSource.TagSuffix != "") {
-		options = append(options,
-			image.WithRepository(harborcluster.Spec.ImageSource.Repository),
-			image.WithTagSuffix(harborcluster.Spec.ImageSource.TagSuffix),
-		)
-	} else {
-		options = append(options,
-			image.WithConfigstore(m.ConfigStore),
-			image.WithConfigImageKey(ConfigImageKey),
-		)
-	}
+	options := harborcluster.Spec.ImageSource.AddRepositoryAndTagSuffixOptions(
+		image.WithImageFromSpec(harborcluster.Spec.Storage.Spec.MinIO.Image),
+		image.WithHarborVersion(harborcluster.Spec.Version),
+	)
 
 	image, err := image.GetImage(ctx, ComponentName, options...)
 	if err != nil {
@@ -83,23 +68,10 @@ func (m *MinIOController) getImagePullSecret(_ context.Context, harborcluster *g
 }
 
 func (m *MinIOController) getMinIOClientImage(ctx context.Context, harborcluster *goharborv1.HarborCluster) (string, error) {
-	spec := harborcluster.Spec.Storage.Spec.MinIO
-	if spec != nil && spec.Image != "" {
-		return spec.Image, nil
-	}
-
-	options := []image.Option{image.WithHarborVersion(harborcluster.Spec.Version)}
-	if harborcluster.Spec.ImageSource != nil && (harborcluster.Spec.ImageSource.Repository != "" || harborcluster.Spec.ImageSource.TagSuffix != "") {
-		options = append(options,
-			image.WithRepository(harborcluster.Spec.ImageSource.Repository),
-			image.WithTagSuffix(harborcluster.Spec.ImageSource.TagSuffix),
-		)
-	} else {
-		options = append(options,
-			image.WithConfigstore(m.ConfigStore),
-			image.WithConfigImageKey(MinIOClientConfigImageKey),
-		)
-	}
+	options := harborcluster.Spec.ImageSource.AddRepositoryAndTagSuffixOptions(
+		image.WithImageFromSpec(harborcluster.Spec.Storage.Spec.MinIO.GetMinIOClientImage()),
+		image.WithHarborVersion(harborcluster.Spec.Version),
+	)
 
 	image, err := image.GetImage(ctx, MinIOClientComponentName, options...)
 	if err != nil {
@@ -110,7 +82,7 @@ func (m *MinIOController) getMinIOClientImage(ctx context.Context, harborcluster
 }
 
 func (m *MinIOController) getMinIOClientImagePullPolicy(_ context.Context, harborcluster *goharborv1.HarborCluster) corev1.PullPolicy {
-	spec := harborcluster.Spec.Storage.Spec.MinIO
+	spec := harborcluster.Spec.Storage.Spec.MinIO.MinIOClientSpec
 	if spec != nil && spec.ImagePullPolicy != nil {
 		return *spec.ImagePullPolicy
 	}
@@ -123,7 +95,7 @@ func (m *MinIOController) getMinIOClientImagePullPolicy(_ context.Context, harbo
 }
 
 func (m *MinIOController) getMinIOClientImagePullSecrets(_ context.Context, harborcluster *goharborv1.HarborCluster) []corev1.LocalObjectReference {
-	spec := harborcluster.Spec.Storage.Spec.MinIO
+	spec := harborcluster.Spec.Storage.Spec.MinIO.MinIOClientSpec
 	if spec != nil && len(spec.ImagePullSecrets) > 0 {
 		return spec.ImagePullSecrets
 	}

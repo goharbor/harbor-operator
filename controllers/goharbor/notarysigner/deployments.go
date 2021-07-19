@@ -32,7 +32,6 @@ var (
 
 func (r *Reconciler) GetDeployment(ctx context.Context, notary *goharborv1.NotarySigner) (*appsv1.Deployment, error) { // nolint:funlen
 	getImageOptions := []image.Option{
-		image.WithConfigstore(r.ConfigStore),
 		image.WithImageFromSpec(notary.Spec.Image),
 		image.WithHarborVersion(version.GetVersion(notary.Annotations)),
 	}

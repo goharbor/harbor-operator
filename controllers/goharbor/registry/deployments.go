@@ -51,7 +51,6 @@ const (
 
 func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1.Registry) (*appsv1.Deployment, error) { // nolint:funlen
 	getImageOptions := []image.Option{
-		image.WithConfigstore(r.ConfigStore),
 		image.WithImageFromSpec(registry.Spec.Image),
 		image.WithHarborVersion(version.GetVersion(registry.Annotations)),
 	}

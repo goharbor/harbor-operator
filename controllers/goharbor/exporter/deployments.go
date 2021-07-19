@@ -49,7 +49,6 @@ var (
 
 func (r *Reconciler) GetDeployment(ctx context.Context, exporter *goharborv1.Exporter) (*appsv1.Deployment, error) { // nolint:funlen
 	getImageOptions := []image.Option{
-		image.WithConfigstore(r.ConfigStore),
 		image.WithImageFromSpec(exporter.Spec.Image),
 		image.WithHarborVersion(version.GetVersion(exporter.Annotations)),
 	}

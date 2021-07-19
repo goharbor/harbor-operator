@@ -76,17 +76,13 @@ func Convert_v1alpha3_HarborSpec_To_v1beta1_HarborSpec(src *HarborSpec, dst *v1b
 	dst.HarborAdminPasswordRef = src.HarborAdminPasswordRef
 	dst.UpdateStrategyType = src.UpdateStrategyType
 	dst.Version = src.Version
+	dst.ImageSource = src.ImageSource.DeepCopy()
 
 	if src.Proxy != nil {
 		dst.Proxy = &v1beta1.HarborProxySpec{
 			ProxySpec:  src.Proxy.ProxySpec,
 			Components: src.Proxy.Components,
 		}
-	}
-
-	if src.ImageSource != nil {
-		dst.ImageSource = &v1beta1.ImageSourceSpec{}
-		Convert_v1alpha3_ImageSourceSpec_To_v1beta1_ImageSourceSpec(src.ImageSource, dst.ImageSource)
 	}
 
 	Convert_v1alpha3_HarborExposeSpec_To_v1beta1_HarborExposeSpec(&src.Expose, &dst.Expose)
@@ -208,13 +204,6 @@ func Convert_v1alpha3_NotaryComponentSpec_To_v1beta1_NotaryComponentSpec(src *No
 	dst.Server = src.Server
 	dst.Signer = src.Signer
 	dst.MigrationEnabled = src.MigrationEnabled
-}
-
-func Convert_v1alpha3_ImageSourceSpec_To_v1beta1_ImageSourceSpec(src *ImageSourceSpec, dst *v1beta1.ImageSourceSpec) { // nolint
-	dst.ImagePullPolicy = src.ImagePullPolicy
-	dst.ImagePullSecrets = src.ImagePullSecrets
-	dst.Repository = src.Repository
-	dst.TagSuffix = src.TagSuffix
 }
 
 func Convert_v1alpha3_Cache_To_v1beta1_Cache(src *Cache, dst *v1beta1.Cache) { // nolint
@@ -349,6 +338,10 @@ func Convert_v1alpha3_MinIOSpec_to_v1beta1_MinIOSpec(src *MinIOSpec, dst *v1beta
 	if src.Redirect.Expose != nil {
 		dst.Redirect.Expose = &v1beta1.HarborExposeComponentSpec{}
 		Convert_v1alpha3_HarborExposeComponentSpec_To_v1beta1_HarborExposeComponentSpec(src.Redirect.Expose, dst.Redirect.Expose)
+	}
+
+	if src.MinIOClientSpec != nil {
+		dst.MinIOClientSpec = &v1beta1.MinIOClientSpec{ImageSpec: src.MinIOClientSpec.ImageSpec}
 	}
 }
 
@@ -546,17 +539,13 @@ func Convert_v1beta1_EmbeddedHarborSpec_To_v1alpha3_HarborSpec(src *v1beta1.Embe
 	dst.HarborAdminPasswordRef = src.HarborAdminPasswordRef
 	dst.UpdateStrategyType = src.UpdateStrategyType
 	dst.Version = src.Version
+	dst.ImageSource = src.ImageSource.DeepCopy()
 
 	if src.Proxy != nil {
 		dst.Proxy = &HarborProxySpec{
 			ProxySpec:  src.Proxy.ProxySpec,
 			Components: src.Proxy.Components,
 		}
-	}
-
-	if src.ImageSource != nil {
-		dst.ImageSource = &ImageSourceSpec{}
-		Convert_v1beta1_ImageSourceSpec_To_v1alpha3_ImageSourceSpec(src.ImageSource, dst.ImageSource)
 	}
 
 	Convert_v1beta1_HarborExposeSpec_To_v1alpha3_HarborExposeSpec(&src.Expose, &dst.Expose)
@@ -672,13 +661,6 @@ func Convert_v1beta1_NotaryComponentSpec_To_v1alpha3_NotaryComponentSpec(src *v1
 	dst.MigrationEnabled = src.MigrationEnabled
 }
 
-func Convert_v1beta1_ImageSourceSpec_To_v1alpha3_ImageSourceSpec(src *v1beta1.ImageSourceSpec, dst *ImageSourceSpec) { // nolint
-	dst.ImagePullPolicy = src.ImagePullPolicy
-	dst.ImagePullSecrets = src.ImagePullSecrets
-	dst.Repository = src.Repository
-	dst.TagSuffix = src.TagSuffix
-}
-
 func Convert_v1beta1_ExternalRedisSpec_To_v1alpha3_ExternalRedisSpec(src *v1beta1.ExternalRedisSpec, dst *ExternalRedisSpec) { // nolint
 	dst.RedisCredentials = src.RedisCredentials
 	dst.RedisHostSpec = src.RedisHostSpec
@@ -755,6 +737,10 @@ func Convert_v1beta1_MinIOSpec_To_v1alpha3_MinIOSpec(src *v1beta1.MinIOSpec, dst
 	if src.Redirect.Expose != nil {
 		dst.Redirect.Expose = &HarborExposeComponentSpec{}
 		Convert_v1beta1_HarborExposeComponentSpec_To_v1alpha3_HarborExposeComponentSpec(src.Redirect.Expose, dst.Redirect.Expose)
+	}
+
+	if src.MinIOClientSpec != nil {
+		dst.MinIOClientSpec = &MinIOClientSpec{ImageSpec: src.MinIOClientSpec.ImageSpec}
 	}
 }
 
