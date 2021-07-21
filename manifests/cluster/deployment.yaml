@@ -8178,6 +8178,428 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
+    controller-gen.kubebuilder.io/version: v0.5.0
+    goharbor.io/deploy-engine: Kustomization
+    goharbor.io/deploy-mode: cluster
+    goharbor.io/operator-version: v1.0.0
+  creationTimestamp: null
+  name: harborconfigurations.goharbor.io
+spec:
+  group: goharbor.io
+  names:
+    categories:
+    - goharbor
+    kind: HarborConfiguration
+    listKind: HarborConfigurationList
+    plural: harborconfigurations
+    shortNames:
+    - hc
+    singular: harborconfiguration
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: Harbor instance name
+      jsonPath: .metadata.labels['harbor-name']
+      name: HarborName
+      type: string
+    - description: HarborConfiguration status
+      jsonPath: .status.status
+      name: Status
+      type: string
+    - description: Timestamp representing the server time when this object was created. It is not guaranteed to be set in happens-before order across separate operations. Clients may not set this value. It is represented in RFC3339 form and is in UTC.
+      jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: HarborConfiguration is the Schema for the harbors configuration.
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: HarborConfigurationSpec defines the spec of HarborConfiguration.
+            properties:
+              auth_mode:
+                description: The auth mode of current system, such as "db_auth", "ldap_auth", "oidc_auth".
+                type: string
+              email_from:
+                description: The sender name for Email notification.
+                type: string
+              email_host:
+                description: The hostname of SMTP server that sends Email notification.
+                type: string
+              email_identity:
+                description: By default it's empty so the email_username is picked
+                type: string
+              email_insecure:
+                description: Whether or not the certificate will be verified when Harbor tries to access the email server.
+                type: boolean
+              email_password:
+                description: Email password.
+                type: string
+              email_port:
+                description: The port of SMTP server.
+                type: integer
+              email_ssl:
+                description: When it''s set to true the system will access Email server via TLS by default.  If it''s set to false, it still will handle "STARTTLS" from server side.
+                type: boolean
+              email_username:
+                description: The username for authenticate against SMTP server.
+                type: string
+              extension:
+                description: AdditionalProperties provides workaround for those unknown configuration fields in the future.
+                type: object
+              http_authproxy_admin_groups:
+                description: The group which has the harbor admin privileges.
+                type: string
+              http_authproxy_admin_usernames:
+                description: The username which has the harbor admin privileges.
+                type: string
+              http_authproxy_endpoint:
+                description: The endpoint of the HTTP auth.
+                type: string
+              http_authproxy_server_certificate:
+                description: The certificate of the HTTP auth provider.
+                type: boolean
+              http_authproxy_skip_search:
+                description: Search user before onboard.
+                type: boolean
+              http_authproxy_tokenreview_endpoint:
+                description: The token review endpoint.
+                type: string
+              http_authproxy_verify_cert:
+                description: Verify the HTTP auth provider's certificate.
+                type: boolean
+              ldap_base_dn:
+                description: The Base DN for LDAP binding.
+                type: string
+              ldap_filter:
+                description: The filter for LDAP search.
+                type: string
+              ldap_group_admin_dn:
+                description: Specify the ldap group which have the same privilege with Harbor admin.
+                type: string
+              ldap_group_attribute_name:
+                description: The attribute which is used as identity of the LDAP group, default is cn.
+                type: string
+              ldap_group_base_dn:
+                description: The base DN to search LDAP group.
+                type: string
+              ldap_group_membership_attribute:
+                description: The user attribute to identify the group membership.
+                type: string
+              ldap_group_search_filter:
+                description: The filter to search the ldap group.
+                type: string
+              ldap_group_search_scope:
+                description: The scope to search ldap group. ''0-LDAP_SCOPE_BASE, 1-LDAP_SCOPE_ONELEVEL, 2-LDAP_SCOPE_SUBTREE''.
+                type: integer
+              ldap_scope:
+                description: The scope to search ldap users,'0-LDAP_SCOPE_BASE, 1-LDAP_SCOPE_ONELEVEL, 2-LDAP_SCOPE_SUBTREE'.
+                type: integer
+              ldap_search_dn:
+                description: The DN of the user to do the search.
+                type: string
+              ldap_search_password:
+                description: The password ref of the ldap search dn.
+                type: string
+              ldap_timeout:
+                description: Timeout in seconds for connection to LDAP server.
+                type: integer
+              ldap_uid:
+                description: The attribute which is used as identity for the LDAP binding, such as "CN" or "SAMAccountname".
+                type: string
+              ldap_url:
+                description: The URL of LDAP server.
+                type: string
+              ldap_verify_cert:
+                description: Whether verify your OIDC server certificate, disable it if your OIDC server is hosted via self-hosted certificate.
+                type: boolean
+              notification_enable:
+                description: Enable notification.
+                type: boolean
+              oidc_admin_group:
+                description: The OIDC group which has the harbor admin privileges.
+                type: string
+              oidc_auto_onboard:
+                description: Auto onboard the OIDC user.
+                type: boolean
+              oidc_client_id:
+                description: The client ID of the OIDC provider.
+                type: string
+              oidc_client_secret:
+                description: The OIDC provider secret.
+                type: string
+              oidc_endpoint:
+                description: The endpoint of the OIDC provider.
+                type: string
+              oidc_extra_redirect_parms:
+                description: Extra parameters to add when redirect request to OIDC provider.
+                type: string
+              oidc_groups_claim:
+                description: The attribute claims the group name.
+                type: string
+              oidc_name:
+                description: The OIDC provider name.
+                type: string
+              oidc_scope:
+                description: The scope of the OIDC provider.
+                type: string
+              oidc_user_claim:
+                description: The attribute claims the username.
+                type: string
+              oidc_verify_cert:
+                description: Verify the OIDC provider's certificate'.
+                type: boolean
+              project_creation_restriction:
+                description: Indicate who can create projects, it could be ''adminonly'' or ''everyone''.
+                type: string
+              quota_per_project_enable:
+                description: Enable quota per project.
+                type: boolean
+              read_only:
+                description: The flag to indicate whether Harbor is in readonly mode.
+                type: boolean
+              robot_name_prefix:
+                description: The rebot account name prefix.
+                type: string
+              robot_token_duration:
+                description: The robot account token duration in days.
+                type: integer
+              self_registration:
+                description: Whether the Harbor instance supports self-registration.  If it''s set to false, admin need to add user to the instance.
+                type: boolean
+              storage_per_project:
+                description: The storage quota per project.
+                type: integer
+              token_expiration:
+                description: The expiration time of the token for internal Registry, in minutes.
+                type: integer
+              uaa_client_id:
+                description: The client id of UAA.
+                type: string
+              uaa_client_secret:
+                description: The client secret of the UAA.
+                type: string
+              uaa_endpoint:
+                description: The endpoint of the UAA.
+                type: string
+              uaa_verify_cert:
+                description: Verify the certificate in UAA server.
+                type: boolean
+            type: object
+          status:
+            description: HarborConfigurationStatus defines the status of HarborConfiguration.
+            properties:
+              lastApplyTime:
+                description: LastApplyTime represents the last apply configuration time.
+                format: date-time
+                type: string
+              lastConfiguration:
+                description: LastConfiguration represents the configuration of last time.
+                properties:
+                  auth_mode:
+                    description: The auth mode of current system, such as "db_auth", "ldap_auth", "oidc_auth".
+                    type: string
+                  email_from:
+                    description: The sender name for Email notification.
+                    type: string
+                  email_host:
+                    description: The hostname of SMTP server that sends Email notification.
+                    type: string
+                  email_identity:
+                    description: By default it's empty so the email_username is picked
+                    type: string
+                  email_insecure:
+                    description: Whether or not the certificate will be verified when Harbor tries to access the email server.
+                    type: boolean
+                  email_password:
+                    description: Email password.
+                    type: string
+                  email_port:
+                    description: The port of SMTP server.
+                    type: integer
+                  email_ssl:
+                    description: When it''s set to true the system will access Email server via TLS by default.  If it''s set to false, it still will handle "STARTTLS" from server side.
+                    type: boolean
+                  email_username:
+                    description: The username for authenticate against SMTP server.
+                    type: string
+                  extension:
+                    description: AdditionalProperties provides workaround for those unknown configuration fields in the future.
+                    type: object
+                  http_authproxy_admin_groups:
+                    description: The group which has the harbor admin privileges.
+                    type: string
+                  http_authproxy_admin_usernames:
+                    description: The username which has the harbor admin privileges.
+                    type: string
+                  http_authproxy_endpoint:
+                    description: The endpoint of the HTTP auth.
+                    type: string
+                  http_authproxy_server_certificate:
+                    description: The certificate of the HTTP auth provider.
+                    type: boolean
+                  http_authproxy_skip_search:
+                    description: Search user before onboard.
+                    type: boolean
+                  http_authproxy_tokenreview_endpoint:
+                    description: The token review endpoint.
+                    type: string
+                  http_authproxy_verify_cert:
+                    description: Verify the HTTP auth provider's certificate.
+                    type: boolean
+                  ldap_base_dn:
+                    description: The Base DN for LDAP binding.
+                    type: string
+                  ldap_filter:
+                    description: The filter for LDAP search.
+                    type: string
+                  ldap_group_admin_dn:
+                    description: Specify the ldap group which have the same privilege with Harbor admin.
+                    type: string
+                  ldap_group_attribute_name:
+                    description: The attribute which is used as identity of the LDAP group, default is cn.
+                    type: string
+                  ldap_group_base_dn:
+                    description: The base DN to search LDAP group.
+                    type: string
+                  ldap_group_membership_attribute:
+                    description: The user attribute to identify the group membership.
+                    type: string
+                  ldap_group_search_filter:
+                    description: The filter to search the ldap group.
+                    type: string
+                  ldap_group_search_scope:
+                    description: The scope to search ldap group. ''0-LDAP_SCOPE_BASE, 1-LDAP_SCOPE_ONELEVEL, 2-LDAP_SCOPE_SUBTREE''.
+                    type: integer
+                  ldap_scope:
+                    description: The scope to search ldap users,'0-LDAP_SCOPE_BASE, 1-LDAP_SCOPE_ONELEVEL, 2-LDAP_SCOPE_SUBTREE'.
+                    type: integer
+                  ldap_search_dn:
+                    description: The DN of the user to do the search.
+                    type: string
+                  ldap_search_password:
+                    description: The password ref of the ldap search dn.
+                    type: string
+                  ldap_timeout:
+                    description: Timeout in seconds for connection to LDAP server.
+                    type: integer
+                  ldap_uid:
+                    description: The attribute which is used as identity for the LDAP binding, such as "CN" or "SAMAccountname".
+                    type: string
+                  ldap_url:
+                    description: The URL of LDAP server.
+                    type: string
+                  ldap_verify_cert:
+                    description: Whether verify your OIDC server certificate, disable it if your OIDC server is hosted via self-hosted certificate.
+                    type: boolean
+                  notification_enable:
+                    description: Enable notification.
+                    type: boolean
+                  oidc_admin_group:
+                    description: The OIDC group which has the harbor admin privileges.
+                    type: string
+                  oidc_auto_onboard:
+                    description: Auto onboard the OIDC user.
+                    type: boolean
+                  oidc_client_id:
+                    description: The client ID of the OIDC provider.
+                    type: string
+                  oidc_client_secret:
+                    description: The OIDC provider secret.
+                    type: string
+                  oidc_endpoint:
+                    description: The endpoint of the OIDC provider.
+                    type: string
+                  oidc_extra_redirect_parms:
+                    description: Extra parameters to add when redirect request to OIDC provider.
+                    type: string
+                  oidc_groups_claim:
+                    description: The attribute claims the group name.
+                    type: string
+                  oidc_name:
+                    description: The OIDC provider name.
+                    type: string
+                  oidc_scope:
+                    description: The scope of the OIDC provider.
+                    type: string
+                  oidc_user_claim:
+                    description: The attribute claims the username.
+                    type: string
+                  oidc_verify_cert:
+                    description: Verify the OIDC provider's certificate'.
+                    type: boolean
+                  project_creation_restriction:
+                    description: Indicate who can create projects, it could be ''adminonly'' or ''everyone''.
+                    type: string
+                  quota_per_project_enable:
+                    description: Enable quota per project.
+                    type: boolean
+                  read_only:
+                    description: The flag to indicate whether Harbor is in readonly mode.
+                    type: boolean
+                  robot_name_prefix:
+                    description: The rebot account name prefix.
+                    type: string
+                  robot_token_duration:
+                    description: The robot account token duration in days.
+                    type: integer
+                  self_registration:
+                    description: Whether the Harbor instance supports self-registration.  If it''s set to false, admin need to add user to the instance.
+                    type: boolean
+                  storage_per_project:
+                    description: The storage quota per project.
+                    type: integer
+                  token_expiration:
+                    description: The expiration time of the token for internal Registry, in minutes.
+                    type: integer
+                  uaa_client_id:
+                    description: The client id of UAA.
+                    type: string
+                  uaa_client_secret:
+                    description: The client secret of the UAA.
+                    type: string
+                  uaa_endpoint:
+                    description: The endpoint of the UAA.
+                    type: string
+                  uaa_verify_cert:
+                    description: Verify the certificate in UAA server.
+                    type: boolean
+                type: object
+              message:
+                description: Message provides human-readable message.
+                type: string
+              reason:
+                description: Reason represents status reason.
+                type: string
+              status:
+                description: Status represents harbor configuration status.
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
     cert-manager.io/inject-ca-from: harbor-operator-ns/serving-cert
     controller-gen.kubebuilder.io/version: v0.5.0
     goharbor.io/deploy-engine: Kustomization
@@ -32444,6 +32866,18 @@ rules:
   - ""
   resources:
   - configmaps
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
   - secrets
   - services
   verbs:
@@ -32483,6 +32917,18 @@ rules:
   - ""
   resources:
   - pods
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - secrets
   verbs:
   - create
   - delete
@@ -32686,6 +33132,30 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - goharbor.io
+  resources:
+  - harborconfigurations
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - goharbor.io
+  resources:
+  - harborconfigurations/status
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
 - apiGroups:
   - goharbor.io
   resources:

@@ -2,14 +2,12 @@ package configuration
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"time"
 
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
 	"github.com/goharbor/harbor-operator/controllers"
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
-	"github.com/goharbor/harbor-operator/pkg/harbor"
+	pkgharbor "github.com/goharbor/harbor-operator/pkg/harbor"
 	"github.com/goharbor/harbor-operator/pkg/utils/strings"
 	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
@@ -19,13 +17,12 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/event"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
-	"sigs.k8s.io/yaml"
 )
 
-// pwdFields deines configuration password related fidlds list.
-var pwdFields = []string{"email_password", "ldap_search_password", "uaa_client_secret", "oidc_client_secret"}
+const (
+	// HarborNameLabelKey defines the key of harbor name.
+	HarborNameLabelKey = "harbor-name"
+)
 
 // New HarborConfiguration reconciler.
 func New(ctx context.Context, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
@@ -35,54 +32,22 @@ func New(ctx context.Context, configStore *configstore.Store) (commonCtrl.Reconc
 	return r, nil
 }
 
-const (
-	// ConfigurationLabelKey is the key label for configuration.
-	ConfigurationLabelKey = "goharbor.io/configuration"
-	// ConfigurationApplyError is the reason of condition.
-	ConfigurationApplyError = "ConfigurationApplyError"
-	// ConfigurationApplySuccess is the reason of condition.
-	ConfigurationApplySuccess = "ConfigurationApplySuccess"
-)
-
-// Reconciler reconciles a configuration configmap.
+// Reconciler reconciles a configuration cr.
 type Reconciler struct {
 	*commonCtrl.Controller
 	Scheme *runtime.Scheme
 }
 
-var configMapPredicate = predicate.Funcs{
-	// configuration reconciler only watch create and update events, ignore
-	// delete and generic events.
-	CreateFunc: func(event event.CreateEvent) bool {
-		return isConfiguration(event.Object)
-	},
-	UpdateFunc: func(event event.UpdateEvent) bool {
-		return isConfiguration(event.ObjectNew)
-	},
-	DeleteFunc: func(event event.DeleteEvent) bool {
-		return false
-	},
-	GenericFunc: func(event event.GenericEvent) bool {
-		return false
-	},
-}
-
-// isConfiguration checks whether the object has configuration anno.
-func isConfiguration(obj metav1.Object) bool {
-	if _, ok := obj.GetAnnotations()[ConfigurationLabelKey]; ok {
-		return true
-	}
-
-	return false
-}
+// +kubebuilder:rbac:groups=goharbor.io,resources=harborconfigurations,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=goharbor.io,resources=harborconfigurations/status,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
 
 func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) error {
 	r.Client = mgr.GetClient()
 	r.Scheme = mgr.GetScheme()
 
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&corev1.ConfigMap{}).
-		WithEventFilter(configMapPredicate).
+		For(&goharborv1.HarborConfiguration{}).
 		Complete(r)
 }
 
@@ -93,172 +58,158 @@ func (r *Reconciler) NormalizeName(ctx context.Context, name string, suffixes ..
 }
 
 // Reconcile does configuration reconcile.
-func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (res ctrl.Result, err error) {
+func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (res ctrl.Result, err error) { // nolint:funlen
 	log := r.Log.WithValues("resource", req.NamespacedName)
 
-	// get the configmap firstly
-	cm := &corev1.ConfigMap{}
-	if err = r.Client.Get(ctx, req.NamespacedName, cm); err != nil {
+	log.Info("Start reconciling")
+
+	hc := &goharborv1.HarborConfiguration{}
+	if err = r.Client.Get(ctx, req.NamespacedName, hc); err != nil {
 		if apierrors.IsNotFound(err) {
 			// The resource may have be deleted after reconcile request coming in
 			// Reconcile is done
 			return ctrl.Result{}, nil
 		}
 
-		return ctrl.Result{}, fmt.Errorf("get harbor cluster configmap error: %w", err)
-	}
-	// get harborcluster name from annotataions
-	harborClusterName := cm.GetAnnotations()[ConfigurationLabelKey]
-	if len(harborClusterName) == 0 {
-		// if configmap value is invalid, not do reconcile
-		return ctrl.Result{}, nil
-	}
-	// get harbor cluster
-	cluster := &goharborv1.HarborCluster{}
-	if err = r.Client.Get(ctx, types.NamespacedName{Namespace: req.Namespace, Name: harborClusterName}, cluster); err != nil {
-		if apierrors.IsNotFound(err) {
-			// The resource may have be deleted after reconcile request coming in
-			// Reconcile is done
-			return ctrl.Result{}, nil
-		}
-
-		return ctrl.Result{}, fmt.Errorf("get harbor cluster cr error: %w", err)
+		return ctrl.Result{}, fmt.Errorf("error get harbor configuration: %w", err)
 	}
 
-	log.Info("Get configmap and harbor cluster cr successfully", "configmap", cm, "harborcluster", cluster)
+	hcCopy := hc.DeepCopy()
 
 	defer func() {
-		log.Info("Reconcile end", "result", res, "error", err, "updateStatusErr", r.UpdateStatus(ctx, err, cluster))
+		if err != nil {
+			hc.Status.Status = goharborv1.HarborConfigurationStatusFail
+		} else {
+			hc.Status.Status = goharborv1.HarborConfigurationStatusReady
+			now := metav1.Now()
+			hc.Status.LastApplyTime = &now
+			hc.Status.LastConfiguration = &hcCopy.Spec
+		}
+
+		log.Info("Reconcile end", "result", res, "error", err, "updateStatusError", r.Client.Status().Update(ctx, hc))
 	}()
 
-	harborClient, err := r.getHarborClient(ctx, cluster)
-	if err != nil {
-		return ctrl.Result{}, fmt.Errorf("get harbor client error: %w", err)
-	}
-	// assemble config payload
-	jsonPayload, err := r.assembleConfig(ctx, cm)
-	if err != nil {
-		return ctrl.Result{}, fmt.Errorf("assemble configuration error: %w", err)
-	}
+	hc.Status.Status = goharborv1.HarborConfigurationStatusUnknown
 
+	harborName := hc.GetLabels()[HarborNameLabelKey]
+	if len(harborName) == 0 {
+		err = errors.Errorf("harbor configuration is invalid, without %s label", HarborNameLabelKey)
+		hc.Status.Reason = "ConfigurationInvalid"
+
+		return
+	}
+	// get harbor cr
+	harbor := &goharborv1.Harbor{}
+	if err = r.Client.Get(ctx, types.NamespacedName{Namespace: req.Namespace, Name: harborName}, harbor); err != nil {
+		err = fmt.Errorf("error get harbor: %w", err)
+		hc.Status.Reason = "HarborError"
+
+		return
+	}
+	// get harbor client
+	harborClient, err := r.getHarborClient(ctx, harbor)
+	if err != nil {
+		err = fmt.Errorf("error get harbor client: %w", err)
+		hc.Status.Reason = "HarborClientError"
+
+		return
+	}
+	// assemble hc
+	payload, err := r.assembleHarborConfiguration(ctx, hc)
+	if err != nil {
+		err = fmt.Errorf("error assemble harbor configuration: %w", err)
+		hc.Status.Reason = "AssembleConfigurationError"
+
+		return
+	}
 	// apply configuration
-	if err = harborClient.ApplyConfiguration(ctx, jsonPayload); err != nil {
-		return ctrl.Result{}, fmt.Errorf("apply harbor configuration error: %w", err)
-	}
+	if err = harborClient.ApplyConfiguration(ctx, payload); err != nil {
+		err = fmt.Errorf("apply harbor configuration error: %w", err)
+		hc.Status.Reason = "ApplyConfigurationError"
 
-	log.Info("Apply harbor configuration successfully", "configmap", cm, "harborcluster", cluster.Name)
+		return
+	}
 
 	return ctrl.Result{}, nil
 }
 
-// assembleConfig assembles password filed from secret.
-func (r *Reconciler) assembleConfig(ctx context.Context, cm *corev1.ConfigMap) (jsonPayload []byte, err error) {
-	// configuration payload
-	payload := cm.Data["config.yaml"]
-	config := make(map[string]interface{})
-
-	if err = yaml.Unmarshal([]byte(payload), &config); err != nil {
-		return nil, fmt.Errorf("unmarshal config payload error: %w", err)
-	}
-
-	isPwdField := func(field string) bool {
-		for _, v := range pwdFields {
-			if field == v {
-				return true
-			}
-		}
-
-		return false
-	}
-
-	for itemKey, itemValue := range config {
-		if isPwdField(itemKey) {
-			// password field, read password from secret.
-			secret := &corev1.Secret{}
-			// itemValue is secret name.
-			secretName, ok := itemValue.(string)
-			if !ok {
-				return nil, errors.Errorf("config field %s's value %v, type is invalid, should be string", itemKey, itemValue)
-			}
-			// get secret.
-			if err = r.Client.Get(ctx, types.NamespacedName{Namespace: cm.Namespace, Name: secretName}, secret); err != nil {
-				return nil, fmt.Errorf("get config field %s value from secret %s error: %w", itemKey, itemValue, err)
-			}
-			// itemKey is the secret data key.
-			config[itemKey] = secret.Data[itemKey]
-		}
-	}
-
-	return json.Marshal(config)
-}
-
 // getHarborClient gets harbor client.
-func (r *Reconciler) getHarborClient(ctx context.Context, cluster *goharborv1.HarborCluster) (harbor.Client, error) {
-	if cluster == nil {
-		return nil, errors.Errorf("harbor cluster can not be nil")
-	}
-
-	url := cluster.Spec.ExternalURL
+func (r *Reconciler) getHarborClient(ctx context.Context, harbor *goharborv1.Harbor) (pkgharbor.Client, error) {
+	url := harbor.Spec.ExternalURL
 	if len(url) == 0 {
 		return nil, errors.Errorf("harbor url is invalid")
 	}
 
-	var opts []harbor.ClientOption
+	var opts []pkgharbor.ClientOption
 
-	adminSecretRef := cluster.Spec.HarborAdminPasswordRef
+	adminSecretRef := harbor.Spec.HarborAdminPasswordRef
 	if len(adminSecretRef) > 0 {
 		// fetch admin password
 		secret := &corev1.Secret{}
-		if err := r.Client.Get(ctx, types.NamespacedName{Namespace: cluster.Namespace, Name: adminSecretRef}, secret); err != nil {
-			return nil, fmt.Errorf("get harbor admin secret error: %w", err)
+		if err := r.Client.Get(ctx, types.NamespacedName{Namespace: harbor.Namespace, Name: adminSecretRef}, secret); err != nil {
+			return nil, fmt.Errorf("error get harbor admin secret: %w", err)
 		}
 
 		password := string(secret.Data["secret"])
-		opts = append(opts, harbor.WithCredential("admin", password))
+		opts = append(opts, pkgharbor.WithCredential("admin", password))
 	}
 
-	return harbor.NewClient(url, opts...), nil
+	return pkgharbor.NewClient(url, opts...), nil
 }
 
-// UpdateStatus updates harbor cluster status.
-func (r *Reconciler) UpdateStatus(ctx context.Context, err error, cluster *goharborv1.HarborCluster) error {
-	now := metav1.Now()
-	cond := goharborv1.HarborClusterCondition{
-		Type:               goharborv1.ConfigurationReady,
-		LastTransitionTime: &now,
-	}
-
-	if err != nil {
-		cond.Status = corev1.ConditionFalse
-		cond.Reason = ConfigurationApplyError
-		cond.Message = err.Error()
-	} else {
-		cond.Status = corev1.ConditionTrue
-		cond.Reason = ConfigurationApplySuccess
-		cond.Message = "harbor configuraion has been applied successfully."
-	}
-
-	var found bool
-
-	for i, c := range cluster.Status.Conditions {
-		if c.Type == cond.Type {
-			found = true
-
-			if c.Status != cond.Status ||
-				c.Reason != cond.Reason ||
-				c.Message != cond.Message {
-				cluster.Status.Conditions[i] = cond
-			}
-
-			break
+// assembleConfig assembles password filed from secret.
+func (r *Reconciler) assembleHarborConfiguration(ctx context.Context, hc *goharborv1.HarborConfiguration) (payload []byte, err error) {
+	secretValueGetter := func(secretName, secretNamespace, key string) (string, error) {
+		secret := &corev1.Secret{}
+		if err := r.Client.Get(ctx, types.NamespacedName{Namespace: secretNamespace, Name: secretName}, secret); err != nil {
+			return "", err
 		}
+
+		if v, ok := secret.Data[key]; ok {
+			return string(v), nil
+		}
+
+		return "", errors.Errorf("secret key '%s' not found in secret data", key)
 	}
 
-	if !found {
-		cluster.Status.Conditions = append(cluster.Status.Conditions, cond)
-	}
-	// update rivision
-	cluster.Status.Revision = time.Now().UnixNano()
+	// "email_password", "ldap_search_password", "uaa_client_secret", "oidc_client_secret"
+	// these configuration spec need extracts value from secret.
 
-	return r.Client.Status().Update(ctx, cluster)
+	if len(hc.Spec.EmailPassword) != 0 {
+		password, err := secretValueGetter(hc.Spec.EmailPassword, hc.Namespace, "email_password")
+		if err != nil {
+			return nil, fmt.Errorf("error extract email_password from secret %s: %w", hc.Spec.EmailPassword, err)
+		}
+
+		hc.Spec.EmailPassword = password
+	}
+
+	if len(hc.Spec.LdapSearchPassword) != 0 {
+		password, err := secretValueGetter(hc.Spec.LdapSearchPassword, hc.Namespace, "ldap_search_password")
+		if err != nil {
+			return nil, fmt.Errorf("error extract ldap_search_password from secret %s: %w", hc.Spec.LdapSearchPassword, err)
+		}
+
+		hc.Spec.LdapSearchPassword = password
+	}
+
+	if len(hc.Spec.UaaClientSecret) != 0 {
+		secret, err := secretValueGetter(hc.Spec.UaaClientSecret, hc.Namespace, "uaa_client_secret")
+		if err != nil {
+			return nil, fmt.Errorf("error extract uaa_client_secret from secret %s: %w", hc.Spec.UaaClientSecret, err)
+		}
+
+		hc.Spec.UaaClientSecret = secret
+	}
+
+	if len(hc.Spec.OidcClientSecret) != 0 {
+		secret, err := secretValueGetter(hc.Spec.OidcClientSecret, hc.Namespace, "oidc_client_secret")
+		if err != nil {
+			return nil, fmt.Errorf("error extract oidc_client_secret from secret %s: %w", hc.Spec.UaaClientSecret, err)
+		}
+
+		hc.Spec.OidcClientSecret = secret
+	}
+
+	return hc.Spec.ToJSON()
 }
