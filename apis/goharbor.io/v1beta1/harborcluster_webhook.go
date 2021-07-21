@@ -113,6 +113,10 @@ func (harborcluster *HarborCluster) validate(old *HarborCluster) error {
 		allErrs = append(allErrs, err)
 	}
 
+	if err := harborcluster.validateExpose(); err != nil {
+		allErrs = append(allErrs, err)
+	}
+
 	if old == nil { // create harbor resource
 		if err := version.Validate(harborcluster.Spec.Version); err != nil {
 			allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("version"), harborcluster.Spec.Version, err.Error()))
@@ -208,10 +212,39 @@ func (harborcluster *HarborCluster) validateCache() *field.Error {
 	return nil
 }
 
+func (harborcluster *HarborCluster) validateExpose() *field.Error {
+	core := field.NewPath("spec").Child("expose").Child("core")
+
+	if harborcluster.Spec.Expose.Core.LoadBalancer != nil &&
+		harborcluster.Spec.Expose.Core.Ingress != nil {
+		lb := core.Child("loadbalancer")
+		ingress := core.Child("ingress")
+
+		return forbidden(ingress, lb)
+	}
+
+	notary := field.NewPath("spec").Child("expose").Child("notary")
+
+	if harborcluster.Spec.Expose.Notary != nil &&
+		harborcluster.Spec.Expose.Notary.LoadBalancer != nil &&
+		harborcluster.Spec.Expose.Notary.Ingress != nil {
+		lb := notary.Child("loadbalancer")
+		ingress := notary.Child("ingress")
+
+		return forbidden(ingress, lb)
+	}
+
+	return nil
+}
+
 func required(mainPath *field.Path) *field.Error {
 	return field.Required(mainPath, fmt.Sprintf("%s should be configured", mainPath.String()))
 }
 
 func invalid(mainPath *field.Path, value interface{}, details string) *field.Error {
 	return field.Invalid(mainPath, value, details)
+}
+
+func forbidden(mainPath fmt.Stringer, conflictPath *field.Path) *field.Error {
+	return field.Forbidden(conflictPath, fmt.Sprintf("conflicts: %s should not be configured as %s has been configured already", conflictPath.String(), mainPath.String()))
 }
