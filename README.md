@@ -77,9 +77,9 @@ NOTES:
 
 Harbor operator supports two extra Kubernetes versions besides the current latest version (`n-2` pattern):
 
-|    Versions   |         1.18       |        1.19        |        1.20        |           1.21            |
-|---------------|--------------------|--------------------|--------------------|---------------------------|
-| Compatibility | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |  :heavy_multiplication_x: |
+|    Versions   |        1.19        |        1.20        |           1.21            |
+|---------------|--------------------|--------------------|---------------------------|
+| Compatibility | :heavy_check_mark: | :heavy_check_mark: |  :heavy_multiplication_x: |
 
 ### Cert manager versions
 
