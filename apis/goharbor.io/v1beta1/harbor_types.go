@@ -50,7 +50,6 @@ func (h *Harbor) GetComponentSpec(ctx context.Context, component harbormetav1.Co
 }
 
 func (h *Harbor) deepCopyComponentSpecInto(_ context.Context, component harbormetav1.Component, spec *harbormetav1.ComponentSpec) {
-	// nolint:exhaustive
 	switch component {
 	case harbormetav1.ChartMuseumComponent:
 		if h.Spec.ChartMuseum != nil {
@@ -58,6 +57,8 @@ func (h *Harbor) deepCopyComponentSpecInto(_ context.Context, component harborme
 		}
 	case harbormetav1.CoreComponent:
 		h.Spec.Core.ComponentSpec.DeepCopyInto(spec)
+	case harbormetav1.ExporterComponent:
+		h.Spec.Exporter.ComponentSpec.DeepCopyInto(spec)
 	case harbormetav1.JobServiceComponent:
 		h.Spec.JobService.ComponentSpec.DeepCopyInto(spec)
 	case harbormetav1.NotaryServerComponent:
