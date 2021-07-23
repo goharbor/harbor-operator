@@ -119,12 +119,12 @@ func (m *MinIOController) generateIngress(ctx context.Context, harborcluster *go
 	annotations := make(map[string]string)
 	annotations["nginx.ingress.kubernetes.io/proxy-body-size"] = "0"
 
-	if harborcluster.Spec.Expose.Core.Ingress.Controller == v1alpha1.IngressControllerNCP {
+	if harborcluster.Spec.Expose.Core.Ingress != nil && harborcluster.Spec.Expose.Core.Ingress.Controller == v1alpha1.IngressControllerNCP {
 		annotations["ncp/use-regex"] = NCPIngressValueTrue
 		if tls != nil {
 			annotations["ncp/http-redirect"] = NCPIngressValueTrue
 		}
-	} else if harborcluster.Spec.Expose.Core.Ingress.Controller == v1alpha1.IngressControllerContour {
+	} else if harborcluster.Spec.Expose.Core.Ingress != nil && harborcluster.Spec.Expose.Core.Ingress.Controller == v1alpha1.IngressControllerContour {
 		if tls != nil {
 			annotations["ingress.kubernetes.io/force-ssl-redirect"] = ContourIngressValueTrue
 		}
