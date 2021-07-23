@@ -21,6 +21,8 @@ spec:
         command:
         - /manager
         env:
+        - name: POSTGRES_SECRETS_TEMPLATE
+          value: '{username}.{cluster}.credentials.{tprkind}.{tprgroup}'
         - name: CONFIGURATION_FROM
           value: env,file:/etc/harbor-operator/config.yaml
         - name: CLASSNAME
