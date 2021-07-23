@@ -23,10 +23,6 @@ imagePullSecrets: []
 # priorityClassName -- priority class to be used for the harbor-operator pods
 priorityClassName: ""
 
-postgresOperator:
-  configKubernetes:
-    secret_name_template: "{username}.{cluster}.credentials"
-    
 rbac:
   # rbac.create -- Whether to install Role Based Access Control
   create: true
@@ -252,3 +248,20 @@ tolerations: []
 #   }
 # }`
 affinity: {}
+
+redisoperator:
+  # redisoperator.enabled -- Whether to enabled [Redis Operator](https://github.com/spotahome/redis-operator)
+  enabled: false
+  rbac:
+    install: true
+
+minio-operator:
+  # minio-operator.enabled -- Whether to enabled [MinIO Operator](https://github.com/minio/operator)
+  enabled: false
+
+postgres-operator:
+  # postgres-operator.enabled -- Whether to enabled [Postgres operator](https://github.com/zalando/postgres-operator)
+  enabled: false
+
+  configKubernetes:
+    secret_name_template: "{username}.{cluster}.credentials"

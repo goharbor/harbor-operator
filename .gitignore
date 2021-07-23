@@ -29,6 +29,7 @@ config/webhook/manifests.yaml
 ## Helm packages
 charts/index.yaml
 charts/*.tgz
+charts/harbor-operator/charts/*.tgz
 
 ## Mac file
 .DS_Store

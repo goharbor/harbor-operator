@@ -1,0 +1,12 @@
+dependencies:
+- name: minio-operator
+  repository: https://operator.min.io/
+  version: 4.1.7
+- name: redisoperator
+  repository: ""
+  version: 3.1.0
+- name: postgres-operator
+  repository: ""
+  version: 1.6.3
+digest: sha256:b9e7bff552f3a229e795ef6f0e2b41591a13461e14c288120aa5f7be254142ad
+generated: "2021-07-23T17:48:32.275194+08:00"

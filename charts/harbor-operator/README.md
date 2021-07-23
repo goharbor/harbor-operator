@@ -42,14 +42,18 @@ Deploy Harbor Operator
 | installCRDs | bool | `false` | If true, CRD resources will be installed as part of the Helm chart. If enabled, when uninstalling CRD resources will be deleted causing all installed custom resources to be DELETED |
 | leaderElection.namespace | string | `"kube-system"` | The namespace used to store the ConfigMap for leader election |
 | logLevel | int | `4` | Set the verbosity of controller. Range of 0 - 6 with 6 being the most verbose. Info level is 4. |
+| minio-operator.enabled | bool | `false` | Whether to enabled [MinIO Operator](https://github.com/minio/operator) |
 | nameOverride | string | `""` |  |
 | nodeSelector | object | `{}` | Expects input structure as per specification <https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#nodeselector-v1-core> For example: `[   {     "matchExpressions": [       {         "key": "kubernetes.io/e2e-az-name",         "operator": "In",         "values": [           "e2e-az1",           "e2e-az2"         ]       }     ]   } ]` |
 | podAnnotations | object | `{}` | Additional annotations to add to the controller Pods |
 | podLabels | object | `{}` | Additional labels to add to the controller Pods |
 | podSecurityContext | object | `{"runAsNonRoot":true,"runAsUser":65532}` | Expects input structure as per specification <https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#podsecuritycontext-v1-core> For example: `{   "fsGroup": 2000,   "runAsUser": 1000,   "runAsNonRoot": true }` |
-| postgresOperator.configKubernetes.secret_name_template | string | `"{username}.{cluster}.credentials"` |  |
+| postgres-operator.configKubernetes.secret_name_template | string | `"{username}.{cluster}.credentials"` |  |
+| postgres-operator.enabled | bool | `false` | Whether to enabled [Postgres operator](https://github.com/zalando/postgres-operator) |
 | priorityClassName | string | `""` | priority class to be used for the harbor-operator pods |
 | rbac.create | bool | `true` | Whether to install Role Based Access Control |
+| redisoperator.enabled | bool | `false` | Whether to enabled [Redis Operator](https://github.com/spotahome/redis-operator) |
+| redisoperator.rbac.install | bool | `true` |  |
 | replicaCount | int | `1` | Number of replicas for the controller |
 | resources | object | `{"limits":{"cpu":"500m","memory":"300Mi"},"requests":{"cpu":"300m","memory":"200Mi"}}` | Expects input structure as per specification <https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#resourcerequirements-v1-core> |
 | service.port | int | `443` | Expose port for WebHook controller |
