@@ -49,7 +49,7 @@ func setupValidExporter(ctx context.Context, ns string) (Resource, client.Object
 				PostgresConnectionWithParameters: core.Spec.Database.PostgresConnectionWithParameters,
 				EncryptionKeyRef:                 core.Spec.Database.EncryptionKeyRef,
 			},
-			JobService: goharborv1.ExporterJobServiceSpec{
+			JobService: &goharborv1.ExporterJobServiceSpec{
 				Redis: &goharborv1.JobServicePoolRedisSpec{
 					RedisConnection: redis,
 				},
