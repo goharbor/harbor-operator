@@ -4246,7 +4246,6 @@ spec:
             required:
             - core
             - database
-            - jobservice
             type: object
           status:
             description: ComponentStatus represents the current status of the resource. https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md#typical-status-properties

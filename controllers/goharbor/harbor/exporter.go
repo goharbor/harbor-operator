@@ -98,7 +98,7 @@ func (r *Reconciler) GetExporter(ctx context.Context, harbor *goharborv1.Harbor)
 				PostgresConnectionWithParameters: *postgresConn,
 				EncryptionKeyRef:                 encryptionKeyRef,
 			},
-			JobService: goharborv1.ExporterJobServiceSpec{
+			JobService: &goharborv1.ExporterJobServiceSpec{
 				Redis: &goharborv1.JobServicePoolRedisSpec{
 					RedisConnection: harbor.Spec.RedisConnection(harbormetav1.JobServiceRedis),
 				},

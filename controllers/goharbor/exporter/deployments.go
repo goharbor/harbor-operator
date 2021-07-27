@@ -113,28 +113,26 @@ func (r *Reconciler) GetDeployment(ctx context.Context, exporter *goharborv1.Exp
 		})
 	}
 
-	if exporter.Spec.JobService.Redis != nil {
-		redisURL, err := r.getJobServiceRedisURL(ctx, exporter)
-		if err != nil {
-			return nil, errors.Wrap(err, "get redis url of jobservice")
-		}
-
-		redisNamespace := jobserviceRedisNamespace
-		if exporter.Spec.JobService.Redis.Namespace != "" {
-			redisNamespace = exporter.Spec.JobService.Redis.Namespace
-		}
-
-		redisTimeout := jobserivceRedisTimeout
-		if exporter.Spec.JobService.Redis.IdleTimeout != nil {
-			redisTimeout = int(exporter.Spec.JobService.Redis.IdleTimeout.Seconds())
-		}
-
-		envs = append(envs, []corev1.EnvVar{
-			{Name: "HARBOR_REDIS_URL", Value: redisURL},
-			{Name: "HARBOR_REDIS_NAMESPACE", Value: redisNamespace},
-			{Name: "HARBOR_REDIS_TIMEOUT", Value: fmt.Sprintf("%d", redisTimeout)},
-		}...)
+	redisURL, err := r.getJobServiceRedisURL(ctx, exporter)
+	if err != nil {
+		return nil, errors.Wrap(err, "get redis url of jobservice")
 	}
+
+	redisNamespace := jobserviceRedisNamespace
+	if exporter.Spec.JobService.Redis.Namespace != "" {
+		redisNamespace = exporter.Spec.JobService.Redis.Namespace
+	}
+
+	redisTimeout := jobserivceRedisTimeout
+	if exporter.Spec.JobService.Redis.IdleTimeout != nil {
+		redisTimeout = int(exporter.Spec.JobService.Redis.IdleTimeout.Seconds())
+	}
+
+	envs = append(envs, []corev1.EnvVar{
+		{Name: "HARBOR_REDIS_URL", Value: redisURL},
+		{Name: "HARBOR_REDIS_NAMESPACE", Value: redisNamespace},
+		{Name: "HARBOR_REDIS_TIMEOUT", Value: fmt.Sprintf("%d", redisTimeout)},
+	}...)
 
 	volumes := []corev1.Volume{}
 
@@ -249,23 +247,32 @@ func (r *Reconciler) GetDeployment(ctx context.Context, exporter *goharborv1.Exp
 }
 
 func (r *Reconciler) getJobServiceRedisURL(ctx context.Context, exporter *goharborv1.Exporter) (string, error) {
-	if exporter.Spec.JobService.Redis == nil {
-		return "", nil
+	if exporter.Spec.JobService == nil {
+		// compatible with the exporter converted from v1alpha3 and the upgrade to harbor v2.3.x
+		key := client.ObjectKey{
+			Namespace: exporter.Namespace,
+			Name:      strings.TrimSuffix(exporter.Name, "-harbor"),
+		}
+
+		var harbor goharborv1.Harbor
+		if err := r.Client.Get(ctx, key, &harbor); err != nil {
+			return "", err
+		}
+
+		exporter.Spec.JobService = &goharborv1.ExporterJobServiceSpec{
+			Redis: &goharborv1.JobServicePoolRedisSpec{
+				RedisConnection: harbor.Spec.RedisConnection(harbormetav1.JobServiceRedis),
+			},
+		}
 	}
 
-	var redisPassword string
+	redisPassword, err := r.getValueFromSecret(ctx, exporter.GetNamespace(), exporter.Spec.JobService.Redis.PasswordRef, jobserivceRedisPasswordKey)
+	if err != nil {
+		return "", errors.Wrap(err, "get redis password of jobservice")
+	}
 
-	if exporter.Spec.JobService.Redis.PasswordRef != "" {
-		var err error
-
-		redisPassword, err = r.getValueFromSecret(ctx, exporter.GetNamespace(), exporter.Spec.JobService.Redis.PasswordRef, jobserivceRedisPasswordKey)
-		if err != nil {
-			return "", errors.Wrap(err, "get redis password of jobservice")
-		}
-
-		if redisPassword == "" {
-			logger.Get(ctx).Info("redis password secret of jobservice not found", "secret", exporter.Spec.JobService.Redis.PasswordRef)
-		}
+	if redisPassword == "" {
+		logger.Get(ctx).Info("redis password secret of jobservice not found", "secret", exporter.Spec.JobService.Redis.PasswordRef)
 	}
 
 	return exporter.Spec.JobService.Redis.GetDSNStringWithRawPassword(redisPassword), nil

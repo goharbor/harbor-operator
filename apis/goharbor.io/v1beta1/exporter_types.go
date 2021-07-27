@@ -56,8 +56,8 @@ type ExporterSpec struct {
 	// +kubebuilder:validation:Required
 	Database ExporterDatabaseSpec `json:"database"`
 
-	// +kubebuilder:validation:Required
-	JobService ExporterJobServiceSpec `json:"jobservice"`
+	// +kubebuilder:validation:Optional
+	JobService *ExporterJobServiceSpec `json:"jobservice,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=8001
