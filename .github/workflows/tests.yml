@@ -144,8 +144,8 @@ jobs:
         - "0.46.0"
 
         samples:
-        - "full_stack.yaml"
-        - "standard_stack_fs.yaml"
+        - "full_stack_v1beta1.yaml"
+        - "standard_stack_fs_v1beta1.yaml"
 
     steps:
     - uses: actions/checkout@v2
@@ -345,7 +345,7 @@ jobs:
           - "1.20.7"
 
         samples:
-          - "full_stack.yaml"
+          - "full_stack_v1beta1.yaml"
 
     steps:
       - uses: actions/checkout@v2
