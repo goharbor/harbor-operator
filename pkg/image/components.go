@@ -133,7 +133,7 @@ func init() { // nolint:gochecknoinits
 
 	RegisterRepository("cluster-minio", "minio", "*") // the minio repository of dockerhub
 	RegisterImageName("cluster-minio", "minio", "*")
-	RegisterTag("cluster-minio", "RELEASE.2021-04-06T23-11-00Z", "~2.2.0", "~2.3.0")
+	RegisterTag("cluster-minio", "RELEASE.2021-07-27T02-40-15Z", "~2.2.0", "~2.3.0")
 
 	RegisterRepository("cluster-minio-init", "minio", "*") // the minio repository of dockerhub
 	RegisterImageName("cluster-minio-init", "mc", "*")
