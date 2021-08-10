@@ -47,6 +47,7 @@ Deploy Harbor Operator
 | podAnnotations | object | `{}` | Additional annotations to add to the controller Pods |
 | podLabels | object | `{}` | Additional labels to add to the controller Pods |
 | podSecurityContext | object | `{"runAsNonRoot":true,"runAsUser":65532}` | Expects input structure as per specification <https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#podsecuritycontext-v1-core> For example: `{   "fsGroup": 2000,   "runAsUser": 1000,   "runAsNonRoot": true }` |
+| postgres-operator.configKubernetes.secret_name_template | string | `"{username}.{cluster}.credentials.{tprkind}.{tprgroup}"` |  |
 | priorityClassName | string | `""` | priority class to be used for the harbor-operator pods |
 | rbac.create | bool | `true` | Whether to install Role Based Access Control |
 | replicaCount | int | `1` | Number of replicas for the controller |
