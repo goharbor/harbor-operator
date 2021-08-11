@@ -6,7 +6,7 @@ The installation guide documented here help you deploy Harbor operator stack wit
 
 1. `Kubernetes` cluster (v1.19+) is running (see [Applicative Kubernetes versions](../../README.md#applicative-kubernetes-versions)
    for more information). For local development purpose, check [Kind installation](./kind-installation.md).
-1. `cert-manager` (v1.0+) is [installed](https://cert-manager.io/docs/installation/kubernetes/).
+1. `cert-manager` (v1.2+) is [installed](https://cert-manager.io/docs/installation/kubernetes/).
 1. Ingress controller is deployed (see [Ingress controller types](../../README.md#ingress-controller-types) for more information). For default
    ingress controller, check [NGINX ingress controller](https://kubernetes.github.io/ingress-nginx/deploy/).
 1. `kubectl` with a proper version(v1.18.6+) is [installed](https://kubernetes.io/docs/tasks/tools/).
