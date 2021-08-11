@@ -9,7 +9,7 @@ spec:
       - name: manager
         env:
         - name: POSTGRES_SECRETS_TEMPLATE
-          value: '{{.Values.postgresOperator.configKubernetes.secret_name_template}}'
+          value: '{{.Values.postgresOperator.configKubernetes.secret_name_template|quote}}'
         - name: CONFIGURATION_FROM
           value: 'env,file:/etc/harbor-operator/config.yaml'
         - name: CLASSNAME

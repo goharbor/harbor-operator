@@ -25,7 +25,7 @@ priorityClassName: ""
 
 postgresOperator:
   configKubernetes:
-    secret_name_template: "{username}.{cluster}.credentials.{tprkind}.{tprgroup}"
+    secret_name_template: "{username}.{cluster}.credentials"
     
 rbac:
   # rbac.create -- Whether to install Role Based Access Control
