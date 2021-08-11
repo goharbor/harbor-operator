@@ -23,7 +23,7 @@ imagePullSecrets: []
 # priorityClassName -- priority class to be used for the harbor-operator pods
 priorityClassName: ""
 
-postgres-operator:
+postgresOperator:
   configKubernetes:
     secret_name_template: "{username}.{cluster}.credentials.{tprkind}.{tprgroup}"
     
