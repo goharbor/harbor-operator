@@ -111,6 +111,8 @@ jobs:
         run: |
           mkdir  -p /tmp/logs
           kind export logs --name harbor /tmp/logs
+          ls -l /tmp/logs
+
       - uses: actions/upload-artifact@v2
         if: ${{ failure() }}
         with:
@@ -144,8 +146,8 @@ jobs:
         - "0.46.0"
 
         samples:
-        - "full_stack_v1beta1.yaml"
-        - "standard_stack_fs_v1beta1.yaml"
+        - "full_stack.yaml"
+        - "standard_stack_fs.yaml"
 
     steps:
     - uses: actions/checkout@v2
@@ -299,6 +301,7 @@ jobs:
         done
         kubectl -n cluster-sample-ns logs -l "application=spilo" --all-containers > /tmp/harbor/db.log
         kubectl -n cluster-sample-ns logs -l "app.kubernetes.io/component=redis" --all-containers > /tmp/harbor/redis.log
+        ls -l /tmp/harbor
 
     - uses: actions/upload-artifact@v2
       if: ${{ failure() }}
@@ -311,6 +314,7 @@ jobs:
       run: |
         mkdir  -p /tmp/logs
         kind export logs --name harbor /tmp/logs
+        ls -l /tmp/logs
 
     - uses: actions/upload-artifact@v2
       if: ${{ failure() }}
@@ -345,7 +349,7 @@ jobs:
           - "1.20.7"
 
         samples:
-          - "full_stack_v1beta1.yaml"
+          - "full_stack.yaml"
 
     steps:
       - uses: actions/checkout@v2
@@ -503,6 +507,7 @@ jobs:
           done
           kubectl -n cluster-sample-ns logs -l "application=spilo" --all-containers > /tmp/harbor/db.log
           kubectl -n cluster-sample-ns logs -l "app.kubernetes.io/component=redis" --all-containers > /tmp/harbor/redis.log
+          ls -l /tmp/harbor
 
       - uses: actions/upload-artifact@v2
         if: ${{ failure() }}
@@ -515,6 +520,7 @@ jobs:
         run: |
           mkdir  -p /tmp/logs
           kind export logs --name harbor /tmp/logs
+          ls -l /tmp/logs
 
       - uses: actions/upload-artifact@v2
         if: ${{ failure() }}
@@ -685,6 +691,7 @@ jobs:
           done
           kubectl logs -l "app.kubernetes.io/instance=harbor-database" --all-containers > /tmp/harbor/db.log
           kubectl logs -l "release=harbor-redis" --all-containers > /tmp/harbor/redis.log
+          ls -l /tmp/harbor
 
       - uses: actions/upload-artifact@v2
         if: ${{ failure() }}
@@ -697,6 +704,7 @@ jobs:
         run: |
           mkdir  -p /tmp/logs
           kind export logs --name harbor /tmp/logs
+          ls -l /tmp/logs
 
       - uses: actions/upload-artifact@v2
         if: ${{ failure() }}
