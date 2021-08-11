@@ -449,7 +449,7 @@ certmanager: helm jetstack
 	$(HELM) repo add jetstack https://charts.jetstack.io # https://cert-manager.io/docs/installation/kubernetes/
 	$(HELM) upgrade --install certmanager jetstack/cert-manager \
 		--namespace $(CERTMANAGER_NAMESPACE) \
-		--version v1.0.3 \
+		--version v1.4.3 \
 		--set installCRDs=true
 
 .PHONY: jetstack
