@@ -14,6 +14,17 @@ data:
   secret: SGFyYm9yMTIzNDU=
 type: Opaque
 ---
+# A secret for minIO access.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: minio-access-secret
+  namespace: cluster-sample-ns
+data:
+  accesskey: YWRtaW4=
+  secretkey: bWluaW8xMjM=
+type: Opaque
+---
 apiVersion: v1
 kind: Secret
 metadata:
@@ -44,6 +55,7 @@ spec:
   dnsNames:
     - core.harbor.domain
     - notary.harbor.domain
+    - minio.harbor.domain
   issuerRef:
     name: selfsigned-issuer
     kind: Issuer
@@ -101,7 +113,7 @@ spec:
       storage: 5Gi
 ---
 # Full stack Harbor
-apiVersion: goharbor.io/v1alpha3
+apiVersion: goharbor.io/v1beta1
 kind: HarborCluster
 metadata:
   name: harborcluster-sample
@@ -126,13 +138,6 @@ spec:
         controller: default
       tls:
         certificateRef: sample-public-certificate
-  trivy:
-    skipUpdate: false
-    storage:
-      reportsPersistentVolume:
-        claimName: sample-harbor-trivy-reports
-      cachePersistentVolume:
-        claimName: sample-harbor-trivy-cache
   internalTLS:
     enabled: true
   portal: {}
@@ -147,30 +152,21 @@ spec:
       enabled: true
   chartmuseum: {}
   exporter: {}
+  trivy:
+    skipUpdate: false
+    storage:
+      cachePersistentVolume:
+        claimName: sample-harbor-trivy-cache
+      reportsPersistentVolume:
+        claimName: sample-harbor-trivy-reports
   notary:
     migrationEnabled: true
-  imageChartStorage:
-    filesystem:
-      registryPersistentVolume:
-        claimName: sample-harbor-registry
-      chartPersistentVolume:
-        claimName: sample-harbor-chart
-  inClusterDatabase:
-    kind: PostgresSQL
-    postgresSqlSpec:
-      storage: 1Gi
-      replicas: 1
-      resources:
-        limits:
-          cpu: 500m
-          memory: 500Mi
-        requests:
-          cpu: 100m
-          memory: 250Mi
-  inClusterCache:
-    kind: Redis
-    redisSpec:
-      server:
+  database:
+    kind: Zlando/PostgreSQL
+    spec:
+      zlandoPostgreSql:
+        operatorVersion: "1.5.0"
+        storage: 1Gi
         replicas: 1
         resources:
           limits:
@@ -179,5 +175,27 @@ spec:
           requests:
             cpu: 100m
             memory: 250Mi
-      sentinel:
-        replicas: 1
+  storage:
+    kind: FileSystem
+    spec:
+      fileSystem:
+        chartPersistentVolume:
+          claimName: sample-harbor-chart
+        registryPersistentVolume:
+          claimName: sample-harbor-registry
+  cache:
+    kind: RedisFailover
+    spec:
+      redisFailover:
+        operatorVersion: "1.0.0"
+        server:
+          replicas: 1
+          resources:
+            limits:
+              cpu: 500m
+              memory: 500Mi
+            requests:
+              cpu: 100m
+              memory: 250Mi
+        sentinel:
+          replicas: 1

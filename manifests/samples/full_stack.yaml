@@ -61,7 +61,7 @@ spec:
     kind: Issuer
 ---
 # Full stack Harbor
-apiVersion: goharbor.io/v1alpha3
+apiVersion: goharbor.io/v1beta1
 kind: HarborCluster
 metadata:
   name: harborcluster-sample
@@ -105,42 +105,12 @@ spec:
     storage: {}
   notary:
     migrationEnabled: true
-  inClusterDatabase:
-    kind: PostgresSQL
-    postgresSqlSpec:
-      storage: 1Gi
-      replicas: 1
-      resources:
-        limits:
-          cpu: 500m
-          memory: 500Mi
-        requests:
-          cpu: 100m
-          memory: 250Mi
-  inClusterStorage:
-    kind: MinIO
-    minIOSpec:
-      replicas: 2
-      secretRef: minio-access-secret
-      redirect:
-        enable: true
-        expose:
-          ingress:
-            host: minio.harbor.domain
-          tls:
-            certificateRef: sample-public-certificate
-      volumesPerServer: 2
-      volumeClaimTemplate:
-        spec:
-          accessModes:
-            - ReadWriteOnce
-          resources:
-            requests:
-              storage: 10Gi
-  inClusterCache:
-    kind: Redis
-    redisSpec:
-      server:
+  database:
+    kind: Zlando/PostgreSQL
+    spec:
+      zlandoPostgreSql:
+        operatorVersion: "1.5.0"
+        storage: 1Gi
         replicas: 1
         resources:
           limits:
@@ -149,5 +119,41 @@ spec:
           requests:
             cpu: 100m
             memory: 250Mi
-      sentinel:
-        replicas: 1
+  storage:
+    kind: MinIO
+    spec:
+      minIO:
+        operatorVersion: "4.0.6"
+        replicas: 2
+        secretRef: minio-access-secret
+        redirect:
+          enable: true
+          expose:
+            ingress:
+              host: minio.harbor.domain
+            tls:
+              certificateRef: sample-public-certificate
+        volumesPerServer: 2
+        volumeClaimTemplate:
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 10Gi
+  cache:
+    kind: RedisFailover
+    spec:
+      redisFailover:
+        operatorVersion: "1.0.0"
+        server:
+          replicas: 1
+          resources:
+            limits:
+              cpu: 500m
+              memory: 500Mi
+            requests:
+              cpu: 100m
+              memory: 250Mi
+        sentinel:
+          replicas: 1

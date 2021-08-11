@@ -62,7 +62,7 @@ spec:
       storage: 2Gi
 ---
 # Full stack Harbor
-apiVersion: goharbor.io/v1alpha3
+apiVersion: goharbor.io/v1beta1
 kind: HarborCluster
 metadata:
   name: harborcluster-sample
@@ -84,31 +84,22 @@ spec:
   internalTLS:
     enabled: true
   portal: {}
-  registry: {}
+  registry:
+    metrics:
+      enabled: true
   core:
     tokenIssuer:
       name: selfsigned-issuer
       kind: Issuer
-  imageChartStorage:
-    filesystem:
-      registryPersistentVolume:
-        claimName: sample-harbor-registry
-  inClusterDatabase:
-    kind: PostgresSQL
-    postgresSqlSpec:
-      storage: 1Gi
-      replicas: 1
-      resources:
-        limits:
-          cpu: 500m
-          memory: 500Mi
-        requests:
-          cpu: 100m
-          memory: 250Mi
-  inClusterCache:
-    kind: Redis
-    redisSpec:
-      server:
+    metrics:
+      enabled: true
+  exporter: {}
+  database:
+    kind: Zlando/PostgreSQL
+    spec:
+      zlandoPostgreSql:
+        operatorVersion: "1.5.0"
+        storage: 1Gi
         replicas: 1
         resources:
           limits:
@@ -117,5 +108,27 @@ spec:
           requests:
             cpu: 100m
             memory: 250Mi
-      sentinel:
-        replicas: 1
+  storage:
+    kind: FileSystem
+    spec:
+      fileSystem:
+        chartPersistentVolume:
+          claimName: sample-harbor-chart
+        registryPersistentVolume:
+          claimName: sample-harbor-registry
+  cache:
+    kind: RedisFailover
+    spec:
+      redisFailover:
+        operatorVersion: "1.0.0"
+        server:
+          replicas: 1
+          resources:
+            limits:
+              cpu: 500m
+              memory: 500Mi
+            requests:
+              cpu: 100m
+              memory: 250Mi
+        sentinel:
+          replicas: 1
