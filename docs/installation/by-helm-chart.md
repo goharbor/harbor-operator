@@ -47,14 +47,18 @@ There are several ways to get the Harbor operator helm chart:
 
 ## Deploy Harbor operator with chart
 
+> CRDs should be uninstalled before deployment when the older version(`<v1.1.0`) helm chart has been deployed.
+
 Run the `helm` command to install the harbor operator to your cluster:
 
 ```shell
 # Change chart path depends on how do you get the helm chart.
-helm upgrade --namespace harbor-operator-ns --install harbor-operator charts/harbor-operator-v1.0.0.tgz --set-string image.repository=ghcr.io/goharbor/harbor-operator --set-string image.tag=v1.0.0
+helm upgrade --namespace harbor-operator-ns --install harbor-operator charts/harbor-operator-v1.1.0.tgz --set-string image.repository=ghcr.io/goharbor/harbor-operator --set-string image.tag=v1.1.0 —set installCRDs=true
 ```
 
 For what settings you can override with `--set`, `--set-string`, `--set-file` or `--values`, you can refer to the [values.yaml](../../charts/harbor-operator/values.yaml) file.
+
+> If you 
 
 Once the installation is finished you can check the installation status with either `helm` or `kubectl`.
 
