@@ -58,8 +58,6 @@ helm upgrade --namespace harbor-operator-ns --install harbor-operator charts/har
 
 For what settings you can override with `--set`, `--set-string`, `--set-file` or `--values`, you can refer to the [values.yaml](../../charts/harbor-operator/values.yaml) file.
 
-> If you 
-
 Once the installation is finished you can check the installation status with either `helm` or `kubectl`.
 
 With `helm`:
