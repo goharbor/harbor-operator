@@ -29,8 +29,9 @@ Harbor deployment stack is controlled by a custom Harbor resource `HarborCluster
   * Add the optional Harbor components
 * Support upgrading the managed Harbor registry version
 * Deletes all the linked resources when deleting the Harbor cluster
-* Configures Harbor system settings with ConfigMap in a declarative way
-* Support services exposed with [ingress](https://kubernetes.io/fr/docs/concepts/services-networking/ingress/) ([`default`](https://git.k8s.io/ingress-nginx/README.md#readme), [`gce`](https://git.k8s.io/ingress-gce/README.md#readme) and `ncp`)
+* Configures Harbor system settings with CRD-based configuration or labeled ConfigMap
+* Support services exposed with [ingress](https://kubernetes.io/fr/docs/concepts/services-networking/ingress/) ([`default`](https://git.k8s.io/ingress-nginx/README.md#readme), [`gce`](https://git.k8s.io/ingress-gce/README.md#readme), `ncp` and `contour`)
+* Support services exposed with LoadBalancer
 
 ## Future features
 
@@ -42,15 +43,13 @@ Harbor deployment stack is controlled by a custom Harbor resource `HarborCluster
   * [ ] [gcs](https://cloud.google.com/storage): A driver storing objects in a Google Cloud Storage bucket.
 * Supports updating the deployed Harbor cluster
   * Remove the optional Harbor components
-* CRD based day2 configuration
-* Support services exposed with LoadBalancer
 * More day2 operations (see [PoC project](https://github.com/szlabs/harbor-automation-4k8s))
   * Auto mapping Kubernetes namespaces and Harbor project
   * Pull secrets injections
   * Container image path rewriting
   * Transparent proxy cache settings
 
-## Replease plans
+## Release plans
 
 * [Release 1.1](https://github.com/goharbor/harbor-operator/projects/8)
 * [Release 1.2](https://github.com/goharbor/harbor-operator/projects/7)
@@ -65,7 +64,7 @@ Versions of the underlying components are listed below:
 
 |  Components   |       Harbor      | MinIO operator | PostgreSQL operator | Redis operator |
 |---------------|-------------------|----------------|---------------------|----------------|
-|  Versions     | 2.2.x `[1]`       | 4.0.6          | 1.5.0               | 1.0.0          |
+|  Versions     | 2.3.x `[1]`       | 4.0.6+         | 1.5.0+              | 1.0.0          |
 
 NOTES:
 
@@ -77,28 +76,30 @@ NOTES:
 
 Harbor operator supports two extra Kubernetes versions besides the current latest version (`n-2` pattern):
 
-|    Versions   |        1.19        |        1.20        |           1.21            |
-|---------------|--------------------|--------------------|---------------------------|
-| Compatibility | :heavy_check_mark: | :heavy_check_mark: |  :heavy_multiplication_x: |
+|    Versions   |        1.19        |        1.20        |         1.21        |
+|---------------|--------------------|--------------------|---------------------|
+| Compatibility | :heavy_check_mark: | :heavy_check_mark: |  :heavy_check_mark: |
 
 ### Cert manager versions
 
 Harbor operator relies on cert manager to manage kinds of certificates used by Harbor cluster components. Table shown below lists the compatibilities of cert manager versions:
 
-|    Versions   |       1.1.1        |       1.2.0        |         1.3.1        |         1.4.0        |
-|---------------|--------------------|--------------------|----------------------|----------------------|
-| Compatibility | :heavy_check_mark: | :heavy_check_mark: |  :heavy_check_mark:  |  :heavy_check_mark:  |
+|    Versions   |         1.2        |           1.3        |           1.4        |
+|---------------|--------------------|----------------------|----------------------|
+| Compatibility | :heavy_check_mark: |  :heavy_check_mark:  |  :heavy_check_mark:  |
 
 ### Ingress controller types
 
 Harbor operator exposes the frontend service with ingress (CRD version: `v1beta1`). Table shown below lists the ingress controller types supported.
 
-|  Ingress Controller  |        default      |         gce        |        ncp         |        contour      |
-|----------------------|---------------------|--------------------|--------------------|---------------------|
-|  Compatibility       |  :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |  :heavy_check_mark: |
-|  Description         | Default ingress controller like NGINX | Google Cloud Engine ingress controller | NSX-T Container plugin ingress controller | Ingress controller that works by deploying the Envoy proxy |
+|  Ingress Controller  |  Compatibility      |                           Description                      |
+|----------------------|---------------------|------------------------------------------------------------|
+|  default             | :heavy_check_mark:  | Default ingress controller like NGINX                      |
+|  gce                 | :heavy_check_mark:  | Google Cloud Engine ingress controller                     |
+|  ncp                 | :heavy_check_mark:  | NSX-T Container plugin ingress controller                  |
+|  contour             | :heavy_check_mark:  | Ingress controller that works by deploying the Envoy proxy |
 
-NOTES:
+**NOTES:**
 
   :heavy_check_mark: : support
   :heavy_multiplication_x: : not support

@@ -52,28 +52,33 @@ Then put the related PostgreSQL info into the `database` spec. e.g.:
 
 ```yaml
 spec:
-# Configure existing pre-deployed or cloud database service.
-  database: # Optional
-    # PostgreSQL user name to connect as.
-    # Defaults to be the same as the operating system name of the user running the application.
-    username: postgres # Required
-    # Secret containing the password to be used if the server demands password authentication.
-    passwordRef: harbor-database-password # Optional
-    # PostgreSQL hosts.
-    # At least 1.
-    hosts:
-      # Name of host to connect to.
-      # If a host name begins with a slash, it specifies Unix-domain communication rather than
-      # TCP/IP communication; the value is the name of the directory in which the socket file is stored.
-      - host: my.psql.com # Required
-      # Port number to connect to at the server host,
-      # or socket file name extension for Unix-domain connections.
-      # Zero, specifies the default port number established when PostgreSQL was built.
+  database:
+    # Configure existing pre-deployed or cloud database service.
+    kind: PostgreSQL
+    # Database spec
+    spec:
+      # PostgreSQL configuration spec.
+      postgresql:
+        # PostgreSQL user name to connect as.
+        # Defaults to be the same as the operating system name of the user running the application.
+        username: postgres # Required
+        # Secret containing the password to be used if the server demands password authentication.
+        passwordRef: harbor-database-password # Optional
+        # PostgreSQL hosts.
+        # At least 1.
+        hosts:
+        # Name of host to connect to.
+        # If a host name begins with a slash, it specifies Unix-domain communication rather than
+        # TCP/IP communication; the value is the name of the directory in which the socket file is stored.
+        - host: my.psql.com # Required
+        # Port number to connect to at the server host,
+        # or socket file name extension for Unix-domain connections.
+        # Zero, specifies the default port number established when PostgreSQL was built.
         port: 5432 # Optional
-    # PostgreSQL has native support for using SSL connections to encrypt client/server communications for increased security.
-    # Supports values ["disable","allow","prefer","require","verify-ca","verify-full"].
-    sslMode: prefer # Optional, default=prefer
-    prefix: prefix # Optional
+        # PostgreSQL has native support for using SSL connections to encrypt client/server communications for increased security.
+        # Supports values ["disable","allow","prefer","require","verify-ca","verify-full"].
+        sslMode: prefer # Optional, default=prefer
+        prefix: prefix # Optional
 ```
 
 The thing to note here is the names of the databases `core`, `notaryserver` (only needed when enabling notary) and `notarysigner` (only needed when enabling notary) are relatively unchangeable. You can only append some prefixes to the database names by setting the optional field `prefix` in the `database` spec. For example, if the `spec.database.prefix` is "prefix", the database names will be "prefix-core", "prefix-notaryserver" and "prefix-notarysigner".
@@ -108,16 +113,18 @@ Then put the related Redis info into the `redis` spec. e.g.:
 
 ```yaml
 spec:
-  # Redis configuration.
-  redis: # Optional
-    # Server host.
-    host: myredis.com # Required
-    # Server port.
-    port: 6347 # Required
-    # For setting sentinel masterSet.
-    sentinelMasterSet: sentinel # Optional
-    # Secret containing the password to use when connecting to the server.
-    passwordRef: harbor-redis # Optional
-    # Secret containing the client certificate to authenticate with.
-    certificateRef: cert # Optional
+  kind: Redis
+  spec:
+    # Redis configuration.
+    redis:
+      # Server host.
+      host: myredis.com # Required
+      # Server port.
+      port: 6347 # Required
+      # For setting sentinel masterSet.
+      sentinelMasterSet: sentinel # Optional
+      # Secret containing the password to use when connecting to the server.
+      passwordRef: harbor-redis # Optional
+      # Secret containing the client certificate to authenticate with.
+      certificateRef: cert # Optional
 ```
