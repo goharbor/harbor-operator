@@ -137,8 +137,8 @@ manager: go-generate
 		-ldflags "-X main.version=$(RELEASE_VERSION) -X main.gitCommit=$(GIT_COMMIT)" \
 		*.go
 
-.PHONY:helm-generate
-helm-generate: $(CHARTS_DIRECTORY)/index.yaml
+.PHONY: helm-generate
+helm-generate: go-generate $(CHARTS_DIRECTORY)/index.yaml
 
 .PHONY: release
 release: goreleaser
@@ -250,6 +250,7 @@ $(CHARTS_DIRECTORY)/harbor-operator-$(RELEASE_VERSION).tgz: $(CHART_HARBOR_OPERA
 	$(CHART_TEMPLATE_PATH)/mutatingwebhookconfiguration.yaml $(CHART_TEMPLATE_PATH)/validatingwebhookconfiguration.yaml \
 	$(CHART_TEMPLATE_PATH)/certificate.yaml $(CHART_TEMPLATE_PATH)/issuer.yaml \
 	$(CHART_TEMPLATE_PATH)/deployment.yaml
+	$(HELM) dependency update $(CHART_HARBOR_OPERATOR)
 	$(HELM) package $(CHART_HARBOR_OPERATOR) \
 		--version $(RELEASE_VERSION) \
 		--app-version $(RELEASE_VERSION) \

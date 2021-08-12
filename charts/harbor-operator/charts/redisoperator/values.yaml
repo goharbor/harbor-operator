@@ -1,0 +1,22 @@
+image: quay.io/spotahome/redis-operator
+tag: latest
+pullPolicy: Always
+containerName: redisoperator
+podAnnotations: {}
+resources:
+  requests:
+    cpu: 10m
+    memory: 50Mi
+  limits:
+    cpu: 100m
+    memory: 50Mi
+rbac:
+  install: false
+  apiVersion: v1
+  imagePullSecrets: []
+monitoring:
+  enabled: false
+  serviceMonitor: false
+  serviceAnnotations: {}
+  prometheus:
+    name: unknown
