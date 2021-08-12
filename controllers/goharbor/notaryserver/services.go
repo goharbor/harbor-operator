@@ -10,10 +10,6 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-const (
-	PublicPort = 443
-)
-
 func (r *Reconciler) GetService(ctx context.Context, notary *goharborv1.NotaryServer) (*corev1.Service, error) {
 	name := r.NormalizeName(ctx, notary.GetName())
 	namespace := notary.GetNamespace()

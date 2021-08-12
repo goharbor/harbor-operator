@@ -7,7 +7,6 @@ import (
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/controllers"
-	"github.com/goharbor/harbor-operator/controllers/goharbor/notaryserver"
 	"github.com/goharbor/harbor-operator/pkg/graph"
 	"github.com/pkg/errors"
 	netv1 "k8s.io/api/networking/v1"
@@ -149,7 +148,7 @@ func (r *Reconciler) GetNotaryIngressRules(ctx context.Context, harbor *goharbor
 		Service: &netv1.IngressServiceBackend{
 			Name: r.NormalizeName(ctx, harbor.GetName(), controllers.NotaryServer.String()),
 			Port: netv1.ServiceBackendPort{
-				Number: notaryserver.PublicPort,
+				Number: harbor.Spec.InternalTLS.GetInternalPort(harbormetav1.NotaryServerTLS),
 			},
 		},
 	}
