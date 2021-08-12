@@ -30,15 +30,6 @@ make dev-tools
 ### Services
 
 - [Kubernetes cluster](https://kubernetes.io). You can order a Kubernetes cluster on [ovh.com](https://www.ovh.com/fr/public-cloud/kubernetes/). Then configure your environment to have the right [`Kubeconfig`](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/).
-- [CertManager](https://cert-manager.io/docs/installation/kubernetes/#steps) >= 0.11
-
-  ```bash
-  helm install cert-manager \
-    --namespace cert-manager \
-    --version v0.12.0 \
-    jetstack/cert-manager
-  ```
-
 - Jaeger server.
   
   ```bash
