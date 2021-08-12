@@ -114,7 +114,7 @@ you can check the additional references listed below.
 * [Install PostgreSQL operator with chart](https://github.com/zalando/postgres-operator/blob/master/docs/quickstart.md#helm-chart)
 * [Install Redis operator with chart](https://github.com/spotahome/redis-operator#using-the-helm-chart)
 
-Besides, you can also enable the operators of the dependent services in `charts/harbor-operator/values.yaml` to deploy full stack Harbor more efficiency.
+Besides, you can also enable the operators of the dependent services in `charts/harbor-operator/values.yaml` to deploy full stack Harbor more efficient.
 
 * Find the configuration items of the dependent operators charts from [here](https://github.com/goharbor/harbor-operator/blob/master/charts/harbor-operator/values.yaml#L252)
 
