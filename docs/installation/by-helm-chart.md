@@ -47,13 +47,13 @@ There are several ways to get the Harbor operator helm chart:
 
 ## Deploy Harbor operator with chart
 
-> CRDs should be uninstalled before deployment when the older version(`<v1.1.0`) helm chart has been deployed.
+> Under the restriction of helm chart upgrades, CRDs should be updated manully before the deployment of the Harbor operator when the older version(`<v1.1.0`) helm chart has been deployed.
 
 Run the `helm` command to install the harbor operator to your cluster:
 
 ```shell
 # Change chart path depends on how do you get the helm chart.
-helm upgrade --namespace harbor-operator-ns --install harbor-operator charts/harbor-operator-v1.1.0.tgz --set-string image.repository=ghcr.io/goharbor/harbor-operator --set-string image.tag=v1.1.0 —set installCRDs=true
+helm upgrade --namespace harbor-operator-ns --install harbor-operator charts/harbor-operator-v1.1.0.tgz --set-string image.repository=ghcr.io/goharbor/harbor-operator --set-string image.tag=v1.1.0
 ```
 
 For what settings you can override with `--set`, `--set-string`, `--set-file` or `--values`, you can refer to the [values.yaml](../../charts/harbor-operator/values.yaml) file.
@@ -113,6 +113,10 @@ you can check the additional references listed below.
   * Find archived minio operator charts from [here](https://github.com/minio/operator/tree/master/helm-releases)
 * [Install PostgreSQL operator with chart](https://github.com/zalando/postgres-operator/blob/master/docs/quickstart.md#helm-chart)
 * [Install Redis operator with chart](https://github.com/spotahome/redis-operator#using-the-helm-chart)
+
+Besides, you can also enable the operators of the dependent services in `charts/harbor-operator/values.yaml` to deploy full stack Harbor more efficiency.
+
+* Find the configuration items of the dependent operators charts from [here](https://github.com/goharbor/harbor-operator/blob/master/charts/harbor-operator/values.yaml#L252)
 
 ## What's next
 
