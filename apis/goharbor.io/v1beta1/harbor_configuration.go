@@ -3,57 +3,9 @@ package v1beta1
 import (
 	"encoding/json"
 
+	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
-
-type Extension struct {
-	// Work around for https://github.com/kubernetes-sigs/kubebuilder/issues/528
-	Data map[string]interface{} `json:"-"`
-}
-
-// MarshalJSON marshals the HelmValues data to a JSON blob.
-func (e Extension) MarshalJSON() ([]byte, error) {
-	return json.Marshal(e.Data)
-}
-
-// UnmarshalJSON sets the HelmValues to a copy of data.
-func (e *Extension) UnmarshalJSON(data []byte) error {
-	var out map[string]interface{}
-
-	err := json.Unmarshal(data, &out)
-	if err != nil {
-		return err
-	}
-
-	e.Data = out
-
-	return nil
-}
-
-// DeepCopyInto is an deepcopy function, copying the receiver, writing
-// into out. In must be non-nil. Declaring this here prevents it from
-// being generated in `zz_generated.deepcopy.go`.
-//
-// This exists here to work around https://github.com/kubernetes/code-generator/issues/50,
-// and partially around https://github.com/kubernetes-sigs/controller-tools/pull/126
-// and https://github.com/kubernetes-sigs/controller-tools/issues/294.
-func (e *Extension) DeepCopyInto(out *Extension) {
-	b, err := json.Marshal(e.Data)
-	if err != nil {
-		// The marshal should have been performed cleanly as otherwise
-		// the resource would not have been created by the API server.
-		panic(err)
-	}
-
-	var c map[string]interface{}
-
-	err = json.Unmarshal(b, &c)
-	if err != nil {
-		panic(err)
-	}
-
-	out.Data = c
-}
 
 // +genclient
 
@@ -82,7 +34,7 @@ type HarborConfiguration struct {
 type HarborConfigurationSpec struct {
 	// AdditionalProperties provides workaround for those unknown configuration fields in the future.
 	// +kubebuilder:validation:Optional
-	Extension Extension `json:"extension,omitempty"`
+	Extension apiextensionsv1.JSON `json:"extension,omitempty"`
 	// The auth mode of current system, such as "db_auth", "ldap_auth", "oidc_auth".
 	// +kubebuilder:validation:Optional
 	AuthMode string `json:"auth_mode,omitempty"`
@@ -142,10 +94,11 @@ func (h HarborConfigurationSpec) ToJSON() ([]byte, error) {
 		return nil, err
 	}
 
-	if h.Extension.Data != nil {
+	extension := make(map[string]interface{})
+	if json.Unmarshal(h.Extension.Raw, &extension) != nil {
 		delete(data, "extension")
 
-		for k, v := range h.Extension.Data {
+		for k, v := range extension {
 			data[k] = v
 		}
 	}

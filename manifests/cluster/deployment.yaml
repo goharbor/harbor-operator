@@ -8303,7 +8303,7 @@ spec:
                 type: string
               extension:
                 description: AdditionalProperties provides workaround for those unknown configuration fields in the future.
-                type: object
+                x-kubernetes-preserve-unknown-fields: true
               http_authproxy_admin_groups:
                 description: The group which has the harbor admin privileges.
                 type: string
@@ -8482,7 +8482,7 @@ spec:
                     type: string
                   extension:
                     description: AdditionalProperties provides workaround for those unknown configuration fields in the future.
-                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
                   http_authproxy_admin_groups:
                     description: The group which has the harbor admin privileges.
                     type: string
