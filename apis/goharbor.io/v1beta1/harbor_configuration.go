@@ -94,8 +94,12 @@ func (h HarborConfigurationSpec) ToJSON() ([]byte, error) {
 		return nil, err
 	}
 
-	extension := make(map[string]interface{})
-	if json.Unmarshal(h.Extension.Raw, &extension) != nil {
+	if len(h.Extension.Raw) > 0 {
+		extension := make(map[string]interface{})
+		if err = json.Unmarshal(h.Extension.Raw, &extension); err != nil {
+			return nil, err
+		}
+
 		delete(data, "extension")
 
 		for k, v := range extension {
