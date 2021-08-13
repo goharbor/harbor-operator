@@ -124,7 +124,21 @@ helm-install: helm helm-generate
 		--set-string image.repository="$$(echo $(IMG) | sed 's/:.*//')" \
 		--set-string image.tag="$$(echo $(IMG) | sed 's/.*://')" \
 		--set-string harborClass='$(CHART_HARBOR_CLASS)' \
-		--set installCRDs=true
+		--set installCRDs=true \
+		--set minio-operator.enabled=true \
+		--set postgres-operator.enabled=true \
+		--set redisoperator.enabled=true 
+
+CLUSTER_NAME := harbor-operator
+
+delete-environment:
+	-@$(KIND) delete cluster --name $(CLUSTER_NAME)
+
+create-environment: delete-environment kind docker-build
+	@$(KIND) create cluster --name $(CLUSTER_NAME)
+	@$(KIND) load docker-image $(IMG) --name $(CLUSTER_NAME)
+	$(MAKE) certmanager
+	$(MAKE) helm-install
 
 #####################
 #     Packaging     #
