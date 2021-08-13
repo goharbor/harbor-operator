@@ -78,7 +78,8 @@ dev-tools: \
 	kubebuilder \
 	kustomize \
 	markdownlint \
-	stringer
+	stringer \
+	kind
 
 #####################
 #      Tests        #
@@ -646,6 +647,21 @@ $(HADOLINT):
 	curl -sL "https://github.com/hadolint/hadolint/releases/download/v$(HADOLINT_VERSION)/hadolint-$$(uname -s)-x86_64" \
 		> $(HADOLINT)
 	chmod u+x $(HADOLINT)
+
+KIND_VERSION := 0.11.1
+KIND := $(BIN)/kind
+
+.PHONY: kind
+kind:
+	@$(KIND) --version 2>&1 \
+		| grep '$(KIND_VERSION)' > /dev/null \
+	|| rm -f $(KIND)
+	@$(MAKE) $(KIND)
+
+$(KIND):
+	$(MAKE) $(BIN)
+	curl -Lo $(KIND) "https://kind.sigs.k8s.io/dl/v$(KIND_VERSION)/kind-$$(go env GOOS)-$$(go env GOARCH)"
+	chmod u+x $(KIND)
 
 # find or download helm-docs
 # download helm-docs if necessary
