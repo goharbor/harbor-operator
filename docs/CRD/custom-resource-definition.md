@@ -2,7 +2,7 @@
 
 This document guides user to learn the related fields defined in the `HarborCluster` CRD and then customize their Harbor cluster deployment stack.
 
-**CRD version**: `v1alpha3`
+**CRD version**: `v1beta1`
 
 ## CRD spec
 
@@ -10,7 +10,7 @@ Describe the spec fields with YAML code snippets and comments.
 All the parts here share the head YAML code snippet shown below.
 
 ```yaml
-apiVersion: goharbor.io/v1alpha3
+apiVersion: goharbor.io/v1beta1
 kind: HarborCluster
 metadata:
   name: harborcluster-sample
@@ -382,168 +382,164 @@ spec:
 
 ### Storage related fields
 
-Two alternatives provided to configure the backend storage of the deploying Harbor.
+So far, there are four options for storage configurations: `filesystem` ([Persistent Volume](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)), [`S3`](https://docs.aws.amazon.com/AmazonS3/latest/API/Welcome.html) , [`Swift`](https://docs.openstack.org/swift/latest/), MinIO.
 
-#### Standard (`imageChartStorage`)
+#### FileSystem 
 
-Standard storage configuration spec can be used to configure the *existing pre-deployed* or *cloud storage services* as the backed storage of the deploying Harbor.
-So far, there are three options for standard storage configurations: `filesystem` ([Persistent Volume](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)), [`S3`](https://docs.aws.amazon.com/AmazonS3/latest/API/Welcome.html) and [`Swift`](https://docs.openstack.org/swift/latest/).
-
-1. Configure `filesystem` as backend storage.
-
-   ```yaml
-   spec:
-     # ... Skipped fields
-
-     # Configure standard backend storage for the deploying Harbor.
-     imageChartStorage: # Optional
-       # If disable the redirection of blob downloading.
-       redirect:
-         disable: false # Optional, default = false
-       # FileSystem is an implementation of the storagedriver.StorageDriver interface which uses the local filesystem.
-       # The local filesystem can be a remote volume.
-       # See: https://docs.docker.com/registry/storage-drivers/filesystem/
-       filesystem: # Optional
-         chartPersistentVolume: # Optional
-           # Inline the corev1.PersistentVolumeClaimVolumeSource
-           # ClaimName is the name of a PersistentVolumeClaim in the same namespace as the pod using this volume.
-           # More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#persistentvolumeclaims
-           claimName: myPVC # Required
-           # Will force the ReadOnly setting in VolumeMounts.
-           readOnly: false # Optional
-           prefix: myPrefix # Optional
-         registryPersistentVolume: # Optional
-           # ... Skipped the same fields with 'chartPersistentVolume': 'claimName', 'readOnly' and 'prefix'.
-           # ...
-           # Max threads
-           maxthreads: 100 # Optional, default = 100, minimal = 25
-
-     # ... Skipped fields
-   ```
-
-2. Configure `s3` as backend storage.
-
-   ```yaml
-   spec:
-     # ... Skipped fields
-
-     # Configure standard backend storage for the deploying Harbor.
-     imageChartStorage: # Optional
-       # If disable the redirection of blob downloading.
-       redirect:
-         disable: false # Optional, default = false
-       # Configure S3 as the backend storage of Harbor.
-       # An implementation of the storagedriver.StorageDriver interface which uses Amazon S3 or S3 compatible services for object storage.
-       # See: https://docs.docker.com/registry/storage-drivers/s3/
-       s3: # Optional
-         # The AWS Access Key.
-         # If you use IAM roles, omit to fetch temporary credentials from IAM.
-         accesskey: ak # Optional
-         # Reference to the secret containing the AWS Secret Key.
-         # If you use IAM roles, omit to fetch temporary credentials from IAM.
-         secretkeyRef: secret # Optional
-         # The AWS region in which your bucket exists.
-         # For the moment, the Go AWS library in use does not use the newer DNS based bucket routing.
-         # For a list of regions, see http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html
-         region: us-east-1 # Required
-         # Endpoint for S3 compatible storage services (Minio, etc).
-         regionendpoint: Minio # Required
-         # The bucket name in which you want to store the registry’s data.
-         bucket: default # Required
-         # This is a prefix that is applied to all S3 keys to allow you to segment data in your bucket if necessary.
-         rootdirectory: registry # Optional
-         # The S3 storage class applied to each registry file.
-         storageclass: STANDARD # Optional, default="STANDARD"
-         # KMS key ID to use for encryption (encrypt must be true, or this parameter is ignored).
-         keyid: kid # Optional
-         # Specifies whether the registry stores the image in encrypted format or not. A boolean value.
-         encrypt: false # Optional, default=false
-         # Skips TLS verification when the value is set to true.
-         skipverify: false # Optional, default=false
-         # Certificate
-         certificateRef: cert # Optional
-         # Indicates whether to use HTTPS instead of HTTP. A boolean value.
-         secure: true # Optional, default=true
-         # Indicates whether the registry uses Version 4 of AWS’s authentication.
-         v4auth: true # Optional, default=true
-         # The S3 API requires multipart upload chunks to be at least 5MB.
-         chunksize: 5242880 # Optional, minimal = 5242880
-
-     # ... Skipped fields
-   ```
-
-3. Configure `swift` as backend storage.
-   This method is not recommended since Swift is *enventual consistent*.
-   Please use [S3 Middleware](https://docs.openstack.org/newton/config-reference/object-storage/configure-s3.html) in front of Swift and configure 2nd method: S3 storage.
-
-   ```yaml
-   spec:
-     # ... Skipped fields
-
-     # Configure standard backend storage for the deploying Harbor.
-     imageChartStorage: # Optional
-       # If disable the redirection of blob downloading.
-       redirect:
-         disable: false # Optional, default = false
-       # Configure Swift as the backend storage of Harbor.
-       # An implementation of the storagedriver.StorageDriver interface that uses OpenStack Swift for object storage.
-       # See: https://docs.docker.com/registry/storage-drivers/swift/
-       swift: # Optional
-         # URL for obtaining an auth token.
-         # https://storage.myprovider.com/v2.0 or https://storage.myprovider.com/v3/auth
-         authurl: https://storage.myprovider.com/v3/auth # Required
-         # The Openstack user name.
-         username: openstack-user # Required
-         # Secret name containing the Openstack password.
-         passwordRef: secret # Required
-         # The Openstack region in which your container exists.
-         region: region-1 # Optional
-         # The name of your Swift container where you wish to store the registry’s data.
-         # The driver creates the named container during its initialization.
-         container: container1 # Required
-         # You can either use tenant or tenantid.
-         tenant: myTenant # Optional
-         # You can either use tenant or tenantid.
-         tenantid: myTenantID # Optional
-         # Your Openstack domain name for Identity v3 API. You can either use domain or domainid.
-         domain: sampleDomain # Optional
-         # Your Openstack domain ID for Identity v3 API. You can either use domain or domainid.
-         domainid: did # Optional
-         # Your Openstack trust ID for Identity v3 API.
-         trustid: myTrustID # Optional
-         # Skips TLS verification if the value is set to true.
-         insecureskipverify: false # Optional, default=false
-         # Size of the data segments for the Swift Dynamic Large Objects.
-         # This value should be a number.
-         chunksize: 5242880 # Optional, minimal=5242880
-         # This is a prefix that is applied to all Swift keys to allow you to segment data in your container if necessary. Defaults to the container’s root.
-         prefix: registry # Optional
-         # The secret key used to generate temporary URLs.
-         secretkeyRef: key # Optional
-         # The access key to generate temporary URLs. It is used by HP Cloud Object Storage in addition to the secretkey parameter.
-         accesskey: ak # Optional
-         # Specify the OpenStack Auth’s version, for example 3. By default the driver autodetects the auth’s version from the authurl.
-         authversion: 3 # Optional
-         # The endpoint type used when connecting to swift.
-         # Supports values ["public","internal","admin"]
-         endpointtype: public # Optional, default=public
-
-     # ... Skipped fields
-   ```
-
-#### in-cluster storage configuration (`inClusterStorage`)
-
-The *in-cluster storage configuration* can be configured to let the Harbor operator automatically deploy an in-cluster S3 compatible Minio service with HA supported as the backend storage service of the deploying Harbor.
-If
+Configure `filesystem` as backend storage.
 
 ```yaml
 spec:
   # ... Skipped fields
-  inClusterStorage: # Optional
+  
+  storage:
+    kind: "FileSystem"
+    spec: 
+      # FileSystem is an implementation of the storagedriver.StorageDriver interface which uses the local filesystem.
+      # The local filesystem can be a remote volume.
+      # See: https://docs.docker.com/registry/storage-drivers/filesystem/
+      filesystem: # Optional
+        chartPersistentVolume: # Optional
+          # Inline the corev1.PersistentVolumeClaimVolumeSource
+          # ClaimName is the name of a PersistentVolumeClaim in the same namespace as the pod using this volume.
+          # More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#persistentvolumeclaims
+          claimName: myPVC # Required
+          # Will force the ReadOnly setting in VolumeMounts.
+          readOnly: false # Optional
+          prefix: myPrefix # Optional
+        registryPersistentVolume: # Optional
+          # ... Skipped the same fields with 'chartPersistentVolume': 'claimName', 'readOnly' and 'prefix'.
+          # ...
+          # Max threads
+          maxthreads: 100 # Optional, default = 100, minimal = 25
+
+  # ... Skipped fields
+```
+
+#### S3
+
+Configure `s3` as backend storage.
+
+```yaml
+spec:
+  # ... Skipped fields
+
+  storage:
+    kind: "S3"
+    spec: 
+      # Configure S3 as the backend storage of Harbor.
+    	# An implementation of the storagedriver.StorageDriver interface which uses Amazon S3 or S3 compatible services for object storage.
+    	# See: https://docs.docker.com/registry/storage-drivers/s3/
+      s3: # Optional
+        # The AWS Access Key.
+        # If you use IAM roles, omit to fetch temporary credentials from IAM.
+        accesskey: ak # Optional
+        # Reference to the secret containing the AWS Secret Key.
+        # If you use IAM roles, omit to fetch temporary credentials from IAM.
+        secretkeyRef: secret # Optional
+        # The AWS region in which your bucket exists.
+        # For the moment, the Go AWS library in use does not use the newer DNS based bucket routing.
+        # For a list of regions, see http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html
+        region: us-east-1 # Required
+        # Endpoint for S3 compatible storage services (Minio, etc).
+        regionendpoint: Minio # Required
+        # The bucket name in which you want to store the registry’s data.
+        bucket: default # Required
+        # This is a prefix that is applied to all S3 keys to allow you to segment data in your bucket if necessary.
+        rootdirectory: registry # Optional
+        # The S3 storage class applied to each registry file.
+        storageclass: STANDARD # Optional, default="STANDARD"
+        # KMS key ID to use for encryption (encrypt must be true, or this parameter is ignored).
+        keyid: kid # Optional
+        # Specifies whether the registry stores the image in encrypted format or not. A boolean value.
+        encrypt: false # Optional, default=false
+        # Skips TLS verification when the value is set to true.
+        skipverify: false # Optional, default=false
+        # Certificate
+        certificateRef: cert # Optional
+        # Indicates whether to use HTTPS instead of HTTP. A boolean value.
+        secure: true # Optional, default=true
+        # Indicates whether the registry uses Version 4 of AWS’s authentication.
+        v4auth: true # Optional, default=true
+        # The S3 API requires multipart upload chunks to be at least 5MB.
+        chunksize: 5242880 # Optional, minimal = 5242880
+
+  # ... Skipped fields
+```
+
+#### Swift
+
+Configure `swift` as backend storage.
+This method is not recommended since Swift is *enventual consistent*.
+Please use [S3 Middleware](https://docs.openstack.org/newton/config-reference/object-storage/configure-s3.html) in front of Swift and configure 2nd method: S3 storage.
+
+```yaml
+spec:
+  # ... Skipped fields
+
+  storage: 
+   	kind: Swift
+   	spec: 
+      # Configure Swift as the backend storage of Harbor.
+      # An implementation of the storagedriver.StorageDriver interface that uses OpenStack Swift for object storage.
+      # See: https://docs.docker.com/registry/storage-drivers/swift/
+
+      swift: # Optional
+        # URL for obtaining an auth token.
+        # https://storage.myprovider.com/v2.0 or https://storage.myprovider.com/v3/auth
+        authurl: https://storage.myprovider.com/v3/auth # Required
+        # The Openstack user name.
+        username: openstack-user # Required
+        # Secret name containing the Openstack password.
+        passwordRef: secret # Required
+        # The Openstack region in which your container exists.
+        region: region-1 # Optional
+        # The name of your Swift container where you wish to store the registry’s data.
+        # The driver creates the named container during its initialization.
+        container: container1 # Required
+        # You can either use tenant or tenantid.
+        tenant: myTenant # Optional
+        # You can either use tenant or tenantid.
+        tenantid: myTenantID # Optional
+        # Your Openstack domain name for Identity v3 API. You can either use domain or domainid.
+        domain: sampleDomain # Optional
+        # Your Openstack domain ID for Identity v3 API. You can either use domain or domainid.
+        domainid: did # Optional
+        # Your Openstack trust ID for Identity v3 API.
+        trustid: myTrustID # Optional
+        # Skips TLS verification if the value is set to true.
+        insecureskipverify: false # Optional, default=false
+        # Size of the data segments for the Swift Dynamic Large Objects.
+        # This value should be a number.
+        chunksize: 5242880 # Optional, minimal=5242880
+        # This is a prefix that is applied to all Swift keys to allow you to segment data in your container if necessary. Defaults to the container’s root.
+        prefix: registry # Optional
+        # The secret key used to generate temporary URLs.
+        secretkeyRef: key # Optional
+        # The access key to generate temporary URLs. It is used by HP Cloud Object Storage in addition to the secretkey parameter.
+        accesskey: ak # Optional
+        # Specify the OpenStack Auth’s version, for example 3. By default the driver autodetects the auth’s version from the authurl.
+        authversion: 3 # Optional
+        # The endpoint type used when connecting to swift.
+        # Supports values ["public","internal","admin"]
+        endpointtype: public # Optional, default=public
+
+  # ... Skipped fields
+```
+
+#### MinIO
+
+The minio storage configuration can be configured to let the Harbor operator automatically deploy an in-cluster S3 compatible  service with HA supported as the backend storage service of the deploying Harbor.
+
+```yaml
+spec:
+  # ... Skipped fields
+  
+  storage:
     # Kind of which storage service to be used. Only support MinIO now.
     kind: MinIO # Required
     # MinIO configurations
-    minIOSpec: # Required
+    spec: # Required
       # Image name for the MinIO. It will override the default one.
       image: my-minio # Optional
       # Image pull policy. It will override the global 'imageSource' settings and the default one.
@@ -606,7 +602,7 @@ spec:
 
 Two alternatives provided to configure the database service used by the deploying Harbor.
 
-#### Standard (`database`)
+#### Standard
 
 Standard database configurations can be used to set the *existing pre-deployed* or *cloud database services* as the dependent database of the deploying Harbor.
 
@@ -615,32 +611,34 @@ spec:
   # ... Skipped fields
 
   # Configure existing pre-deployed or cloud database service.
-  database: # Optional
-    # PostgreSQL user name to connect as.
-    # Defaults to be the same as the operating system name of the user running the application.
-    username: postsql # Required
-    # Secret containing the password to be used if the server demands password authentication.
-    passwordRef: psqlSecret # Optional
-    # PostgreSQL hosts.
-    # At least 1.
-    hosts:
-      # Name of host to connect to.
-      # If a host name begins with a slash, it specifies Unix-domain communication rather than
-      # TCP/IP communication; the value is the name of the directory in which the socket file is stored.
-      - host: psql # Required
-      # Port number to connect to at the server host,
-      # or socket file name extension for Unix-domain connections.
-      # Zero, specifies the default port number established when PostgreSQL was built.
-        port: 5432 # Optional
-    # PostgreSQL has native support for using SSL connections to encrypt client/server communications for increased security.
-    # Supports values ["disable","allow","prefer","require","verify-ca","verify-full"].
-    sslMode: prefer # Optional, default=prefer
-    prefix: prefix # Optional
+  database: 
+    spec: "PostgreSQL"
+    postgresql:
+      # PostgreSQL user name to connect as.
+      # Defaults to be the same as the operating system name of the user running the application.
+      username: postsql # Required
+      # Secret containing the password to be used if the server demands password authentication.
+      passwordRef: psqlSecret # Optional
+      # PostgreSQL hosts.
+      # At least 1.
+      hosts:
+        # Name of host to connect to.
+        # If a host name begins with a slash, it specifies Unix-domain communication rather than
+        # TCP/IP communication; the value is the name of the directory in which the socket file is stored.
+        - host: psql # Required
+        # Port number to connect to at the server host,
+        # or socket file name extension for Unix-domain connections.
+        # Zero, specifies the default port number established when PostgreSQL was built.
+          port: 5432 # Optional
+      # PostgreSQL has native support for using SSL connections to encrypt client/server communications for increased security.
+      # Supports values ["disable","allow","prefer","require","verify-ca","verify-full"].
+      sslMode: prefer # Optional, default=prefer
+      prefix: prefix # Optional
   
   # ... Skipped fields
 ```
 
-#### in-cluster database configuration(`inClusterDatabase`)
+#### in-cluster database configuration
 
 The *in-cluster database configuration* can be configured to let the Harbor operator automatically deploy an in-cluster PostgreSQL database service with HA supported as the dependent database of the deploying Harbor.
 
@@ -648,104 +646,26 @@ The *in-cluster database configuration* can be configured to let the Harbor oper
 spec:
   # ... Skipped fields
 
-  # In-cluster database configurations.
-  inClusterDatabase: # Optional
+  # database configurations.
+  database:
     # Set the kind of which database service to be used, Only support 'PostgresSQL' now.
-    kind: PostgresSQL # Required
-    # Postgresql spec
-    postgresSqlSpec: # Required
-      # Image name for the PostgresSQL. It will override the default one.
-      image: my-psql # Optional
-      # Image pull policy. It will override the global 'imageSource' settings and the default one.
-      imagePullPolicy: # Optional, default = IfNotPresent
-      # Image pull secrets. It will override the global 'imageSource' settings if it has been set.
-      imagePullSecrets:
-        - name: myHarborRegSecretOfPsql
-      # Specify the storage size for the PostgresSQL.
-      storage: 1Gi # Optional, default="1Gi"
-      # Replicas of PostgresSQL instances.
-      replicas: 3 # Optional, default=3
-      # The storage class used for creating storage.
-      storageClassName: default # Optional
-      # If provided, use these requests and limit for cpu/memory resource allocation
-      # More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
-      resources: # Optional
-        # Limits describes the maximum amount of compute resources allowed.
-        # More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
-        limits: {} # Optional
-        # Requests describes the minimum amount of compute resources required.
-        # If Requests is omitted for a container, it defaults to Limits if that is explicitly specified,
-        # otherwise to an implementation-defined value.
-        # More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
-        requests: {} # Optional
-
-
-  # ... Skipped fields
-```
-
->NOTES: You can choose either `database` or `inClusterDatabase` based on your actual use case.
-
-### Cache related fields
-
-Two alternatives provided to configure the cache(`Redis`) service used by the deploying Harbor.
-
-#### Standard(`redis`)
-
-Standard cache configurations can be used to set the *existing pre-deployed* or *cloud cache services* as the dependent cache of the deploying Harbor.
-
-```yaml
-spec:
-  # ... Skipped fields
-
-  # Redis configuration.
-  redis: # Optional
-    # Server host.
-    host: myredis.com # Required
-    # Server port.
-    port: 6347 # Required
-    # For setting sentinel masterSet.
-    sentinelMasterSet: sentinel # Optional
-    # Secret containing the password to use when connecting to the server.
-    passwordRef: pwdSecret # Optional
-    # Secret containing the client certificate to authenticate with.
-    certificateRef: cert # Optional
-  
-  # ... Skipped fields
-```
-
-#### in-cluster cache configuration(`inClusterCache`)
-
-The *in-cluster cache configuration* can be configured to let the Harbor operator automatically deploy an in-cluster Redis service with HA supported as the dependent cache of the deploying Harbor.
-
-```yaml
-spec:
-  # ... Skipped fields
-
-  # In-cluster cache configurations.
-  inClusterCache: # Optional
-    # Set the kind of cache service to be used. Only support 'Redis' now.
-    kind: Redis # Required
-    # Redis configuration spec.
-    redisSpec: # Required
-      # Image name for the Redis. It will override the default one.
-      image: my-redis # Optional
-      # Image pull policy. It will override the global 'imageSource' settings and the default one.
-      imagePullPolicy: # Optional, default = IfNotPresent
-      # Image pull secrets. It will override the global 'imageSource' settings if it has been set.
-      imagePullSecrets:
-        - name: myHarborRegSecretOfRedis
-      # Redis sentinel
-      sentinel: # Required
-        # Replicas of the sentinel service.
+    kind: "Zlando/PostgreSQL" # Required
+    # storage spec
+    spec: # Required
+      zlandoPostgreSql:
+        # Image name for the PostgresSQL. It will override the default one.
+        image: my-psql # Optional
+        # Image pull policy. It will override the global 'imageSource' settings and the default one.
+        imagePullPolicy: # Optional, default = IfNotPresent
+        # Image pull secrets. It will override the global 'imageSource' settings if it has been set.
+        imagePullSecrets:
+          - name: myHarborRegSecretOfPsql
+        # Specify the storage size for the PostgresSQL.
+        storage: 1Gi # Optional, default="1Gi"
+        # Replicas of PostgresSQL instances.
         replicas: 3 # Optional, default=3
-      # Redis server.
-      server: # Required
-        # Replicas of the server.
-        replicas: 3 # Optional, default=3
-        # Storage class used to apply storage of redis.
-        StorageClassName: default # Optional
-        # Storage size.
-        storage: 1Gi # Optional
+        # The storage class used for creating storage.
+        storageClassName: default # Optional
         # If provided, use these requests and limit for cpu/memory resource allocation
         # More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
         resources: # Optional
@@ -758,11 +678,90 @@ spec:
           # More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
           requests: {} # Optional
 
+
+  # ... Skipped fields
+```
+
+### Cache related fields
+
+Two alternatives provided to configure the cache(`Redis`) service used by the deploying Harbor.
+
+#### Standard
+
+Standard cache configurations can be used to set the *existing pre-deployed* or *cloud cache services* as the dependent cache of the deploying Harbor.
+
+```yaml
+spec:
+  # ... Skipped fields
+
+  # Cache configuration.
+  cache: # Optional
+  	kind: "Redis"
+  	spec:
+  	  redis:
+        # Server host.
+        host: myredis.com # Required
+        # Server port.
+        port: 6347 # Required
+        # For setting sentinel masterSet.
+        sentinelMasterSet: sentinel # Optional
+        # Secret containing the password to use when connecting to the server.
+        passwordRef: pwdSecret # Optional
+        # Secret containing the client certificate to authenticate with.
+        certificateRef: cert # Optional
+  
+  # ... Skipped fields
+```
+
+#### in-cluster cache configuration
+
+The *in-cluster cache configuration* can be configured to let the Harbor operator automatically deploy an in-cluster Redis service with HA supported as the dependent cache of the deploying Harbor.
+
+```yaml
+spec:
+  # ... Skipped fields
+
+  # cache configurations.
+  cache:
+    # Set the kind of cache service to be used. Only support 'Redis' now.
+    kind: RedisFailover # Required
+    # Redis configuration spec.
+    spec: # Required
+      redisFailover:
+        # Image name for the Redis. It will override the default one.
+        image: my-redis # Optional
+        # Image pull policy. It will override the global 'imageSource' settings and the default one.
+        imagePullPolicy: # Optional, default = IfNotPresent
+        # Image pull secrets. It will override the global 'imageSource' settings if it has been set.
+        imagePullSecrets:
+          - name: myHarborRegSecretOfRedis
+        # Redis sentinel
+        sentinel: # Required
+          # Replicas of the sentinel service.
+          replicas: 3 # Optional, default=3
+        # Redis server.
+        server: # Required
+          # Replicas of the server.
+          replicas: 3 # Optional, default=3
+          # Storage class used to apply storage of redis.
+          StorageClassName: default # Optional
+          # Storage size.
+          storage: 1Gi # Optional
+          # If provided, use these requests and limit for cpu/memory resource allocation
+          # More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+          resources: # Optional
+            # Limits describes the maximum amount of compute resources allowed.
+            # More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+            limits: {} # Optional
+            # Requests describes the minimum amount of compute resources required.
+            # If Requests is omitted for a container, it defaults to Limits if that is explicitly specified,
+            # otherwise to an implementation-defined value.
+            # More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+            requests: {} # Optional
+
   # ... Skipped fields
 
 ```
-
-> NOTES: You can choose either `redis` or `inClusterCache` based on your actual use case.
 
 ## Status spec
 
