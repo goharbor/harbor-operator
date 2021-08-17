@@ -384,7 +384,7 @@ spec:
 
 So far, there are four options for storage configurations: `filesystem` ([Persistent Volume](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)), [`S3`](https://docs.aws.amazon.com/AmazonS3/latest/API/Welcome.html) , [`Swift`](https://docs.openstack.org/swift/latest/), MinIO.
 
-#### FileSystem 
+#### FileSystem
 
 Configure `filesystem` as backend storage.
 
@@ -394,7 +394,7 @@ spec:
   
   storage:
     kind: "FileSystem"
-    spec: 
+    spec:
       # FileSystem is an implementation of the storagedriver.StorageDriver interface which uses the local filesystem.
       # The local filesystem can be a remote volume.
       # See: https://docs.docker.com/registry/storage-drivers/filesystem/
@@ -426,10 +426,10 @@ spec:
 
   storage:
     kind: "S3"
-    spec: 
+    spec:
       # Configure S3 as the backend storage of Harbor.
-    	# An implementation of the storagedriver.StorageDriver interface which uses Amazon S3 or S3 compatible services for object storage.
-    	# See: https://docs.docker.com/registry/storage-drivers/s3/
+      # An implementation of the storagedriver.StorageDriver interface which uses Amazon S3 or S3 compatible services for object storage.
+      # See: https://docs.docker.com/registry/storage-drivers/s3/
       s3: # Optional
         # The AWS Access Key.
         # If you use IAM roles, omit to fetch temporary credentials from IAM.
@@ -477,9 +477,9 @@ Please use [S3 Middleware](https://docs.openstack.org/newton/config-reference/ob
 spec:
   # ... Skipped fields
 
-  storage: 
-   	kind: Swift
-   	spec: 
+  storage:
+    kind: Swift
+    spec:
       # Configure Swift as the backend storage of Harbor.
       # An implementation of the storagedriver.StorageDriver interface that uses OpenStack Swift for object storage.
       # See: https://docs.docker.com/registry/storage-drivers/swift/
@@ -596,13 +596,11 @@ spec:
   # ... Skipped fields
 ```
 
->NOTES: You can choose either `imageChartStorage` or `inClusterStorage` based on your actual use case.
-
 ### Database related fields
 
 Two alternatives provided to configure the database service used by the deploying Harbor.
 
-#### Standard
+#### Standard Database
 
 Standard database configurations can be used to set the *existing pre-deployed* or *cloud database services* as the dependent database of the deploying Harbor.
 
@@ -611,7 +609,7 @@ spec:
   # ... Skipped fields
 
   # Configure existing pre-deployed or cloud database service.
-  database: 
+  database:
     spec: "PostgreSQL"
     postgresql:
       # PostgreSQL user name to connect as.
@@ -686,7 +684,7 @@ spec:
 
 Two alternatives provided to configure the cache(`Redis`) service used by the deploying Harbor.
 
-#### Standard
+#### Standard Cache
 
 Standard cache configurations can be used to set the *existing pre-deployed* or *cloud cache services* as the dependent cache of the deploying Harbor.
 
@@ -696,9 +694,9 @@ spec:
 
   # Cache configuration.
   cache: # Optional
-  	kind: "Redis"
-  	spec:
-  	  redis:
+    kind: "Redis"
+    spec:
+      redis:
         # Server host.
         host: myredis.com # Required
         # Server port.
