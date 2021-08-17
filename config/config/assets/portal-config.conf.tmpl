@@ -13,9 +13,15 @@ http {
     scgi_temp_path /tmp/scgi_temp;
 
     server {
+{{- if .Spec.Network.IsIPv4Enabled }}
+        listen {{- if .Spec.TLS.Enabled }} 8443 ssl{{- else }} 8080{{- end }};
+{{- end }}
+
+{{- if .Spec.Network.IsIPv6Enabled }}
+        listen {{- if .Spec.TLS.Enabled }} [::]:8443 ssl{{- else }} [::]:8080{{- end }};
+{{- end }}
+
 {{- if .Spec.TLS.Enabled }}
-        listen 8443 ssl;
-        listen [::]:8443 ssl;
         # SSL
         ssl_certificate /etc/portal/ssl/tls.crt;
         ssl_certificate_key /etc/portal/ssl/tls.key;
@@ -25,9 +31,6 @@ http {
         ssl_ciphers '!aNULL:kECDH+AESGCM:ECDH+AESGCM:RSA+AESGCM:kECDH+AES:ECDH+AES:RSA+AES:';
         ssl_prefer_server_ciphers on;
         ssl_session_cache shared:SSL:10m;
-{{- else }}
-        listen 8080;
-        listen [::]:8080;
 {{- end }}
         server_name  localhost;
 

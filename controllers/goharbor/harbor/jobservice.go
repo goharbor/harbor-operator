@@ -180,6 +180,7 @@ func (r *Reconciler) GetJobService(ctx context.Context, harbor *goharborv1.Harbo
 			CertificateInjection: harbor.Spec.JobService.CertificateInjection,
 			Proxy:                harbor.GetComponentProxySpec(harbormetav1.JobServiceComponent),
 			Metrics:              harbor.Spec.JobService.Metrics,
+			Network:              harbor.Spec.Network,
 		},
 	}, nil
 }

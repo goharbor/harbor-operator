@@ -52,6 +52,9 @@ type NotarySignerSpec struct {
 
 	// +kubebuilder:validation:Optional
 	MigrationEnabled *bool `json:"migrationEnabled,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	Network *harbormetav1.Network `json:"network,omitempty"`
 }
 
 type NotarySignerAuthenticationSpec struct {

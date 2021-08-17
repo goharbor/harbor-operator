@@ -47,6 +47,10 @@ type PortalSpec struct {
 
 	// +kubebuilder:validation:Optional
 	TLS *harbormetav1.ComponentsTLSSpec `json:"tls,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Network settings for the portal
+	Network *harbormetav1.Network `json:"network,omitempty"`
 }
 
 func init() { // nolint:gochecknoinits

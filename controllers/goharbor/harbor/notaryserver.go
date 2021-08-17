@@ -231,6 +231,7 @@ func (r *Reconciler) GetNotaryServer(ctx context.Context, harbor *goharborv1.Har
 				},
 			},
 			MigrationEnabled: &migrationEnabled,
+			Network:          harbor.Spec.Network,
 		},
 	}, nil
 }

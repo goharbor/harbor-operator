@@ -78,7 +78,8 @@ func (r *Reconciler) GetRegistryCtl(ctx context.Context, harbor *goharborv1.Harb
 				CoreSecretRef:       coreSecretRef,
 				JobServiceSecretRef: jobserviceSecretRef,
 			},
-			TLS: tls,
+			TLS:     tls,
+			Network: harbor.Spec.Network,
 		},
 	}, nil
 }

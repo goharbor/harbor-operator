@@ -103,6 +103,7 @@ func (r *Reconciler) GetExporter(ctx context.Context, harbor *goharborv1.Harbor)
 					RedisConnection: harbor.Spec.RedisConnection(harbormetav1.JobServiceRedis),
 				},
 			},
+			Network: harbor.Spec.Network,
 		},
 	}, nil
 }

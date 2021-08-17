@@ -69,6 +69,10 @@ metadata:
 spec:
   version: 2.3.0
   logLevel: info
+  network:
+    ipFamilies:
+      - IPv4
+      - IPv6
   imageSource:
     repository: ghcr.io/goharbor
   harborAdminPasswordRef: admin-core-secret

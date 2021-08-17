@@ -363,6 +363,7 @@ func (r *Reconciler) GetNotarySigner(ctx context.Context, harbor *goharborv1.Har
 				AliasesRef: encryptionKeyAliasesRef,
 			},
 			MigrationEnabled: &migrationEnabled,
+			Network:          harbor.Spec.Network,
 		},
 	}, nil
 }
