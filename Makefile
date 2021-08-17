@@ -78,7 +78,8 @@ dev-tools: \
 	kubebuilder \
 	kustomize \
 	markdownlint \
-	stringer
+	stringer \
+	kind
 
 #####################
 #      Tests        #
@@ -123,7 +124,21 @@ helm-install: helm helm-generate
 		--set-string image.repository="$$(echo $(IMG) | sed 's/:.*//')" \
 		--set-string image.tag="$$(echo $(IMG) | sed 's/.*://')" \
 		--set-string harborClass='$(CHART_HARBOR_CLASS)' \
-		--set installCRDs=true
+		--set installCRDs=true \
+		--set minio-operator.enabled=true \
+		--set postgres-operator.enabled=true \
+		--set redisoperator.enabled=true 
+
+CLUSTER_NAME := harbor-operator
+
+delete-environment:
+	-@$(KIND) delete cluster --name $(CLUSTER_NAME)
+
+create-environment: delete-environment kind docker-build
+	@$(KIND) create cluster --name $(CLUSTER_NAME)
+	@$(KIND) load docker-image $(IMG) --name $(CLUSTER_NAME)
+	$(MAKE) certmanager
+	$(MAKE) helm-install
 
 #####################
 #     Packaging     #
@@ -646,6 +661,21 @@ $(HADOLINT):
 	curl -sL "https://github.com/hadolint/hadolint/releases/download/v$(HADOLINT_VERSION)/hadolint-$$(uname -s)-x86_64" \
 		> $(HADOLINT)
 	chmod u+x $(HADOLINT)
+
+KIND_VERSION := 0.11.1
+KIND := $(BIN)/kind
+
+.PHONY: kind
+kind:
+	@$(KIND) --version 2>&1 \
+		| grep '$(KIND_VERSION)' > /dev/null \
+	|| rm -f $(KIND)
+	@$(MAKE) $(KIND)
+
+$(KIND):
+	$(MAKE) $(BIN)
+	curl -Lo $(KIND) "https://kind.sigs.k8s.io/dl/v$(KIND_VERSION)/kind-$$(go env GOOS)-$$(go env GOARCH)"
+	chmod u+x $(KIND)
 
 # find or download helm-docs
 # download helm-docs if necessary
