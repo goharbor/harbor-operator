@@ -19,11 +19,6 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
-const (
-	// HarborNameLabelKey defines the key of harbor name.
-	HarborNameLabelKey = "harbor-name"
-)
-
 // New HarborConfiguration reconciler.
 func New(ctx context.Context, configStore *configstore.Store) (commonCtrl.Reconciler, error) {
 	r := &Reconciler{}
@@ -91,23 +86,16 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (res ctrl.
 
 	hc.Status.Status = goharborv1.HarborConfigurationStatusUnknown
 
-	harborName := hc.GetLabels()[HarborNameLabelKey]
-	if len(harborName) == 0 {
-		err = errors.Errorf("harbor configuration is invalid, without %s label", HarborNameLabelKey)
-		hc.Status.Reason = "ConfigurationInvalid"
-
-		return
-	}
 	// get harbor cr
-	harbor := &goharborv1.Harbor{}
-	if err = r.Client.Get(ctx, types.NamespacedName{Namespace: req.Namespace, Name: harborName}, harbor); err != nil {
-		err = fmt.Errorf("error get harbor: %w", err)
-		hc.Status.Reason = "HarborError"
+	harborCluster := &goharborv1.HarborCluster{}
+	if err = r.Client.Get(ctx, types.NamespacedName{Namespace: req.Namespace, Name: hc.Spec.HarborClusterRef}, harborCluster); err != nil {
+		err = fmt.Errorf("error get harborCluster: %w", err)
+		hc.Status.Reason = "HarborClusterError"
 
 		return
 	}
 	// get harbor client
-	harborClient, err := r.getHarborClient(ctx, harbor)
+	harborClient, err := r.getHarborClient(ctx, harborCluster)
 	if err != nil {
 		err = fmt.Errorf("error get harbor client: %w", err)
 		hc.Status.Reason = "HarborClientError"
@@ -134,7 +122,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (res ctrl.
 }
 
 // getHarborClient gets harbor client.
-func (r *Reconciler) getHarborClient(ctx context.Context, harbor *goharborv1.Harbor) (pkgharbor.Client, error) {
+func (r *Reconciler) getHarborClient(ctx context.Context, harbor *goharborv1.HarborCluster) (pkgharbor.Client, error) {
 	url := harbor.Spec.ExternalURL
 	if len(url) == 0 {
 		return nil, errors.Errorf("harbor url is invalid")
@@ -158,7 +146,7 @@ func (r *Reconciler) getHarborClient(ctx context.Context, harbor *goharborv1.Har
 }
 
 // assembleConfig assembles password filed from secret.
-func (r *Reconciler) assembleHarborConfiguration(ctx context.Context, hc *goharborv1.HarborConfiguration) (payload []byte, err error) {
+func (r *Reconciler) assembleHarborConfiguration(ctx context.Context, hc *goharborv1.HarborConfiguration) (payload []byte, err error) { // nolint:funlen
 	secretValueGetter := func(secretName, secretNamespace, key string) (string, error) {
 		secret := &corev1.Secret{}
 		if err := r.Client.Get(ctx, types.NamespacedName{Namespace: secretNamespace, Name: secretName}, secret); err != nil {
@@ -175,41 +163,51 @@ func (r *Reconciler) assembleHarborConfiguration(ctx context.Context, hc *goharb
 	// "email_password", "ldap_search_password", "uaa_client_secret", "oidc_client_secret"
 	// these configuration spec need extracts value from secret.
 
-	if len(hc.Spec.EmailPassword) != 0 {
-		password, err := secretValueGetter(hc.Spec.EmailPassword, hc.Namespace, "email_password")
+	if len(hc.Spec.Configuration.EmailPassword) != 0 {
+		password, err := secretValueGetter(hc.Spec.Configuration.EmailPassword, hc.Namespace, "email_password")
 		if err != nil {
-			return nil, fmt.Errorf("error extract email_password from secret %s: %w", hc.Spec.EmailPassword, err)
+			return nil, fmt.Errorf("error extract email_password from secret %s: %w", hc.Spec.Configuration.EmailPassword, err)
 		}
 
-		hc.Spec.EmailPassword = password
+		hc.Spec.Configuration.EmailPassword = password
 	}
 
-	if len(hc.Spec.LdapSearchPassword) != 0 {
-		password, err := secretValueGetter(hc.Spec.LdapSearchPassword, hc.Namespace, "ldap_search_password")
+	if len(hc.Spec.Configuration.LdapSearchPassword) != 0 {
+		password, err := secretValueGetter(hc.Spec.Configuration.LdapSearchPassword, hc.Namespace, "ldap_search_password")
 		if err != nil {
-			return nil, fmt.Errorf("error extract ldap_search_password from secret %s: %w", hc.Spec.LdapSearchPassword, err)
+			return nil, fmt.Errorf("error extract ldap_search_password from secret %s: %w", hc.Spec.Configuration.LdapSearchPassword, err)
 		}
 
-		hc.Spec.LdapSearchPassword = password
+		hc.Spec.Configuration.LdapSearchPassword = password
 	}
 
-	if len(hc.Spec.UaaClientSecret) != 0 {
-		secret, err := secretValueGetter(hc.Spec.UaaClientSecret, hc.Namespace, "uaa_client_secret")
+	if len(hc.Spec.Configuration.UaaClientSecret) != 0 {
+		secret, err := secretValueGetter(hc.Spec.Configuration.UaaClientSecret, hc.Namespace, "uaa_client_secret")
 		if err != nil {
-			return nil, fmt.Errorf("error extract uaa_client_secret from secret %s: %w", hc.Spec.UaaClientSecret, err)
+			return nil, fmt.Errorf("error extract uaa_client_secret from secret %s: %w", hc.Spec.Configuration.UaaClientSecret, err)
 		}
 
-		hc.Spec.UaaClientSecret = secret
+		hc.Spec.Configuration.UaaClientSecret = secret
 	}
 
-	if len(hc.Spec.OidcClientSecret) != 0 {
-		secret, err := secretValueGetter(hc.Spec.OidcClientSecret, hc.Namespace, "oidc_client_secret")
+	if len(hc.Spec.Configuration.OidcClientSecret) != 0 {
+		secret, err := secretValueGetter(hc.Spec.Configuration.OidcClientSecret, hc.Namespace, "oidc_client_secret")
 		if err != nil {
-			return nil, fmt.Errorf("error extract oidc_client_secret from secret %s: %w", hc.Spec.UaaClientSecret, err)
+			return nil, fmt.Errorf("error extract oidc_client_secret from secret %s: %w", hc.Spec.Configuration.UaaClientSecret, err)
 		}
 
-		hc.Spec.OidcClientSecret = secret
+		hc.Spec.Configuration.OidcClientSecret = secret
+	}
+	// convert spec config to json format
+	p, err := hc.Spec.Configuration.ToJSON()
+	if err != nil {
+		return nil, err
+	}
+	// from json payload to harbor configuration
+	c, err := pkgharbor.FromJSONToConfiguration(p)
+	if err != nil {
+		return nil, err
 	}
 
-	return hc.Spec.ToJSON()
+	return c.Payload()
 }

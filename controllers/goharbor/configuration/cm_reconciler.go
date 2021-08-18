@@ -10,6 +10,7 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/factories/application"
 	"github.com/goharbor/harbor-operator/pkg/utils/strings"
 	"github.com/ovh/configstore"
+	"gopkg.in/yaml.v2"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -19,7 +20,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
-	"sigs.k8s.io/yaml"
 )
 
 // New HarborConfiguration configmap reconciler.
@@ -113,9 +113,9 @@ func (r *CmReconciler) Reconcile(ctx context.Context, req ctrl.Request) (res ctr
 	log.Info("Convert harbor configuration configmap to HarborConfiguration CR")
 
 	oldConfig := []byte(cm.Data["config.yaml"])
-	spec := &goharborv1.HarborConfigurationSpec{}
+	model := &goharborv1.HarborConfigurationModel{}
 
-	if err = yaml.Unmarshal(oldConfig, spec); err != nil {
+	if err = yaml.Unmarshal(oldConfig, model); err != nil {
 		return ctrl.Result{}, fmt.Errorf("error unmarshal configmap configuration to HarborConfigurationSpec: %w", err)
 	}
 
@@ -123,11 +123,11 @@ func (r *CmReconciler) Reconcile(ctx context.Context, req ctrl.Request) (res ctr
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      cm.Name,
 			Namespace: cm.Namespace,
-			Labels: map[string]string{
-				HarborNameLabelKey: fmt.Sprintf("%s-harbor", cm.GetAnnotations()[ConfigurationLabelKey]),
-			},
 		},
-		Spec: *spec,
+		Spec: goharborv1.HarborConfigurationSpec{
+			HarborClusterRef: cm.GetAnnotations()[ConfigurationLabelKey],
+			Configuration:    *model,
+		},
 	}
 
 	if err = r.createOrUpdateHarborConfiguration(ctx, hc); err != nil {

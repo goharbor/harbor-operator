@@ -4,7 +4,7 @@ Initially, we configured harbor by means of configmap, but currently we recommen
 
 > The harbor configuration items can be found in [harbor swagger](https://github.com/goharbor/harbor/blob/0867a6bfd6f33149f86a7ae8a740f5e1f976cafa/api/v2.0/swagger.yaml#L7990).
 
-## ConfigMap (will be deprecated)
+## ConfigMap (deprecated)
 
 First you need to prepare a config map to provide your harbor configurations, apply the config map in the same namespace as harborcluster. In particular, you need to add an annotation to your config map to mark which harborcluster it is acting on.
 
@@ -43,7 +43,7 @@ data:
     email_password: secret-sample # the value is the name of secret which store the email_password.
 ```
 
-## HarborConfiguration (recommended)
+## CRD-based HarborConfiguration
 
 We have defined a new kubernetes crd `HarborConfiguration` as harbor configuration, which can provide more validate capabilities and scalability. The configuration is similar to configmap, you just need prepare a `harborconfiguration` resource and input the sepc you needed to configurate harbor.
 
@@ -65,16 +65,14 @@ data:
 apiVersion: goharbor.io/v1alpha3
 kind: HarborConfiguration
 metadata:
-  labels:
-    # required.
-    # your harbor instance(cr) name.
-    harbor-name: harborcluster-sample-harbor
   name: test-config
   namespace: cluster-sample-ns
 spec:
   # your harbor configuration
-  email_password: secret-sample
-  email_ssl: true
+  configuration:
+    email_password: secret-sample
+    email_ssl: true
+  harborClusterRef: harborcluster-sample
 ```
 
 After apply your `harborconfiguration` cr to kubernetes cluster, the controller of `harborconfiguration` will apply your configuration to harbor instance, you can see the result of configuraion from cr status.
@@ -83,7 +81,8 @@ After apply your `harborconfiguration` cr to kubernetes cluster, the controller 
 status:
   lastApplyTime: "2021-06-04T06:07:53Z"
   lastConfiguration:
-    email_password: secret-sample
-    email_ssl: true
+    configuration:
+      email_password: secret-sample
+      email_ssl: true
   status: Success
 ```
