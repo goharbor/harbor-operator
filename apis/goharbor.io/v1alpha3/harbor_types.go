@@ -754,3 +754,7 @@ type HarborProxySpec struct {
 func init() { // nolint:gochecknoinits
 	SchemeBuilder.Register(&Harbor{}, &HarborList{})
 }
+
+func required(mainPath *field.Path) *field.Error {
+	return field.Required(mainPath, fmt.Sprintf("%s should be configured", mainPath.String()))
+}
