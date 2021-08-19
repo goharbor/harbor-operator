@@ -8,11 +8,12 @@ metadata:
 webhooks:
 - admissionReviewVersions:
   - v1beta1
+  - v1
   clientConfig:
     service:
       name: {{ include "chart.fullname" . | quote }}
       namespace: {{ .Release.Namespace | quote }}
-      path: /validate-goharbor-io-v1alpha3-harbor
+      path: /validate-goharbor-io-v1beta1-harbor
       port: {{ .Values.service.port }}
   failurePolicy: Fail
   name: vharbor.kb.io
@@ -20,7 +21,7 @@ webhooks:
   - apiGroups:
     - goharbor.io
     apiVersions:
-    - v1alpha3
+    - v1beta1
     operations:
     - CREATE
     - UPDATE
@@ -29,11 +30,12 @@ webhooks:
   sideEffects: None
 - admissionReviewVersions:
   - v1beta1
+  - v1
   clientConfig:
     service:
       name: {{ include "chart.fullname" . | quote }}
       namespace: {{ .Release.Namespace | quote }}
-      path: /validate-goharbor-io-v1alpha3-jobservice
+      path: /validate-goharbor-io-v1beta1-jobservice
       port: {{ .Values.service.port }}
   failurePolicy: Fail
   name: vjobservice.kb.io
@@ -41,7 +43,7 @@ webhooks:
   - apiGroups:
     - goharbor.io
     apiVersions:
-    - v1alpha3
+    - v1beta1
     operations:
     - CREATE
     - UPDATE
@@ -50,11 +52,12 @@ webhooks:
   sideEffects: None
 - admissionReviewVersions:
   - v1beta1
+  - v1
   clientConfig:
     service:
       name: {{ include "chart.fullname" . | quote }}
       namespace: {{ .Release.Namespace | quote }}
-      path: /validate-goharbor-io-v1alpha3-registry
+      path: /validate-goharbor-io-v1beta1-registry
       port: {{ .Values.service.port }}
   failurePolicy: Fail
   name: vregistry.kb.io
@@ -62,54 +65,12 @@ webhooks:
   - apiGroups:
     - goharbor.io
     apiVersions:
-    - v1alpha3
+    - v1beta1
     operations:
     - CREATE
     - UPDATE
     resources:
     - registries
-  sideEffects: None
-- admissionReviewVersions:
-  - v1beta1
-  clientConfig:
-    service:
-      name: {{ include "chart.fullname" . | quote }}
-      namespace: {{ .Release.Namespace | quote }}
-      path: /validate-goharbor-io-v1alpha3-notaryserver
-      port: {{ .Values.service.port }}
-  failurePolicy: Fail
-  name: vnotaryserver.kb.io
-  rules:
-  - apiGroups:
-    - goharbor.io
-    apiVersions:
-    - v1alpha3
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - notaryservers
-  sideEffects: None
-- admissionReviewVersions:
-  - v1beta1
-  clientConfig:
-    service:
-      name: {{ include "chart.fullname" . | quote }}
-      namespace: {{ .Release.Namespace | quote }}
-      path: /validate-goharbor-io-v1alpha3-notarysigner
-      port: {{ .Values.service.port }}
-  failurePolicy: Fail
-  name: vnotarysigner.kb.io
-  rules:
-  - apiGroups:
-    - goharbor.io
-    apiVersions:
-    - v1alpha3
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - notarysigners
   sideEffects: None
 - admissionReviewVersions:
   - v1beta1

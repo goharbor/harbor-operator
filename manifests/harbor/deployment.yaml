@@ -27202,26 +27202,6 @@ webhooks:
     resources:
     - harborclusters
   sideEffects: None
-- admissionReviewVersions:
-  - v1beta1
-  clientConfig:
-    service:
-      name: webhook-service
-      namespace: harbor-operator-ns
-      path: /mutate-goharbor-io-v1alpha3-harbor
-  failurePolicy: Fail
-  name: mharbor.kb.io
-  rules:
-  - apiGroups:
-    - goharbor.io
-    apiVersions:
-    - v1alpha3
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - harbors
-  sideEffects: None
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
@@ -27233,6 +27213,27 @@ metadata:
     goharbor.io/operator-version: v1.0.0
   name: validating-webhook-configuration
 webhooks:
+- admissionReviewVersions:
+  - v1beta1
+  - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: harbor-operator-ns
+      path: /validate-goharbor-io-v1beta1-harbor
+  failurePolicy: Fail
+  name: vharbor.kb.io
+  rules:
+  - apiGroups:
+    - goharbor.io
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - harbors
+  sideEffects: None
 - admissionReviewVersions:
   - v1beta1
   - v1
@@ -27256,38 +27257,19 @@ webhooks:
   sideEffects: None
 - admissionReviewVersions:
   - v1beta1
+  - v1
   clientConfig:
     service:
       name: webhook-service
       namespace: harbor-operator-ns
-      path: /validate-goharbor-io-v1alpha3-harbor
-  failurePolicy: Fail
-  name: vharbor.kb.io
-  rules:
-  - apiGroups:
-    - goharbor.io
-    apiVersions:
-    - v1alpha3
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - harbors
-  sideEffects: None
-- admissionReviewVersions:
-  - v1beta1
-  clientConfig:
-    service:
-      name: webhook-service
-      namespace: harbor-operator-ns
-      path: /validate-goharbor-io-v1alpha3-jobservice
+      path: /validate-goharbor-io-v1beta1-jobservice
   failurePolicy: Fail
   name: vjobservice.kb.io
   rules:
   - apiGroups:
     - goharbor.io
     apiVersions:
-    - v1alpha3
+    - v1beta1
     operations:
     - CREATE
     - UPDATE
@@ -27296,58 +27278,19 @@ webhooks:
   sideEffects: None
 - admissionReviewVersions:
   - v1beta1
+  - v1
   clientConfig:
     service:
       name: webhook-service
       namespace: harbor-operator-ns
-      path: /validate-goharbor-io-v1alpha3-notaryserver
-  failurePolicy: Fail
-  name: vnotaryserver.kb.io
-  rules:
-  - apiGroups:
-    - goharbor.io
-    apiVersions:
-    - v1alpha3
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - notaryservers
-  sideEffects: None
-- admissionReviewVersions:
-  - v1beta1
-  clientConfig:
-    service:
-      name: webhook-service
-      namespace: harbor-operator-ns
-      path: /validate-goharbor-io-v1alpha3-notarysigner
-  failurePolicy: Fail
-  name: vnotarysigner.kb.io
-  rules:
-  - apiGroups:
-    - goharbor.io
-    apiVersions:
-    - v1alpha3
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - notarysigners
-  sideEffects: None
-- admissionReviewVersions:
-  - v1beta1
-  clientConfig:
-    service:
-      name: webhook-service
-      namespace: harbor-operator-ns
-      path: /validate-goharbor-io-v1alpha3-registry
+      path: /validate-goharbor-io-v1beta1-registry
   failurePolicy: Fail
   name: vregistry.kb.io
   rules:
   - apiGroups:
     - goharbor.io
     apiVersions:
-    - v1alpha3
+    - v1beta1
     operations:
     - CREATE
     - UPDATE

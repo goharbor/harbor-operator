@@ -206,26 +206,6 @@ type HarborSpec struct {
 }
 
 func (spec *HarborSpec) ValidateNotary() *field.Error {
-	if spec.Notary == nil {
-		return nil
-	}
-
-	if spec.Expose.Notary == nil {
-		return required(field.NewPath("spec").Child("expose", "notary"))
-	}
-
-	if spec.Expose.Notary.Ingress == nil {
-		return required(field.NewPath("spec").Child("expose", "notary", "ingress"))
-	}
-
-	if spec.Expose.Notary.TLS == nil {
-		return required(field.NewPath("spec").Child("expose", "notary", "tls"))
-	}
-
-	if spec.Expose.Notary.TLS.CertificateRef == "" {
-		return required(field.NewPath("spec").Child("expose", "notary", "tls", "certificateRef"))
-	}
-
 	return nil
 }
 

@@ -4,8 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	goharborv1alpha3 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
-	goharborv1beta1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
 	"github.com/goharbor/harbor-operator/controllers"
 	"github.com/goharbor/harbor-operator/pkg/config"
 	"github.com/ovh/configstore"
@@ -17,18 +16,18 @@ const (
 )
 
 var webhooksBuilder = map[controllers.Controller][]WebHook{
-	controllers.ChartMuseum:        {&goharborv1beta1.ChartMuseum{}},
-	controllers.Core:               {&goharborv1beta1.Core{}},
-	controllers.Exporter:           {&goharborv1beta1.Exporter{}},
-	controllers.Harbor:             {&goharborv1alpha3.Harbor{}, &goharborv1beta1.Harbor{}},
-	controllers.JobService:         {&goharborv1alpha3.JobService{}, &goharborv1beta1.JobService{}},
-	controllers.Registry:           {&goharborv1alpha3.Registry{}, &goharborv1beta1.Registry{}},
-	controllers.Portal:             {&goharborv1beta1.Portal{}},
-	controllers.RegistryController: {&goharborv1beta1.RegistryController{}},
-	controllers.Trivy:              {&goharborv1beta1.Trivy{}},
-	controllers.NotaryServer:       {&goharborv1alpha3.NotaryServer{}, &goharborv1beta1.NotaryServer{}},
-	controllers.NotarySigner:       {&goharborv1alpha3.NotarySigner{}, &goharborv1beta1.NotarySigner{}},
-	controllers.HarborCluster:      {&goharborv1alpha3.HarborCluster{}, &goharborv1beta1.HarborCluster{}},
+	controllers.ChartMuseum:        {&goharborv1.ChartMuseum{}},
+	controllers.Core:               {&goharborv1.Core{}},
+	controllers.Exporter:           {&goharborv1.Exporter{}},
+	controllers.Harbor:             {&goharborv1.Harbor{}},
+	controllers.JobService:         {&goharborv1.JobService{}},
+	controllers.Registry:           {&goharborv1.Registry{}},
+	controllers.Portal:             {&goharborv1.Portal{}},
+	controllers.RegistryController: {&goharborv1.RegistryController{}},
+	controllers.Trivy:              {&goharborv1.Trivy{}},
+	controllers.NotaryServer:       {&goharborv1.NotaryServer{}},
+	controllers.NotarySigner:       {&goharborv1.NotarySigner{}},
+	controllers.HarborCluster:      {&goharborv1.HarborCluster{}},
 }
 
 type WebHook interface {

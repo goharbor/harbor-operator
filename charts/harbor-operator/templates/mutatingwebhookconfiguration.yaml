@@ -8,27 +8,6 @@ metadata:
 webhooks:
 - admissionReviewVersions:
   - v1beta1
-  clientConfig:
-    service:
-      name: {{ include "chart.fullname" . | quote }}
-      namespace: {{ .Release.Namespace | quote }}
-      path: /mutate-goharbor-io-v1alpha3-harbor
-      port: {{ .Values.service.port }}
-  failurePolicy: Fail
-  name: mharbor.kb.io
-  rules:
-  - apiGroups:
-    - goharbor.io
-    apiVersions:
-    - v1alpha3
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - harbors
-  sideEffects: None
-- admissionReviewVersions:
-  - v1beta1
   - v1
   clientConfig:
     service:
