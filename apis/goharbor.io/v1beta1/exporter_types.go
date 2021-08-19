@@ -68,6 +68,9 @@ type ExporterSpec struct {
 	// +kubebuilder:default="/metrics"
 	// +kubebuilder:validation:Pattern="/.+"
 	Path string `json:"path,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	Network *harbormetav1.Network `json:"network,omitempty"`
 }
 
 type ExporterCacheSpec struct {

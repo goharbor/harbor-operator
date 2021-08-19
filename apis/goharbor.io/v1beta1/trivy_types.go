@@ -66,6 +66,9 @@ type TrivySpec struct {
 
 	// +kubebuilder:validation:Optional
 	Proxy *harbormetav1.ProxySpec `json:"proxy,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	Network *harbormetav1.Network `json:"network,omitempty"`
 }
 
 type TrivyUpdateSpec struct {

@@ -79,6 +79,9 @@ type JobServiceSpec struct {
 
 	// +kubebuilder:validation:Optional
 	Metrics *harbormetav1.MetricsSpec `json:"metrics,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	Network *harbormetav1.Network `json:"network,omitempty"`
 }
 
 type JobServiceTokenSpec struct {

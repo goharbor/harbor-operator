@@ -68,6 +68,7 @@ func (r *Reconciler) GetPortal(ctx context.Context, harbor *goharborv1.Harbor) (
 		Spec: goharborv1.PortalSpec{
 			ComponentSpec: harbor.GetComponentSpec(ctx, harbormetav1.PortalComponent),
 			TLS:           tls,
+			Network:       harbor.Spec.Network,
 		},
 	}, nil
 }

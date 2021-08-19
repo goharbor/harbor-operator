@@ -62,6 +62,9 @@ type RegistryControllerSpec struct {
 
 	// +kubebuilder:validation:Required
 	Authentication RegistryControllerAuthenticationSpec `json:"authentication"`
+
+	// +kubebuilder:validation:Optional
+	Network *harbormetav1.Network `json:"network,omitempty"`
 }
 
 type RegistryControllerAuthenticationSpec struct {

@@ -100,6 +100,10 @@ func (harborcluster *HarborCluster) ValidateDelete() error {
 func (harborcluster *HarborCluster) validate(old *HarborCluster) error {
 	var allErrs field.ErrorList
 
+	if err := harborcluster.Spec.Network.Validate(nil); err != nil {
+		allErrs = append(allErrs, err)
+	}
+
 	// For database(psql), cache(Redis) and storage, either external services or in-cluster services MUST be configured
 	if err := harborcluster.validateStorage(); err != nil {
 		allErrs = append(allErrs, err)

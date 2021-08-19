@@ -199,6 +199,10 @@ type HarborSpec struct {
 	// +kubebuilder:validation:Pattern="[0-9]+\\.[0-9]+\\.[0-9]+"
 	// The version of the harbor, eg 2.1.2
 	Version string `json:"version"`
+
+	// +kubebuilder:validation:Optional
+	// Network settings for the harbor
+	Network *harbormetav1.Network `json:"network,omitempty"`
 }
 
 func (spec *HarborSpec) ValidateNotary() *field.Error {

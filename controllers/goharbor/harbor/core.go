@@ -468,6 +468,7 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1.Harbor) (*g
 			Proxy:                harbor.GetComponentProxySpec(harbormetav1.CoreComponent),
 			CertificateInjection: harbor.Spec.Core.CertificateInjection,
 			Metrics:              harbor.Spec.Core.Metrics,
+			Network:              harbor.Spec.Network,
 		},
 	}, nil
 }

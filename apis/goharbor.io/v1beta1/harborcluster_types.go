@@ -46,6 +46,10 @@ type HarborClusterSpec struct {
 	// Storage configuration for in-cluster storage service
 	// +kubebuilder:validation:Required
 	Storage Storage `json:"storage"`
+
+	// +kubebuilder:validation:Optional
+	// Network settings for the harbor
+	Network *harbormetav1.Network `json:"network,omitempty"`
 }
 
 type EmbeddedHarborSpec struct {

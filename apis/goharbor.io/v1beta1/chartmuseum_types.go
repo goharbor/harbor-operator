@@ -61,6 +61,9 @@ type ChartMuseumSpec struct {
 
 	// +kubebuilder:validation:Required
 	Chart ChartMuseumChartSpec `json:"chart"`
+
+	// +kubebuilder:validation:Optional
+	Network *harbormetav1.Network `json:"network,omitempty"`
 }
 
 type ChartMuseumServerSpec struct {

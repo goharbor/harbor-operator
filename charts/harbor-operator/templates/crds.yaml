@@ -2546,6 +2546,14 @@ spec:
                     description: log latency as an integer instead of a string
                     type: boolean
                 type: object
+              network:
+                properties:
+                  ipFamilies:
+                    items:
+                      description: IPFamily represents the IP Family (IPv4 or IPv6). This type is used to express the family of an IP expressed by a type (e.g. service.spec.ipFamilies).
+                      type: string
+                    type: array
+                type: object
               nodeSelector:
                 additionalProperties:
                   type: string
@@ -3508,6 +3516,14 @@ spec:
                     minimum: 1
                     type: integer
                 type: object
+              network:
+                properties:
+                  ipFamilies:
+                    items:
+                      description: IPFamily represents the IP Family (IPv4 or IPv6). This type is used to express the family of an IP expressed by a type (e.g. service.spec.ipFamilies).
+                      type: string
+                    type: array
+                type: object
               nodeSelector:
                 additionalProperties:
                   type: string
@@ -4169,6 +4185,14 @@ spec:
                     - error
                     - panic
                     type: string
+                type: object
+              network:
+                properties:
+                  ipFamilies:
+                    items:
+                      description: IPFamily represents the IP Family (IPv4 or IPv6). This type is used to express the family of an IP expressed by a type (e.g. service.spec.ipFamilies).
+                      type: string
+                    type: array
                 type: object
               nodeSelector:
                 additionalProperties:
@@ -7056,6 +7080,15 @@ spec:
                 - error
                 - fatal
                 type: string
+              network:
+                description: Network settings for the harbor
+                properties:
+                  ipFamilies:
+                    items:
+                      description: IPFamily represents the IP Family (IPv4 or IPv6). This type is used to express the family of an IP expressed by a type (e.g. service.spec.ipFamilies).
+                      type: string
+                    type: array
+                type: object
               notary:
                 properties:
                   migrationEnabled:
@@ -10943,6 +10976,15 @@ spec:
                 - error
                 - fatal
                 type: string
+              network:
+                description: Network settings for the harbor
+                properties:
+                  ipFamilies:
+                    items:
+                      description: IPFamily represents the IP Family (IPv4 or IPv6). This type is used to express the family of an IP expressed by a type (e.g. service.spec.ipFamilies).
+                      type: string
+                    type: array
+                type: object
               notary:
                 properties:
                   migrationEnabled:
@@ -15844,6 +15886,14 @@ spec:
                     minimum: 1
                     type: integer
                 type: object
+              network:
+                properties:
+                  ipFamilies:
+                    items:
+                      description: IPFamily represents the IP Family (IPv4 or IPv6). This type is used to express the family of an IP expressed by a type (e.g. service.spec.ipFamilies).
+                      type: string
+                    type: array
+                type: object
               nodeSelector:
                 additionalProperties:
                   type: string
@@ -16479,6 +16529,14 @@ spec:
                 type: object
               migrationEnabled:
                 type: boolean
+              network:
+                properties:
+                  ipFamilies:
+                    items:
+                      description: IPFamily represents the IP Family (IPv4 or IPv6). This type is used to express the family of an IP expressed by a type (e.g. service.spec.ipFamilies).
+                      type: string
+                    type: array
+                type: object
               nodeSelector:
                 additionalProperties:
                   type: string
@@ -17008,6 +17066,14 @@ spec:
                 type: object
               migrationEnabled:
                 type: boolean
+              network:
+                properties:
+                  ipFamilies:
+                    items:
+                      description: IPFamily represents the IP Family (IPv4 or IPv6). This type is used to express the family of an IP expressed by a type (e.g. service.spec.ipFamilies).
+                      type: string
+                    type: array
+                type: object
               nodeSelector:
                 additionalProperties:
                   type: string
@@ -17430,6 +17496,15 @@ spec:
                 format: int32
                 minimum: 0
                 type: integer
+              network:
+                description: Network settings for the portal
+                properties:
+                  ipFamilies:
+                    items:
+                      description: IPFamily represents the IP Family (IPv4 or IPv6). This type is used to express the family of an IP expressed by a type (e.g. service.spec.ipFamilies).
+                      type: string
+                    type: array
+                type: object
               nodeSelector:
                 additionalProperties:
                   type: string
@@ -19662,6 +19737,14 @@ spec:
                       type: object
                     type: array
                 type: object
+              network:
+                properties:
+                  ipFamilies:
+                    items:
+                      description: IPFamily represents the IP Family (IPv4 or IPv6). This type is used to express the family of an IP expressed by a type (e.g. service.spec.ipFamilies).
+                      type: string
+                    type: array
+                type: object
               nodeSelector:
                 additionalProperties:
                   type: string
@@ -21337,6 +21420,14 @@ spec:
                     - error
                     - fatal
                     type: string
+                type: object
+              network:
+                properties:
+                  ipFamilies:
+                    items:
+                      description: IPFamily represents the IP Family (IPv4 or IPv6). This type is used to express the family of an IP expressed by a type (e.g. service.spec.ipFamilies).
+                      type: string
+                    type: array
                 type: object
               nodeSelector:
                 additionalProperties:
@@ -23751,6 +23842,14 @@ spec:
                     - fatal
                     - panic
                     type: string
+                type: object
+              network:
+                properties:
+                  ipFamilies:
+                    items:
+                      description: IPFamily represents the IP Family (IPv4 or IPv6). This type is used to express the family of an IP expressed by a type (e.g. service.spec.ipFamilies).
+                      type: string
+                    type: array
                 type: object
               nodeSelector:
                 additionalProperties:
