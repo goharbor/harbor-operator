@@ -10,8 +10,8 @@ Clone the harbor operator codebase into your computer with command
 git clone https://github.com/goharbor/harbor-operator.git
 
 # Checkout to the specified branch or the specified tag.
-# To branch: git checkout <branch-name> e.g.: git checkout release-1.0.0
-# To tag: git checkout tags/<tag> -b <branch-name> e.g: git checkout tags/v1.0.0 -b tag-v1.0.0
+# To branch: git checkout <branch-name> e.g.: git checkout release-1.1.0
+# To tag: git checkout tags/<tag> -b <branch-name> e.g: git checkout tags/v1.1.0 -b tag-v1.1.0
 ```
 
 The `Makefile` is in the root dir of the code repository.

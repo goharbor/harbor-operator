@@ -21,7 +21,7 @@ Directly apply the all-in-one deployment manifest to your Kubernetes cluster:
 kubectl apply -f https://raw.githubusercontent.com/goharbor/harbor-operator/master/manifests/cluster/deployment.yaml
 ```
 
->NOTES: Here we use the deployment manifest in the `master` branch as an example, for deploying the released versions, you can get the deployment manifest in the GitHub release page or find it in the corresponding code branch such as `release-1.0.0`.
+>NOTES: Here we use the deployment manifest in the `master` branch as an example, for deploying the released versions, you can get the deployment manifest in the GitHub release page or find it in the corresponding code branch such as `release-1.1.0`.
 
 Check the installed operators:
 
@@ -47,8 +47,8 @@ If you want to customize the deployment manifest like editing image settings of 
 git clone https://github.com/goharbor/harbor-operator.git
 
 # Checkout to the specified branch or the specified tag.
-# To branch: git checkout <branch-name> e.g.: git checkout release-1.0.0
-# To tag: git checkout tags/<tag> -b <branch-name> e.g: git checkout tags/v1.0.0 -b tag-v1.0.0
+# To branch: git checkout <branch-name> e.g.: git checkout release-1.1.0
+# To tag: git checkout tags/<tag> -b <branch-name> e.g: git checkout tags/v1.1.0 -b tag-v1.1.0
 ```
 
 As the resource manifests are not stored in the codebase, then you need to run the following command to generate the related resource manifests before using `kustomize` to build your customized operator deployment manifest:
