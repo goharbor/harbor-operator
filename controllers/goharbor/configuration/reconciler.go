@@ -74,8 +74,11 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (res ctrl.
 	defer func() {
 		if err != nil {
 			hc.Status.Status = goharborv1.HarborConfigurationStatusFail
+			hc.Status.Message = err.Error()
 		} else {
 			hc.Status.Status = goharborv1.HarborConfigurationStatusReady
+			hc.Status.Reason = ""
+			hc.Status.Message = ""
 			now := metav1.Now()
 			hc.Status.LastApplyTime = &now
 			hc.Status.LastConfiguration = &hcCopy.Spec
