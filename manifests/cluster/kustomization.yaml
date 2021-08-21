@@ -13,38 +13,38 @@ commonAnnotations:
 # All the referred deployment manifests
 # NOTES: when doing changes to the ref versions, please also do same changes in the patch/annotation.yaml file
 resources:
-- ../../config/default
-- patch/namespace.yaml
-- https://raw.githubusercontent.com/spotahome/redis-operator/master/example/operator/all-redis-operator-resources.yaml?ref=v1.0.0
-- github.com/zalando/postgres-operator/manifests?ref=v1.5.0
-- github.com/minio/operator?ref=v4.0.6
+  - ../../config/default # harbor operator
+  - patch/namespace.yaml
+  - https://raw.githubusercontent.com/spotahome/redis-operator/master/example/operator/all-redis-operator-resources.yaml?ref=v1.0.0 # redis operator
+  - github.com/zalando/postgres-operator/manifests?ref=v1.5.0 # postgresql operator
+  - github.com/minio/operator?ref=v4.0.6 # minIO storage operator
 
 # If you have to override the image source, uncomment this patch and also change the image source in the patch/image-source.yaml file.
 # Then rebuild.
-#   - patch/image-source.yaml
 patchesStrategicMerge:
-- patch/delete-minio-console.yaml
-- patch/delete-duplicated-ns.yaml
-- patch/pg-configmap.yaml
+  #   - patch/image-source.yaml
+  - patch/delete-minio-console.yaml
+  - patch/delete-duplicated-ns.yaml
+  - patch/pg-configmap.yaml
 
 patchesJson6902:
-- path: patch/annotations.yaml
-  target:
-    group: apps
-    kind: Deployment
-    name: harbor-operator
-    version: v1
+  - target:
+      kind: Deployment
+      name: harbor-operator
+      group: apps
+      version: v1
+    path: patch/annotations.yaml # add version annotations to the harbor operator ctrl
 
 images:
-- name: goharbor/harbor-operator
-  newName: heww/harbor-operator
-  newTag: dev
-- name: minio/console
-  newName: ghcr.io/goharbor/minio-console
-- name: minio/operator
-  newName: ghcr.io/goharbor/minio-operator
-- name: quay.io/spotahome/redis-operator
-  newName: ghcr.io/goharbor/redis-operator
-  newTag: v1.0.0
-- name: registry.opensource.zalan.do/acid/postgres-operator
-  newName: ghcr.io/goharbor/postgres-operator
+  - name: quay.io/spotahome/redis-operator
+    newName: ghcr.io/goharbor/redis-operator
+    newTag: v1.0.0
+  - name: minio/operator
+    newName: ghcr.io/goharbor/minio-operator
+  - name: minio/console
+    newName: ghcr.io/goharbor/minio-console
+  - name: registry.opensource.zalan.do/acid/postgres-operator
+    newName: ghcr.io/goharbor/postgres-operator
+  - name: goharbor/harbor-operator
+    newName: ghcr.io/goharbor/harbor-operator
+    newTag: dev_master

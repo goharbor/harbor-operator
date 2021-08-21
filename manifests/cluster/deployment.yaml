@@ -34637,7 +34637,7 @@ spec:
               fieldPath: metadata.namespace
         - name: CONFIGURATION_FROM
           value: env,file:/etc/harbor-operator/config.yaml
-        image: heww/harbor-operator:dev
+        image: ghcr.io/goharbor/harbor-operator:dev_master
         livenessProbe:
           httpGet:
             path: /healthz
