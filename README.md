@@ -51,8 +51,8 @@ Harbor deployment stack is controlled by a custom Harbor resource `HarborCluster
 
 ## Release plans
 
-* [Release 1.1](https://github.com/goharbor/harbor-operator/projects/8)
 * [Release 1.2](https://github.com/goharbor/harbor-operator/projects/7)
+* [Release 1.3](https://github.com/goharbor/harbor-operator/projects/9)
 
 ## Getting started
 
