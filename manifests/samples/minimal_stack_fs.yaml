@@ -112,8 +112,6 @@ spec:
     kind: FileSystem
     spec:
       fileSystem:
-        chartPersistentVolume:
-          claimName: sample-harbor-chart
         registryPersistentVolume:
           claimName: sample-harbor-registry
   cache:
