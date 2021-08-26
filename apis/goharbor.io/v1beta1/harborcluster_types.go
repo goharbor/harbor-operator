@@ -89,8 +89,8 @@ type EmbeddedHarborSpec struct {
 }
 
 type EmbeddedHarborComponentsSpec struct {
-	// +kubebuilder:validation:Required
-	Portal harbormetav1.ComponentSpec `json:"portal,omitempty"`
+	// +kubebuilder:validation:Optional
+	Portal *PortalComponentSpec `json:"portal,omitempty"`
 
 	// +kubebuilder:validation:Required
 	Core CoreComponentSpec `json:"core,omitempty"`
