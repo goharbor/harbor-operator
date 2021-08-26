@@ -54,8 +54,8 @@ func (r *Reconciler) GetCoreLB(ctx context.Context, harbor *goharborv1beta1.Harb
 				Protocol:   corev1.ProtocolTCP,
 			}},
 			Selector: map[string]string{
-				r.Label("name"):      core,
-				r.Label("namespace"): namespace,
+				controllers.Core.Label("name"):      core,
+				controllers.Core.Label("namespace"): namespace,
 			},
 			Type: corev1.ServiceTypeLoadBalancer,
 		},
@@ -98,8 +98,8 @@ func (r *Reconciler) GetNotaryServerLB(ctx context.Context, harbor *goharborv1be
 				Protocol:   corev1.ProtocolTCP,
 			}},
 			Selector: map[string]string{
-				r.Label("name"):      name,
-				r.Label("namespace"): namespace,
+				controllers.NotaryServer.Label("name"):      name,
+				controllers.NotaryServer.Label("namespace"): namespace,
 			},
 			Type: corev1.ServiceTypeLoadBalancer,
 		},
@@ -140,8 +140,8 @@ func (r *Reconciler) GetNotarySignerLB(ctx context.Context, harbor *goharborv1be
 				Protocol:   corev1.ProtocolTCP,
 			}},
 			Selector: map[string]string{
-				r.Label("name"):      name,
-				r.Label("namespace"): namespace,
+				controllers.NotarySigner.Label("name"):      name,
+				controllers.NotarySigner.Label("namespace"): namespace,
 			},
 			Type: corev1.ServiceTypeLoadBalancer,
 		},
@@ -187,8 +187,8 @@ func (r *Reconciler) GetPortalLB(ctx context.Context, harbor *goharborv1beta1.Ha
 				Protocol:   corev1.ProtocolTCP,
 			}},
 			Selector: map[string]string{
-				r.Label("name"):      name,
-				r.Label("namespace"): namespace,
+				controllers.Portal.Label("name"):      name,
+				controllers.Portal.Label("namespace"): namespace,
 			},
 			Type: corev1.ServiceTypeLoadBalancer,
 		},
