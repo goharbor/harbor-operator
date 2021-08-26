@@ -186,6 +186,11 @@ func (r *Reconciler) GetCoreIngressAnnotations(ctx context.Context, harbor *goha
 		// resolve 413(Too Large Entity) error when push large image. It only works for NGINX ingress.
 		"nginx.ingress.kubernetes.io/proxy-body-size": "0",
 	}
+
+	if harbor.Spec.Expose.Core.Ingress == nil {
+		return annotations
+	}
+
 	if harbor.Spec.Expose.Core.Ingress.Controller == harbormetav1.IngressControllerNCP {
 		annotations["ncp/use-regex"] = NCPIngressValueTrue
 		if harbor.Spec.InternalTLS.IsEnabled() {
@@ -217,6 +222,17 @@ func (r *Reconciler) GetNotaryIngressAnnotations(ctx context.Context, harbor *go
 		// resolve 413(Too Large Entity) error when push large image. It only works for NGINX ingress.
 		"nginx.ingress.kubernetes.io/proxy-body-size": "0",
 	}
+
+	if harbor.Spec.Expose.Notary != nil && harbor.Spec.Expose.Notary.Ingress != nil {
+		for key, value := range harbor.Spec.Expose.Notary.Ingress.Annotations {
+			annotations[key] = value
+		}
+	}
+
+	if harbor.Spec.Expose.Core.Ingress == nil {
+		return annotations
+	}
+
 	if harbor.Spec.Expose.Core.Ingress.Controller == harbormetav1.IngressControllerNCP {
 		annotations["ncp/use-regex"] = NCPIngressValueTrue
 		if harbor.Spec.InternalTLS.IsEnabled() {
@@ -226,10 +242,6 @@ func (r *Reconciler) GetNotaryIngressAnnotations(ctx context.Context, harbor *go
 		if harbor.Spec.InternalTLS.IsEnabled() {
 			annotations["ingress.kubernetes.io/force-ssl-redirect"] = ContourIngressValueTrue
 		}
-	}
-
-	for key, value := range harbor.Spec.Expose.Notary.Ingress.Annotations {
-		annotations[key] = value
 	}
 
 	return annotations
