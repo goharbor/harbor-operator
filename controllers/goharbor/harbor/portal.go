@@ -14,6 +14,10 @@ import (
 type Portal graph.Resource
 
 func (r *Reconciler) AddPortal(ctx context.Context, harbor *goharborv1.Harbor, tlsIssuer InternalTLSIssuer) (PortalInternalCertificate, Portal, error) {
+	if harbor.Spec.Portal == nil {
+		return nil, nil, nil
+	}
+
 	cert, err := r.AddPortalInternalCertificate(ctx, harbor, tlsIssuer)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "certificate")

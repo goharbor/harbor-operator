@@ -69,7 +69,7 @@ func (h *Harbor) deepCopyComponentSpecInto(_ context.Context, component harborme
 			h.Spec.Notary.Signer.DeepCopyInto(spec)
 		}
 	case harbormetav1.PortalComponent:
-		h.Spec.Portal.DeepCopyInto(spec)
+		h.Spec.Portal.ComponentSpec.DeepCopyInto(spec)
 	case harbormetav1.RegistryComponent:
 		h.Spec.Registry.ComponentSpec.DeepCopyInto(spec)
 	case harbormetav1.RegistryControllerComponent:
@@ -254,8 +254,8 @@ func (spec *HarborSpec) ValidateRegistryController() *field.Error {
 }
 
 type HarborComponentsSpec struct {
-	// +kubebuilder:validation:Required
-	Portal harbormetav1.ComponentSpec `json:"portal,omitempty"`
+	// +kubebuilder:validation:Optional
+	Portal *PortalComponentSpec `json:"portal,omitempty"`
 
 	// +kubebuilder:validation:Required
 	Core CoreComponentSpec `json:"core,omitempty"`
@@ -376,6 +376,10 @@ func (r *HarborComponentsSpec) RedisConnection(component harbormetav1.ComponentW
 		RedisHostSpec:    r.Redis.RedisHostSpec,
 		Database:         component.Index(),
 	}
+}
+
+type PortalComponentSpec struct {
+	harbormetav1.ComponentSpec `json:",inline"`
 }
 
 type CoreComponentSpec struct {
