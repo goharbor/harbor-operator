@@ -662,9 +662,6 @@ type HarborExposeSpec struct {
 	// +kubebuilder:validation:Optional
 	// The ingress of the notary, required when notary component enabled.
 	Notary *HarborExposeComponentSpec `json:"notary,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	Portal *HarborExposeComponentSpec `json:"portal,omitempty"`
 }
 
 type HarborExposeComponentSpec struct {
@@ -673,14 +670,6 @@ type HarborExposeComponentSpec struct {
 
 	// +kubebuilder:validation:Optional
 	Ingress *HarborExposeIngressSpec `json:"ingress,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	LoadBalancer *HarborExposeLBSpec `json:"loadbalancer,omitempty"`
-}
-
-type HarborExposeLBSpec struct {
-	// +kubebuilder:validation:Optional
-	Enable bool `json:"enable,omitempty"`
 }
 
 type HarborExposeIngressSpec struct {
