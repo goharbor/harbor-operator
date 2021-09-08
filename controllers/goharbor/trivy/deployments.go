@@ -112,9 +112,8 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1.Trivy)
 
 		volumesMount = append(volumesMount, corev1.VolumeMount{
 			Name:      volumeName,
-			MountPath: path.Join(InternalCertificateAuthorityDirectory, fmt.Sprintf("%d-%s", i, corev1.ServiceAccountRootCAKey)),
+			MountPath: InternalCertificateAuthorityDirectory,
 			ReadOnly:  true,
-			SubPath:   corev1.ServiceAccountRootCAKey,
 		})
 	}
 

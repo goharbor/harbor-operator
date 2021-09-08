@@ -3,8 +3,6 @@ package v1alpha3
 import (
 	"context"
 	"fmt"
-	"path"
-	"strings"
 
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/image"
@@ -738,8 +736,7 @@ func (ci CertificateInjection) GenerateVolumeMounts() []corev1.VolumeMount {
 	for _, ref := range ci.CertificateRefs {
 		volumeMounts = append(volumeMounts, corev1.VolumeMount{
 			Name:      fmt.Sprintf("%s-certifacts", ref),
-			MountPath: path.Join("/harbor_cust_cert", fmt.Sprintf("%s.crt", ref)),
-			SubPath:   strings.TrimLeft(corev1.ServiceAccountRootCAKey, "/"),
+			MountPath: "/harbor_cust_cert",
 			ReadOnly:  true,
 		})
 	}

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/url"
-	"path"
 	"strconv"
 	"strings"
 
@@ -141,8 +140,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, exporter *goharborv1.Exp
 	if exporter.Spec.TLS.Enabled() {
 		volumeMounts = append(volumeMounts, corev1.VolumeMount{
 			Name:      InternalCertificatesVolumeName,
-			MountPath: path.Join(InternalCertificateAuthorityDirectory, corev1.ServiceAccountRootCAKey),
-			SubPath:   strings.TrimLeft(corev1.ServiceAccountRootCAKey, "/"),
+			MountPath: InternalCertificateAuthorityDirectory,
 			ReadOnly:  true,
 		}, corev1.VolumeMount{
 			Name:      InternalCertificatesVolumeName,

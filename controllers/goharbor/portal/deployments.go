@@ -87,8 +87,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, portal *goharborv1.Porta
 
 		volumeMounts = append(volumeMounts, corev1.VolumeMount{
 			Name:      InternalCertificatesVolumeName,
-			MountPath: path.Join(InternalCertificateAuthorityDirectory, corev1.ServiceAccountRootCAKey),
-			SubPath:   corev1.ServiceAccountRootCAKey,
+			MountPath: InternalCertificateAuthorityDirectory,
 			ReadOnly:  true,
 		}, corev1.VolumeMount{
 			Name:      InternalCertificatesVolumeName,
