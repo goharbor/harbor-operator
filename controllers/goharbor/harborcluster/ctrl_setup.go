@@ -49,19 +49,27 @@ type Reconciler struct {
 
 // +kubebuilder:rbac:groups=goharbor.io,resources=harborclusters,verbs=get;list;watch
 // +kubebuilder:rbac:groups=goharbor.io,resources=harborclusters/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=goharbor.io,resources=harborclusters/finalizers,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=apiextensions.k8s.io,resources=customresourcedefinitions,verbs=get;list;watch
-// +kubebuilder:rbac:groups=acid.zalan.do,resources=postgresqls;operatorconfigurations,verbs=get;list;watch;create;update;patch;delete;deletecollection
-// +kubebuilder:rbac:groups=acid.zalan.do,resources=postgresqls/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=databases.spotahome.com,resources=redisfailovers,verbs=*
+// +kubebuilder:rbac:groups=databases.spotahome.com,resources=*,verbs=*
+// +kubebuilder:rbac:groups=acid.zalan.do,resources=*,verbs=*
 // +kubebuilder:rbac:groups=minio.min.io,resources=*,verbs=*
 // +kubebuilder:rbac:groups="",resources=pods,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=apps,resources=statefulsets;deployments,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=goharbor.io,resources=harbors,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=goharbor.io,resources=harbors/finalizers,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=apiextensions.k8s.io,resources=customresourcedefinitions,verbs=get;list;watch
 // +kubebuilder:rbac:groups=batch,resources=jobs,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="",resources=persistentvolumeclaims,verbs=get;list;watch;create;update;patch;delete
+
+// Enhancements to RBAC
+// see: https://sdk.operatorframework.io/docs/faqs/#after-deploying-my-operator-why-do-i-see-errors-like-is-forbidden-cannot-set-blockownerdeletion-if-an-ownerreference-refers-to-a-resource-you-cant-set-finalizers-on-
+// +kubebuilder:rbac:groups=batch,resources=jobs/finalizers,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups="",resources=persistentvolumeclaims/finalizers,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups="",resources=secrets/finalizers,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=networking.k8s.io,resources=ingresses/finalizers,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=goharbor.io,resources=harbors/finalizers,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=goharbor.io,resources=harborclusters/finalizers,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=goharbor.io,resources=harborconfigurations/finalizers,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=goharbor.io,resources=chartmuseums/finalizers;cores/finalizers;exporters/finalizers;jobservices/finalizers;notaryservers/finalizers;notarysigners/finalizers;portals/finalizers;registries/finalizers;registrycontrollers/finalizers;trivies/finalizers,verbs=get;list;watch;create;update;patch;delete
 
 func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) error {
 	concurrentReconcile, err := config.GetInt(r.ConfigStore, config.ReconciliationKey, config.DefaultConcurrentReconcile)

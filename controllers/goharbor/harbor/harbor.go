@@ -26,7 +26,6 @@ type Reconciler struct {
 // +kubebuilder:rbac:groups=goharbor.io,resources=harbors,verbs=get;list;watch
 // +kubebuilder:rbac:groups=goharbor.io,resources=harbors/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=goharbor.io,resources=chartmuseums;cores;exporters;jobservices;notaryservers;notarysigners;portals;registries;registrycontrollers;trivies,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=goharbor.io,resources=chartmuseums/finalizers;cores/finalizers;exporters/finalizers;jobservices/finalizers;notaryservers/finalizers;notarysigners/finalizers;portals/finalizers;registries/finalizers;registrycontrollers/finalizers;trivies/finalizers,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=networking.k8s.io,resources=ingresses,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=networking.k8s.io,resources=networkpolicies,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=cert-manager.io,resources=issuers;certificates,verbs=get;list;watch;create;update;patch;delete

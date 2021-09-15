@@ -26032,6 +26032,18 @@ rules:
 - apiGroups:
   - ""
   resources:
+  - persistentvolumeclaims/finalizers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
   - pods
   verbs:
   - create
@@ -26056,6 +26068,18 @@ rules:
 - apiGroups:
   - ""
   resources:
+  - secrets/finalizers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
   - services
   verbs:
   - create
@@ -26068,25 +26092,9 @@ rules:
 - apiGroups:
   - acid.zalan.do
   resources:
-  - operatorconfigurations
-  - postgresqls
+  - '*'
   verbs:
-  - create
-  - delete
-  - deletecollection
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - acid.zalan.do
-  resources:
-  - postgresqls/status
-  verbs:
-  - get
-  - patch
-  - update
+  - '*'
 - apiGroups:
   - apiextensions.k8s.io
   resources:
@@ -26133,6 +26141,18 @@ rules:
   - update
   - watch
 - apiGroups:
+  - batch
+  resources:
+  - jobs/finalizers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
   - cert-manager.io
   resources:
   - certificates
@@ -26160,7 +26180,7 @@ rules:
 - apiGroups:
   - databases.spotahome.com
   resources:
-  - redisfailovers
+  - '*'
   verbs:
   - '*'
 - apiGroups:
@@ -26471,6 +26491,18 @@ rules:
   - networking.k8s.io
   resources:
   - ingresses
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses/finalizers
   verbs:
   - create
   - delete
