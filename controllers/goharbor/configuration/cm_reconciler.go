@@ -68,7 +68,6 @@ func isConfiguration(obj metav1.Object) bool {
 }
 
 // +kubebuilder:rbac:groups=goharbor.io,resources=harborconfigurations,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=goharbor.io,resources=harborconfigurations/finalizers,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;create;update;patch;delete
 
 func (r *CmReconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) error {
