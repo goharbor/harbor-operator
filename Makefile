@@ -455,7 +455,8 @@ ingress: helm
 	$(HELM) repo add ingress-nginx https://kubernetes.github.io/ingress-nginx # https://github.com/kubernetes/ingress-nginx/tree/master/charts/ingress-nginx#get-repo-info
 	$(HELM) upgrade --install nginx ingress-nginx/ingress-nginx \
 		--namespace $(INGRESS_NAMESPACE) \
-		--set-string controller.config.proxy-body-size=0
+		--set-string controller.config.proxy-body-size=0 \
+		--set-string controller.ingressClassResource.default=true
 
 CERTMANAGER_NAMESPACE := cert-manager
 
