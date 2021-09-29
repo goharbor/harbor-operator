@@ -47,4 +47,4 @@ images:
     newName: ghcr.io/goharbor/postgres-operator
   - name: goharbor/harbor-operator
     newName: ghcr.io/goharbor/harbor-operator
-    newTag: v1.1.0
+    newTag: v1.1.1
