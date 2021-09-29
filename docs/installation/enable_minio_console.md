@@ -18,8 +18,8 @@ First, clone the code from the `harbor-operator` repository.
 git clone https://github.com/goharbor/harbor-operator.git
 
 # Checkout to the specified branch or the specified tag.
-# To branch: git checkout <branch-name> e.g.: git checkout release-1.1.0
-# To tag: git checkout tags/<tag> -b <branch-name> e.g: git checkout tags/v1.1.0 -b tag-v1.1.0
+# To branch: git checkout <branch-name> e.g.: git checkout release-1.1.1
+# To tag: git checkout tags/<tag> -b <branch-name> e.g: git checkout tags/v1.1.1 -b tag-v1.1.1
 ```
 
 Then open the [all-in-one](./kustomization-all-in-one.md) kustomization manifest and locate the `patchesStrategicMerge` section. Comment the patch `- patch/delete-minio-console.yaml`.

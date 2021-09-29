@@ -8,7 +8,7 @@ namespace: harbor-operator-ns
 commonAnnotations:
   goharbor.io/deploy-engine: Kustomization
   goharbor.io/deploy-mode: cluster
-  goharbor.io/operator-version: v1.1.0
+  goharbor.io/operator-version: v1.1.1
 
 # All the referred deployment manifests
 # NOTES: when doing changes to the ref versions, please also do same changes in the patch/annotation.yaml file

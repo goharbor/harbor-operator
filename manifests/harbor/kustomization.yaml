@@ -6,7 +6,7 @@ namespace: harbor-operator-ns
 
 # Common annotations
 commonAnnotations:
-  goharbor.io/operator-version: "v1.1.0"
+  goharbor.io/operator-version: "v1.1.1"
   goharbor.io/deploy-mode: "harbor"
   goharbor.io/deploy-engine: "Kustomization"
 
