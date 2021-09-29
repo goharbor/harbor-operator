@@ -121,7 +121,7 @@ metadata:
   name: harborcluster-sample
   namespace: cluster-sample-ns
 spec:
-  version: 2.3.0
+  version: 2.3.3
   logLevel: info
   network:
     ipFamilies:

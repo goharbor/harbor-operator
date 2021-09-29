@@ -67,7 +67,7 @@ metadata:
   name: harborcluster-sample
   namespace: cluster-sample-ns
 spec:
-  version: 2.3.0
+  version: 2.3.3
   logLevel: info
   imageSource:
     repository: ghcr.io/goharbor
@@ -119,6 +119,7 @@ spec:
           expose:
             ingress:
               host: minio.harbor.domain
+              controller: default
             tls:
               certificateRef: sample-public-certificate
         volumesPerServer: 2

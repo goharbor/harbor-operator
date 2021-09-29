@@ -16,7 +16,7 @@ For upgrading Harbor cluster across different minor versions, an operator upgrad
 
 1. Upgrade the harbor operator to the newer version that supports the Harbor version you're planning to upgrade your existing Harbor cluster to by `helm` or `kustomize`, the method depends on the original way to install the harbor operator. [Installation](../installation/installation.md) is a reference resources to upgrade the harbor operator to new release.
 
-1. Edit the manifest of the harbor cluster by `kubectl` and set the `version` field to the newer Harbor version (e.g:`2.3.0`) in the spec.
+1. Edit the manifest of the harbor cluster by `kubectl` and set the `version` field to the newer Harbor version (e.g:`2.3.3`) in the spec.
 
    ```bash
    kubectl -n harbor-cluster-ns edit harborclusters cluster-name
