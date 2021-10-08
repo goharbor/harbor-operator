@@ -650,6 +650,21 @@ type RegistryStorageDriverFilesystemSpec struct {
 	Prefix string `json:"prefix,omitempty"`
 }
 
+type RegistryStorageDriverAzureSpec struct {
+	// +kubebuilder:validation:Optional
+	AccountName string `json:"accountname,omitempty"`
+	// +kubebuilder:validation:Optional
+	AccountKeyRef string `json:"accountkeyRef,omitempty"`
+	// +kubebuilder:validation:Optional
+	Container string `json:"container,omitempty"`
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=core.windows.net
+	BaseURL string `json:"baseURL,omitempty"`
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=/azure/harbor/charts
+	PathPrefix string `json:"pathPrefix,omitempty"`
+}
+
 type RegistryStorageDriverS3Spec struct {
 	// +kubebuilder:validation:Optional
 	// The AWS Access Key.
