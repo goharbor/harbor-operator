@@ -228,6 +228,8 @@ type StorageSpec struct {
 	S3 *S3Spec `json:"s3,omitempty"`
 	// +kubebuilder:validation:Optional
 	Swift *SwiftSpec `json:"swift,omitempty"`
+	// +kubebuilder:validation:Optional
+	Azure *AzureSpec `json:"azure,omitempty"`
 }
 
 // StorageRedirectSpec defines if the redirection is disabled.
@@ -245,6 +247,10 @@ type FileSystemSpec struct {
 
 type S3Spec struct {
 	HarborStorageImageChartStorageS3Spec `json:",inline"`
+}
+
+type AzureSpec struct {
+	HarborStorageImageChartStorageAzureSpec `json:",inline"`
 }
 
 type SwiftSpec struct {

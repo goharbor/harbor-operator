@@ -123,6 +123,39 @@ func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1.
 		})
 	}
 
+	if chartMuseum.Spec.Chart.Storage.Azure != nil {
+		envs = append(envs, corev1.EnvVar{
+			Name:  "STORAGE",
+			Value: "microsoft",
+		}, corev1.EnvVar{
+			Name:  "STORAGE_MICROSOFT_CONTAINER",
+			Value: chartMuseum.Spec.Chart.Storage.Azure.Container,
+		}, corev1.EnvVar{
+			Name:  "AZURE_STORAGE_ACCOUNT",
+			Value: chartMuseum.Spec.Chart.Storage.Azure.AccountName,
+		}, corev1.EnvVar{
+			Name:  "AZURE_BASE_URL",
+			Value: chartMuseum.Spec.Chart.Storage.Azure.BaseURL,
+		}, corev1.EnvVar{
+			Name:  "STORAGE_MICROSOFT_PREFIX",
+			Value: chartMuseum.Spec.Chart.Storage.Azure.PathPrefix,
+		})
+
+		if chartMuseum.Spec.Chart.Storage.Azure.AccountKeyRef != "" {
+			envs = append(envs, corev1.EnvVar{
+				Name: "AZURE_STORAGE_ACCESS_KEY",
+				ValueFrom: &corev1.EnvVarSource{
+					SecretKeyRef: &corev1.SecretKeySelector{
+						LocalObjectReference: corev1.LocalObjectReference{
+							Name: chartMuseum.Spec.Chart.Storage.Azure.AccountKeyRef,
+						},
+						Key: harbormetav1.SharedSecretKey,
+					},
+				},
+			})
+		}
+	}
+
 	if chartMuseum.Spec.Chart.Storage.Amazon != nil {
 		envs = append(envs, corev1.EnvVar{
 			Name:  "STORAGE",

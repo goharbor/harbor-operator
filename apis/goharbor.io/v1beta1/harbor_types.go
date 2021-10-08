@@ -564,6 +564,24 @@ type HarborStorageRegistryPersistentVolumeSpec struct {
 	MaxThreads int32 `json:"maxthreads,omitempty"`
 }
 
+type HarborStorageImageChartStorageAzureSpec struct {
+	RegistryStorageDriverAzureSpec `json:",inline"`
+}
+
+func (r *HarborStorageImageChartStorageAzureSpec) ChartMuseum() *ChartMuseumChartStorageDriverAzureSpec {
+	return &ChartMuseumChartStorageDriverAzureSpec{
+		AccountName:   r.AccountName,
+		AccountKeyRef: r.AccountKeyRef,
+		Container:     r.Container,
+		BaseURL:       r.BaseURL,
+		PathPrefix:    r.PathPrefix,
+	}
+}
+
+func (r *HarborStorageImageChartStorageAzureSpec) Registry() *RegistryStorageDriverAzureSpec {
+	return &r.RegistryStorageDriverAzureSpec
+}
+
 type HarborStorageImageChartStorageS3Spec struct {
 	RegistryStorageDriverS3Spec `json:",inline"`
 }
