@@ -1542,6 +1542,21 @@ spec:
                         required:
                         - bucket
                         type: object
+                      azure:
+                        properties:
+                          accountkeyRef:
+                            type: string
+                          accountname:
+                            type: string
+                          baseURL:
+                            default: core.windows.net
+                            type: string
+                          container:
+                            type: string
+                          pathPrefix:
+                            default: /azure/harbor/charts
+                            type: string
+                        type: object
                       filesystem:
                         properties:
                           prefix:
@@ -7547,6 +7562,21 @@ spec:
                   spec:
                     description: the spec of Storage.
                     properties:
+                      azure:
+                        properties:
+                          accountkeyRef:
+                            type: string
+                          accountname:
+                            type: string
+                          baseURL:
+                            default: core.windows.net
+                            type: string
+                          container:
+                            type: string
+                          pathPrefix:
+                            default: /azure/harbor/charts
+                            type: string
+                        type: object
                       fileSystem:
                         properties:
                           chartPersistentVolume:
