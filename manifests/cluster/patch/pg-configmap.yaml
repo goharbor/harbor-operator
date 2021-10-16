@@ -5,3 +5,4 @@ metadata:
 data:
   default_cpu_request: 250m
   default_memory_request: 500Mi
+  enable_pod_antiaffinity: true

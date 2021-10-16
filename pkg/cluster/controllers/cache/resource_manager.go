@@ -113,6 +113,16 @@ func (rm *redisResourceManager) GetCacheCR(ctx context.Context, harborcluster *g
 		},
 	}
 
+	serverAffinity := rm.getServerAffinity(harborcluster)
+	if serverAffinity != nil {
+		rf.Spec.Redis.Affinity = serverAffinity
+	}
+
+	sentinelAffinity := rm.getSentinelAffinity(harborcluster)
+	if sentinelAffinity != nil {
+		rf.Spec.Sentinel.Affinity = sentinelAffinity
+	}
+
 	dependencies := checksum.New(rm.scheme)
 	dependencies.Add(ctx, harborcluster, true)
 	dependencies.AddAnnotations(rf)
@@ -229,6 +239,22 @@ func (rm *redisResourceManager) getImagePullSecrets(_ context.Context, harborclu
 
 	if harborcluster.Spec.ImageSource != nil {
 		return harborcluster.Spec.ImageSource.ImagePullSecrets
+	}
+
+	return nil
+}
+
+func (rm *redisResourceManager) getServerAffinity(harborcluster *goharborv1.HarborCluster) *corev1.Affinity {
+	if harborcluster.Spec.Cache.Spec.RedisFailover.Server != nil {
+		return harborcluster.Spec.Cache.Spec.RedisFailover.Server.Affinity
+	}
+
+	return nil
+}
+
+func (rm *redisResourceManager) getSentinelAffinity(harborcluster *goharborv1.HarborCluster) *corev1.Affinity {
+	if harborcluster.Spec.Cache.Spec.RedisFailover.Sentinel != nil {
+		return harborcluster.Spec.Cache.Spec.RedisFailover.Sentinel.Affinity
 	}
 
 	return nil

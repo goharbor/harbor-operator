@@ -153,6 +153,10 @@ type RedisSentinel struct {
 	// +kubebuilder:default=1
 	// Replicas is the instance number of redis sentinel.
 	Replicas int `json:"replicas,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Affinity is the configuration of the redis sentinel pod affinity.
+	Affinity *corev1.Affinity `json:"affinity,omitempty"`
 }
 
 type RedisServer struct {
@@ -160,6 +164,10 @@ type RedisServer struct {
 	// +kubebuilder:default=1
 	// Replicas is the instance number of redis server.
 	Replicas int `json:"replicas,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Affinity is the configuration of the redis server pod affinity.
+	Affinity *corev1.Affinity `json:"affinity,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// Resources is the resources requests and limits for redis.
