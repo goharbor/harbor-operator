@@ -7539,6 +7539,7 @@ spec:
                     - S3
                     - Swift
                     - FileSystem
+                    - Azure
                     type: string
                   spec:
                     description: the spec of Storage.
@@ -10589,6 +10590,21 @@ spec:
                 type: string
               imageChartStorage:
                 properties:
+                  azure:
+                    properties:
+                      accountkeyRef:
+                        type: string
+                      accountname:
+                        type: string
+                      baseURL:
+                        default: core.windows.net
+                        type: string
+                      container:
+                        type: string
+                      pathPrefix:
+                        default: /azure/harbor/charts
+                        type: string
+                    type: object
                   filesystem:
                     description: 'FileSystem is an implementation of the storagedriver.StorageDriver interface which uses the local filesystem. The local filesystem can be a remote volume. See: https://docs.docker.com/registry/storage-drivers/filesystem/'
                     properties:
@@ -19880,6 +19896,21 @@ spec:
                     type: object
                   driver:
                     properties:
+                      azure:
+                        properties:
+                          accountkeyRef:
+                            type: string
+                          accountname:
+                            type: string
+                          baseURL:
+                            default: core.windows.net
+                            type: string
+                          container:
+                            type: string
+                          pathPrefix:
+                            default: /azure/harbor/charts
+                            type: string
+                        type: object
                       filesystem:
                         description: 'FileSystem is an implementation of the storagedriver.StorageDriver interface which uses the local filesystem. The local filesystem can be a remote volume. See: https://docs.docker.com/registry/storage-drivers/filesystem/'
                         properties:

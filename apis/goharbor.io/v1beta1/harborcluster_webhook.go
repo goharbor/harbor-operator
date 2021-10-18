@@ -52,21 +52,30 @@ func (harborcluster *HarborCluster) Default() {
 
 	switch harborcluster.Spec.Storage.Kind {
 	case KindStorageFileSystem:
+		harborcluster.Spec.Storage.Spec.Azure = nil
 		harborcluster.Spec.Storage.Spec.S3 = nil
 		harborcluster.Spec.Storage.Spec.Swift = nil
 		harborcluster.Spec.Storage.Spec.MinIO = nil
 	case KindStorageS3:
+		harborcluster.Spec.Storage.Spec.Azure = nil
 		harborcluster.Spec.Storage.Spec.FileSystem = nil
 		harborcluster.Spec.Storage.Spec.Swift = nil
 		harborcluster.Spec.Storage.Spec.MinIO = nil
 	case KindStorageSwift:
+		harborcluster.Spec.Storage.Spec.Azure = nil
 		harborcluster.Spec.Storage.Spec.S3 = nil
 		harborcluster.Spec.Storage.Spec.FileSystem = nil
 		harborcluster.Spec.Storage.Spec.MinIO = nil
 	case KindStorageMinIO:
+		harborcluster.Spec.Storage.Spec.Azure = nil
 		harborcluster.Spec.Storage.Spec.S3 = nil
 		harborcluster.Spec.Storage.Spec.Swift = nil
 		harborcluster.Spec.Storage.Spec.FileSystem = nil
+	case KindStorageAzure:
+		harborcluster.Spec.Storage.Spec.S3 = nil
+		harborcluster.Spec.Storage.Spec.Swift = nil
+		harborcluster.Spec.Storage.Spec.FileSystem = nil
+		harborcluster.Spec.Storage.Spec.MinIO = nil
 	}
 }
 
@@ -152,6 +161,11 @@ func (harborcluster *HarborCluster) validateStorage() *field.Error {
 	if harborcluster.Spec.Storage.Kind == KindStorageSwift && harborcluster.Spec.Storage.Spec.Swift == nil {
 		// Invalid and not acceptable
 		return required(fp.Child("swift"))
+	}
+
+	if harborcluster.Spec.Storage.Kind == KindStorageAzure && harborcluster.Spec.Storage.Spec.Azure == nil {
+		// Invalid and not acceptable
+		return required(fp.Child("azure"))
 	}
 
 	if harborcluster.Spec.Storage.Kind == KindStorageFileSystem && harborcluster.Spec.Storage.Spec.FileSystem == nil {

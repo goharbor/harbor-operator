@@ -11,6 +11,7 @@ import (
 const (
 	KindDatabaseZlandoPostgreSQL = "Zlando/PostgreSQL"
 	KindDatabasePostgreSQL       = "PostgreSQL"
+	KindStorageAzure             = "Azure"
 	KindStorageMinIO             = "MinIO"
 	KindStorageSwift             = "Swift"
 	KindStorageS3                = "S3"
@@ -211,7 +212,7 @@ type ZlandoPostgreSQLSpec struct {
 
 type Storage struct {
 	// Kind of which storage service to be used. Only support MinIO now.
-	// +kubebuilder:validation:Enum={MinIO,S3,Swift,FileSystem}
+	// +kubebuilder:validation:Enum={MinIO,S3,Swift,FileSystem,Azure}
 	Kind string `json:"kind"`
 
 	Spec StorageSpec `json:"spec"`
