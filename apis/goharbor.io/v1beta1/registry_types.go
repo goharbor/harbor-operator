@@ -604,6 +604,8 @@ type RegistryStorageDriverSpec struct {
 	// An implementation of the storagedriver.StorageDriver interface that uses OpenStack Swift for object storage.
 	// See: https://docs.docker.com/registry/storage-drivers/swift/
 	Swift *RegistryStorageDriverSwiftSpec `json:"swift,omitempty"`
+
+	Azure *RegistryStorageDriverAzureSpec `json:"azure,omitempty"`
 }
 
 func (r *RegistryStorageDriverSpec) Validate() error {
@@ -622,6 +624,10 @@ func (r *RegistryStorageDriverSpec) Validate() error {
 	}
 
 	if r.Swift != nil {
+		found++
+	}
+
+	if r.Azure != nil {
 		found++
 	}
 

@@ -486,6 +486,9 @@ type HarborStorageImageChartStorageSpec struct {
 	// An implementation of the storagedriver.StorageDriver interface that uses OpenStack Swift for object storage.
 	// See: https://docs.docker.com/registry/storage-drivers/swift/
 	Swift *HarborStorageImageChartStorageSwiftSpec `json:"swift,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	Azure *HarborStorageImageChartStorageAzureSpec `json:"azure,omitempty"`
 }
 
 type HarborStorageTrivyStorageSpec struct {
@@ -534,6 +537,10 @@ func (r *HarborStorageImageChartStorageSpec) Validate() error {
 	}
 
 	if r.Swift != nil {
+		found++
+	}
+
+	if r.Azure != nil {
 		found++
 	}
 
