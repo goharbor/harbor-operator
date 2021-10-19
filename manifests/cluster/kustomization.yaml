@@ -26,6 +26,7 @@ patchesStrategicMerge:
   - patch/delete-minio-console.yaml
   - patch/delete-duplicated-ns.yaml
   - patch/pg-configmap.yaml
+  - patch/redis-rbac.yaml
 
 patchesJson6902:
   - target:
