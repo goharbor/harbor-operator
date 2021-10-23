@@ -361,6 +361,24 @@ func (r *Reconciler) ApplySwiftStorageEnvs(ctx context.Context, registry *goharb
 	return nil
 }
 
+func (r *Reconciler) ApplyAzureStorageEnvs(ctx context.Context, registry *goharborv1.Registry, deploy *appsv1.Deployment) error {
+	regContainer := &deploy.Spec.Template.Spec.Containers[registryContainerIndex]
+
+	regContainer.Env = append(regContainer.Env, corev1.EnvVar{
+		Name: "REGISTRY_STORAGE_AZURE_ACCOUNTKEY",
+		ValueFrom: &corev1.EnvVarSource{
+			SecretKeyRef: &corev1.SecretKeySelector{
+				Key: harbormetav1.SharedSecretKey,
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: registry.Spec.Storage.Driver.Azure.AccountKeyRef,
+				},
+			},
+		},
+	})
+
+	return nil
+}
+
 func (r *Reconciler) ApplyInMemoryStorageEnvs(ctx context.Context, registry *goharborv1.Registry, deploy *appsv1.Deployment) error {
 	regContainer := &deploy.Spec.Template.Spec.Containers[registryContainerIndex]
 
@@ -381,6 +399,10 @@ func (r *Reconciler) ApplyStorageConfiguration(ctx context.Context, registry *go
 
 	if registry.Spec.Storage.Driver.Swift != nil {
 		return r.ApplySwiftStorageEnvs(ctx, registry, deploy)
+	}
+
+	if registry.Spec.Storage.Driver.Azure != nil {
+		return r.ApplyAzureStorageEnvs(ctx, registry, deploy)
 	}
 
 	if registry.Spec.Storage.Driver.FileSystem != nil {

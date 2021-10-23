@@ -605,6 +605,7 @@ type RegistryStorageDriverSpec struct {
 	// See: https://docs.docker.com/registry/storage-drivers/swift/
 	Swift *RegistryStorageDriverSwiftSpec `json:"swift,omitempty"`
 
+	// +kubebuilder:validation:Optional
 	Azure *RegistryStorageDriverAzureSpec `json:"azure,omitempty"`
 }
 
