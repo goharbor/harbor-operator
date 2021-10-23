@@ -507,6 +507,7 @@ const (
 	S3DriverName         = "s3"
 	SwiftDriverName      = "swift"
 	FileSystemDriverName = "filesystem"
+	AzureDriverName      = "azure"
 )
 
 func (r *HarborStorageImageChartStorageSpec) ProviderName() string {
@@ -516,6 +517,10 @@ func (r *HarborStorageImageChartStorageSpec) ProviderName() string {
 
 	if r.Swift != nil {
 		return SwiftDriverName
+	}
+
+	if r.Azure != nil {
+		return AzureDriverName
 	}
 
 	return FileSystemDriverName

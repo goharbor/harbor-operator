@@ -138,6 +138,13 @@ storage:
     {{- end }}
   {{- end }}
 
+  {{- if .Spec.Storage.Driver.Azure }}
+  azure:
+    accountname: {{ .Spec.Storage.Driver.Azure.AccountName | quote }}
+    container: {{ .Spec.Storage.Driver.Azure.Container | quote }}
+    realm: {{ .Spec.Storage.Driver.Azure.BaseURL | quote }}
+  {{- end }}
+
   {{- if .Spec.Storage.Driver.Swift }}
   swift:
     username: {{ .Spec.Storage.Driver.Swift.Username | quote }}
