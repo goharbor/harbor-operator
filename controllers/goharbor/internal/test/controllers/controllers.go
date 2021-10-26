@@ -13,7 +13,6 @@ import (
 	"github.com/goharbor/harbor-operator/controllers/goharbor/notarysigner"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/portal"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/registry"
-	"github.com/goharbor/harbor-operator/controllers/goharbor/registryctl"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/trivy"
 	"github.com/goharbor/harbor-operator/pkg/config"
 	"github.com/goharbor/harbor-operator/pkg/controller"
@@ -54,10 +53,6 @@ func NewPortal(ctx context.Context, className string) *portal.Reconciler {
 
 func NewRegistry(ctx context.Context, className string) *registry.Reconciler {
 	return New(ctx, controllers.Registry, className, registry.New).(*registry.Reconciler)
-}
-
-func NewRegistryCtl(ctx context.Context, className string) *registryctl.Reconciler {
-	return New(ctx, controllers.RegistryController, className, registryctl.New).(*registryctl.Reconciler)
 }
 
 type CtrlBuilder func(context.Context, *configstore.Store) (controller.Reconciler, error)

@@ -44,6 +44,18 @@ func setupValidRegistry(ctx context.Context, ns string) (Resource, client.Object
 		},
 	}
 
+	registryCtl := &goharborv1.RegistryController{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:        name,
+			Namespace:   ns,
+			Annotations: test.AddVersionAnnotations(nil),
+		},
+		Spec: goharborv1.RegistryControllerSpec{
+			RegistryRef: registry.GetName(),
+		},
+	}
+
+	Expect(k8sClient.Create(ctx, registryCtl)).To(Succeed())
 	Expect(k8sClient.Create(ctx, registry)).To(Succeed())
 
 	return registry, client.ObjectKey{

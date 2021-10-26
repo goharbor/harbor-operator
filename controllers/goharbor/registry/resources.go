@@ -27,6 +27,24 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 	span, ctx := opentracing.StartSpanFromContext(ctx, "addResources")
 	defer span.Finish()
 
+	// cleanup registryctl resources
+	registryCtl, err := r.GetRegistryCtl(ctx, registry)
+	if err != nil {
+		return errors.Wrap(err, "cannot get registryctl")
+	}
+
+	defer func() {
+		e := r.UpdateRegistryCtlStatus(ctx, registry, registryCtl)
+		if e != nil {
+			r.Log.Error(err, "cannot update registry controller status")
+		}
+	}()
+
+	err = r.CleanUpRegistryCtlResources(ctx, registryCtl)
+	if err != nil {
+		return errors.Wrap(err, "cleanup registryctl resources error")
+	}
+
 	service, err := r.GetService(ctx, registry)
 	if err != nil {
 		return errors.Wrap(err, "cannot get service")
@@ -35,6 +53,16 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 	_, err = r.Controller.AddServiceToManage(ctx, service)
 	if err != nil {
 		return errors.Wrapf(err, "cannot add service %s", service.GetName())
+	}
+
+	ctlService, err := r.GetCtlService(ctx, registryCtl)
+	if err != nil {
+		return errors.Wrap(err, "cannot get ctlService")
+	}
+
+	_, err = r.Controller.AddServiceToManage(ctx, ctlService)
+	if err != nil {
+		return errors.Wrapf(err, "cannot add ctlService %s", ctlService.GetName())
 	}
 
 	deploymentDependencies, err := r.GetSecrets(ctx, registry)
@@ -52,7 +80,17 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrapf(err, "cannot add configMap %s", configMap.GetName())
 	}
 
-	deploymentDependencies = append(deploymentDependencies, configMapResource)
+	ctlConfigMap, err := r.GetCtlConfigMap(ctx, registryCtl)
+	if err != nil {
+		return errors.Wrap(err, "cannot get ctlConfigMap")
+	}
+
+	ctlConfigMapResource, err := r.Controller.AddConfigMapToManage(ctx, ctlConfigMap)
+	if err != nil {
+		return errors.Wrapf(err, "cannot add configMap %s", ctlConfigMap.GetName())
+	}
+
+	deploymentDependencies = append(deploymentDependencies, configMapResource, ctlConfigMapResource)
 
 	if registry.Spec.HTTP.SecretRef != "" {
 		httpSecret, err := r.AddExternalTypedSecret(ctx, &corev1.Secret{

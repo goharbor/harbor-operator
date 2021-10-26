@@ -18,7 +18,6 @@ import (
 	"github.com/goharbor/harbor-operator/controllers/goharbor/notarysigner"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/portal"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/registry"
-	"github.com/goharbor/harbor-operator/controllers/goharbor/registryctl"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/trivy"
 	"github.com/goharbor/harbor-operator/pkg/config"
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
@@ -33,18 +32,17 @@ const (
 )
 
 var controllersBuilder = map[controllers.Controller]func(context.Context, *configstore.Store) (commonCtrl.Reconciler, error){
-	controllers.Core:               core.New,
-	controllers.Exporter:           exporter.New,
-	controllers.Harbor:             harbor.New,
-	controllers.JobService:         jobservice.New,
-	controllers.Registry:           registry.New,
-	controllers.NotaryServer:       notaryserver.New,
-	controllers.NotarySigner:       notarysigner.New,
-	controllers.RegistryController: registryctl.New,
-	controllers.Portal:             portal.New,
-	controllers.ChartMuseum:        chartmuseum.New,
-	controllers.Trivy:              trivy.New,
-	controllers.HarborCluster:      harborcluster.New,
+	controllers.Core:          core.New,
+	controllers.Exporter:      exporter.New,
+	controllers.Harbor:        harbor.New,
+	controllers.JobService:    jobservice.New,
+	controllers.Registry:      registry.New,
+	controllers.NotaryServer:  notaryserver.New,
+	controllers.NotarySigner:  notarysigner.New,
+	controllers.Portal:        portal.New,
+	controllers.ChartMuseum:   chartmuseum.New,
+	controllers.Trivy:         trivy.New,
+	controllers.HarborCluster: harborcluster.New,
 	// old configmap controller is planned to be removed at v1.3,
 	// the controller converts the cm to configuration cr.
 	controllers.HarborConfigurationCm: configuration.NewWithCm,
