@@ -231,11 +231,6 @@ func (r *Reconciler) GetCoreTokenCertificate(ctx context.Context, harbor *goharb
 	name := r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String(), "tokencert")
 	namespace := harbor.GetNamespace()
 
-	publicDNS, err := url.Parse(harbor.Spec.ExternalURL)
-	if err != nil {
-		return nil, errors.Wrap(err, "cannot parse external url")
-	}
-
 	secretName := r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String(), "tokencert")
 
 	return &certv1.Certificate{
@@ -247,11 +242,11 @@ func (r *Reconciler) GetCoreTokenCertificate(ctx context.Context, harbor *goharb
 			Duration: &metav1.Duration{
 				Duration: CoreTokenServiceDefaultCertificateDuration,
 			},
+			CommonName: secretName,
 			PrivateKey: &certv1.CertificatePrivateKey{
 				Algorithm: certv1.RSAKeyAlgorithm,
 				Size:      CoreTokenServiceDefaultKeySize,
 			},
-			DNSNames:   []string{publicDNS.Hostname()},
 			SecretName: secretName,
 			Usages:     []certv1.KeyUsage{certv1.UsageSigning},
 			IssuerRef:  harbor.Spec.Core.TokenIssuer,
