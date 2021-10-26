@@ -251,7 +251,7 @@ func (r *Reconciler) GetCoreTokenCertificate(ctx context.Context, harbor *goharb
 				Algorithm: certv1.RSAKeyAlgorithm,
 				Size:      CoreTokenServiceDefaultKeySize,
 			},
-			DNSNames:   []string{publicDNS.Host},
+			DNSNames:   []string{publicDNS.Hostname()},
 			SecretName: secretName,
 			Usages:     []certv1.KeyUsage{certv1.UsageSigning},
 			IssuerRef:  harbor.Spec.Core.TokenIssuer,
