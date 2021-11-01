@@ -6859,6 +6859,8 @@ spec:
                             type: string
                           host:
                             type: string
+                          ingressClassName:
+                            type: string
                         required:
                         - host
                         type: object
@@ -6888,6 +6890,8 @@ spec:
                             - contour
                             type: string
                           host:
+                            type: string
+                          ingressClassName:
                             type: string
                         required:
                         - host
@@ -7657,6 +7661,8 @@ spec:
                                         - contour
                                         type: string
                                       host:
+                                        type: string
+                                      ingressClassName:
                                         type: string
                                     required:
                                     - host
@@ -10532,6 +10538,8 @@ spec:
                             type: string
                           host:
                             type: string
+                          ingressClassName:
+                            type: string
                         required:
                         - host
                         type: object
@@ -10561,6 +10569,8 @@ spec:
                             - contour
                             type: string
                           host:
+                            type: string
+                          ingressClassName:
                             type: string
                         required:
                         - host

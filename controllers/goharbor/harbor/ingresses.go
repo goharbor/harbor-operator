@@ -57,8 +57,9 @@ func (r *Reconciler) GetCoreIngress(ctx context.Context, harbor *goharborv1.Harb
 			Annotations: r.GetCoreIngressAnnotations(ctx, harbor),
 		},
 		Spec: netv1.IngressSpec{
-			TLS:   tls,
-			Rules: rules,
+			TLS:              tls,
+			Rules:            rules,
+			IngressClassName: harbor.Spec.Expose.Core.Ingress.IngressClassName,
 		},
 	}, nil
 }
@@ -137,8 +138,9 @@ func (r *Reconciler) GetNotaryServerIngress(ctx context.Context, harbor *goharbo
 			Annotations: r.GetNotaryIngressAnnotations(ctx, harbor),
 		},
 		Spec: netv1.IngressSpec{
-			TLS:   tls,
-			Rules: ingressRules,
+			TLS:              tls,
+			Rules:            ingressRules,
+			IngressClassName: harbor.Spec.Expose.Notary.Ingress.IngressClassName,
 		},
 	}, nil
 }

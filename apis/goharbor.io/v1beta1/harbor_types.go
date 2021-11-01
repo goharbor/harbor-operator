@@ -683,6 +683,9 @@ type HarborExposeIngressSpec struct {
 
 	// +kubebuilder:validation:Optional
 	Annotations map[string]string `json:"annotations,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	IngressClassName *string `json:"ingressClassName,omitempt"`
 }
 
 // CertificateInjection defines the certs injection.
