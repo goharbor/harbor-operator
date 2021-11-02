@@ -26,7 +26,7 @@ kubectl apply -f https://raw.githubusercontent.com/goharbor/harbor-operator/mast
 Check the installed operators:
 
 ```shell
-k8s get pod -n harbor-operator-ns
+kubectl get pod -n harbor-operator-ns
 ```
 
 Output:

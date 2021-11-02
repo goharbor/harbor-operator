@@ -111,7 +111,7 @@ kubectl apply -f https://raw.githubusercontent.com/goharbor/harbor-operator/mast
 Check the Harbor operator status (by default it's deployed into the `harbor-operator-ns` namespace):
 
 ```shell
-k8s get pod -n harbor-operator-ns
+kubectl get pod -n harbor-operator-ns
 ```
 
 Output:

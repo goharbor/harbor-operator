@@ -36,6 +36,8 @@ rules:
       - endpoints
       - events
       - configmaps
+      - persistentvolumeclaims
+      - persistentvolumeclaims/finalizers
     verbs:
       - "*"
   - apiGroups:
