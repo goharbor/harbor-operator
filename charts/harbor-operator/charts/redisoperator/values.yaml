@@ -1,5 +1,5 @@
-image: quay.io/spotahome/redis-operator
-tag: latest
+image: googleimages/redis-operator 
+tag: v1.0.2 
 pullPolicy: Always
 containerName: redisoperator
 podAnnotations: {}

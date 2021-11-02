@@ -15,9 +15,9 @@ commonAnnotations:
 resources:
   - ../../config/default # harbor operator
   - patch/namespace.yaml
-  - https://raw.githubusercontent.com/spotahome/redis-operator/master/example/operator/all-redis-operator-resources.yaml?ref=v1.0.0 # redis operator
-  - github.com/zalando/postgres-operator/manifests?ref=v1.5.0 # postgresql operator
-  - github.com/minio/operator?ref=v4.0.6 # minIO storage operator
+  - https://raw.githubusercontent.com/szlabs/redis-operator/master/example/operator/all-redis-operator-resources.yaml?ref=v1.0.1 # redis operator
+  - github.com/zalando/postgres-operator/manifests?ref=v1.6.3 # postgresql operator
+  - github.com/minio/operator?ref=v4.1.3 # minIO storage operator
 
 # If you have to override the image source, uncomment this patch and also change the image source in the patch/image-source.yaml file.
 # Then rebuild.
@@ -38,10 +38,10 @@ patchesJson6902:
 
 images:
   - name: quay.io/spotahome/redis-operator
-    newName: ghcr.io/goharbor/redis-operator
-    newTag: v1.0.0
+    newName: googleimages/redis-operator 
+    newTag: v1.0.2
   - name: minio/operator
-    newName: ghcr.io/goharbor/minio-operator
+    newName: quay.io/minio/operator 
   - name: minio/console
     newName: ghcr.io/goharbor/minio-console
   - name: registry.opensource.zalan.do/acid/postgres-operator
