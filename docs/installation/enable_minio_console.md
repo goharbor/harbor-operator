@@ -67,7 +67,7 @@ After a short while, the console pod will be ready then.
 
 ```shell
 # Check console pod status
-k8s get pods --selector=app=console -n harbor-operator-ns
+kubectl get pods --selector=app=console -n harbor-operator-ns
 
 ## Output
 # NAME                      READY   STATUS    RESTARTS   AGE

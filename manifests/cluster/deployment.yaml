@@ -33888,6 +33888,7 @@ rules:
   - databases.spotahome.com
   resources:
   - redisfailovers
+  - redisfailovers/finalizers
   verbs:
   - '*'
 - apiGroups:
@@ -33904,6 +33905,8 @@ rules:
   - endpoints
   - events
   - configmaps
+  - persistentvolumeclaims
+  - persistentvolumeclaims/finalizers
   verbs:
   - '*'
 - apiGroups:
