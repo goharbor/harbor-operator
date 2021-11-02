@@ -13,7 +13,7 @@ Check the prerequisites and install the Harbor operator base on your needs by fo
 Before moving on, make sure the harbor operator is successfully deployed in the Kubenetes cluster.
 
 ```shell
-~/harbor-operator$ k8s get all -n harbor-operator-ns
+~/harbor-operator$ kubectl get all -n harbor-operator-ns
 NAME                                     READY   STATUS    RESTARTS   AGE
 pod/harbor-operator-6fd4dc66b-sh6cc      1/1     Running   0          3h18m
 pod/minio-operator-667b56db9c-q6v4j      1/1     Running   0          3h18m
