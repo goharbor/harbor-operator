@@ -17,7 +17,7 @@ resources:
   - patch/namespace.yaml
   - https://raw.githubusercontent.com/szlabs/redis-operator/master/example/operator/all-redis-operator-resources.yaml?ref=v1.0.1 # redis operator
   - github.com/zalando/postgres-operator/manifests?ref=v1.6.3 # postgresql operator
-  - github.com/minio/operator?ref=v4.1.3 # minIO storage operator
+  - github.com/minio/operator?ref=v4.3.2 # minIO storage operator
 
 # If you have to override the image source, uncomment this patch and also change the image source in the patch/image-source.yaml file.
 # Then rebuild.
@@ -41,7 +41,7 @@ images:
     newName: ghcr.io/goharbor/redis-operator-ext
     newTag: v1.0.1
   - name: minio/operator
-    newName: quay.io/minio/operator 
+    newName: quay.io/minio/operator
   - name: minio/console
     newName: ghcr.io/goharbor/minio-console
   - name: registry.opensource.zalan.do/acid/postgres-operator

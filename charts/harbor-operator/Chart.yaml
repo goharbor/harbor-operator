@@ -21,7 +21,7 @@ icon: https://branding.cncf.io/img/projects/harbor/icon/color/harbor-icon-color.
 
 dependencies:
 - name: minio-operator
-  version: 4.1.7
+  version: 4.3.2
   condition: minio-operator.enabled
   repository: https://operator.min.io/
   tags:
