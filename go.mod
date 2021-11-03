@@ -17,7 +17,7 @@ require (
 	github.com/minio/minio-go/v6 v6.0.57
 	github.com/mitchellh/reflectwalk v1.0.1 // indirect
 	github.com/onsi/ginkgo v1.16.4
-	github.com/onsi/gomega v1.13.0
+	github.com/onsi/gomega v1.15.0
 	github.com/opentracing-contrib/go-stdlib v1.0.0
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/ovh/configstore v0.3.2
@@ -31,7 +31,7 @@ require (
 	github.com/uber/jaeger-client-go v2.24.0+incompatible
 	github.com/uber/jaeger-lib v2.2.0+incompatible
 	github.com/zalando/postgres-operator v1.6.1
-	go.uber.org/zap v1.17.0
+	go.uber.org/zap v1.19.0
 	golang.org/x/crypto v0.0.0-20210220033148-5ea612d1eb83
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	gopkg.in/yaml.v2 v2.4.0
@@ -40,7 +40,7 @@ require (
 	k8s.io/apimachinery v0.22.3
 	k8s.io/client-go v0.22.3
 	k8s.io/klog v1.0.0
-	sigs.k8s.io/controller-runtime v0.9.0
+	sigs.k8s.io/controller-runtime v0.10.2
 	sigs.k8s.io/kustomize/kstatus v0.0.2
 	sigs.k8s.io/yaml v1.2.0
 )
