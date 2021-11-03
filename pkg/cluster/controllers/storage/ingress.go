@@ -4,7 +4,7 @@ import (
 	"context"
 
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
-	"github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/common"
 	miniov2 "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/apis/minio.min.io/v2"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
@@ -105,7 +105,43 @@ func (m *MinIOController) cleanupIngress(ctx context.Context, harborcluster *goh
 	return minioUnknownStatus(), nil
 }
 
-func (m *MinIOController) generateIngress(ctx context.Context, harborcluster *goharborv1.HarborCluster) *netv1.Ingress { // nolint:funlen
+func (m *MinIOController) getMinioIngressAnnotations(harborcluster *goharborv1.HarborCluster) map[string]string {
+	isEnableExpose := false
+	if harborcluster.Spec.Storage.Spec.MinIO.Redirect.Expose != nil {
+		isEnableExpose = true
+	}
+
+	istls := false
+	if isEnableExpose && harborcluster.Spec.Storage.Spec.MinIO.Redirect.Expose.TLS.Enabled() {
+		istls = true
+	}
+
+	annotations := map[string]string{
+		// resolve 413(Too Large Entity) error when push large image. It only works for NGINX ingress.
+		"nginx.ingress.kubernetes.io/proxy-body-size": "0",
+	}
+
+	if isEnableExpose && harborcluster.Spec.Storage.Spec.MinIO.Redirect.Expose.Ingress.Controller == harbormetav1.IngressControllerNCP {
+		annotations["ncp/use-regex"] = NCPIngressValueTrue
+		if istls {
+			annotations["ncp/http-redirect"] = NCPIngressValueTrue
+		}
+	} else if harborcluster.Spec.Storage.Spec.MinIO.Redirect.Expose.Ingress.Controller == harbormetav1.IngressControllerContour {
+		if istls {
+			annotations["ingress.kubernetes.io/force-ssl-redirect"] = ContourIngressValueTrue
+		}
+	}
+
+	if isEnableExpose {
+		for key, value := range harborcluster.Spec.Storage.Spec.MinIO.Redirect.Expose.Ingress.Annotations {
+			annotations[key] = value
+		}
+	}
+
+	return annotations
+}
+
+func (m *MinIOController) generateIngress(ctx context.Context, harborcluster *goharborv1.HarborCluster) *netv1.Ingress {
 	var tls []netv1.IngressTLS
 
 	if harborcluster.Spec.Storage.Spec.MinIO.Redirect.Expose != nil &&
@@ -116,19 +152,7 @@ func (m *MinIOController) generateIngress(ctx context.Context, harborcluster *go
 		}}
 	}
 
-	annotations := make(map[string]string)
-	annotations["nginx.ingress.kubernetes.io/proxy-body-size"] = "0"
-
-	if harborcluster.Spec.Expose.Core.Ingress != nil && harborcluster.Spec.Expose.Core.Ingress.Controller == v1alpha1.IngressControllerNCP {
-		annotations["ncp/use-regex"] = NCPIngressValueTrue
-		if tls != nil {
-			annotations["ncp/http-redirect"] = NCPIngressValueTrue
-		}
-	} else if harborcluster.Spec.Expose.Core.Ingress != nil && harborcluster.Spec.Expose.Core.Ingress.Controller == v1alpha1.IngressControllerContour {
-		if tls != nil {
-			annotations["ingress.kubernetes.io/force-ssl-redirect"] = ContourIngressValueTrue
-		}
-	}
+	annotations := m.getMinioIngressAnnotations(harborcluster)
 
 	pathTypePrefix := netv1.PathTypePrefix
 
