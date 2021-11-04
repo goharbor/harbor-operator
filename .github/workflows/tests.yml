@@ -132,8 +132,8 @@ jobs:
       matrix:
         # https://github.com/jetstack/cert-manager/tags
         certManager:
-        - "1.1.1"
-#        - "1.2.0"
+#        - "1.1.1"
+        - "1.2.0"
         - "1.5.3"
 
         # https://github.com/kubernetes-sigs/kind/releases
