@@ -144,7 +144,7 @@ jobs:
         - "1.22.0"
 
         ingress:
-        - "0.48.1"
+        - "v1.0.4"
 
         samples:
         - "full_stack.yaml"
