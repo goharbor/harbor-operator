@@ -144,7 +144,8 @@ func (m *MinIOController) generateIngress(ctx context.Context, harborcluster *go
 			Annotations: annotations,
 		},
 		Spec: netv1.IngressSpec{
-			TLS: tls,
+			TLS:              tls,
+			IngressClassName: harborcluster.Spec.Storage.Spec.MinIO.Redirect.Expose.Ingress.IngressClassName,
 			Rules: []netv1.IngressRule{
 				{
 					Host: harborcluster.Spec.Storage.Spec.MinIO.Redirect.Expose.Ingress.Host,
