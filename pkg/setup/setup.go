@@ -5,6 +5,8 @@ import (
 
 	"github.com/goharbor/harbor-operator/pkg/factories/application"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
+	"github.com/goharbor/harbor-operator/webhooks/harborserverconfiguration"
+	"github.com/goharbor/harbor-operator/webhooks/pod"
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
 	kauthn "k8s.io/api/authorization/v1"
@@ -12,7 +14,9 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/client-go/discovery"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
 )
 
 func WithManager(ctx context.Context, mgr manager.Manager) error {
@@ -147,5 +151,24 @@ func WebhooksWithManager(ctx context.Context, mgr manager.Manager) error {
 		}
 	}
 
+	// setup separate webhooks
+	setupCustomWebhooks(mgr)
+
 	return nil
+}
+
+func setupCustomWebhooks(mgr manager.Manager) {
+	mgr.GetWebhookServer().Register("/mutate-image-path", &webhook.Admission{
+		Handler: &pod.ImagePathRewriter{
+			Client: mgr.GetClient(),
+			Log:    logf.Log.WithName("webhooks").WithName("MutatingImagePath"),
+		},
+	})
+
+	mgr.GetWebhookServer().Register("/validate-hsc", &webhook.Admission{
+		Handler: &harborserverconfiguration.Validator{
+			Client: mgr.GetClient(),
+			Log:    logf.Log.WithName("webhooks").WithName("HarborServerConfigurationValidator"),
+		},
+	})
 }

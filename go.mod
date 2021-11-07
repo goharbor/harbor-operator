@@ -6,8 +6,10 @@ require (
 	cloud.google.com/go v0.58.0 // indirect
 	github.com/Masterminds/semver v1.5.0
 	github.com/Masterminds/sprig v2.22.0+incompatible
+	github.com/containers/image/v5 v5.16.1
 	github.com/go-kit/kit v0.10.0
 	github.com/go-logr/logr v0.4.0
+	github.com/go-openapi/runtime v0.21.0
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/goharbor/go-client v0.24.3
 	github.com/goharbor/harbor/src v0.0.0-20211025104526-d4affc2eba6d
@@ -26,13 +28,15 @@ require (
 	github.com/sethvargo/go-password v0.1.3
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spotahome/redis-operator v1.0.0
+	github.com/stretchr/testify v1.7.0
 	github.com/szlabs/redis-operator v1.0.1 // indirect
 	github.com/theupdateframework/notary v0.6.1
 	github.com/uber/jaeger-client-go v2.24.0+incompatible
 	github.com/uber/jaeger-lib v2.2.0+incompatible
+	github.com/umisama/go-regexpcache v0.0.0-20150417035358-2444a542492f
 	github.com/zalando/postgres-operator v1.6.1
 	go.uber.org/zap v1.19.0
-	golang.org/x/crypto v0.0.0-20210220033148-5ea612d1eb83
+	golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/api v0.22.3

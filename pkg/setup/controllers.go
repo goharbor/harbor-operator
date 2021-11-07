@@ -13,10 +13,13 @@ import (
 	"github.com/goharbor/harbor-operator/controllers/goharbor/exporter"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/harbor"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/harborcluster"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/harborserverconfiguration"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/jobservice"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/namespace"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/notaryserver"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/notarysigner"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/portal"
+	"github.com/goharbor/harbor-operator/controllers/goharbor/pullsecretbinding"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/registry"
 	"github.com/goharbor/harbor-operator/controllers/goharbor/trivy"
 	"github.com/goharbor/harbor-operator/pkg/config"
@@ -45,8 +48,11 @@ var controllersBuilder = map[controllers.Controller]func(context.Context, *confi
 	controllers.HarborCluster: harborcluster.New,
 	// old configmap controller is planned to be removed at v1.3,
 	// the controller converts the cm to configuration cr.
-	controllers.HarborConfigurationCm: configuration.NewWithCm,
-	controllers.HarborConfiguration:   configuration.New,
+	controllers.HarborConfigurationCm:     configuration.NewWithCm,
+	controllers.HarborConfiguration:       configuration.New,
+	controllers.HarborServerConfiguration: harborserverconfiguration.New,
+	controllers.PullSecretBinding:         pullsecretbinding.New,
+	controllers.Namespace:                 namespace.New,
 }
 
 type ControllerFactory func(context.Context, string, string, *configstore.Store) (commonCtrl.Reconciler, error)

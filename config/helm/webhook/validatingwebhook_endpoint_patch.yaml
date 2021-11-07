@@ -28,3 +28,9 @@ webhooks:
       name: '{{ include "chart.fullname" . | quote }}'
       namespace: '{{ .Release.Namespace | quote }}'
       port: '{{ .Values.service.port }}'
+- name: hsc.goharbor.io
+  clientConfig:
+    service:
+      name: '{{ include "chart.fullname" . | quote }}'
+      namespace: '{{ .Release.Namespace | quote }}'
+      port: '{{ .Values.service.port }}'

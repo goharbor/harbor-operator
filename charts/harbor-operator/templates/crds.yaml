@@ -12011,6 +12011,148 @@ metadata:
   annotations:
     cert-manager.io/inject-ca-from: '{{.Release.Namespace}}/{{. | include "chart.fullname"}}-serving-cert'
     controller-gen.kubebuilder.io/version: v0.5.0
+  creationTimestamp: null
+  name: harborserverconfigurations.goharbor.io
+spec:
+  group: goharbor.io
+  names:
+    categories:
+    - goharbor
+    kind: HarborServerConfiguration
+    listKind: HarborServerConfigurationList
+    plural: harborserverconfigurations
+    shortNames:
+    - hsc
+    singular: harborserverconfiguration
+  scope: Cluster
+  versions:
+  - additionalPrinterColumns:
+    - description: The public URL to the Harbor server
+      jsonPath: .spec.serverURL
+      name: Harbor Server
+      type: string
+    - description: The status of the Harbor server
+      jsonPath: .status.status
+      name: Status
+      type: string
+    - description: The version of the Harbor server
+      jsonPath: .spec.version
+      name: Version
+      priority: 5
+      type: string
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: HarborServerConfiguration is the Schema for the harborserverconfigurations API.
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: HarborServerConfigurationSpec defines the desired state of HarborServerConfiguration.
+            properties:
+              accessCredential:
+                description: AccessCredential is a namespaced credential to keep the access key and secret for the harbor server configuration.
+                properties:
+                  accessSecretRef:
+                    pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                    type: string
+                  namespace:
+                    pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                    type: string
+                required:
+                - accessSecretRef
+                - namespace
+                type: object
+              default:
+                description: Default indicates the harbor configuration manages namespaces. Value in goharbor.io/harbor annotation will be considered with high priority. At most, one HarborServerConfiguration can be the default, multiple defaults will be rejected.
+                type: boolean
+              inSecure:
+                description: Indicate if the Harbor server is an insecure registry
+                type: boolean
+              namespaceSelector:
+                description: "NamespaceSelector decides whether to apply the HSC on a namespace based on whether the namespace matches the selector. See https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ for more examples of label selectors. \n Default to the empty LabelSelector, which matches everything."
+                properties:
+                  matchExpressions:
+                    description: matchExpressions is a list of label selector requirements. The requirements are ANDed.
+                    items:
+                      description: A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+                      properties:
+                        key:
+                          description: key is the label key that the selector applies to.
+                          type: string
+                        operator:
+                          description: operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+                          type: string
+                        values:
+                          description: values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+                          items:
+                            type: string
+                          type: array
+                      required:
+                      - key
+                      - operator
+                      type: object
+                    type: array
+                  matchLabels:
+                    additionalProperties:
+                      type: string
+                    description: matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and the values array contains only "value". The requirements are ANDed.
+                    type: object
+                type: object
+              rules:
+                description: Rules configures the container image rewrite rules for transparent proxy caching with Harbor.
+                items:
+                  type: string
+                type: array
+              serverURL:
+                pattern: (?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)+([A-Za-z]|[A-Za-z][A-Za-z0-9\-]*[A-Za-z0-9])
+                type: string
+              version:
+                description: The version of the Harbor server
+                pattern: (0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?
+                type: string
+            required:
+            - accessCredential
+            - serverURL
+            - version
+            type: object
+          status:
+            description: HarborConfigurationStatus defines the status of HarborServerConfiguration.
+            properties:
+              message:
+                description: Message provides human-readable message.
+                type: string
+              reason:
+                description: Reason represents status reason.
+                type: string
+              status:
+                description: Status represents harbor configuration status.
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    cert-manager.io/inject-ca-from: '{{.Release.Namespace}}/{{. | include "chart.fullname"}}-serving-cert'
+    controller-gen.kubebuilder.io/version: v0.5.0
   name: jobservices.goharbor.io
 spec:
   conversion:
@@ -18089,6 +18231,101 @@ spec:
                 type: integer
             required:
             - conditions
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    cert-manager.io/inject-ca-from: '{{.Release.Namespace}}/{{. | include "chart.fullname"}}-serving-cert'
+    controller-gen.kubebuilder.io/version: v0.5.0
+  creationTimestamp: null
+  name: pullsecretbindings.goharbor.io
+spec:
+  group: goharbor.io
+  names:
+    categories:
+    - goharbor
+    kind: PullSecretBinding
+    listKind: PullSecretBindingList
+    plural: pullsecretbindings
+    shortNames:
+    - psb
+    singular: pullsecretbinding
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: The Harbor server configuration CR reference
+      jsonPath: .spec.harborServerConfig
+      name: Harbor Server
+      type: string
+    - description: The service account binding the pull secret
+      jsonPath: .spec.serviceAccount
+      name: Service Account
+      type: string
+    - description: The status of the Harbor server
+      jsonPath: .status.status
+      name: Status
+      type: string
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: PullSecretBinding is the Schema for the pullsecretbindings API.
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: PullSecretBindingSpec defines the desired state of PullSecretBinding.
+            properties:
+              harborServerConfig:
+                description: Indicate which harbor server configuration is referred
+                type: string
+              projectId:
+                description: ProjectID points to the project associated with the secret binding
+                type: string
+              robotId:
+                description: RobotID points to the robot account id used for secret binding
+                type: string
+              serviceAccount:
+                description: Indicate which service account binds the pull secret
+                type: string
+            required:
+            - harborServerConfig
+            - projectId
+            - robotId
+            - serviceAccount
+            type: object
+          status:
+            description: PullSecretBindingStatus defines the observed state of PullSecretBinding.
+            properties:
+              message:
+                description: Message provides human-readable message.
+                type: string
+              reason:
+                description: Reason represents status reason.
+                type: string
+              status:
+                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state of cluster Important: Run "make" to regenerate code after modifying this file Indicate the status of binding: `binding`, `bound` and `unknown`'
+                type: string
+            required:
+            - status
             type: object
         type: object
     served: true

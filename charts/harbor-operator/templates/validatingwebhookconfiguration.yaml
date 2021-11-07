@@ -94,3 +94,24 @@ webhooks:
     resources:
     - harborclusters
   sideEffects: None
+- admissionReviewVersions:
+  - v1beta1
+  clientConfig:
+    service:
+      name: {{ include "chart.fullname" . | quote }}
+      namespace: {{ .Release.Namespace | quote }}
+      path: /validate-hsc
+      port: {{ .Values.service.port }}
+  failurePolicy: Fail
+  name: hsc.goharbor.io
+  rules:
+  - apiGroups:
+    - goharbor.io
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - harborserverconfigurations
+  sideEffects: None

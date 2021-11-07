@@ -261,6 +261,7 @@ jobs:
           kubectl -n cluster-sample-ns get all -o wide
           kubectl get harbor -n cluster-sample-ns -o wide
           kubectl get harborcluster -n cluster-sample-ns -o wide
+          kubectl get all -n ${operatorNamespace}
         fi
         free -h
         df -h
@@ -632,6 +633,8 @@ jobs:
           sed -i "s/notary.harbor.domain/$NOTARY_HOST/g" config/samples/harborcluster-minimal/*.yaml
           sed -i "s/core.harbor.domain/$CORE_HOST/g" config/samples/harborcluster-standard/*.yaml
           sed -i "s/notary.harbor.domain/$NOTARY_HOST/g" config/samples/harborcluster-standard/*.yaml
+
+          kubectl label ns default harbor-day2-webhook-configuration=disabled
 
           make sample-harborcluster-standard
 

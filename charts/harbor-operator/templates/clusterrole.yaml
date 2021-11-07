@@ -48,6 +48,26 @@ rules:
 - apiGroups:
   - ""
   resources:
+  - namespaces
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - namespaces/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - ""
+  resources:
   - persistentvolumeclaims
   verbs:
   - create
@@ -100,6 +120,16 @@ rules:
   verbs:
   - create
   - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - serviceaccounts
+  verbs:
   - get
   - list
   - patch
@@ -400,6 +430,26 @@ rules:
 - apiGroups:
   - goharbor.io
   resources:
+  - harborserverconfigurations
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - goharbor.io
+  resources:
+  - harborserverconfigurations/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - goharbor.io
+  resources:
   - jobservices
   verbs:
   - get
@@ -457,6 +507,26 @@ rules:
   - goharbor.io
   resources:
   - portals/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - goharbor.io
+  resources:
+  - pullsecretbindings
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - goharbor.io
+  resources:
+  - pullsecretbindings/status
   verbs:
   - get
   - patch
