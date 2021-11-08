@@ -1,5 +1,5 @@
-image: googleimages/redis-operator 
-tag: v1.0.2 
+image: ghcr.io/goharbor/redis-operator
+tag: v1.0.0.1
 pullPolicy: Always
 containerName: redisoperator
 podAnnotations: {}
