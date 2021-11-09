@@ -25118,6 +25118,17 @@ spec:
                 type: object
               currentState:
                 type: string
+              drivesHealing:
+                format: int32
+                type: integer
+              drivesOffline:
+                format: int32
+                type: integer
+              drivesOnline:
+                format: int32
+                type: integer
+              healthStatus:
+                type: string
               pools:
                 items:
                   properties:
@@ -25136,6 +25147,9 @@ spec:
                 type: integer
               syncVersion:
                 type: string
+              writeQuorum:
+                format: int32
+                type: integer
             required:
             - availableReplicas
             - certificates
@@ -26529,6 +26543,15 @@ spec:
                           type: string
                       type: object
                     type: array
+                type: object
+              logging:
+                properties:
+                  anonymous:
+                    type: boolean
+                  json:
+                    type: boolean
+                  quiet:
+                    type: boolean
                 type: object
               mountPath:
                 type: string
@@ -28593,6 +28616,17 @@ spec:
                 type: object
               currentState:
                 type: string
+              drivesHealing:
+                format: int32
+                type: integer
+              drivesOffline:
+                format: int32
+                type: integer
+              drivesOnline:
+                format: int32
+                type: integer
+              healthStatus:
+                type: string
               pools:
                 items:
                   properties:
@@ -28611,6 +28645,9 @@ spec:
                 type: integer
               syncVersion:
                 type: string
+              writeQuorum:
+                format: int32
+                type: integer
             required:
             - availableReplicas
             - certificates
@@ -33846,6 +33883,8 @@ rules:
   - certificates.k8s.io
   resourceNames:
   - kubernetes.io/legacy-unknown
+  - kubernetes.io/kube-apiserver-client
+  - kubernetes.io/kubelet-serving
   resources:
   - signers
   verbs:
@@ -33893,6 +33932,14 @@ rules:
   - list
   - patch
   - update
+  - watch
+- apiGroups:
+  - acid.zalan.do
+  resources:
+  - postgresteams
+  verbs:
+  - get
+  - list
   - watch
 - apiGroups:
   - apiextensions.k8s.io
@@ -33958,6 +34005,8 @@ rules:
   - delete
   - get
   - list
+  - patch
+  - update
 - apiGroups:
   - ""
   resources:
@@ -34043,14 +34092,6 @@ rules:
   verbs:
   - get
   - create
-- apiGroups:
-  - extensions
-  resourceNames:
-  - privileged
-  resources:
-  - podsecuritypolicies
-  verbs:
-  - use
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -34090,14 +34131,6 @@ rules:
   - services
   verbs:
   - create
-- apiGroups:
-  - extensions
-  resourceNames:
-  - privileged
-  resources:
-  - podsecuritypolicies
-  verbs:
-  - use
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -34664,19 +34697,27 @@ data:
   cluster_history_entries: "1000"
   cluster_labels: application:spilo
   cluster_name_label: cluster-name
-  connection_pooler_image: registry.opensource.zalan.do/acid/pgbouncer:master-7
+  connection_pooler_image: registry.opensource.zalan.do/acid/pgbouncer:master-16
   db_hosted_zone: db.example.com
   debug_logging: "true"
   default_cpu_request: 250m
   default_memory_request: 500Mi
-  docker_image: registry.opensource.zalan.do/acid/spilo-12:1.6-p3
+  docker_image: registry.opensource.zalan.do/acid/spilo-13:2.0-p7
+  enable_ebs_gp3_migration: "false"
   enable_master_load_balancer: "false"
+  enable_pgversion_env_var: "true"
   enable_replica_load_balancer: "false"
+  enable_spilo_wal_path_compat: "true"
+  enable_team_member_deprecation: "false"
   enable_teams_api: "false"
-  logical_backup_docker_image: registry.opensource.zalan.do/acid/logical-backup
+  external_traffic_policy: Cluster
+  logical_backup_docker_image: registry.opensource.zalan.do/acid/logical-backup:v1.6.3
+  logical_backup_job_prefix: logical-backup-
+  logical_backup_provider: s3
   logical_backup_s3_bucket: my-bucket-url
   logical_backup_s3_sse: AES256
   logical_backup_schedule: 30 00 * * *
+  major_version_upgrade_mode: manual
   master_dns_name_format: '{cluster}.{team}.{hostedzone}'
   pdb_name_format: postgres-{cluster}-pdb
   pod_deletion_wait_timeout: 10m
@@ -34694,11 +34735,14 @@ data:
   resource_check_timeout: 10m
   resync_period: 30m
   ring_log_lines: "100"
+  role_deletion_suffix: _deleted
   secret_name_template: '{username}.{cluster}.credentials'
+  spilo_allow_privilege_escalation: "true"
   spilo_privileged: "false"
+  storage_resize_mode: pvc
   super_username: postgres
   watched_namespace: '*'
-  workers: "4"
+  workers: "8"
 kind: ConfigMap
 metadata:
   annotations:
@@ -34887,7 +34931,7 @@ spec:
         name: minio-operator
     spec:
       containers:
-      - image: ghcr.io/goharbor/minio-operator:v4.0.6
+      - image: quay.io/minio/operator:v4.1.3
         imagePullPolicy: IfNotPresent
         name: minio-operator
         resources:
@@ -34908,6 +34952,8 @@ metadata:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
     goharbor.io/operator-version: v1.1.0
+  labels:
+    application: postgres-operator
   name: postgres-operator
   namespace: harbor-operator-ns
 spec:
@@ -34915,6 +34961,8 @@ spec:
   selector:
     matchLabels:
       name: postgres-operator
+  strategy:
+    type: Recreate
   template:
     metadata:
       annotations:
@@ -34928,7 +34976,7 @@ spec:
       - env:
         - name: CONFIG_MAP_NAME
           value: postgres-operator
-        image: ghcr.io/goharbor/postgres-operator:v1.5.0
+        image: ghcr.io/goharbor/postgres-operator:v1.6.3
         imagePullPolicy: IfNotPresent
         name: postgres-operator
         resources:
@@ -34939,6 +34987,7 @@ spec:
             cpu: 100m
             memory: 250Mi
         securityContext:
+          allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
           runAsNonRoot: true
           runAsUser: 1000
@@ -34972,7 +35021,7 @@ spec:
         app: redisoperator
     spec:
       containers:
-      - image: ghcr.io/goharbor/redis-operator:v1.0.0
+      - image: googleimages/redis-operator:v1.0.2
         imagePullPolicy: IfNotPresent
         name: app
         resources:
