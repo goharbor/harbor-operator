@@ -10,6 +10,7 @@ import (
 	"github.com/goharbor/harbor-operator/controllers"
 	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
 	"github.com/goharbor/harbor-operator/pkg/image"
+	utilStrings "github.com/goharbor/harbor-operator/pkg/utils/strings"
 	"github.com/goharbor/harbor-operator/pkg/version"
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
@@ -20,17 +21,22 @@ import (
 
 const (
 	VolumeName                            = "registry-config"
+	CtlVolumeName                         = "registryctl-config"
 	ConfigPath                            = "/etc/registry"
+	CtlConfigPath                         = "/etc/registryctl"
 	CompatibilitySchema1Path              = ConfigPath + "/compatibility-schema1"
 	CompatibilitySchema1VolumeName        = "compatibility-schema1-certificate"
 	AuthenticationHTPasswdPath            = ConfigPath + "/auth"
 	AuthenticationHTPasswdVolumeName      = "authentication-htpasswd"
 	InternalCertificatesVolumeName        = "internal-certificates"
+	CtlInternalCertificatesVolumeName     = "ctl-internal-certificates"
 	InternalCertificateAuthorityDirectory = "/harbor_cust_cert"
 	InternalCertificatesPath              = ConfigPath + "/ssl"
+	CtlInternalCertificatesPath           = CtlConfigPath + "/ssl"
 	StorageName                           = "storage"
 	StoragePath                           = "/var/lib/registry"
 	HealthPath                            = "/"
+	CtlHealthPath                         = "/api/health"
 	StorageServiceCAName                  = "storage-service-ca"
 	StorageServiceCAMountPath             = "/harbor_cust_cert/custom-ca-bundle.crt"
 )
@@ -47,6 +53,9 @@ var (
 const (
 	apiPort     = 5000 // https://github.com/docker/distribution/blob/749f6afb4572201e3c37325d0ffedb6f32be8950/contrib/compose/docker-compose.yml#L15
 	metricsPort = 5001 // https://github.com/docker/distribution/blob/b12bd4004afc203f1cbd2072317c8fda30b89710/cmd/registry/config-dev.yml#L34
+	// registry controller port.
+	httpsPort = 8443
+	httpPort  = 8080
 )
 
 func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1.Registry) (*appsv1.Deployment, error) { // nolint:funlen
@@ -288,11 +297,143 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1.Reg
 		},
 	}
 
-	err = r.ApplyStorageConfiguration(ctx, registry, deploy)
+	if err = r.ApplyStorageConfiguration(ctx, registry, deploy); err != nil {
+		return nil, errors.Wrap(err, "cannot apply storage configuration")
+	}
+
+	// attach registry controller container
+	if err = r.attachRegistryCtlContainer(ctx, registry, deploy); err != nil {
+		return nil, errors.Wrap(err, "cannot attach registryctl container")
+	}
 
 	registry.Spec.ComponentSpec.ApplyToDeployment(deploy)
 
-	return deploy, errors.Wrap(err, "cannot apply storage configuration")
+	return deploy, nil
+}
+
+func (r *Reconciler) attachRegistryCtlContainer(ctx context.Context, registry *goharborv1.Registry, deploy *appsv1.Deployment) error { // nolint:funlen
+	registryCtl, err := r.GetRegistryCtl(ctx, registry)
+	if err != nil {
+		return errors.Wrap(err, "can not get registryctl from registry")
+	}
+
+	getImageOptions := []image.Option{
+		image.WithImageFromSpec(registryCtl.Spec.Image),
+		image.WithHarborVersion(version.GetVersion(registryCtl.Annotations)),
+	}
+
+	image, err := image.GetImage(ctx, harbormetav1.RegistryControllerComponent.String(), getImageOptions...)
+	if err != nil {
+		return errors.Wrap(err, "cannot get registryctl image")
+	}
+
+	name := controllers.RegistryController.String()
+
+	volumeMounts := append(deploy.Spec.Template.Spec.Containers[0].VolumeMounts, corev1.VolumeMount{
+		Name:      CtlVolumeName,
+		MountPath: CtlConfigPath,
+	})
+
+	if registryCtl.Spec.TLS.Enabled() {
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{
+			Name:      CtlInternalCertificatesVolumeName,
+			MountPath: path.Join(InternalCertificateAuthorityDirectory, "ctl-"+corev1.ServiceAccountRootCAKey),
+			SubPath:   strings.TrimLeft(corev1.ServiceAccountRootCAKey, "/"),
+			ReadOnly:  true,
+		}, corev1.VolumeMount{
+			Name:      CtlInternalCertificatesVolumeName,
+			MountPath: CtlInternalCertificatesPath,
+			ReadOnly:  true,
+		})
+
+		deploy.Spec.Template.Spec.Volumes = append(deploy.Spec.Template.Spec.Volumes, corev1.Volume{
+			Name: CtlInternalCertificatesVolumeName,
+			VolumeSource: corev1.VolumeSource{
+				Secret: &corev1.SecretVolumeSource{
+					SecretName: registryCtl.Spec.TLS.CertificateRef,
+				},
+			},
+		})
+	}
+
+	deploy.Spec.Template.Spec.Volumes = append(deploy.Spec.Template.Spec.Volumes, corev1.Volume{
+		Name: CtlVolumeName,
+		VolumeSource: corev1.VolumeSource{
+			ConfigMap: &corev1.ConfigMapVolumeSource{
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: utilStrings.NormalizeName(registryCtl.GetName(), RegistryCtlName),
+				},
+				Optional: &varFalse,
+			},
+		},
+	})
+
+	envs := deploy.Spec.Template.Spec.Containers[0].Env
+	if registryCtl.Spec.Authentication.JobServiceSecretRef != "" {
+		envs = append(envs, corev1.EnvVar{
+			Name: "JOBSERVICE_SECRET",
+			ValueFrom: &corev1.EnvVarSource{
+				SecretKeyRef: &corev1.SecretKeySelector{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: registryCtl.Spec.Authentication.JobServiceSecretRef,
+					},
+					Key: harbormetav1.SharedSecretKey,
+				},
+			},
+		})
+	}
+
+	if registryCtl.Spec.Authentication.CoreSecretRef != "" {
+		envs = append(envs, corev1.EnvVar{
+			Name: "CORE_SECRET",
+			ValueFrom: &corev1.EnvVarSource{
+				SecretKeyRef: &corev1.SecretKeySelector{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: registryCtl.Spec.Authentication.CoreSecretRef,
+					},
+					Key: harbormetav1.SharedSecretKey,
+				},
+			},
+		})
+	}
+
+	ports := []corev1.ContainerPort{{
+		Name:          harbormetav1.RegistryControllerHTTPPortName,
+		ContainerPort: httpPort,
+		Protocol:      corev1.ProtocolTCP,
+	}, {
+		Name:          harbormetav1.RegistryControllerHTTPSPortName,
+		ContainerPort: httpsPort,
+		Protocol:      corev1.ProtocolTCP,
+	}}
+
+	port := harbormetav1.RegistryControllerHTTPPortName
+	if registryCtl.Spec.TLS.Enabled() {
+		port = harbormetav1.RegistryControllerHTTPSPortName
+	}
+
+	probe := &corev1.Probe{
+		Handler: corev1.Handler{
+			HTTPGet: &corev1.HTTPGetAction{
+				Path:   CtlHealthPath,
+				Port:   intstr.FromString(port),
+				Scheme: registryCtl.Spec.TLS.GetScheme(),
+			},
+		},
+	}
+
+	container := &corev1.Container{
+		Name:           name,
+		Image:          image,
+		Env:            envs,
+		Ports:          ports,
+		LivenessProbe:  probe,
+		ReadinessProbe: probe,
+		VolumeMounts:   volumeMounts,
+	}
+	deploy.Spec.Template.Spec.Containers = append(deploy.Spec.Template.Spec.Containers, *container)
+
+	return nil
 }
 
 const registryContainerIndex = 0

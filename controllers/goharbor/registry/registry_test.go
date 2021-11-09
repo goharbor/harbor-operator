@@ -56,6 +56,19 @@ var _ = Describe("Registry", func() {
 					},
 				},
 			}
+
+			registryCtl := &goharborv1.RegistryController{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:        registry.GetName(),
+					Namespace:   registry.GetNamespace(),
+					Annotations: test.AddVersionAnnotations(nil),
+				},
+				Spec: goharborv1.RegistryControllerSpec{
+					RegistryRef: registry.GetName(),
+				},
+			}
+			Ω(test.GetClient(ctx).Create(ctx, registryCtl)).
+				Should(test.SuccessOrExists)
 		})
 
 		It("Should works", func() {
