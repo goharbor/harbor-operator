@@ -397,6 +397,11 @@ func (r *Reconciler) attachRegistryCtlContainer(ctx context.Context, registry *g
 		})
 	}
 
+	envs, err = registry.Spec.Trace.AddEnvVars(harbormetav1.RegistryControllerComponent.String(), envs)
+	if err != nil {
+		return errors.Wrap(err, "get trace environment variables")
+	}
+
 	ports := []corev1.ContainerPort{{
 		Name:          harbormetav1.RegistryControllerHTTPPortName,
 		ContainerPort: httpPort,

@@ -57,6 +57,14 @@ func (h *Harbor) ValidateDelete() error {
 func (h *Harbor) Validate(old *Harbor) error {
 	var allErrs field.ErrorList
 
+	if err := h.Spec.Network.Validate(nil); err != nil {
+		allErrs = append(allErrs, err)
+	}
+
+	if err := h.Spec.Trace.Validate(nil); err != nil {
+		allErrs = append(allErrs, err)
+	}
+
 	err := h.Spec.ImageChartStorage.Validate()
 	if err != nil {
 		allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("imageChartStorage"), h.Spec.ImageChartStorage, err.Error()))

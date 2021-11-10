@@ -9,13 +9,12 @@ require (
 	github.com/go-kit/kit v0.10.0
 	github.com/go-logr/logr v0.4.0
 	github.com/go-redis/redis v6.15.9+incompatible
-	github.com/goharbor/harbor/src v0.0.0-20210705083811-ddb66197697f
+	github.com/goharbor/harbor/src v0.0.0-20211109090510-6fe2a0cd1de6
 	github.com/huandu/xstrings v1.3.2 // indirect
 	github.com/jaegertracing/jaeger-lib v2.2.0+incompatible
 	github.com/jetstack/cert-manager v1.1.0
-	github.com/markbates/pkger v0.15.1
+	github.com/markbates/pkger v0.17.1
 	github.com/minio/minio-go/v6 v6.0.57
-	github.com/mitchellh/reflectwalk v1.0.1 // indirect
 	github.com/onsi/ginkgo v1.16.4
 	github.com/onsi/gomega v1.15.0
 	github.com/opentracing-contrib/go-stdlib v1.0.0

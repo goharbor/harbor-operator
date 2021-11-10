@@ -139,6 +139,7 @@ func (harbor *Controller) getHarborCR(ctx context.Context, harborcluster *goharb
 			ImageSource: spec.ImageSource,
 			Proxy:       spec.Proxy,
 			Network:     harborcluster.Spec.Network,
+			Trace:       harborcluster.Spec.Trace,
 		},
 	}
 

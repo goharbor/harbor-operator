@@ -40,7 +40,7 @@ var _ = Describe("Version", func() {
 		It("Should fail", func() {
 			err := version.UpgradeAllowed("2.0.0", "2.2.0")
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(Equal("unknow version 2.0.0"))
+			Expect(err.Error()).To(Equal("unknown version 2.0.0"))
 		})
 	})
 
@@ -48,7 +48,7 @@ var _ = Describe("Version", func() {
 		It("Should fail", func() {
 			err := version.UpgradeAllowed("2.1.0", "2.3.0")
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(Equal("unknow version 2.3.0"))
+			Expect(err.Error()).To(Equal("unknown version 2.3.0"))
 		})
 	})
 
@@ -56,7 +56,7 @@ var _ = Describe("Version", func() {
 		It("Should fail", func() {
 			err := version.UpgradeAllowed("2.0.0", "2.3.0")
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(Equal("unknow version 2.0.0"))
+			Expect(err.Error()).To(Equal("unknown version 2.0.0"))
 		})
 	})
 

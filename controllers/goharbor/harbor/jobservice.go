@@ -181,6 +181,7 @@ func (r *Reconciler) GetJobService(ctx context.Context, harbor *goharborv1.Harbo
 			Proxy:                harbor.GetComponentProxySpec(harbormetav1.JobServiceComponent),
 			Metrics:              harbor.Spec.JobService.Metrics,
 			Network:              harbor.Spec.Network,
+			Trace:                harbor.Spec.Trace,
 		},
 	}, nil
 }
