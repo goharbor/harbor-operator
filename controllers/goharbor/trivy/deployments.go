@@ -186,6 +186,13 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1.Trivy)
 
 	envs = append(envs, trivy.Spec.Proxy.GetEnvVars()...)
 
+	if trivy.Spec.Timeout != nil {
+		envs = append(envs, corev1.EnvVar{
+			Name:  "SCANNER_TRIVY_TIMEOUT",
+			Value: trivy.Spec.Timeout.Duration.String(),
+		})
+	}
+
 	deploy := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        name,

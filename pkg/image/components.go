@@ -89,18 +89,18 @@ func (cs *components) Register(component string, kind metadataKind, value string
 	cs.metadata(component).Add(kind, value, harborVersions...)
 }
 
-var knownCompoents = components{mds: map[string]*metadata{}}
+var knownComponents = components{mds: map[string]*metadata{}}
 
 func RegisterImageName(component, imageName string, harborVersions ...string) {
-	knownCompoents.Register(component, imageNameKind, imageName, harborVersions...)
+	knownComponents.Register(component, imageNameKind, imageName, harborVersions...)
 }
 
 func RegisterRepository(component, repository string, harborVersions ...string) {
-	knownCompoents.Register(component, repositoryKind, repository, harborVersions...)
+	knownComponents.Register(component, repositoryKind, repository, harborVersions...)
 }
 
 func RegisterTag(component, tag string, harborVersions ...string) {
-	knownCompoents.Register(component, tagKind, tag, harborVersions...)
+	knownComponents.Register(component, tagKind, tag, harborVersions...)
 }
 
 func init() { // nolint:gochecknoinits
@@ -125,17 +125,17 @@ func init() { // nolint:gochecknoinits
 	// Register the cluster service components
 	RegisterRepository("cluster-redis", "", "*") // the - repository of dockerhub
 	RegisterImageName("cluster-redis", "redis", "*")
-	RegisterTag("cluster-redis", "5.0-alpine", "~2.2.0", "~2.3.0")
+	RegisterTag("cluster-redis", "5.0-alpine", "~2.2.0", "~2.3.0", "~2.4.0")
 
 	RegisterRepository("cluster-postgresql", "registry.opensource.zalan.do/acid", "*")
 	RegisterImageName("cluster-postgresql", "spilo-12", "*")
-	RegisterTag("cluster-postgresql", "1.6-p3", "~2.2.0", "~2.3.0")
+	RegisterTag("cluster-postgresql", "1.6-p3", "~2.2.0", "~2.3.0", "~2.4.0")
 
 	RegisterRepository("cluster-minio", "minio", "*") // the minio repository of dockerhub
 	RegisterImageName("cluster-minio", "minio", "*")
-	RegisterTag("cluster-minio", "RELEASE.2021-07-27T02-40-15Z", "~2.2.0", "~2.3.0")
+	RegisterTag("cluster-minio", "RELEASE.2021-07-27T02-40-15Z", "~2.2.0", "~2.3.0", "~2.4.0")
 
 	RegisterRepository("cluster-minio-init", "minio", "*") // the minio repository of dockerhub
 	RegisterImageName("cluster-minio-init", "mc", "*")
-	RegisterTag("cluster-minio-init", "RELEASE.2021-03-23T05-46-11Z", "~2.2.0", "~2.3.0")
+	RegisterTag("cluster-minio-init", "RELEASE.2021-03-23T05-46-11Z", "~2.2.0", "~2.3.0", "~2.4.0")
 }

@@ -18,6 +18,7 @@ func init() { // nolint:gochecknoinits
 	RegisterKnownConstraints(
 		"~2.2.x",
 		"~2.3.x",
+		"~2.4.x",
 	)
 }
 
@@ -33,7 +34,7 @@ func parseVersion(version string) (*semver.Version, error) {
 		}
 	}
 
-	return nil, errors.Errorf("unknow version %s", version)
+	return nil, errors.Errorf("unknown version %s", version)
 }
 
 // RegisterKnownConstraints register the know constraints.

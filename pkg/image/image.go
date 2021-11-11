@@ -68,7 +68,7 @@ func GetImage(ctx context.Context, component string, options ...Option) (string,
 		if repository != "" {
 			opts.repository = repository
 		} else {
-			opts.repository = knownCompoents.Get(component, repositoryKind, opts.harborVersion)
+			opts.repository = knownComponents.Get(component, repositoryKind, opts.harborVersion)
 		}
 	}
 
@@ -79,9 +79,9 @@ func GetImage(ctx context.Context, component string, options ...Option) (string,
 		}
 	}
 
-	imageName := knownCompoents.Get(component, imageNameKind, opts.harborVersion)
+	imageName := knownComponents.Get(component, imageNameKind, opts.harborVersion)
 	if imageName == "" {
-		return "", errors.Errorf("unknow component %s", component)
+		return "", errors.Errorf("unknown component %s", component)
 	}
 
 	repository := opts.repository
@@ -89,7 +89,7 @@ func GetImage(ctx context.Context, component string, options ...Option) (string,
 		repository += "/"
 	}
 
-	tag := knownCompoents.Get(component, tagKind, opts.harborVersion, "v"+opts.harborVersion)
+	tag := knownComponents.Get(component, tagKind, opts.harborVersion, "v"+opts.harborVersion)
 
 	return fmt.Sprintf("%s%s:%s%s", repository, imageName, tag, opts.tagSuffix), nil
 }

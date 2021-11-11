@@ -464,6 +464,7 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1.Harbor) (*g
 			CertificateInjection: harbor.Spec.Core.CertificateInjection,
 			Metrics:              harbor.Spec.Core.Metrics,
 			Network:              harbor.Spec.Network,
+			Trace:                harbor.Spec.Trace,
 		},
 	}, nil
 }
