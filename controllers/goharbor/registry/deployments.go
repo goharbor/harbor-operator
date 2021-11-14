@@ -33,6 +33,7 @@ const (
 	HealthPath                            = "/"
 	StorageServiceCAName                  = "storage-service-ca"
 	StorageServiceCAMountPath             = "/harbor_cust_cert/custom-ca-bundle.crt"
+	GcsJsonKeyFilePath                    = ConfigPath + "/gcs-key.json"
 )
 
 var (
@@ -179,6 +180,29 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1.Reg
 			MountPath: StorageServiceCAMountPath,
 			ReadOnly:  true,
 			SubPath:   corev1.ServiceAccountRootCAKey,
+		})
+	}
+
+	if registry.Spec.Storage.Driver.Gcs != nil && registry.Spec.Storage.Driver.Gcs.KetDataRef != "" {
+		volumes = append(volumes, corev1.Volume{
+			Name: "gcs-key",
+			VolumeSource: corev1.VolumeSource{
+				Secret: &corev1.SecretVolumeSource{
+					SecretName: registry.Spec.Storage.Driver.Gcs.KetDataRef,
+					Items: []corev1.KeyToPath{
+						{
+							Key: "GCS_KEY_DATA",
+							Path: "gcs-key.json",
+						},
+					},
+				},
+			},
+		})
+
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{
+			Name:      "gcs-key",
+			MountPath: GcsJsonKeyFilePath,
+			SubPath:   "gcs-key.json",
 		})
 	}
 
@@ -361,6 +385,24 @@ func (r *Reconciler) ApplySwiftStorageEnvs(ctx context.Context, registry *goharb
 	return nil
 }
 
+func (r *Reconciler) ApplyGcsStorageEnvs(ctx context.Context, registry *goharborv1.Registry, deploy *appsv1.Deployment) error {
+	regContainer := &deploy.Spec.Template.Spec.Containers[registryContainerIndex]
+
+	regContainer.Env = append(regContainer.Env, corev1.EnvVar{
+		Name: "GCS_KEY_DATA",
+		ValueFrom: &corev1.EnvVarSource{
+			SecretKeyRef: &corev1.SecretKeySelector{
+				Key: harbormetav1.SharedSecretKey,
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: registry.Spec.Storage.Driver.Gcs.KetDataRef,
+				},
+			},
+		},
+	})
+
+	return nil
+}
+
 func (r *Reconciler) ApplyAzureStorageEnvs(ctx context.Context, registry *goharborv1.Registry, deploy *appsv1.Deployment) error {
 	regContainer := &deploy.Spec.Template.Spec.Containers[registryContainerIndex]
 
@@ -403,6 +445,10 @@ func (r *Reconciler) ApplyStorageConfiguration(ctx context.Context, registry *go
 
 	if registry.Spec.Storage.Driver.Azure != nil {
 		return r.ApplyAzureStorageEnvs(ctx, registry, deploy)
+	}
+
+	if registry.Spec.Storage.Driver.Gcs != nil {
+		return r.ApplyGcsStorageEnvs(ctx, registry, deploy)
 	}
 
 	if registry.Spec.Storage.Driver.FileSystem != nil {

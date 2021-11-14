@@ -158,6 +158,25 @@ type ChartMuseumChartStorageDriverSpec struct {
 
 	// +kubebuilder:validation:Optional
 	Azure *ChartMuseumChartStorageDriverAzureSpec `json:"azure,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	Gcs *ChartMuseumChartStorageDriverGcsSpec `json:"gcs,omitempty"`
+}
+
+type ChartMuseumChartStorageDriverGcsSpec struct {
+	// +kubebuilder:validation:Required
+	// bucket to store charts for Gcs storage
+	Bucket string `json:"bucket,omitempty"`
+
+	// +kubebuilder:validation:Required
+	// The base64 encoded json file which contains the key
+	KetDataSecretRef string `json:"ketDataSecretRef,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	PathPrefix string `json:"pathPrefix,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	ChunkSize string `json:"chunksize,omitempty"`
 }
 
 type ChartMuseumChartStorageDriverAzureSpec struct {
