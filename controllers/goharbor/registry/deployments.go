@@ -318,17 +318,19 @@ func (r *Reconciler) ApplyFilesystemStorageEnvs(ctx context.Context, registry *g
 func (r *Reconciler) ApplyS3StorageEnvs(ctx context.Context, registry *goharborv1.Registry, deploy *appsv1.Deployment) error {
 	regContainer := &deploy.Spec.Template.Spec.Containers[registryContainerIndex]
 
-	regContainer.Env = append(regContainer.Env, corev1.EnvVar{
-		Name: "REGISTRY_STORAGE_S3_SECRETKEY",
-		ValueFrom: &corev1.EnvVarSource{
-			SecretKeyRef: &corev1.SecretKeySelector{
-				Key: harbormetav1.SharedSecretKey,
-				LocalObjectReference: corev1.LocalObjectReference{
-					Name: registry.Spec.Storage.Driver.S3.SecretKeyRef,
+	if registry.Spec.Storage.Driver.S3.SecretKeyRef != "" {
+		regContainer.Env = append(regContainer.Env, corev1.EnvVar{
+			Name: "REGISTRY_STORAGE_S3_SECRETKEY",
+			ValueFrom: &corev1.EnvVarSource{
+				SecretKeyRef: &corev1.SecretKeySelector{
+					Key: harbormetav1.SharedSecretKey,
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: registry.Spec.Storage.Driver.S3.SecretKeyRef,
+					},
 				},
 			},
-		},
-	})
+		})
+	}
 
 	return nil
 }
