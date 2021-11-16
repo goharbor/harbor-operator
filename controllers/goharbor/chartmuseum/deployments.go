@@ -28,7 +28,7 @@ const (
 	LocalStorageVolume                    = "storage"
 	DefaultLocalStoragePath               = "/mnt/chartstorage"
 	StorageTimestampTolerance             = 1 * time.Second
-	DefautJsonKeyFilePath                 = ConfigPath + "/gcs-key.json"
+	DefautJSONKeyFilePath                 = ConfigPath + "/gcs-key.json"
 )
 
 var (
@@ -133,7 +133,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1.
 			Value: chartMuseum.Spec.Chart.Storage.Gcs.Bucket,
 		}, corev1.EnvVar{
 			Name:  "GOOGLE_APPLICATION_CREDENTIALS",
-			Value: DefautJsonKeyFilePath,
+			Value: DefautJSONKeyFilePath,
 		}, corev1.EnvVar{
 			Name:  "STORAGE_GOOGLE_PREFIX",
 			Value: chartMuseum.Spec.Chart.Storage.Gcs.PathPrefix,
@@ -156,7 +156,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1.
 
 		volumeMounts = append(volumeMounts, corev1.VolumeMount{
 			Name:      "gcs-key",
-			MountPath: DefautJsonKeyFilePath,
+			MountPath: DefautJSONKeyFilePath,
 			SubPath:   "gcs-key.json",
 		})
 	}

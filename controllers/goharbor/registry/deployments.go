@@ -33,7 +33,7 @@ const (
 	HealthPath                            = "/"
 	StorageServiceCAName                  = "storage-service-ca"
 	StorageServiceCAMountPath             = "/harbor_cust_cert/custom-ca-bundle.crt"
-	GcsJsonKeyFilePath                    = ConfigPath + "/gcs-key.json"
+	GcsJSONKeyFilePath                    = ConfigPath + "/gcs-key.json"
 )
 
 var (
@@ -201,7 +201,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1.Reg
 
 		volumeMounts = append(volumeMounts, corev1.VolumeMount{
 			Name:      "gcs-key",
-			MountPath: GcsJsonKeyFilePath,
+			MountPath: GcsJSONKeyFilePath,
 			SubPath:   "gcs-key.json",
 		})
 	}
