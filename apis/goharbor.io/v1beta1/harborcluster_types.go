@@ -51,6 +51,10 @@ type HarborClusterSpec struct {
 	// +kubebuilder:validation:Optional
 	// Network settings for the harbor
 	Network *harbormetav1.Network `json:"network,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Trace settings for the harbor
+	Trace *harbormetav1.TraceSpec `json:"trace,omitempty"`
 }
 
 type EmbeddedHarborSpec struct {

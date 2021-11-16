@@ -62,7 +62,7 @@ func (s *TrivySeverityTypes) GetValue() string {
 type TrivySeverityType string
 
 const (
-	TrivyUnkownSeverity   TrivySeverityType = "UNKNOWN"
+	TrivyUnknownSeverity  TrivySeverityType = "UNKNOWN"
 	TrivyLowSeverity      TrivySeverityType = "LOW"
 	TrivyMediumSeverity   TrivySeverityType = "MEDIUM"
 	TrivyHighSeverity     TrivySeverityType = "HIGH"

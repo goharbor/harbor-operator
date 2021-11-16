@@ -42,7 +42,7 @@ Follow the deployment guide shown [here](https://github.com/spotahome/redis-oper
 A simple way is:
 
 ```shell script
-kubectl create -f https://raw.githubusercontent.com/spotahome/redis-operator/master/example/operator/all-redis-operator-resources.yaml
+kubectl create -f https://raw.githubusercontent.com/szlabs/redis-operator/master/example/operator/all-redis-operator-resources.yaml
 ```
 
 Check the Redis operator status (by default it's deployed into the `default` namespace):
@@ -61,7 +61,7 @@ redisoperator-56d6888cc-5sz9k   1/1     Running   0          84s
 For deleting the Redis operator, just call:
 
 ```shell
-kubectl delete -f https://raw.githubusercontent.com/spotahome/redis-operator/master/example/operator/all-redis-operator-resources.yaml
+kubectl delete -f https://raw.githubusercontent.com/szlabs/redis-operator/master/example/operator/all-redis-operator-resources.yaml
 ```
 
 ## Deploy Minio operator (Optional)
