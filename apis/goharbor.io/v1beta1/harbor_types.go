@@ -698,7 +698,7 @@ type HarborExposeComponentSpec struct {
 	// +kubebuilder:validation:Optional
 	TLS *harbormetav1.ComponentsTLSSpec `json:"tls,omitempty"`
 
-	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Required
 	Ingress *HarborExposeIngressSpec `json:"ingress,omitempty"`
 }
 

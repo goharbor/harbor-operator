@@ -130,6 +130,10 @@ func (m *MinIOController) generateIngress(ctx context.Context, harborcluster *go
 		}
 	}
 
+	for key, value := range harborcluster.Spec.Storage.Spec.MinIO.Redirect.Expose.Ingress.Annotations {
+		annotations[key] = value
+	}
+
 	pathTypePrefix := netv1.PathTypePrefix
 
 	ingress := &netv1.Ingress{

@@ -147,39 +147,45 @@ func (harborcluster *HarborCluster) validateStorage() *field.Error {
 	// in cluster storage has high priority
 	fp := field.NewPath("spec").Child("storage").Child("spec")
 
+	storage := harborcluster.Spec.Storage
 	// Storage
-	if harborcluster.Spec.Storage.Kind == KindStorageS3 && harborcluster.Spec.Storage.Spec.S3 == nil {
+	if storage.Kind == KindStorageS3 && storage.Spec.S3 == nil {
 		// Invalid and not acceptable
 		return required(fp.Child("s3"))
 	}
 
-	if harborcluster.Spec.Storage.Kind == KindStorageMinIO && harborcluster.Spec.Storage.Spec.MinIO == nil {
-		// Invalid and not acceptable
-		return required(fp.Child("minIO"))
-	}
-
-	if harborcluster.Spec.Storage.Kind == KindStorageSwift && harborcluster.Spec.Storage.Spec.Swift == nil {
+	if storage.Kind == KindStorageSwift && storage.Spec.Swift == nil {
 		// Invalid and not acceptable
 		return required(fp.Child("swift"))
 	}
 
-	if harborcluster.Spec.Storage.Kind == KindStorageAzure && harborcluster.Spec.Storage.Spec.Azure == nil {
+	if storage.Kind == KindStorageAzure && storage.Spec.Azure == nil {
 		// Invalid and not acceptable
 		return required(fp.Child("azure"))
 	}
 
-	if harborcluster.Spec.Storage.Kind == KindStorageFileSystem && harborcluster.Spec.Storage.Spec.FileSystem == nil {
+	if storage.Kind == KindStorageFileSystem && storage.Spec.FileSystem == nil {
 		// Invalid and not acceptable
 		return required(fp.Child("fileSystem"))
 	}
 
 	// Validate more if incluster storage is configured.
-	if harborcluster.Spec.Storage.Kind == KindStorageMinIO {
-		desiredReplicas := harborcluster.Spec.Storage.Spec.MinIO.Replicas
-		volumePerServer := harborcluster.Spec.Storage.Spec.MinIO.VolumesPerServer
+	if storage.Kind == KindStorageMinIO {
+		minio := storage.Spec.MinIO
+
+		if minio == nil {
+			return required(fp.Child("minIO"))
+		}
+
+		desiredReplicas := minio.Replicas
+		volumePerServer := minio.VolumesPerServer
 
 		if desiredReplicas*volumePerServer < minimalVolumeCount {
-			return invalid(fp, harborcluster.Spec.Storage.Spec.MinIO, fmt.Sprintf("minIO.replicas * minIO.volumesPerServer should be >=%d", minimalVolumeCount))
+			return invalid(fp, minio, fmt.Sprintf("minIO.replicas * minIO.volumesPerServer should be >=%d", minimalVolumeCount))
+		}
+
+		if minio.Redirect.Enable && minio.Redirect.Expose == nil {
+			return required(fp.Child("minIO").Child("redirect").Child("expose"))
 		}
 	}
 
