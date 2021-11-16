@@ -8,8 +8,13 @@ require (
 	github.com/Masterminds/sprig v2.22.0+incompatible
 	github.com/go-kit/kit v0.10.0
 	github.com/go-logr/logr v0.4.0
+	github.com/go-openapi/errors v0.19.6
+	github.com/go-openapi/runtime v0.19.20
+	github.com/go-openapi/strfmt v0.19.5
+	github.com/go-openapi/swag v0.19.14
+	github.com/go-openapi/validate v0.19.10
 	github.com/go-redis/redis v6.15.9+incompatible
-	github.com/goharbor/harbor/src v0.0.0-20211112031241-d260e632d85c
+	github.com/goharbor/harbor/src v0.0.0-20211116063910-060341ba4e9a
 	github.com/huandu/xstrings v1.3.2 // indirect
 	github.com/jaegertracing/jaeger-lib v2.2.0+incompatible
 	github.com/jetstack/cert-manager v1.1.0
