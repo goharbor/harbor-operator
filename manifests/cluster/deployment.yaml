@@ -7016,6 +7016,8 @@ spec:
                             pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
                             type: string
                         type: object
+                    required:
+                    - ingress
                     type: object
                   notary:
                     description: The ingress of the notary, required when notary component enabled.
@@ -7048,6 +7050,8 @@ spec:
                             pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
                             type: string
                         type: object
+                    required:
+                    - ingress
                     type: object
                 required:
                 - core
@@ -7835,6 +7839,8 @@ spec:
                                         pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
                                         type: string
                                     type: object
+                                required:
+                                - ingress
                                 type: object
                             required:
                             - enable
@@ -10811,6 +10817,8 @@ spec:
                             pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
                             type: string
                         type: object
+                    required:
+                    - ingress
                     type: object
                   notary:
                     description: The ingress of the notary, required when notary component enabled.
@@ -10843,6 +10851,8 @@ spec:
                             pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
                             type: string
                         type: object
+                    required:
+                    - ingress
                     type: object
                 required:
                 - core
