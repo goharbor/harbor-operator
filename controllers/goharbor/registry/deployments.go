@@ -191,7 +191,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1.Reg
 					SecretName: registry.Spec.Storage.Driver.Gcs.KetDataRef,
 					Items: []corev1.KeyToPath{
 						{
-							Key: "GCS_KEY_DATA",
+							Key:  "GCS_KEY_DATA",
 							Path: "gcs-key.json",
 						},
 					},

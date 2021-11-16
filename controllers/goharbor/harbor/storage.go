@@ -105,7 +105,6 @@ func (r *Reconciler) RegistryStorage(ctx context.Context, harbor *goharborv1.Har
 		}
 	}
 
-
 	if harbor.Spec.ImageChartStorage.Gcs != nil {
 		return goharborv1.RegistryStorageDriverSpec{
 			Gcs: harbor.Spec.ImageChartStorage.Gcs.Registry(),
