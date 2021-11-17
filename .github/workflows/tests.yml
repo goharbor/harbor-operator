@@ -139,13 +139,12 @@ jobs:
 
         # https://github.com/kubernetes-sigs/kind/releases
         k8sVersion:
-        - "1.19.11"
         - "1.20.7"
         - "1.21.2"
         - "1.22.0"
 
         ingress:
-        - "1.0.1"
+        - "1.0.5"
 
         samples:
         - "full_stack.yaml"
@@ -182,7 +181,7 @@ jobs:
         version: v0.11.0
         node_image: kindest/node:v${{ matrix.k8sVersion }}
         cluster_name: harbor
-        config: .github/kind.yaml
+        config: .github/kind_permission.yaml
 
     - name: Install CertManager v${{ matrix.certManager }}
       run: |
@@ -344,11 +343,11 @@ jobs:
       matrix:
         # https://github.com/jetstack/cert-manager/tags
         certManager:
-          - "1.2.0"
+          - "1.4.4"
 
         # https://snapcraft.io/microk8s
         k8sVersion:
-          - "1.20.7"
+          - "1.22.0"
 
         samples:
           - "full_stack.yaml"
@@ -394,7 +393,7 @@ jobs:
 
       - name: Install Contour
         run: |
-          kubectl apply -f https://raw.githubusercontent.com/projectcontour/contour/release-1.18/examples/render/contour.yaml
+          kubectl apply -f https://github.com/projectcontour/contour/raw/v1.19.1/examples/render/contour.yaml
           sleep 5
           kubectl patch daemonsets -n projectcontour envoy -p '{"spec":{"template":{"spec":{"nodeSelector":{"ingress-ready":"true"},"tolerations":[{"key":"node-role.kubernetes.io/master","operator":"Equal","effect":"NoSchedule"}]}}}}'
           sleep 5
@@ -554,10 +553,10 @@ jobs:
 
         # https://snapcraft.io/microk8s
         k8sVersion:
-          - "1.21.2"
+          - "1.22.0"
 
         ingress:
-          - "0.48.1"
+          - "1.0.5"
 
     steps:
       - uses: actions/checkout@v2
