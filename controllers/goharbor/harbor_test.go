@@ -147,6 +147,17 @@ func setupValidHarbor(ctx context.Context, ns string) (Resource, client.ObjectKe
 			ExternalURL:            publicURL.String(),
 			HarborAdminPasswordRef: adminSecretName,
 			Version:                test.GetVersion(),
+			Expose: goharborv1.HarborExposeSpec{
+				Core: goharborv1.HarborExposeComponentSpec{
+					TLS: nil,
+					Ingress: &goharborv1.HarborExposeIngressSpec{
+						Host:             "core.goharbor.io",
+						Annotations:      nil,
+						IngressClassName: func(name string) *string { return &name }("nginx"),
+					},
+				},
+				Notary: nil,
+			},
 			ImageChartStorage: &goharborv1.HarborStorageImageChartStorageSpec{
 				FileSystem: &goharborv1.HarborStorageImageChartStorageFileSystemSpec{
 					RegistryPersistentVolume: goharborv1.HarborStorageRegistryPersistentVolumeSpec{
