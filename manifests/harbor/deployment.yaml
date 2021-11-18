@@ -7799,7 +7799,7 @@ spec:
                             description: the version of minIO operator
                             type: string
                           redirect:
-                            description: Determine if the redirection of minio storage is disabled.
+                            description: deprecated Determine if the redirection of minio storage is disabled.
                             properties:
                               enable:
                                 default: true
@@ -8042,9 +8042,49 @@ spec:
                             type: integer
                         required:
                         - operatorVersion
-                        - redirect
                         - replicas
                         - volumesPerServer
+                        type: object
+                      redirect:
+                        description: Determine if the redirection of minio storage is disabled.
+                        properties:
+                          enable:
+                            default: true
+                            description: Default is true
+                            type: boolean
+                          expose:
+                            properties:
+                              ingress:
+                                properties:
+                                  annotations:
+                                    additionalProperties:
+                                      type: string
+                                    type: object
+                                  controller:
+                                    default: default
+                                    description: Set to the type of ingress controller.
+                                    enum:
+                                    - default
+                                    - gce
+                                    - ncp
+                                    - contour
+                                    type: string
+                                  host:
+                                    type: string
+                                  ingressClassName:
+                                    type: string
+                                required:
+                                - host
+                                type: object
+                              tls:
+                                properties:
+                                  certificateRef:
+                                    pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                                    type: string
+                                type: object
+                            type: object
+                        required:
+                        - enable
                         type: object
                       s3:
                         properties:

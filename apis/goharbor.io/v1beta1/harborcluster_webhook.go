@@ -147,7 +147,7 @@ func (harborcluster *HarborCluster) validate(old *HarborCluster) error {
 	return apierrors.NewInvalid(schema.GroupKind{Group: GroupVersion.Group, Kind: "HarborCluster"}, harborcluster.Name, allErrs)
 }
 
-func (harborcluster *HarborCluster) validateStorage() *field.Error {
+func (harborcluster *HarborCluster) validateStorage() *field.Error { // nolint:gocognit
 	// in cluster storage has high priority
 	fp := field.NewPath("spec").Child("storage").Child("spec")
 
@@ -178,12 +178,26 @@ func (harborcluster *HarborCluster) validateStorage() *field.Error {
 	}
 
 	// Validate more if incluster storage is configured.
-	if harborcluster.Spec.Storage.Kind == KindStorageMinIO {
+	if harborcluster.Spec.Storage.Kind == KindStorageMinIO { // nolint:nestif
 		desiredReplicas := harborcluster.Spec.Storage.Spec.MinIO.Replicas
 		volumePerServer := harborcluster.Spec.Storage.Spec.MinIO.VolumesPerServer
 
 		if desiredReplicas*volumePerServer < minimalVolumeCount {
 			return invalid(fp, harborcluster.Spec.Storage.Spec.MinIO, fmt.Sprintf("minIO.replicas * minIO.volumesPerServer should be >=%d", minimalVolumeCount))
+		}
+
+		redirect := harborcluster.Spec.Storage.Spec.Redirect
+		rp := fp.Child("redirect")
+
+		if redirect == nil && harborcluster.Spec.Storage.Spec.MinIO != nil {
+			redirect = harborcluster.Spec.Storage.Spec.MinIO.Redirect
+			rp = fp.Child("minio").Child("redirect")
+		}
+
+		if redirect != nil && redirect.Enable {
+			if redirect.Expose == nil || redirect.Expose.Ingress == nil {
+				return required(rp.Child("ingress"))
+			}
 		}
 	}
 

@@ -72,7 +72,7 @@ func (m *MinIOController) Apply(ctx context.Context, harborcluster *goharborv1.H
 	}
 
 	// Set ownerReferences to MinIO PVS
-	if err := m.SetOwnerReferencesWithPVC(ctx, harborcluster); err != nil {
+	if err := m.setOwnerReferencesWithPVC(ctx, harborcluster); err != nil {
 		return minioUnknownStatus(), err
 	}
 	// Check readiness
@@ -108,7 +108,7 @@ func (m *MinIOController) Apply(ctx context.Context, harborcluster *goharborv1.H
 		return minioUnknownStatus(), nil
 	}
 
-	crs, err := m.ProvisionMinIOProperties(ctx, harborcluster, mt)
+	crs, err := m.provisionMinIOProperties(ctx, harborcluster, mt)
 	if err != nil {
 		return crs, err
 	}
@@ -118,7 +118,7 @@ func (m *MinIOController) Apply(ctx context.Context, harborcluster *goharborv1.H
 	return crs, nil
 }
 
-func (m *MinIOController) SetOwnerReferencesWithPVC(ctx context.Context, harborcluster *goharborv1.HarborCluster) (err error) {
+func (m *MinIOController) setOwnerReferencesWithPVC(ctx context.Context, harborcluster *goharborv1.HarborCluster) (err error) {
 	// Get the existing minIO CR first
 	minioCR := &miniov2.Tenant{}
 	if err = m.KubeClient.Get(ctx, m.getMinIONamespacedName(harborcluster), minioCR); err != nil {
