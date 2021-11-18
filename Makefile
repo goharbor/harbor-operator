@@ -520,9 +520,15 @@ controller-gen:
 $(CONTROLLER_GEN):
 	$(MAKE) $(BIN)
 	# https://github.com/kubernetes-sigs/controller-tools/tree/master/cmd/controller-gen
-	go get 'sigs.k8s.io/controller-tools/cmd/controller-gen@v$(CONTROLLER_GEN_VERSION)'
-	go build -mod=readonly -o $(CONTROLLER_GEN) sigs.k8s.io/controller-tools/cmd/controller-gen
-	go mod tidy
+	@{ \
+	set -e ;\
+	CONTROLLER_GEN_TMP_DIR=$$(mktemp -d) ;\
+	cd $$CONTROLLER_GEN_TMP_DIR ;\
+	go mod init tmp ;\
+	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v$(CONTROLLER_GEN_VERSION) ;\
+	go build -mod=readonly -o $(CONTROLLER_GEN) sigs.k8s.io/controller-tools/cmd/controller-gen ;\
+	rm -rf $$CONTROLLER_GEN_TMP_DIR ;\
+	}
 
 # find or download markdownlint
 # download markdownlint if necessary
@@ -640,9 +646,15 @@ stringer:
 $(STRINGER):
 	$(MAKE) $(BIN)
 	# https://pkg.go.dev/golang.org/x/tools/cmd/stringer
-	go get 'golang.org/x/tools/cmd/stringer@$(STRINGER_VERSION)'
-	go build -mod=readonly -o $(STRINGER) golang.org/x/tools/cmd/stringer
-	go mod tidy
+	@{ \
+	set -e ;\
+	STRINGER_TMP_DIR=$$(mktemp -d) ;\
+	cd $$STRINGER_TMP_DIR ;\
+	go mod init tmp ;\
+	go get golang.org/x/tools/cmd/stringer@$(STRINGER_VERSION) ;\
+	go build -mod=readonly -o $(STRINGER) golang.org/x/tools/cmd/stringer ;\
+	rm -rf $$STRINGER_TMP_DIR ;\
+	}
 
 # find or download hadolint
 # download hadolint if necessary
