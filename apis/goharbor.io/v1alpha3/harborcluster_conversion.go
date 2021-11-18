@@ -733,10 +733,12 @@ func Convert_v1beta1_MinIOSpec_To_v1alpha3_MinIOSpec(src *v1beta1.MinIOSpec, dst
 	dst.Replicas = src.Replicas
 	dst.Resources = src.Resources
 
-	dst.Redirect.Enable = src.Redirect.Enable
-	if src.Redirect.Expose != nil {
-		dst.Redirect.Expose = &HarborExposeComponentSpec{}
-		Convert_v1beta1_HarborExposeComponentSpec_To_v1alpha3_HarborExposeComponentSpec(src.Redirect.Expose, dst.Redirect.Expose)
+	if src.Redirect != nil {
+		dst.Redirect.Enable = src.Redirect.Enable
+		if src.Redirect.Expose != nil {
+			dst.Redirect.Expose = &HarborExposeComponentSpec{}
+			Convert_v1beta1_HarborExposeComponentSpec_To_v1alpha3_HarborExposeComponentSpec(src.Redirect.Expose, dst.Redirect.Expose)
+		}
 	}
 
 	if src.MinIOClientSpec != nil {

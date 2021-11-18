@@ -9,6 +9,7 @@ import (
 	miniov2 "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/apis/minio.min.io/v2"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	"github.com/goharbor/harbor-operator/pkg/resources/checksum"
+	"github.com/pkg/errors"
 	netv1 "k8s.io/api/networking/v1"
 	k8serror "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -21,10 +22,19 @@ const (
 
 func (m *MinIOController) applyIngress(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*lcm.CRStatus, error) {
 	// expose minIO access endpoint by ingress if necessary.
-	if !harborcluster.Spec.Storage.Spec.MinIO.Redirect.Enable {
+	redirect := harborcluster.Spec.Storage.Spec.Redirect
+	if redirect == nil && harborcluster.Spec.Storage.Spec.MinIO != nil {
+		redirect = harborcluster.Spec.Storage.Spec.MinIO.Redirect
+	}
+
+	if redirect == nil || !redirect.Enable {
 		m.Log.Info("Redirect of MinIO is not enabled")
 
 		return m.cleanupIngress(ctx, harborcluster)
+	} else if redirect.Expose == nil || redirect.Expose.Ingress == nil {
+		err := errors.New("Expose.Ingress should be defined when redirect enabled")
+
+		return minioNotReadyStatus(UpdateIngressError, err.Error()), err
 	}
 
 	// Get current minIO ingress
@@ -34,13 +44,13 @@ func (m *MinIOController) applyIngress(ctx context.Context, harborcluster *gohar
 	if k8serror.IsNotFound(err) {
 		m.Log.Info("Creating minIO ingress")
 
-		return m.createIngress(ctx, harborcluster)
+		return m.createIngress(ctx, harborcluster, redirect)
 	} else if err != nil {
 		return minioNotReadyStatus(GetMinIOIngressError, err.Error()), err
 	}
 
 	// Generate desired ingress object
-	ingress := m.generateIngress(ctx, harborcluster)
+	ingress := m.generateIngress(ctx, harborcluster, redirect)
 
 	// Update if necessary
 	if !common.Equals(ctx, m.Scheme, harborcluster, curIngress) {
@@ -56,7 +66,7 @@ func (m *MinIOController) applyIngress(ctx context.Context, harborcluster *gohar
 	return minioUnknownStatus(), nil
 }
 
-func (m *MinIOController) createIngress(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*lcm.CRStatus, error) {
+func (m *MinIOController) createIngress(ctx context.Context, harborcluster *goharborv1.HarborCluster, redirect *goharborv1.StorageRedirectSpec) (*lcm.CRStatus, error) {
 	// Get the existing minIO CR first
 	minioCR := &miniov2.Tenant{}
 	if err := m.KubeClient.Get(ctx, m.getMinIONamespacedName(harborcluster), minioCR); err != nil {
@@ -64,7 +74,7 @@ func (m *MinIOController) createIngress(ctx context.Context, harborcluster *goha
 	}
 
 	// Generate desired ingress object
-	ingress := m.generateIngress(ctx, harborcluster)
+	ingress := m.generateIngress(ctx, harborcluster, redirect)
 
 	ingress.OwnerReferences = []metav1.OwnerReference{
 		*metav1.NewControllerRef(minioCR, HarborClusterMinIOGVK),
@@ -105,14 +115,14 @@ func (m *MinIOController) cleanupIngress(ctx context.Context, harborcluster *goh
 	return minioUnknownStatus(), nil
 }
 
-func (m *MinIOController) getMinioIngressAnnotations(harborcluster *goharborv1.HarborCluster) map[string]string {
+func (m *MinIOController) getMinioIngressAnnotations(redirect *goharborv1.StorageRedirectSpec) map[string]string {
 	isEnableExpose := false
-	if harborcluster.Spec.Storage.Spec.MinIO.Redirect.Expose != nil {
+	if redirect.Expose != nil {
 		isEnableExpose = true
 	}
 
 	istls := false
-	if isEnableExpose && harborcluster.Spec.Storage.Spec.MinIO.Redirect.Expose.TLS.Enabled() {
+	if isEnableExpose && redirect.Expose.TLS.Enabled() {
 		istls = true
 	}
 
@@ -121,19 +131,19 @@ func (m *MinIOController) getMinioIngressAnnotations(harborcluster *goharborv1.H
 		"nginx.ingress.kubernetes.io/proxy-body-size": "0",
 	}
 
-	if isEnableExpose && harborcluster.Spec.Storage.Spec.MinIO.Redirect.Expose.Ingress.Controller == harbormetav1.IngressControllerNCP {
+	if isEnableExpose && redirect.Expose.Ingress.Controller == harbormetav1.IngressControllerNCP {
 		annotations["ncp/use-regex"] = NCPIngressValueTrue
 		if istls {
 			annotations["ncp/http-redirect"] = NCPIngressValueTrue
 		}
-	} else if harborcluster.Spec.Storage.Spec.MinIO.Redirect.Expose.Ingress.Controller == harbormetav1.IngressControllerContour {
+	} else if redirect.Expose.Ingress.Controller == harbormetav1.IngressControllerContour {
 		if istls {
 			annotations["ingress.kubernetes.io/force-ssl-redirect"] = ContourIngressValueTrue
 		}
 	}
 
 	if isEnableExpose {
-		for key, value := range harborcluster.Spec.Storage.Spec.MinIO.Redirect.Expose.Ingress.Annotations {
+		for key, value := range redirect.Expose.Ingress.Annotations {
 			annotations[key] = value
 		}
 	}
@@ -141,18 +151,17 @@ func (m *MinIOController) getMinioIngressAnnotations(harborcluster *goharborv1.H
 	return annotations
 }
 
-func (m *MinIOController) generateIngress(ctx context.Context, harborcluster *goharborv1.HarborCluster) *netv1.Ingress {
+func (m *MinIOController) generateIngress(ctx context.Context, harborcluster *goharborv1.HarborCluster, redirect *goharborv1.StorageRedirectSpec) *netv1.Ingress {
 	var tls []netv1.IngressTLS
 
-	if harborcluster.Spec.Storage.Spec.MinIO.Redirect.Expose != nil &&
-		harborcluster.Spec.Storage.Spec.MinIO.Redirect.Expose.TLS.Enabled() {
+	if redirect.Expose != nil && redirect.Expose.TLS.Enabled() {
 		tls = []netv1.IngressTLS{{
-			SecretName: harborcluster.Spec.Storage.Spec.MinIO.Redirect.Expose.TLS.CertificateRef,
-			Hosts:      []string{harborcluster.Spec.Storage.Spec.MinIO.Redirect.Expose.Ingress.Host},
+			SecretName: redirect.Expose.TLS.CertificateRef,
+			Hosts:      []string{redirect.Expose.Ingress.Host},
 		}}
 	}
 
-	annotations := m.getMinioIngressAnnotations(harborcluster)
+	annotations := m.getMinioIngressAnnotations(redirect)
 
 	pathTypePrefix := netv1.PathTypePrefix
 
@@ -169,10 +178,10 @@ func (m *MinIOController) generateIngress(ctx context.Context, harborcluster *go
 		},
 		Spec: netv1.IngressSpec{
 			TLS:              tls,
-			IngressClassName: harborcluster.Spec.Storage.Spec.MinIO.Redirect.Expose.Ingress.IngressClassName,
+			IngressClassName: redirect.Expose.Ingress.IngressClassName,
 			Rules: []netv1.IngressRule{
 				{
-					Host: harborcluster.Spec.Storage.Spec.MinIO.Redirect.Expose.Ingress.Host,
+					Host: redirect.Expose.Ingress.Host,
 					IngressRuleValue: netv1.IngressRuleValue{
 						HTTP: &netv1.HTTPIngressRuleValue{
 							Paths: []netv1.HTTPIngressPath{

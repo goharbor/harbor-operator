@@ -2471,7 +2471,11 @@ func (in *MinIOClientSpec) DeepCopy() *MinIOClientSpec {
 func (in *MinIOSpec) DeepCopyInto(out *MinIOSpec) {
 	*out = *in
 	in.ImageSpec.DeepCopyInto(&out.ImageSpec)
-	in.Redirect.DeepCopyInto(&out.Redirect)
+	if in.Redirect != nil {
+		in, out := &in.Redirect, &out.Redirect
+		*out = new(StorageRedirectSpec)
+		(*in).DeepCopyInto(*out)
+	}
 	in.VolumeClaimTemplate.DeepCopyInto(&out.VolumeClaimTemplate)
 	in.Resources.DeepCopyInto(&out.Resources)
 	if in.MinIOClientSpec != nil {
@@ -4369,6 +4373,11 @@ func (in *StorageSpec) DeepCopyInto(out *StorageSpec) {
 		in, out := &in.Azure, &out.Azure
 		*out = new(AzureSpec)
 		**out = **in
+	}
+	if in.Redirect != nil {
+		in, out := &in.Redirect, &out.Redirect
+		*out = new(StorageRedirectSpec)
+		(*in).DeepCopyInto(*out)
 	}
 }
 
