@@ -36760,7 +36760,7 @@ spec:
         app: redisoperator
     spec:
       containers:
-      - image: googleimages/redis-operator:v1.0.2
+      - image: ghcr.io/goharbor/redis-operator-ext:v1.0.1
         imagePullPolicy: IfNotPresent
         name: app
         resources:

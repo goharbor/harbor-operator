@@ -19,6 +19,7 @@ import (
 	"github.com/pkg/errors"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -34,6 +35,8 @@ type Controller struct {
 	BaseController controllers.Controller
 	Version        string
 	GitCommit      string
+
+	deletableResources map[schema.GroupVersionKind]struct{}
 
 	ConfigStore *configstore.Store
 	rm          ResourceManager
@@ -52,12 +55,13 @@ func NewController(ctx context.Context, base controllers.Controller, rm Resource
 	}
 
 	return &Controller{
-		BaseController: base,
-		Version:        application.GetVersion(ctx),
-		GitCommit:      gitCommit,
-		rm:             rm,
-		Log:            ctrl.Log.WithName(application.GetName(ctx)).WithName("controller").WithValues(logValues...),
-		ConfigStore:    config,
+		BaseController:     base,
+		Version:            application.GetVersion(ctx),
+		GitCommit:          gitCommit,
+		rm:                 rm,
+		Log:                ctrl.Log.WithName(application.GetName(ctx)).WithName("controller").WithValues(logValues...),
+		deletableResources: application.GetDeletableResources(ctx),
+		ConfigStore:        config,
 	}
 }
 
@@ -184,6 +188,10 @@ func (c *Controller) Run(ctx context.Context, owner resources.Resource) error {
 
 	if err := c.PrepareStatus(ctx, owner); err != nil {
 		return errors.Wrap(err, "cannot prepare owner status")
+	}
+
+	if err := c.Mark(ctx, owner); err != nil {
+		return errors.Wrap(err, "cannot mark resources")
 	}
 
 	return sgraph.Get(ctx).Run(ctx)

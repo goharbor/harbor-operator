@@ -12,7 +12,7 @@ type resourceManager struct {
 	resources map[Resource][]Resource
 	functions map[Resource]RunFunc
 
-	lock sync.Mutex
+	lock sync.RWMutex
 }
 
 func NewResourceManager() Manager {
@@ -20,6 +20,19 @@ func NewResourceManager() Manager {
 		resources: map[Resource][]Resource{},
 		functions: map[Resource]RunFunc{},
 	}
+}
+
+func (rm *resourceManager) GetAllResources(ctx context.Context) []Resource {
+	resources := []Resource{}
+
+	rm.lock.RLock()
+	defer rm.lock.RUnlock()
+
+	for resource := range rm.resources {
+		resources = append(resources, resource)
+	}
+
+	return resources
 }
 
 func (rm *resourceManager) AddResource(ctx context.Context, resource Resource, blockers []Resource, run RunFunc) error {
