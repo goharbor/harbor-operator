@@ -140,6 +140,24 @@ func (harborcluster *HarborCluster) validate(old *HarborCluster) error {
 		}
 	}
 
+	if old.Spec.Cache.Kind != harborcluster.Spec.Cache.Kind {
+		allErrs = append(allErrs, field.Forbidden(
+			field.NewPath("spec").Child("cache"),
+			"don't allow to switch cache between incluster and external"))
+	}
+
+	if old.Spec.Database.Kind != harborcluster.Spec.Database.Kind {
+		allErrs = append(allErrs, field.Forbidden(
+			field.NewPath("spec").Child("database"),
+			"don't allow to switch database between incluster and external"))
+	}
+
+	if old.Spec.Storage.Kind != harborcluster.Spec.Storage.Kind {
+		allErrs = append(allErrs, field.Forbidden(
+			field.NewPath("spec").Child("storage"),
+			"don't allow to switch storage between incluster and external"))
+	}
+
 	if len(allErrs) == 0 {
 		return nil
 	}
