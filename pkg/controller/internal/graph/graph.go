@@ -8,8 +8,8 @@ import (
 
 var graphKey = "graph"
 
-func WithGraph(ctx context.Context) context.Context {
-	return context.WithValue(ctx, &graphKey, graph.NewResourceManager())
+func SetGraph(ctx *context.Context, mgr graph.Manager) {
+	*ctx = context.WithValue(*ctx, &graphKey, mgr)
 }
 
 func Get(ctx context.Context) graph.Manager {

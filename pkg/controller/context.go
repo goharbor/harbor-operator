@@ -6,6 +6,7 @@ import (
 	sgraph "github.com/goharbor/harbor-operator/pkg/controller/internal/graph"
 	"github.com/goharbor/harbor-operator/pkg/factories/application"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
+	"github.com/goharbor/harbor-operator/pkg/graph"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -13,7 +14,7 @@ func (c *Controller) PopulateContext(ctx context.Context, req ctrl.Request) cont
 	application.SetName(&ctx, c.GetName())
 	application.SetVersion(&ctx, c.GetVersion())
 	application.SetGitCommit(&ctx, c.GetGitCommit())
-	ctx = sgraph.WithGraph(ctx)
+	sgraph.SetGraph(&ctx, graph.NewResourceManager())
 
 	logger.Set(&ctx, c.Log.WithValues("request", req))
 

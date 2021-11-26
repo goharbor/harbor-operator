@@ -3,9 +3,15 @@ package setup
 import (
 	"context"
 
+	"github.com/goharbor/harbor-operator/pkg/factories/application"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
+	kauthn "k8s.io/api/authorization/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/util/sets"
+	"k8s.io/client-go/discovery"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
 
@@ -23,7 +29,60 @@ func WithManager(ctx context.Context, mgr manager.Manager) error {
 	return g.Wait()
 }
 
+func populateContext(ctx context.Context, mgr manager.Manager) (context.Context, error) {
+	discoveryClient := discovery.NewDiscoveryClientForConfigOrDie(mgr.GetConfig())
+
+	preferredResources, err := discoveryClient.ServerPreferredResources()
+	if err != nil {
+		return ctx, err
+	}
+
+	resources := discovery.FilteredBy(discovery.ResourcePredicateFunc(func(groupVersion string, r *metav1.APIResource) bool {
+		check := sets.NewString([]string(r.Verbs)...).HasAll("delete", "list", "create")
+		check = check && r.Namespaced
+
+		return check
+	}), preferredResources)
+	deletableResources := make(map[schema.GroupVersionKind]struct{})
+
+	for _, rl := range resources {
+		gv, err := schema.ParseGroupVersion(rl.GroupVersion)
+		if err != nil {
+			return ctx, err
+		}
+
+		for i := range rl.APIResources {
+			sar := &kauthn.SelfSubjectAccessReview{
+				Spec: kauthn.SelfSubjectAccessReviewSpec{
+					ResourceAttributes: &kauthn.ResourceAttributes{
+						Verb:     "delete",
+						Group:    gv.Group,
+						Version:  gv.Version,
+						Resource: rl.APIResources[i].Name,
+					},
+				},
+			}
+			if err := mgr.GetClient().Create(ctx, sar); err != nil {
+				return ctx, err
+			}
+
+			if sar.Status.Allowed {
+				deletableResources[gv.WithKind(rl.APIResources[i].Kind)] = struct{}{}
+			}
+		}
+	}
+
+	application.SetDeletableResources(&ctx, deletableResources)
+
+	return ctx, nil
+}
+
 func ControllersWithManager(ctx context.Context, mgr manager.Manager) error {
+	ctx, err := populateContext(ctx, mgr)
+	if err != nil {
+		return errors.Wrap(err, "populateContext")
+	}
+
 	var g errgroup.Group
 
 	for name, builder := range controllersBuilder {
