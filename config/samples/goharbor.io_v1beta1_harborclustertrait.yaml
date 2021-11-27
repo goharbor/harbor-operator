@@ -1,0 +1,27 @@
+apiVersion: goharbor.io/v1beta1
+kind: HarborClusterTrait
+metadata:
+  name: harborclustertrait-sample
+spec:
+  affinities:
+  - selector:
+      matchLabels:
+        app: ghostbaby
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: kubernetes.io/e2e-az-name
+              operator: In
+              values:
+              - e2e-az1
+              - e2e-az2
+        preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 1
+          preference:
+            matchExpressions:
+            - key: another-node-label-key
+              operator: In
+              values:
+              - another-node-label-value

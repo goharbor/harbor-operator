@@ -25,11 +25,12 @@ func _() {
 	_ = x[HarborServerConfiguration-14]
 	_ = x[PullSecretBinding-15]
 	_ = x[Namespace-16]
+	_ = x[HarborClusterTrait-17]
 }
 
-const _Controller_name = "corejobserviceportalregistryregistryctlchartmuseumexporternotaryservernotarysignertrivyharborharborclusterharborconfigurationcmharborconfigurationharborserverconfigurationpullsecretbindingnamespace"
+const _Controller_name = "corejobserviceportalregistryregistryctlchartmuseumexporternotaryservernotarysignertrivyharborharborclusterharborconfigurationcmharborconfigurationharborserverconfigurationpullsecretbindingnamespaceharborclustertrait"
 
-var _Controller_index = [...]uint8{0, 4, 14, 20, 28, 39, 50, 58, 70, 82, 87, 93, 106, 127, 146, 171, 188, 197}
+var _Controller_index = [...]uint8{0, 4, 14, 20, 28, 39, 50, 58, 70, 82, 87, 93, 106, 127, 146, 171, 188, 197, 215}
 
 func (i Controller) String() string {
 	if i < 0 || i >= Controller(len(_Controller_index)-1) {

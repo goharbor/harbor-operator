@@ -362,6 +362,26 @@ rules:
 - apiGroups:
   - goharbor.io
   resources:
+  - harborclustertraits
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - goharbor.io
+  resources:
+  - harborclustertraits/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - goharbor.io
+  resources:
   - harborconfigurations
   verbs:
   - create

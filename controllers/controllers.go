@@ -28,6 +28,8 @@ const (
 	HarborServerConfiguration                   // harborserverconfiguration
 	PullSecretBinding                           // pullsecretbinding
 	Namespace                                   // namespace
+	HarborClusterTrait                          // harborclustertrait
+
 )
 
 func (c Controller) GetFQDN() string {

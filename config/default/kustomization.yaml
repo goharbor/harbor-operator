@@ -38,6 +38,8 @@ patchesStrategicMerge:
 # avoid blocking controller coming up
 - webhook_namespaceselector_patch.yaml
 
+- webhook_patch_trait_mutationg.yaml
+
 
 # the following config is for teaching kustomize how to do var substitution
 vars:

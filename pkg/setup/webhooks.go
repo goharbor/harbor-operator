@@ -28,6 +28,7 @@ var webhooksBuilder = map[controllers.Controller][]WebHook{
 	controllers.NotaryServer:       {&goharborv1.NotaryServer{}},
 	controllers.NotarySigner:       {&goharborv1.NotarySigner{}},
 	controllers.HarborCluster:      {&goharborv1.HarborCluster{}},
+	controllers.HarborClusterTrait: {&goharborv1.HarborClusterTrait{}},
 }
 
 type WebHook interface {
