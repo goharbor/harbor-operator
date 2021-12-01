@@ -8596,9 +8596,6 @@ spec:
                   emailUsername:
                     description: The username for authenticate against SMTP server.
                     type: string
-                  extension:
-                    description: AdditionalProperties provides workaround for those unknown configuration fields in the future.
-                    x-kubernetes-preserve-unknown-fields: true
                   httpAuthproxyAdminGroups:
                     description: The group which has the harbor admin privileges.
                     type: string
@@ -8782,9 +8779,6 @@ spec:
                       emailUsername:
                         description: The username for authenticate against SMTP server.
                         type: string
-                      extension:
-                        description: AdditionalProperties provides workaround for those unknown configuration fields in the future.
-                        x-kubernetes-preserve-unknown-fields: true
                       httpAuthproxyAdminGroups:
                         description: The group which has the harbor admin privileges.
                         type: string

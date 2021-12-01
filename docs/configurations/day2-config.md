@@ -62,7 +62,7 @@ data:
 ```
 
 ```yaml
-apiVersion: goharbor.io/v1alpha3
+apiVersion: goharbor.io/v1beta1
 kind: HarborConfiguration
 metadata:
   name: test-config
@@ -70,8 +70,8 @@ metadata:
 spec:
   # your harbor configuration
   configuration:
-    email_password: secret-sample
-    email_ssl: true
+    emailPassword: secret-sample
+    emailSsl: true
   harborClusterRef: harborcluster-sample
 ```
 
@@ -82,7 +82,7 @@ status:
   lastApplyTime: "2021-06-04T06:07:53Z"
   lastConfiguration:
     configuration:
-      email_password: secret-sample
-      email_ssl: true
+      emailPassword: secret-sample
+      emailSsl: true
   status: Success
 ```
