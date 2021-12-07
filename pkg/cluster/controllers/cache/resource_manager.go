@@ -96,6 +96,7 @@ func (rm *redisResourceManager) GetCacheCR(ctx context.Context, harborcluster *g
 				Replicas:  int32(rm.GetServerReplica()),
 				Resources: resources,
 				Storage: redisOp.RedisStorage{
+					KeepAfterDeletion:     true,
 					PersistentVolumeClaim: pvc,
 				},
 				Image:            image,

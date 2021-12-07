@@ -67,7 +67,7 @@ metadata:
   name: harborcluster-sample
   namespace: cluster-sample-ns
 spec:
-  version: 2.3.0
+  version: 2.4.0
   logLevel: info
   imageSource:
     repository: ghcr.io/goharbor
@@ -110,17 +110,19 @@ spec:
   storage:
     kind: MinIO
     spec:
+      redirect:
+        enable: true
+        expose:
+          ingress:
+            host: minio.harbor.domain
+          tls:
+            certificateRef: sample-public-certificate
       minIO:
         operatorVersion: "4.0.6"
         replicas: 2
         secretRef: minio-access-secret
         redirect:
           enable: true
-          expose:
-            ingress:
-              host: minio.harbor.domain
-            tls:
-              certificateRef: sample-public-certificate
         volumesPerServer: 2
         volumeClaimTemplate:
           spec:

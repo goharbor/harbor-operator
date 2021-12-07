@@ -139,6 +139,7 @@ func (harbor *Controller) getHarborCR(ctx context.Context, harborcluster *goharb
 			ImageSource: spec.ImageSource,
 			Proxy:       spec.Proxy,
 			Network:     harborcluster.Spec.Network,
+			Trace:       harborcluster.Spec.Trace,
 		},
 	}
 
@@ -160,6 +161,10 @@ func (harbor *Controller) getHarborCR(ctx context.Context, harborcluster *goharb
 	if harborcluster.Spec.Storage.Spec.Azure != nil {
 		harborCR.Spec.ImageChartStorage.Azure =
 			harborcluster.Spec.Storage.Spec.Azure.HarborStorageImageChartStorageAzureSpec.DeepCopy()
+	}
+
+	if harborcluster.Spec.Storage.Spec.Redirect != nil {
+		harborCR.Spec.ImageChartStorage.Redirect.Disable = !harborcluster.Spec.Storage.Spec.Redirect.Enable
 	}
 
 	if harborcluster.Spec.Database.Spec.PostgreSQL != nil {
@@ -187,7 +192,6 @@ func (harbor *Controller) getHarborCR(ctx context.Context, harborcluster *goharb
 	if storage := harbor.getStorageSpec(dependencies); storage != nil {
 		harbor.Log.Info("use incluster storage", "storage", storage.S3.RegionEndpoint)
 		harborCR.Spec.ImageChartStorage = storage
-		harborCR.Spec.ImageChartStorage.Redirect.Disable = !harborcluster.Spec.Storage.Spec.MinIO.Redirect.Enable
 	}
 
 	// inject cert to harbor comps

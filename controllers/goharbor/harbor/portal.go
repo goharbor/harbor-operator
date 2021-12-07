@@ -59,9 +59,7 @@ func (r *Reconciler) GetPortal(ctx context.Context, harbor *goharborv1.Harbor) (
 		harbormetav1.NetworkPoliciesAnnotationName: harbormetav1.NetworkPoliciesAnnotationDisabled,
 	}
 
-	if harbor.Spec.Expose.Core.Ingress != nil {
-		annotation[harbormetav1.IngressControllerAnnotationName] = string(harbor.Spec.Expose.Core.Ingress.Controller)
-	}
+	annotation[harbormetav1.IngressControllerAnnotationName] = string(harbor.Spec.Expose.Core.Ingress.Controller)
 
 	return &goharborv1.Portal{
 		ObjectMeta: metav1.ObjectMeta{

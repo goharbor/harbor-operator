@@ -8,6 +8,11 @@ nodes:
     nodeRegistration:
       kubeletExtraArgs:
         node-labels: "ingress-ready=true"
+  - |
+    kind: ClusterConfiguration
+    apiServer:
+      extraArgs:
+        enable-admission-plugins: "OwnerReferencesPermissionEnforcement"
   extraMounts:
   - containerPath: /var/lib/etcd
     hostPath: /tmp/lib/etcd

@@ -78,6 +78,11 @@ func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1.J
 
 	envs = append(envs, metricsEnvs...)
 
+	envs, err = jobservice.Spec.Trace.AddEnvVars(harbormetav1.JobServiceComponent.String(), envs)
+	if err != nil {
+		return nil, errors.Wrap(err, "get trace environment variables")
+	}
+
 	envs = append(envs, jobservice.Spec.Proxy.GetEnvVars()...)
 
 	envs = append(envs, corev1.EnvVar{

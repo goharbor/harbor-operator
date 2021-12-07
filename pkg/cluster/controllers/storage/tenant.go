@@ -7,11 +7,12 @@ import (
 	"strings"
 
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
-	"github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/common"
 	miniov2 "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/apis/minio.min.io/v2"
 	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
 	"github.com/goharbor/harbor-operator/pkg/resources/checksum"
+	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	k8serror "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -24,7 +25,7 @@ var (
 	runAsUser  int64 = 10000
 )
 
-func (m *MinIOController) ProvisionMinIOProperties(ctx context.Context, harborcluster *goharborv1.HarborCluster, minioInstance *miniov2.Tenant) (*lcm.CRStatus, error) {
+func (m *MinIOController) provisionMinIOProperties(ctx context.Context, harborcluster *goharborv1.HarborCluster, minioInstance *miniov2.Tenant) (*lcm.CRStatus, error) {
 	properties := &lcm.Properties{}
 
 	data, err := m.getMinIOProperties(ctx, harborcluster, minioInstance)
@@ -37,7 +38,7 @@ func (m *MinIOController) ProvisionMinIOProperties(ctx context.Context, harborcl
 	return minioReadyStatus(properties), nil
 }
 
-func (m *MinIOController) getMinIOProperties(ctx context.Context, harborcluster *goharborv1.HarborCluster, minioInstance *miniov2.Tenant) (*goharborv1.HarborStorageImageChartStorageSpec, error) {
+func (m *MinIOController) getMinIOProperties(ctx context.Context, harborcluster *goharborv1.HarborCluster, minioInstance *miniov2.Tenant) (*goharborv1.HarborStorageImageChartStorageSpec, error) { // nolint:funlen
 	accessKey, secretKey, err := m.getCredsFromSecret(ctx, harborcluster)
 	if err != nil {
 		return nil, err
@@ -64,6 +65,8 @@ func (m *MinIOController) getMinIOProperties(ctx context.Context, harborcluster 
 	var (
 		endpoint       string
 		certificateRef string
+		tls            *harbormetav1.ComponentsTLSSpec
+		host           string
 
 		scheme     = corev1.URISchemeHTTP
 		secure     = false
@@ -71,8 +74,21 @@ func (m *MinIOController) getMinIOProperties(ctx context.Context, harborcluster 
 		skipVerify = true
 	)
 
-	if harborcluster.Spec.Storage.Kind == goharborv1.KindStorageMinIO && harborcluster.Spec.Storage.Spec.MinIO != nil {
-		tls := harborcluster.Spec.Storage.Spec.MinIO.Redirect.Expose.TLS
+	redirect := harborcluster.Spec.Storage.Spec.Redirect
+	if redirect == nil && harborcluster.Spec.Storage.Spec.MinIO != nil {
+		redirect = harborcluster.Spec.Storage.Spec.MinIO.Redirect
+	}
+
+	if redirect != nil && redirect.Enable {
+		storageSpec.Redirect.Disable = false
+
+		if redirect.Expose == nil {
+			return nil, errors.New("Expose should be defined when redirect enabled")
+		}
+
+		tls = redirect.Expose.TLS
+		host = redirect.Expose.Ingress.Host
+
 		if tls.Enabled() {
 			secure = true
 			skipVerify = false
@@ -80,10 +96,14 @@ func (m *MinIOController) getMinIOProperties(ctx context.Context, harborcluster 
 			certificateRef = tls.CertificateRef
 		}
 
-		endpoint = fmt.Sprintf("%s://%s", scheme, harborcluster.Spec.Storage.Spec.MinIO.Redirect.Expose.Ingress.Host)
+		endpoint = fmt.Sprintf("%s://%s", scheme, host)
 
 		storageSpec.S3.CertificateRef = certificateRef
 	} else {
+		storageSpec.Redirect.Disable = true
+	}
+
+	if endpoint == "" {
 		endpoint = fmt.Sprintf("http://%s.%s.svc:%d", m.getTenantsServiceName(harborcluster), harborcluster.Namespace, m.getServicePort())
 	}
 
@@ -112,7 +132,7 @@ func (m *MinIOController) createSecretKeyRef(secretKey []byte, harborcluster *go
 		},
 		Type: corev1.SecretTypeOpaque,
 		Data: map[string][]byte{
-			v1alpha1.SharedSecretKey: secretKey,
+			harbormetav1.SharedSecretKey: secretKey,
 		},
 	}
 

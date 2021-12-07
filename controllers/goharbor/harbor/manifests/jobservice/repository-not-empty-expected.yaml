@@ -3,7 +3,7 @@ kind: JobService
 metadata:
   annotations:
     goharbor.io/network-policies: "false"
-    harbor.goharbor.io/version: 2.3.0
+    harbor.goharbor.io/version: 2.4.0
   creationTimestamp: null
   name: example-harbor
   namespace: default
@@ -11,7 +11,7 @@ spec:
   core:
     secretRef: example-harbor-core-secret
     url: http://example-harbor-core:80
-  image: example.goharbor.io/goharbor/harbor-jobservice:v2.3.0
+  image: example.goharbor.io/goharbor/harbor-jobservice:v2.4.0
   jobLoggers:
     files:
     - level: INFO

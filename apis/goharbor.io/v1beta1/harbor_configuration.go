@@ -2,7 +2,6 @@ package v1beta1
 
 import (
 	goyaml "gopkg.in/yaml.v2"
-	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8syaml "sigs.k8s.io/yaml"
 )
@@ -40,9 +39,6 @@ type HarborConfigurationSpec struct {
 
 // HarborConfigurationModel defines the spec of HarborConfiguration.
 type HarborConfigurationModel struct {
-	// AdditionalProperties provides workaround for those unknown configuration fields in the future.
-	// +kubebuilder:validation:Optional
-	Extension *apiextensionsv1.JSON `json:"extension,omitempty" yaml:"extension,omitempty"`
 	// The auth mode of current system, such as "db_auth", "ldap_auth", "oidc_auth".
 	// +kubebuilder:validation:Optional
 	AuthMode string `json:"authMode,omitempty" yaml:"auth_mode,omitempty"`

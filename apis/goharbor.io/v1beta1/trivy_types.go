@@ -69,6 +69,10 @@ type TrivySpec struct {
 
 	// +kubebuilder:validation:Optional
 	Network *harbormetav1.Network `json:"network,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default="5m0s"
+	Timeout *metav1.Duration `json:"timeout,omitempty"`
 }
 
 type TrivyUpdateSpec struct {

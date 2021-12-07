@@ -52,6 +52,10 @@ type HarborClusterSpec struct {
 	// +kubebuilder:validation:Optional
 	// Network settings for the harbor
 	Network *harbormetav1.Network `json:"network,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Trace settings for the harbor
+	Trace *harbormetav1.TraceSpec `json:"trace,omitempty"`
 }
 
 type EmbeddedHarborSpec struct {
@@ -234,6 +238,9 @@ type StorageSpec struct {
 	Azure *AzureSpec `json:"azure,omitempty"`
 	// +kubebuilder:validation:Optional
 	Gcs *GcsSpec `json:"gcs,omitempty"`
+	// Determine if the redirection of minio storage is disabled.
+	// +kubebuilder:validation:Optional
+	Redirect *StorageRedirectSpec `json:"redirect,omitempty"`
 }
 
 // StorageRedirectSpec defines if the redirection is disabled.
@@ -272,9 +279,9 @@ type MinIOSpec struct {
 	// +kubebuilder:default:="4.0.6"
 	OperatorVersion string `json:"operatorVersion"`
 
-	// Determine if the redirection of minio storage is disabled.
-	// +kubebuilder:validation:Required
-	Redirect StorageRedirectSpec `json:"redirect"`
+	// deprecated Determine if the redirection of minio storage is disabled.
+	// +kubebuilder:validation:Optional
+	Redirect *StorageRedirectSpec `json:"redirect,omitempty"`
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 	// Reference to the secret containing the MinIO access key and secret key.

@@ -19,8 +19,10 @@ import (
 )
 
 const (
-	DefaultRequeueWait            = 2 * time.Second
-	DefaultConfigTemplateFileName = "registry-config.yaml.tmpl"
+	DefaultRequeueWait               = 2 * time.Second
+	DefaultConfigTemplateFileName    = "registry-config.yaml.tmpl"
+	DefaultCtlConfigTemplateFileName = "registryctl-config.yaml.tmpl"
+	CtlConfigTemplateKey             = "template-content-ctl"
 )
 
 // Reconciler reconciles a Registry object.
@@ -33,6 +35,9 @@ type Reconciler struct {
 // +kubebuilder:rbac:groups=networking.k8s.io,resources=networkpolicies,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="",resources=configmaps;services,verbs=get;list;watch;create;update;patch;delete
+
+// +kubebuilder:rbac:groups=goharbor.io,resources=registrycontrollers,verbs=get;list;watch
+// +kubebuilder:rbac:groups=goharbor.io,resources=registrycontrollers/status,verbs=get;update;patch
 
 func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) error {
 	err := r.Controller.SetupWithManager(ctx, mgr)
@@ -84,7 +89,15 @@ func (r *Reconciler) Template(ctx context.Context) (*template.ConfigTemplate, er
 		return nil, errors.Wrap(err, "from configstore")
 	}
 
+	ctlTemplateConfig, err := template.FromConfigStore(r.ConfigStore, DefaultCtlConfigTemplateFileName)
+	if err != nil {
+		return nil, errors.Wrap(err, "from ctl configstore")
+	}
+
 	templateConfig.Register(r.ConfigStore)
+	// mutate key
+	ctlTemplateConfig.Key = CtlConfigTemplateKey
+	ctlTemplateConfig.Register(r.ConfigStore)
 
 	return templateConfig, nil
 }

@@ -25,7 +25,7 @@ func (r *Reconciler) AddRegistryController(ctx context.Context, harbor *goharbor
 		return nil, nil, errors.Wrap(err, "cannot get registryCtl")
 	}
 
-	registryCtlRes, err := r.AddBasicResource(ctx, registryCtl, registry, certificate)
+	registryCtlRes, err := r.AddBasicResource(ctx, registryCtl, certificate)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "cannot add registryCtl")
 	}

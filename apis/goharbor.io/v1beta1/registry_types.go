@@ -51,6 +51,9 @@ type RegistrySpec struct {
 
 	// +kubebuilder:validation:Optional
 	Network *harbormetav1.Network `json:"network,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	Trace *harbormetav1.TraceSpec `json:"trace,omitempty"`
 }
 
 func (r *RegistrySpec) Default() {

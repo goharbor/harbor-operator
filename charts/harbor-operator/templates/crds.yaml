@@ -470,7 +470,23 @@ spec:
                                               type: string
                                             type: array
                                           dataSource:
-                                            description: 'This field can be used to specify either: * An existing VolumeSnapshot object (snapshot.storage.k8s.io/VolumeSnapshot) * An existing PVC (PersistentVolumeClaim) * An existing custom resource that implements data population (Alpha) In order to use custom resource types that implement data population, the AnyVolumeDataSource feature gate must be enabled. If the provisioner or an external controller can support the specified data source, it will create a new volume based on the contents of the specified data source.'
+                                            description: 'This field can be used to specify either: * An existing VolumeSnapshot object (snapshot.storage.k8s.io/VolumeSnapshot) * An existing PVC (PersistentVolumeClaim) If the provisioner or an external controller can support the specified data source, it will create a new volume based on the contents of the specified data source. If the AnyVolumeDataSource feature gate is enabled, this field will always have the same contents as the DataSourceRef field.'
+                                            properties:
+                                              apiGroup:
+                                                description: APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind must be in the core API group. For any other third-party types, APIGroup is required.
+                                                type: string
+                                              kind:
+                                                description: Kind is the type of resource being referenced
+                                                type: string
+                                              name:
+                                                description: Name is the name of resource being referenced
+                                                type: string
+                                            required:
+                                            - kind
+                                            - name
+                                            type: object
+                                          dataSourceRef:
+                                            description: 'Specifies the object from which to populate the volume with data, if a non-empty volume is desired. This may be any local object from a non-empty API group (non core object) or a PersistentVolumeClaim object. When this field is specified, volume binding will only succeed if the type of the specified object matches some installed volume populator or dynamic provisioner. This field will replace the functionality of the DataSource field and as such if both fields are non-empty, they must have the same value. For backwards compatibility, both fields (DataSource and DataSourceRef) will be set to the same value automatically if one of them is empty and the other is non-empty. There are two important differences between DataSource and DataSourceRef: * While DataSource only allows two specific types of objects, DataSourceRef   allows any non-core object, as well as PersistentVolumeClaim objects. * While DataSource ignores disallowed values (dropping them), DataSourceRef   preserves all values, and generates an error if a disallowed value is   specified. (Alpha) Using this field requires the AnyVolumeDataSource feature gate to be enabled.'
                                             properties:
                                               apiGroup:
                                                 description: APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind must be in the core API group. For any other third-party types, APIGroup is required.
@@ -1814,7 +1830,23 @@ spec:
                                               type: string
                                             type: array
                                           dataSource:
-                                            description: 'This field can be used to specify either: * An existing VolumeSnapshot object (snapshot.storage.k8s.io/VolumeSnapshot) * An existing PVC (PersistentVolumeClaim) * An existing custom resource that implements data population (Alpha) In order to use custom resource types that implement data population, the AnyVolumeDataSource feature gate must be enabled. If the provisioner or an external controller can support the specified data source, it will create a new volume based on the contents of the specified data source.'
+                                            description: 'This field can be used to specify either: * An existing VolumeSnapshot object (snapshot.storage.k8s.io/VolumeSnapshot) * An existing PVC (PersistentVolumeClaim) If the provisioner or an external controller can support the specified data source, it will create a new volume based on the contents of the specified data source. If the AnyVolumeDataSource feature gate is enabled, this field will always have the same contents as the DataSourceRef field.'
+                                            properties:
+                                              apiGroup:
+                                                description: APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind must be in the core API group. For any other third-party types, APIGroup is required.
+                                                type: string
+                                              kind:
+                                                description: Kind is the type of resource being referenced
+                                                type: string
+                                              name:
+                                                description: Name is the name of resource being referenced
+                                                type: string
+                                            required:
+                                            - kind
+                                            - name
+                                            type: object
+                                          dataSourceRef:
+                                            description: 'Specifies the object from which to populate the volume with data, if a non-empty volume is desired. This may be any local object from a non-empty API group (non core object) or a PersistentVolumeClaim object. When this field is specified, volume binding will only succeed if the type of the specified object matches some installed volume populator or dynamic provisioner. This field will replace the functionality of the DataSource field and as such if both fields are non-empty, they must have the same value. For backwards compatibility, both fields (DataSource and DataSourceRef) will be set to the same value automatically if one of them is empty and the other is non-empty. There are two important differences between DataSource and DataSourceRef: * While DataSource only allows two specific types of objects, DataSourceRef   allows any non-core object, as well as PersistentVolumeClaim objects. * While DataSource ignores disallowed values (dropping them), DataSourceRef   preserves all values, and generates an error if a disallowed value is   specified. (Alpha) Using this field requires the AnyVolumeDataSource feature gate to be enabled.'
                                             properties:
                                               apiGroup:
                                                 description: APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind must be in the core API group. For any other third-party types, APIGroup is required.
@@ -3672,6 +3704,89 @@ spec:
                       type: string
                   type: object
                 type: array
+              trace:
+                properties:
+                  attributes:
+                    additionalProperties:
+                      type: string
+                    description: A key value dict contains user defined attributes used to initialize trace provider.
+                    type: object
+                  enabled:
+                    default: false
+                    description: Enable tracing or not.
+                    type: boolean
+                  jaeger:
+                    properties:
+                      agent:
+                        properties:
+                          host:
+                            description: The host of the jaeger agent.
+                            type: string
+                          port:
+                            description: The port of the jaeger agent.
+                            type: integer
+                        type: object
+                      collector:
+                        properties:
+                          endpoint:
+                            description: The endpoint of the jaeger collector.
+                            type: string
+                          passwordRef:
+                            description: The password secret reference name of the jaeger collector.
+                            type: string
+                          username:
+                            description: The username of the jaeger collector.
+                            type: string
+                        required:
+                        - endpoint
+                        type: object
+                      mode:
+                        description: 'The jaeger mode: ''collector'' or ''agent''.'
+                        enum:
+                        - collector
+                        - agent
+                        type: string
+                    required:
+                    - mode
+                    type: object
+                  namespace:
+                    description: Namespace used to differentiate different harbor services.
+                    type: string
+                  otel:
+                    properties:
+                      compression:
+                        description: Whether enable compression or not for otel.
+                        type: boolean
+                      endpoint:
+                        description: The endpoint of otel.
+                        type: string
+                      insecure:
+                        description: Whether establish insecure connection or not for otel.
+                        type: boolean
+                      timeout:
+                        default: 10s
+                        description: The timeout of otel.
+                        type: string
+                      urlPath:
+                        description: The URL path of otel.
+                        type: string
+                    required:
+                    - endpoint
+                    - urlPath
+                    type: object
+                  provider:
+                    description: 'The tracing provider: ''jaeger'' or ''otel''.'
+                    enum:
+                    - jaeger
+                    - otel
+                    type: string
+                  sampleRate:
+                    default: 1
+                    description: Set `sampleRate` to 1 if you wanna sampling 100% of trace data; set 0.5 if you wanna sampling 50% of trace data, and so forth.
+                    type: integer
+                required:
+                - provider
+                type: object
             required:
             - adminInitialPasswordRef
             - components
@@ -5333,7 +5448,23 @@ spec:
                                   type: string
                                 type: array
                               dataSource:
-                                description: 'This field can be used to specify either: * An existing VolumeSnapshot object (snapshot.storage.k8s.io/VolumeSnapshot) * An existing PVC (PersistentVolumeClaim) * An existing custom resource that implements data population (Alpha) In order to use custom resource types that implement data population, the AnyVolumeDataSource feature gate must be enabled. If the provisioner or an external controller can support the specified data source, it will create a new volume based on the contents of the specified data source.'
+                                description: 'This field can be used to specify either: * An existing VolumeSnapshot object (snapshot.storage.k8s.io/VolumeSnapshot) * An existing PVC (PersistentVolumeClaim) If the provisioner or an external controller can support the specified data source, it will create a new volume based on the contents of the specified data source. If the AnyVolumeDataSource feature gate is enabled, this field will always have the same contents as the DataSourceRef field.'
+                                properties:
+                                  apiGroup:
+                                    description: APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind must be in the core API group. For any other third-party types, APIGroup is required.
+                                    type: string
+                                  kind:
+                                    description: Kind is the type of resource being referenced
+                                    type: string
+                                  name:
+                                    description: Name is the name of resource being referenced
+                                    type: string
+                                required:
+                                - kind
+                                - name
+                                type: object
+                              dataSourceRef:
+                                description: 'Specifies the object from which to populate the volume with data, if a non-empty volume is desired. This may be any local object from a non-empty API group (non core object) or a PersistentVolumeClaim object. When this field is specified, volume binding will only succeed if the type of the specified object matches some installed volume populator or dynamic provisioner. This field will replace the functionality of the DataSource field and as such if both fields are non-empty, they must have the same value. For backwards compatibility, both fields (DataSource and DataSourceRef) will be set to the same value automatically if one of them is empty and the other is non-empty. There are two important differences between DataSource and DataSourceRef: * While DataSource only allows two specific types of objects, DataSourceRef   allows any non-core object, as well as PersistentVolumeClaim objects. * While DataSource ignores disallowed values (dropping them), DataSourceRef   preserves all values, and generates an error if a disallowed value is   specified. (Alpha) Using this field requires the AnyVolumeDataSource feature gate to be enabled.'
                                 properties:
                                   apiGroup:
                                     description: APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind must be in the core API group. For any other third-party types, APIGroup is required.
@@ -6879,6 +7010,8 @@ spec:
                             pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
                             type: string
                         type: object
+                    required:
+                    - ingress
                     type: object
                   notary:
                     description: The ingress of the notary, required when notary component enabled.
@@ -6911,6 +7044,8 @@ spec:
                             pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
                             type: string
                         type: object
+                    required:
+                    - ingress
                     type: object
                 required:
                 - core
@@ -7676,7 +7811,7 @@ spec:
                             description: the version of minIO operator
                             type: string
                           redirect:
-                            description: Determine if the redirection of minio storage is disabled.
+                            description: deprecated Determine if the redirection of minio storage is disabled.
                             properties:
                               enable:
                                 default: true
@@ -7712,6 +7847,8 @@ spec:
                                         pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
                                         type: string
                                     type: object
+                                required:
+                                - ingress
                                 type: object
                             required:
                             - enable
@@ -7768,7 +7905,23 @@ spec:
                                       type: string
                                     type: array
                                   dataSource:
-                                    description: 'This field can be used to specify either: * An existing VolumeSnapshot object (snapshot.storage.k8s.io/VolumeSnapshot) * An existing PVC (PersistentVolumeClaim) * An existing custom resource that implements data population (Alpha) In order to use custom resource types that implement data population, the AnyVolumeDataSource feature gate must be enabled. If the provisioner or an external controller can support the specified data source, it will create a new volume based on the contents of the specified data source.'
+                                    description: 'This field can be used to specify either: * An existing VolumeSnapshot object (snapshot.storage.k8s.io/VolumeSnapshot) * An existing PVC (PersistentVolumeClaim) If the provisioner or an external controller can support the specified data source, it will create a new volume based on the contents of the specified data source. If the AnyVolumeDataSource feature gate is enabled, this field will always have the same contents as the DataSourceRef field.'
+                                    properties:
+                                      apiGroup:
+                                        description: APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind must be in the core API group. For any other third-party types, APIGroup is required.
+                                        type: string
+                                      kind:
+                                        description: Kind is the type of resource being referenced
+                                        type: string
+                                      name:
+                                        description: Name is the name of resource being referenced
+                                        type: string
+                                    required:
+                                    - kind
+                                    - name
+                                    type: object
+                                  dataSourceRef:
+                                    description: 'Specifies the object from which to populate the volume with data, if a non-empty volume is desired. This may be any local object from a non-empty API group (non core object) or a PersistentVolumeClaim object. When this field is specified, volume binding will only succeed if the type of the specified object matches some installed volume populator or dynamic provisioner. This field will replace the functionality of the DataSource field and as such if both fields are non-empty, they must have the same value. For backwards compatibility, both fields (DataSource and DataSourceRef) will be set to the same value automatically if one of them is empty and the other is non-empty. There are two important differences between DataSource and DataSourceRef: * While DataSource only allows two specific types of objects, DataSourceRef   allows any non-core object, as well as PersistentVolumeClaim objects. * While DataSource ignores disallowed values (dropping them), DataSourceRef   preserves all values, and generates an error if a disallowed value is   specified. (Alpha) Using this field requires the AnyVolumeDataSource feature gate to be enabled.'
                                     properties:
                                       apiGroup:
                                         description: APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind must be in the core API group. For any other third-party types, APIGroup is required.
@@ -7903,9 +8056,51 @@ spec:
                             type: integer
                         required:
                         - operatorVersion
-                        - redirect
                         - replicas
                         - volumesPerServer
+                        type: object
+                      redirect:
+                        description: Determine if the redirection of minio storage is disabled.
+                        properties:
+                          enable:
+                            default: true
+                            description: Default is true
+                            type: boolean
+                          expose:
+                            properties:
+                              ingress:
+                                properties:
+                                  annotations:
+                                    additionalProperties:
+                                      type: string
+                                    type: object
+                                  controller:
+                                    default: default
+                                    description: Set to the type of ingress controller.
+                                    enum:
+                                    - default
+                                    - gce
+                                    - ncp
+                                    - contour
+                                    type: string
+                                  host:
+                                    type: string
+                                  ingressClassName:
+                                    type: string
+                                required:
+                                - host
+                                type: object
+                              tls:
+                                properties:
+                                  certificateRef:
+                                    pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                                    type: string
+                                type: object
+                            required:
+                            - ingress
+                            type: object
+                        required:
+                        - enable
                         type: object
                       s3:
                         properties:
@@ -8042,6 +8237,90 @@ spec:
                 required:
                 - kind
                 - spec
+                type: object
+              trace:
+                description: Trace settings for the harbor
+                properties:
+                  attributes:
+                    additionalProperties:
+                      type: string
+                    description: A key value dict contains user defined attributes used to initialize trace provider.
+                    type: object
+                  enabled:
+                    default: false
+                    description: Enable tracing or not.
+                    type: boolean
+                  jaeger:
+                    properties:
+                      agent:
+                        properties:
+                          host:
+                            description: The host of the jaeger agent.
+                            type: string
+                          port:
+                            description: The port of the jaeger agent.
+                            type: integer
+                        type: object
+                      collector:
+                        properties:
+                          endpoint:
+                            description: The endpoint of the jaeger collector.
+                            type: string
+                          passwordRef:
+                            description: The password secret reference name of the jaeger collector.
+                            type: string
+                          username:
+                            description: The username of the jaeger collector.
+                            type: string
+                        required:
+                        - endpoint
+                        type: object
+                      mode:
+                        description: 'The jaeger mode: ''collector'' or ''agent''.'
+                        enum:
+                        - collector
+                        - agent
+                        type: string
+                    required:
+                    - mode
+                    type: object
+                  namespace:
+                    description: Namespace used to differentiate different harbor services.
+                    type: string
+                  otel:
+                    properties:
+                      compression:
+                        description: Whether enable compression or not for otel.
+                        type: boolean
+                      endpoint:
+                        description: The endpoint of otel.
+                        type: string
+                      insecure:
+                        description: Whether establish insecure connection or not for otel.
+                        type: boolean
+                      timeout:
+                        default: 10s
+                        description: The timeout of otel.
+                        type: string
+                      urlPath:
+                        description: The URL path of otel.
+                        type: string
+                    required:
+                    - endpoint
+                    - urlPath
+                    type: object
+                  provider:
+                    description: 'The tracing provider: ''jaeger'' or ''otel''.'
+                    enum:
+                    - jaeger
+                    - otel
+                    type: string
+                  sampleRate:
+                    default: 1
+                    description: Set `sampleRate` to 1 if you wanna sampling 100% of trace data; set 0.5 if you wanna sampling 50% of trace data, and so forth.
+                    type: integer
+                required:
+                - provider
                 type: object
               trivy:
                 properties:
@@ -8331,9 +8610,6 @@ spec:
                   emailUsername:
                     description: The username for authenticate against SMTP server.
                     type: string
-                  extension:
-                    description: AdditionalProperties provides workaround for those unknown configuration fields in the future.
-                    x-kubernetes-preserve-unknown-fields: true
                   httpAuthproxyAdminGroups:
                     description: The group which has the harbor admin privileges.
                     type: string
@@ -8517,9 +8793,6 @@ spec:
                       emailUsername:
                         description: The username for authenticate against SMTP server.
                         type: string
-                      extension:
-                        description: AdditionalProperties provides workaround for those unknown configuration fields in the future.
-                        x-kubernetes-preserve-unknown-fields: true
                       httpAuthproxyAdminGroups:
                         description: The group which has the harbor admin privileges.
                         type: string
@@ -10583,6 +10856,8 @@ spec:
                             pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
                             type: string
                         type: object
+                    required:
+                    - ingress
                     type: object
                   notary:
                     description: The ingress of the notary, required when notary component enabled.
@@ -10615,6 +10890,8 @@ spec:
                             pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
                             type: string
                         type: object
+                    required:
+                    - ingress
                     type: object
                 required:
                 - core
@@ -11485,6 +11762,90 @@ spec:
                       type: object
                     type: array
                 type: object
+              trace:
+                description: Trace settings for the harbor
+                properties:
+                  attributes:
+                    additionalProperties:
+                      type: string
+                    description: A key value dict contains user defined attributes used to initialize trace provider.
+                    type: object
+                  enabled:
+                    default: false
+                    description: Enable tracing or not.
+                    type: boolean
+                  jaeger:
+                    properties:
+                      agent:
+                        properties:
+                          host:
+                            description: The host of the jaeger agent.
+                            type: string
+                          port:
+                            description: The port of the jaeger agent.
+                            type: integer
+                        type: object
+                      collector:
+                        properties:
+                          endpoint:
+                            description: The endpoint of the jaeger collector.
+                            type: string
+                          passwordRef:
+                            description: The password secret reference name of the jaeger collector.
+                            type: string
+                          username:
+                            description: The username of the jaeger collector.
+                            type: string
+                        required:
+                        - endpoint
+                        type: object
+                      mode:
+                        description: 'The jaeger mode: ''collector'' or ''agent''.'
+                        enum:
+                        - collector
+                        - agent
+                        type: string
+                    required:
+                    - mode
+                    type: object
+                  namespace:
+                    description: Namespace used to differentiate different harbor services.
+                    type: string
+                  otel:
+                    properties:
+                      compression:
+                        description: Whether enable compression or not for otel.
+                        type: boolean
+                      endpoint:
+                        description: The endpoint of otel.
+                        type: string
+                      insecure:
+                        description: Whether establish insecure connection or not for otel.
+                        type: boolean
+                      timeout:
+                        default: 10s
+                        description: The timeout of otel.
+                        type: string
+                      urlPath:
+                        description: The URL path of otel.
+                        type: string
+                    required:
+                    - endpoint
+                    - urlPath
+                    type: object
+                  provider:
+                    description: 'The tracing provider: ''jaeger'' or ''otel''.'
+                    enum:
+                    - jaeger
+                    - otel
+                    type: string
+                  sampleRate:
+                    default: 1
+                    description: Set `sampleRate` to 1 if you wanna sampling 100% of trace data; set 0.5 if you wanna sampling 50% of trace data, and so forth.
+                    type: integer
+                required:
+                - provider
+                type: object
               trivy:
                 properties:
                   certificateRefs:
@@ -12084,7 +12445,23 @@ spec:
                                             type: string
                                           type: array
                                         dataSource:
-                                          description: 'This field can be used to specify either: * An existing VolumeSnapshot object (snapshot.storage.k8s.io/VolumeSnapshot) * An existing PVC (PersistentVolumeClaim) * An existing custom resource that implements data population (Alpha) In order to use custom resource types that implement data population, the AnyVolumeDataSource feature gate must be enabled. If the provisioner or an external controller can support the specified data source, it will create a new volume based on the contents of the specified data source.'
+                                          description: 'This field can be used to specify either: * An existing VolumeSnapshot object (snapshot.storage.k8s.io/VolumeSnapshot) * An existing PVC (PersistentVolumeClaim) If the provisioner or an external controller can support the specified data source, it will create a new volume based on the contents of the specified data source. If the AnyVolumeDataSource feature gate is enabled, this field will always have the same contents as the DataSourceRef field.'
+                                          properties:
+                                            apiGroup:
+                                              description: APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind must be in the core API group. For any other third-party types, APIGroup is required.
+                                              type: string
+                                            kind:
+                                              description: Kind is the type of resource being referenced
+                                              type: string
+                                            name:
+                                              description: Name is the name of resource being referenced
+                                              type: string
+                                          required:
+                                          - kind
+                                          - name
+                                          type: object
+                                        dataSourceRef:
+                                          description: 'Specifies the object from which to populate the volume with data, if a non-empty volume is desired. This may be any local object from a non-empty API group (non core object) or a PersistentVolumeClaim object. When this field is specified, volume binding will only succeed if the type of the specified object matches some installed volume populator or dynamic provisioner. This field will replace the functionality of the DataSource field and as such if both fields are non-empty, they must have the same value. For backwards compatibility, both fields (DataSource and DataSourceRef) will be set to the same value automatically if one of them is empty and the other is non-empty. There are two important differences between DataSource and DataSourceRef: * While DataSource only allows two specific types of objects, DataSourceRef   allows any non-core object, as well as PersistentVolumeClaim objects. * While DataSource ignores disallowed values (dropping them), DataSourceRef   preserves all values, and generates an error if a disallowed value is   specified. (Alpha) Using this field requires the AnyVolumeDataSource feature gate to be enabled.'
                                           properties:
                                             apiGroup:
                                               description: APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind must be in the core API group. For any other third-party types, APIGroup is required.
@@ -13031,7 +13408,23 @@ spec:
                                             type: string
                                           type: array
                                         dataSource:
-                                          description: 'This field can be used to specify either: * An existing VolumeSnapshot object (snapshot.storage.k8s.io/VolumeSnapshot) * An existing PVC (PersistentVolumeClaim) * An existing custom resource that implements data population (Alpha) In order to use custom resource types that implement data population, the AnyVolumeDataSource feature gate must be enabled. If the provisioner or an external controller can support the specified data source, it will create a new volume based on the contents of the specified data source.'
+                                          description: 'This field can be used to specify either: * An existing VolumeSnapshot object (snapshot.storage.k8s.io/VolumeSnapshot) * An existing PVC (PersistentVolumeClaim) If the provisioner or an external controller can support the specified data source, it will create a new volume based on the contents of the specified data source. If the AnyVolumeDataSource feature gate is enabled, this field will always have the same contents as the DataSourceRef field.'
+                                          properties:
+                                            apiGroup:
+                                              description: APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind must be in the core API group. For any other third-party types, APIGroup is required.
+                                              type: string
+                                            kind:
+                                              description: Kind is the type of resource being referenced
+                                              type: string
+                                            name:
+                                              description: Name is the name of resource being referenced
+                                              type: string
+                                          required:
+                                          - kind
+                                          - name
+                                          type: object
+                                        dataSourceRef:
+                                          description: 'Specifies the object from which to populate the volume with data, if a non-empty volume is desired. This may be any local object from a non-empty API group (non core object) or a PersistentVolumeClaim object. When this field is specified, volume binding will only succeed if the type of the specified object matches some installed volume populator or dynamic provisioner. This field will replace the functionality of the DataSource field and as such if both fields are non-empty, they must have the same value. For backwards compatibility, both fields (DataSource and DataSourceRef) will be set to the same value automatically if one of them is empty and the other is non-empty. There are two important differences between DataSource and DataSourceRef: * While DataSource only allows two specific types of objects, DataSourceRef   allows any non-core object, as well as PersistentVolumeClaim objects. * While DataSource ignores disallowed values (dropping them), DataSourceRef   preserves all values, and generates an error if a disallowed value is   specified. (Alpha) Using this field requires the AnyVolumeDataSource feature gate to be enabled.'
                                           properties:
                                             apiGroup:
                                               description: APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind must be in the core API group. For any other third-party types, APIGroup is required.
@@ -14281,7 +14674,23 @@ spec:
                                             type: string
                                           type: array
                                         dataSource:
-                                          description: 'This field can be used to specify either: * An existing VolumeSnapshot object (snapshot.storage.k8s.io/VolumeSnapshot) * An existing PVC (PersistentVolumeClaim) * An existing custom resource that implements data population (Alpha) In order to use custom resource types that implement data population, the AnyVolumeDataSource feature gate must be enabled. If the provisioner or an external controller can support the specified data source, it will create a new volume based on the contents of the specified data source.'
+                                          description: 'This field can be used to specify either: * An existing VolumeSnapshot object (snapshot.storage.k8s.io/VolumeSnapshot) * An existing PVC (PersistentVolumeClaim) If the provisioner or an external controller can support the specified data source, it will create a new volume based on the contents of the specified data source. If the AnyVolumeDataSource feature gate is enabled, this field will always have the same contents as the DataSourceRef field.'
+                                          properties:
+                                            apiGroup:
+                                              description: APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind must be in the core API group. For any other third-party types, APIGroup is required.
+                                              type: string
+                                            kind:
+                                              description: Kind is the type of resource being referenced
+                                              type: string
+                                            name:
+                                              description: Name is the name of resource being referenced
+                                              type: string
+                                          required:
+                                          - kind
+                                          - name
+                                          type: object
+                                        dataSourceRef:
+                                          description: 'Specifies the object from which to populate the volume with data, if a non-empty volume is desired. This may be any local object from a non-empty API group (non core object) or a PersistentVolumeClaim object. When this field is specified, volume binding will only succeed if the type of the specified object matches some installed volume populator or dynamic provisioner. This field will replace the functionality of the DataSource field and as such if both fields are non-empty, they must have the same value. For backwards compatibility, both fields (DataSource and DataSourceRef) will be set to the same value automatically if one of them is empty and the other is non-empty. There are two important differences between DataSource and DataSourceRef: * While DataSource only allows two specific types of objects, DataSourceRef   allows any non-core object, as well as PersistentVolumeClaim objects. * While DataSource ignores disallowed values (dropping them), DataSourceRef   preserves all values, and generates an error if a disallowed value is   specified. (Alpha) Using this field requires the AnyVolumeDataSource feature gate to be enabled.'
                                           properties:
                                             apiGroup:
                                               description: APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind must be in the core API group. For any other third-party types, APIGroup is required.
@@ -15228,7 +15637,23 @@ spec:
                                             type: string
                                           type: array
                                         dataSource:
-                                          description: 'This field can be used to specify either: * An existing VolumeSnapshot object (snapshot.storage.k8s.io/VolumeSnapshot) * An existing PVC (PersistentVolumeClaim) * An existing custom resource that implements data population (Alpha) In order to use custom resource types that implement data population, the AnyVolumeDataSource feature gate must be enabled. If the provisioner or an external controller can support the specified data source, it will create a new volume based on the contents of the specified data source.'
+                                          description: 'This field can be used to specify either: * An existing VolumeSnapshot object (snapshot.storage.k8s.io/VolumeSnapshot) * An existing PVC (PersistentVolumeClaim) If the provisioner or an external controller can support the specified data source, it will create a new volume based on the contents of the specified data source. If the AnyVolumeDataSource feature gate is enabled, this field will always have the same contents as the DataSourceRef field.'
+                                          properties:
+                                            apiGroup:
+                                              description: APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind must be in the core API group. For any other third-party types, APIGroup is required.
+                                              type: string
+                                            kind:
+                                              description: Kind is the type of resource being referenced
+                                              type: string
+                                            name:
+                                              description: Name is the name of resource being referenced
+                                              type: string
+                                          required:
+                                          - kind
+                                          - name
+                                          type: object
+                                        dataSourceRef:
+                                          description: 'Specifies the object from which to populate the volume with data, if a non-empty volume is desired. This may be any local object from a non-empty API group (non core object) or a PersistentVolumeClaim object. When this field is specified, volume binding will only succeed if the type of the specified object matches some installed volume populator or dynamic provisioner. This field will replace the functionality of the DataSource field and as such if both fields are non-empty, they must have the same value. For backwards compatibility, both fields (DataSource and DataSourceRef) will be set to the same value automatically if one of them is empty and the other is non-empty. There are two important differences between DataSource and DataSourceRef: * While DataSource only allows two specific types of objects, DataSourceRef   allows any non-core object, as well as PersistentVolumeClaim objects. * While DataSource ignores disallowed values (dropping them), DataSourceRef   preserves all values, and generates an error if a disallowed value is   specified. (Alpha) Using this field requires the AnyVolumeDataSource feature gate to be enabled.'
                                           properties:
                                             apiGroup:
                                               description: APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind must be in the core API group. For any other third-party types, APIGroup is required.
@@ -16016,6 +16441,89 @@ spec:
                       type: string
                   type: object
                 type: array
+              trace:
+                properties:
+                  attributes:
+                    additionalProperties:
+                      type: string
+                    description: A key value dict contains user defined attributes used to initialize trace provider.
+                    type: object
+                  enabled:
+                    default: false
+                    description: Enable tracing or not.
+                    type: boolean
+                  jaeger:
+                    properties:
+                      agent:
+                        properties:
+                          host:
+                            description: The host of the jaeger agent.
+                            type: string
+                          port:
+                            description: The port of the jaeger agent.
+                            type: integer
+                        type: object
+                      collector:
+                        properties:
+                          endpoint:
+                            description: The endpoint of the jaeger collector.
+                            type: string
+                          passwordRef:
+                            description: The password secret reference name of the jaeger collector.
+                            type: string
+                          username:
+                            description: The username of the jaeger collector.
+                            type: string
+                        required:
+                        - endpoint
+                        type: object
+                      mode:
+                        description: 'The jaeger mode: ''collector'' or ''agent''.'
+                        enum:
+                        - collector
+                        - agent
+                        type: string
+                    required:
+                    - mode
+                    type: object
+                  namespace:
+                    description: Namespace used to differentiate different harbor services.
+                    type: string
+                  otel:
+                    properties:
+                      compression:
+                        description: Whether enable compression or not for otel.
+                        type: boolean
+                      endpoint:
+                        description: The endpoint of otel.
+                        type: string
+                      insecure:
+                        description: Whether establish insecure connection or not for otel.
+                        type: boolean
+                      timeout:
+                        default: 10s
+                        description: The timeout of otel.
+                        type: string
+                      urlPath:
+                        description: The URL path of otel.
+                        type: string
+                    required:
+                    - endpoint
+                    - urlPath
+                    type: object
+                  provider:
+                    description: 'The tracing provider: ''jaeger'' or ''otel''.'
+                    enum:
+                    - jaeger
+                    - otel
+                    type: string
+                  sampleRate:
+                    default: 1
+                    description: Set `sampleRate` to 1 if you wanna sampling 100% of trace data; set 0.5 if you wanna sampling 50% of trace data, and so forth.
+                    type: integer
+                required:
+                - provider
+                type: object
               workerPool:
                 description: Configurations of worker pool
                 properties:
@@ -18491,7 +18999,23 @@ spec:
                                               type: string
                                             type: array
                                           dataSource:
-                                            description: 'This field can be used to specify either: * An existing VolumeSnapshot object (snapshot.storage.k8s.io/VolumeSnapshot) * An existing PVC (PersistentVolumeClaim) * An existing custom resource that implements data population (Alpha) In order to use custom resource types that implement data population, the AnyVolumeDataSource feature gate must be enabled. If the provisioner or an external controller can support the specified data source, it will create a new volume based on the contents of the specified data source.'
+                                            description: 'This field can be used to specify either: * An existing VolumeSnapshot object (snapshot.storage.k8s.io/VolumeSnapshot) * An existing PVC (PersistentVolumeClaim) If the provisioner or an external controller can support the specified data source, it will create a new volume based on the contents of the specified data source. If the AnyVolumeDataSource feature gate is enabled, this field will always have the same contents as the DataSourceRef field.'
+                                            properties:
+                                              apiGroup:
+                                                description: APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind must be in the core API group. For any other third-party types, APIGroup is required.
+                                                type: string
+                                              kind:
+                                                description: Kind is the type of resource being referenced
+                                                type: string
+                                              name:
+                                                description: Name is the name of resource being referenced
+                                                type: string
+                                            required:
+                                            - kind
+                                            - name
+                                            type: object
+                                          dataSourceRef:
+                                            description: 'Specifies the object from which to populate the volume with data, if a non-empty volume is desired. This may be any local object from a non-empty API group (non core object) or a PersistentVolumeClaim object. When this field is specified, volume binding will only succeed if the type of the specified object matches some installed volume populator or dynamic provisioner. This field will replace the functionality of the DataSource field and as such if both fields are non-empty, they must have the same value. For backwards compatibility, both fields (DataSource and DataSourceRef) will be set to the same value automatically if one of them is empty and the other is non-empty. There are two important differences between DataSource and DataSourceRef: * While DataSource only allows two specific types of objects, DataSourceRef   allows any non-core object, as well as PersistentVolumeClaim objects. * While DataSource ignores disallowed values (dropping them), DataSourceRef   preserves all values, and generates an error if a disallowed value is   specified. (Alpha) Using this field requires the AnyVolumeDataSource feature gate to be enabled.'
                                             properties:
                                               apiGroup:
                                                 description: APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind must be in the core API group. For any other third-party types, APIGroup is required.
@@ -20237,7 +20761,23 @@ spec:
                                               type: string
                                             type: array
                                           dataSource:
-                                            description: 'This field can be used to specify either: * An existing VolumeSnapshot object (snapshot.storage.k8s.io/VolumeSnapshot) * An existing PVC (PersistentVolumeClaim) * An existing custom resource that implements data population (Alpha) In order to use custom resource types that implement data population, the AnyVolumeDataSource feature gate must be enabled. If the provisioner or an external controller can support the specified data source, it will create a new volume based on the contents of the specified data source.'
+                                            description: 'This field can be used to specify either: * An existing VolumeSnapshot object (snapshot.storage.k8s.io/VolumeSnapshot) * An existing PVC (PersistentVolumeClaim) If the provisioner or an external controller can support the specified data source, it will create a new volume based on the contents of the specified data source. If the AnyVolumeDataSource feature gate is enabled, this field will always have the same contents as the DataSourceRef field.'
+                                            properties:
+                                              apiGroup:
+                                                description: APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind must be in the core API group. For any other third-party types, APIGroup is required.
+                                                type: string
+                                              kind:
+                                                description: Kind is the type of resource being referenced
+                                                type: string
+                                              name:
+                                                description: Name is the name of resource being referenced
+                                                type: string
+                                            required:
+                                            - kind
+                                            - name
+                                            type: object
+                                          dataSourceRef:
+                                            description: 'Specifies the object from which to populate the volume with data, if a non-empty volume is desired. This may be any local object from a non-empty API group (non core object) or a PersistentVolumeClaim object. When this field is specified, volume binding will only succeed if the type of the specified object matches some installed volume populator or dynamic provisioner. This field will replace the functionality of the DataSource field and as such if both fields are non-empty, they must have the same value. For backwards compatibility, both fields (DataSource and DataSourceRef) will be set to the same value automatically if one of them is empty and the other is non-empty. There are two important differences between DataSource and DataSourceRef: * While DataSource only allows two specific types of objects, DataSourceRef   allows any non-core object, as well as PersistentVolumeClaim objects. * While DataSource ignores disallowed values (dropping them), DataSourceRef   preserves all values, and generates an error if a disallowed value is   specified. (Alpha) Using this field requires the AnyVolumeDataSource feature gate to be enabled.'
                                             properties:
                                               apiGroup:
                                                 description: APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind must be in the core API group. For any other third-party types, APIGroup is required.
@@ -21078,6 +21618,89 @@ spec:
                       type: string
                   type: object
                 type: array
+              trace:
+                properties:
+                  attributes:
+                    additionalProperties:
+                      type: string
+                    description: A key value dict contains user defined attributes used to initialize trace provider.
+                    type: object
+                  enabled:
+                    default: false
+                    description: Enable tracing or not.
+                    type: boolean
+                  jaeger:
+                    properties:
+                      agent:
+                        properties:
+                          host:
+                            description: The host of the jaeger agent.
+                            type: string
+                          port:
+                            description: The port of the jaeger agent.
+                            type: integer
+                        type: object
+                      collector:
+                        properties:
+                          endpoint:
+                            description: The endpoint of the jaeger collector.
+                            type: string
+                          passwordRef:
+                            description: The password secret reference name of the jaeger collector.
+                            type: string
+                          username:
+                            description: The username of the jaeger collector.
+                            type: string
+                        required:
+                        - endpoint
+                        type: object
+                      mode:
+                        description: 'The jaeger mode: ''collector'' or ''agent''.'
+                        enum:
+                        - collector
+                        - agent
+                        type: string
+                    required:
+                    - mode
+                    type: object
+                  namespace:
+                    description: Namespace used to differentiate different harbor services.
+                    type: string
+                  otel:
+                    properties:
+                      compression:
+                        description: Whether enable compression or not for otel.
+                        type: boolean
+                      endpoint:
+                        description: The endpoint of otel.
+                        type: string
+                      insecure:
+                        description: Whether establish insecure connection or not for otel.
+                        type: boolean
+                      timeout:
+                        default: 10s
+                        description: The timeout of otel.
+                        type: string
+                      urlPath:
+                        description: The URL path of otel.
+                        type: string
+                    required:
+                    - endpoint
+                    - urlPath
+                    type: object
+                  provider:
+                    description: 'The tracing provider: ''jaeger'' or ''otel''.'
+                    enum:
+                    - jaeger
+                    - otel
+                    type: string
+                  sampleRate:
+                    default: 1
+                    description: Set `sampleRate` to 1 if you wanna sampling 100% of trace data; set 0.5 if you wanna sampling 50% of trace data, and so forth.
+                    type: integer
+                required:
+                - provider
+                type: object
               validation:
                 properties:
                   disabled:
@@ -22175,7 +22798,23 @@ spec:
                                           type: string
                                         type: array
                                       dataSource:
-                                        description: 'This field can be used to specify either: * An existing VolumeSnapshot object (snapshot.storage.k8s.io/VolumeSnapshot) * An existing PVC (PersistentVolumeClaim) * An existing custom resource that implements data population (Alpha) In order to use custom resource types that implement data population, the AnyVolumeDataSource feature gate must be enabled. If the provisioner or an external controller can support the specified data source, it will create a new volume based on the contents of the specified data source.'
+                                        description: 'This field can be used to specify either: * An existing VolumeSnapshot object (snapshot.storage.k8s.io/VolumeSnapshot) * An existing PVC (PersistentVolumeClaim) If the provisioner or an external controller can support the specified data source, it will create a new volume based on the contents of the specified data source. If the AnyVolumeDataSource feature gate is enabled, this field will always have the same contents as the DataSourceRef field.'
+                                        properties:
+                                          apiGroup:
+                                            description: APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind must be in the core API group. For any other third-party types, APIGroup is required.
+                                            type: string
+                                          kind:
+                                            description: Kind is the type of resource being referenced
+                                            type: string
+                                          name:
+                                            description: Name is the name of resource being referenced
+                                            type: string
+                                        required:
+                                        - kind
+                                        - name
+                                        type: object
+                                      dataSourceRef:
+                                        description: 'Specifies the object from which to populate the volume with data, if a non-empty volume is desired. This may be any local object from a non-empty API group (non core object) or a PersistentVolumeClaim object. When this field is specified, volume binding will only succeed if the type of the specified object matches some installed volume populator or dynamic provisioner. This field will replace the functionality of the DataSource field and as such if both fields are non-empty, they must have the same value. For backwards compatibility, both fields (DataSource and DataSourceRef) will be set to the same value automatically if one of them is empty and the other is non-empty. There are two important differences between DataSource and DataSourceRef: * While DataSource only allows two specific types of objects, DataSourceRef   allows any non-core object, as well as PersistentVolumeClaim objects. * While DataSource ignores disallowed values (dropping them), DataSourceRef   preserves all values, and generates an error if a disallowed value is   specified. (Alpha) Using this field requires the AnyVolumeDataSource feature gate to be enabled.'
                                         properties:
                                           apiGroup:
                                             description: APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind must be in the core API group. For any other third-party types, APIGroup is required.
@@ -23075,7 +23714,23 @@ spec:
                                           type: string
                                         type: array
                                       dataSource:
-                                        description: 'This field can be used to specify either: * An existing VolumeSnapshot object (snapshot.storage.k8s.io/VolumeSnapshot) * An existing PVC (PersistentVolumeClaim) * An existing custom resource that implements data population (Alpha) In order to use custom resource types that implement data population, the AnyVolumeDataSource feature gate must be enabled. If the provisioner or an external controller can support the specified data source, it will create a new volume based on the contents of the specified data source.'
+                                        description: 'This field can be used to specify either: * An existing VolumeSnapshot object (snapshot.storage.k8s.io/VolumeSnapshot) * An existing PVC (PersistentVolumeClaim) If the provisioner or an external controller can support the specified data source, it will create a new volume based on the contents of the specified data source. If the AnyVolumeDataSource feature gate is enabled, this field will always have the same contents as the DataSourceRef field.'
+                                        properties:
+                                          apiGroup:
+                                            description: APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind must be in the core API group. For any other third-party types, APIGroup is required.
+                                            type: string
+                                          kind:
+                                            description: Kind is the type of resource being referenced
+                                            type: string
+                                          name:
+                                            description: Name is the name of resource being referenced
+                                            type: string
+                                        required:
+                                        - kind
+                                        - name
+                                        type: object
+                                      dataSourceRef:
+                                        description: 'Specifies the object from which to populate the volume with data, if a non-empty volume is desired. This may be any local object from a non-empty API group (non core object) or a PersistentVolumeClaim object. When this field is specified, volume binding will only succeed if the type of the specified object matches some installed volume populator or dynamic provisioner. This field will replace the functionality of the DataSource field and as such if both fields are non-empty, they must have the same value. For backwards compatibility, both fields (DataSource and DataSourceRef) will be set to the same value automatically if one of them is empty and the other is non-empty. There are two important differences between DataSource and DataSourceRef: * While DataSource only allows two specific types of objects, DataSourceRef   allows any non-core object, as well as PersistentVolumeClaim objects. * While DataSource ignores disallowed values (dropping them), DataSourceRef   preserves all values, and generates an error if a disallowed value is   specified. (Alpha) Using this field requires the AnyVolumeDataSource feature gate to be enabled.'
                                         properties:
                                           apiGroup:
                                             description: APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind must be in the core API group. For any other third-party types, APIGroup is required.
@@ -24370,7 +25025,23 @@ spec:
                                           type: string
                                         type: array
                                       dataSource:
-                                        description: 'This field can be used to specify either: * An existing VolumeSnapshot object (snapshot.storage.k8s.io/VolumeSnapshot) * An existing PVC (PersistentVolumeClaim) * An existing custom resource that implements data population (Alpha) In order to use custom resource types that implement data population, the AnyVolumeDataSource feature gate must be enabled. If the provisioner or an external controller can support the specified data source, it will create a new volume based on the contents of the specified data source.'
+                                        description: 'This field can be used to specify either: * An existing VolumeSnapshot object (snapshot.storage.k8s.io/VolumeSnapshot) * An existing PVC (PersistentVolumeClaim) If the provisioner or an external controller can support the specified data source, it will create a new volume based on the contents of the specified data source. If the AnyVolumeDataSource feature gate is enabled, this field will always have the same contents as the DataSourceRef field.'
+                                        properties:
+                                          apiGroup:
+                                            description: APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind must be in the core API group. For any other third-party types, APIGroup is required.
+                                            type: string
+                                          kind:
+                                            description: Kind is the type of resource being referenced
+                                            type: string
+                                          name:
+                                            description: Name is the name of resource being referenced
+                                            type: string
+                                        required:
+                                        - kind
+                                        - name
+                                        type: object
+                                      dataSourceRef:
+                                        description: 'Specifies the object from which to populate the volume with data, if a non-empty volume is desired. This may be any local object from a non-empty API group (non core object) or a PersistentVolumeClaim object. When this field is specified, volume binding will only succeed if the type of the specified object matches some installed volume populator or dynamic provisioner. This field will replace the functionality of the DataSource field and as such if both fields are non-empty, they must have the same value. For backwards compatibility, both fields (DataSource and DataSourceRef) will be set to the same value automatically if one of them is empty and the other is non-empty. There are two important differences between DataSource and DataSourceRef: * While DataSource only allows two specific types of objects, DataSourceRef   allows any non-core object, as well as PersistentVolumeClaim objects. * While DataSource ignores disallowed values (dropping them), DataSourceRef   preserves all values, and generates an error if a disallowed value is   specified. (Alpha) Using this field requires the AnyVolumeDataSource feature gate to be enabled.'
                                         properties:
                                           apiGroup:
                                             description: APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind must be in the core API group. For any other third-party types, APIGroup is required.
@@ -25270,7 +25941,23 @@ spec:
                                           type: string
                                         type: array
                                       dataSource:
-                                        description: 'This field can be used to specify either: * An existing VolumeSnapshot object (snapshot.storage.k8s.io/VolumeSnapshot) * An existing PVC (PersistentVolumeClaim) * An existing custom resource that implements data population (Alpha) In order to use custom resource types that implement data population, the AnyVolumeDataSource feature gate must be enabled. If the provisioner or an external controller can support the specified data source, it will create a new volume based on the contents of the specified data source.'
+                                        description: 'This field can be used to specify either: * An existing VolumeSnapshot object (snapshot.storage.k8s.io/VolumeSnapshot) * An existing PVC (PersistentVolumeClaim) If the provisioner or an external controller can support the specified data source, it will create a new volume based on the contents of the specified data source. If the AnyVolumeDataSource feature gate is enabled, this field will always have the same contents as the DataSourceRef field.'
+                                        properties:
+                                          apiGroup:
+                                            description: APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind must be in the core API group. For any other third-party types, APIGroup is required.
+                                            type: string
+                                          kind:
+                                            description: Kind is the type of resource being referenced
+                                            type: string
+                                          name:
+                                            description: Name is the name of resource being referenced
+                                            type: string
+                                        required:
+                                        - kind
+                                        - name
+                                        type: object
+                                      dataSourceRef:
+                                        description: 'Specifies the object from which to populate the volume with data, if a non-empty volume is desired. This may be any local object from a non-empty API group (non core object) or a PersistentVolumeClaim object. When this field is specified, volume binding will only succeed if the type of the specified object matches some installed volume populator or dynamic provisioner. This field will replace the functionality of the DataSource field and as such if both fields are non-empty, they must have the same value. For backwards compatibility, both fields (DataSource and DataSourceRef) will be set to the same value automatically if one of them is empty and the other is non-empty. There are two important differences between DataSource and DataSourceRef: * While DataSource only allows two specific types of objects, DataSourceRef   allows any non-core object, as well as PersistentVolumeClaim objects. * While DataSource ignores disallowed values (dropping them), DataSourceRef   preserves all values, and generates an error if a disallowed value is   specified. (Alpha) Using this field requires the AnyVolumeDataSource feature gate to be enabled.'
                                         properties:
                                           apiGroup:
                                             description: APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind must be in the core API group. For any other third-party types, APIGroup is required.
@@ -25904,6 +26591,9 @@ spec:
                 - cache
                 - reports
                 type: object
+              timeout:
+                default: 5m0s
+                type: string
               tolerations:
                 description: If specified, the pod's tolerations.
                 items:

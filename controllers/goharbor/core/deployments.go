@@ -219,6 +219,11 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1.Core) (
 
 	envs = append(envs, metricsEnvs...)
 
+	envs, err = core.Spec.Trace.AddEnvVars(harbormetav1.CoreComponent.String(), envs)
+	if err != nil {
+		return nil, errors.Wrap(err, "get trace environment variables")
+	}
+
 	envs = append(envs, core.Spec.Proxy.GetEnvVars()...)
 
 	envs = append(envs, []corev1.EnvVar{{
@@ -308,31 +313,9 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1.Core) (
 		Value: getDefaultAllowedRegistryTypesForProxyCache(),
 	}}...)
 
-	if core.Spec.Database.MaxIdleConnections != nil {
-		maxConns, err := harbor.EnvVar(common.PostGreSQLMaxIdleConns, harbor.Value(fmt.Sprintf("%d", *core.Spec.Database.MaxIdleConnections)))
-		if err != nil {
-			return nil, errors.Wrap(err, "cannot configure max idle connections")
-		}
-
-		envs = append(envs, maxConns)
-	}
-
-	if core.Spec.Database.MaxOpenConnections != nil {
-		maxConns, err := harbor.EnvVar(common.PostGreSQLMaxOpenConns, harbor.Value(fmt.Sprintf("%d", *core.Spec.Database.MaxOpenConnections)))
-		if err != nil {
-			return nil, errors.Wrap(err, "cannot configure max open connections")
-		}
-
-		envs = append(envs, maxConns)
-	}
-
-	if sslMode, ok := core.Spec.Database.Parameters[harbormetav1.PostgresSSLModeKey]; ok {
-		sslModeVar, err := harbor.EnvVar(common.PostGreSQLSSLMode, harbor.Value(sslMode))
-		if err != nil {
-			return nil, errors.Wrap(err, "cannot configure ssl mode")
-		}
-
-		envs = append(envs, sslModeVar)
+	envs, err = addDatabaseEnvs(core, envs)
+	if err != nil {
+		return nil, err
 	}
 
 	if core.Spec.Components.Registry.Redis != nil {
@@ -524,4 +507,35 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1.Core) (
 	core.Spec.ComponentSpec.ApplyToDeployment(deploy)
 
 	return deploy, nil
+}
+
+func addDatabaseEnvs(core *goharborv1.Core, envs []corev1.EnvVar) ([]corev1.EnvVar, error) {
+	if core.Spec.Database.MaxIdleConnections != nil {
+		maxConns, err := harbor.EnvVar(common.PostGreSQLMaxIdleConns, harbor.Value(fmt.Sprintf("%d", *core.Spec.Database.MaxIdleConnections)))
+		if err != nil {
+			return nil, errors.Wrap(err, "cannot configure max idle connections")
+		}
+
+		envs = append(envs, maxConns)
+	}
+
+	if core.Spec.Database.MaxOpenConnections != nil {
+		maxConns, err := harbor.EnvVar(common.PostGreSQLMaxOpenConns, harbor.Value(fmt.Sprintf("%d", *core.Spec.Database.MaxOpenConnections)))
+		if err != nil {
+			return nil, errors.Wrap(err, "cannot configure max open connections")
+		}
+
+		envs = append(envs, maxConns)
+	}
+
+	if sslMode, ok := core.Spec.Database.Parameters[harbormetav1.PostgresSSLModeKey]; ok {
+		sslModeVar, err := harbor.EnvVar(common.PostGreSQLSSLMode, harbor.Value(sslMode))
+		if err != nil {
+			return nil, errors.Wrap(err, "cannot configure ssl mode")
+		}
+
+		envs = append(envs, sslModeVar)
+	}
+
+	return envs, nil
 }
