@@ -1,10 +1,7 @@
 package model
 
 import (
-	"net/url"
-
 	gruntime "github.com/go-openapi/runtime"
-	httptransport "github.com/go-openapi/runtime/client"
 	hc "github.com/goharbor/go-client/pkg/harbor"
 	assistclient "github.com/goharbor/go-client/pkg/sdk/assist/client"
 	v2client "github.com/goharbor/go-client/pkg/sdk/v2.0/client"
@@ -18,49 +15,37 @@ const (
 	accessSecret = "accessSecret"
 )
 
-// AccessCred contains credential data for accessing the harbor server.
-type AccessCred struct {
-	AccessKey    string
-	AccessSecret string
-}
-
-// FillIn put secret into AccessCred.
-func (ac *AccessCred) FillIn(secret *corev1.Secret) error {
+// GetCredential put secret into AccessCred.
+func GetCredential(secret *corev1.Secret) (string, string, error) {
 	decodedAK, ok1 := secret.Data[accessKey]
 	decodedAS, ok2 := secret.Data[accessSecret]
 
 	if !(ok1 && ok2) {
-		return errors.New("invalid access secret")
+		return "", "", errors.New("invalid access secret")
 	}
 
-	ac.AccessKey = string(decodedAK)
-	ac.AccessSecret = string(decodedAS)
-
-	return nil
-}
-
-// Validate validates wether the key and secret has correct format.
-func (ac *AccessCred) Validate(secret *corev1.Secret) error {
-	if len(ac.AccessKey) == 0 || len(ac.AccessSecret) == 0 {
-		return errors.New("access key and secret can't be empty")
+	if len(decodedAK) == 0 || len(decodedAS) == 0 {
+		return "", "", errors.New("access key and secret can't be empty")
 	}
 
-	return nil
+	return string(decodedAK), string(decodedAS), nil
 }
 
 // HarborServer contains connection data.
 type HarborServer struct {
-	ServerURL  *url.URL
-	AccessCred *AccessCred
-	InSecure   bool
+	ServerURL string
+	Username  string
+	Password  string
+	Insecure  bool
 }
 
 // NewHarborServer returns harbor server with inputs.
-func NewHarborServer(serverURL *url.URL, accessCred *AccessCred, insecure bool) *HarborServer {
+func NewHarborServer(url, username, password string, insecure bool) *HarborServer {
 	return &HarborServer{
-		ServerURL:  serverURL,
-		AccessCred: accessCred,
-		InSecure:   insecure,
+		ServerURL: url,
+		Username:  username,
+		Password:  password,
+		Insecure:  insecure,
 	}
 }
 
@@ -80,31 +65,21 @@ type HarborClientV2 struct {
 	Auth   gruntime.ClientAuthInfoWriter
 }
 
-// ClientLegacy created based on the server data.
-func (h *HarborServer) ClientLegacy() *HarborLegacyClient {
-	c := &hc.Config{
-		URL:      h.ServerURL,
-		AuthInfo: httptransport.BasicAuth(h.AccessCred.AccessKey, h.AccessCred.AccessSecret),
-	}
-
-	cs := hc.NewClientSet(c)
-
-	return &HarborLegacyClient{
-		Client: cs.Legacy(),
-	}
-}
-
 // ClientV2 created based on the server data. Harbor V2 API.
-func (h *HarborServer) ClientV2() *HarborClientV2 {
-
-	c := &hc.Config{
+func (h *HarborServer) ClientV2() (*HarborClientV2, error) {
+	c := &hc.ClientSetConfig{
 		URL:      h.ServerURL,
-		AuthInfo: httptransport.BasicAuth(h.AccessCred.AccessKey, h.AccessCred.AccessSecret),
+		Username: h.Username,
+		Password: h.Password,
+		Insecure: h.Insecure,
 	}
 
-	cs := hc.NewClientSet(c)
+	cs, err := hc.NewClientSet(c)
+	if err != nil {
+		return nil, err
+	}
 
 	return &HarborClientV2{
 		Client: cs.V2(),
-	}
+	}, nil
 }

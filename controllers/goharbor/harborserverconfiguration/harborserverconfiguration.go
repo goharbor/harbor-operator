@@ -9,7 +9,7 @@ import (
 	"github.com/goharbor/harbor-operator/controllers"
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
 	harborClient "github.com/goharbor/harbor-operator/pkg/rest"
-	"github.com/goharbor/harbor-operator/pkg/rest/legacy"
+	v2 "github.com/goharbor/harbor-operator/pkg/rest/v2"
 	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
 	apierr "k8s.io/apimachinery/pkg/api/errors"
@@ -35,7 +35,7 @@ type Reconciler struct {
 	*commonCtrl.Controller
 	client.Client
 	Scheme *runtime.Scheme
-	Harbor *legacy.Client
+	Harbor *v2.Client
 }
 
 // +kubebuilder:rbac:groups=goharbor.io,resources=harborserverconfigurations,verbs=get;list;watch;create;update;patch;delete
@@ -75,14 +75,14 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (res ctrl.
 	}()
 
 	// Create harbor client
-	harborLegacy, err := harborClient.CreateHarborLegacyClient(ctx, r.Client, hsc)
+	harborv2, err := harborClient.CreateHarborV2Client(ctx, r.Client, hsc)
 	if err != nil {
 		log.Error(err, "failed to create harbor client")
 
 		return ctrl.Result{}, err
 	}
 
-	r.Harbor = harborLegacy
+	r.Harbor = harborv2.WithContext(ctx)
 
 	// Check if the configuration is being deleted
 	if !hsc.ObjectMeta.DeletionTimestamp.IsZero() {

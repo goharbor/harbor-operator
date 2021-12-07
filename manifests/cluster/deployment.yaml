@@ -12100,7 +12100,7 @@ spec:
               default:
                 description: Default indicates the harbor configuration manages namespaces. Value in goharbor.io/harbor annotation will be considered with high priority. At most, one HarborServerConfiguration can be the default, multiple defaults will be rejected.
                 type: boolean
-              inSecure:
+              insecure:
                 description: Indicate if the Harbor server is an insecure registry
                 type: boolean
               namespaceSelector:

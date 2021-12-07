@@ -162,7 +162,7 @@ spec:
     namespace: kube-system
     accessSecretRef: mysecret
   version: 2.1.0
-  inSecure: true
+  insecure: true
   rules: ## rules to define to rewrite image path
   - "docker.io,myharbor"    ## <repo-regex>,<harbor-project>
   namespaceSelector:
@@ -307,7 +307,7 @@ spec:
     namespace: kube-system
     accessSecretRef: mysecret
   version: 2.1.0
-  inSecure: true
+  insecure: true
   rules: ## rules to define to rewrite image path
   - "docker.io,testharbor"    ## <repo-regex>,<harbor-project>
 

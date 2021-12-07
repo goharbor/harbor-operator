@@ -11,7 +11,6 @@ import (
 	"github.com/goharbor/harbor-operator/controllers"
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
 	harborClient "github.com/goharbor/harbor-operator/pkg/rest"
-	"github.com/goharbor/harbor-operator/pkg/rest/legacy"
 	v2 "github.com/goharbor/harbor-operator/pkg/rest/v2"
 	"github.com/goharbor/harbor-operator/pkg/utils/consts"
 	"github.com/goharbor/harbor-operator/pkg/utils/strings"
@@ -43,9 +42,8 @@ func New(ctx context.Context, configStore *configstore.Store) (commonCtrl.Reconc
 type Reconciler struct {
 	*commonCtrl.Controller
 	client.Client
-	Scheme   *runtime.Scheme
-	HarborV2 *v2.Client
-	Harbor   *legacy.Client
+	Scheme *runtime.Scheme
+	Harbor *v2.Client
 }
 
 // +kubebuilder:rbac:groups="",resources=namespaces,verbs=get;list;watch;create;update;patch;delete
@@ -202,7 +200,7 @@ func (r *Reconciler) validateProject(projectName string) (string, error) {
 		err  error
 	)
 
-	if proj, err = r.HarborV2.GetProject(projectName); err != nil {
+	if proj, err = r.Harbor.GetProject(projectName); err != nil {
 		return "", err
 	}
 
@@ -234,12 +232,12 @@ func (r *Reconciler) validateRobot(proj, robot string) error {
 }
 
 func (r *Reconciler) createProjectAndRobot(proj string) (string, string, error) {
-	projID, err := r.HarborV2.EnsureProject(proj)
+	projID, err := r.Harbor.EnsureProject(proj)
 	if err != nil {
 		return "", "", err
 	}
 
-	robot, err := r.Harbor.CreateRobotAccount(projID)
+	robot, err := r.Harbor.CreateRobotAccount(fmt.Sprintf("%d", projID))
 	if err != nil {
 		return "", "", err
 	}
@@ -324,15 +322,14 @@ func (r *Reconciler) createPullSecretBinding(ctx context.Context, ns *corev1.Nam
 
 func (r *Reconciler) setHarborClient(ctx context.Context, log logr.Logger, harborCfg *goharborv1.HarborServerConfiguration) error {
 	// Create harbor client
-	harborV2, harborLegacy, err := harborClient.CreateHarborClients(ctx, r.Client, harborCfg)
+	harborV2, err := harborClient.CreateHarborV2Client(ctx, r.Client, harborCfg)
 	if err != nil {
 		log.Error(err, "failed to create harbor client")
 
 		return err
 	}
 
-	r.HarborV2 = harborV2
-	r.Harbor = harborLegacy
+	r.Harbor = harborV2.WithContext(ctx)
 
 	return nil
 }

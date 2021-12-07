@@ -18,7 +18,7 @@ type HarborServerConfigurationSpec struct {
 
 	// Indicate if the Harbor server is an insecure registry
 	// +kubebuilder:validation:Optional
-	InSecure bool `json:"inSecure,omitempty"`
+	Insecure bool `json:"insecure,omitempty"`
 
 	// Default indicates the harbor configuration manages namespaces.
 	// Value in goharbor.io/harbor annotation will be considered with high priority.

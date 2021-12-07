@@ -6,11 +6,11 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/goharbor/go-client/pkg/sdk/v2.0/models"
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
 	"github.com/goharbor/harbor-operator/controllers"
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
 	"github.com/goharbor/harbor-operator/pkg/registry/secret"
-	"github.com/goharbor/harbor-operator/pkg/rest/legacy"
 	"github.com/goharbor/harbor-operator/pkg/rest/model"
 	v2 "github.com/goharbor/harbor-operator/pkg/rest/v2"
 	"github.com/goharbor/harbor-operator/pkg/utils/consts"
@@ -46,9 +46,8 @@ func New(ctx context.Context, configStore *configstore.Store) (commonCtrl.Reconc
 type Reconciler struct {
 	*commonCtrl.Controller
 	client.Client
-	Scheme   *runtime.Scheme
-	HarborV2 *v2.Client
-	Harbor   *legacy.Client
+	Scheme *runtime.Scheme
+	Harbor *v2.Client
 }
 
 // +kubebuilder:rbac:groups=goharbor.io,resources=pullsecretbindings,verbs=get;list;watch;create;update;patch;delete
@@ -81,11 +80,15 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (res ctrl.
 		}
 	}
 
-	// Talk to this server
-	r.HarborV2 = &v2.Client{}
-	r.HarborV2.WithServer(server).WithContext(ctx)
-	r.Harbor = &legacy.Client{}
-	r.Harbor.WithServer(server).WithContext(ctx)
+	// Create harbor client
+	harborv2, err := v2.NewWithServer(server)
+	if err != nil {
+		log.Error(err, "failed to create harbor client")
+
+		return ctrl.Result{}, err
+	}
+
+	r.Harbor = harborv2.WithContext(ctx)
 
 	// Check if the binding is being deleted
 	if bd.ObjectMeta.DeletionTimestamp.IsZero() {
@@ -207,7 +210,7 @@ func (r *Reconciler) update(ctx context.Context, binding *goharborv1.PullSecretB
 func (r *Reconciler) getConfigData(ctx context.Context, hsc *goharborv1.HarborServerConfiguration) (*model.HarborServer, error) {
 	s := &model.HarborServer{
 		ServerURL: hsc.Spec.ServerURL,
-		InSecure:  hsc.Spec.InSecure,
+		Insecure:  hsc.Spec.Insecure,
 	}
 
 	namespacedName := types.NamespacedName{
@@ -219,12 +222,13 @@ func (r *Reconciler) getConfigData(ctx context.Context, hsc *goharborv1.HarborSe
 		return nil, fmt.Errorf("failed to get the configured secret with error: %w", err)
 	}
 
-	cred := &model.AccessCred{}
-	if err := cred.FillIn(sec); err != nil {
+	username, password, err := model.GetCredential(sec)
+	if err != nil {
 		return nil, fmt.Errorf("get credential error: %w", err)
 	}
 
-	s.AccessCred = cred
+	s.Username = username
+	s.Password = password
 
 	return s, nil
 }
@@ -306,13 +310,13 @@ func (r *Reconciler) getServiceAccount(ctx context.Context, ns, name string) (*c
 	return sc, nil
 }
 
-func (r *Reconciler) createRegSec(ctx context.Context, namespace string, registry string, robot *model.Robot, psb *goharborv1.PullSecretBinding) (*corev1.Secret, error) {
+func (r *Reconciler) createRegSec(ctx context.Context, namespace string, registry string, robot *models.Robot, psb *goharborv1.PullSecretBinding) (*corev1.Secret, error) {
 	auths := &secret.Object{
 		Auths: map[string]*secret.Auth{},
 	}
 	auths.Auths[registry] = &secret.Auth{
 		Username: robot.Name,
-		Password: robot.Token,
+		Password: robot.Secret,
 		Email:    fmt.Sprintf("%s@goharbor.io", robot.Name),
 	}
 
@@ -338,7 +342,7 @@ func (r *Reconciler) createRegSec(ctx context.Context, namespace string, registr
 
 func (r *Reconciler) deleteExternalResources(bd *goharborv1.PullSecretBinding) error {
 	if pro, ok := bd.Annotations[consts.AnnotationProject]; ok {
-		if err := r.HarborV2.DeleteProject(pro); err != nil {
+		if err := r.Harbor.DeleteProject(pro); err != nil {
 			// TODO: handle delete error
 			// Delete non-empty project will cause error?
 			r.Log.Error(err, "delete external resources", "finalizer", finalizerID)
