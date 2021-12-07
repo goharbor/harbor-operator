@@ -217,7 +217,7 @@ type ZlandoPostgreSQLSpec struct {
 
 type Storage struct {
 	// Kind of which storage service to be used. Only support MinIO now.
-	// +kubebuilder:validation:Enum={MinIO,S3,Swift,FileSystem,Azure, Gcs}
+	// +kubebuilder:validation:Enum={MinIO,S3,Swift,FileSystem,Azure,Gcs}
 	Kind string `json:"kind"`
 
 	Spec StorageSpec `json:"spec"`

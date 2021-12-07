@@ -145,7 +145,7 @@ storage:
     realm: {{ .Spec.Storage.Driver.Azure.BaseURL | quote }}
   {{- end }}
 
-  {{- if .Spec.Storage.Driver.gcs }}
+  {{- if .Spec.Storage.Driver.Gcs }}
   gcs:
     bucket: {{ .Spec.Storage.Driver.Gcs.Bucket | quote }}
     keyfile: {{ .Spec.Storage.Driver.Gcs.Container | quote }}

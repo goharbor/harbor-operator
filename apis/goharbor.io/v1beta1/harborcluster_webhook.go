@@ -35,7 +35,7 @@ var clog = logf.Log.WithName("harborcluster-resource")
 
 var _ webhook.Defaulter = &HarborCluster{}
 
-func (harborcluster *HarborCluster) Default() {
+func (harborcluster *HarborCluster) Default() { // nolint:funlen
 	switch harborcluster.Spec.Cache.Kind {
 	case KindCacheRedis:
 		harborcluster.Spec.Cache.Spec.RedisFailover = nil

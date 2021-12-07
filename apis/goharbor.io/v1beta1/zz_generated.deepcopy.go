@@ -4445,6 +4445,7 @@ func (in *StorageSpec) DeepCopyInto(out *StorageSpec) {
 		in, out := &in.Gcs, &out.Gcs
 		*out = new(GcsSpec)
 		**out = **in
+	}
 	if in.Redirect != nil {
 		in, out := &in.Redirect, &out.Redirect
 		*out = new(StorageRedirectSpec)

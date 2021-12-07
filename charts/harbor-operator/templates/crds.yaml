@@ -2490,6 +2490,9 @@ spec:
                             type: string
                           pathPrefix:
                             type: string
+                        required:
+                        - bucket
+                        - ketDataSecretRef
                         type: object
                       maxStorageObject:
                         description: Maximum number of objects allowed in storage (per tenant)

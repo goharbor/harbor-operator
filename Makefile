@@ -214,6 +214,7 @@ dist/harbor-operator_linux_amd64/manager:
 # Run go linters
 .PHONY: go-lint
 go-lint: golangci-lint vet go-generate
+	$(GOLANGCI_LINT) cache clean
 	$(GOLANGCI_LINT) run --verbose --max-same-issues 0 --sort-results
 
 # Run go fmt against code

@@ -166,11 +166,11 @@ type ChartMuseumChartStorageDriverSpec struct {
 type ChartMuseumChartStorageDriverGcsSpec struct {
 	// +kubebuilder:validation:Required
 	// bucket to store charts for Gcs storage
-	Bucket string `json:"bucket,omitempty"`
+	Bucket string `json:"bucket"`
 
 	// +kubebuilder:validation:Required
 	// The base64 encoded json file which contains the key
-	KetDataSecretRef string `json:"ketDataSecretRef,omitempty"`
+	KetDataSecretRef string `json:"ketDataSecretRef"`
 
 	// +kubebuilder:validation:Optional
 	PathPrefix string `json:"pathPrefix,omitempty"`
