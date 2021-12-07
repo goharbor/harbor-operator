@@ -32,7 +32,6 @@ func (r *Reconciler) AddCoreIngress(ctx context.Context, harbor *goharborv1.Harb
 }
 
 func (r *Reconciler) GetCoreIngress(ctx context.Context, harbor *goharborv1.Harbor) (*netv1.Ingress, error) {
-
 	var tls []netv1.IngressTLS
 
 	if harbor.Spec.Expose.Core.TLS.Enabled() {
