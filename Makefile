@@ -468,6 +468,8 @@ certmanager: helm jetstack
 		--namespace $(CERTMANAGER_NAMESPACE) \
 		--version v1.4.3 \
 		--set installCRDs=true
+	kubectl wait --namespace $(CERTMANAGER_NAMESPACE) --for=condition=ready pod --timeout="60s" --all
+	
 
 .PHONY: jetstack
 jetstack:
