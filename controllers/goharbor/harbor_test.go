@@ -150,7 +150,7 @@ func setupValidHarbor(ctx context.Context, ns string) (Resource, client.ObjectKe
 			Expose: goharborv1.HarborExposeSpec{
 				Core: goharborv1.HarborExposeComponentSpec{
 					TLS: nil,
-					Ingress: &goharborv1.HarborExposeIngressSpec{
+					Ingress: goharborv1.HarborExposeIngressSpec{
 						Host: "core.goharbor.io",
 					},
 				},
