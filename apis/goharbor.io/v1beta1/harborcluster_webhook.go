@@ -195,8 +195,8 @@ func (harborcluster *HarborCluster) validateStorage() *field.Error { // nolint:g
 		}
 
 		if redirect != nil && redirect.Enable {
-			if redirect.Expose == nil || redirect.Expose.Ingress == nil {
-				return required(rp.Child("ingress"))
+			if redirect.Expose == nil {
+				return required(rp.Child("expose"))
 			}
 		}
 	}
