@@ -609,7 +609,14 @@ type RegistryStorageDriverSpec struct {
 	Swift *RegistryStorageDriverSwiftSpec `json:"swift,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// An implementation of the storagedriver.StorageDriver interface which uses Microsoft Azure Blob Storage for object storage.
+	// See: https://docs.docker.com/registry/storage-drivers/azure/
 	Azure *RegistryStorageDriverAzureSpec `json:"azure,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// An implementation of the storagedriver.StorageDriver interface which uses Google Cloud for object storage.
+	// https://docs.docker.com/registry/storage-drivers/gcs/
+	Gcs *RegistryStorageDriverGcsSpec `json:"gcs,omitempty"`
 }
 
 func (r *RegistryStorageDriverSpec) Validate() error {
@@ -632,6 +639,10 @@ func (r *RegistryStorageDriverSpec) Validate() error {
 	}
 
 	if r.Azure != nil {
+		found++
+	}
+
+	if r.Gcs != nil {
 		found++
 	}
 
@@ -673,6 +684,22 @@ type RegistryStorageDriverAzureSpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=/azure/harbor/charts
 	PathPrefix string `json:"pathPrefix,omitempty"`
+}
+
+type RegistryStorageDriverGcsSpec struct {
+	// +kubebuilder:validation:Required
+	// The base64 encoded json file which contains the key
+	KetDataRef string `json:"keyDataRef,omitempty"`
+
+	// +kubebuilder:validation:Required
+	// bucket to store charts for Gcs storage
+	Bucket string `json:"bucket,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	PathPrefix string `json:"pathPrefix,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	ChunkSize string `json:"chunkSize,omitempty"`
 }
 
 type RegistryStorageDriverS3Spec struct {

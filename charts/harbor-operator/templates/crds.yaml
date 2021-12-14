@@ -2478,6 +2478,22 @@ spec:
                         required:
                         - volumeSource
                         type: object
+                      gcs:
+                        properties:
+                          bucket:
+                            description: bucket to store charts for Gcs storage
+                            type: string
+                          chunksize:
+                            type: string
+                          ketDataSecretRef:
+                            description: The base64 encoded json file which contains the key
+                            type: string
+                          pathPrefix:
+                            type: string
+                        required:
+                        - bucket
+                        - ketDataSecretRef
+                        type: object
                       maxStorageObject:
                         description: Maximum number of objects allowed in storage (per tenant)
                         format: int64
@@ -7679,6 +7695,7 @@ spec:
                     - Swift
                     - FileSystem
                     - Azure
+                    - Gcs
                     type: string
                   spec:
                     description: the spec of Storage.
@@ -7733,6 +7750,19 @@ spec:
                             type: object
                         required:
                         - registryPersistentVolume
+                        type: object
+                      gcs:
+                        properties:
+                          bucket:
+                            description: bucket to store charts for Gcs storage
+                            type: string
+                          chunkSize:
+                            type: string
+                          keyDataRef:
+                            description: The base64 encoded json file which contains the key
+                            type: string
+                          pathPrefix:
+                            type: string
                         type: object
                       minIO:
                         description: inCluster options.
@@ -10878,6 +10908,7 @@ spec:
               imageChartStorage:
                 properties:
                   azure:
+                    description: An implementation of the storagedriver.StorageDriver interface which uses Microsoft Azure Blob Storage for object storage. See https://docs.docker.com/registry/storage-drivers/azure/
                     properties:
                       accountkeyRef:
                         type: string
@@ -10928,6 +10959,20 @@ spec:
                         type: object
                     required:
                     - registryPersistentVolume
+                    type: object
+                  gcs:
+                    description: An implementation of the storagedriver.StorageDriver interface which uses Google Cloud for object storage. See https://docs.docker.com/registry/storage-drivers/gcs/
+                    properties:
+                      bucket:
+                        description: bucket to store charts for Gcs storage
+                        type: string
+                      chunkSize:
+                        type: string
+                      keyDataRef:
+                        description: The base64 encoded json file which contains the key
+                        type: string
+                      pathPrefix:
+                        type: string
                     type: object
                   redirect:
                     properties:
@@ -20431,6 +20476,7 @@ spec:
                   driver:
                     properties:
                       azure:
+                        description: 'An implementation of the storagedriver.StorageDriver interface which uses Microsoft Azure Blob Storage for object storage. See: https://docs.docker.com/registry/storage-drivers/azure/'
                         properties:
                           accountkeyRef:
                             type: string
@@ -21365,6 +21411,20 @@ spec:
                             type: object
                         required:
                         - volumeSource
+                        type: object
+                      gcs:
+                        description: An implementation of the storagedriver.StorageDriver interface which uses Google Cloud for object storage. https://docs.docker.com/registry/storage-drivers/gcs/
+                        properties:
+                          bucket:
+                            description: bucket to store charts for Gcs storage
+                            type: string
+                          chunkSize:
+                            type: string
+                          keyDataRef:
+                            description: The base64 encoded json file which contains the key
+                            type: string
+                          pathPrefix:
+                            type: string
                         type: object
                       inmemory:
                         description: 'InMemory storage driver is for purely tests purposes. This driver is an implementation of the storagedriver.StorageDriver interface which uses local memory for object storage. If you would like to run a registry from volatile memory, use the filesystem driver on a ramdisk. IMPORTANT: This storage driver does not persist data across runs. This is why it is only suitable for testing. Never use this driver in production. See: https://docs.docker.com/registry/storage-drivers/inmemory/'

@@ -492,7 +492,14 @@ type HarborStorageImageChartStorageSpec struct {
 	Swift *HarborStorageImageChartStorageSwiftSpec `json:"swift,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// An implementation of the storagedriver.StorageDriver interface which uses Microsoft Azure Blob Storage for object storage.
+	// See https://docs.docker.com/registry/storage-drivers/azure/
 	Azure *HarborStorageImageChartStorageAzureSpec `json:"azure,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// An implementation of the storagedriver.StorageDriver interface which uses Google Cloud for object storage.
+	// See https://docs.docker.com/registry/storage-drivers/gcs/
+	Gcs *HarborStorageImageChartStorageGcsSpec `json:"gcs,omitempty"`
 }
 
 type HarborStorageTrivyStorageSpec struct {
@@ -512,6 +519,7 @@ const (
 	SwiftDriverName      = "swift"
 	FileSystemDriverName = "filesystem"
 	AzureDriverName      = "azure"
+	GcsDriverName        = "gcs"
 )
 
 func (r *HarborStorageImageChartStorageSpec) ProviderName() string {
@@ -525,6 +533,10 @@ func (r *HarborStorageImageChartStorageSpec) ProviderName() string {
 
 	if r.Azure != nil {
 		return AzureDriverName
+	}
+
+	if r.Gcs != nil {
+		return GcsDriverName
 	}
 
 	return FileSystemDriverName
@@ -550,6 +562,10 @@ func (r *HarborStorageImageChartStorageSpec) Validate() error {
 	}
 
 	if r.Azure != nil {
+		found++
+	}
+
+	if r.Gcs != nil {
 		found++
 	}
 
@@ -582,6 +598,23 @@ type HarborStorageRegistryPersistentVolumeSpec struct {
 
 type HarborStorageImageChartStorageAzureSpec struct {
 	RegistryStorageDriverAzureSpec `json:",inline"`
+}
+
+type HarborStorageImageChartStorageGcsSpec struct {
+	RegistryStorageDriverGcsSpec `json:",inline"`
+}
+
+func (r *HarborStorageImageChartStorageGcsSpec) ChartMuseum() *ChartMuseumChartStorageDriverGcsSpec {
+	return &ChartMuseumChartStorageDriverGcsSpec{
+		KetDataSecretRef: r.KetDataRef,
+		Bucket:           r.Bucket,
+		PathPrefix:       r.PathPrefix,
+		ChunkSize:        r.ChunkSize,
+	}
+}
+
+func (r *HarborStorageImageChartStorageGcsSpec) Registry() *RegistryStorageDriverGcsSpec {
+	return &r.RegistryStorageDriverGcsSpec
 }
 
 func (r *HarborStorageImageChartStorageAzureSpec) ChartMuseum() *ChartMuseumChartStorageDriverAzureSpec {

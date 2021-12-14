@@ -145,6 +145,14 @@ storage:
     realm: {{ .Spec.Storage.Driver.Azure.BaseURL | quote }}
   {{- end }}
 
+  {{- if .Spec.Storage.Driver.Gcs }}
+  gcs:
+    bucket: {{ .Spec.Storage.Driver.Gcs.Bucket | quote }}
+    keyfile: {{ .Spec.Storage.Driver.Gcs.Container | quote }}
+    rootdirectory: {{ .Spec.Storage.Driver.Gcs.PathPrefix | quote }}
+    chunksize: {{ .Spec.Storage.Driver.Gcs.ChunkSize | quote }}
+  {{- end }}
+
   {{- if .Spec.Storage.Driver.Swift }}
   swift:
     username: {{ .Spec.Storage.Driver.Swift.Username | quote }}

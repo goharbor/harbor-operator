@@ -35,7 +35,7 @@ var clog = logf.Log.WithName("harborcluster-resource")
 
 var _ webhook.Defaulter = &HarborCluster{}
 
-func (harborcluster *HarborCluster) Default() {
+func (harborcluster *HarborCluster) Default() { // nolint:funlen
 	switch harborcluster.Spec.Cache.Kind {
 	case KindCacheRedis:
 		harborcluster.Spec.Cache.Spec.RedisFailover = nil
@@ -52,26 +52,37 @@ func (harborcluster *HarborCluster) Default() {
 
 	switch harborcluster.Spec.Storage.Kind {
 	case KindStorageFileSystem:
+		harborcluster.Spec.Storage.Spec.Gcs = nil
 		harborcluster.Spec.Storage.Spec.Azure = nil
 		harborcluster.Spec.Storage.Spec.S3 = nil
 		harborcluster.Spec.Storage.Spec.Swift = nil
 		harborcluster.Spec.Storage.Spec.MinIO = nil
 	case KindStorageS3:
+		harborcluster.Spec.Storage.Spec.Gcs = nil
 		harborcluster.Spec.Storage.Spec.Azure = nil
 		harborcluster.Spec.Storage.Spec.FileSystem = nil
 		harborcluster.Spec.Storage.Spec.Swift = nil
 		harborcluster.Spec.Storage.Spec.MinIO = nil
 	case KindStorageSwift:
+		harborcluster.Spec.Storage.Spec.Gcs = nil
 		harborcluster.Spec.Storage.Spec.Azure = nil
 		harborcluster.Spec.Storage.Spec.S3 = nil
 		harborcluster.Spec.Storage.Spec.FileSystem = nil
 		harborcluster.Spec.Storage.Spec.MinIO = nil
 	case KindStorageMinIO:
+		harborcluster.Spec.Storage.Spec.Gcs = nil
 		harborcluster.Spec.Storage.Spec.Azure = nil
 		harborcluster.Spec.Storage.Spec.S3 = nil
 		harborcluster.Spec.Storage.Spec.Swift = nil
 		harborcluster.Spec.Storage.Spec.FileSystem = nil
 	case KindStorageAzure:
+		harborcluster.Spec.Storage.Spec.Gcs = nil
+		harborcluster.Spec.Storage.Spec.S3 = nil
+		harborcluster.Spec.Storage.Spec.Swift = nil
+		harborcluster.Spec.Storage.Spec.FileSystem = nil
+		harborcluster.Spec.Storage.Spec.MinIO = nil
+	case KindStorageGcs:
+		harborcluster.Spec.Storage.Spec.Azure = nil
 		harborcluster.Spec.Storage.Spec.S3 = nil
 		harborcluster.Spec.Storage.Spec.Swift = nil
 		harborcluster.Spec.Storage.Spec.FileSystem = nil
@@ -188,6 +199,11 @@ func (harborcluster *HarborCluster) validateStorage() *field.Error { // nolint:g
 	if harborcluster.Spec.Storage.Kind == KindStorageAzure && harborcluster.Spec.Storage.Spec.Azure == nil {
 		// Invalid and not acceptable
 		return required(fp.Child("azure"))
+	}
+
+	if harborcluster.Spec.Storage.Kind == KindStorageGcs && harborcluster.Spec.Storage.Spec.Gcs == nil {
+		// Invalid and not acceptable
+		return required(fp.Child("gcs"))
 	}
 
 	if harborcluster.Spec.Storage.Kind == KindStorageFileSystem && harborcluster.Spec.Storage.Spec.FileSystem == nil {
