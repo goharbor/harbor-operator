@@ -5,8 +5,6 @@ metadata:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
     goharbor.io/operator-version: v1.1.0
-  labels:
-    harbor-day2-webhook-configuration: disabled
   name: harbor-operator-ns
 ---
 apiVersion: apiextensions.k8s.io/v1
@@ -37188,9 +37186,9 @@ webhooks:
   namespaceSelector:
     matchExpressions:
     - key: harbor-day2-webhook-configuration
-      operator: NotIn
+      operator: In
       values:
-      - disabled
+      - enabled
   rules:
   - apiGroups:
     - ""

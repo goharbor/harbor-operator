@@ -634,8 +634,6 @@ jobs:
           sed -i "s/core.harbor.domain/$CORE_HOST/g" config/samples/harborcluster-standard/*.yaml
           sed -i "s/notary.harbor.domain/$NOTARY_HOST/g" config/samples/harborcluster-standard/*.yaml
 
-          kubectl label ns default harbor-day2-webhook-configuration=disabled
-
           make sample-harborcluster-standard
 
           for i in $(seq 1 7);do

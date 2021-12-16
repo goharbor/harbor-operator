@@ -9,5 +9,5 @@ webhooks:
   namespaceSelector:
     matchExpressions:
     - key: harbor-day2-webhook-configuration
-      operator: NotIn
-      values: ["disabled"]
+      operator: In
+      values: ["enabled"]
