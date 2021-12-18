@@ -38,6 +38,12 @@ webhooks:
       port: {{ .Values.service.port }}
   failurePolicy: Fail
   name: mimg.kb.io
+  namespaceSelector:
+    matchExpressions:
+    - key: harbor-day2-webhook-configuration
+      operator: In
+      values:
+      - enabled
   rules:
   - apiGroups:
     - ""

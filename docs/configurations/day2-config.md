@@ -32,39 +32,41 @@ host and access key & secret (key and secret should be wrapped into a kubernetes
 It has a `default` field to define whether this HSC will be applied to all namespaces. There could be only one default HSC.
 
 Rewriting rule is a k-v pair to specify images from which repo should be redirected to which harbor project:
-`"docker.io": "harborproject1"` or `"*": "harborproejct2"`
+`"docker.io": "harborproject1"` or `"*": "harborproject2"`
 
-Here we should pay attention is the key "*" means images from any repo are redirected to harbor project "harborproejct2".
+Here we should pay attention is the key "*" means images from any repo are redirected to harbor project "harborproject2".
 
 Rewriting rules will be defined as a rule list like:
 
 ```shell
 rules:
   - docker.io:harborproject1
-  - *:harborproejct2
-  - quay.io:harborproejct3
+  - *:harborproject2
+  - quay.io:harborproject3
 ```
 
 **Definition location:**
+
+To enforce the rewrite rule to a specific namespace, you need to add a label to the namespace `harbor-day2-webhook-configuration: enabled`.
 
 The rewriting rules can be defined into two places, one is in the HSC spec and another is in a configMap.
 
 Rules in HSC spec are for the whole cluster scope. The rules will be applied to the namespaces selected by the namespace selector of HSC.
 
-The rules defined in the configMap are only visible to the namespace where the configMap is living. Use annotation of namespace `goharbor.io/image-rewrite`(rename to `goharbor.io/rewriting-rules`) to link the rule configMap.
+The rules defined in the configMap are only visible to the namespace where the configMap is living. Use annotation of namespace rename to `goharbor.io/rewriting-rules` to link the rule configMap.
 
 **The priority:**
 
 Rules in configMap > rules in HSC referenced by ConfigMap > default HSC > "*" rule
 
-For example. images from `docker.io` will be rewritten to 'harborproject1' and images from `quay.io` will be rewritten to 'harborproejct3'. The images from `gcr.io` or `ghcr.io` will both be rewritten to 'harborproejct2' by following the "*" rule.
+For example. images from `docker.io` will be rewritten to 'harborproject1' and images from `quay.io` will be rewritten to 'harborproject3'. The images from `gcr.io` or `ghcr.io` will both be rewritten to 'harborproject2' by following the "*" rule.
 
 **Assumptions:**
 
-Only 1 HSC as default. (ctrl has to make sure this constraint)
-Default HSC is appliable for all namespaces as the default behavior (except its namespace selector is configured).
-HSC can have a namespace selector to specify its influencing scope.
-Namespace selector is optional. The empty selector means adapting all.
+- Only 1 HSC as default. (ctrl has to make sure this constraint)
+- Default HSC is appliable for all namespaces as the default behavior (except its namespace selector is configured).
+- HSC can have a namespace selector to specify its influencing scope.
+- Namespace selector is optional. The empty selector means adapting all.
 
 Namespace admin can create a configMap to customize image rewriting for the specified namespace:
 
@@ -75,8 +77,8 @@ hsc: myHscName ## if this ns missing the selector of the specfying HSC, log warn
 rewriting: on ## or off
 rules: -|
   - docker.io:harborproject1-1
-  - *:harborproejct2-1
-  - quay.io:harborproejct3-1
+  - *:harborproject2-1
+  - quay.io:harborproject3-1
 ```
 
 Add annotation `goharbor.io/rewriting-rules=configMapName` to the namespace to enable the rewriting.
@@ -195,6 +197,8 @@ metadata:
     goharbor.io/harbor: harborserverconfiguration-sample
     goharbor.io/service-account: default
     goharbor.io/project: "*"
+  label:
+    harbor-day2-webhook-configuration: enabled
 ```
 
 Create it:
@@ -274,7 +278,7 @@ metadata:
   annotations:
     goharbor.io/harbor: harborserverconfiguration-sample
     goharbor.io/service-account: default
-    goharbor.io/rewriting-rules: sz-namespace1
+    goharbor.io/rewriting-rules: cm
 ```
 
 Corresponding ConfigMap
@@ -283,7 +287,7 @@ Corresponding ConfigMap
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: sz-namespace1
+  name: cm
   namespace: sz-namespace1
 data:
   hsc: harbor2

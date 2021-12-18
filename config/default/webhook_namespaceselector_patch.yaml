@@ -1,5 +1,5 @@
 # This patch add namespace selector to admission webhook config and
-# resources under namespace with this label won't trigger this webhook
+# resources under namespace with this label to trigger this webhook
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
