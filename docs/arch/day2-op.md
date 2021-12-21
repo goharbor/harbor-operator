@@ -10,7 +10,7 @@ The day2 operations includes:
 * Transparent proxy cache
 * Apply configuration changes
 
-For more info, check [Here](https://github.com/szlabs/harbor-automation-4k8s#harbor-automation-4k8s).
+For more info, check [Here](https://github.com/goharbor/harbor-operator/docs/configurations/day2-config.md).
 
 ## Overall design
 
@@ -64,4 +64,4 @@ Set the Harbor system settings via a configuration CRD. At this time, it is not 
 
 ## References
 
-* Learn more, check Harbor day2 operator [prototype project](https://github.com/szlabs/harbor-automation-4k8s).
+* Learn more, check Harbor day2 operator [prototype project](https://github.com/goharbor/harbor-operator).

@@ -10,3 +10,16 @@ webhooks:
       name: '{{ include "chart.fullname" . | quote }}'
       namespace: '{{ .Release.Namespace | quote }}'
       port: '{{ .Values.service.port }}'
+- name: mimg.kb.io
+  clientConfig:
+    service:
+      name: '{{ include "chart.fullname" . | quote }}'
+      namespace: '{{ .Release.Namespace | quote }}'
+      port: '{{ .Values.service.port }}'
+  # This patch add namespace selector to admission webhook config and
+  # resources under namespace with this label to trigger this webhook
+  namespaceSelector:
+    matchExpressions:
+    - key: harbor-day2-webhook-configuration
+      operator: In
+      values: ["enabled"]

@@ -43,7 +43,7 @@ Harbor deployment stack is controlled by a custom Harbor resource `HarborCluster
   * [ ] [gcs](https://cloud.google.com/storage): A driver storing objects in a Google Cloud Storage bucket.
 * Supports updating the deployed Harbor cluster
   * Remove the optional Harbor components
-* More day2 operations (see [PoC project](https://github.com/szlabs/harbor-automation-4k8s))
+* More day2 operations (see [PoC project](https://github.com/goharbor/harbor-operator))
   * Auto mapping Kubernetes namespaces and Harbor project
   * Pull secrets injections
   * Container image path rewriting

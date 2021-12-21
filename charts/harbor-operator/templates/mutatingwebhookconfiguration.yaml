@@ -28,3 +28,30 @@ webhooks:
     resources:
     - harborclusters
   sideEffects: None
+- admissionReviewVersions:
+  - v1beta1
+  clientConfig:
+    service:
+      name: {{ include "chart.fullname" . | quote }}
+      namespace: {{ .Release.Namespace | quote }}
+      path: /mutate-image-path
+      port: {{ .Values.service.port }}
+  failurePolicy: Fail
+  name: mimg.kb.io
+  namespaceSelector:
+    matchExpressions:
+    - key: harbor-day2-webhook-configuration
+      operator: In
+      values:
+      - enabled
+  rules:
+  - apiGroups:
+    - ""
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - pods
+  sideEffects: NoneOnDryRun

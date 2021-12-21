@@ -33,6 +33,12 @@ patchesStrategicMerge:
 # 'CERTMANAGER' needs to be enabled to use ca injection
 - webhookcainjection_patch.yaml
 
+# [WEBHOOK] To add namespaceselector to weebhook.
+# so that webhook won't check namespaces with specific labels
+# avoid blocking controller coming up
+- webhook_namespaceselector_patch.yaml
+
+
 # the following config is for teaching kustomize how to do var substitution
 vars:
 # [CERTMANAGER] To enable cert-manager, uncomment all sections with 'CERTMANAGER' prefix.

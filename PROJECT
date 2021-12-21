@@ -67,5 +67,11 @@ resources:
   version: v1beta1
 - group: goharbor
   kind: HarborCluster
-  version: v1beta1  
+  version: v1beta1
+- group: goharbor
+  kind: HarborServerConfiguration
+  version: v1alpha1
+- group: goharbor
+  kind: PullSecretBinding
+  version: v1alpha1
 version: "2"

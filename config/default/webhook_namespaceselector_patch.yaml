@@ -1,0 +1,13 @@
+# This patch add namespace selector to admission webhook config and
+# resources under namespace with this label to trigger this webhook
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: mutating-webhook-configuration
+webhooks:
+- name: mimg.kb.io
+  namespaceSelector:
+    matchExpressions:
+    - key: harbor-day2-webhook-configuration
+      operator: In
+      values: ["enabled"]
