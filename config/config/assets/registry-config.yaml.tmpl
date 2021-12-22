@@ -148,7 +148,7 @@ storage:
   {{- if .Spec.Storage.Driver.Gcs }}
   gcs:
     bucket: {{ .Spec.Storage.Driver.Gcs.Bucket | quote }}
-    keyfile: {{ .Spec.Storage.Driver.Gcs.Container | quote }}
+    keyfile: {{ .Spec.Storage.Driver.Gcs.KeyDataRef | quote }}
     rootdirectory: {{ .Spec.Storage.Driver.Gcs.PathPrefix | quote }}
     chunksize: {{ .Spec.Storage.Driver.Gcs.ChunkSize | quote }}
   {{- end }}

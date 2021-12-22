@@ -606,7 +606,7 @@ type HarborStorageImageChartStorageGcsSpec struct {
 
 func (r *HarborStorageImageChartStorageGcsSpec) ChartMuseum() *ChartMuseumChartStorageDriverGcsSpec {
 	return &ChartMuseumChartStorageDriverGcsSpec{
-		KetDataSecretRef: r.KetDataRef,
+		KeyDataSecretRef: r.KeyDataRef,
 		Bucket:           r.Bucket,
 		PathPrefix:       r.PathPrefix,
 		ChunkSize:        r.ChunkSize,

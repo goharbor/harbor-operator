@@ -170,7 +170,7 @@ type ChartMuseumChartStorageDriverGcsSpec struct {
 
 	// +kubebuilder:validation:Required
 	// The base64 encoded json file which contains the key
-	KetDataSecretRef string `json:"ketDataSecretRef"`
+	KeyDataSecretRef string `json:"keyDataSecretRef"`
 
 	// +kubebuilder:validation:Optional
 	PathPrefix string `json:"pathPrefix,omitempty"`

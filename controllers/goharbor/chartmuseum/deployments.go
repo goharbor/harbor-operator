@@ -143,7 +143,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1.
 			Name: "gcs-key",
 			VolumeSource: corev1.VolumeSource{
 				Secret: &corev1.SecretVolumeSource{
-					SecretName: chartMuseum.Spec.Chart.Storage.Gcs.KetDataSecretRef,
+					SecretName: chartMuseum.Spec.Chart.Storage.Gcs.KeyDataSecretRef,
 					Items: []corev1.KeyToPath{
 						{
 							Key:  "GCS_KEY_DATA",

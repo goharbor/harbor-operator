@@ -163,6 +163,11 @@ func (harbor *Controller) getHarborCR(ctx context.Context, harborcluster *goharb
 			harborcluster.Spec.Storage.Spec.Azure.HarborStorageImageChartStorageAzureSpec.DeepCopy()
 	}
 
+	if harborcluster.Spec.Storage.Spec.Gcs != nil {
+		harborCR.Spec.ImageChartStorage.Gcs =
+			harborcluster.Spec.Storage.Spec.Gcs.HarborStorageImageChartStorageGcsSpec.DeepCopy()
+	}
+
 	if harborcluster.Spec.Storage.Spec.Redirect != nil {
 		harborCR.Spec.ImageChartStorage.Redirect.Disable = !harborcluster.Spec.Storage.Spec.Redirect.Enable
 	}

@@ -192,12 +192,12 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1.Reg
 		})
 	}
 
-	if registry.Spec.Storage.Driver.Gcs != nil && registry.Spec.Storage.Driver.Gcs.KetDataRef != "" {
+	if registry.Spec.Storage.Driver.Gcs != nil && registry.Spec.Storage.Driver.Gcs.KeyDataRef != "" {
 		volumes = append(volumes, corev1.Volume{
 			Name: "gcs-key",
 			VolumeSource: corev1.VolumeSource{
 				Secret: &corev1.SecretVolumeSource{
-					SecretName: registry.Spec.Storage.Driver.Gcs.KetDataRef,
+					SecretName: registry.Spec.Storage.Driver.Gcs.KeyDataRef,
 					Items: []corev1.KeyToPath{
 						{
 							Key:  "GCS_KEY_DATA",
@@ -542,7 +542,7 @@ func (r *Reconciler) ApplyGcsStorageEnvs(ctx context.Context, registry *goharbor
 			SecretKeyRef: &corev1.SecretKeySelector{
 				Key: harbormetav1.SharedSecretKey,
 				LocalObjectReference: corev1.LocalObjectReference{
-					Name: registry.Spec.Storage.Driver.Gcs.KetDataRef,
+					Name: registry.Spec.Storage.Driver.Gcs.KeyDataRef,
 				},
 			},
 		},

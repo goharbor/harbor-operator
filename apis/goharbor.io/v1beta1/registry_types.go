@@ -689,7 +689,7 @@ type RegistryStorageDriverAzureSpec struct {
 type RegistryStorageDriverGcsSpec struct {
 	// +kubebuilder:validation:Required
 	// The base64 encoded json file which contains the key
-	KetDataRef string `json:"keyDataRef,omitempty"`
+	KeyDataRef string `json:"keyDataRef,omitempty"`
 
 	// +kubebuilder:validation:Required
 	// bucket to store charts for Gcs storage
