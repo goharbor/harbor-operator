@@ -88,8 +88,17 @@ func (ipr *ImagePathRewriter) Handle(ctx context.Context, req admission.Request)
 			}
 
 			// append rules of configMap to rules of hsc.
-			allRules = rule.MergeRules(rule.StringToRules(hsc.Spec.Rules, hsc.Spec.ServerURL),
-				rule.StringToRules(strings.Split(strings.TrimSpace(cm.Data[consts.ConfigMapKeyRules]), "\n"), hsc.Spec.ServerURL))
+			rulesFromHSC, err := rule.StringToRules(hsc.Spec.Rules, hsc.Spec.ServerURL)
+			if err != nil {
+				return admission.Errored(http.StatusInternalServerError, fmt.Errorf("failed to parse rule, error: %w", err))
+			}
+
+			rulesFromConfigMap, err := rule.StringToRules(strings.Split(strings.TrimSpace(cm.Data[consts.ConfigMapKeyRules]), "\n"), hsc.Spec.ServerURL)
+			if err != nil {
+				return admission.Errored(http.StatusInternalServerError, fmt.Errorf("failed to parse rule, error: %w", err))
+			}
+
+			allRules = rule.MergeRules(rulesFromConfigMap, rulesFromHSC)
 		} else if _, yes := cm.Data[consts.ConfigMapKeyRules]; yes && strings.TrimSpace(cm.Data[consts.ConfigMapKeyRules]) != "" {
 			return admission.Errored(http.StatusBadRequest, errors.New("rule are defined in configMap but there is no hsc associated with it"))
 		}
@@ -103,7 +112,12 @@ func (ipr *ImagePathRewriter) Handle(ctx context.Context, req admission.Request)
 	if defaultHSC != nil && defaultHSC.Spec.NamespaceSelector != nil {
 		// check selector, if there is match, add the default rule to it. it has lowerest priority
 		if match := checkNamespaceSelector(podNS.Labels, defaultHSC.Spec.NamespaceSelector.MatchLabels); match {
-			allRules = rule.MergeRules(rule.StringToRules(defaultHSC.Spec.Rules, defaultHSC.Spec.ServerURL), allRules)
+			ruleFromDefaultHSC, err := rule.StringToRules(defaultHSC.Spec.Rules, defaultHSC.Spec.ServerURL)
+			if err != nil {
+				return admission.Errored(http.StatusInternalServerError, fmt.Errorf("failed to parse rule, error: %w", err))
+			}
+
+			allRules = rule.MergeRules(allRules, ruleFromDefaultHSC)
 		} else {
 			// it's ok to not match the default hsc
 			ipr.Log.Info("default hsc ", defaultHSC.Namespace, "/", defaultHSC.Name, " doesn't match current namespace")
@@ -138,7 +152,7 @@ func (ipr *ImagePathRewriter) getConfigMap(ctx context.Context, name, namespace 
 		Namespace: namespace,
 		Name:      name,
 	}
-	// TODO: replace with no cache client to avoid potential OOM issue
+
 	if err := ipr.Client.Get(ctx, cmNamespacedName, cm); err != nil {
 		return nil, err
 	}
