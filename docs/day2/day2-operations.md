@@ -117,7 +117,7 @@ host and access key & secret (key and secret should be wrapped into a kubernetes
 It has a `default` field to define whether this HSC will be applied to all namespaces. There could be only one default HSC.
 
 Rewriting rule is a k-v pair to specify images from which repo should be redirected to which harbor project:
-`"docker.io": "harborproject1"` or `"*": "harborproject2"`
+`docker.io=>harborproject1` or `*=>harborproject2`
 
 Here we should pay attention is the key "*" means images from any repo are redirected to harbor project "harborproject2".
 
@@ -125,9 +125,9 @@ Rewriting rules will be defined as a rule list like:
 
 ```shell
 rules:
-  - docker.io:harborproject1
-  - *:harborproject2
-  - quay.io:harborproject3
+  - docker.io=>harborproject1
+  - *=>harborproject2
+  - quay.io=>harborproject3
 ```
 
 **Definition location:**
@@ -149,7 +149,7 @@ For example. images from `docker.io` will be rewritten to 'harborproject1' and i
 **Assumptions:**
 
 - Only 1 HSC as default. (ctrl has to make sure this constraint)
-- Default HSC is appliable for all namespaces as the default behavior (except its namespace selector is configured).
+- Default HSC is applicable for all namespaces as the default behavior (except its namespace selector is configured).
 - HSC can have a namespace selector to specify its influencing scope.
 - Namespace selector is optional. The empty selector means adapting all.
 
@@ -161,9 +161,9 @@ Namespace admin can create a configMap to customize image rewriting for the spec
 hsc: myHscName ## if this ns missing the selector of the specfying HSC, log warnning and no action.
 rewriting: on ## or off
 rules: -|
-  - docker.io:harborproject1-1
-  - *:harborproject2-1
-  - quay.io:harborproject3-1
+  - docker.io=>harborproject1-1
+  - *=>harborproject2-1
+  - quay.io=>harborproject3-1
 ```
 
 Add annotation `goharbor.io/rewriting-rules=configMapName` to the namespace to enable the rewriting.
@@ -197,6 +197,7 @@ Then a PSB can be created to track the relationship and bind pull secret to the 
 Register your Harbor in a `HarborServerConfiguration` CR:
 
 ```yaml
+---
 apiVersion: v1
 kind: Secret
 metadata:
@@ -207,23 +208,18 @@ data:
   accessKey: YWRtaW4=
   accessSecret: SGFyYm9yMTIzNDU=
 ---
-apiVersion: goharbor.io/v1alpha1
+apiVersion: goharbor.io/v1beta1
 kind: HarborServerConfiguration
 metadata:
   name: harborserverconfiguration-sample
 spec:
   default: true ## whether it will be default global hsc
-  serverURL: 10.168.167.189
+  serverURL: https://10.168.167.189 ## https/http is required
   accessCredential:
     namespace: kube-system
     accessSecretRef: mysecret
-  version: 2.1.0
+  version: 2.4.0
   insecure: true
-  rules: ## rules to define to rewrite image path
-  - "docker.io,myharbor"    ## <repo-regex>,<harbor-project>
-  namespaceSelector:
-    matchLabels:
-      usethisHSC: true
 ```
 
 Create it:
@@ -240,7 +236,7 @@ kubectl get hsc
 
 ### Pulling secret injection
 
-Add related annotations to your namespace when enabling secret injection:
+Add related annotations and labels to your namespace when enabling secret injection:
 
 ```yaml
 apiVersion: v1
@@ -261,7 +257,47 @@ Create it:
 kubectl apply -f namespace.yaml
 ```
 
-After the automation is completed, a CR `PullSecretBinding` is created:
+After the automation is completed, Namespace is updated with newest annotations, a CR `PullSecretBinding` is created:
+
+```shell script
+kubectl get namespace sz-namespace1 -oyaml
+```
+
+Output details:
+
+```yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  annotations:
+    goharbor.io/harbor: harborserverconfiguration-sample
+    goharbor.io/project: sz-namespace1-y87uip
+    goharbor.io/robot: "8"
+    goharbor.io/service-account: default
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","kind":"Namespace","metadata":{"annotations":{"goharbor.io/harbor":"harborserverconfiguration-sample","goharbor.io/project":"*","goharbor.io/service-account":"default"},"labels":{"harbor-day2-webhook-configuration":"enabled","usethisHSC":"ok"},"name":"sz-namespace1"}}
+  creationTimestamp: "2021-12-22T21:17:38Z"
+  labels:
+    harbor-day2-webhook-configuration: enabled
+    kubernetes.io/metadata.name: sz-namespace1
+    usethisHSC: ok
+  name: sz-namespace1
+  resourceVersion: "8102"
+  uid: 43bd7365-792f-4523-a749-57ea19ace40f
+spec:
+  finalizers:
+  - kubernetes
+status:
+  phase: Active
+```
+
+The related auto-generated data is recorded in the related annotations:
+
+```yaml
+annotations:
+  goharbor.io/project: sz-namespace1-y87uip
+  goharbor.io/robot: "8"
+```
 
 ```shell script
 kubectl get psb -n sz-namespace1
@@ -280,18 +316,16 @@ k8s get psb/binding-txushc -n sz-namespace1 -o yaml
 Output details:
 
 ```yaml
-apiVersion: goharbor.io/v1alpha1
+apiVersion: goharbor.io/v1beta1
 kind: PullSecretBinding
 metadata:
   annotations:
-    goharbor.io/project: sz-namespace1-axtnd8
-    goharbor.io/robot: "31"
-    goharbor.io/robot-secret: regsecret-sab3pq
-  creationTimestamp: "2020-12-02T15:21:48Z"
+    goharbor.io/robot-secret: regsecret-dhrdxd
+  creationTimestamp: "2021-12-22T21:33:35Z"
   finalizers:
   - psb.finalizers.resource.goharbor.io
   generation: 1
-  name: binding-txushc
+  name: binding-fqgysg
   namespace: sz-namespace1
   ownerReferences:
   - apiVersion: v1
@@ -299,15 +333,15 @@ metadata:
     controller: true
     kind: Namespace
     name: sz-namespace1
-    uid: 810efadd-b560-4791-8007-8decaf2fbb1c
-  resourceVersion: "2500851"
-  selfLink: /apis/goharbor.io/v1alpha1/namespaces/sz-namespace1/pullsecretbindings/binding-txushc
-  uid: f5b4f68a-4657-4f89-b231-0fc96c03ca00
+    uid: 43bd7365-792f-4523-a749-57ea19ace40f
+  resourceVersion: "8107"
+  uid: c52f5b10-1cbd-49f6-9731-78e5d3f8dfdb
 spec:
   harborServerConfig: harborserverconfiguration-sample
+  projectId: "30"
+  robotId: "8"
   serviceAccount: default
 status:
-  conditions: []
   status: ready
 ```
 
@@ -315,14 +349,16 @@ The related auto-generated data is recorded in the related annotations:
 
 ```yaml
 annotations:
-  goharbor.io/project: sz-namespace1-axtnd8
-  goharbor.io/robot: "31"
-  goharbor.io/robot-secret: regsecret-sab3pq
+  goharbor.io/robot-secret: regsecret-dhrdxd
 ```
 
 ### Image path rewrite
 
-To enable image rewrite, set the rules section in hsc, or set annotation to refer to a configMap that contains rules and hsc
+Add `goharbor.io/rewriting-rules` annotation to target namespace, the value would be the name of ConfigMap that contains the rule. The configMap should be in the same namespace.
+
+Add label `harbor-day2-webhook-configuration: enabled` to the target namespace as well.
+
+If you set namespaceSelector, also add corresponding label to namespace.
 
 ```yaml
 apiVersion: v1
@@ -333,9 +369,14 @@ metadata:
     goharbor.io/harbor: harborserverconfiguration-sample
     goharbor.io/service-account: default
     goharbor.io/rewriting-rules: cm
+  labels:
+    usethisHSC: ok
+    harbor-day2-webhook-configuration: enabled
 ```
 
-Corresponding ConfigMap
+Rules can be set in ConfigMap, or in the HSC that is referred in `configmap.data.hsc`. `configmap.data.rewriting` needs to be `on`.
+
+Corresponding ConfigMap:
 
 ```yaml
 apiVersion: v1
@@ -344,34 +385,63 @@ metadata:
   name: cm
   namespace: sz-namespace1
 data:
-  hsc: harbor2
-  rewriting: "on"
+  hsc: harbor2 # hsc that could store the rule
+  rewriting: "on" # set to "on" to turn on the rewriting
   rules: | # configMap doesn't support storing nested string
-    docker.io,highestproject
-    gcr.io,a
-
+    - docker.io=>highestproject
+    - gcr.io=>a
 ```
 
 Corresponding HSC
 
+To only select specific namespace for apply rules under specific HSC, add `namespaceSelector` to target HSC spec.
+
 ```yaml
-apiVersion: goharbor.io/v1alpha1
+apiVersion: goharbor.io/v1beta1
 kind: HarborServerConfiguration
 metadata:
-  name: harborserverconfiguration-sample
+  name: harbor2
 spec:
-  serverURL: 10.168.167.12
+  serverURL: https://10.168.167.189 ## https/http is required
   accessCredential:
     namespace: kube-system
     accessSecretRef: mysecret
-  version: 2.1.0
+  version: 2.4.0
   insecure: true
   rules: ## rules to define to rewrite image path
-  - "docker.io,testharbor"    ## <repo-regex>,<harbor-project>
-
+  - "docker.io=>testharbor"    ## <repo-regex>,<harbor-project>
+  namespaceSelector:
+    matchLabels:
+      usethisHSC: ok
 ```
 
 As mentioned before, the mutating webhook will rewrite all the images of the deploying pods which has no registry host
 prefix to the flowing pattern:
 
 `image:tag => <hsc/hsc-name.[spec.serverURL]>/<psb/binding-xxx.[metadata.annotations[goharbor.io/project]]>/image:tag`
+
+And priority of the rule is
+
+> Rules in configMap > rules in HSC referenced by ConfigMap > default HSC > "*" rule
+
+Try create a pod under namespace `sz-namespace1`
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: webserver
+  namespace: sz-namespace1
+spec:
+  containers:
+  - name: webserver  # The name that this container will have.
+    image: nginx:latest # The image on which it is based.
+    ports:               # The port(s) that will be open.
+    - containerPort: 80
+```
+
+The pod image path should be changed
+
+```yaml
+Image:          demo.goharbor.io/highestproject/library/nginx:latest
+```

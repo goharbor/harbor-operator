@@ -1,6 +1,11 @@
 package rule
 
-import "strings"
+import (
+	"net/url"
+	"strings"
+
+	"github.com/pkg/errors"
+)
 
 type Rule struct {
 	RegistryRegex string
@@ -8,26 +13,44 @@ type Rule struct {
 	ServerURL     string
 }
 
-// assume rule.Rules are concatentated by ','.
-func StringToRules(raw []string, server string) []Rule {
+// StringToRules parse rule and create Rule object
+// assume rule.Rules are concatentated by '=>'.
+func StringToRules(raw []string, server string) ([]Rule, error) {
 	res := make([]Rule, 0)
 
+	// remove https/http from the serverURL
+	u, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
 	for _, r := range raw {
-		registryRegex := r[:strings.LastIndex(r, ",")]
-		project := r[strings.LastIndex(r, ",")+1:]
+		// format read from configMap could be like '- docker.io=>value'
+		if r == "" || !strings.Contains(r, "=>") {
+			return nil, errors.Errorf("rule '%s' is invalid", r)
+		}
+
+		if len(r) >= 2 && r[0:2] == "- " {
+			r = r[2:]
+		}
+
+		lastIndex := strings.LastIndex(r, "=")
+		registryRegex := r[:lastIndex]
+		project := r[lastIndex+2:]
 
 		res = append(res, Rule{
 			RegistryRegex: registryRegex,
 			Project:       project,
-			ServerURL:     server,
+			ServerURL:     u.Host,
 		})
 	}
 
-	return res
+	return res, nil
 }
 
-// append l after h, so l will be checked first.
-// there could be cases that regex in h is `gcr.io`, while in l is `gcr.io*`.
-func MergeRules(l, h []Rule) []Rule {
+// MergeRules appends rule l after h, so h will be checked first.
+// we append instead of merge since rules are regex, hard to merge,
+// for example 'google.com' and '$google.com^' are the same.
+func MergeRules(h, l []Rule) []Rule {
 	return append(h, l...)
 }
