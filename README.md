@@ -24,30 +24,26 @@ Harbor deployment stack is controlled by a custom Harbor resource `HarborCluster
   * [X] filesystem: A storage driver configured to use a directory tree in the a kubernetes volume.
   * [X] [s3](https://docs.aws.amazon.com/AmazonS3/latest/API/Welcome.html): A driver storing objects in an Amazon Simple Storage Service (S3) bucket.
   * [X] [swift](https://wiki.openstack.org/wiki/Swift): A driver storing objects in Openstack Swift.
+  * [X] [azure](https://azure.microsoft.com/services/storage/): A driver storing objects in Microsoft Azure Blob Storage.
+  * [X] [gcs](https://cloud.google.com/storage): A driver storing objects in a Google Cloud Storage bucket.
 * Supports updating the deployed Harbor cluster
   * Adjust replicas of components
-  * Add the optional Harbor components
-* Support upgrading the managed Harbor registry version
+  * Add/remove the optional Harbor components
+* Supports upgrading the managed Harbor registry version
 * Deletes all the linked resources when deleting the Harbor cluster
-* Configures Harbor system settings with CRD-based configuration or labeled ConfigMap
-* Support services exposed with [ingress](https://kubernetes.io/fr/docs/concepts/services-networking/ingress/) ([`default`](https://git.k8s.io/ingress-nginx/README.md#readme), [`gce`](https://git.k8s.io/ingress-gce/README.md#readme), `ncp` and `contour`)
-* Support services exposed with LoadBalancer
+* Support services exposed with [ingress](https://kubernetes.io/fr/docs/concepts/services-networking/ingress/): [nginx(default)](https://git.k8s.io/ingress-nginx/README.md#readme), [gce](https://git.k8s.io/ingress-gce/README.md#readme), [contour](https://github.com/projectcontour/contour) and `ncp`
+* Support Day2 operations
+  * Configures Harbor system settings with configuration CRD (`recommend`) or labeled ConfigMap (`deprecated`)
+  * Image pulling secret auto-injection
+    * Auto mapping Kubernetes namespaces to the Harbor project
+  * Image pulling path auto-rewriting
+    * Transparent proxy cache settings
 
 ## Future features
 
 * [Auto-scaling](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) for each component.
 * Backup/restore data (registry layer, chartmuseum data, databases content).
-* More backend storage configurations supported
-  * [ ] [azure](https://azure.microsoft.com/services/storage/): A driver storing objects in Microsoft Azure Blob Storage.
-  * [ ] [oss](https://www.alibabacloud.com/product/oss): A driver storing objects in Aliyun OSS.
-  * [ ] [gcs](https://cloud.google.com/storage): A driver storing objects in a Google Cloud Storage bucket.
-* Supports updating the deployed Harbor cluster
-  * Remove the optional Harbor components
-* More day2 operations (see [PoC project](https://github.com/goharbor/harbor-operator))
-  * Auto mapping Kubernetes namespaces and Harbor project
-  * Pull secrets injections
-  * Container image path rewriting
-  * Transparent proxy cache settings
+* Support services exposed with LoadBalancer
 
 ## Release plans
 
@@ -64,11 +60,13 @@ Versions of the underlying components are listed below:
 
 |  Components   |       Harbor      | MinIO operator | PostgreSQL operator | Redis operator |
 |---------------|-------------------|----------------|---------------------|----------------|
-|  Versions     | 2.3.x `[1]`       | 4.0.6+         | 1.5.0+              | 1.0.0          |
+|  Versions     | 2.4.x `[1]`       | 4.3.2          | 1.6.3               | 1.0.1 `[2]`    |
 
 NOTES:
 
 [1] `.x` means all the patch releases of Harbor can be naturally supported in one operator version.
+
+[2] Use a [forked version](https://github.com/szlabs/redis-operator) of [spotahome/redis-operator](https://github.com/spotahome/redis-operator).
 
 ## Compatibility
 
@@ -76,7 +74,7 @@ NOTES:
 
 Harbor operator supports two extra Kubernetes versions besides the current latest version (`n-2` pattern):
 
-|    Versions   |        1.19        |        1.20        |         1.21        |
+|    Versions   |        1.20        |        1.21        |         1.22        |
 |---------------|--------------------|--------------------|---------------------|
 | Compatibility | :heavy_check_mark: | :heavy_check_mark: |  :heavy_check_mark: |
 
@@ -84,7 +82,7 @@ Harbor operator supports two extra Kubernetes versions besides the current lates
 
 Harbor operator relies on cert manager to manage kinds of certificates used by Harbor cluster components. Table shown below lists the compatibilities of cert manager versions:
 
-|    Versions   |         1.2        |           1.3        |           1.4        |
+|    Versions   |         1.4[.4]    |           1.5[.3]    |           1.6[.1]    |
 |---------------|--------------------|----------------------|----------------------|
 | Compatibility | :heavy_check_mark: |  :heavy_check_mark:  |  :heavy_check_mark:  |
 
@@ -113,7 +111,7 @@ Harbor operator exposes the frontend service with ingress (CRD version: `v1beta1
 * [Manifests references](./docs/manifests-reference.md)
 * [Customize storage, database and cache services](./docs/installation/customize-storage-db-redis.md)
 * [Customize images](./docs/customize-images.md)
-* [Day2 configurations](./docs/configurations/day2-config.md)
+* [Day2 operations](docs/day2/day2-operations.md)
 * [Upgrade Harbor cluster](./docs/LCM/upgrade-cluster.md)
 * [Delete Harbor cluster](./docs/LCM/cluster-deletion.md)
 * [Backup data](./docs/LCM/backup-data.md)
@@ -127,7 +125,7 @@ Harbor operator exposes the frontend service with ingress (CRD version: `v1beta1
 
 Harbor operator project is developed and maintained by the [Harbor operator workgroup](https://github.com/goharbor/community/blob/master/workgroups/wg-operator/README.md). If you're willing to join the group and do contributions to operator project, welcome to [contact us](#community). Follow the [Development guide](https://github.com/goharbor/harbor-operator/blob/master/docs/development.md) to start on the project.
 
-Special thanks to the [contributors](./MAINTAINERS) who did significant contributions.
+Special thanks to the [contributors](./MAINTAINERS) who did significant contributions ([see feature area](./docs/feature-areas.md)).
 
 ## Community
 
@@ -139,8 +137,8 @@ Special thanks to the [contributors](./MAINTAINERS) who did significant contribu
 ## Additional references
 
 * [cert-manager](https://cert-manager.io/docs/)
-* [Underlying zalando postgreSQL operator](https://github.com/zalando/postgres-operator)
-* [Underlying spotahome redis operator](https://github.com/spotahome/redis-operator)
+* [Underlying postgreSQL operator](https://github.com/zalando/postgres-operator)
+* [Underlying redis operator](https://github.com/szlabs/redis-operator)
 * [Underlying minio operator](https://github.com/minio/minio-operator)
 * [Kubernetes operator](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/)
 * [Custom Resource Definition](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/)
@@ -148,7 +146,7 @@ Special thanks to the [contributors](./MAINTAINERS) who did significant contribu
 
 ## Related links
 
-* Contribute: <https://github.com/goharbor/harbor-operator/blob/master/CONTRIBUTING.md>
+* Contribute: <https://github.com/goharbor/harbor-operator/blob/master/CONTRIBUTING>
 * Report bugs: <https://github.com/goharbor/harbor-operator/issues>
 * Get latest version: <https://hub.docker.com/r/goharbor/harbor-operator>
 

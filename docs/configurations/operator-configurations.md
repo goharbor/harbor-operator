@@ -4,8 +4,8 @@ There are some settings for you to configure your Harbor operator deployment.
 
 ## common config
 
-- for install by kustomize build, change file config/config/config.yaml
-- for install by helm chart, change values.yaml or change configure map in charts/harbor-operator/templates/configmap.yaml
+- For installing by `kustomize` build, change file `config/config/config.yaml`
+- For installing by `helm` chart, change `values.yaml` or change configure map in `charts/harbor-operator/templates/configmap.yaml`
 
 ### config.yaml
 
@@ -20,8 +20,8 @@ There are some settings for you to configure your Harbor operator deployment.
 
 ## controller config files
 
-- for install by kustomize build, change file config/config/*-ctrl.yaml
-- for install by helm chart, change values.yaml or change configure map in charts/harbor-operator/templates/configmap.yaml
+- For installing by `kustomize` build, change file `config/config/*-ctrl.yaml`
+- For installing by `helm` chart, change `values.yaml` or change configure map in `charts/harbor-operator/templates/configmap.yaml`
 
 ### chartmuseum-ctrl.yaml
 

@@ -60,7 +60,7 @@ should be appended to the namespace.
 
 ### Configuration
 
-Set the Harbor system settings via a configuration CRD. At this time, it is not supported anywhere, but a configMap based configuration has been supported in the released Harbor operator. For how to use it, check [day2 config](../configurations/day2-config.md).
+Set the Harbor system settings via a configuration CRD. At this time, it is not supported anywhere, but a configMap based configuration has been supported in the released Harbor operator. For how to use it, check [day2 config](../day2/day2-operations.md).
 
 ## References
 

@@ -1,29 +1,114 @@
-# Day2 Operation
+# Day2 Operations
 
 Day2 Operation provides the following features to help users get better experiences of using [Harbor](https://github.com/goharbor/harbor)
 or apply some Day2 operations to the Harbor deployed in the Kubernetes cluster:
 
 - [x] **Mapping k8s namespace and harbor project**: make sure there is a relevant project existing at linked Harbor side for the
  specified k8s namespace pulling image from there (bind specified one or create new).
-- [x] **Pulling secret auto injection**: auto create robot account in the corresponding Harbor project and bind it to the
+- [x] **Pulling secret auto-injection**: auto create robot account in the corresponding Harbor project and bind it to the
  related service account of the related k8s namespace to avoid explicitly specifying image pulling secret in the
  deployment manifest yaml.
 - [x] **image path auto rewriting**: rewrite the pulling path of the matched workload images (e.g: no full repository path specified)
  being deployed in the specified k8s namespace to the corresponding project at the linked Harbor.
 - [x] **transparent proxy cache**: rewrite the pulling path of the matched workload images to the proxy cache project of the linked Harbor.
-- [ ] apply configuration changes: update the system configurations of the linked Harbor with Kubernetes way by providing a configMap.
+- [x] **apply configuration changes**: update the system configurations of the linked Harbor with Kubernetes way by providing a CRD.
 - [ ] certificate population: populate the CA of the linked Harbor instance to the container runtimes of all the cluster workers and let workers trust it to avoid image pulling issues.
-- [ ] TBD
 
 ## Overall Design
 
 The diagram below shows the overall design of this project:
 
-![overall design](./docs/assets/4k8s-automation.png)
+![overall design](../images/arch/day2-operator-design.jpg)
 
-### Feature
+## Feature
 
-#### Image rewrite
+### Day2 configurations
+
+Initially, we configure harbor by means of configmap, but currently we recommend using `HarborConfiguration` CRD to configure harbor, for the configmap method will be deprecated in version 1.2, those who have used and still use configmap will be automatically converted to `HarborConfiguration` CR by the controller, and automatically remove old configmap.
+> The harbor configuration items can be found in [harbor swagger](https://github.com/goharbor/harbor/blob/0867a6bfd6f33149f86a7ae8a740f5e1f976cafa/api/v2.0/swagger.yaml#L7990).
+
+#### ConfigMap (deprecated)
+
+First you need to prepare a config map to provide your harbor configurations, apply the config map in the same namespace as harborcluster. In particular, you need to add an annotation (`goharbor.io/configuration: <harbor cluster name>`) to your config map to mark which harborcluster it is acting on.
+
+In addition, in order to protect the password from being displayed directly in the config map, you need to define the password inside the secret, and then specify the name of the secret in the configuration. We currently offer these type of secret configurations fields: `"email_password", "ldap_search_password", "uaa_client_secret", "oidc_client_secret"`.
+
+**ConfigMap example**:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-sample
+  namespace: cluster-sample-ns
+type: Opaque
+data:
+  # the key is same with fields name.
+  email_password: YmFyCg==
+```
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-config
+  # namespace same with harborcluster cr namespace.
+  namespace: cluster-sample-ns
+  annotations:
+    # required.
+    # if not define the anno, the config map will not work.
+    # the key is `goharbor.io/configuration`, and the value is your harborcluster cr name.
+    goharbor.io/configuration: harborcluster-sample
+data:
+  # provide your harbor configuration by yaml format.
+  config.yaml: |
+    email_ssl: true
+    email_password: secret-sample # the value is the name of secret which store the email_password.
+```
+
+#### CRD-based HarborConfiguration:
+
+**Example of HarborConfiguration**:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-sample
+  namespace: cluster-sample-ns
+type: Opaque
+data:
+  # the key is same with fields name.
+  email_password: YmFyCg==
+```
+
+```yaml
+apiVersion: goharbor.io/v1beta1
+kind: HarborConfiguration
+metadata:
+  name: test-config
+  namespace: cluster-sample-ns
+spec:
+  # your harbor configuration
+  configuration:
+    email_password: secret-sample
+    email_ssl: true
+  harborClusterRef: harborcluster-sample
+```
+
+After apply your `HarborConfiguration` CR to kubernetes cluster, the controller of `HarborConfiguration` will apply your configuration to harbor instance, you can see the result of configuration from CR status.
+
+```yaml
+status:
+  lastApplyTime: "2021-06-04T06:07:53Z"
+  lastConfiguration:
+    configuration:
+      email_password: secret-sample
+      email_ssl: true
+  status: Success
+```
+
+### Image rewrite
 
 Image rewrite will rewrite the original image paths to the specified Harbor projects by following the pre-defined rewriting rules via Kubernetes admission control webhook.
 
@@ -85,7 +170,7 @@ Add annotation `goharbor.io/rewriting-rules=configMapName` to the namespace to e
 
 Merging rules: rules defined in configMap has higher priority if conflicts happened.
 
-#### Project mapping and secret injection
+### Project mapping and secret injection
 
 When doing project mapping and secret injection, an annotation `goharbor.io/project` MUST be added to the specified namespace ( if `goharbor.io/project` is
 not set, that means the mapping/injection function is not enabled).
@@ -104,37 +189,6 @@ Then a PSB can be created to track the relationship and bind pull secret to the 
 
 - wrap the robot account as a secret
 - bind the secret to the service account which is specified by the annotation `goharbor.io/service-account` (this is optional, if it is not set, then use the default service account under the namespace)
-
-## Installation
-
-For trying this project, you can follow the guideline shown below to quickly install the operator and webhook to your cluster:
-(tools like `git`,`make`,`kustomize` and `kubectl` should be installed and available in the $PATH)
-
-1. Clone the repository
-
-1. Build the image (no official image built so far)
-
-```shell script
-make docker-build && make docker-push
-```
-
-1. Deploy the operator to the Kubernetes cluster
-
-```shell script
-make deploy
-```
-
-1. Check the status of the operator
-
-```shell script
-kubectl get all -n harbor-operator-ns
-```
-
-1. Uninstall the operator
-
-```shell script
-kustomize build config/default | kubectl delete -f -
-```
 
 ## Usages
 
@@ -197,7 +251,7 @@ metadata:
     goharbor.io/harbor: harborserverconfiguration-sample
     goharbor.io/service-account: default
     goharbor.io/project: "*"
-  label:
+  labels:
     harbor-day2-webhook-configuration: enabled
 ```
 

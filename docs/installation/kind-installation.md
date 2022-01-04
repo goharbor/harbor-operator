@@ -6,7 +6,7 @@
 
 * [Docker](https://docs.docker.com/engine/install/) installed (Version: v19.03.12+)
 * [kind](https://kind.sigs.k8s.io/docs/user/quick-start/#installation) installed (Version: v0.8.1+).
-* [kubectl](https://kubernetes.io/docs/tasks/tools/) installed (Version: v1.18.6+)
+* [kubectl](https://kubernetes.io/docs/tasks/tools/) installed (Version: v1.20.1+)
 
 ## Prepare kind config
 
