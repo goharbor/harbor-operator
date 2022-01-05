@@ -148,9 +148,13 @@ storage:
   {{- if .Spec.Storage.Driver.Gcs }}
   gcs:
     bucket: {{ .Spec.Storage.Driver.Gcs.Bucket | quote }}
-    keyfile: {{ .Spec.Storage.Driver.Gcs.KeyDataRef | quote }}
+    keyfile: /etc/gcs/gcs-key.json
+    {{- if .Spec.Storage.Driver.Gcs.PathPrefix }}
     rootdirectory: {{ .Spec.Storage.Driver.Gcs.PathPrefix | quote }}
+    {{- end }}
+    {{- if .Spec.Storage.Driver.Gcs.ChunkSize }}
     chunksize: {{ .Spec.Storage.Driver.Gcs.ChunkSize | quote }}
+    {{- end }}
   {{- end }}
 
   {{- if .Spec.Storage.Driver.Swift }}

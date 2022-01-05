@@ -39,7 +39,7 @@ const (
 	CtlHealthPath                         = "/api/health"
 	StorageServiceCAName                  = "storage-service-ca"
 	StorageServiceCAMountPath             = "/harbor_cust_cert/custom-ca-bundle.crt"
-	GcsJSONKeyFilePath                    = ConfigPath + "/gcs-key.json"
+	GcsJSONKeyFilePath                    = "/etc/gcs/gcs-key.json"
 )
 
 var (
@@ -540,7 +540,7 @@ func (r *Reconciler) ApplyGcsStorageEnvs(ctx context.Context, registry *goharbor
 		Name: "GCS_KEY_DATA",
 		ValueFrom: &corev1.EnvVarSource{
 			SecretKeyRef: &corev1.SecretKeySelector{
-				Key: harbormetav1.SharedSecretKey,
+				Key: "GCS_KEY_DATA",
 				LocalObjectReference: corev1.LocalObjectReference{
 					Name: registry.Spec.Storage.Driver.Gcs.KeyDataRef,
 				},
