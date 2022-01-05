@@ -66,7 +66,7 @@ data:
     email_password: secret-sample # the value is the name of secret which store the email_password.
 ```
 
-#### CRD-based HarborConfiguration:
+#### CRD-based HarborConfiguration
 
 **Example of HarborConfiguration**:
 

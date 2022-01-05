@@ -12,7 +12,7 @@
 
 |    Feature area        |                   Owners                 |
 |------------------------|------------------------------------------|
-| CI/CD & Development    | [ZiMing Zhang](https://github.com/bitsf) | 
+| CI/CD & Development    | [ZiMing Zhang](https://github.com/bitsf) |
 | K8s CRD                | [CanFeng Wang](https://github.com/wangcanfengxs) / [ChenYu Zhang](https://github.com/chlins) / [YiNan Li](https://github.com/cndoit18)|
 | Harbor                 | [ZiMing Zhang](https://github.com/bitsf) / [Weiwei He](https://github.com/heww) |
 | Day2 operations        | [Lubron Zhan](https://github.com/lubronzhan) / [ChenYu Zhang](https://github.com/chlins) |

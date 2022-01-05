@@ -245,7 +245,7 @@ spec:
       insecure: true # Optional
       # The timeout of otel
       timeout: 10s # Optional, default is 10s
-      
+
   # ... Skipped fields
 ```
 
