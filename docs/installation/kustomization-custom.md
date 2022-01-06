@@ -37,7 +37,7 @@ kubectl delete -k github.com/zalando/postgres-operator/manifests
 
 ## Deploy Redis operator (Optional)
 
-Follow the deployment guide shown [here](https://github.com/spotahome/redis-operator#operator-deployment-on-kubernetes) to deploy Redis operator to your cluster.
+Follow the deployment guide shown [here](https://github.com/szlabs/redis-operator/tree/v1.0.1#operator-deployment-on-kubernetes) to deploy Redis operator to your cluster.
 
 A simple way is:
 
@@ -66,7 +66,7 @@ kubectl delete -f https://raw.githubusercontent.com/szlabs/redis-operator/master
 
 ## Deploy Minio operator (Optional)
 
-Follow the installation guide shown [here](https://github.com/minio/operator/tree/v4.0.6#1-install-the-minio-operator) to install the Minio operator.
+Follow the installation guide shown [here](https://github.com/minio/operator/tree/v4.3.2#1-install-the-minio-operator) to install the Minio operator.
 
 Or use the Minio kustomization template:
 
@@ -74,7 +74,7 @@ Or use the Minio kustomization template:
 # Clone the codebase.
 git clone https://github.com/minio/operator.git && \
 cd operator && \
-git checkout tags/v4.0.6 -b minio-v4.0.6
+git checkout tags/v4.3.2 -b minio-v4.3.2
 
 # Apply with the kustomization template that is located the root dir of the codebase.
 kustomize build | kubectl apply -f -
@@ -133,8 +133,8 @@ Of course, you can clone the codebase into your computer and then customize and 
 git clone https://github.com/goharbor/harbor-operator.git
 
 # Checkout to the specified branch or the specified tag.
-# To branch: git checkout <branch-name> e.g.: git checkout release-1.1.0
-# To tag: git checkout tags/<tag> -b <branch-name> e.g: git checkout tags/v1.1.0 -b tag-v1.1.0
+# To branch: git checkout <branch-name> e.g.: git checkout release-1.2.0
+# To tag: git checkout tags/<tag> -b <branch-name> e.g: git checkout tags/v1.2.0 -b tag-v1.2.0
 
 # As the resource manifests are not stored in the codebase, then you need to run the following command to generate the related resource manifests before using `kustomize` to build your customized operator deployment manifest:
 make manifests
@@ -146,7 +146,7 @@ kustomize build manifests/harbor | kubectl apply -f -
 ## kustomize build manifests/harbor | kubectl delete -f -
 ```
 
->NOTES: Here we use the deployment manifest in the `master` branch as an example, for deploying the released versions,you can get the deployment manifest in the GitHub release page or find it in the corresponding code branch such as `release-1.1.0`.
+>NOTES: Here we use the deployment manifest in the `main` branch as an example, for deploying the released versions,you can get the deployment manifest in the GitHub release page or find it in the corresponding code branch such as `release-1.2.0`.
 
 ## What's next
 

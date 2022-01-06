@@ -4,12 +4,12 @@ The Harbor operator can also be deployed via the operator helm chart provided. W
 
 ## Prerequisites
 
-1. `Kubernetes` cluster (v1.19+) is running (see [Applicative Kubernetes versions](../../README.md#applicative-kubernetes-versions)
+1. `Kubernetes` cluster (v1.20+) is running (see [Applicative Kubernetes versions](../../README.md#applicative-kubernetes-versions)
    for more information). For local development purpose, check [Kind installation](./kind-installation.md).
-1. `cert-manager` (v1.2+) is [installed](https://cert-manager.io/docs/installation/kubernetes/).
+1. `cert-manager` (v1.4.4+) is [installed](https://cert-manager.io/docs/installation/kubernetes/).
 1. Ingress controller is deployed (see [Ingress controller types](../../README.md#ingress-controller-types) for more information). For default
-   ingress controller, check [NGINX ingress controller](https://kubernetes.github.io/ingress-nginx/deploy/).
-1. `kubectl` with a proper version(v1.18.6+) is [installed](https://kubernetes.io/docs/tasks/tools/).
+   ingress controller, check [NGINX ingress controller](https://kubernetes.github.io/ingress-nginx/deploy/) (version should be >1.0).
+1. `kubectl` with a proper version(v1.20.1+) is [installed](https://kubernetes.io/docs/tasks/tools/).
 1. `git` (optional) is [installed](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git).
 1. `make` and `curl` (optional) are installed.
 1. `helm` v3 is [installed](https://helm.sh/docs/intro/install/).
@@ -35,25 +35,25 @@ There are several ways to get the Harbor operator helm chart:
     ```shell
     git clone https://github.com/goharbor/harbor-operator.git && \
     cd harbor-operator && \
-    git checkout release-1.1.0 && \
-    make helm-generate RELEASE_VERSION=v1.1.0
+    git checkout release-1.2.0 && \
+    make helm-generate RELEASE_VERSION=v1.2.0
 
     # Checkout to the specified branch or the specified tag
-    # To branch: git checkout <branch-name> e.g.: git checkout release-1.1.0
-    # To tag: git checkout tags/<tag> -b <branch-name> e.g: git checkout tags/v1.1.0 -b tag-v1.1.0
+    # To branch: git checkout <branch-name> e.g.: git checkout release-1.2.0
+    # To tag: git checkout tags/<tag> -b <branch-name> e.g: git checkout tags/v1.2.0 -b tag-v1.2.0
 
-    # chart is generated to `charts/harbor-operator-v1.1.0.tgz`
+    # chart is generated to `charts/harbor-operator-v1.2.0.tgz`
     ```
 
 ## Deploy Harbor operator with chart
 
-> Under the restriction of helm chart upgrades, CRDs should be updated manully before the deployment of the Harbor operator when the older version(`<v1.1.0`) helm chart has been deployed.
+> Under the restriction of helm chart upgrades, CRDs should be updated manually before the deployment of the Harbor operator when the older version(`<v1.2.0`) helm chart has been deployed.
 
 Run the `helm` command to install the harbor operator to your cluster:
 
 ```shell
 # Change chart path depends on how do you get the helm chart.
-helm upgrade --namespace harbor-operator-ns --install harbor-operator charts/harbor-operator-v1.1.0.tgz --set-string image.repository=ghcr.io/goharbor/harbor-operator --set-string image.tag=v1.1.0
+helm upgrade --namespace harbor-operator-ns --install harbor-operator charts/harbor-operator-v1.2.0.tgz --set-string image.repository=ghcr.io/goharbor/harbor-operator --set-string image.tag=v1.2.0
 ```
 
 For what settings you can override with `--set`, `--set-string`, `--set-file` or `--values`, you can refer to the [values.yaml](../../charts/harbor-operator/values.yaml) file.
@@ -109,7 +109,7 @@ helm uninstall harbor-operator --namespace harbor-operator-ns
 If you selectively decide to install the operators of the dependent services (such as PostgreSQL, Redis and Minio) to achieve the capabilities of deploying full stack Harbor (harbor components + in-cluster dependent services) with helm charts,
 you can check the additional references listed below.
 
-* [Install Minio operator with chart](https://github.com/minio/operator/tree/master/helm/minio-operator)
+* [Install Minio operator with chart](https://github.com/minio/operator/tree/master/helm/operator)
   * Find archived minio operator charts from [here](https://github.com/minio/operator/tree/master/helm-releases)
 * [Install PostgreSQL operator with chart](https://github.com/zalando/postgres-operator/blob/master/docs/quickstart.md#helm-chart)
 * [Install Redis operator with chart](https://github.com/spotahome/redis-operator#using-the-helm-chart)

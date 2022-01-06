@@ -40,11 +40,14 @@ spec:
       ingress:
         # Host of the exposed service
         host: <registry.goharbor.io> # Required
-        # Ingress controller type, support ["gce","ncp","default"]
+        # Ingress controller type, support ["gce","ncp","contour","default"]
+        # "default" means nginx
         controller: default # Optional, default value = "default"
         # Annotations applied to the ingress
         annotations: # Optional
           key: value
+        # Set the ingress class name. If it is not set, the system default one will be picked up.
+        ingressClassName: ingressClass # Optional
     # Expose notary service when it is configured
     notary: # Optional
       ## Totally same with above [expose.core] part, skipped here.
@@ -105,7 +108,7 @@ spec:
 spec:
   # ... Skipped fields
 
-  updateStrategyType: "myEncryption" # Optional, default="RollingUpdate"
+  updateStrategyType: "RollingUpdate" # Optional, default="RollingUpdate"
   
   # ... Skipped fields
 ```
@@ -116,7 +119,7 @@ spec:
 spec:
   # ... Skipped fields
   
-  # Example: 2.2.1
+  # Example: 2.4.0
   version: <Harbor version> # Optional
   
   # ... Skipped fields
@@ -170,6 +173,79 @@ spec:
     imagePullSecrets: # Optional
       - name: myHarborRegSecret
   
+  # ... Skipped fields
+```
+
+### Network stack settings
+
+Network settings for the deploying Harbor.
+
+```yaml
+spec:
+  # ... Skipped fields
+  
+  # Network settings
+  network: # Optional
+    # Set what IP families are used for the deploying Harbor
+    ipFamilies:
+      - IPv4
+      - IPv6
+  
+  # ... Skipped fields
+```
+
+### Trace settings
+
+Tracing settings for the deploying Harbor.
+
+```yaml
+spec:
+  # ... Skipped fields
+  
+  # Tracing settings
+  trace: # Optional
+    # Enable tracing or not
+    enabled: false # Optional, default is false
+    # Used to differentiate different harbor services.
+    namespace: core # Optional
+    # Set `sampleRate` to 1 if you wanna sampling 100% of trace data; set 0.5 if you wanna sampling 50% of trace data, and so forth.
+    sampleRate: 1 # Optional, default is 1
+    # A key value dict contains user defined attributes used to initialize trace provider.
+    attributes: # Optional
+      key: value
+    # The tracing provider: 'jaeger' or 'otel'
+    provider: jaeger # Required
+    # Spec for jaeger provider if provider is set to jaeger
+    jaeger: # Optional
+      # Serve mode. `collector` or `agent`
+      mode: collector # Required
+      # Configuration for collector mode
+      collector: # Optional
+        # The endpoint of the jaeger collector
+        endpoint: jaeger.io # Required
+        # The username of the jaeger collector
+        username: foo
+        # The password secret reference name of the jaeger collector
+        passwordRef: foobar
+      # Configuration for agent mode
+      agent: # Optional
+        # The host of the jaeger agent
+        host: jaeger.io # Required
+        # The port of the jaeger agent
+        port: 8000
+    # Spec for otel provider if provider is set to otel.
+    otel: # Optional
+      # The endpoint of otel
+      endpoint: otel.io # Required
+      # The URL path of otel
+      urlPath: /otel # Required
+      # Whether enable compression or not for otel
+      compression: false # Optional
+      # Whether establish insecure connection or not for otel
+      insecure: true # Optional
+      # The timeout of otel
+      timeout: 10s # Optional, default is 10s
+
   # ... Skipped fields
 ```
 
@@ -233,6 +309,7 @@ spec:
   registryctl: {}
   chartmuseum: {}
   trivy: {}
+  exporter: {}
   notary:
     server: {}
     signer: {}
@@ -257,6 +334,11 @@ spec:
       - cert2
     # Token issuer
     tokenIssuer: myIssuer # Required
+    # Metrics settings
+    metrics: # optional
+      enabled: false # optional, default is false
+      port: 8001 # optional, default is 8001
+      path: /metrics # optional, default is /metrics
   
   # ... Skipped fields
 ```
@@ -278,6 +360,10 @@ spec:
       - cert2
     # The number of workers
     workerCount: 10 # Optional, default = 10 , minimal = 1
+    # Metrics settings
+    metrics: # optional
+      # Similar to the section shown in the `core` component
+      # Skip here
   
   # ... Skipped fields
 ```
@@ -299,6 +385,9 @@ spec:
     storageMiddlewares: # Optional
       - name: m1 # Required
         optionsRef: op1 # Optional
+    metrics: # optional
+    # Similar to the section shown in the `core` component
+    # Skip here
   
   # ... Skipped fields
 ```
@@ -382,7 +471,7 @@ spec:
 
 ### Storage related fields
 
-So far, there are four options for storage configurations: `filesystem` ([Persistent Volume](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)), [`S3`](https://docs.aws.amazon.com/AmazonS3/latest/API/Welcome.html) , [`Swift`](https://docs.openstack.org/swift/latest/), MinIO.
+So far, there are 6 options for storage configurations: `FileSystem` ([Persistent Volume](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)), [S3](https://docs.aws.amazon.com/AmazonS3/latest/API/Welcome.html) , [Swift](https://docs.openstack.org/swift/latest/), [Azure](https://azure.microsoft.com/services/storage/), [Gcs](https://cloud.google.com/storage) and MinIO.
 
 #### FileSystem
 
@@ -610,28 +699,29 @@ spec:
 
   # Configure existing pre-deployed or cloud database service.
   database:
-    spec: "PostgreSQL"
-    postgresql:
-      # PostgreSQL user name to connect as.
-      # Defaults to be the same as the operating system name of the user running the application.
-      username: postsql # Required
-      # Secret containing the password to be used if the server demands password authentication.
-      passwordRef: psqlSecret # Optional
-      # PostgreSQL hosts.
-      # At least 1.
-      hosts:
-        # Name of host to connect to.
-        # If a host name begins with a slash, it specifies Unix-domain communication rather than
-        # TCP/IP communication; the value is the name of the directory in which the socket file is stored.
-        - host: psql # Required
-        # Port number to connect to at the server host,
-        # or socket file name extension for Unix-domain connections.
-        # Zero, specifies the default port number established when PostgreSQL was built.
-          port: 5432 # Optional
-      # PostgreSQL has native support for using SSL connections to encrypt client/server communications for increased security.
-      # Supports values ["disable","allow","prefer","require","verify-ca","verify-full"].
-      sslMode: prefer # Optional, default=prefer
-      prefix: prefix # Optional
+    kind: PostgreSQL
+    spec:
+      postgresql:
+        # PostgreSQL user name to connect as.
+        # Defaults to be the same as the operating system name of the user running the application.
+        username: postsql # Required
+        # Secret containing the password to be used if the server demands password authentication.
+        passwordRef: psqlSecret # Optional
+        # PostgreSQL hosts.
+        # At least 1.
+        hosts:
+          # Name of host to connect to.
+          # If a host name begins with a slash, it specifies Unix-domain communication rather than
+          # TCP/IP communication; the value is the name of the directory in which the socket file is stored.
+          - host: psql # Required
+          # Port number to connect to at the server host,
+          # or socket file name extension for Unix-domain connections.
+          # Zero, specifies the default port number established when PostgreSQL was built.
+            port: 5432 # Optional
+        # PostgreSQL has native support for using SSL connections to encrypt client/server communications for increased security.
+        # Supports values ["disable","allow","prefer","require","verify-ca","verify-full"].
+        sslMode: prefer # Optional, default=prefer
+        prefix: prefix # Optional
   
   # ... Skipped fields
 ```
@@ -646,7 +736,7 @@ spec:
 
   # database configurations.
   database:
-    # Set the kind of which database service to be used, Only support 'PostgresSQL' now.
+    # Set the kind of which database service to be used.
     kind: "Zlando/PostgreSQL" # Required
     # storage spec
     spec: # Required
