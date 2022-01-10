@@ -61,6 +61,8 @@ func (r *Reconciler) GetCoreIngress(ctx context.Context, harbor *goharborv1.Harb
 }
 
 func (r *Reconciler) GetCoreIngressRules(ctx context.Context, harbor *goharborv1.Harbor) ([]netv1.IngressRule, error) {
+	var portalBackend *netv1.IngressBackend
+
 	coreBackend := netv1.IngressBackend{
 		Service: &netv1.IngressServiceBackend{
 			Name: r.NormalizeName(ctx, harbor.GetName(), controllers.Core.String()),
@@ -71,16 +73,18 @@ func (r *Reconciler) GetCoreIngressRules(ctx context.Context, harbor *goharborv1
 		Resource: nil,
 	}
 
-	portalBackend := netv1.IngressBackend{
-		Service: &netv1.IngressServiceBackend{
-			Name: r.NormalizeName(ctx, harbor.GetName(), "portal"),
-			Port: netv1.ServiceBackendPort{
-				Number: harbor.Spec.InternalTLS.GetInternalPort(harbormetav1.PortalTLS),
+	if harbor.Spec.Portal != nil {
+		portalBackend = &netv1.IngressBackend{
+			Service: &netv1.IngressServiceBackend{
+				Name: r.NormalizeName(ctx, harbor.GetName(), "portal"),
+				Port: netv1.ServiceBackendPort{
+					Number: harbor.Spec.InternalTLS.GetInternalPort(harbormetav1.PortalTLS),
+				},
 			},
-		},
+		}
 	}
 
-	ruleValue, err := r.GetCoreIngressRuleValue(ctx, harbor, coreBackend, portalBackend)
+	ruleValue, err := r.GetCoreIngressRuleValue(ctx, harbor, &coreBackend, portalBackend)
 	if err != nil {
 		return nil, errors.Wrap(err, "rule value")
 	}
@@ -241,36 +245,42 @@ func (err ErrInvalidIngressController) Error() string {
 	return fmt.Sprintf("controller %s unsupported", err.Controller)
 }
 
-func (r *Reconciler) GetCoreIngressRuleValue(ctx context.Context, harbor *goharborv1.Harbor, core, portal netv1.IngressBackend) (*netv1.IngressRuleValue, error) {
+func (r *Reconciler) GetCoreIngressRuleValue(ctx context.Context, harbor *goharborv1.Harbor, core, portal *netv1.IngressBackend) (*netv1.IngressRuleValue, error) {
 	pathTypePrefix := netv1.PathTypePrefix
 
-	return &netv1.IngressRuleValue{
+	rule := &netv1.IngressRuleValue{
 		HTTP: &netv1.HTTPIngressRuleValue{
 			Paths: []netv1.HTTPIngressPath{{
-				Path:     "/",
-				PathType: &pathTypePrefix,
-				Backend:  portal,
-			}, {
 				Path:     "/api/",
 				PathType: &pathTypePrefix,
-				Backend:  core,
+				Backend:  *core,
 			}, {
 				Path:     "/service/",
 				PathType: &pathTypePrefix,
-				Backend:  core,
+				Backend:  *core,
 			}, {
 				Path:     "/v2", // distribution APIs will request to `/v2` so don't append slash for this ingress path
 				PathType: &pathTypePrefix,
-				Backend:  core,
+				Backend:  *core,
 			}, {
 				Path:     "/chartrepo/",
 				PathType: &pathTypePrefix,
-				Backend:  core,
+				Backend:  *core,
 			}, {
 				Path:     "/c/",
 				PathType: &pathTypePrefix,
-				Backend:  core,
+				Backend:  *core,
 			}},
 		},
-	}, nil
+	}
+
+	if portal != nil {
+		rule.HTTP.Paths = append(rule.HTTP.Paths, netv1.HTTPIngressPath{
+			Path:     "/",
+			PathType: &pathTypePrefix,
+			Backend:  *portal,
+		})
+	}
+
+	return rule, nil
 }
