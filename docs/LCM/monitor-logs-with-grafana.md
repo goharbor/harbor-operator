@@ -1,8 +1,10 @@
 # Monitor logs with grafana
 
 Quickly setup the grafana+loki+fluentbit for harbor logs in KIND k8s
+
 - change the host `grafana.harbor.domain` and grafana password `Admin123` below
-```
+
+```bash
 kubectl apply -f - <<EOF
 ---
 apiVersion: v1
@@ -394,7 +396,8 @@ EOF
 ```
 
 - you can use port-forward to access `http://grafana.harbor.domain` after set /etc/hosts
-```
+
+```bash
 sudo kubectl port-forward svc/ingress-nginx-controller -n ingress-nginx --address 0.0.0.0 80:80 443:443
 ```
 
