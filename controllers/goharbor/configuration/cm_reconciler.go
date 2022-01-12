@@ -148,10 +148,17 @@ func (r *CmReconciler) createOrUpdateHarborConfiguration(ctx context.Context, hc
 	if err != nil {
 		if apierrors.IsNotFound(err) {
 			// create hc
+			r.Log.Info("Create HarborConfiguration", "hc", hc)
+
 			return r.Client.Create(ctx, hc)
 		}
 	}
 
-	// hc exist
-	return r.Client.Update(ctx, hc)
+	// if hc exist, update it
+	new := old.DeepCopy()
+	new.Spec = hc.Spec
+
+	r.Log.Info("Update HarborConfiguration", "hc", new)
+
+	return r.Client.Update(ctx, new)
 }
