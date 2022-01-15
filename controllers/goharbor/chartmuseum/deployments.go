@@ -28,7 +28,7 @@ const (
 	LocalStorageVolume                    = "storage"
 	DefaultLocalStoragePath               = "/mnt/chartstorage"
 	StorageTimestampTolerance             = 1 * time.Second
-	GcsJSONKeyFilePath                 = "/etc/gcs/gcs-key.json"
+	GcsJSONKeyFilePath                    = "/etc/gcs/gcs-key.json"
 )
 
 var (
