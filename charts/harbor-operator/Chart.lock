@@ -2,11 +2,11 @@ dependencies:
 - name: minio-operator
   repository: https://operator.min.io/
   version: 4.3.2
-- name: redisoperator
-  repository: ""
-  version: 3.1.0
+- name: redis-operator
+  repository: https://spotahome.github.io/redis-operator
+  version: 3.1.4
 - name: postgres-operator
   repository: ""
   version: 1.6.3
-digest: sha256:242bc9e61b8d6ffb110e3b7a46218f9f3160d5e61a2ed372e3b060e6c9439104
-generated: "2021-11-02T14:09:21.061946+08:00"
+digest: sha256:a83ab1189da727ad8b68ed63268edf497e3c996aa89d5ee6527c6384e8ce2f66
+generated: "2022-01-18T22:38:09.96004016+08:00"

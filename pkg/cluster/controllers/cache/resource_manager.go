@@ -96,8 +96,16 @@ func (rm *redisResourceManager) GetCacheCR(ctx context.Context, harborcluster *g
 				Replicas:  int32(rm.GetServerReplica()),
 				Resources: resources,
 				Storage: redisOp.RedisStorage{
-					KeepAfterDeletion:     true,
-					PersistentVolumeClaim: pvc,
+					KeepAfterDeletion: true,
+					PersistentVolumeClaim: &redisOp.EmbeddedPersistentVolumeClaim{
+						EmbeddedObjectMetadata: redisOp.EmbeddedObjectMetadata{
+							Name:        pvc.Name,
+							Labels:      pvc.ObjectMeta.Labels,
+							Annotations: pvc.ObjectMeta.Annotations,
+						},
+						TypeMeta: pvc.TypeMeta,
+						Spec:     pvc.Spec,
+					},
 				},
 				Image:            image,
 				ImagePullPolicy:  rm.getImagePullPolicy(ctx, harborcluster),

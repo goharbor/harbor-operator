@@ -26,9 +26,10 @@ dependencies:
   repository: https://operator.min.io/
   tags:
     - storage
-- name: redisoperator
-  version: 3.1.0
-  condition: redisoperator.enabled
+- name: redis-operator
+  version: 3.1.4
+  condition: rediso-perator.enabled
+  repository: https://spotahome.github.io/redis-operator
   tags:
     - cache
 - name: postgres-operator

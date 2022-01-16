@@ -487,13 +487,13 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1.Core) (
 						// https://github.com/goharbor/harbor/blob/master/make/photon/prepare/templates/core/env.jinja
 						Env: envs,
 						LivenessProbe: &corev1.Probe{
-							Handler: corev1.Handler{
+							ProbeHandler: corev1.ProbeHandler{
 								HTTPGet: httpGET,
 							},
 							PeriodSeconds: int32(healthCheckPeriod.Seconds()),
 						},
 						ReadinessProbe: &corev1.Probe{
-							Handler: corev1.Handler{
+							ProbeHandler: corev1.ProbeHandler{
 								HTTPGet: httpGET,
 							},
 						},

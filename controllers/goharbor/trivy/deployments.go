@@ -260,7 +260,7 @@ func (r *Reconciler) getProbe(_ context.Context, trivy *goharborv1.Trivy, probeP
 	}
 
 	return &corev1.Probe{
-		Handler: corev1.Handler{
+		ProbeHandler: corev1.ProbeHandler{
 			HTTPGet: &corev1.HTTPGetAction{
 				Path:   probePath,
 				Port:   intstr.FromInt(port),

@@ -162,12 +162,12 @@ func (r *Reconciler) GetDeployment(ctx context.Context, portal *goharborv1.Porta
 							Env:          envs,
 							VolumeMounts: volumeMounts,
 							LivenessProbe: &corev1.Probe{
-								Handler: corev1.Handler{
+								ProbeHandler: corev1.ProbeHandler{
 									HTTPGet: httpGET,
 								},
 							},
 							ReadinessProbe: &corev1.Probe{
-								Handler: corev1.Handler{
+								ProbeHandler: corev1.ProbeHandler{
 									HTTPGet: httpGET,
 								},
 							},

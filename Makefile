@@ -127,7 +127,7 @@ helm-install: helm helm-generate
 		--set installCRDs=true \
 		--set minio-operator.enabled=true \
 		--set postgres-operator.enabled=true \
-		--set redisoperator.enabled=true 
+		--set redis-operator.enabled=true 
 
 CLUSTER_NAME := harbor-operator
 
