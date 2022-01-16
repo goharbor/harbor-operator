@@ -303,12 +303,12 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1.Reg
 							Protocol:      corev1.ProtocolTCP,
 						}},
 						LivenessProbe: &corev1.Probe{
-							Handler: corev1.Handler{
+							ProbeHandler: corev1.ProbeHandler{
 								HTTPGet: httpGET,
 							},
 						},
 						ReadinessProbe: &corev1.Probe{
-							Handler: corev1.Handler{
+							ProbeHandler: corev1.ProbeHandler{
 								HTTPGet: httpGET,
 							},
 						},
@@ -442,7 +442,7 @@ func (r *Reconciler) attachRegistryCtlContainer(ctx context.Context, registry *g
 	}
 
 	probe := &corev1.Probe{
-		Handler: corev1.Handler{
+		ProbeHandler: corev1.ProbeHandler{
 			HTTPGet: &corev1.HTTPGetAction{
 				Path:   CtlHealthPath,
 				Port:   intstr.FromString(port),

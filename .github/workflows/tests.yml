@@ -19,7 +19,7 @@ jobs:
     steps:
     - uses: actions/setup-go@v2
       with:
-        go-version: 1.16
+        go-version: 1.17
     - uses: actions/checkout@v2
     - run: make docker-build
 
@@ -37,7 +37,7 @@ jobs:
     steps:
     - uses: actions/setup-go@v2
       with:
-        go-version: 1.16
+        go-version: 1.17
     - uses: actions/checkout@v2
     - run: make go-lint
 
@@ -47,7 +47,7 @@ jobs:
     steps:
     - uses: actions/setup-go@v2
       with:
-        go-version: 1.16
+        go-version: 1.17
     - uses: actions/checkout@v2
     - run: make go-dependencies-test
 
@@ -57,7 +57,7 @@ jobs:
     steps:
     - uses: actions/setup-go@v2
       with:
-        go-version: 1.16
+        go-version: 1.17
     - uses: actions/checkout@v2
     - run: make generated-diff-test
 
@@ -73,7 +73,7 @@ jobs:
 
       - uses: actions/setup-go@v2
         with:
-          go-version: 1.16
+          go-version: 1.17
 
       - name: Cache go mod
         uses: actions/cache@v2
@@ -142,6 +142,7 @@ jobs:
         - "1.20.7"
         - "1.21.2"
         - "1.22.0"
+        - "1.23.0"
 
         ingress:
         - "1.0.5"
@@ -155,7 +156,7 @@ jobs:
 
     - uses: actions/setup-go@v2
       with:
-        go-version: 1.16
+        go-version: 1.17
 
     - uses: azure/setup-kubectl@v1
       with:
@@ -211,6 +212,8 @@ jobs:
           kubectl get all -n ${operatorNamespace}
           exit 1
         fi
+
+        kubectl get all -n ${operatorNamespace}
 
         sleep 10
 
@@ -346,9 +349,11 @@ jobs:
         certManager:
           - "1.4.4"
 
-        # https://snapcraft.io/microk8s
         k8sVersion:
+          - "1.20.7"
+          - "1.21.2"
           - "1.22.0"
+          - "1.23.0"
 
         samples:
           - "full_stack.yaml"
@@ -358,7 +363,7 @@ jobs:
 
       - uses: actions/setup-go@v2
         with:
-          go-version: 1.16
+          go-version: 1.17
 
       - uses: azure/setup-kubectl@v1
         with:
@@ -554,7 +559,10 @@ jobs:
 
         # https://snapcraft.io/microk8s
         k8sVersion:
-          - "1.22.0"
+        - "1.20.7"
+        - "1.21.2"
+        - "1.22.0"
+        - "1.23.0"
 
         ingress:
           - "1.0.5"
@@ -564,7 +572,7 @@ jobs:
 
       - uses: actions/setup-go@v2
         with:
-          go-version: 1.16
+          go-version: 1.17
 
       - uses: azure/setup-kubectl@v1
         with:
@@ -728,7 +736,7 @@ jobs:
     steps:
     - uses: actions/setup-go@v2
       with:
-        go-version: 1.16
+        go-version: 1.17
     - uses: actions/checkout@v2
     - run: make manifests
     - uses: azure/k8s-bake@v1
@@ -743,7 +751,7 @@ jobs:
     steps:
     - uses: actions/setup-go@v2
       with:
-        go-version: 1.16
+        go-version: 1.17
     - uses: actions/checkout@v2
     - run: make manifests
     - uses: azure/k8s-bake@v1

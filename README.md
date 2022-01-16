@@ -66,7 +66,7 @@ NOTES:
 
 [1] `.x` means all the patch releases of Harbor can be naturally supported in one operator version.
 
-[2] Use a [forked version](https://github.com/szlabs/redis-operator) of [spotahome/redis-operator](https://github.com/spotahome/redis-operator).
+[2] Use a [forked version](https://github.com/spotahome/redis-operator) of [spotahome/redis-operator](https://github.com/spotahome/redis-operator).
 
 ## Compatibility
 
@@ -138,7 +138,7 @@ Special thanks to the [contributors](./MAINTAINERS) who did significant contribu
 
 * [cert-manager](https://cert-manager.io/docs/)
 * [Underlying postgreSQL operator](https://github.com/zalando/postgres-operator)
-* [Underlying redis operator](https://github.com/szlabs/redis-operator)
+* [Underlying redis operator](https://github.com/spotahome/redis-operator)
 * [Underlying minio operator](https://github.com/minio/minio-operator)
 * [Kubernetes operator](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/)
 * [Custom Resource Definition](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/)

@@ -32,7 +32,7 @@ import (
 // status is designed to track the status and conditions of the deploying Harbor cluster.
 type status struct {
 	client.Client
-	log     logr.Logger
+	log     *logr.Logger
 	context context.Context
 
 	cr             *goharborv1.HarborCluster
@@ -152,7 +152,7 @@ func (s *status) WithContext(ctx context.Context) *status {
 
 // WithLog set logger.
 func (s *status) WithLog(logger logr.Logger) *status {
-	s.log = logger
+	s.log = &logger
 
 	return s
 }

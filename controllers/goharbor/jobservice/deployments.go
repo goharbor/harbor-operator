@@ -311,12 +311,12 @@ func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1.J
 						// https://github.com/goharbor/harbor/blob/master/make/photon/prepare/templates/jobservice/env.jinja
 						Env: envs,
 						LivenessProbe: &corev1.Probe{
-							Handler: corev1.Handler{
+							ProbeHandler: corev1.ProbeHandler{
 								HTTPGet: httpGET,
 							},
 						},
 						ReadinessProbe: &corev1.Probe{
-							Handler: corev1.Handler{
+							ProbeHandler: corev1.ProbeHandler{
 								HTTPGet: httpGET,
 							},
 						},

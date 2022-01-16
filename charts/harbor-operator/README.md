@@ -52,8 +52,8 @@ Deploy Harbor Operator
 | postgres-operator.enabled | bool | `false` | Whether to enabled [Postgres operator](https://github.com/zalando/postgres-operator) |
 | priorityClassName | string | `""` | priority class to be used for the harbor-operator pods |
 | rbac.create | bool | `true` | Whether to install Role Based Access Control |
-| redisoperator.enabled | bool | `false` | Whether to enabled [Redis Operator](https://github.com/spotahome/redis-operator) |
-| redisoperator.rbac.install | bool | `true` |  |
+| redis-operator.enabled | bool | `false` | Whether to enabled [Redis Operator](https://github.com/spotahome/redis-operator) |
+| redis-operator.rbac.install | bool | `true` |  |
 | replicaCount | int | `1` | Number of replicas for the controller |
 | resources | object | `{"limits":{"cpu":"500m","memory":"300Mi"},"requests":{"cpu":"300m","memory":"200Mi"}}` | Expects input structure as per specification <https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#resourcerequirements-v1-core> |
 | service.port | int | `443` | Expose port for WebHook controller |
