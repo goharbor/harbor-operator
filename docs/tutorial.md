@@ -15,27 +15,28 @@ Before moving on, make sure the harbor operator is successfully deployed in the 
 ```shell
 ~/harbor-operator$ kubectl get all -n harbor-operator-ns
 NAME                                     READY   STATUS    RESTARTS   AGE
-pod/harbor-operator-6fd4dc66b-sh6cc      1/1     Running   0          3h18m
-pod/minio-operator-667b56db9c-q6v4j      1/1     Running   0          3h18m
-pod/postgres-operator-749db5dd66-phw98   1/1     Running   0          3h18m
-pod/redisoperator-64dc645c84-9jlv6       1/1     Running   0          3h18m
+pod/harbor-operator-85c94454bb-vm4mk     1/1     Running   0          6m12s
+pod/minio-operator-67ddbdd4d8-v6qkl      1/1     Running   0          6m12s
+pod/minio-operator-67ddbdd4d8-vqvrp      1/1     Running   0          6m12s
+pod/postgres-operator-7dfbcfdf6b-wdgj4   1/1     Running   0          6m12s
+pod/redisoperator-6f758c79fc-gk2cm       1/1     Running   0          6m12s
 
-NAME                        TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)             AGE
-service/operator            ClusterIP   10.96.202.139   <none>        4222/TCP,4233/TCP   3h18m
-service/postgres-operator   ClusterIP   10.96.193.93    <none>        8080/TCP            3h18m
-service/webhook-service     ClusterIP   10.96.251.203   <none>        443/TCP             3h18m
+NAME                        TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
+service/operator            ClusterIP   10.96.141.225   <none>        4222/TCP   6m12s
+service/postgres-operator   ClusterIP   10.96.247.95    <none>        8080/TCP   6m12s
+service/webhook-service     ClusterIP   10.96.49.170    <none>        443/TCP    6m12s
 
 NAME                                READY   UP-TO-DATE   AVAILABLE   AGE
-deployment.apps/harbor-operator     1/1     1            1           3h18m
-deployment.apps/minio-operator      1/1     1            1           3h18m
-deployment.apps/postgres-operator   1/1     1            1           3h18m
-deployment.apps/redisoperator       1/1     1            1           3h18m
+deployment.apps/harbor-operator     1/1     1            1           6m12s
+deployment.apps/minio-operator      2/2     2            2           6m12s
+deployment.apps/postgres-operator   1/1     1            1           6m12s
+deployment.apps/redisoperator       1/1     1            1           6m12s
 
 NAME                                           DESIRED   CURRENT   READY   AGE
-replicaset.apps/harbor-operator-6fd4dc66b      1         1         1       3h18m
-replicaset.apps/minio-operator-667b56db9c      1         1         1       3h18m
-replicaset.apps/postgres-operator-749db5dd66   1         1         1       3h18m
-replicaset.apps/redisoperator-64dc645c84       1         1         1       3h18m
+replicaset.apps/harbor-operator-85c94454bb     1         1         1       6m12s
+replicaset.apps/minio-operator-67ddbdd4d8      2         2         2       6m12s
+replicaset.apps/postgres-operator-7dfbcfdf6b   1         1         1       6m12s
+replicaset.apps/redisoperator-6f758c79fc       1         1         1       6m12s
 ```
 
 ## Deploy Harbor cluster
@@ -236,7 +237,7 @@ The `name`, `public URL`, `status`, `operator version` and `operator commit` inf
 
 ```log
 NAME                   PUBLIC URL                          STATUS    OPERATOR VERSION   OPERATOR GIT COMMIT
-harborcluster-sample   https://core.10.10.10.100.xip.io   healthy   1.1.1          20072ed0511e59778f5325416314e41af8d76087
+harborcluster-sample   https://core.10.10.10.100.nip.io   healthy   1.2.0          35056b427665e9ee6331e7b3ddede8c26b86dbc5
 ```
 
 You can check more detailed status(conditions) info of the deployed Harbor cluster with appending `-o yaml`.
@@ -249,28 +250,34 @@ Some status info like the following data is printed out:
 
 ```yaml
 status:
-  conditions:
-  - lastTransitionTime: "2021-09-28T07:40:45Z"
-    status: "True"
-    type: StorageReady
-  - lastTransitionTime: "2021-09-28T07:40:45Z"
-    message: Harbor component database secrets are already create
-    reason: Database is ready
-    status: "True"
-    type: DatabaseReady
-  - lastTransitionTime: "2021-09-28T07:23:55Z"
-    message: harbor component redis secrets are already create.
-    reason: redis already ready
-    status: "True"
-    type: CacheReady
-  - lastTransitionTime: "2021-09-28T07:40:34Z"
-    status: "False"
-    type: InProgress
-  - lastTransitionTime: "2021-09-28T10:20:14Z"
-    status: "True"
-    type: ServiceReady
-  - status: "False"
-    type: Failed
+    conditions:
+    - lastTransitionTime: "2022-01-18T10:02:02Z"
+      status: "True"
+      type: StorageReady
+    - lastTransitionTime: "2022-01-18T10:00:55Z"
+      message: Harbor component database secrets are already create
+      reason: Database is ready
+      status: "True"
+      type: DatabaseReady
+    - lastTransitionTime: "2022-01-18T10:00:27Z"
+      message: harbor component redis secrets are already create.
+      reason: redis already ready
+      status: "True"
+      type: CacheReady
+    - status: "False"
+      type: InProgress
+    - lastTransitionTime: "2022-01-18T10:02:31Z"
+      status: "True"
+      type: ServiceReady
+    - status: "False"
+      type: Failed
+    observedGeneration: 1
+    operator:
+      controllerGitCommit: 35056b427665e9ee6331e7b3ddede8c26b86dbc5
+      controllerName: harborcluster
+      controllerVersion: dev_master
+    revision: 1642500151584677122
+    status: healthy
 ```
 
 You can also check what Kubernetes resources are created by getting all.
@@ -282,77 +289,79 @@ kubectl get all -n cluster-sample-ns
 A few of resources info like the following data are output:
 
 ```log
-NAME                                                                  READY   STATUS      RESTARTS   AGEpod/harborcluster-sample-harbor-harbor-chartmuseum-5fcd966f47-6c2vb   1/1     Running     0          3h1m
-pod/harborcluster-sample-harbor-harbor-core-74bb457c94-wmsjr          1/1     Running     0          3h1m
-pod/harborcluster-sample-harbor-harbor-exporter-5dfb5c6f4-kbmtf       1/1     Running     0          3h17m
-pod/harborcluster-sample-harbor-harbor-jobservice-58c8946c6c-bwg84    1/1     Running     0          3h17m
-pod/harborcluster-sample-harbor-harbor-notaryserver-7dc7dc5f8dfnqkj   1/1     Running     0          3h1m
-pod/harborcluster-sample-harbor-harbor-notarysigner-85459fbbb5rxsk5   1/1     Running     0          3h17m
-pod/harborcluster-sample-harbor-harbor-portal-844cf56674-4c657        1/1     Running     0          3h17m
-pod/harborcluster-sample-harbor-harbor-registry-89487bb8c-gkfn6       1/1     Running     0          21m
-pod/harborcluster-sample-harbor-harbor-registryctl-7db9744d44-xl76b   1/1     Running     0          3h17m
-pod/harborcluster-sample-harbor-harbor-trivy-5c795b8c77-ksdhk         1/1     Running     0          3h17m
-pod/minio-harborcluster-sample-gn4qb                                  0/1     Completed   0          3h1m
-pod/minio-harborcluster-sample-zone-harbor-0                          1/1     Running     0          3h
-pod/minio-harborcluster-sample-zone-harbor-1                          1/1     Running     0          3h1m
-pod/postgresql-cluster-sample-ns-harborcluster-sample-0               1/1     Running     0          3h18m
-pod/rfr-harborcluster-sample-redis-0                                  1/1     Running     0          3h18m
-pod/rfs-harborcluster-sample-redis-6fddf664-c7vj7                     1/1     Running     0          3h18m
+NAME                                                                  READY   STATUS      RESTARTS   AGE
+pod/harborcluster-sample-harbor-harbor-chartmuseum-5b68bd46b8-lq9g9   1/1     Running     0          105s
+pod/harborcluster-sample-harbor-harbor-core-7849f9c844-vf4w7          1/1     Running     0          105s
+pod/harborcluster-sample-harbor-harbor-exporter-dd5c99bc9-br9sk       1/1     Running     0          98s
+pod/harborcluster-sample-harbor-harbor-jobservice-668dd85cc4-2q9bf    1/1     Running     0          98s
+pod/harborcluster-sample-harbor-harbor-notaryserver-77779bf8bf8t5tv   1/1     Running     0          108s
+pod/harborcluster-sample-harbor-harbor-notarysigner-5c88dc99d8d5s64   1/1     Running     0          113s
+pod/harborcluster-sample-harbor-harbor-portal-64465c4954-52zxc        1/1     Running     0          109s
+pod/harborcluster-sample-harbor-harbor-registry-756dbcf5bb-zcrfn      2/2     Running     0          104s
+pod/harborcluster-sample-harbor-harbor-trivy-599ff5c789-hcblv         1/1     Running     0          108s
+pod/minio-harborcluster-sample--1-4n72x                               0/1     Completed   0          117s
+pod/minio-harborcluster-sample-zone-harbor-0                          1/1     Running     0          3m23s
+pod/minio-harborcluster-sample-zone-harbor-1                          1/1     Running     0          3m23s
+pod/postgresql-cluster-sample-ns-harborcluster-sample-0               1/1     Running     0          3m31s
+pod/rfr-harborcluster-sample-redis-0                                  1/1     Running     0          3m31s
+pod/rfs-harborcluster-sample-redis-6fddf664-9nwsc                     1/1     Running     0          3m31s
 
 NAME                                                               TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)            AGE
-service/harborcluster-sample-harbor-harbor-chartmuseum             ClusterIP   10.96.180.44    <none>        443/TCP            3h17m
-service/harborcluster-sample-harbor-harbor-core                    ClusterIP   10.96.147.11    <none>        443/TCP,8001/TCP   3h17m
-service/harborcluster-sample-harbor-harbor-exporter                ClusterIP   10.96.242.24    <none>        8001/TCP           3h17m
-service/harborcluster-sample-harbor-harbor-jobservice              ClusterIP   10.96.90.187    <none>        443/TCP            3h17m
-service/harborcluster-sample-harbor-harbor-notaryserver            ClusterIP   10.96.18.168    <none>        443/TCP            3h17m
-service/harborcluster-sample-harbor-harbor-notarysigner            ClusterIP   10.96.242.45    <none>        7899/TCP           3h17m
-service/harborcluster-sample-harbor-harbor-portal                  ClusterIP   10.96.54.68     <none>        443/TCP            3h17m
-service/harborcluster-sample-harbor-harbor-registry                ClusterIP   10.96.249.140   <none>        443/TCP,8001/TCP   3h17m
-service/harborcluster-sample-harbor-harbor-registryctl             ClusterIP   10.96.44.32     <none>        443/TCP            3h17m
-service/harborcluster-sample-harbor-harbor-trivy                   ClusterIP   10.96.231.198   <none>        443/TCP            3h17m
-service/minio                                                      ClusterIP   10.96.74.160    <none>        80/TCP             3h17m
-service/minio-harborcluster-sample-hl                              ClusterIP   None            <none>        9000/TCP           3h17m
-service/postgresql-cluster-sample-ns-harborcluster-sample          ClusterIP   10.96.75.26     <none>        5432/TCP           3h18m
-service/postgresql-cluster-sample-ns-harborcluster-sample-config   ClusterIP   None            <none>        <none>             3h17m
-service/postgresql-cluster-sample-ns-harborcluster-sample-repl     ClusterIP   10.96.135.172   <none>        5432/TCP           3h18m
-service/rfs-harborcluster-sample-redis                             ClusterIP   10.96.217.247   <none>        26379/TCP          3h18m
+service/harborcluster-sample-harbor-harbor-chartmuseum             ClusterIP   10.96.9.53      <none>        443/TCP            105s
+service/harborcluster-sample-harbor-harbor-core                    ClusterIP   10.96.175.82    <none>        443/TCP,8001/TCP   106s
+service/harborcluster-sample-harbor-harbor-exporter                ClusterIP   10.96.1.77      <none>        8001/TCP           98s
+service/harborcluster-sample-harbor-harbor-jobservice              ClusterIP   10.96.67.178    <none>        443/TCP            98s
+service/harborcluster-sample-harbor-harbor-notaryserver            ClusterIP   10.96.235.154   <none>        443/TCP            108s
+service/harborcluster-sample-harbor-harbor-notarysigner            ClusterIP   10.96.246.138   <none>        7899/TCP           113s
+service/harborcluster-sample-harbor-harbor-portal                  ClusterIP   10.96.177.105   <none>        443/TCP            109s
+service/harborcluster-sample-harbor-harbor-registry                ClusterIP   10.96.24.80     <none>        443/TCP,8001/TCP   105s
+service/harborcluster-sample-harbor-harbor-registryctl             ClusterIP   10.96.171.157   <none>        443/TCP            105s
+service/harborcluster-sample-harbor-harbor-trivy                   ClusterIP   10.96.163.122   <none>        443/TCP            108s
+service/minio                                                      ClusterIP   10.96.89.191    <none>        80/TCP             3m25s
+service/minio-harborcluster-sample-console                         ClusterIP   10.96.29.2      <none>        9090/TCP           3m24s
+service/minio-harborcluster-sample-hl                              ClusterIP   None            <none>        9000/TCP           3m23s
+service/postgresql-cluster-sample-ns-harborcluster-sample          ClusterIP   10.96.16.82     <none>        5432/TCP           3m31s
+service/postgresql-cluster-sample-ns-harborcluster-sample-config   ClusterIP   None            <none>        <none>             3m23s
+service/postgresql-cluster-sample-ns-harborcluster-sample-repl     ClusterIP   10.96.33.5      <none>        5432/TCP           3m31s
+service/rfs-harborcluster-sample-redis                             ClusterIP   10.96.53.11     <none>        26379/TCP          3m31s
 
 NAME                                                              READY   UP-TO-DATE   AVAILABLE   AGE
-deployment.apps/harborcluster-sample-harbor-harbor-chartmuseum    1/1     1            1           3h17m
-deployment.apps/harborcluster-sample-harbor-harbor-core           1/1     1            1           3h17m
-deployment.apps/harborcluster-sample-harbor-harbor-exporter       1/1     1            1           3h17m
-deployment.apps/harborcluster-sample-harbor-harbor-jobservice     1/1     1            1           3h17m
-deployment.apps/harborcluster-sample-harbor-harbor-notaryserver   1/1     1            1           3h17m
-deployment.apps/harborcluster-sample-harbor-harbor-notarysigner   1/1     1            1           3h17m
-deployment.apps/harborcluster-sample-harbor-harbor-portal         1/1     1            1           3h17m
-deployment.apps/harborcluster-sample-harbor-harbor-registry       1/1     1            1           3h17m
-deployment.apps/harborcluster-sample-harbor-harbor-registryctl    1/1     1            1           3h17m
-deployment.apps/harborcluster-sample-harbor-harbor-trivy          1/1     1            1           3h17m
-deployment.apps/rfs-harborcluster-sample-redis                    1/1     1            1           3h18m
+deployment.apps/harborcluster-sample-harbor-harbor-chartmuseum    1/1     1            1           105s
+deployment.apps/harborcluster-sample-harbor-harbor-core           1/1     1            1           105s
+deployment.apps/harborcluster-sample-harbor-harbor-exporter       1/1     1            1           98s
+deployment.apps/harborcluster-sample-harbor-harbor-jobservice     1/1     1            1           98s
+deployment.apps/harborcluster-sample-harbor-harbor-notaryserver   1/1     1            1           108s
+deployment.apps/harborcluster-sample-harbor-harbor-notarysigner   1/1     1            1           113s
+deployment.apps/harborcluster-sample-harbor-harbor-portal         1/1     1            1           109s
+deployment.apps/harborcluster-sample-harbor-harbor-registry       1/1     1            1           104s
+deployment.apps/harborcluster-sample-harbor-harbor-trivy          1/1     1            1           108s
+deployment.apps/rfs-harborcluster-sample-redis                    1/1     1            1           3m31s
 
 NAME                                                                         DESIRED   CURRENT   READY   AGE
-replicaset.apps/harborcluster-sample-harbor-harbor-chartmuseum-5fcd966f47    1         1         1       3h1m
-replicaset.apps/harborcluster-sample-harbor-harbor-core-74bb457c94           1         1         1       3h1m
-replicaset.apps/harborcluster-sample-harbor-harbor-exporter-5dfb5c6f4        1         1         1       3h17m
-replicaset.apps/harborcluster-sample-harbor-harbor-jobservice-58c8946c6c     1         1         1       3h17m
-replicaset.apps/harborcluster-sample-harbor-harbor-notaryserver-7dc7dc5f8d   1         1         1       3h1m
-replicaset.apps/harborcluster-sample-harbor-harbor-notarysigner-85459fbbb5   1         1         1       3h17m
-replicaset.apps/harborcluster-sample-harbor-harbor-portal-844cf56674         1         1         1       3h17m
-replicaset.apps/harborcluster-sample-harbor-harbor-registry-89487bb8c        1         1         1       3h1m
-replicaset.apps/harborcluster-sample-harbor-harbor-registryctl-7db9744d44    1         1         1       3h17m
-replicaset.apps/harborcluster-sample-harbor-harbor-trivy-5c795b8c77          1         1         1       3h17m
-replicaset.apps/rfs-harborcluster-sample-redis-6fddf664                      1         1         1       3h18m
+replicaset.apps/harborcluster-sample-harbor-harbor-chartmuseum-5b68bd46b8    1         1         1       105s
+replicaset.apps/harborcluster-sample-harbor-harbor-core-7849f9c844           1         1         1       105s
+replicaset.apps/harborcluster-sample-harbor-harbor-exporter-dd5c99bc9        1         1         1       98s
+replicaset.apps/harborcluster-sample-harbor-harbor-jobservice-668dd85cc4     1         1         1       98s
+replicaset.apps/harborcluster-sample-harbor-harbor-notaryserver-77779bf8bf   1         1         1       108s
+replicaset.apps/harborcluster-sample-harbor-harbor-notarysigner-5c88dc99d8   1         1         1       113s
+replicaset.apps/harborcluster-sample-harbor-harbor-portal-64465c4954         1         1         1       109s
+replicaset.apps/harborcluster-sample-harbor-harbor-registry-756dbcf5bb       1         1         1       104s
+replicaset.apps/harborcluster-sample-harbor-harbor-trivy-599ff5c789          1         1         1       108s
+replicaset.apps/rfs-harborcluster-sample-redis-6fddf664                      1         1         1       3m31s
 
 NAME                                                                 READY   AGE
-statefulset.apps/minio-harborcluster-sample-zone-harbor              2/2     3h17m
-statefulset.apps/postgresql-cluster-sample-ns-harborcluster-sample   1/1     3h18m
-statefulset.apps/rfr-harborcluster-sample-redis                      1/1     3h18m
+statefulset.apps/minio-harborcluster-sample-zone-harbor              2/2     3m23s
+statefulset.apps/postgresql-cluster-sample-ns-harborcluster-sample   1/1     3m31s
+statefulset.apps/rfr-harborcluster-sample-redis                      1/1     3m31s
 
 NAME                                   COMPLETIONS   DURATION   AGE
-job.batch/minio-harborcluster-sample   1/1           11s        3h1m
+job.batch/minio-harborcluster-sample   1/1           1s         117s
+
+NAME                                                                         TEAM                           VERSION   PODS   VOLUME   CPU-REQUEST   MEMORY-REQUEST   AGE     STATUS
+postgresql.acid.zalan.do/postgresql-cluster-sample-ns-harborcluster-sample   postgresql-cluster-sample-ns   12        1      1Gi      100m          250Mi            3m31s   Running
 
 NAME                                                               AGE
-redisfailover.databases.spotahome.com/harborcluster-sample-redis   3h18m
+redisfailover.databases.spotahome.com/harborcluster-sample-redis   3m31s
 ```
 
 Of course, you can also check other resources such as `ingress`, `secret`, `pv`, `certificate` and `configMap` etc. under the specified namespace with `kubectl get xxxx -n cluster-sample-ns` commands.
@@ -361,7 +370,7 @@ Of course, you can also check other resources such as `ingress`, `secret`, `pv`,
 
 Now you can try the deployed Harbor cluster.
 
-1. Navigate to the Harbor home address `https://core.10.10.10.100.xip.io` and login Harbor with the root user `admin` and the password you provided in the deployment manifest above.
+1. Navigate to the Harbor home address `https://core.10.10.10.100.nip.io` and login Harbor with the root user `admin` and the password you provided in the deployment manifest above.
 
     >In case you forgot the password, try to get it with the command:
 
