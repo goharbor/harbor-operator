@@ -12,8 +12,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-var force = true
-
 func (c *Controller) Apply(ctx context.Context, res *Resource) error {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "apply")
 	defer span.Finish()
@@ -23,11 +21,6 @@ func (c *Controller) Apply(ctx context.Context, res *Resource) error {
 	l.V(1).Info("Deploying resource")
 
 	resource := res.resource
-
-	if err := res.mutable(ctx, resource); err != nil {
-		return errors.Wrap(err, "mutate")
-	}
-
 	key := client.ObjectKeyFromObject(resource)
 
 	existing := resource.DeepCopyObject().(client.Object)
@@ -38,6 +31,10 @@ func (c *Controller) Apply(ctx context.Context, res *Resource) error {
 
 		l.Info("apply creating", "key", key, "kind", resource.GetObjectKind().GroupVersionKind())
 
+		if err := res.mutable(ctx, resource); err != nil {
+			return errors.Wrap(err, "mutate")
+		}
+
 		if err := c.Create(ctx, resource); err != nil {
 			return err
 		}
@@ -45,13 +42,17 @@ func (c *Controller) Apply(ctx context.Context, res *Resource) error {
 		return nil
 	}
 
-	l.Info("apply changing", "key", key, "kind", resource.GetObjectKind().GroupVersionKind())
+	original := existing.DeepCopyObject().(client.Object)
+	if err := res.mutable(ctx, existing); err != nil {
+		return errors.Wrap(err, "mutate")
+	}
 
-	if err := c.Client.Patch(ctx, resource, client.Apply, &client.PatchOptions{
-		Force:        &force,
+	l.Info("apply changing", "key", key, "kind", existing.GetObjectKind().GroupVersionKind())
+
+	if err := c.Client.Patch(ctx, existing, client.MergeFrom(original), &client.PatchOptions{
 		FieldManager: application.GetName(ctx),
 	}); err != nil {
-		l.Error(err, "Cannot deploy resource", "key", key, "kind", resource.GetObjectKind().GroupVersionKind())
+		l.Error(err, "Cannot deploy resource", "key", key, "kind", existing.GetObjectKind().GroupVersionKind())
 
 		if apierrs.IsForbidden(err) {
 			return serrors.RetryLaterError(err, "dependencyStatus", err.Error())

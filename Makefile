@@ -431,6 +431,7 @@ install-dependencies: certmanager postgresql redis ingress
 .PHONY: redis
 redis: helm sample-redis
 	$(HELM) repo add bitnami https://charts.bitnami.com/bitnami
+	$(HELM) repo update
 	$(HELM) upgrade --install harbor-redis bitnami/redis --version 12.10.0 \
 		--set-string existingSecret=harbor-redis \
 		--set-string existingSecretPasswordKey=redis-password \
@@ -439,6 +440,7 @@ redis: helm sample-redis
 .PHONY: postgresql
 postgresql: helm sample-database
 	$(HELM) repo add bitnami https://charts.bitnami.com/bitnami
+	$(HELM) repo update
 	$(HELM) upgrade --install harbor-database bitnami/postgresql --version 10.3.17 \
 		--set-string initdbScriptsConfigMap=harbor-init-db \
 		--set-string existingSecret=harbor-database-password
@@ -454,6 +456,7 @@ INGRESS_NAMESPACE := nginx-ingress
 ingress: helm
 	$(MAKE) kube-namespace NAMESPACE=$(INGRESS_NAMESPACE)
 	$(HELM) repo add ingress-nginx https://kubernetes.github.io/ingress-nginx # https://github.com/kubernetes/ingress-nginx/tree/master/charts/ingress-nginx#get-repo-info
+	$(HELM) repo update
 	$(HELM) upgrade --install nginx ingress-nginx/ingress-nginx \
 		--namespace $(INGRESS_NAMESPACE) \
 		--set-string controller.config.proxy-body-size=0 \
@@ -462,19 +465,15 @@ ingress: helm
 CERTMANAGER_NAMESPACE := cert-manager
 
 .PHONY: certmanager
-certmanager: helm jetstack
+certmanager: helm
 	$(MAKE) kube-namespace NAMESPACE=$(CERTMANAGER_NAMESPACE)
 	$(HELM) repo add jetstack https://charts.jetstack.io # https://cert-manager.io/docs/installation/kubernetes/
+	$(HELM) repo update
 	$(HELM) upgrade --install certmanager jetstack/cert-manager \
 		--namespace $(CERTMANAGER_NAMESPACE) \
 		--version v1.4.3 \
 		--set installCRDs=true
 	kubectl wait --namespace $(CERTMANAGER_NAMESPACE) --for=condition=ready pod --timeout="60s" --all
-	
-
-.PHONY: jetstack
-jetstack:
-	$(HELM) repo add jetstack https://charts.jetstack.io
 
 # Install local certificate
 # Required for webhook server to start
