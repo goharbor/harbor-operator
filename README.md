@@ -115,7 +115,7 @@ Harbor operator exposes the frontend service with ingress (CRD version: `v1beta1
 * [Manifests references](./docs/manifests-reference.md)
 * [Customize storage, database and cache services](./docs/installation/customize-storage-db-redis.md)
 * [Customize images](./docs/customize-images.md)
-* [Day2 operations](docs/day2/day2-operations.md)
+* [Day2 configurations](docs/day2/day2-configurations.md)
 * [Upgrade Harbor cluster](./docs/LCM/upgrade-cluster.md)
 * [Delete Harbor cluster](./docs/LCM/cluster-deletion.md)
 * [Backup data](./docs/LCM/backup-data.md)
