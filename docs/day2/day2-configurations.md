@@ -3,7 +3,7 @@
 Initially, we configure harbor by means of configmap, but currently we recommend using `HarborConfiguration` CRD to configure harbor, for the configmap method will be deprecated in version 1.2, those who have used and still use configmap will be automatically converted to `HarborConfiguration` CR by the controller, and automatically remove old configmap.
 > The harbor configuration items can be found in [harbor swagger](https://github.com/goharbor/harbor/blob/0867a6bfd6f33149f86a7ae8a740f5e1f976cafa/api/v2.0/swagger.yaml#L7990).
 
-#### ConfigMap (deprecated)
+## ConfigMap (deprecated)
 
 First you need to prepare a config map to provide your harbor configurations, apply the config map in the same namespace as harborcluster. In particular, you need to add an annotation (`goharbor.io/configuration: <harbor cluster name>`) to your config map to mark which harborcluster it is acting on.
 
@@ -42,7 +42,7 @@ data:
     email_password: secret-sample # the value is the name of secret which store the email_password.
 ```
 
-#### CRD-based HarborConfiguration
+## CRD-based HarborConfiguration
 
 **Example of HarborConfiguration**:
 
