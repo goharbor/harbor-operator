@@ -125,11 +125,14 @@ func init() { // nolint:gochecknoinits
 	// Register the cluster service components
 	RegisterRepository("cluster-redis", "", "*") // the - repository of dockerhub
 	RegisterImageName("cluster-redis", "redis", "*")
-	RegisterTag("cluster-redis", "5.0-alpine", "~2.2.0", "~2.3.0", "~2.4.0")
+	RegisterTag("cluster-redis", "5.0-alpine", "~2.2.0", "~2.3.0")
+	RegisterTag("cluster-redis", "6.0-alpine", "~2.4.0")
 
 	RegisterRepository("cluster-postgresql", "registry.opensource.zalan.do/acid", "*")
-	RegisterImageName("cluster-postgresql", "spilo-12", "*")
-	RegisterTag("cluster-postgresql", "1.6-p3", "~2.2.0", "~2.3.0", "~2.4.0")
+	RegisterImageName("cluster-postgresql", "spilo-12", "~2.2.0", "~2.3.0")
+	RegisterTag("cluster-postgresql", "1.6-p3", "~2.2.0", "~2.3.0")
+	RegisterImageName("cluster-postgresql", "spilo-13", "~2.4.0")
+	RegisterTag("cluster-postgresql", "2.0-p7", "~2.4.0")
 
 	RegisterRepository("cluster-minio", "minio", "*") // the minio repository of dockerhub
 	RegisterImageName("cluster-minio", "minio", "*")
