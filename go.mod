@@ -25,7 +25,7 @@ require (
 	github.com/prometheus/client_golang v1.11.0
 	github.com/sethvargo/go-password v0.1.3
 	github.com/sirupsen/logrus v1.8.1
-	github.com/spotahome/redis-operator v1.1.0-rc.3
+	github.com/spotahome/redis-operator v1.1.1
 	github.com/stretchr/testify v1.7.0
 	github.com/theupdateframework/notary v0.6.1
 	github.com/uber/jaeger-client-go v2.24.0+incompatible
