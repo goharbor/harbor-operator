@@ -1,6 +1,6 @@
 - op: add
   path: "/metadata/annotations"
   value:
-    cache.goharbor.io/version: v1.1.0-rc.3 
+    cache.goharbor.io/version: v1.1.1
     database.goharbor.io/version: v1.5.0
     storage.goharbor.io/version: v4.3.2

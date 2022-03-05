@@ -252,8 +252,8 @@ affinity: {}
 redis-operator:
   # redis-operator.enabled -- Whether to enabled [Redis Operator](https://github.com/spotahome/redis-operator)
   enabled: false
-  rbac:
-    install: true
+  image:
+    tag: v1.1.1
 
 minio-operator:
   # minio-operator.enabled -- Whether to enabled [MinIO Operator](https://github.com/minio/operator)
