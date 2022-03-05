@@ -72,7 +72,7 @@ func New(ctx context.Context, ns string) harbormetav1.RedisConnection {
 					}},
 					Containers: []corev1.Container{{
 						Name:  "redis",
-						Image: "bitnami/redis",
+						Image: "bitnami/redis:6.2.6",
 						Env: []corev1.EnvVar{{
 							Name: "REDIS_PASSWORD",
 							ValueFrom: &corev1.EnvVarSource{
