@@ -36,13 +36,13 @@ There are several ways to get the Harbor operator helm chart:
     git clone https://github.com/goharbor/harbor-operator.git && \
     cd harbor-operator && \
     git checkout release-1.1.0 && \
-    make helm-generate RELEASE_VERSION=v1.1.1
+    make helm-generate RELEASE_VERSION=v1.1.2
 
     # Checkout to the specified branch or the specified tag
     # To branch: git checkout <branch-name> e.g.: git checkout release-1.1.0
-    # To tag: git checkout tags/<tag> -b <branch-name> e.g: git checkout tags/v1.1.1 -b tag-v1.1.1
+    # To tag: git checkout tags/<tag> -b <branch-name> e.g: git checkout tags/v1.1.2 -b tag-v1.1.2
 
-    # chart is generated to `charts/harbor-operator-v1.1.1.tgz`
+    # chart is generated to `charts/harbor-operator-v1.1.2.tgz`
     ```
 
 ## Deploy Harbor operator with chart
@@ -53,7 +53,7 @@ Run the `helm` command to install the harbor operator to your cluster:
 
 ```shell
 # Change chart path depends on how do you get the helm chart.
-helm upgrade --namespace harbor-operator-ns --install harbor-operator charts/harbor-operator-v1.1.1.tgz --set-string image.repository=ghcr.io/goharbor/harbor-operator --set-string image.tag=v1.1.1
+helm upgrade --namespace harbor-operator-ns --install harbor-operator charts/harbor-operator-v1.1.2.tgz --set-string image.repository=ghcr.io/goharbor/harbor-operator --set-string image.tag=v1.1.2
 ```
 
 For what settings you can override with `--set`, `--set-string`, `--set-file` or `--values`, you can refer to the [values.yaml](../../charts/harbor-operator/values.yaml) file.

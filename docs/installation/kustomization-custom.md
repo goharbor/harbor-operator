@@ -133,8 +133,8 @@ Of course, you can clone the codebase into your computer and then customize and 
 git clone https://github.com/goharbor/harbor-operator.git
 
 # Checkout to the specified branch or the specified tag.
-# To branch: git checkout <branch-name> e.g.: git checkout release-1.1.1
-# To tag: git checkout tags/<tag> -b <branch-name> e.g: git checkout tags/v1.1.1 -b tag-v1.1.1
+# To branch: git checkout <branch-name> e.g.: git checkout release-1.1.2
+# To tag: git checkout tags/<tag> -b <branch-name> e.g: git checkout tags/v1.1.2 -b tag-v1.1.2
 
 # As the resource manifests are not stored in the codebase, then you need to run the following command to generate the related resource manifests before using `kustomize` to build your customized operator deployment manifest:
 make manifests
