@@ -15,8 +15,8 @@ commonAnnotations:
 resources:
   - ../../config/default # harbor operator
   - patch/namespace.yaml
-  - https://raw.githubusercontent.com/spotahome/redis-operator/master/example/operator/all-redis-operator-resources.yaml?ref=v1.1.0-rc.3 # redis operator
-  - https://raw.githubusercontent.com/spotahome/redis-operator/master/manifests/databases.spotahome.com_redisfailovers.yaml?ref=v1.1.0-rc.3 # redis operator crd
+  - https://raw.githubusercontent.com/spotahome/redis-operator/master/example/operator/all-redis-operator-resources.yaml?ref=v1.1.1 # redis operator
+  - https://raw.githubusercontent.com/spotahome/redis-operator/master/manifests/databases.spotahome.com_redisfailovers.yaml?ref=v1.1.1 # redis operator crd
   - github.com/zalando/postgres-operator/manifests?ref=v1.6.3 # postgresql operator
   - github.com/minio/operator?ref=v4.4.9 # minIO storage operator
 
@@ -38,7 +38,7 @@ patchesJson6902:
 
 images:
   - name: quay.io/spotahome/redis-operator
-    newTag: v1.1.0-rc.3
+    newTag: v1.1.1
   - name: minio/operator
     newName: quay.io/minio/operator
   - name: minio/console

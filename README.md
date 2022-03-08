@@ -34,21 +34,27 @@ Harbor deployment stack is controlled by a custom Harbor resource `HarborCluster
 * Support services exposed with [ingress](https://kubernetes.io/fr/docs/concepts/services-networking/ingress/): [nginx(default)](https://git.k8s.io/ingress-nginx/README.md#readme), [gce](https://git.k8s.io/ingress-gce/README.md#readme), [contour](https://github.com/projectcontour/contour) and `ncp`
 * Support Day2 operations
   * Configures Harbor system settings with configuration CRD (`recommend`) or labeled ConfigMap (`deprecated`)
+
+## Future features
+
+* Support Day2 operations
   * Image pulling secret auto-injection
     * Auto mapping Kubernetes namespaces to the Harbor project
   * Image pulling path auto-rewriting
     * Transparent proxy cache settings
-
-## Future features
-
+  * Certification auto injection
+  * Manage Harbor resources with the declaration way
+    * Robot account
+    * Project
+    * and more
 * [Auto-scaling](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) for each component.
 * Backup/restore data (registry layer, chartmuseum data, databases content).
 * Support services exposed with LoadBalancer
 
 ## Release plans
 
-* [Release 1.2](https://github.com/goharbor/harbor-operator/projects/7)
 * [Release 1.3](https://github.com/goharbor/harbor-operator/projects/9)
+* [Release 1.4](https://github.com/goharbor/harbor-operator/projects/12)
 
 ## Getting started
 
@@ -60,13 +66,11 @@ Versions of the underlying components are listed below:
 
 |  Components   |       Harbor      | MinIO operator | PostgreSQL operator | Redis operator |
 |---------------|-------------------|----------------|---------------------|----------------|
-|  Versions     | 2.4.x `[1]`       | 4.4.9          | 1.6.3               | 1.0.1 `[2]`    |
+|  Versions     | 2.4.x `[1]`       | 4.4.9          | 1.6.3               | 1.1.1          |
 
 NOTES:
 
 [1] `.x` means all the patch releases of Harbor can be naturally supported in one operator version.
-
-[2] Use a [forked version](https://github.com/spotahome/redis-operator) of [spotahome/redis-operator](https://github.com/spotahome/redis-operator).
 
 ## Compatibility
 
@@ -111,7 +115,7 @@ Harbor operator exposes the frontend service with ingress (CRD version: `v1beta1
 * [Manifests references](./docs/manifests-reference.md)
 * [Customize storage, database and cache services](./docs/installation/customize-storage-db-redis.md)
 * [Customize images](./docs/customize-images.md)
-* [Day2 operations](docs/day2/day2-operations.md)
+* [Day2 configurations](docs/day2/day2-configurations.md)
 * [Upgrade Harbor cluster](./docs/LCM/upgrade-cluster.md)
 * [Delete Harbor cluster](./docs/LCM/cluster-deletion.md)
 * [Backup data](./docs/LCM/backup-data.md)
