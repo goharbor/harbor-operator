@@ -136,7 +136,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1.
 			Value: GcsJSONKeyFilePath,
 		}, corev1.EnvVar{
 			Name:  "STORAGE_GOOGLE_PREFIX",
-			Value: chartMuseum.Spec.Chart.Storage.Gcs.PathPrefix,
+			Value: getChartFolder(chartMuseum.Spec.Chart.Storage.Gcs.PathPrefix),
 		})
 
 		volumes = append(volumes, corev1.Volume{
@@ -176,7 +176,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1.
 			Value: chartMuseum.Spec.Chart.Storage.Azure.BaseURL,
 		}, corev1.EnvVar{
 			Name:  "STORAGE_MICROSOFT_PREFIX",
-			Value: chartMuseum.Spec.Chart.Storage.Azure.PathPrefix,
+			Value: getChartFolder(chartMuseum.Spec.Chart.Storage.Azure.PathPrefix),
 		})
 
 		if chartMuseum.Spec.Chart.Storage.Azure.AccountKeyRef != "" {
@@ -206,7 +206,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1.
 			Value: chartMuseum.Spec.Chart.Storage.Amazon.Bucket,
 		}, corev1.EnvVar{
 			Name:  "STORAGE_AMAZON_PREFIX",
-			Value: chartMuseum.Spec.Chart.Storage.Amazon.Prefix,
+			Value: getChartFolder(chartMuseum.Spec.Chart.Storage.Amazon.Prefix),
 		}, corev1.EnvVar{
 			Name:  "STORAGE_AMAZON_REGION",
 			Value: chartMuseum.Spec.Chart.Storage.Amazon.Region,
@@ -249,7 +249,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1.
 			},
 		}, corev1.EnvVar{
 			Name:  "STORAGE_OPENSTACK_PREFIX",
-			Value: chartMuseum.Spec.Chart.Storage.OpenStack.Prefix,
+			Value: getChartFolder(chartMuseum.Spec.Chart.Storage.OpenStack.Prefix),
 		}, corev1.EnvVar{
 			Name:  "STORAGE_OPENSTACK_REGION",
 			Value: chartMuseum.Spec.Chart.Storage.OpenStack.Region,
@@ -432,4 +432,8 @@ func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1.
 	chartMuseum.Spec.ComponentSpec.ApplyToDeployment(deploy)
 
 	return deploy, nil
+}
+
+func getChartFolder(prefix string) string {
+	return path.Join(prefix, "chart_storage")
 }
