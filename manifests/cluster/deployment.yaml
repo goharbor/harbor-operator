@@ -26382,8 +26382,6 @@ spec:
                 properties:
                   bucketDNS:
                     type: boolean
-                required:
-                - bucketDNS
                 type: object
               securityContext:
                 properties:
@@ -28325,6 +28323,10 @@ spec:
                   type: object
                 nullable: true
                 type: array
+              provisionedBuckets:
+                type: boolean
+              provisionedUsers:
+                type: boolean
               revision:
                 format: int32
                 type: integer
@@ -28392,6 +28394,17 @@ spec:
             type: object
           spec:
             properties:
+              buckets:
+                items:
+                  properties:
+                    name:
+                      type: string
+                    objectLock:
+                      type: boolean
+                    region:
+                      type: string
+                  type: object
+                type: array
               certConfig:
                 properties:
                   commonName:
@@ -28512,6 +28525,18 @@ spec:
                     type: string
                 required:
                 - name
+                type: object
+              features:
+                properties:
+                  bucketDNS:
+                    type: boolean
+                  domains:
+                    properties:
+                      minio:
+                        items:
+                          type: string
+                        type: array
+                    type: object
                 type: object
               image:
                 type: string
@@ -30995,16 +31020,7 @@ spec:
                     type: array
                 type: object
               prometheusOperator:
-                properties:
-                  annotations:
-                    additionalProperties:
-                      type: string
-                    type: object
-                  labels:
-                    additionalProperties:
-                      type: string
-                    type: object
-                type: object
+                type: boolean
               readiness:
                 properties:
                   exec:
@@ -31076,8 +31092,6 @@ spec:
                 properties:
                   bucketDNS:
                     type: boolean
-                required:
-                - bucketDNS
                 type: object
               serviceAccountName:
                 type: string
@@ -32526,6 +32540,10 @@ spec:
                   type: object
                 nullable: true
                 type: array
+              provisionedBuckets:
+                type: boolean
+              provisionedUsers:
+                type: boolean
               revision:
                 format: int32
                 type: integer
@@ -37884,7 +37902,7 @@ rules:
 - apiGroups:
   - monitoring.coreos.com
   resources:
-  - servicemonitors
+  - prometheuses
   verbs:
   - '*'
 - apiGroups:
@@ -38802,7 +38820,7 @@ metadata:
   annotations:
     cache.goharbor.io/version: v1.1.1
     database.goharbor.io/version: v1.5.0
-    storage.goharbor.io/version: v4.3.2
+    storage.goharbor.io/version: v4.4.9
   labels:
     control-plane: harbor-operator
   name: harbor-operator
@@ -38927,7 +38945,7 @@ spec:
                 - minio-operator
             topologyKey: kubernetes.io/hostname
       containers:
-      - image: quay.io/minio/operator:v4.3.2
+      - image: quay.io/minio/operator:v4.4.9
         imagePullPolicy: IfNotPresent
         name: minio-operator
         resources:

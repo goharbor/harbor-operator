@@ -66,7 +66,7 @@ kubectl delete -f https://raw.githubusercontent.com/spotahome/redis-operator/mas
 
 ## Deploy Minio operator (Optional)
 
-Follow the installation guide shown [here](https://github.com/minio/operator/tree/v4.3.2#1-install-the-minio-operator) to install the Minio operator.
+Follow the installation guide shown [here](https://github.com/minio/operator/tree/v4.4.9#deploy-the-minio-operator-and-create-a-tenant) to install the Minio operator.
 
 Or use the Minio kustomization template:
 
@@ -74,7 +74,7 @@ Or use the Minio kustomization template:
 # Clone the codebase.
 git clone https://github.com/minio/operator.git && \
 cd operator && \
-git checkout tags/v4.3.2 -b minio-v4.3.2
+git checkout tags/v4.4.9 -b minio-v4.4.9
 
 # Apply with the kustomization template that is located the root dir of the codebase.
 kustomize build | kubectl apply -f -

@@ -66,7 +66,7 @@ Versions of the underlying components are listed below:
 
 |  Components   |       Harbor      | MinIO operator | PostgreSQL operator | Redis operator |
 |---------------|-------------------|----------------|---------------------|----------------|
-|  Versions     | 2.4.x `[1]`       | 4.3.2          | 1.6.3               | 1.1.1          |
+|  Versions     | 2.4.x `[1]`       | 4.4.9          | 1.6.3               | 1.1.1          |
 
 NOTES:
 
