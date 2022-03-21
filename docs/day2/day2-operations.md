@@ -218,7 +218,7 @@ spec:
   accessCredential:
     namespace: kube-system
     accessSecretRef: mysecret
-  version: 2.4.1
+  version: 2.4.2
   insecure: true
 ```
 
@@ -406,7 +406,7 @@ spec:
   accessCredential:
     namespace: kube-system
     accessSecretRef: mysecret
-  version: 2.4.1
+  version: 2.4.2
   insecure: true
   rules: ## rules to define to rewrite image path
   - "docker.io=>testharbor"    ## <repo-regex>,<harbor-project>
