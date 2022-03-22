@@ -43,7 +43,6 @@ Deploy Harbor Operator
 | leaderElection.namespace | string | `"kube-system"` | The namespace used to store the ConfigMap for leader election |
 | logLevel | int | `4` | Set the verbosity of controller. Range of 0 - 6 with 6 being the most verbose. Info level is 4. |
 | minio-operator.enabled | bool | `false` | Whether to enabled [MinIO Operator](https://github.com/minio/operator) |
-| minio-operator.image.tag | string | `"v4.4.9"` |  |
 | nameOverride | string | `""` |  |
 | nodeSelector | object | `{}` | Expects input structure as per specification <https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#nodeselector-v1-core> For example: `[   {     "matchExpressions": [       {         "key": "kubernetes.io/e2e-az-name",         "operator": "In",         "values": [           "e2e-az1",           "e2e-az2"         ]       }     ]   } ]` |
 | podAnnotations | object | `{}` | Additional annotations to add to the controller Pods |

@@ -20,8 +20,8 @@ home: https://github.com/goharbor/harbor-operator
 icon: https://branding.cncf.io/img/projects/harbor/icon/color/harbor-icon-color.svg
 
 dependencies:
-- name: minio-operator
-  version: 4.3.2
+- name: operator
+  version: 4.4.9
   condition: minio-operator.enabled
   repository: https://operator.min.io/
   tags:
