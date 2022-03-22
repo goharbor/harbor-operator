@@ -81,7 +81,7 @@ main() {
     echo "kubectl location: $kubectl_dir/kubectl"
     echo "kind location: $kind_dir/kind"
 
-    echo "Access the harbor with: https://$IP, enjoy!"
+    echo "Access the harbor with: https://core.$IP.nip.io, enjoy!"
 
 }
 
