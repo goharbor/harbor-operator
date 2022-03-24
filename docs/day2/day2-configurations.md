@@ -47,18 +47,6 @@ data:
 **Example of HarborConfiguration**:
 
 ```yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: secret-sample
-  namespace: cluster-sample-ns
-type: Opaque
-data:
-  # the key is same with fields name.
-  email_password: YmFyCg==
-```
-
-```yaml
 apiVersion: goharbor.io/v1beta1
 kind: HarborConfiguration
 metadata:
@@ -67,8 +55,9 @@ metadata:
 spec:
   # your harbor configuration
   configuration:
-    email_password: secret-sample
-    email_ssl: true
+    robotTokenDuration: 45
+    robotNamePrefix: harbor$
+    notificationEnable: false
   harborClusterRef: harborcluster-sample
 ```
 
@@ -79,7 +68,8 @@ status:
   lastApplyTime: "2021-06-04T06:07:53Z"
   lastConfiguration:
     configuration:
-      email_password: secret-sample
-      email_ssl: true
+      robotTokenDuration: 45
+      robotNamePrefix: harbor$
+      notificationEnable: false
   status: Success
 ```
