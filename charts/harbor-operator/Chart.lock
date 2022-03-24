@@ -8,5 +8,5 @@ dependencies:
 - name: postgres-operator
   repository: ""
   version: 1.6.3
-digest: sha256:a83ab1189da727ad8b68ed63268edf497e3c996aa89d5ee6527c6384e8ce2f66
-generated: "2022-01-18T22:38:09.96004016+08:00"
+digest: sha256:5f751a10a1bebdc645382cfc2a24c2dfcb5d1b55f22e5ccb3d9dec48932e7e6b
+generated: "2022-03-24T17:49:40.180836609+08:00"

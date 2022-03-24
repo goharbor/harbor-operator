@@ -28,7 +28,7 @@ dependencies:
     - storage
 - name: redis-operator
   version: 3.1.4
-  condition: rediso-perator.enabled
+  condition: redis-operator.enabled
   repository: https://spotahome.github.io/redis-operator
   tags:
     - cache
