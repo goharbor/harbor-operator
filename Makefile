@@ -554,7 +554,7 @@ $(MARKDOWNLINT):
 # find or download golangci-lint
 # download golangci-lint if necessary
 GOLANGCI_LINT := $(BIN)/golangci-lint
-GOLANGCI_LINT_VERSION := 1.33.0
+GOLANGCI_LINT_VERSION := 1.37.1
 
 .PHONY: golangci-lint
 golangci-lint:
@@ -589,7 +589,7 @@ $(KUBEBUILDER):
 
 # find or download kustomize
 # download kustomize if necessary
-KUSTOMIZE_VERSION := 3.8.7
+KUSTOMIZE_VERSION := 4.2.0
 KUSTOMIZE := $(BIN)/kustomize
 
 .PHONY: kustomize
