@@ -52,8 +52,7 @@ var (
 )
 
 const (
-	apiPort     = 5000 // https://github.com/docker/distribution/blob/749f6afb4572201e3c37325d0ffedb6f32be8950/contrib/compose/docker-compose.yml#L15
-	metricsPort = 5001 // https://github.com/docker/distribution/blob/b12bd4004afc203f1cbd2072317c8fda30b89710/cmd/registry/config-dev.yml#L34
+	apiPort = 5000 // https://github.com/docker/distribution/blob/749f6afb4572201e3c37325d0ffedb6f32be8950/contrib/compose/docker-compose.yml#L15
 	// registry controller port.
 	httpsPort = 8443
 	httpPort  = 8080
@@ -298,7 +297,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1.Reg
 							Name:          harbormetav1.RegistryAPIPortName,
 							Protocol:      corev1.ProtocolTCP,
 						}, {
-							ContainerPort: metricsPort,
+							ContainerPort: registry.Spec.HTTP.Debug.Port,
 							Name:          harbormetav1.RegistryMetricsPortName,
 							Protocol:      corev1.ProtocolTCP,
 						}},
