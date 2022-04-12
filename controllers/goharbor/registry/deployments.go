@@ -260,6 +260,22 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1.Reg
 		Scheme: registry.Spec.HTTP.TLS.GetScheme(),
 	}
 
+	containerPorts := []corev1.ContainerPort{
+		{
+			ContainerPort: apiPort,
+			Name:          harbormetav1.RegistryAPIPortName,
+			Protocol:      corev1.ProtocolTCP,
+		},
+	}
+
+	if registry.Spec.HTTP.Debug != nil {
+		containerPorts = append(containerPorts, corev1.ContainerPort{
+			ContainerPort: registry.Spec.HTTP.Debug.Port,
+			Name:          harbormetav1.RegistryMetricsPortName,
+			Protocol:      corev1.ProtocolTCP,
+		})
+	}
+
 	deploy := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        name,
@@ -292,15 +308,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1.Reg
 					Containers: []corev1.Container{{
 						Name:  controllers.Registry.String(),
 						Image: image,
-						Ports: []corev1.ContainerPort{{
-							ContainerPort: apiPort,
-							Name:          harbormetav1.RegistryAPIPortName,
-							Protocol:      corev1.ProtocolTCP,
-						}, {
-							ContainerPort: registry.Spec.HTTP.Debug.Port,
-							Name:          harbormetav1.RegistryMetricsPortName,
-							Protocol:      corev1.ProtocolTCP,
-						}},
+						Ports: containerPorts,
 						LivenessProbe: &corev1.Probe{
 							ProbeHandler: corev1.ProbeHandler{
 								HTTPGet: httpGET,
