@@ -20,6 +20,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/util/version"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -71,7 +72,7 @@ func (c *Controller) Changed(ctx context.Context, depManager *checksum.Dependenc
 	return false, nil
 }
 
-func (c *Controller) ProcessFunc(ctx context.Context, resource runtime.Object, dependencies ...graph.Resource) func(context.Context, graph.Resource) error { // nolint:funlen
+func (c *Controller) ProcessFunc(ctx context.Context, resource runtime.Object, dependencies ...graph.Resource) func(context.Context, graph.Resource) error { // nolint:funlen,gocognit
 	depManager := checksum.New(c.Scheme)
 
 	depManager.Add(ctx, owner.Get(ctx), true)
@@ -137,10 +138,93 @@ func (c *Controller) ProcessFunc(ctx context.Context, resource runtime.Object, d
 			return nil
 		})
 
-		err = c.applyAndCheck(ctx, r)
+		info, err := c.DiscoveryClient.ServerVersion()
+		if err != nil {
+			return errors.Wrap(err, "failed to get server version")
+		}
 
-		return errors.Wrapf(err, "apply %s (%s/%s)", gvk, namespace, name)
+		if version.MustParseGeneric(info.String()).AtLeast(version.MustParseGeneric("v1.22.0")) {
+			return errors.Wrapf(
+				c.applyAndCheck(ctx, r),
+				"apply %s (%s/%s)", gvk, namespace, name,
+			)
+		}
+
+		res.mutable.AppendMutation(func(ctx context.Context, resource runtime.Object) error {
+			newSvc, ok := resource.(*corev1.Service)
+			if !ok {
+				return nil
+			}
+
+			oldSvc := &corev1.Service{}
+			err := c.Client.Get(ctx, client.ObjectKeyFromObject(newSvc), oldSvc)
+			if err != nil {
+				if apierrors.IsNotFound(err) {
+					return nil
+				}
+
+				return err
+			}
+
+			// copied from https://github.com/kubernetes/kubernetes/blob/076168b84d0af4ad65cb5664fc1cef40f837e9dc/pkg/registry/core/service/strategy.go#L318
+			if newSvc.Spec.ClusterIP == "" {
+				newSvc.Spec.ClusterIP = oldSvc.Spec.ClusterIP
+			}
+
+			if len(newSvc.Spec.ClusterIPs) == 0 {
+				newSvc.Spec.ClusterIPs = oldSvc.Spec.ClusterIPs
+			}
+
+			if needsNodePort(oldSvc) && needsNodePort(newSvc) {
+				// Map NodePorts by name.  The user may have changed other properties
+				// of the port, but we won't see that here.
+				np := map[string]int32{}
+				for i := range oldSvc.Spec.Ports {
+					p := &oldSvc.Spec.Ports[i]
+					np[p.Name] = p.NodePort
+				}
+				for i := range newSvc.Spec.Ports {
+					p := &newSvc.Spec.Ports[i]
+					if p.NodePort == 0 {
+						p.NodePort = np[p.Name]
+					}
+				}
+			}
+
+			if needsHCNodePort(oldSvc) && needsHCNodePort(newSvc) {
+				if newSvc.Spec.HealthCheckNodePort == 0 {
+					newSvc.Spec.HealthCheckNodePort = oldSvc.Spec.HealthCheckNodePort
+				}
+			}
+
+			return nil
+		})
+
+		return errors.Wrapf(
+			c.applyAndCheck(ctx, r),
+			"apply %s (%s/%s)", gvk, namespace, name,
+		)
 	}
+}
+
+func needsHCNodePort(svc *corev1.Service) bool {
+	if svc.Spec.Type != corev1.ServiceTypeLoadBalancer {
+		return false
+	}
+
+	if svc.Spec.ExternalTrafficPolicy != corev1.ServiceExternalTrafficPolicyTypeLocal {
+		return false
+	}
+
+	return true
+}
+
+func needsNodePort(svc *corev1.Service) bool {
+	if svc.Spec.Type == corev1.ServiceTypeNodePort || svc.Spec.Type == corev1.ServiceTypeLoadBalancer {
+		return true
+	}
+
+	return false
 }
 
 func (c *Controller) AddUnsctructuredToManage(ctx context.Context, resource *unstructured.Unstructured, dependencies ...graph.Resource) (graph.Resource, error) { // nolint:interfacer

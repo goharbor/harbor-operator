@@ -12,8 +12,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-var force = true
-
 func (c *Controller) Apply(ctx context.Context, res *Resource) error {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "apply")
 	defer span.Finish()
@@ -47,8 +45,7 @@ func (c *Controller) Apply(ctx context.Context, res *Resource) error {
 
 	l.Info("apply changing", "key", key, "kind", resource.GetObjectKind().GroupVersionKind())
 
-	if err := c.Client.Patch(ctx, resource, client.Apply, &client.PatchOptions{
-		Force:        &force,
+	if err := c.Client.Update(ctx, resource, &client.UpdateOptions{
 		FieldManager: application.GetName(ctx),
 	}); err != nil {
 		l.Error(err, "Cannot deploy resource", "key", key, "kind", resource.GetObjectKind().GroupVersionKind())
