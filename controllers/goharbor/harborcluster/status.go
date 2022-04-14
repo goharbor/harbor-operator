@@ -114,19 +114,17 @@ func (s *status) DependsReady() bool {
 	s.locker.Lock()
 	defer s.locker.Unlock()
 
-	ready := 0
-
 	for _, c := range s.data.Conditions {
 		if c.Type == goharborv1.CacheReady ||
 			c.Type == goharborv1.DatabaseReady ||
 			c.Type == goharborv1.StorageReady {
-			if c.Status == corev1.ConditionTrue {
-				ready++
+			if c.Status != corev1.ConditionTrue {
+				return false
 			}
 		}
 	}
 
-	return ready == 3
+	return true
 }
 
 // For the harbor cluster CR.

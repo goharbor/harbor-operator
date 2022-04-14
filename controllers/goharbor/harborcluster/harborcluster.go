@@ -15,7 +15,7 @@ import (
 )
 
 // Reconcile logic of the HarborCluster.
-func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (res ctrl.Result, err error) { // nolint:funlen
+func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (res ctrl.Result, err error) { //nolint:funlen
 	ctx = r.PopulateContext(ctx, req)
 
 	// Get the harborcluster first
@@ -59,7 +59,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (res ctrl.
 			er = fmt.Errorf("defer: update status error: %w", er)
 
 			if err != nil {
-				// nolint:errorlint
 				err = fmt.Errorf("%s, upstreaming error: %w", er.Error(), err)
 			} else {
 				err = er

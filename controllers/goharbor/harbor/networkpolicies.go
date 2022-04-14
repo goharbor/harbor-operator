@@ -120,7 +120,7 @@ func (r *Reconciler) AddCoreIngressNetworkPolicy(ctx context.Context, harbor *go
 	return NetworkPolicy(networkPolicyRes), errors.Wrap(err, "add")
 }
 
-func (r *Reconciler) GetCoreIngressNetworkPolicy(ctx context.Context, harbor *goharborv1.Harbor) (*netv1.NetworkPolicy, error) { //nolint:dupl
+func (r *Reconciler) GetCoreIngressNetworkPolicy(ctx context.Context, harbor *goharborv1.Harbor) (*netv1.NetworkPolicy, error) {
 	var port intstr.IntOrString
 
 	if harbor.Spec.Expose.Core.TLS != nil {
@@ -268,7 +268,7 @@ func (r *Reconciler) AddPortalIngressNetworkPolicy(ctx context.Context, harbor *
 	return NetworkPolicy(networkPolicyRes), errors.Wrap(err, "add")
 }
 
-func (r *Reconciler) GetPortalIngressNetworkPolicy(ctx context.Context, harbor *goharborv1.Harbor) (*netv1.NetworkPolicy, error) { //nolint:dupl
+func (r *Reconciler) GetPortalIngressNetworkPolicy(ctx context.Context, harbor *goharborv1.Harbor) (*netv1.NetworkPolicy, error) {
 	httpPort := intstr.FromString(harbormetav1.PortalHTTPPortName)
 	httpsPort := intstr.FromString(harbormetav1.PortalHTTPSPortName)
 
