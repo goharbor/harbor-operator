@@ -15,7 +15,7 @@ import (
 )
 
 // Reconcile logic of the HarborCluster.
-func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (res ctrl.Result, err error) { //nolint:funlen
+func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (res ctrl.Result, err error) { // nolint:funlen
 	ctx = r.PopulateContext(ctx, req)
 
 	// Get the harborcluster first
