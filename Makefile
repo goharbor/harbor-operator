@@ -510,7 +510,7 @@ clean:
 
 # find or download controller-gen
 # download controller-gen if necessary
-CONTROLLER_GEN_VERSION := 0.5.0
+CONTROLLER_GEN_VERSION := 0.6.2
 CONTROLLER_GEN := $(BIN)/controller-gen
 
 .PHONY: controller-gen
@@ -535,7 +535,7 @@ $(CONTROLLER_GEN):
 
 # find or download markdownlint
 # download markdownlint if necessary
-MARKDOWNLINT_VERSION := 0.16.0
+MARKDOWNLINT_VERSION := 0.31.1
 MARKDOWNLINT := $(BIN)/markdownlint
 
 .PHONY: markdownlint
@@ -554,7 +554,7 @@ $(MARKDOWNLINT):
 # find or download golangci-lint
 # download golangci-lint if necessary
 GOLANGCI_LINT := $(BIN)/golangci-lint
-GOLANGCI_LINT_VERSION := 1.33.0
+GOLANGCI_LINT_VERSION := 1.45.2
 
 .PHONY: golangci-lint
 golangci-lint:
@@ -571,7 +571,7 @@ $(GOLANGCI_LINT):
 
 # find or download kubebuilder
 # download kubebuilder if necessary
-KUBEBUIDER_VERSION := 3.1.0
+KUBEBUIDER_VERSION := 3.2.0
 KUBEBUILDER=$(BIN)/kubebuilder
 
 .PHONY: kubebuilder
@@ -589,7 +589,7 @@ $(KUBEBUILDER):
 
 # find or download kustomize
 # download kustomize if necessary
-KUSTOMIZE_VERSION := 3.8.7
+KUSTOMIZE_VERSION := 4.5.4
 KUSTOMIZE := $(BIN)/kustomize
 
 .PHONY: kustomize
@@ -616,7 +616,7 @@ HELM=$(shell which helm 2> /dev/null)
 endif
 
 # find or download goreleaser
-GORELEASER_VERSION := 0.129.0
+GORELEASER_VERSION := v1.6.3
 GORELEASER := $(BIN)/goreleaser
 
 .PHONY: goreleaser
@@ -629,13 +629,19 @@ goreleaser:
 $(GORELEASER):
 	$(MAKE) $(BIN)
 	# https://goreleaser.com/install/
-	export BINDIR='$(BIN)' ; \
-	curl -sfL https://install.goreleaser.com/github.com/goreleaser/goreleaser.sh \
-		| bash -s 'v$(GORELEASER_VERSION)'
+	@{ \
+	set -e ;\
+	GORELEASER_TMP_DIR=$$(mktemp -d) ;\
+	cd $$GORELEASER_TMP_DIR ;\
+	go mod init tmp ;\
+	go get github.com/goreleaser/goreleaser@$(GORELEASER_VERSION) ;\
+	go build -mod=readonly -o $(GORELEASER) github.com/goreleaser/goreleaser ;\
+	rm -rf $$GORELEASER_TMP_DIR ;\
+	}
 
 # find or download stringer
 # download stringer if necessary
-STRINGER_VERSION := v0.1.2
+STRINGER_VERSION := v0.1.10
 STRINGER := $(BIN)/stringer
 
 .PHONY: stringer
@@ -695,7 +701,7 @@ $(KIND):
 
 # find or download helm-docs
 # download helm-docs if necessary
-HELM_DOCS_VERSION := 1.4.0
+HELM_DOCS_VERSION := 1.8.1
 HELM_DOCS := $(BIN)/helm-docs
 
 .PHONY: helm-docs
