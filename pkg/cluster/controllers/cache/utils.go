@@ -9,6 +9,7 @@ import (
 
 // GenerateResourceList generates resource list by parsing parameters cpu and memory.
 func GenerateResourceList(cpu, memory string) (resources corev1.ResourceList, err error) {
+	resources = corev1.ResourceList{}
 	if cpu != "" {
 		resources[corev1.ResourceCPU], err = resource.ParseQuantity(cpu)
 		if err != nil {

@@ -353,7 +353,8 @@ func (r *Reconciler) attachRegistryCtlContainer(ctx context.Context, registry *g
 
 	name := controllers.RegistryController.String()
 
-	volumeMounts := append(deploy.Spec.Template.Spec.Containers[0].VolumeMounts, corev1.VolumeMount{
+	volumeMounts := deploy.Spec.Template.Spec.Containers[0].VolumeMounts
+	volumeMounts = append(volumeMounts, corev1.VolumeMount{
 		Name:      CtlVolumeName,
 		MountPath: CtlConfigPath,
 	})

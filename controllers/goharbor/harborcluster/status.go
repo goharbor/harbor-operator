@@ -126,7 +126,9 @@ func (s *status) DependsReady() bool {
 		}
 	}
 
-	return ready == 3
+	allReadyNum := 3
+
+	return ready == allReadyNum
 }
 
 // For the harbor cluster CR.

@@ -12,6 +12,8 @@ const (
 	charset                = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	nameLen                = 6
 	NormalizationSeparator = "-"
+	baseInt10              = 10
+	baseBitSize            = 64
 )
 
 var seededRand *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano())) // nolint:gosec
@@ -42,5 +44,5 @@ func RandomName(prefix string) string {
 func ExtractID(location string) (int64, error) {
 	idstr := location[strings.LastIndex(location, "/")+1:]
 
-	return strconv.ParseInt(idstr, 10, 64)
+	return strconv.ParseInt(idstr, baseInt10, baseBitSize)
 }

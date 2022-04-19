@@ -190,7 +190,6 @@ type Database struct {
 }
 
 type DatabaseSpec struct {
-
 	// +kubebuilder:validation:Optional
 	PostgreSQL *PostgreSQLSpec `json:"postgresql,omitempty"`
 

@@ -28,6 +28,8 @@ import (
 
 const (
 	defaultSaName = "default"
+	baseInt10     = 10
+	baseBitSize   = 64
 )
 
 // New Namespace reconciler.
@@ -216,12 +218,12 @@ func (r *Reconciler) validateRobot(proj, robot string) error {
 		return errors.Errorf("proj should not be empty")
 	}
 
-	robotID, err := strconv.ParseInt(robot, 10, 64)
+	robotID, err := strconv.ParseInt(robot, baseInt10, baseBitSize)
 	if err != nil {
 		return err
 	}
 
-	projectID, err := strconv.ParseInt(proj, 10, 64)
+	projectID, err := strconv.ParseInt(proj, baseInt10, baseBitSize)
 	if err != nil {
 		return err
 	}

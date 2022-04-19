@@ -86,6 +86,8 @@ const (
 	defaultCacheDurationSeconds = 30
 
 	defaultCacheCleanIntervalSeconds = 4 * 60 * 60 // 4hours
+
+	baseInt10 = 10
 )
 
 func (spec *ExporterCacheSpec) GetDurationEnvVar() string {
@@ -94,7 +96,7 @@ func (spec *ExporterCacheSpec) GetDurationEnvVar() string {
 		seconds = int64(spec.Duration.Seconds())
 	}
 
-	return strconv.FormatInt(seconds, 10)
+	return strconv.FormatInt(seconds, baseInt10)
 }
 
 func (spec *ExporterCacheSpec) GetCleanIntervalEnvVar() string {
@@ -103,7 +105,7 @@ func (spec *ExporterCacheSpec) GetCleanIntervalEnvVar() string {
 		seconds = int64(spec.CleanInterval.Seconds())
 	}
 
-	return strconv.FormatInt(seconds, 10)
+	return strconv.FormatInt(seconds, baseInt10)
 }
 
 type ExporterCoreSpec struct {
