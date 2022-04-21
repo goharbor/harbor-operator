@@ -16,6 +16,7 @@ package harborcluster
 
 import (
 	"context"
+	"fmt"
 
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
 	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/harbor"
@@ -91,6 +92,7 @@ func (s *ServiceManager) Apply() error { // nolint:funlen
 	defer func() {
 		// Add condition
 		if status != nil {
+			s.st.log.Info(fmt.Sprintf("%s readiness is %s, %s, %s", s.component, status.Condition.Status, status.Condition.Reason, status.Condition.Message))
 			// Here just add condition update to the status, the real update happens outside
 			s.st.UpdateCondition(conditionType, status.Condition)
 			// Assign to harbor ctrl for the reconcile of cluster
