@@ -122,7 +122,7 @@ storage:
     accesskey: {{ .Spec.Storage.Driver.S3.AccessKey | quote }}
     {{- end }}
     {{- if .Spec.Storage.Driver.S3.SecretKeyRef }}
-    # secretkey: setted through environment variable
+    # secretkey: set through environment variable
     {{- end }}
     {{- if .Spec.Storage.Driver.S3.RegionEndpoint }}
     regionendpoint: {{ .Spec.Storage.Driver.S3.RegionEndpoint | quote }}
@@ -160,7 +160,7 @@ storage:
   {{- if .Spec.Storage.Driver.Swift }}
   swift:
     username: {{ .Spec.Storage.Driver.Swift.Username | quote }}
-    # password: setted through environment variable
+    # password: set through environment variable
     authurl: {{ .Spec.Storage.Driver.Swift.AuthURL | quote }}
     container: {{ .Spec.Storage.Driver.Swift.Container | quote }}
     insecureskipverify: {{ .Spec.Storage.Driver.Swift.InsecureSkipVerify }}
@@ -177,7 +177,7 @@ storage:
     accesskey: {{ .Spec.Storage.Driver.Swift.AccessKey | quote }}
     {{- end }}
     {{- if .Spec.Storage.Driver.Swift.SecretKeyRef }}
-    # secretkey: setted through environment variable
+    # secretkey: set through environment variable
     {{- end }}
     {{- if .Spec.Storage.Driver.Swift.AuthVersion }}
     authversion: {{ .Spec.Storage.Driver.Swift.AuthVersion | quote }}
@@ -242,7 +242,7 @@ redis:
   {{- else }}
   addr: {{ .Spec.Redis.Host | quote }}
   {{- end }}
-  # password: setted through environment variable
+  # password: set through environment variable
   db: {{ .Spec.Redis.Database }}
   {{- if .Spec.Redis.DialTimeout }}
   dialtimeout: {{ .Spec.Redis.DialTimeout.Duration }}
@@ -268,7 +268,7 @@ redis:
 {{- end }}
 compatibility:
   schema1:
-    # signingkeyfile: setted through environment variable
+    # signingkeyfile: set through environment variable
     enabled: {{ .Spec.Compatibility.Schema1.Enabled }}
 validation:
   disabled: {{ .Spec.Validation.Disabled }}
@@ -300,7 +300,7 @@ auth:
   {{- if .Spec.Authentication.HTPasswd }}
   htpasswd:
     realm: {{ .Spec.Authentication.HTPasswd.Realm | quote }}
-    # path: setted through environment variable
+    # path: set through environment variable
   {{- end }}
 {{- end }}
 notifications:
