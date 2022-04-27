@@ -59,7 +59,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (res ctrl.
 			er = fmt.Errorf("defer: update status error: %w", er)
 
 			if err != nil {
-				// nolint:errorlint
 				err = fmt.Errorf("%s, upstreaming error: %w", er.Error(), err)
 			} else {
 				err = er

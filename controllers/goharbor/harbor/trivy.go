@@ -69,7 +69,7 @@ func (r *Reconciler) AddTrivyUpdateSecret(ctx context.Context, harbor *goharborv
 	return TrivyUpdateSecret(authSecretRes), nil
 }
 
-const TrivyGithubCredentialsConfigKey = "trivy-github-credentials"
+const TrivyGithubCredentialsConfigKey = "trivy-github-credentials" // nolint:gosec
 
 func (r *Reconciler) GetTrivyUpdateSecret(ctx context.Context, harbor *goharborv1.Harbor) (*corev1.Secret, error) {
 	name := r.NormalizeName(ctx, harbor.GetName(), controllers.Trivy.String(), "github")

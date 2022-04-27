@@ -144,28 +144,23 @@ func (harbor *Controller) getHarborCR(ctx context.Context, harborcluster *goharb
 	}
 
 	if harborcluster.Spec.Storage.Spec.FileSystem != nil {
-		harborCR.Spec.ImageChartStorage.FileSystem =
-			harborcluster.Spec.Storage.Spec.FileSystem.HarborStorageImageChartStorageFileSystemSpec.DeepCopy()
+		harborCR.Spec.ImageChartStorage.FileSystem = harborcluster.Spec.Storage.Spec.FileSystem.HarborStorageImageChartStorageFileSystemSpec.DeepCopy()
 	}
 
 	if harborcluster.Spec.Storage.Spec.S3 != nil {
-		harborCR.Spec.ImageChartStorage.S3 =
-			harborcluster.Spec.Storage.Spec.S3.HarborStorageImageChartStorageS3Spec.DeepCopy()
+		harborCR.Spec.ImageChartStorage.S3 = harborcluster.Spec.Storage.Spec.S3.HarborStorageImageChartStorageS3Spec.DeepCopy()
 	}
 
 	if harborcluster.Spec.Storage.Spec.Swift != nil {
-		harborCR.Spec.ImageChartStorage.Swift =
-			harborcluster.Spec.Storage.Spec.Swift.HarborStorageImageChartStorageSwiftSpec.DeepCopy()
+		harborCR.Spec.ImageChartStorage.Swift = harborcluster.Spec.Storage.Spec.Swift.HarborStorageImageChartStorageSwiftSpec.DeepCopy()
 	}
 
 	if harborcluster.Spec.Storage.Spec.Azure != nil {
-		harborCR.Spec.ImageChartStorage.Azure =
-			harborcluster.Spec.Storage.Spec.Azure.HarborStorageImageChartStorageAzureSpec.DeepCopy()
+		harborCR.Spec.ImageChartStorage.Azure = harborcluster.Spec.Storage.Spec.Azure.HarborStorageImageChartStorageAzureSpec.DeepCopy()
 	}
 
 	if harborcluster.Spec.Storage.Spec.Gcs != nil {
-		harborCR.Spec.ImageChartStorage.Gcs =
-			harborcluster.Spec.Storage.Spec.Gcs.HarborStorageImageChartStorageGcsSpec.DeepCopy()
+		harborCR.Spec.ImageChartStorage.Gcs = harborcluster.Spec.Storage.Spec.Gcs.HarborStorageImageChartStorageGcsSpec.DeepCopy()
 	}
 
 	if harborcluster.Spec.Storage.Spec.Redirect != nil {
@@ -173,13 +168,11 @@ func (harbor *Controller) getHarborCR(ctx context.Context, harborcluster *goharb
 	}
 
 	if harborcluster.Spec.Database.Spec.PostgreSQL != nil {
-		harborCR.Spec.Database =
-			harborcluster.Spec.Database.Spec.PostgreSQL.HarborDatabaseSpec.DeepCopy()
+		harborCR.Spec.Database = harborcluster.Spec.Database.Spec.PostgreSQL.HarborDatabaseSpec.DeepCopy()
 	}
 
 	if harborcluster.Spec.Cache.Spec.Redis != nil {
-		harborCR.Spec.Redis =
-			harborcluster.Spec.Cache.Spec.Redis.DeepCopy()
+		harborCR.Spec.Redis = harborcluster.Spec.Cache.Spec.Redis.DeepCopy()
 	}
 
 	// Use incluster spec in first priority.

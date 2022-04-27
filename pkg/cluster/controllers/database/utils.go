@@ -18,6 +18,8 @@ const (
 	DefaultDatabaseReplica        = 3
 	DefaultDatabaseMemory         = "1Gi"
 	DefaultDatabaseMaxConnections = "1024"
+	baseInt10                     = 10
+	basebBitSize                  = 64
 )
 
 var postgresqlVersions = map[string]string{
@@ -147,7 +149,7 @@ func (p *PostgreSQLController) GetPosgresMaxConnections() string {
 		maxConnections = DefaultDatabaseMaxConnections
 	}
 
-	if _, err := strconv.ParseInt(maxConnections, 10, 64); err != nil {
+	if _, err := strconv.ParseInt(maxConnections, baseInt10, basebBitSize); err != nil {
 		p.Log.Error(err, "%s is not a valid number for postgres max connections", maxConnections)
 
 		maxConnections = DefaultDatabaseMaxConnections
