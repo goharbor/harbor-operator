@@ -25878,7 +25878,7 @@ spec:
                     enum:
                     - debug
                     - info
-                    - warn
+                    - warning
                     - error
                     type: string
                 type: object
@@ -28467,7 +28467,7 @@ spec:
                     enum:
                     - debug
                     - info
-                    - warn
+                    - warning
                     - error
                     type: string
                 type: object
