@@ -76,7 +76,7 @@ func (l HarborLogLevel) Exporter() ExporterLogLevel {
 }
 
 // +kubebuilder:validation:Type=string
-// +kubebuilder:validation:Enum={"debug","info","warn","error"}
+// +kubebuilder:validation:Enum={"debug","info","warning","error"}
 // RegistryLogLevel is the log level for Registry.
 type RegistryLogLevel string
 
