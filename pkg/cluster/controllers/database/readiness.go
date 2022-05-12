@@ -214,7 +214,7 @@ func GetPostgresSecretsTemplate() SecretsTemplate {
 	template := SecretsTemplate(os.Getenv("POSTGRES_SECRETS_TEMPLATE"))
 
 	if len(template) == 0 {
-		return "{username}.{cluster}.credentials"
+		return "{username}.{cluster}.credentials.postgresql.acid.zalan.do"
 	}
 
 	return template

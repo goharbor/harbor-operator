@@ -93,6 +93,7 @@ func GetPatron() api.Patroni {
 
 func GetPgHba() []string {
 	return []string{
+		"local   all all      trust",
 		"hostssl all all 0.0.0.0/0 md5",
 		"host    all all 0.0.0.0/0 md5",
 	}

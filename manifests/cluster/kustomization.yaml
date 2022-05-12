@@ -17,7 +17,7 @@ resources:
   - patch/namespace.yaml
   - https://raw.githubusercontent.com/spotahome/redis-operator/master/example/operator/all-redis-operator-resources.yaml?ref=v1.1.1 # redis operator
   - https://raw.githubusercontent.com/spotahome/redis-operator/master/manifests/databases.spotahome.com_redisfailovers.yaml?ref=v1.1.1 # redis operator crd
-  - github.com/zalando/postgres-operator/manifests?ref=v1.6.3 # postgresql operator
+  - github.com/zalando/postgres-operator/manifests?ref=v1.8.0 # postgresql operator
   - github.com/minio/operator?ref=v4.4.9 # minIO storage operator
 
 # If you have to override the image source, uncomment this patch and also change the image source in the patch/image-source.yaml file.

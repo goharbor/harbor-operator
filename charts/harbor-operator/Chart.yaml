@@ -35,6 +35,6 @@ dependencies:
 - name: postgres-operator
   version: 1.6.3
   condition: postgres-operator.enabled
-  repository: https://opensource.zalando.com/postgres-operator/charts/postgres-operator 
+  repository: https://opensource.zalando.com/postgres-operator/charts/postgres-operator
   tags:
     - database
