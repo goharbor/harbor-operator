@@ -6,7 +6,7 @@ dependencies:
   repository: https://spotahome.github.io/redis-operator
   version: 3.1.4
 - name: postgres-operator
-  repository: ""
+  repository: https://opensource.zalando.com/postgres-operator/charts/postgres-operator
   version: 1.6.3
-digest: sha256:1e6f09172d55e1e04fb98c84c76dbba94c0636822f9cc88163e059030b7c9a71
-generated: "2022-04-19T19:48:34.855535+08:00"
+digest: sha256:c7386e79c639c546246a5ce9c52b3249e35af83bbd0eb5d497acac5a077df32a
+generated: "2022-05-12T22:05:05.865860016+08:00"
