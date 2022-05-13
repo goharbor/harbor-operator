@@ -359,9 +359,6 @@ $(CHART_TEMPLATE_PATH)/issuer.yaml: kustomize $(wildcard config/helm/certmanager
 	sed "s/'\({{[^}}]*}}\)'/\1/g" \
 		>> $(CHART_TEMPLATE_PATH)/issuer.yaml
 
-$(CHART_HARBOR_OPERATOR)/charts: $(CHART_HARBOR_OPERATOR)/Chart.lock
-	$(HELM) dependency build $(CHART_HARBOR_OPERATOR)
-
 $(CHART_HARBOR_OPERATOR)/Chart.lock: $(CHART_HARBOR_OPERATOR)/Chart.yaml
 	$(HELM) dependency update $(CHART_HARBOR_OPERATOR)
 
