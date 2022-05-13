@@ -78,7 +78,6 @@ dev-tools: \
 	kubebuilder \
 	kustomize \
 	markdownlint \
-	stringer \
 	kind
 
 #####################
@@ -382,7 +381,7 @@ install: go-generate
 uninstall: go-generate
 	kubectl delete -f config/crd/bases
 
-go-generate: controller-gen stringer manifests
+go-generate: controller-gen manifests
 	export PATH="$(BIN):$${PATH}" ; \
 	go generate ./...
 
@@ -637,32 +636,6 @@ $(GORELEASER):
 	go get github.com/goreleaser/goreleaser@$(GORELEASER_VERSION) ;\
 	go build -mod=readonly -o $(GORELEASER) github.com/goreleaser/goreleaser ;\
 	rm -rf $$GORELEASER_TMP_DIR ;\
-	}
-
-# find or download stringer
-# download stringer if necessary
-STRINGER_VERSION := v0.1.10
-STRINGER := $(BIN)/stringer
-
-.PHONY: stringer
-stringer:
-	$(warning stringer command has no `version` command)
-	#@$(STRINGER) version 2>&1 \
-	#	| grep '$(STRINGER_VERSION)' > /dev/null \
-	#|| rm -f $(STRINGER)
-	@$(MAKE) $(STRINGER)
-
-$(STRINGER):
-	$(MAKE) $(BIN)
-	# https://pkg.go.dev/golang.org/x/tools/cmd/stringer
-	@{ \
-	set -e ;\
-	STRINGER_TMP_DIR=$$(mktemp -d) ;\
-	cd $$STRINGER_TMP_DIR ;\
-	go mod init tmp ;\
-	go get golang.org/x/tools/cmd/stringer@$(STRINGER_VERSION) ;\
-	go build -mod=readonly -o $(STRINGER) golang.org/x/tools/cmd/stringer ;\
-	rm -rf $$STRINGER_TMP_DIR ;\
 	}
 
 # find or download hadolint

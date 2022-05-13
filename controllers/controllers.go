@@ -7,7 +7,7 @@ import (
 
 //go:generate controller-gen rbac:roleName="harbor-operator-role" output:artifacts:config="../config/rbac" paths="./..."
 
-//go:generate stringer -type=Controller -linecomment
+//go:generate go run golang.org/x/tools/cmd/stringer@v0.1.10 -type=Controller -linecomment
 type Controller int
 
 const (

@@ -11,7 +11,7 @@ import (
 	"sigs.k8s.io/kustomize/kstatus/status"
 )
 
-//go:generate stringer -type=Component -linecomment
+//go:generate go run golang.org/x/tools/cmd/stringer@v0.1.10  -type=Component -linecomment
 type Component int
 
 const (
