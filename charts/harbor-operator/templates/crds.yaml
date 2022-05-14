@@ -31342,7 +31342,7 @@ spec:
   - name: v1beta1
     schema:
       openAPIV3Schema:
-        description: RobotAccount is the Schema for the robotaccounts API
+        description: RobotAccount is the Schema for the robotaccounts API.
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -31357,7 +31357,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: RobotAccountSpec defines the desired state of RobotAccount
+            description: RobotAccountSpec defines the desired state of RobotAccount.
             properties:
               foo:
                 description: Foo is an example field of RobotAccount. Edit robotaccount_types.go
@@ -31365,7 +31365,7 @@ spec:
                 type: string
             type: object
           status:
-            description: RobotAccountStatus defines the observed state of RobotAccount
+            description: RobotAccountStatus defines the observed state of RobotAccount.
             type: object
         type: object
     served: true
