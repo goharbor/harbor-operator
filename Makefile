@@ -584,7 +584,8 @@ kubebuilder:
 $(KUBEBUILDER):
 	$(MAKE) $(BIN)
 	# https://kubebuilder.io/quick-start.html#installation
-	curl -sSL "https://go.kubebuilder.io/dl/$(KUBEBUIDER_VERSION)/$$(go env GOOS)/$$(go env GOARCH)" --output $(KUBEBUILDER)
+	curl -sSL "https://github.com/kubernetes-sigs/kubebuilder/releases/download/v$(KUBEBUIDER_VERSION)/kubebuilder_$$(go env GOOS)_$$(go env GOARCH)" --output $(KUBEBUILDER)
+
 	chmod u+x $(KUBEBUILDER)
 
 # find or download kustomize
