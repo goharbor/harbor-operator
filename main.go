@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"os"
 
 	"github.com/go-logr/logr"
 	"github.com/ovh/configstore"
@@ -92,14 +91,6 @@ func main() {
 		exit.SetCode(ControllersExitCode)
 
 		return
-	}
-	if err = (&goharboriocontroller.RobotAccountReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("RobotAccount"),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "RobotAccount")
-		os.Exit(1)
 	}
 	// +kubebuilder:scaffold:builder
 

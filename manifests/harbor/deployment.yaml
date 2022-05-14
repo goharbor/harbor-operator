@@ -39228,7 +39228,7 @@ rules:
   - patch
   - update
 - apiGroups:
-  - goharbor.io.goharbor.io
+  - goharbor.io
   resources:
   - robotaccounts
   verbs:
@@ -39240,7 +39240,7 @@ rules:
   - update
   - watch
 - apiGroups:
-  - goharbor.io.goharbor.io
+  - goharbor.io
   resources:
   - robotaccounts/status
   verbs:

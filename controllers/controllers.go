@@ -28,6 +28,7 @@ const (
 	HarborServerConfiguration                   // harborserverconfiguration
 	PullSecretBinding                           // pullsecretbinding
 	Namespace                                   // namespace
+	RobotAccount                                // robotaccount
 )
 
 func (c Controller) GetFQDN() string {
