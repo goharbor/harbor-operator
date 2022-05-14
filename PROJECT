@@ -74,4 +74,7 @@ resources:
 - group: goharbor
   kind: PullSecretBinding
   version: v1alpha1
+- group: goharbor.io
+  kind: RobotAccount
+  version: v1beta1
 version: "2"

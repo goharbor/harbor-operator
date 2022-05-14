@@ -2,8 +2,13 @@ package main
 
 import (
 	"context"
+	"os"
 
 	"github.com/go-logr/logr"
+	"github.com/ovh/configstore"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	ctrl "sigs.k8s.io/controller-runtime"
+
 	"github.com/goharbor/harbor-operator/pkg/exit"
 	"github.com/goharbor/harbor-operator/pkg/factories/application"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
@@ -11,9 +16,6 @@ import (
 	"github.com/goharbor/harbor-operator/pkg/scheme"
 	"github.com/goharbor/harbor-operator/pkg/setup"
 	"github.com/goharbor/harbor-operator/pkg/tracing"
-	"github.com/ovh/configstore"
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 var (
@@ -90,6 +92,14 @@ func main() {
 		exit.SetCode(ControllersExitCode)
 
 		return
+	}
+	if err = (&goharboriocontroller.RobotAccountReconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("RobotAccount"),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "RobotAccount")
+		os.Exit(1)
 	}
 	// +kubebuilder:scaffold:builder
 

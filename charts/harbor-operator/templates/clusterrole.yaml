@@ -580,6 +580,26 @@ rules:
   - patch
   - update
 - apiGroups:
+  - goharbor.io.goharbor.io
+  resources:
+  - robotaccounts
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - goharbor.io.goharbor.io
+  resources:
+  - robotaccounts/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - minio.min.io
   resources:
   - '*'

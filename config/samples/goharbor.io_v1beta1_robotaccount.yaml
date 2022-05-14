@@ -1,0 +1,6 @@
+apiVersion: goharbor.io.goharbor.io/v1beta1
+kind: RobotAccount
+metadata:
+  name: robotaccount-sample
+spec:
+  # TODO(user): Add fields here
