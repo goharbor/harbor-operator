@@ -50531,22 +50531,6 @@ rules:
 - apiGroups:
   - goharbor.io
   resources:
-  - trivies
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - goharbor.io
-  resources:
-  - trivies/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - goharbor.io
-  resources:
   - robotaccounts
   verbs:
   - create
@@ -50560,6 +50544,22 @@ rules:
   - goharbor.io
   resources:
   - robotaccounts/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - goharbor.io
+  resources:
+  - trivies
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - goharbor.io
+  resources:
+  - trivies/status
   verbs:
   - get
   - patch
