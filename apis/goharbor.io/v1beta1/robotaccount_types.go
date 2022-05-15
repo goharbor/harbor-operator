@@ -12,8 +12,12 @@ type RobotAccountSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Foo is an example field of RobotAccount. Edit robotaccount_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	// ProjectID points to the project associated with the secret binding
+	// +kubebuilder:validation:Required
+	ProjectID string `json:"projectId"`
+
+	// Indicate which harbor server configuration is referred
+	HarborServerConfig string `json:"harborServerConfig"`
 }
 
 // RobotAccountStatus defines the observed state of RobotAccount.

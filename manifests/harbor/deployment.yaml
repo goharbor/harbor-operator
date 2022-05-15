@@ -31407,10 +31407,16 @@ spec:
           spec:
             description: RobotAccountSpec defines the desired state of RobotAccount.
             properties:
-              foo:
-                description: Foo is an example field of RobotAccount. Edit robotaccount_types.go
-                  to remove/update
+              harborServerConfig:
+                description: Indicate which harbor server configuration is referred
                 type: string
+              projectId:
+                description: ProjectID points to the project associated with the secret
+                  binding
+                type: string
+            required:
+            - harborServerConfig
+            - projectId
             type: object
           status:
             description: RobotAccountStatus defines the observed state of RobotAccount.
