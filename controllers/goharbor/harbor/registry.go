@@ -3,6 +3,7 @@ package harbor
 import (
 	"context"
 	"fmt"
+	"time"
 
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
@@ -25,6 +26,11 @@ const (
 
 const (
 	RegistryAuthRealm = "harbor-registry-basic-realm"
+)
+
+const (
+	defaultUploadPurgingAge      = time.Hour * 168
+	defaultUploadPurgingInterval = time.Hour * 24
 )
 
 var (
@@ -257,6 +263,17 @@ func (r *Reconciler) GetRegistry(ctx context.Context, harbor *goharborv1.Harbor)
 						Blobdescriptor: "redis",
 					},
 					Redirect: harbor.Spec.ImageChartStorage.Redirect,
+					Maintenance: goharborv1.RegistryStorageMaintenanceSpec{
+						UploadPurging: goharborv1.RegistryStorageMaintenanceUploadPurgingSpec{
+							Enabled: true,
+							Age: &metav1.Duration{
+								Duration: defaultUploadPurgingAge,
+							},
+							Interval: &metav1.Duration{
+								Duration: defaultUploadPurgingInterval,
+							},
+						},
+					},
 				},
 				Redis: &goharborv1.RegistryRedisSpec{
 					RedisConnection: redis,
