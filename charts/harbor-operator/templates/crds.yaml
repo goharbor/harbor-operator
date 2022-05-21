@@ -31359,16 +31359,42 @@ spec:
           spec:
             description: RobotAccountSpec defines the desired state of RobotAccount.
             properties:
+              description:
+                type: string
+              disable:
+                type: boolean
+              duration:
+                type: integer
               harborServerConfig:
                 description: Indicate which harbor server configuration is referred
                 type: string
-              projectId:
-                description: ProjectID points to the project associated with the secret
-                  binding
+              level:
                 type: string
+              name:
+                type: string
+              permissions:
+                items:
+                  properties:
+                    access:
+                      items:
+                        properties:
+                          action:
+                            type: string
+                          effect:
+                            type: string
+                          resource:
+                            type: string
+                        type: object
+                      type: array
+                    kind:
+                      type: string
+                    namespace:
+                      type: string
+                  type: object
+                type: array
             required:
             - harborServerConfig
-            - projectId
+            - level
             type: object
           status:
             description: RobotAccountStatus defines the observed state of RobotAccount.

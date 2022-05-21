@@ -186,7 +186,7 @@ func (c *Client) CreateRobotAccount(ra *goharboriov1beta1.RobotAccount) (*models
 		return nil, errors.New("nil harbor client")
 	}
 
-	RobotCreateModel := &models.RobotCreate{
+	robotCreateModel := &models.RobotCreate{
 		Name:        ra.Spec.Name,
 		Description: ra.Spec.Description,
 		Disable:     ra.Spec.Disable,
@@ -208,12 +208,12 @@ func (c *Client) CreateRobotAccount(ra *goharboriov1beta1.RobotAccount) (*models
 			permission.Access = append(permission.Access, access)
 		}
 
-		RobotCreateModel.Permissions = append(RobotCreateModel.Permissions, permission)
+		robotCreateModel.Permissions = append(robotCreateModel.Permissions, permission)
 	}
 
 	params := robot.NewCreateRobotParams().
 		WithTimeout(c.timeout).
-		WithRobot(RobotCreateModel)
+		WithRobot(robotCreateModel)
 
 	res, err := c.harborClient.Client.Robot.CreateRobot(c.context, params)
 	if err != nil {
