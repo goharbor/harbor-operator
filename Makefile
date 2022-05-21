@@ -682,7 +682,7 @@ $(HADOLINT):
 		> $(HADOLINT)
 	chmod u+x $(HADOLINT)
 
-KIND_VERSION := 0.11.1
+KIND_VERSION := 0.14.0
 KIND := $(BIN)/kind
 
 .PHONY: kind
