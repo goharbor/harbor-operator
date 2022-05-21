@@ -9,8 +9,10 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/goharbor/go-client/pkg/sdk/v2.0/client/health"
 	"github.com/goharbor/go-client/pkg/sdk/v2.0/client/project"
+	"github.com/goharbor/go-client/pkg/sdk/v2.0/client/robot"
 	"github.com/goharbor/go-client/pkg/sdk/v2.0/client/robotv1"
 	"github.com/goharbor/go-client/pkg/sdk/v2.0/models"
+	goharboriov1beta1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
 	"github.com/goharbor/harbor-operator/pkg/rest/model"
 	utilstring "github.com/goharbor/harbor-operator/pkg/utils/strings"
 	"github.com/pkg/errors"
@@ -179,7 +181,59 @@ func (c *Client) CheckHealth() (*models.OverallHealthStatus, error) {
 	return res.Payload, nil
 }
 
-func (c *Client) CreateRobotAccount(projectID string) (*models.Robot, error) {
+func (c *Client) CreateRobotAccount(ra *goharboriov1beta1.RobotAccount) (*models.Robot, error) {
+	if c.harborClient == nil {
+		return nil, errors.New("nil harbor client")
+	}
+
+	RobotCreateModel := &models.RobotCreate{
+		Name:        ra.Spec.Name,
+		Description: ra.Spec.Description,
+		Disable:     ra.Spec.Disable,
+		Level:       ra.Spec.Level,
+	}
+
+	for _, p := range ra.Spec.Permissions {
+		permission := &models.RobotPermission{
+			Kind:      p.Kind,
+			Namespace: p.Namespace,
+		}
+
+		for _, a := range p.Access {
+			access := &models.Access{
+				Action:   a.Action,
+				Resource: a.Resource,
+				Effect:   a.Effect,
+			}
+			permission.Access = append(permission.Access, access)
+		}
+
+		RobotCreateModel.Permissions = append(RobotCreateModel.Permissions, permission)
+	}
+
+	params := robot.NewCreateRobotParams().
+		WithTimeout(c.timeout).
+		WithRobot(RobotCreateModel)
+
+	res, err := c.harborClient.Client.Robot.CreateRobot(c.context, params)
+	if err != nil {
+		return nil, err
+	}
+
+	rid, err := utilstring.ExtractID(res.Location)
+	if err != nil {
+		// ignore this error that should never happen
+		c.log.Error(err, "location", res.Location)
+	}
+
+	return &models.Robot{
+		ID:     rid,
+		Name:   res.Payload.Name,
+		Secret: res.Payload.Secret,
+	}, nil
+}
+
+func (c *Client) CreateRobotAccountV1(projectID string) (*models.Robot, error) {
 	if len(projectID) == 0 {
 		return nil, errors.New("empty project id")
 	}
@@ -221,7 +275,7 @@ func (c *Client) CreateRobotAccount(projectID string) (*models.Robot, error) {
 	}, nil
 }
 
-func (c *Client) DeleteRobotAccount(projectID, robotID int64) error {
+func (c *Client) DeleteRobotAccountV1(projectID, robotID int64) error {
 	if projectID <= 0 {
 		return errors.New("invalid project id")
 	}
@@ -246,7 +300,7 @@ func (c *Client) DeleteRobotAccount(projectID, robotID int64) error {
 	return nil
 }
 
-func (c *Client) GetRobotAccount(projectID, robotID int64) (*models.Robot, error) {
+func (c *Client) GetRobotAccountV1(projectID, robotID int64) (*models.Robot, error) {
 	if projectID <= 0 {
 		return nil, errors.New("invalid project id")
 	}

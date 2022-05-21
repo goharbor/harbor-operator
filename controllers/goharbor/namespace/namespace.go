@@ -228,7 +228,7 @@ func (r *Reconciler) validateRobot(proj, robot string) error {
 		return err
 	}
 
-	_, err = r.Harbor.GetRobotAccount(projectID, robotID)
+	_, err = r.Harbor.GetRobotAccountV1(projectID, robotID)
 
 	return err
 }
@@ -239,7 +239,7 @@ func (r *Reconciler) createProjectAndRobot(proj string) (string, string, error) 
 		return "", "", err
 	}
 
-	robot, err := r.Harbor.CreateRobotAccount(fmt.Sprintf("%d", projID))
+	robot, err := r.Harbor.CreateRobotAccountV1(fmt.Sprintf("%d", projID))
 	if err != nil {
 		return "", "", err
 	}

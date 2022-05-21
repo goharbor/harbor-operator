@@ -97,7 +97,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	r.Harbor = harborv2.WithContext(ctx)
 
-	_, err = r.Harbor.CreateRobotAccount(ra.Spec.ProjectID)
+	_, err = r.Harbor.CreateRobotAccount(ra)
 
 	if err != nil {
 		log.Error(err, "failed to create robot account")

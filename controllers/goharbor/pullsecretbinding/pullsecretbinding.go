@@ -134,7 +134,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (res ctrl.
 	_, ok := bd.Annotations[consts.AnnotationRobotSecretRef]
 	if !ok {
 		// Need to create a new one as we only have one time to get the robot token
-		robot, err := r.Harbor.GetRobotAccount(projID, robotID)
+		robot, err := r.Harbor.GetRobotAccountV1(projID, robotID)
 		if err != nil {
 			return ctrl.Result{}, fmt.Errorf("create robot account error: %w", err)
 		}
