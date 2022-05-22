@@ -31446,6 +31446,22 @@ spec:
             type: object
           status:
             description: RobotAccountStatus defines the observed state of RobotAccount.
+            properties:
+              id:
+                description: ID is robot account id.
+                format: int64
+                type: integer
+              message:
+                description: Message provides human-readable message.
+                type: string
+              reason:
+                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
+                  of cluster Important: Run "make" to regenerate code after modifying
+                  this file Reason represents status reason.'
+                type: string
+              secret:
+                description: Secret is robot account secret.
+                type: string
             type: object
         type: object
     served: true
