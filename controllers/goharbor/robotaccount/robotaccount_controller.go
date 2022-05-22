@@ -2,15 +2,18 @@ package robotaccount
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"time"
 
 	"github.com/go-logr/logr"
+	"github.com/goharbor/go-client/pkg/sdk/v2.0/client/robot"
+	"github.com/goharbor/go-client/pkg/sdk/v2.0/models"
 	goharboriov1beta1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
 	"github.com/goharbor/harbor-operator/controllers"
 	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
 	harborClient "github.com/goharbor/harbor-operator/pkg/rest"
 	v2 "github.com/goharbor/harbor-operator/pkg/rest/v2"
+	"github.com/goharbor/harbor-operator/pkg/utils/strings"
 	"github.com/ovh/configstore"
 	apierr "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -20,7 +23,7 @@ import (
 )
 
 const (
-	defaultCycle = 5 * time.Second
+	finalizerID = "robotaccount.finalizers.resource.goharbor.io"
 )
 
 // RobotAccountReconciler reconciles a RobotAccount object.
@@ -38,6 +41,94 @@ func New(ctx context.Context, configStore *configstore.Store) (commonCtrl.Reconc
 	r.Controller = commonCtrl.NewController(ctx, controllers.HarborCluster, nil, configStore)
 
 	return r, nil
+}
+
+func (r *Reconciler) update(ctx context.Context, ra *goharboriov1beta1.RobotAccount) error {
+	if err := r.Client.Update(ctx, ra, &client.UpdateOptions{}); err != nil {
+		return err
+	}
+
+	// Refresh object status to avoid problem
+	namespacedName := types.NamespacedName{
+		Name:      ra.Name,
+		Namespace: ra.Namespace,
+	}
+
+	return r.Client.Get(ctx, namespacedName, ra)
+}
+
+// cleanRobotAccount remove the robot account from harbor.
+func (r *Reconciler) cleanRobotAccount(ra *goharboriov1beta1.RobotAccount) error {
+	// get robot account
+	_, err := r.Harbor.GetRobotAccountByID(ra.Status.ID)
+
+	var robotAccountNotFound *robot.GetRobotByIDNotFound
+	if err != nil && errors.As(err, &robotAccountNotFound) {
+		return nil
+	} else if err != nil && !errors.As(err, &robotAccountNotFound) {
+		return err
+	}
+
+	// delete robot account
+	if err := r.Harbor.DeleteRobotAccount(ra.Status.ID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// createOrUpdateRobotAccount creates or updates a robot account.
+func (r *Reconciler) createOrUpdateRobotAccount(ra *goharboriov1beta1.RobotAccount) (*models.Robot, error) {
+	// get robot account
+	raGetIns, err := r.Harbor.GetRobotAccountByName(ra.Spec.Name)
+
+	var robotAccountListNotFound *robot.ListRobotNotFound
+	if err != nil && !errors.As(err, &robotAccountListNotFound) {
+		return nil, err
+	}
+
+	if err != nil && errors.As(err, &robotAccountListNotFound) {
+		return r.Harbor.CreateRobotAccount(ra)
+	}
+
+	// err is nil and robot account is found
+	// update robot account
+
+	return r.Harbor.UpdateRobotAccount(raGetIns.ID, ra)
+}
+
+// setHarborClient sets up the Harbor client.
+func (r *Reconciler) setHarbotClient(ctx context.Context, ra *goharboriov1beta1.RobotAccount) error {
+	harborCfg, err := r.getHarborServerConfig(ctx, ra.Spec.HarborServerConfig)
+	if err != nil {
+		return fmt.Errorf("error finding harborCfg: %w", err)
+	}
+
+	// Create harbor client
+	harborv2, err := harborClient.CreateHarborV2Client(ctx, r.Client, harborCfg)
+	if err != nil {
+		return err
+	}
+
+	r.Harbor = harborv2.WithContext(ctx)
+
+	return nil
+}
+
+func (r *Reconciler) delete(ctx context.Context, ra *goharboriov1beta1.RobotAccount) error {
+	if err := r.cleanRobotAccount(ra); err != nil {
+		return err
+	}
+
+	if strings.ContainsString(ra.ObjectMeta.Finalizers, finalizerID) {
+		// Execute and remove our finalizer from the finalizer list
+		ra.ObjectMeta.Finalizers = strings.RemoveString(ra.ObjectMeta.Finalizers, finalizerID)
+		if err := r.Client.Update(ctx, ra, &client.UpdateOptions{}); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 //+kubebuilder:rbac:groups=goharbor.io,resources=robotaccounts,verbs=get;list;watch;create;update;patch;delete
@@ -69,43 +160,39 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, fmt.Errorf("get HarborServerConfiguraiton error: %w", err)
 	}
 
-	// Check if the robotaccount is being deleted
+	if err := r.setHarbotClient(ctx, ra); err != nil {
+		log.Error(err, "failed to set harbor client for robotaccount %s", req.NamespacedName)
+
+		return ctrl.Result{}, fmt.Errorf("setHarbotClient error: %w", err)
+	}
+
 	if !ra.ObjectMeta.DeletionTimestamp.IsZero() {
-		log.Info("robotaccount is being deleted", "name", ra.Name)
-
-		return ctrl.Result{}, nil
+		return ctrl.Result{}, r.delete(ctx, ra)
 	}
 
-	harborCfg, err := r.getHarborServerConfig(ctx, ra.Spec.HarborServerConfig)
-	if err != nil {
-		return ctrl.Result{}, fmt.Errorf("error finding harborCfg: %w", err)
+	if !strings.ContainsString(ra.ObjectMeta.Finalizers, finalizerID) {
+		ra.ObjectMeta.Finalizers = append(ra.ObjectMeta.Finalizers, finalizerID)
+		if err := r.update(ctx, ra); err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
-	if harborCfg == nil {
-		log.Info("no default hsc for ra: ", req.NamespacedName, ", skip RobotAccount creation")
-
-		return ctrl.Result{RequeueAfter: defaultCycle}, nil
-	}
-
-	// Create harbor client
-	harborv2, err := harborClient.CreateHarborV2Client(ctx, r.Client, harborCfg)
-	if err != nil {
-		log.Error(err, "failed to create harbor client")
-
-		return ctrl.Result{}, err
-	}
-
-	r.Harbor = harborv2.WithContext(ctx)
-
-	_, err = r.Harbor.CreateRobotAccount(ra)
-
+	modelRobot, err := r.createOrUpdateRobotAccount(ra)
 	if err != nil {
 		log.Error(err, "failed to create robot account")
 
 		return ctrl.Result{}, err
 	}
 
-	return ctrl.Result{}, nil
+	// Update status
+	ra.Status.ID = modelRobot.ID
+	ra.Status.Message = "robot account created"
+	ra.Status.Reason = ""
+	ra.Status.Secret = modelRobot.Secret
+
+	err = r.Status().Update(ctx, ra)
+
+	return ctrl.Result{}, err
 }
 
 func (r *Reconciler) getHarborServerConfig(ctx context.Context, name string) (*goharboriov1beta1.HarborServerConfiguration, error) {

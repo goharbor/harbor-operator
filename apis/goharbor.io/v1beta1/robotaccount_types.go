@@ -55,6 +55,18 @@ type RobotAccountSpec struct {
 type RobotAccountStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+	// Reason represents status reason.
+	// +kubebuilder:validation:Optional
+	Reason string `json:"reason,omitempty"`
+	// Message provides human-readable message.
+	// +kubebuilder:validation:Optional
+	Message string `json:"message,omitempty"`
+	// ID is robot account id.
+	// +kubebuilder:validation:Optional
+	ID int64 `json:"id,omitempty"`
+	// Secret is robot account secret.
+	// +kubebuilder:validation:Optional
+	Secret string `json:"secret,omitempty"`
 }
 
 //+kubebuilder:object:root=true

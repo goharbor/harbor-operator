@@ -233,6 +233,105 @@ func (c *Client) CreateRobotAccount(ra *goharboriov1beta1.RobotAccount) (*models
 	}, nil
 }
 
+func (c *Client) UpdateRobotAccount(robotID int64, ra *goharboriov1beta1.RobotAccount) (*models.Robot, error) {
+	if c.harborClient == nil {
+		return nil, errors.New("nil harbor client")
+	}
+
+	robotUpdateModel := &models.Robot{
+		Name:        ra.Spec.Name,
+		Description: ra.Spec.Description,
+		Disable:     ra.Spec.Disable,
+		Level:       ra.Spec.Level,
+	}
+
+	for _, p := range ra.Spec.Permissions {
+		permission := &models.RobotPermission{
+			Kind:      p.Kind,
+			Namespace: p.Namespace,
+		}
+
+		for _, a := range p.Access {
+			access := &models.Access{
+				Action:   a.Action,
+				Resource: a.Resource,
+				Effect:   a.Effect,
+			}
+			permission.Access = append(permission.Access, access)
+		}
+
+		robotUpdateModel.Permissions = append(robotUpdateModel.Permissions, permission)
+	}
+
+	params := robot.NewUpdateRobotParams().
+		WithTimeout(c.timeout).
+		WithRobotID(robotID).
+		WithRobot(robotUpdateModel)
+
+	if _, err := c.harborClient.Client.Robot.UpdateRobot(c.context, params); err != nil {
+		return nil, err
+	}
+
+	return &models.Robot{
+		ID:   robotID,
+		Name: ra.Spec.Name,
+	}, nil
+}
+
+func (c *Client) DeleteRobotAccount(robotID int64) error {
+	if c.harborClient == nil {
+		return errors.New("nil harbor client")
+	}
+
+	params := robot.NewDeleteRobotParams().
+		WithTimeout(c.timeout).
+		WithRobotID(robotID)
+
+	if _, err := c.harborClient.Client.Robot.DeleteRobot(c.context, params); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) GetRobotAccountByID(robotID int64) (*models.Robot, error) {
+	if c.harborClient == nil {
+		return nil, errors.New("nil harbor client")
+	}
+
+	params := robot.NewGetRobotByIDParams().
+		WithTimeout(c.timeout).
+		WithRobotID(robotID)
+
+	res, err := c.harborClient.Client.Robot.GetRobotByID(c.context, params)
+	if err != nil {
+		return nil, err
+	}
+
+	return &models.Robot{
+		ID:   robotID,
+		Name: res.Payload.Name,
+	}, nil
+}
+
+func (c *Client) GetRobotAccountByName(robotaName string) (*models.Robot, error) {
+	if c.harborClient == nil {
+		return nil, errors.New("nil harbor client")
+	}
+
+	q := fmt.Sprintf("exact match(name=%s)", robotaName)
+	params := robot.NewListRobotParams().
+		WithTimeout(c.timeout).
+		WithQ(&q)
+
+	res, err := c.harborClient.Client.Robot.ListRobot(c.context, params)
+	if err != nil {
+		return nil, err
+	}
+
+	return res.Payload[0], nil
+}
+
 func (c *Client) CreateRobotAccountV1(projectID string) (*models.Robot, error) {
 	if len(projectID) == 0 {
 		return nil, errors.New("empty project id")
