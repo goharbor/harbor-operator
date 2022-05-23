@@ -20,6 +20,7 @@ import (
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/discovery"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -38,10 +39,11 @@ type Controller struct {
 
 	deletableResources map[schema.GroupVersionKind]struct{}
 
-	ConfigStore *configstore.Store
-	rm          ResourceManager
-	Log         logr.Logger
-	Scheme      *runtime.Scheme
+	ConfigStore     *configstore.Store
+	rm              ResourceManager
+	Log             logr.Logger
+	Scheme          *runtime.Scheme
+	DiscoveryClient *discovery.DiscoveryClient
 }
 
 func NewController(ctx context.Context, base controllers.Controller, rm ResourceManager, config *configstore.Store) *Controller {
@@ -68,6 +70,7 @@ func NewController(ctx context.Context, base controllers.Controller, rm Resource
 func (c *Controller) SetupWithManager(ctx context.Context, mgr ctrl.Manager) error {
 	c.Client = mgr.GetClient()
 	c.Scheme = mgr.GetScheme()
+	c.DiscoveryClient = discovery.NewDiscoveryClientForConfigOrDie(mgr.GetConfig())
 
 	return nil
 }
