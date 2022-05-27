@@ -4,7 +4,7 @@ metadata:
   annotations:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: harbor
-    goharbor.io/operator-version: v1.1.0
+    goharbor.io/operator-version: v1.3.0
   name: harbor-operator-ns
 ---
 apiVersion: apiextensions.k8s.io/v1
@@ -15,7 +15,7 @@ metadata:
     controller-gen.kubebuilder.io/version: v0.6.2
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: harbor
-    goharbor.io/operator-version: v1.1.0
+    goharbor.io/operator-version: v1.3.0
   name: chartmuseums.goharbor.io
 spec:
   conversion:
@@ -4356,7 +4356,7 @@ metadata:
     controller-gen.kubebuilder.io/version: v0.6.2
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: harbor
-    goharbor.io/operator-version: v1.1.0
+    goharbor.io/operator-version: v1.3.0
   name: cores.goharbor.io
 spec:
   conversion:
@@ -5580,7 +5580,7 @@ metadata:
     controller-gen.kubebuilder.io/version: v0.6.2
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: harbor
-    goharbor.io/operator-version: v1.1.0
+    goharbor.io/operator-version: v1.3.0
   name: exporters.goharbor.io
 spec:
   conversion:
@@ -6316,7 +6316,7 @@ metadata:
     controller-gen.kubebuilder.io/version: v0.6.2
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: harbor
-    goharbor.io/operator-version: v1.1.0
+    goharbor.io/operator-version: v1.3.0
   name: harborclusters.goharbor.io
 spec:
   conversion:
@@ -11561,7 +11561,7 @@ metadata:
     controller-gen.kubebuilder.io/version: v0.6.2
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: harbor
-    goharbor.io/operator-version: v1.1.0
+    goharbor.io/operator-version: v1.3.0
   creationTimestamp: null
   name: harborconfigurations.goharbor.io
 spec:
@@ -12036,7 +12036,7 @@ metadata:
     controller-gen.kubebuilder.io/version: v0.6.2
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: harbor
-    goharbor.io/operator-version: v1.1.0
+    goharbor.io/operator-version: v1.3.0
   name: harbors.goharbor.io
 spec:
   conversion:
@@ -15948,7 +15948,7 @@ metadata:
     controller-gen.kubebuilder.io/version: v0.6.2
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: harbor
-    goharbor.io/operator-version: v1.1.0
+    goharbor.io/operator-version: v1.3.0
   creationTimestamp: null
   name: harborserverconfigurations.goharbor.io
 spec:
@@ -16122,7 +16122,7 @@ metadata:
     controller-gen.kubebuilder.io/version: v0.6.2
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: harbor
-    goharbor.io/operator-version: v1.1.0
+    goharbor.io/operator-version: v1.3.0
   name: jobservices.goharbor.io
 spec:
   conversion:
@@ -23583,7 +23583,7 @@ metadata:
     controller-gen.kubebuilder.io/version: v0.6.2
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: harbor
-    goharbor.io/operator-version: v1.1.0
+    goharbor.io/operator-version: v1.3.0
   name: notaryservers.goharbor.io
 spec:
   conversion:
@@ -24294,7 +24294,7 @@ metadata:
     controller-gen.kubebuilder.io/version: v0.6.2
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: harbor
-    goharbor.io/operator-version: v1.1.0
+    goharbor.io/operator-version: v1.3.0
   name: notarysigners.goharbor.io
 spec:
   conversion:
@@ -24917,7 +24917,7 @@ metadata:
     controller-gen.kubebuilder.io/version: v0.6.2
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: harbor
-    goharbor.io/operator-version: v1.1.0
+    goharbor.io/operator-version: v1.3.0
   name: portals.goharbor.io
 spec:
   conversion:
@@ -25392,7 +25392,7 @@ metadata:
     controller-gen.kubebuilder.io/version: v0.6.2
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: harbor
-    goharbor.io/operator-version: v1.1.0
+    goharbor.io/operator-version: v1.3.0
   creationTimestamp: null
   name: pullsecretbindings.goharbor.io
 spec:
@@ -25499,7 +25499,7 @@ metadata:
     controller-gen.kubebuilder.io/version: v0.6.2
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: harbor
-    goharbor.io/operator-version: v1.1.0
+    goharbor.io/operator-version: v1.3.0
   name: registries.goharbor.io
 spec:
   conversion:
@@ -30861,7 +30861,7 @@ metadata:
     controller-gen.kubebuilder.io/version: v0.6.2
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: harbor
-    goharbor.io/operator-version: v1.1.0
+    goharbor.io/operator-version: v1.3.0
   name: registrycontrollers.goharbor.io
 spec:
   conversion:
@@ -31376,7 +31376,7 @@ metadata:
     controller-gen.kubebuilder.io/version: v0.6.2
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: harbor
-    goharbor.io/operator-version: v1.1.0
+    goharbor.io/operator-version: v1.3.0
   name: trivies.goharbor.io
 spec:
   conversion:
@@ -38554,7 +38554,7 @@ metadata:
   annotations:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: harbor
-    goharbor.io/operator-version: v1.1.0
+    goharbor.io/operator-version: v1.3.0
   name: leader-election-role
   namespace: harbor-operator-ns
 rules:
@@ -38591,7 +38591,7 @@ metadata:
   annotations:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: harbor
-    goharbor.io/operator-version: v1.1.0
+    goharbor.io/operator-version: v1.3.0
   creationTimestamp: null
   name: harbor-operator-role
 rules:
@@ -39217,7 +39217,7 @@ metadata:
   annotations:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: harbor
-    goharbor.io/operator-version: v1.1.0
+    goharbor.io/operator-version: v1.3.0
   name: leader-election-rolebinding
   namespace: harbor-operator-ns
 roleRef:
@@ -39235,7 +39235,7 @@ metadata:
   annotations:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: harbor
-    goharbor.io/operator-version: v1.1.0
+    goharbor.io/operator-version: v1.3.0
   name: harbor-operator-rolebinding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -39321,7 +39321,7 @@ metadata:
   annotations:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: harbor
-    goharbor.io/operator-version: v1.1.0
+    goharbor.io/operator-version: v1.3.0
   name: config
   namespace: harbor-operator-ns
 ---
@@ -39822,7 +39822,7 @@ metadata:
   annotations:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: harbor
-    goharbor.io/operator-version: v1.1.0
+    goharbor.io/operator-version: v1.3.0
   name: config-template
   namespace: harbor-operator-ns
 ---
@@ -39832,7 +39832,7 @@ metadata:
   annotations:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: harbor
-    goharbor.io/operator-version: v1.1.0
+    goharbor.io/operator-version: v1.3.0
   name: webhook-service
   namespace: harbor-operator-ns
 spec:
@@ -39848,7 +39848,7 @@ metadata:
   annotations:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: harbor
-    goharbor.io/operator-version: v1.1.0
+    goharbor.io/operator-version: v1.3.0
   labels:
     control-plane: harbor-operator
   name: harbor-operator
@@ -39862,7 +39862,7 @@ spec:
       annotations:
         goharbor.io/deploy-engine: Kustomization
         goharbor.io/deploy-mode: harbor
-        goharbor.io/operator-version: v1.1.0
+        goharbor.io/operator-version: v1.3.0
       labels:
         control-plane: harbor-operator
     spec:
@@ -39879,7 +39879,7 @@ spec:
               fieldPath: metadata.namespace
         - name: CONFIGURATION_FROM
           value: env,file:/etc/harbor-operator/config.yaml
-        image: ghcr.io/goharbor/harbor-operator:dev_master
+        image: ghcr.io/goharbor/harbor-operator:v1.3.0-rc1
         livenessProbe:
           httpGet:
             path: /healthz
@@ -39939,7 +39939,7 @@ metadata:
   annotations:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: harbor
-    goharbor.io/operator-version: v1.1.0
+    goharbor.io/operator-version: v1.3.0
   name: serving-cert
   namespace: harbor-operator-ns
 spec:
@@ -39957,7 +39957,7 @@ metadata:
   annotations:
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: harbor
-    goharbor.io/operator-version: v1.1.0
+    goharbor.io/operator-version: v1.3.0
   name: selfsigned-issuer
   namespace: harbor-operator-ns
 spec:
@@ -39970,7 +39970,7 @@ metadata:
     cert-manager.io/inject-ca-from: harbor-operator-ns/serving-cert
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: harbor
-    goharbor.io/operator-version: v1.1.0
+    goharbor.io/operator-version: v1.3.0
   name: mutating-webhook-configuration
 webhooks:
 - admissionReviewVersions:
@@ -40028,7 +40028,7 @@ metadata:
     cert-manager.io/inject-ca-from: harbor-operator-ns/serving-cert
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: harbor
-    goharbor.io/operator-version: v1.1.0
+    goharbor.io/operator-version: v1.3.0
   name: validating-webhook-configuration
 webhooks:
 - admissionReviewVersions:
