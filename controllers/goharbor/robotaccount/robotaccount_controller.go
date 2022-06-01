@@ -65,7 +65,9 @@ func (r *Reconciler) cleanRobotAccount(ra *goharboriov1beta1.RobotAccount) error
 	var robotAccountNotFound *robot.GetRobotByIDNotFound
 	if err != nil && errors.As(err, &robotAccountNotFound) {
 		return nil
-	} else if err != nil && !errors.As(err, &robotAccountNotFound) {
+	}
+	
+	if err != nil {
 		return err
 	}
 
@@ -83,17 +85,19 @@ func (r *Reconciler) createOrUpdateRobotAccount(ra *goharboriov1beta1.RobotAccou
 	raGetIns, err := r.Harbor.GetRobotAccountByName(ra.Spec.Name)
 
 	var robotAccountListNotFound *robot.ListRobotNotFound
+
+	// fail to get robot account from harbor.
 	if err != nil && !errors.As(err, &robotAccountListNotFound) {
 		return nil, err
 	}
 
+	// robot account not found and create it.
 	if err != nil && errors.As(err, &robotAccountListNotFound) {
 		return r.Harbor.CreateRobotAccount(ra)
 	}
 
 	// err is nil and robot account is found
 	// update robot account
-
 	return r.Harbor.UpdateRobotAccount(raGetIns.ID, ra)
 }
 
@@ -115,6 +119,7 @@ func (r *Reconciler) setHarbotClient(ctx context.Context, ra *goharboriov1beta1.
 	return nil
 }
 
+// delete removes the robot account from harbor.
 func (r *Reconciler) delete(ctx context.Context, ra *goharboriov1beta1.RobotAccount) error {
 	if err := r.cleanRobotAccount(ra); err != nil {
 		return err
@@ -157,19 +162,21 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			return ctrl.Result{}, nil
 		}
 
-		return ctrl.Result{}, fmt.Errorf("get HarborServerConfiguraiton error: %w", err)
+		return ctrl.Result{}, fmt.Errorf("get robotAccount %s error: %w", req.NamespacedName, err)
 	}
 
 	if err := r.setHarbotClient(ctx, ra); err != nil {
-		log.Error(err, "failed to set harbor client for robotaccount %s", req.NamespacedName)
+		log.Error(err, "failed to set harbor client for robotAccount %s", req.NamespacedName)
 
 		return ctrl.Result{}, fmt.Errorf("setHarbotClient error: %w", err)
 	}
 
+	// Check if the robot account is deleted, if so, delete robotaccount rc in k8s and robot account in harbor.
 	if !ra.ObjectMeta.DeletionTimestamp.IsZero() {
 		return ctrl.Result{}, r.delete(ctx, ra)
 	}
 
+	// set Finalizer for the robot account rc.
 	if !strings.ContainsString(ra.ObjectMeta.Finalizers, finalizerID) {
 		ra.ObjectMeta.Finalizers = append(ra.ObjectMeta.Finalizers, finalizerID)
 		if err := r.update(ctx, ra); err != nil {
@@ -177,6 +184,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		}
 	}
 
+	// create or update robot account.
 	modelRobot, err := r.createOrUpdateRobotAccount(ra)
 	if err != nil {
 		log.Error(err, "failed to create robot account")
@@ -185,14 +193,25 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	// Update status
-	ra.Status.ID = modelRobot.ID
-	ra.Status.Message = "robot account created"
-	ra.Status.Reason = ""
-	ra.Status.Secret = modelRobot.Secret
-
-	err = r.Status().Update(ctx, ra)
+	err = r.setStatus(ctx, ra, modelRobot.ID, "robot account updated", "", modelRobot.Secret)
 
 	return ctrl.Result{}, err
+}
+
+// setStatus sets the status of the robot account.
+func (r *Reconciler) setStatus(ctx context.Context, ra *goharboriov1beta1.RobotAccount, id int64, reason, message, secret string) error {
+	if id != 0 {
+		ra.Status.ID = id
+	}
+
+	if secret != "" {
+		ra.Status.Secret = secret
+	}
+
+	ra.Status.Reason = reason
+	ra.Status.Message = message
+
+	return r.Status().Update(ctx, ra)
 }
 
 func (r *Reconciler) getHarborServerConfig(ctx context.Context, name string) (*goharboriov1beta1.HarborServerConfiguration, error) {

@@ -273,8 +273,9 @@ func (c *Client) UpdateRobotAccount(robotID int64, ra *goharboriov1beta1.RobotAc
 	}
 
 	return &models.Robot{
-		ID:   robotID,
-		Name: ra.Spec.Name,
+		ID:     robotID,
+		Name:   ra.Spec.Name,
+		Secret: ra.Status.Secret,
 	}, nil
 }
 
