@@ -66,7 +66,7 @@ func (r *Reconciler) cleanRobotAccount(ra *goharboriov1beta1.RobotAccount) error
 	if err != nil && errors.As(err, &robotAccountNotFound) {
 		return nil
 	}
-	
+
 	if err != nil {
 		return err
 	}
