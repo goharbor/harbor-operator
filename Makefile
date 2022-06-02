@@ -436,7 +436,7 @@ redis: helm sample-redis
 .PHONY: postgresql
 postgresql: helm sample-database
 	$(HELM) repo add bitnami https://charts.bitnami.com/bitnami
-	$(HELM) upgrade --install harbor-database bitnami/postgresql --version 10.3.17 \
+	$(HELM) upgrade --install harbor-database bitnami/postgresql --version 10.14.3 \
 		--set-string initdbScriptsConfigMap=harbor-init-db \
 		--set-string existingSecret=harbor-database-password
 
