@@ -90,7 +90,7 @@ The thing to note here is the names of the databases `core`, `notaryserver` (onl
 Harbor uses Redis as its cache service to cache data. You can create a cache instance from your cloud provider or pre-install a Redis on your resources. e.g.:
 
 ```shell
-helm upgrade --install harbor-redis bitnami/redis --version 12.10.0 --set-string password=the-redis-password --set usePassword=true --set-string image.registry=ghcr.io --set-string image.repository=goharbor/redis
+helm upgrade --install harbor-redis bitnami/redis --version 15.7.0 --set-string password=the-redis-password --set usePassword=true --set-string image.registry=ghcr.io --set-string image.repository=goharbor/redis
 ```
 
 >NOTES: `make redis` can also help install a Redis instance quickly.
