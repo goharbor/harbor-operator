@@ -466,7 +466,7 @@ certmanager: helm jetstack
 		--version v1.4.3 \
 		--set installCRDs=true
 	kubectl wait --namespace $(CERTMANAGER_NAMESPACE) --for=condition=ready pod --timeout="60s" --all
-	
+
 
 .PHONY: jetstack
 jetstack:
@@ -714,6 +714,10 @@ $(HELM_DOCS):
 	curl -sL "https://github.com/norwoodj/helm-docs/releases/download/v$(HELM_DOCS_VERSION)/helm-docs_$(HELM_DOCS_VERSION)_$$(uname -s)_x86_64.tar.gz" \
 		| tar -xzC '$(BIN)' helm-docs
 
-.PHONY: localtest 
-localtest:
-	@sh scripts/harbor_operator_kind.sh 
+.PHONY: localtest-start
+localtest-start:
+	@sh scripts/harbor_operator_kind.sh start
+
+.PHONY: localtest-clean
+localtest-clean:
+	@sh scripts/harbor_operator_kind.sh clean

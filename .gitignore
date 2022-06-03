@@ -36,7 +36,3 @@ charts/harbor-operator/charts/*.tgz
 ## goreleaser
 dist/
 vendor/
-
-## local development test files
-config/samples/harborcluster-standard-dev/
-config/samples/harborcluster-minimal-dev/
