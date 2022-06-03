@@ -40,6 +40,11 @@ Usage: $(basename "$0") start [options]
 EOF
 }
 
+set_dev_harbor_operator_image() {
+    DEFAULT_DEV_HABOR_OPERATOR_IMAGE="${DEFAULT_DEV_HABOR_OPERATOR_IMAGE}_$(date +%s)"
+    echo "The harbor operator image is set to $DEFAULT_DEV_HABOR_OPERATOR_IMAGE"
+}
+
 cacheDir() {
     local arch=$(uname -m)
     echo "$RUNNER_TOOL_CACHE/tools/$version/$arch"
@@ -309,7 +314,7 @@ install_harbor() {
 }
 
 check_args_number(){
-    if [ $# -le 1 ]; then
+    if [ $# -lt 1 ]; then
         echo "Usage: $0 start|clean"
         exit 1
     fi
@@ -336,6 +341,8 @@ clean(){
 
 main(){
     check_docker_installed
+    check_args_number $@
+    set_dev_harbor_operator_image
 
     local RUNNER_TOOL_CACHE="$DEFAULT_RUNNER_TOOL_CACHE"
     local version="$DEFAULT_KIND_VERSION"
@@ -346,7 +353,6 @@ main(){
     local wait=60s
     local log_level=
 
-    check_args_number $@
     case $1 in
         start)
             start $@
