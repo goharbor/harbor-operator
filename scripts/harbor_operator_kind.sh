@@ -342,7 +342,6 @@ clean(){
 main(){
     check_docker_installed
     check_args_number $@
-    set_dev_harbor_operator_image
 
     local RUNNER_TOOL_CACHE="$DEFAULT_RUNNER_TOOL_CACHE"
     local version="$DEFAULT_KIND_VERSION"
@@ -355,6 +354,7 @@ main(){
 
     case $1 in
         start)
+            set_dev_harbor_operator_image
             start $@
             ;;
         clean)
