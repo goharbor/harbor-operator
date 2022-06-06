@@ -506,6 +506,8 @@ type HarborStorageImageChartStorageSpec struct {
 	// An implementation of the storagedriver.StorageDriver interface which uses Google Cloud for object storage.
 	// See https://docs.docker.com/registry/storage-drivers/gcs/
 	Gcs *HarborStorageImageChartStorageGcsSpec `json:"gcs,omitempty"`
+
+	AliOSS *HarborStorageImageChartStorageAliOSSSpec `json:"aliOss,omitempty"`
 }
 
 type HarborStorageTrivyStorageSpec struct {
@@ -526,6 +528,7 @@ const (
 	FileSystemDriverName = "filesystem"
 	AzureDriverName      = "azure"
 	GcsDriverName        = "gcs"
+	AliOSSDriverName     = "aliOSS"
 )
 
 func (r *HarborStorageImageChartStorageSpec) ProviderName() string {
@@ -543,6 +546,10 @@ func (r *HarborStorageImageChartStorageSpec) ProviderName() string {
 
 	if r.Gcs != nil {
 		return GcsDriverName
+	}
+
+	if r.AliOSS != nil {
+		return AliOSSDriverName
 	}
 
 	return FileSystemDriverName
@@ -575,6 +582,10 @@ func (r *HarborStorageImageChartStorageSpec) Validate() error {
 		found++
 	}
 
+	if r.AliOSS != nil {
+		found++
+	}
+
 	switch found {
 	case 0:
 		return ErrNoStorageConfiguration
@@ -604,6 +615,24 @@ type HarborStorageRegistryPersistentVolumeSpec struct {
 
 type HarborStorageImageChartStorageAzureSpec struct {
 	RegistryStorageDriverAzureSpec `json:",inline"`
+}
+
+type HarborStorageImageChartStorageAliOSSSpec struct {
+	RegistryStorageDriverAliOSSSpec `json:",inline"`
+}
+
+func (r *HarborStorageImageChartStorageAliOSSSpec) ChartMuseum() *ChartMuseumChartStorageDriverAliOSSSpec {
+	return &ChartMuseumChartStorageDriverAliOSSSpec{
+		Endpoint:        r.Endpoint,
+		AccessKeyID:     r.AccessKeyID,
+		AccessSecretRef: r.AccessSecretRef,
+		BucketName:      r.BucketName,
+		PathPrefix:      r.PathPrefix,
+	}
+}
+
+func (r *HarborStorageImageChartStorageAliOSSSpec) Registry() *RegistryStorageDriverAliOSSSpec {
+	return &r.RegistryStorageDriverAliOSSSpec
 }
 
 type HarborStorageImageChartStorageGcsSpec struct {

@@ -161,6 +161,26 @@ type ChartMuseumChartStorageDriverSpec struct {
 
 	// +kubebuilder:validation:Optional
 	Gcs *ChartMuseumChartStorageDriverGcsSpec `json:"gcs,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	AliOSS *ChartMuseumChartStorageDriverAliOSSSpec `json:"aliOSS,omitempty"`
+}
+
+type ChartMuseumChartStorageDriverAliOSSSpec struct {
+	// +kubebuilder:validation:Optional
+	Endpoint string `json:"endpoint,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	AccessKeyID string `json:"accessKeyID,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	AccessSecretRef string `json:"accessSecretRef,omitempty"`
+
+	// +kubebuilder:validation:Required
+	BucketName string `json:"bucketName"`
+
+	// +kubebuilder:validation:Required
+	PathPrefix string `json:"pathPrefix"`
 }
 
 type ChartMuseumChartStorageDriverGcsSpec struct {

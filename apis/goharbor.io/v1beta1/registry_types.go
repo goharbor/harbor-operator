@@ -617,6 +617,8 @@ type RegistryStorageDriverSpec struct {
 	// An implementation of the storagedriver.StorageDriver interface which uses Google Cloud for object storage.
 	// https://docs.docker.com/registry/storage-drivers/gcs/
 	Gcs *RegistryStorageDriverGcsSpec `json:"gcs,omitempty"`
+
+	AliOSS *RegistryStorageDriverAliOSSSpec `json:"aliOSS,omitempty"`
 }
 
 func (r *RegistryStorageDriverSpec) Validate() error {
@@ -643,6 +645,10 @@ func (r *RegistryStorageDriverSpec) Validate() error {
 	}
 
 	if r.Gcs != nil {
+		found++
+	}
+
+	if r.AliOSS != nil {
 		found++
 	}
 
@@ -684,6 +690,23 @@ type RegistryStorageDriverAzureSpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=/azure/harbor/charts
 	PathPrefix string `json:"pathPrefix,omitempty"`
+}
+
+type RegistryStorageDriverAliOSSSpec struct {
+	// +kubebuilder:validation:Optional
+	Endpoint string `json:"endpoint,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	AccessKeyID string `json:"accessKeyID,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	AccessSecretRef string `json:"accessSecretRef,omitempty"`
+
+	// +kubebuilder:validation:Required
+	BucketName string `json:"bucketName"`
+
+	// +kubebuilder:validation:Required
+	PathPrefix string `json:"pathPrefix"`
 }
 
 type RegistryStorageDriverGcsSpec struct {

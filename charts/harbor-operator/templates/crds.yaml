@@ -2344,6 +2344,22 @@ spec:
                     type: object
                   storage:
                     properties:
+                      aliOSS:
+                        properties:
+                          accessKeyID:
+                            type: string
+                          accessSecretRef:
+                            type: string
+                          bucketName:
+                            type: string
+                          endpoint:
+                            type: string
+                          pathPrefix:
+                            type: string
+                        required:
+                        - bucketName
+                        - pathPrefix
+                        type: object
                       amazon:
                         properties:
                           accessKeyID:
@@ -10486,10 +10502,27 @@ spec:
                     - FileSystem
                     - Azure
                     - Gcs
+                    - AliOSS
                     type: string
                   spec:
                     description: the spec of Storage.
                     properties:
+                      aliOSS:
+                        properties:
+                          accessKeyID:
+                            type: string
+                          accessSecretRef:
+                            type: string
+                          bucketName:
+                            type: string
+                          endpoint:
+                            type: string
+                          pathPrefix:
+                            type: string
+                        required:
+                        - bucketName
+                        - pathPrefix
+                        type: object
                       azure:
                         properties:
                           accountkeyRef:
@@ -14543,6 +14576,22 @@ spec:
                 type: string
               imageChartStorage:
                 properties:
+                  aliOss:
+                    properties:
+                      accessKeyID:
+                        type: string
+                      accessSecretRef:
+                        type: string
+                      bucketName:
+                        type: string
+                      endpoint:
+                        type: string
+                      pathPrefix:
+                        type: string
+                    required:
+                    - bucketName
+                    - pathPrefix
+                    type: object
                   azure:
                     description: An implementation of the storagedriver.StorageDriver
                       interface which uses Microsoft Azure Blob Storage for object
@@ -28835,6 +28884,22 @@ spec:
                     type: object
                   driver:
                     properties:
+                      aliOSS:
+                        properties:
+                          accessKeyID:
+                            type: string
+                          accessSecretRef:
+                            type: string
+                          bucketName:
+                            type: string
+                          endpoint:
+                            type: string
+                          pathPrefix:
+                            type: string
+                        required:
+                        - bucketName
+                        - pathPrefix
+                        type: object
                       azure:
                         description: 'An implementation of the storagedriver.StorageDriver
                           interface which uses Microsoft Azure Blob Storage for object

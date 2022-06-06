@@ -124,6 +124,36 @@ func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1.
 		})
 	}
 
+	if chartMuseum.Spec.Chart.Storage.AliOSS != nil {
+		envs = append(envs, corev1.EnvVar{
+			Name:  "STORAGE",
+			Value: "alibaba",
+		}, corev1.EnvVar{
+			Name:  "STORAGE_ALIBABA_BUCKET",
+			Value: chartMuseum.Spec.Chart.Storage.AliOSS.BucketName,
+		}, corev1.EnvVar{
+			Name:  "STORAGE_ALIBABA_ENDPOINT",
+			Value: chartMuseum.Spec.Chart.Storage.AliOSS.Endpoint,
+		}, corev1.EnvVar{
+			Name:  "ALIBABA_CLOUD_ACCESS_KEY_ID",
+			Value: chartMuseum.Spec.Chart.Storage.AliOSS.AccessKeyID,
+		})
+
+		if chartMuseum.Spec.Chart.Storage.Azure.AccountKeyRef != "" {
+			envs = append(envs, corev1.EnvVar{
+				Name: "ALIBABA_CLOUD_ACCESS_KEY_SECRET",
+				ValueFrom: &corev1.EnvVarSource{
+					SecretKeyRef: &corev1.SecretKeySelector{
+						LocalObjectReference: corev1.LocalObjectReference{
+							Name: chartMuseum.Spec.Chart.Storage.AliOSS.AccessSecretRef,
+						},
+						Key: harbormetav1.SharedSecretKey,
+					},
+				},
+			})
+		}
+	}
+
 	if chartMuseum.Spec.Chart.Storage.Gcs != nil {
 		envs = append(envs, corev1.EnvVar{
 			Name:  "STORAGE",
