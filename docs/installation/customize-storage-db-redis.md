@@ -13,7 +13,7 @@ For customizing the storage spec, you can directly follow the [CRD spec](../CRD/
 Harbor uses PostgreSQL as its database to store the related metadata. You can create a database instance from your cloud provider or pre-install a PostgreSQL on your resources. e.g.:
 
 ```shell
-helm upgrade --install harbor-database bitnami/postgresql --version 10.14.3 --set-string initdbScriptsConfigMap=harbor-init-db --set-string postgresqlPassword=the-psql-password --set-string image.registry=ghcr.io --set-string image.repository=goharbor/postgresql
+helm upgrade --install harbor-database bitnami/postgresql --version 10.14.3 --set-string initdbScriptsConfigMap=harbor-init-db --set-string auth.postgresPassword=the-psql-password --set-string image.registry=ghcr.io --set-string image.repository=goharbor/postgresql
 ```
 
 Here the `initdbScriptsConfigMap` is pointing to a `configMap` used to initialize the databases. e.g.:
@@ -44,7 +44,7 @@ metadata:
     sample: "true"
   name: harbor-database-password
 data:
-  postgresql-password: dGhlLXBzcWwtcGFzc3dvcmQK
+  postgresql-password: dGhlLXBzcWwtcGFzc3dvcmQ=
 type: goharbor.io/postgresql
 ```
 
