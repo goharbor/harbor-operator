@@ -73,6 +73,10 @@ type TrivySpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default="5m0s"
 	Timeout *metav1.Duration `json:"timeout,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=false
+	OfflineScan bool `json:"offlineScan"`
 }
 
 type TrivyUpdateSpec struct {

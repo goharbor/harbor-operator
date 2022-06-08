@@ -467,6 +467,12 @@ type TrivyComponentSpec struct {
 	// The flag to enable or disable Trivy DB downloads from GitHub
 	SkipUpdate bool `json:"skipUpdate"`
 
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=false
+	// Option prevents Trivy from sending API requests to identify dependencies.
+	// This option doesn’t affect DB download. You need to specify "skip-update" as well as "offline-scan" in an air-gapped environment.
+	OfflineScan bool `json:"offlineScan"`
+
 	// +kubebuilder:validation:Required
 	Storage HarborStorageTrivyStorageSpec `json:"storage"`
 }

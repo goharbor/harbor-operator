@@ -164,6 +164,7 @@ func (r *Reconciler) GetTrivy(ctx context.Context, harbor *goharborv1.Harbor, ha
 			CertificateInjection: harbor.Spec.Trivy.CertificateInjection,
 			Proxy:                harbor.GetComponentProxySpec(harbormetav1.TrivyComponent),
 			Network:              harbor.Spec.Network,
+			OfflineScan:          harbor.Spec.Trivy.OfflineScan,
 		},
 	}, nil
 }
