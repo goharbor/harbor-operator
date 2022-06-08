@@ -11333,6 +11333,13 @@ spec:
                       node''s labels for the pod to be scheduled on that node. More
                       info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/'
                     type: object
+                  offlineScan:
+                    default: false
+                    description: Option prevents Trivy from sending API requests to
+                      identify dependencies. This option doesn’t affect DB download.
+                      You need to specify "skip-update" as well as "offline-scan"
+                      in an air-gapped environment.
+                    type: boolean
                   replicas:
                     description: 'Replicas is the number of desired replicas. This
                       is a pointer to distinguish between explicit zero and unspecified.
@@ -15731,6 +15738,13 @@ spec:
                       node''s labels for the pod to be scheduled on that node. More
                       info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/'
                     type: object
+                  offlineScan:
+                    default: false
+                    description: Option prevents Trivy from sending API requests to
+                      identify dependencies. This option doesn’t affect DB download.
+                      You need to specify "skip-update" as well as "offline-scan"
+                      in an air-gapped environment.
+                    type: boolean
                   replicas:
                     description: 'Replicas is the number of desired replicas. This
                       is a pointer to distinguish between explicit zero and unspecified.
@@ -46340,6 +46354,9 @@ spec:
                   component to fit on a node. Selector which must match a node''s
                   labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/'
                 type: object
+              offlineScan:
+                default: false
+                type: boolean
               proxy:
                 properties:
                   httpProxy:

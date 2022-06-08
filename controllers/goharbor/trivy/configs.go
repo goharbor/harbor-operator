@@ -52,6 +52,7 @@ func (r *Reconciler) GetConfigMap(ctx context.Context, trivy *goharborv1.Trivy) 
 			"SCANNER_TRIVY_SEVERITY":       trivy.Spec.TrivySeverityTypes.GetValue(),
 			"SCANNER_TRIVY_IGNORE_UNFIXED": strconv.FormatBool(trivy.Spec.Server.IgnoreUnfixed),
 			"SCANNER_TRIVY_SKIP_UPDATE":    strconv.FormatBool(trivy.Spec.Update.Skip),
+			"SCANNER_TRIVY_OFFLINE_SCAN":   strconv.FormatBool(trivy.Spec.OfflineScan),
 			"SCANNER_TRIVY_INSECURE":       strconv.FormatBool(trivy.Spec.Server.Insecure),
 
 			"SCANNER_STORE_REDIS_NAMESPACE":    trivy.Spec.Redis.Namespace,
