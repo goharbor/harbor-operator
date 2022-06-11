@@ -12,7 +12,7 @@ import (
 	"github.com/goharbor/go-client/pkg/sdk/v2.0/client/robot"
 	"github.com/goharbor/go-client/pkg/sdk/v2.0/client/robotv1"
 	"github.com/goharbor/go-client/pkg/sdk/v2.0/models"
-	goharboriov1beta1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
+	goharborv1beta1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
 	"github.com/goharbor/harbor-operator/pkg/rest/model"
 	utilstring "github.com/goharbor/harbor-operator/pkg/utils/strings"
 	"github.com/pkg/errors"
@@ -181,7 +181,7 @@ func (c *Client) CheckHealth() (*models.OverallHealthStatus, error) {
 	return res.Payload, nil
 }
 
-func (c *Client) CreateRobotAccount(ra *goharboriov1beta1.RobotAccount) (*models.Robot, error) {
+func (c *Client) CreateRobotAccount(ra *goharborv1beta1.RobotAccount) (*models.Robot, error) {
 	if c.harborClient == nil {
 		return nil, errors.New("nil harbor client")
 	}
@@ -233,7 +233,7 @@ func (c *Client) CreateRobotAccount(ra *goharboriov1beta1.RobotAccount) (*models
 	}, nil
 }
 
-func (c *Client) UpdateRobotAccount(robotID int64, ra *goharboriov1beta1.RobotAccount) (*models.Robot, error) {
+func (c *Client) UpdateRobotAccount(robotID int64, ra *goharborv1beta1.RobotAccount) (*models.Robot, error) {
 	if c.harborClient == nil {
 		return nil, errors.New("nil harbor client")
 	}
