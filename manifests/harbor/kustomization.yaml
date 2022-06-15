@@ -23,4 +23,4 @@ resources:
 images:
   - name: goharbor/harbor-operator
     newName: ghcr.io/goharbor/harbor-operator
-    newTag: v1.3.0-rc1
+    newTag: v1.3.0-rc3
