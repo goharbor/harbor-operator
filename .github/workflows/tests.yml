@@ -290,8 +290,8 @@ jobs:
     - name: apidb test
       run: bash .github/scripts/apidb_test.sh
       env:
-        DOCKER_USER: ${{ secrets.DOCKER_USER }}
-        DOCKER_PWD: ${{ secrets.DOCKER_TOKEN }}
+        DOCKER_USER: bitsf
+        DOCKER_PWD: ${{ secrets.DOCKER_PASS }}
         CORE_DEPLOYMENT: harborcluster-sample-harbor-harbor-core
         NAMESPACE: cluster-sample-ns
 
