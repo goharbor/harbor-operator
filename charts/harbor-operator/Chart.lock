@@ -1,12 +1,12 @@
 dependencies:
 - name: operator
   repository: https://operator.min.io/
-  version: 4.4.16
+  version: 4.4.22
 - name: redis-operator
   repository: https://spotahome.github.io/redis-operator
   version: 3.1.4
 - name: postgres-operator
   repository: https://opensource.zalando.com/postgres-operator/charts/postgres-operator
   version: 1.6.3
-digest: sha256:c7386e79c639c546246a5ce9c52b3249e35af83bbd0eb5d497acac5a077df32a
-generated: "2022-05-12T22:05:05.865860016+08:00"
+digest: sha256:0325088de94fe9215f4201f67db9642c51dcdcc65697775b97dfda7a79542bfd
+generated: "2022-06-09T23:31:58.422674+08:00"

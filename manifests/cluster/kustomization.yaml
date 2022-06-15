@@ -8,7 +8,7 @@ namespace: harbor-operator-ns
 commonAnnotations:
   goharbor.io/deploy-engine: Kustomization
   goharbor.io/deploy-mode: cluster
-  goharbor.io/operator-version: v1.1.0
+  goharbor.io/operator-version: v1.3.0
 
 # All the referred deployment manifests
 # NOTES: when doing changes to the ref versions, please also do same changes in the patch/annotation.yaml file
@@ -18,7 +18,7 @@ resources:
   - https://raw.githubusercontent.com/spotahome/redis-operator/master/example/operator/all-redis-operator-resources.yaml?ref=v1.1.1 # redis operator
   - https://raw.githubusercontent.com/spotahome/redis-operator/master/manifests/databases.spotahome.com_redisfailovers.yaml?ref=v1.1.1 # redis operator crd
   - github.com/zalando/postgres-operator/manifests?ref=v1.6.3 # postgresql operator
-  - github.com/minio/operator?ref=v4.4.9 # minIO storage operator
+  - github.com/minio/operator?ref=v4.4.22 # minIO storage operator
 
 # If you have to override the image source, uncomment this patch and also change the image source in the patch/image-source.yaml file.
 # Then rebuild.
@@ -47,4 +47,4 @@ images:
     newName: ghcr.io/goharbor/postgres-operator
   - name: goharbor/harbor-operator
     newName: ghcr.io/goharbor/harbor-operator
-    newTag: dev_master
+    newTag: v1.3.0-rc3

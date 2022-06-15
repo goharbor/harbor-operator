@@ -19,6 +19,7 @@ builds:
 dockers:
   - image_templates:
       - goharbor/harbor-operator:{{ .Tag }}
+    skip_push: true
 
 changelog:
   sort: asc

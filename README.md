@@ -64,9 +64,9 @@ For a quick first try follow the instructions of this [tutorial](./docs/tutorial
 
 Versions of the underlying components are listed below:
 
-|  Components   |       Harbor      | MinIO operator | PostgreSQL operator | Redis operator |
-|---------------|-------------------|----------------|---------------------|----------------|
-|  Versions     | 2.4.x `[1]`       | 4.4.9          | 1.6.3               | 1.1.1          |
+|  Components   | Harbor      | MinIO operator | PostgreSQL operator | Redis operator |
+|---------------|-------------|----------------|---------------------|----------------|
+|  Versions     | 2.5.x `[1]` | 4.4.22         | 1.6.3               | 1.1.1          |
 
 NOTES:
 
@@ -78,9 +78,9 @@ NOTES:
 
 Harbor operator supports two extra Kubernetes versions besides the current latest version (`n-2` pattern):
 
-|    Versions   |        1.20        |        1.21        |         1.22        |
-|---------------|--------------------|--------------------|---------------------|
-| Compatibility | :heavy_check_mark: | :heavy_check_mark: |  :heavy_check_mark: |
+|    Versions   |        1.20        |        1.21        |         1.22        |         1.23        |
+|---------------|--------------------|--------------------|---------------------|---------------------|
+| Compatibility | :heavy_check_mark: | :heavy_check_mark: |  :heavy_check_mark: |  :heavy_check_mark: |
 
 ### Cert manager versions
 
