@@ -33,13 +33,6 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrap(err, "cannot get registryctl")
 	}
 
-	defer func() {
-		e := r.UpdateRegistryCtlStatus(ctx, registry, registryCtl)
-		if e != nil {
-			r.Log.Error(err, "cannot update registry controller status")
-		}
-	}()
-
 	err = r.CleanUpRegistryCtlResources(ctx, registryCtl)
 	if err != nil {
 		return errors.Wrap(err, "cleanup registryctl resources error")
