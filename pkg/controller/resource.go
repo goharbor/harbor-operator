@@ -299,6 +299,30 @@ func (c *Controller) AddBasicResource(ctx context.Context, resource resources.Re
 	return res, g.AddResource(ctx, res, dependencies, c.ProcessFunc(ctx, resource, dependencies...))
 }
 
+func (c *Controller) AddNonCheckableResource(ctx context.Context, resource resources.Resource, dependencies ...graph.Resource) (*Resource, error) {
+	if resource == nil {
+		return nil, nil
+	}
+
+	mutate, err := c.GlobalMutateFn(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	res := &Resource{
+		mutable:   mutate,
+		checkable: statuscheck.True,
+		resource:  resource,
+	}
+
+	g := sgraph.Get(ctx)
+	if g == nil {
+		return nil, errors.Errorf("no graph in current context")
+	}
+
+	return res, g.AddResource(ctx, res, dependencies, c.ProcessFunc(ctx, resource, dependencies...))
+}
+
 func (c *Controller) AddExternalResource(ctx context.Context, resource resources.Resource, dependencies ...graph.Resource) (graph.Resource, error) {
 	if resource == nil {
 		return nil, nil
