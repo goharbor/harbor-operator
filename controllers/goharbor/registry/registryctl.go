@@ -88,11 +88,3 @@ func owneredByRegistryCtl(obj client.Object, registryCtl *goharborv1.RegistryCon
 
 	return false
 }
-
-// UpdateRegistryCtlStatus updates registrycontroller status by registry.
-func (r *Reconciler) UpdateRegistryCtlStatus(ctx context.Context, registry *goharborv1.Registry, registryCtl *goharborv1.RegistryController) error {
-	// sync registrycontroller status with registry
-	registryCtl.Status = registry.Status
-
-	return r.Client.Status().Update(ctx, registryCtl)
-}
