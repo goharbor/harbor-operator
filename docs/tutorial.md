@@ -1,6 +1,6 @@
 # Tutorial
 
-This tutorial will guides you to have a quick first try of the Harbor operator and the Harbor cluster deployed and managed by the operator.
+This tutorial will guide you to have a quick first try of the Harbor operator and the Harbor cluster deployed and managed by the operator.
 
 ## Learn how does it work
 
@@ -10,7 +10,7 @@ If you want to learn the overall design of the Harbor operator before starting t
 
 Check the prerequisites and install the Harbor operator base on your needs by following the [installation guide](./installation/installation.md).
 
-Before moving on, make sure the harbor operator is successfully deployed in the Kubenetes cluster.
+Before moving on, make sure the harbor operator is successfully deployed in the Kubernetes cluster.
 
 ```shell
 ~/harbor-operator$ kubectl get all -n harbor-operator-ns
@@ -45,8 +45,12 @@ To deploy a Harbor cluster, you need to prepare a deployment manifest first. For
 
 Learn more about the sample manifests, you can check [manifests reference](./manifests-reference.md#manifestssamples).
 
-> NOTES: to allow the deployed Harbor cluster to be accessible outside the Kubenetes cluster, make sure the ingress hosts and host in the `externalURL` should be mapping with accessible IPs in the /etc/hosts (for local development environments) or can be resolved and accessible by DNS resolver.
+**NOTES:**
+>To allow the deployed Harbor cluster to be accessible outside the Kubernetes cluster, make sure the ingress hosts and host in the `externalURL` should be mapping with accessible IPs in the /etc/hosts (for local development environments) or can be resolved and accessible by DNS resolver.
 >TIPS: for local development, some plan-domain services like `sub-domain.<IP>.nip.io` can be used to provide simple public accessible hosts.
+
+**ATTENTIONS:**
+>To deploy Harbor cluster, you have to make sure a [default ingress class](https://kubernetes.io/docs/concepts/services-networking/ingress/#default-ingress-class) is marked in your cluster, otherwise, you need to explicitly set the [ingress class](https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class) through the `ingressClassName` field of the `ingress` configuration. e.g. `spec.expose.core.ingress.ingressClassName`. For details, you can refer to the [CRD spec](./CRD/custom-resource-definition.md).
 
 Here we clone the [full stack sample manifest](../manifests/samples/full_stack.yaml) as an example and modify the external host and ingress hosts with `sub-domain.<IP>.nip.io` pattern. Modified content is shown as below. Please pay attention here, the 'namespace', 'admin core secret', 'minio access secret' and 'cert-manager issuer/certificate/key' are pre-defined resources and bound to the deploying Harbor cluster.
 
