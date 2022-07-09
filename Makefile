@@ -506,7 +506,7 @@ clean:
 
 # find or download controller-gen
 # download controller-gen if necessary
-CONTROLLER_GEN_VERSION := 0.6.2
+CONTROLLER_GEN_VERSION := 0.9.2
 CONTROLLER_GEN := $(BIN)/controller-gen
 
 .PHONY: controller-gen
@@ -550,7 +550,7 @@ $(MARKDOWNLINT):
 # find or download golangci-lint
 # download golangci-lint if necessary
 GOLANGCI_LINT := $(BIN)/golangci-lint
-GOLANGCI_LINT_VERSION := 1.45.2
+GOLANGCI_LINT_VERSION := 1.46.2
 
 .PHONY: golangci-lint
 golangci-lint:
@@ -638,7 +638,7 @@ $(GORELEASER):
 
 # find or download stringer
 # download stringer if necessary
-STRINGER_VERSION := v0.1.10
+STRINGER_VERSION := v0.1.11
 STRINGER := $(BIN)/stringer
 
 .PHONY: stringer
