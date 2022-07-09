@@ -227,7 +227,7 @@ func needsNodePort(svc *corev1.Service) bool {
 	return false
 }
 
-func (c *Controller) AddUnsctructuredToManage(ctx context.Context, resource *unstructured.Unstructured, dependencies ...graph.Resource) (graph.Resource, error) { // nolint:interfacer
+func (c *Controller) AddUnsctructuredToManage(ctx context.Context, resource *unstructured.Unstructured, dependencies ...graph.Resource) (graph.Resource, error) {
 	if resource == nil {
 		return nil, nil
 	}
