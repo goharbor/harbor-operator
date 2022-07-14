@@ -31,7 +31,7 @@ Harbor deployment stack is controlled by a custom Harbor resource `HarborCluster
   * Add/remove the optional Harbor components
 * Supports upgrading the managed Harbor registry version
 * Deletes all the linked resources when deleting the Harbor cluster
-* Support services exposed with [ingress](https://kubernetes.io/fr/docs/concepts/services-networking/ingress/): [nginx(default)](https://git.k8s.io/ingress-nginx/README.md#readme), [gce](https://git.k8s.io/ingress-gce/README.md#readme), [contour](https://github.com/projectcontour/contour) and `ncp`
+* Support services exposed with [ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/): [nginx(default)](https://git.k8s.io/ingress-nginx/README.md#readme), [gce](https://git.k8s.io/ingress-gce/README.md#readme), [contour](https://github.com/projectcontour/contour) and `ncp`
 * Support Day2 operations
   * Configures Harbor system settings with configuration CRD (`recommend`) or labeled ConfigMap (`deprecated`)
 
