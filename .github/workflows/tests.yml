@@ -19,7 +19,7 @@ jobs:
     steps:
     - uses: actions/setup-go@v2
       with:
-        go-version: 1.17
+        go-version: 1.18
     - uses: actions/checkout@v2
     - run: make docker-build
 
@@ -37,7 +37,7 @@ jobs:
     steps:
     - uses: actions/setup-go@v2
       with:
-        go-version: 1.17
+        go-version: 1.18
     - uses: actions/checkout@v2
     - run: make go-lint
 
@@ -47,7 +47,7 @@ jobs:
     steps:
     - uses: actions/setup-go@v2
       with:
-        go-version: 1.17
+        go-version: 1.18
     - uses: actions/checkout@v2
     - run: make go-dependencies-test
 
@@ -57,7 +57,7 @@ jobs:
     steps:
     - uses: actions/setup-go@v2
       with:
-        go-version: 1.17
+        go-version: 1.18
     - uses: actions/checkout@v2
     - run: make generated-diff-test
 
@@ -73,7 +73,7 @@ jobs:
 
       - uses: actions/setup-go@v2
         with:
-          go-version: 1.17
+          go-version: 1.18
 
       - name: Cache go mod
         uses: actions/cache@v2
@@ -156,7 +156,7 @@ jobs:
 
     - uses: actions/setup-go@v2
       with:
-        go-version: 1.17
+        go-version: 1.18
 
     - uses: azure/setup-kubectl@v1
       with:
@@ -363,7 +363,7 @@ jobs:
 
       - uses: actions/setup-go@v2
         with:
-          go-version: 1.17
+          go-version: 1.18
 
       - uses: azure/setup-kubectl@v1
         with:
@@ -572,7 +572,7 @@ jobs:
 
       - uses: actions/setup-go@v2
         with:
-          go-version: 1.17
+          go-version: 1.18
 
       - uses: azure/setup-kubectl@v1
         with:
@@ -736,7 +736,7 @@ jobs:
     steps:
     - uses: actions/setup-go@v2
       with:
-        go-version: 1.17
+        go-version: 1.18
     - uses: actions/checkout@v2
     - run: make manifests
     - uses: azure/k8s-bake@v1
@@ -751,7 +751,7 @@ jobs:
     steps:
     - uses: actions/setup-go@v2
       with:
-        go-version: 1.17
+        go-version: 1.18
     - uses: actions/checkout@v2
     - run: make manifests
     - uses: azure/k8s-bake@v1
