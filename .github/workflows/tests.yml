@@ -145,7 +145,7 @@ jobs:
         - "1.24.0"
 
         ingress:
-        - "1.0.5"
+        - "1.3.0"
 
         samples:
         - "full_stack.yaml"
@@ -565,7 +565,7 @@ jobs:
         - "1.24.0"
 
         ingress:
-          - "1.0.5"
+          - "1.3.0"
 
     steps:
       - uses: actions/checkout@v2
