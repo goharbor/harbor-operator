@@ -99,7 +99,7 @@ jobs:
       - name: Install CertManager
         run: |
           # Try the recet way to install crd or fallback to the old one
-          kubectl apply -f "https://github.com/jetstack/cert-manager/releases/download/v1.1.0/cert-manager.yaml"
+          kubectl apply -f "https://github.com/jetstack/cert-manager/releases/download/v1.2.0/cert-manager.yaml"
           sleep 5
           time kubectl -n cert-manager wait --for=condition=Available deployment --all --timeout 300s
 
@@ -399,7 +399,7 @@ jobs:
 
       - name: Install Contour
         run: |
-          kubectl apply -f https://github.com/projectcontour/contour/raw/v1.21.1/examples/render/contour.yaml
+          kubectl apply -f https://github.com/projectcontour/contour/raw/v1.22.0/examples/render/contour.yaml
           sleep 5
           kubectl patch daemonsets -n projectcontour envoy -p '{"spec":{"template":{"spec":{"nodeSelector":{"ingress-ready":"true"},"tolerations":[{"key":"node-role.kubernetes.io/master","operator":"Equal","effect":"NoSchedule"}]}}}}'
           sleep 5
