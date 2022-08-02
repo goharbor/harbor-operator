@@ -53,6 +53,8 @@ kind: PersistentVolumeClaim
 metadata:
   name: sample-harbor-registry
   namespace: cluster-sample-ns
+  labels:
+    goharbor.io/component: registry
 spec:
   accessModes:
     - ReadWriteOnce

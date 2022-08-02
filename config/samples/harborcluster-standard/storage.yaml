@@ -2,6 +2,8 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: sample-harbor-chart
+  labels:
+    goharbor.io/component: chart
 spec:
   accessModes:
   - ReadWriteOnce
@@ -14,6 +16,8 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: sample-harbor-trivy-reports
+  labels:
+    goharbor.io/component: trivy-reports
 spec:
   accessModes:
   - ReadWriteOnce
@@ -26,6 +30,8 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: sample-harbor-trivy-cache
+  labels:
+    goharbor.io/component: trivy-cache
 spec:
   accessModes:
   - ReadWriteOnce

@@ -65,6 +65,8 @@ kind: PersistentVolumeClaim
 metadata:
   name: sample-harbor-registry
   namespace: cluster-sample-ns
+  labels:
+    goharbor.io/component: registry
 spec:
   accessModes:
     - ReadWriteOnce
@@ -78,6 +80,8 @@ kind: PersistentVolumeClaim
 metadata:
   name: sample-harbor-trivy-reports
   namespace: cluster-sample-ns
+  labels:
+    goharbor.io/component: trivy-reports
 spec:
   accessModes:
     - ReadWriteOnce
@@ -91,6 +95,8 @@ kind: PersistentVolumeClaim
 metadata:
   name: sample-harbor-trivy-cache
   namespace: cluster-sample-ns
+  labels:
+    goharbor.io/component: trivy-cache
 spec:
   accessModes:
     - ReadWriteOnce
@@ -104,6 +110,8 @@ kind: PersistentVolumeClaim
 metadata:
   name: sample-harbor-chart
   namespace: cluster-sample-ns
+  labels:
+    goharbor.io/component: chart
 spec:
   accessModes:
     - ReadWriteOnce

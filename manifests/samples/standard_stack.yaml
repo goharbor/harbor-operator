@@ -63,6 +63,7 @@ kind: PersistentVolumeClaim
 metadata:
   labels:
     sample: "true"
+    goharbor.io/component: chart
   name: sample-harbor-chart
 spec:
   accessModes:
@@ -77,6 +78,7 @@ kind: PersistentVolumeClaim
 metadata:
   labels:
     sample: "true"
+    goharbor.io/component: registry
   name: sample-harbor-registry
 spec:
   accessModes:
@@ -91,6 +93,7 @@ kind: PersistentVolumeClaim
 metadata:
   labels:
     sample: "true"
+    goharbor.io/component: trivy-cache
   name: sample-harbor-trivy-cache
 spec:
   accessModes:
@@ -105,6 +108,7 @@ kind: PersistentVolumeClaim
 metadata:
   labels:
     sample: "true"
+    goharbor.io/component: trivy-reports
   name: sample-harbor-trivy-reports
 spec:
   accessModes:
