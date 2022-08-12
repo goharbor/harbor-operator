@@ -370,7 +370,7 @@ type CoreComponentSpec struct {
 	CertificateInjection `json:",inline"`
 
 	// +kubebuilder:validation:Required
-	TokenIssuer cmmeta.ObjectReference `json:"tokenIssuer,omitempty"`
+	TokenIssuer cmmeta.ObjectReference `json:"tokenIssuer"`
 
 	// +kubebuilder:validation:Optional
 	Metrics *harbormetav1.MetricsSpec `json:"metrics,omitempty"`
