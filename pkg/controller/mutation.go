@@ -51,6 +51,11 @@ func (c *Controller) GlobalMutateFn(ctx context.Context) (resources.Mutable, err
 
 	mutate.AppendMutation(mutation.GetOwnerMutation(c.Scheme, o))
 
+	getter, ok := o.(mutation.Getter)
+	if ok {
+		mutate.AppendMutation(mutation.GetAffinity(ctx, c.Client, getter))
+	}
+
 	return mutate, nil
 }
 

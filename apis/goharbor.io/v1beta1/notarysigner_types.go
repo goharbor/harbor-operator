@@ -2,6 +2,7 @@ package v1beta1
 
 import (
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -55,6 +56,18 @@ type NotarySignerSpec struct {
 
 	// +kubebuilder:validation:Optional
 	Network *harbormetav1.Network `json:"network,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Affinity is the configuration of the pod affinity.
+	Affinity *corev1.Affinity `json:"affinity,omitempty"`
+}
+
+func (n *NotarySigner) SetAffinity(affinity *corev1.Affinity) {
+	n.Spec.Affinity = affinity
+}
+
+func (n *NotarySigner) GetAffinity() *corev1.Affinity {
+	return n.Spec.Affinity
 }
 
 type NotarySignerAuthenticationSpec struct {

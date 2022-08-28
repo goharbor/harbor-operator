@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -71,6 +72,18 @@ type ExporterSpec struct {
 
 	// +kubebuilder:validation:Optional
 	Network *harbormetav1.Network `json:"network,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Affinity is the configuration of the pod affinity.
+	Affinity *corev1.Affinity `json:"affinity,omitempty"`
+}
+
+func (e *Exporter) SetAffinity(affinity *corev1.Affinity) {
+	e.Spec.Affinity = affinity
+}
+
+func (e *Exporter) GetAffinity() *corev1.Affinity {
+	return e.Spec.Affinity
 }
 
 type ExporterCacheSpec struct {

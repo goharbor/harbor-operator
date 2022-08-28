@@ -54,6 +54,18 @@ type RegistrySpec struct {
 
 	// +kubebuilder:validation:Optional
 	Trace *harbormetav1.TraceSpec `json:"trace,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Affinity is the configuration of the pod affinity.
+	Affinity *corev1.Affinity `json:"affinity,omitempty"`
+}
+
+func (r *Registry) SetAffinity(affinity *corev1.Affinity) {
+	r.Spec.Affinity = affinity
+}
+
+func (r *Registry) GetAffinity() *corev1.Affinity {
+	return r.Spec.Affinity
 }
 
 func (r *RegistrySpec) Default() {

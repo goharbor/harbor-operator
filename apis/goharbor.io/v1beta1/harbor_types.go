@@ -152,6 +152,14 @@ func (h *Harbor) deepCopyImageSpecInto(ctx context.Context, component harbormeta
 	}
 }
 
+func (h *Harbor) SetAffinity(affinity *corev1.Affinity) {
+	h.Spec.Affinity = affinity
+}
+
+func (h *Harbor) GetAffinity() *corev1.Affinity {
+	return h.Spec.Affinity
+}
+
 // +kubebuilder:object:root=true
 // +resource:path=harbors
 // HarborList contains a list of Harbor.
@@ -207,6 +215,10 @@ type HarborSpec struct {
 	// +kubebuilder:validation:Optional
 	// Trace settings for the harbor
 	Trace *harbormetav1.TraceSpec `json:"trace,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Affinity is the configuration of the pod affinity.
+	Affinity *corev1.Affinity `json:"affinity,omitempty"`
 }
 
 func (spec *HarborSpec) ValidateNotary() *field.Error {

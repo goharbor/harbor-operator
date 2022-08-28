@@ -85,6 +85,18 @@ type JobServiceSpec struct {
 
 	// +kubebuilder:validation:Optional
 	Trace *harbormetav1.TraceSpec `json:"trace,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Affinity is the configuration of the pod affinity.
+	Affinity *corev1.Affinity `json:"affinity,omitempty"`
+}
+
+func (jobservice *JobService) SetAffinity(affinity *corev1.Affinity) {
+	jobservice.Spec.Affinity = affinity
+}
+
+func (jobservice *JobService) GetAffinity() *corev1.Affinity {
+	return jobservice.Spec.Affinity
 }
 
 type JobServiceTokenSpec struct {
