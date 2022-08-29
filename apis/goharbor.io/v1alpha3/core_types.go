@@ -265,6 +265,6 @@ type CoreLogSpec struct {
 	Level harbormetav1.CoreLogLevel `json:"level,omitempty"`
 }
 
-func init() { // nolint:gochecknoinits
+func init() { //nolint:gochecknoinits
 	SchemeBuilder.Register(&Core{}, &CoreList{})
 }

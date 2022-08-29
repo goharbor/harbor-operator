@@ -48,6 +48,6 @@ type PortalSpec struct {
 	TLS *harbormetav1.ComponentsTLSSpec `json:"tls,omitempty"`
 }
 
-func init() { // nolint:gochecknoinits
+func init() { //nolint:gochecknoinits
 	SchemeBuilder.Register(&Portal{}, &PortalList{})
 }

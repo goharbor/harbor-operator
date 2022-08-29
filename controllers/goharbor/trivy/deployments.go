@@ -61,7 +61,7 @@ func (r *Reconciler) AddDeployment(ctx context.Context, trivy *goharborv1.Trivy,
 	return nil
 }
 
-func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1.Trivy) (*appsv1.Deployment, error) { // nolint:funlen
+func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1.Trivy) (*appsv1.Deployment, error) { //nolint:funlen
 	name := r.NormalizeName(ctx, trivy.GetName())
 	namespace := trivy.GetNamespace()
 

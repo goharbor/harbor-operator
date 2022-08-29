@@ -29,7 +29,7 @@ type ImagePathRewriter struct {
 }
 
 // Handle the admission webhook for mutating the image path of deploying pods.
-func (ipr *ImagePathRewriter) Handle(ctx context.Context, req admission.Request) admission.Response { // nolint:funlen,gocognit
+func (ipr *ImagePathRewriter) Handle(ctx context.Context, req admission.Request) admission.Response { //nolint:funlen,gocognit
 	pod := &corev1.Pod{}
 
 	err := ipr.decoder.Decode(req, pod)
@@ -53,7 +53,7 @@ func (ipr *ImagePathRewriter) Handle(ctx context.Context, req admission.Request)
 	var allRules []rule.Rule
 
 	// check if the configmap exist
-	if cmName, ok := podNS.Annotations[consts.AnnotationImageRewriteRuleConfigMapRef]; ok { // nolint:nestif
+	if cmName, ok := podNS.Annotations[consts.AnnotationImageRewriteRuleConfigMapRef]; ok { //nolint:nestif
 		cm, err := ipr.getConfigMap(ctx, cmName, podNS.Name)
 		if err != nil {
 			// The resource may have been deleted after reconcile request coming in

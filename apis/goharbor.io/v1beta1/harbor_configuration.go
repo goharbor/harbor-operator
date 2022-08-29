@@ -291,6 +291,6 @@ type HarborConfigurationList struct {
 	Items           []HarborConfiguration `json:"items"`
 }
 
-func init() { // nolint:gochecknoinits
+func init() { //nolint:gochecknoinits
 	SchemeBuilder.Register(&HarborConfiguration{}, &HarborConfigurationList{})
 }

@@ -10,7 +10,7 @@ const (
 	// AnnotationRobot is the annotation for robot id.
 	AnnotationRobot = "goharbor.io/robot"
 	// AnnotationRobotSecretRef is the annotation for robot secret reference.
-	AnnotationRobotSecretRef = "goharbor.io/robot-secret" // nolint:gosec
+	AnnotationRobotSecretRef = "goharbor.io/robot-secret" //nolint:gosec
 	// AnnotationSecOwner is the annotation for owner.
 	AnnotationSecOwner = "goharbor.io/owner"
 	// AnnotationImageRewriteRuleConfigMapRef is the annotation for reference to configmap that stores rules.

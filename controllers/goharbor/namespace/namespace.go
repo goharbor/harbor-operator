@@ -53,7 +53,7 @@ type Reconciler struct {
 // +kubebuilder:rbac:groups=goharbor.io,resources=pullsecretbindings,verbs=get;list;watch;create;delete
 
 // Reconcile the Namespace.
-func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) { // nolint:funlen
+func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) { //nolint:funlen
 	log := r.Log.WithValues("namespace", req.NamespacedName)
 
 	// Get the namespace object

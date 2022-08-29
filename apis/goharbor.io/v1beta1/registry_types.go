@@ -914,6 +914,6 @@ type RegistryStorageDeleteSpec struct {
 	Enabled *bool `json:"enabled,omitempty"`
 }
 
-func init() { // nolint:gochecknoinits
+func init() { //nolint:gochecknoinits
 	SchemeBuilder.Register(&Registry{}, &RegistryList{})
 }
