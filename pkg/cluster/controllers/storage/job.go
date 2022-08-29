@@ -50,7 +50,7 @@ echo "Initialize bucket $MINIO_BUCKET failed"
 exit 1
 `
 
-func (m *MinIOController) generateMinIOInitJob(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*batchv1.Job, error) { // nolint:funlen
+func (m *MinIOController) generateMinIOInitJob(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*batchv1.Job, error) { //nolint:funlen
 	image, err := m.getMinIOClientImage(ctx, harborcluster)
 	if err != nil {
 		return nil, err

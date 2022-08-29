@@ -311,7 +311,7 @@ func (r *HarborDatabaseSpec) GetPostgresqlConnection(component harbormetav1.Comp
 
 	var databaseName string
 
-	switch component { // nolint:exhaustive
+	switch component { //nolint:exhaustive
 	case harbormetav1.CoreComponent:
 		databaseName = harbormetav1.CoreDatabase
 	case harbormetav1.ExporterComponent:
@@ -755,7 +755,7 @@ type HarborProxySpec struct {
 	Components []string `json:"components,omitempty"`
 }
 
-func init() { // nolint:gochecknoinits
+func init() { //nolint:gochecknoinits
 	SchemeBuilder.Register(&Harbor{}, &HarborList{})
 }
 

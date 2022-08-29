@@ -209,8 +209,8 @@ func (w *tryWatcher) TryWatch() {
 func isCRDReady(getter apiextv1.CustomResourceDefinitionsGetter, name string) bool {
 	log := ctrl.Log.WithName("builder")
 
-	crdReadyWaitInterval := time.Second * 10 // nolint:gomnd
-	crdReadyWaitTimeout := time.Minute * 5   // nolint:gomnd
+	crdReadyWaitInterval := time.Second * 10 //nolint:gomnd
+	crdReadyWaitTimeout := time.Minute * 5   //nolint:gomnd
 
 	// retry to checking the CRD every 10 seconds when it found but not established during 5 minutes
 	err := wait.PollImmediate(crdReadyWaitInterval, crdReadyWaitTimeout, func() (bool, error) {
@@ -220,7 +220,7 @@ func isCRDReady(getter apiextv1.CustomResourceDefinitionsGetter, name string) bo
 		}
 
 		for _, cond := range c.Status.Conditions {
-			switch cond.Type { // nolint:exhaustive
+			switch cond.Type { //nolint:exhaustive
 			case v1.Established:
 				if cond.Status == v1.ConditionTrue {
 					return true, nil // crd is established，poll will return immediately

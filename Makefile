@@ -531,7 +531,7 @@ $(CONTROLLER_GEN):
 
 # find or download markdownlint
 # download markdownlint if necessary
-MARKDOWNLINT_VERSION := 0.31.1
+MARKDOWNLINT_VERSION := 0.32.2
 MARKDOWNLINT := $(BIN)/markdownlint
 
 .PHONY: markdownlint
@@ -550,7 +550,7 @@ $(MARKDOWNLINT):
 # find or download golangci-lint
 # download golangci-lint if necessary
 GOLANGCI_LINT := $(BIN)/golangci-lint
-GOLANGCI_LINT_VERSION := 1.46.2
+GOLANGCI_LINT_VERSION := 1.49.0
 
 .PHONY: golangci-lint
 golangci-lint:
@@ -567,7 +567,7 @@ $(GOLANGCI_LINT):
 
 # find or download kubebuilder
 # download kubebuilder if necessary
-KUBEBUIDER_VERSION := 3.2.0
+KUBEBUIDER_VERSION := 3.6.0
 KUBEBUILDER=$(BIN)/kubebuilder
 
 .PHONY: kubebuilder
@@ -586,7 +586,7 @@ $(KUBEBUILDER):
 
 # find or download kustomize
 # download kustomize if necessary
-KUSTOMIZE_VERSION := 4.5.4
+KUSTOMIZE_VERSION := 4.5.7
 KUSTOMIZE := $(BIN)/kustomize
 
 .PHONY: kustomize
@@ -613,7 +613,7 @@ HELM=$(shell which helm 2> /dev/null)
 endif
 
 # find or download goreleaser
-GORELEASER_VERSION := v1.6.3
+GORELEASER_VERSION := v1.11.0
 GORELEASER := $(BIN)/goreleaser
 
 .PHONY: goreleaser
@@ -638,7 +638,7 @@ $(GORELEASER):
 
 # find or download stringer
 # download stringer if necessary
-STRINGER_VERSION := v0.1.11
+STRINGER_VERSION := v0.1.12
 STRINGER := $(BIN)/stringer
 
 .PHONY: stringer
@@ -664,7 +664,7 @@ $(STRINGER):
 
 # find or download hadolint
 # download hadolint if necessary
-HADOLINT_VERSION := 1.18.0
+HADOLINT_VERSION := 2.10.0
 HADOLINT := $(BIN)/hadolint
 
 .PHONY: hadolint
@@ -698,7 +698,7 @@ $(KIND):
 
 # find or download helm-docs
 # download helm-docs if necessary
-HELM_DOCS_VERSION := 1.8.1
+HELM_DOCS_VERSION := 1.11.0
 HELM_DOCS := $(BIN)/helm-docs
 
 .PHONY: helm-docs

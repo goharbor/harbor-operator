@@ -55,7 +55,7 @@ func (r *Reconciler) NormalizeName(ctx context.Context, name string, suffixes ..
 }
 
 // Reconcile does configuration reconcile.
-func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (res ctrl.Result, err error) { // nolint:funlen
+func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (res ctrl.Result, err error) { //nolint:funlen
 	log := r.Log.WithValues("resource", req.NamespacedName)
 
 	log.Info("Start reconciling")
@@ -155,7 +155,7 @@ func (r *Reconciler) getHarborClient(ctx context.Context, hc *goharborv1.HarborC
 }
 
 // assembleConfig assembles password filed from secret.
-func (r *Reconciler) assembleHarborConfiguration(ctx context.Context, hc *goharborv1.HarborConfiguration) (model *models.Configurations, err error) { // nolint:funlen
+func (r *Reconciler) assembleHarborConfiguration(ctx context.Context, hc *goharborv1.HarborConfiguration) (model *models.Configurations, err error) { //nolint:funlen
 	secretValueGetter := func(secretName, secretNamespace, key string) (string, error) {
 		secret := &corev1.Secret{}
 		if err := r.Client.Get(ctx, types.NamespacedName{Namespace: secretNamespace, Name: secretName}, secret); err != nil {

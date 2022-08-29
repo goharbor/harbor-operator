@@ -35,7 +35,7 @@ var clog = logf.Log.WithName("harborcluster-resource")
 
 var _ webhook.Defaulter = &HarborCluster{}
 
-func (harborcluster *HarborCluster) Default() { // nolint:funlen
+func (harborcluster *HarborCluster) Default() { //nolint:funlen
 	switch harborcluster.Spec.Cache.Kind {
 	case KindCacheRedis:
 		harborcluster.Spec.Cache.Spec.RedisFailover = nil
@@ -176,7 +176,7 @@ func (harborcluster *HarborCluster) validate(old *HarborCluster) error {
 	return apierrors.NewInvalid(schema.GroupKind{Group: GroupVersion.Group, Kind: "HarborCluster"}, harborcluster.Name, allErrs)
 }
 
-func (harborcluster *HarborCluster) validateStorage() *field.Error { // nolint:gocognit
+func (harborcluster *HarborCluster) validateStorage() *field.Error { //nolint:gocognit
 	// in cluster storage has high priority
 	fp := field.NewPath("spec").Child("storage").Child("spec")
 
@@ -212,7 +212,7 @@ func (harborcluster *HarborCluster) validateStorage() *field.Error { // nolint:g
 	}
 
 	// Validate more if incluster storage is configured.
-	if harborcluster.Spec.Storage.Kind == KindStorageMinIO { // nolint:nestif
+	if harborcluster.Spec.Storage.Kind == KindStorageMinIO { //nolint:nestif
 		desiredReplicas := harborcluster.Spec.Storage.Spec.MinIO.Replicas
 		volumePerServer := harborcluster.Spec.Storage.Spec.MinIO.VolumesPerServer
 

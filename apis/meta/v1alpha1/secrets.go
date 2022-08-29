@@ -9,7 +9,7 @@ const (
 	//
 	// Required field:
 	// - Secret.Data["auth"] - File containing user:password lines.
-	SecretTypeHTPasswd corev1.SecretType = "goharbor.io/htpasswd" // nolint:gosec
+	SecretTypeHTPasswd corev1.SecretType = "goharbor.io/htpasswd" //nolint:gosec
 
 	// HTPasswdFileName is the file of the users required for SecretTypeHTPasswd secrets.
 	HTPasswdFileName = "htpasswd" // https://kubernetes.github.io/ingress-nginx/examples/auth/basic/#basic-authentication
@@ -45,7 +45,7 @@ const (
 	SecretTypePostgresql corev1.SecretType = "goharbor.io/postgresql"
 
 	// PostgresqlPasswordKey is the password to connect to postgresql.
-	PostgresqlPasswordKey = "postgresql-password" // nolint:gosec
+	PostgresqlPasswordKey = "postgresql-password" //nolint:gosec
 )
 
 const (
@@ -53,7 +53,7 @@ const (
 	//
 	// Required field:
 	// - Secret.Data["key"] - CSRF key.
-	SecretTypeCSRF corev1.SecretType = "goharbor.io/csrf" // nolint:gosec
+	SecretTypeCSRF corev1.SecretType = "goharbor.io/csrf" //nolint:gosec
 
 	// CSRFSecretKey is the key for SecretTypeCSRF.
 	CSRFSecretKey = "key"
@@ -78,7 +78,7 @@ const (
 	//
 	// Required field:
 	// - Secret.Data["github-token"] - The Github token.
-	SecretTypeGithubToken corev1.SecretType = "goharbor.io/github" // nolint:gosec
+	SecretTypeGithubToken corev1.SecretType = "goharbor.io/github" //nolint:gosec
 
 	// GithubTokenKey is the token to use with the account.
 	GithubTokenKey = "github-token"
@@ -90,8 +90,8 @@ const (
 	// Registry try to yaml unmarshal fields.
 	// So all fields must be yaml marshalled.
 	// Otherwise, a string starting with yaml special character may break the configuration.
-	SecretTypeRegistry corev1.SecretType = "goharbor.io/registry" // nolint:gosec
+	SecretTypeRegistry corev1.SecretType = "goharbor.io/registry" //nolint:gosec
 
 	// RegistryHTTPSecret is the http secret.
-	RegistryHTTPSecret = "REGISTRY_HTTP_SECRET" // nolint:gosec
+	RegistryHTTPSecret = "REGISTRY_HTTP_SECRET" //nolint:gosec
 )
