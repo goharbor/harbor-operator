@@ -89,6 +89,6 @@ type RegistryControllerHTTPSSpec struct {
 	CertificateRef string `json:"certificateRef"`
 }
 
-func init() { // nolint:gochecknoinits
+func init() { //nolint:gochecknoinits
 	SchemeBuilder.Register(&RegistryController{}, &RegistryControllerList{})
 }

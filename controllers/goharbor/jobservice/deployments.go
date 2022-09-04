@@ -47,7 +47,7 @@ const (
 	httpPort  = 8080
 )
 
-func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1.JobService) (*appsv1.Deployment, error) { // nolint:funlen
+func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1.JobService) (*appsv1.Deployment, error) { //nolint:funlen
 	getImageOptions := []image.Option{
 		image.WithImageFromSpec(jobservice.Spec.Image),
 		image.WithHarborVersion(version.GetVersion(jobservice.Annotations)),

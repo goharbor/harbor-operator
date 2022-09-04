@@ -67,6 +67,6 @@ type NotarySignerStorageSpec struct {
 	AliasesRef string `json:"aliasesRef"`
 }
 
-func init() { // nolint:gochecknoinits
+func init() { //nolint:gochecknoinits
 	SchemeBuilder.Register(&NotarySigner{}, &NotarySignerList{})
 }

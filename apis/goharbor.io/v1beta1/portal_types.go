@@ -53,6 +53,6 @@ type PortalSpec struct {
 	Network *harbormetav1.Network `json:"network,omitempty"`
 }
 
-func init() { // nolint:gochecknoinits
+func init() { //nolint:gochecknoinits
 	SchemeBuilder.Register(&Portal{}, &PortalList{})
 }

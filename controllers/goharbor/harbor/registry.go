@@ -200,7 +200,7 @@ func (r *Reconciler) GetRegistryHTTPSecret(ctx context.Context, harbor *goharbor
 	}, nil
 }
 
-func (r *Reconciler) GetRegistry(ctx context.Context, harbor *goharborv1.Harbor) (*goharborv1.Registry, error) { // nolint:funlen
+func (r *Reconciler) GetRegistry(ctx context.Context, harbor *goharborv1.Harbor) (*goharborv1.Registry, error) { //nolint:funlen
 	name := r.NormalizeName(ctx, harbor.GetName())
 	namespace := harbor.GetNamespace()
 

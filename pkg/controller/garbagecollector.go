@@ -40,7 +40,7 @@ func (c *Controller) Sweep(ctx context.Context, resource graph.Resource) error {
 	return nil
 }
 
-func (c *Controller) Mark(ctx context.Context, owner client.Object) error { // nolint: funlen
+func (c *Controller) Mark(ctx context.Context, owner client.Object) error { //nolint: funlen
 	span, ctx := opentracing.StartSpanFromContext(ctx, "mark")
 	defer span.Finish()
 

@@ -99,7 +99,7 @@ func NewHarborController(options ...k8s.Option) *Controller {
 }
 
 // getHarborCR will get a Harbor CR from the harborcluster definition.
-func (harbor *Controller) getHarborCR(ctx context.Context, harborcluster *goharborv1.HarborCluster, dependencies *lcm.CRStatusCollection) *goharborv1.Harbor { // nolint:funlen
+func (harbor *Controller) getHarborCR(ctx context.Context, harborcluster *goharborv1.HarborCluster, dependencies *lcm.CRStatusCollection) *goharborv1.Harbor { //nolint:funlen
 	namespacedName := harbor.getHarborCRNamespacedName(harborcluster)
 
 	spec := harborcluster.Spec.EmbeddedHarborSpec.DeepCopy()

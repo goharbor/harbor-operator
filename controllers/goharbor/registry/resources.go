@@ -18,7 +18,7 @@ func (r *Reconciler) NewEmpty(_ context.Context) resources.Resource {
 	return &goharborv1.Registry{}
 }
 
-func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resource) error { // nolint:funlen
+func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resource) error { //nolint:funlen
 	registry, ok := resource.(*goharborv1.Registry)
 	if !ok {
 		return serrors.UnrecoverrableError(errors.Errorf("%+v", resource), serrors.OperatorReason, "unable to add resource")

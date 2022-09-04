@@ -213,6 +213,6 @@ const (
 
 // +kubebuilder:validation:Type=string
 
-func init() { // nolint:gochecknoinits
+func init() { //nolint:gochecknoinits
 	SchemeBuilder.Register(&JobService{}, &JobServiceList{})
 }

@@ -151,6 +151,6 @@ type ExporterLogSpec struct {
 	Level harbormetav1.ExporterLogLevel `json:"level,omitempty"`
 }
 
-func init() { // nolint:gochecknoinits
+func init() { //nolint:gochecknoinits
 	SchemeBuilder.Register(&Exporter{}, &ExporterList{})
 }
