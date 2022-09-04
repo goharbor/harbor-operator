@@ -117,7 +117,6 @@ func (c *ComponentSpec) ApplyToDeployment(deploy *appsv1.Deployment) {
 	deploy.Spec.Template.Spec.Tolerations = c.Tolerations
 }
 
-// +kubebuilder:validation:Type=object
 // ComponentStatus represents the current status of the resource.
 // https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md#typical-status-properties
 type ComponentStatus struct {

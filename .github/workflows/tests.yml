@@ -206,7 +206,7 @@ jobs:
         kustomize edit add secret github-token --disableNameSuffixHash --from-literal=GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
         kustomize edit add patch --path patch/github-token.yaml
         kustomize edit set image goharbor/harbor-operator=${dockerImage}
-        kustomize build | kubectl apply -f -
+        kustomize build | kubectl create -f -
 
         if ! time kubectl -n ${operatorNamespace} wait --for=condition=Available deployment --all --timeout 300s; then
           kubectl get all -n ${operatorNamespace}
