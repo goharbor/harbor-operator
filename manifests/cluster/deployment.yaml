@@ -12,7 +12,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     cert-manager.io/inject-ca-from: harbor-operator-ns/serving-cert
-    controller-gen.kubebuilder.io/version: v0.6.2
+    controller-gen.kubebuilder.io/version: v0.9.2
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
     goharbor.io/operator-version: v1.3.0
@@ -370,6 +370,7 @@ spec:
                                           kind, uid?'
                                         type: string
                                     type: object
+                                    x-kubernetes-map-type: atomic
                                   user:
                                     description: 'Optional: User is the rados user
                                       name, default is admin More info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it'
@@ -405,6 +406,7 @@ spec:
                                           kind, uid?'
                                         type: string
                                     type: object
+                                    x-kubernetes-map-type: atomic
                                   volumeID:
                                     description: 'volume id used to identify the volume
                                       in cinder. More info: https://examples.k8s.io/mysql-cinder-pd/README.md'
@@ -485,6 +487,7 @@ spec:
                                       its keys must be defined
                                     type: boolean
                                 type: object
+                                x-kubernetes-map-type: atomic
                               csi:
                                 description: CSI (Container Storage Interface) represents
                                   ephemeral storage that is handled by certain external
@@ -519,6 +522,7 @@ spec:
                                           kind, uid?'
                                         type: string
                                     type: object
+                                    x-kubernetes-map-type: atomic
                                   readOnly:
                                     description: Specifies a read-only configuration
                                       for the volume. Defaults to false (read/write).
@@ -578,6 +582,7 @@ spec:
                                           required:
                                           - fieldPath
                                           type: object
+                                          x-kubernetes-map-type: atomic
                                         mode:
                                           description: 'Optional: mode bits used to
                                             set permissions on this file, must be
@@ -626,6 +631,7 @@ spec:
                                           required:
                                           - resource
                                           type: object
+                                          x-kubernetes-map-type: atomic
                                       required:
                                       - path
                                       type: object
@@ -665,20 +671,19 @@ spec:
                                   when the pod is removed. \n Use this if: a) the
                                   volume is only needed while the pod runs, b) features
                                   of normal volumes like restoring from snapshot or
-                                  capacity    tracking are needed, c) the storage
-                                  driver is specified through a storage class, and
-                                  d) the storage driver supports dynamic volume provisioning
-                                  through    a PersistentVolumeClaim (see EphemeralVolumeSource
-                                  for more    information on the connection between
-                                  this volume type    and PersistentVolumeClaim).
-                                  \n Use PersistentVolumeClaim or one of the vendor-specific
-                                  APIs for volumes that persist for longer than the
-                                  lifecycle of an individual pod. \n Use CSI for light-weight
-                                  local ephemeral volumes if the CSI driver is meant
-                                  to be used that way - see the documentation of the
-                                  driver for more information. \n A pod can use both
-                                  types of ephemeral volumes and persistent volumes
-                                  at the same time."
+                                  capacity tracking are needed, c) the storage driver
+                                  is specified through a storage class, and d) the
+                                  storage driver supports dynamic volume provisioning
+                                  through a PersistentVolumeClaim (see EphemeralVolumeSource
+                                  for more information on the connection between this
+                                  volume type and PersistentVolumeClaim). \n Use PersistentVolumeClaim
+                                  or one of the vendor-specific APIs for volumes that
+                                  persist for longer than the lifecycle of an individual
+                                  pod. \n Use CSI for light-weight local ephemeral
+                                  volumes if the CSI driver is meant to be used that
+                                  way - see the documentation of the driver for more
+                                  information. \n A pod can use both types of ephemeral
+                                  volumes and persistent volumes at the same time."
                                 properties:
                                   volumeClaimTemplate:
                                     description: "Will be used to create a stand-alone
@@ -759,6 +764,7 @@ spec:
                                             - kind
                                             - name
                                             type: object
+                                            x-kubernetes-map-type: atomic
                                           dataSourceRef:
                                             description: 'Specifies the object from
                                               which to populate the volume with data,
@@ -780,14 +786,15 @@ spec:
                                               is non-empty. There are two important
                                               differences between DataSource and DataSourceRef:
                                               * While DataSource only allows two specific
-                                              types of objects, DataSourceRef   allows
+                                              types of objects, DataSourceRef allows
                                               any non-core object, as well as PersistentVolumeClaim
                                               objects. * While DataSource ignores
-                                              disallowed values (dropping them), DataSourceRef   preserves
-                                              all values, and generates an error if
-                                              a disallowed value is   specified. (Alpha)
-                                              Using this field requires the AnyVolumeDataSource
-                                              feature gate to be enabled.'
+                                              disallowed values (dropping them), DataSourceRef
+                                              preserves all values, and generates
+                                              an error if a disallowed value is specified.
+                                              (Alpha) Using this field requires the
+                                              AnyVolumeDataSource feature gate to
+                                              be enabled.'
                                             properties:
                                               apiGroup:
                                                 description: APIGroup is the group
@@ -809,6 +816,7 @@ spec:
                                             - kind
                                             - name
                                             type: object
+                                            x-kubernetes-map-type: atomic
                                           resources:
                                             description: 'Resources represents the
                                               minimum resources the volume should
@@ -904,6 +912,7 @@ spec:
                                                   ANDed.
                                                 type: object
                                             type: object
+                                            x-kubernetes-map-type: atomic
                                           storageClassName:
                                             description: 'Name of the StorageClass
                                               required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1'
@@ -1001,6 +1010,7 @@ spec:
                                           kind, uid?'
                                         type: string
                                     type: object
+                                    x-kubernetes-map-type: atomic
                                 required:
                                 - driver
                                 type: object
@@ -1191,6 +1201,7 @@ spec:
                                           kind, uid?'
                                         type: string
                                     type: object
+                                    x-kubernetes-map-type: atomic
                                   targetPortal:
                                     description: iSCSI Target Portal. The Portal is
                                       either an IP or ip_addr:port if the port is
@@ -1369,6 +1380,7 @@ spec:
                                                 or its keys must be defined
                                               type: boolean
                                           type: object
+                                          x-kubernetes-map-type: atomic
                                         downwardAPI:
                                           description: information about the downwardAPI
                                             data to project
@@ -1401,6 +1413,7 @@ spec:
                                                     required:
                                                     - fieldPath
                                                     type: object
+                                                    x-kubernetes-map-type: atomic
                                                   mode:
                                                     description: 'Optional: mode bits
                                                       used to set permissions on this
@@ -1456,6 +1469,7 @@ spec:
                                                     required:
                                                     - resource
                                                     type: object
+                                                    x-kubernetes-map-type: atomic
                                                 required:
                                                 - path
                                                 type: object
@@ -1528,6 +1542,7 @@ spec:
                                                 or its key must be defined
                                               type: boolean
                                           type: object
+                                          x-kubernetes-map-type: atomic
                                         serviceAccountToken:
                                           description: information about the serviceAccountToken
                                             data to project
@@ -1654,6 +1669,7 @@ spec:
                                           kind, uid?'
                                         type: string
                                     type: object
+                                    x-kubernetes-map-type: atomic
                                   user:
                                     description: 'The rados user name. Default is
                                       admin. More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it'
@@ -1697,6 +1713,7 @@ spec:
                                           kind, uid?'
                                         type: string
                                     type: object
+                                    x-kubernetes-map-type: atomic
                                   sslEnabled:
                                     description: Flag to enable/disable SSL communication
                                       with Gateway, default false
@@ -1821,6 +1838,7 @@ spec:
                                           kind, uid?'
                                         type: string
                                     type: object
+                                    x-kubernetes-map-type: atomic
                                   volumeName:
                                     description: VolumeName is the human-readable
                                       name of the StorageOS volume.  Volume names
@@ -1975,6 +1993,7 @@ spec:
                         TODO: Add other useful fields. apiVersion, kind, uid?'
                       type: string
                   type: object
+                  x-kubernetes-map-type: atomic
                 type: array
               log:
                 properties:
@@ -2515,6 +2534,7 @@ spec:
                                           kind, uid?'
                                         type: string
                                     type: object
+                                    x-kubernetes-map-type: atomic
                                   user:
                                     description: 'Optional: User is the rados user
                                       name, default is admin More info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it'
@@ -2550,6 +2570,7 @@ spec:
                                           kind, uid?'
                                         type: string
                                     type: object
+                                    x-kubernetes-map-type: atomic
                                   volumeID:
                                     description: 'volume id used to identify the volume
                                       in cinder. More info: https://examples.k8s.io/mysql-cinder-pd/README.md'
@@ -2630,6 +2651,7 @@ spec:
                                       its keys must be defined
                                     type: boolean
                                 type: object
+                                x-kubernetes-map-type: atomic
                               csi:
                                 description: CSI (Container Storage Interface) represents
                                   ephemeral storage that is handled by certain external
@@ -2664,6 +2686,7 @@ spec:
                                           kind, uid?'
                                         type: string
                                     type: object
+                                    x-kubernetes-map-type: atomic
                                   readOnly:
                                     description: Specifies a read-only configuration
                                       for the volume. Defaults to false (read/write).
@@ -2723,6 +2746,7 @@ spec:
                                           required:
                                           - fieldPath
                                           type: object
+                                          x-kubernetes-map-type: atomic
                                         mode:
                                           description: 'Optional: mode bits used to
                                             set permissions on this file, must be
@@ -2771,6 +2795,7 @@ spec:
                                           required:
                                           - resource
                                           type: object
+                                          x-kubernetes-map-type: atomic
                                       required:
                                       - path
                                       type: object
@@ -2810,20 +2835,19 @@ spec:
                                   when the pod is removed. \n Use this if: a) the
                                   volume is only needed while the pod runs, b) features
                                   of normal volumes like restoring from snapshot or
-                                  capacity    tracking are needed, c) the storage
-                                  driver is specified through a storage class, and
-                                  d) the storage driver supports dynamic volume provisioning
-                                  through    a PersistentVolumeClaim (see EphemeralVolumeSource
-                                  for more    information on the connection between
-                                  this volume type    and PersistentVolumeClaim).
-                                  \n Use PersistentVolumeClaim or one of the vendor-specific
-                                  APIs for volumes that persist for longer than the
-                                  lifecycle of an individual pod. \n Use CSI for light-weight
-                                  local ephemeral volumes if the CSI driver is meant
-                                  to be used that way - see the documentation of the
-                                  driver for more information. \n A pod can use both
-                                  types of ephemeral volumes and persistent volumes
-                                  at the same time."
+                                  capacity tracking are needed, c) the storage driver
+                                  is specified through a storage class, and d) the
+                                  storage driver supports dynamic volume provisioning
+                                  through a PersistentVolumeClaim (see EphemeralVolumeSource
+                                  for more information on the connection between this
+                                  volume type and PersistentVolumeClaim). \n Use PersistentVolumeClaim
+                                  or one of the vendor-specific APIs for volumes that
+                                  persist for longer than the lifecycle of an individual
+                                  pod. \n Use CSI for light-weight local ephemeral
+                                  volumes if the CSI driver is meant to be used that
+                                  way - see the documentation of the driver for more
+                                  information. \n A pod can use both types of ephemeral
+                                  volumes and persistent volumes at the same time."
                                 properties:
                                   volumeClaimTemplate:
                                     description: "Will be used to create a stand-alone
@@ -2904,6 +2928,7 @@ spec:
                                             - kind
                                             - name
                                             type: object
+                                            x-kubernetes-map-type: atomic
                                           dataSourceRef:
                                             description: 'Specifies the object from
                                               which to populate the volume with data,
@@ -2925,14 +2950,15 @@ spec:
                                               is non-empty. There are two important
                                               differences between DataSource and DataSourceRef:
                                               * While DataSource only allows two specific
-                                              types of objects, DataSourceRef   allows
+                                              types of objects, DataSourceRef allows
                                               any non-core object, as well as PersistentVolumeClaim
                                               objects. * While DataSource ignores
-                                              disallowed values (dropping them), DataSourceRef   preserves
-                                              all values, and generates an error if
-                                              a disallowed value is   specified. (Alpha)
-                                              Using this field requires the AnyVolumeDataSource
-                                              feature gate to be enabled.'
+                                              disallowed values (dropping them), DataSourceRef
+                                              preserves all values, and generates
+                                              an error if a disallowed value is specified.
+                                              (Alpha) Using this field requires the
+                                              AnyVolumeDataSource feature gate to
+                                              be enabled.'
                                             properties:
                                               apiGroup:
                                                 description: APIGroup is the group
@@ -2954,6 +2980,7 @@ spec:
                                             - kind
                                             - name
                                             type: object
+                                            x-kubernetes-map-type: atomic
                                           resources:
                                             description: 'Resources represents the
                                               minimum resources the volume should
@@ -3049,6 +3076,7 @@ spec:
                                                   ANDed.
                                                 type: object
                                             type: object
+                                            x-kubernetes-map-type: atomic
                                           storageClassName:
                                             description: 'Name of the StorageClass
                                               required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1'
@@ -3146,6 +3174,7 @@ spec:
                                           kind, uid?'
                                         type: string
                                     type: object
+                                    x-kubernetes-map-type: atomic
                                 required:
                                 - driver
                                 type: object
@@ -3336,6 +3365,7 @@ spec:
                                           kind, uid?'
                                         type: string
                                     type: object
+                                    x-kubernetes-map-type: atomic
                                   targetPortal:
                                     description: iSCSI Target Portal. The Portal is
                                       either an IP or ip_addr:port if the port is
@@ -3514,6 +3544,7 @@ spec:
                                                 or its keys must be defined
                                               type: boolean
                                           type: object
+                                          x-kubernetes-map-type: atomic
                                         downwardAPI:
                                           description: information about the downwardAPI
                                             data to project
@@ -3546,6 +3577,7 @@ spec:
                                                     required:
                                                     - fieldPath
                                                     type: object
+                                                    x-kubernetes-map-type: atomic
                                                   mode:
                                                     description: 'Optional: mode bits
                                                       used to set permissions on this
@@ -3601,6 +3633,7 @@ spec:
                                                     required:
                                                     - resource
                                                     type: object
+                                                    x-kubernetes-map-type: atomic
                                                 required:
                                                 - path
                                                 type: object
@@ -3673,6 +3706,7 @@ spec:
                                                 or its key must be defined
                                               type: boolean
                                           type: object
+                                          x-kubernetes-map-type: atomic
                                         serviceAccountToken:
                                           description: information about the serviceAccountToken
                                             data to project
@@ -3799,6 +3833,7 @@ spec:
                                           kind, uid?'
                                         type: string
                                     type: object
+                                    x-kubernetes-map-type: atomic
                                   user:
                                     description: 'The rados user name. Default is
                                       admin. More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it'
@@ -3842,6 +3877,7 @@ spec:
                                           kind, uid?'
                                         type: string
                                     type: object
+                                    x-kubernetes-map-type: atomic
                                   sslEnabled:
                                     description: Flag to enable/disable SSL communication
                                       with Gateway, default false
@@ -3966,6 +4002,7 @@ spec:
                                           kind, uid?'
                                         type: string
                                     type: object
+                                    x-kubernetes-map-type: atomic
                                   volumeName:
                                     description: VolumeName is the human-readable
                                       name of the StorageOS volume.  Volume names
@@ -4137,6 +4174,7 @@ spec:
                         TODO: Add other useful fields. apiVersion, kind, uid?'
                       type: string
                   type: object
+                  x-kubernetes-map-type: atomic
                 type: array
               log:
                 properties:
@@ -4341,19 +4379,13 @@ spec:
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
     cert-manager.io/inject-ca-from: harbor-operator-ns/serving-cert
-    controller-gen.kubebuilder.io/version: v0.6.2
+    controller-gen.kubebuilder.io/version: v0.9.2
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
     goharbor.io/operator-version: v1.3.0
@@ -4673,6 +4705,7 @@ spec:
                         TODO: Add other useful fields. apiVersion, kind, uid?'
                       type: string
                   type: object
+                  x-kubernetes-map-type: atomic
                 type: array
               log:
                 properties:
@@ -5216,6 +5249,7 @@ spec:
                         TODO: Add other useful fields. apiVersion, kind, uid?'
                       type: string
                   type: object
+                  x-kubernetes-map-type: atomic
                 type: array
               log:
                 properties:
@@ -5565,19 +5599,13 @@ spec:
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
     cert-manager.io/inject-ca-from: harbor-operator-ns/serving-cert
-    controller-gen.kubebuilder.io/version: v0.6.2
+    controller-gen.kubebuilder.io/version: v0.9.2
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
     goharbor.io/operator-version: v1.3.0
@@ -5746,6 +5774,7 @@ spec:
                         TODO: Add other useful fields. apiVersion, kind, uid?'
                       type: string
                   type: object
+                  x-kubernetes-map-type: atomic
                 type: array
               log:
                 properties:
@@ -6065,6 +6094,7 @@ spec:
                         TODO: Add other useful fields. apiVersion, kind, uid?'
                       type: string
                   type: object
+                  x-kubernetes-map-type: atomic
                 type: array
               jobservice:
                 properties:
@@ -6301,19 +6331,13 @@ spec:
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
     cert-manager.io/inject-ca-from: harbor-operator-ns/serving-cert
-    controller-gen.kubebuilder.io/version: v0.6.2
+    controller-gen.kubebuilder.io/version: v0.9.2
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
     goharbor.io/operator-version: v1.3.0
@@ -6412,6 +6436,7 @@ spec:
                             TODO: Add other useful fields. apiVersion, kind, uid?'
                           type: string
                       type: object
+                      x-kubernetes-map-type: atomic
                     type: array
                   nodeSelector:
                     additionalProperties:
@@ -6527,6 +6552,7 @@ spec:
                             TODO: Add other useful fields. apiVersion, kind, uid?'
                           type: string
                       type: object
+                      x-kubernetes-map-type: atomic
                     type: array
                   metrics:
                     properties:
@@ -6741,6 +6767,7 @@ spec:
                             TODO: Add other useful fields. apiVersion, kind, uid?'
                           type: string
                       type: object
+                      x-kubernetes-map-type: atomic
                     type: array
                   nodeSelector:
                     additionalProperties:
@@ -7145,6 +7172,7 @@ spec:
                             TODO: Add other useful fields. apiVersion, kind, uid?'
                           type: string
                       type: object
+                      x-kubernetes-map-type: atomic
                     type: array
                   repository:
                     description: The default repository for the images of the components.
@@ -7188,6 +7216,7 @@ spec:
                                 TODO: Add other useful fields. apiVersion, kind, uid?'
                               type: string
                           type: object
+                          x-kubernetes-map-type: atomic
                         type: array
                       sentinel:
                         description: Sentinel is the configuration of the redis sentinel.
@@ -7279,6 +7308,7 @@ spec:
                                 TODO: Add other useful fields. apiVersion, kind, uid?'
                               type: string
                           type: object
+                          x-kubernetes-map-type: atomic
                         type: array
                       replicas:
                         description: Replicas defines database instance replicas
@@ -7356,6 +7386,7 @@ spec:
                                 TODO: Add other useful fields. apiVersion, kind, uid?'
                               type: string
                           type: object
+                          x-kubernetes-map-type: atomic
                         type: array
                       mc:
                         description: MinIOClientSpec the spec for the mc
@@ -7382,6 +7413,7 @@ spec:
                                     uid?'
                                   type: string
                               type: object
+                              x-kubernetes-map-type: atomic
                             type: array
                         type: object
                       redirect:
@@ -7525,6 +7557,7 @@ spec:
                                 - kind
                                 - name
                                 type: object
+                                x-kubernetes-map-type: atomic
                               dataSourceRef:
                                 description: 'Specifies the object from which to populate
                                   the volume with data, if a non-empty volume is desired.
@@ -7541,13 +7574,13 @@ spec:
                                   automatically if one of them is empty and the other
                                   is non-empty. There are two important differences
                                   between DataSource and DataSourceRef: * While DataSource
-                                  only allows two specific types of objects, DataSourceRef   allows
-                                  any non-core object, as well as PersistentVolumeClaim
+                                  only allows two specific types of objects, DataSourceRef
+                                  allows any non-core object, as well as PersistentVolumeClaim
                                   objects. * While DataSource ignores disallowed values
-                                  (dropping them), DataSourceRef   preserves all values,
-                                  and generates an error if a disallowed value is   specified.
-                                  (Alpha) Using this field requires the AnyVolumeDataSource
-                                  feature gate to be enabled.'
+                                  (dropping them), DataSourceRef preserves all values,
+                                  and generates an error if a disallowed value is
+                                  specified. (Alpha) Using this field requires the
+                                  AnyVolumeDataSource feature gate to be enabled.'
                                 properties:
                                   apiGroup:
                                     description: APIGroup is the group for the resource
@@ -7568,6 +7601,7 @@ spec:
                                 - kind
                                 - name
                                 type: object
+                                x-kubernetes-map-type: atomic
                               resources:
                                 description: 'Resources represents the minimum resources
                                   the volume should have. If RecoverVolumeExpansionFailure
@@ -7649,6 +7683,7 @@ spec:
                                       The requirements are ANDed.
                                     type: object
                                 type: object
+                                x-kubernetes-map-type: atomic
                               storageClassName:
                                 description: 'Name of the StorageClass required by
                                   the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1'
@@ -7805,6 +7840,7 @@ spec:
                             TODO: Add other useful fields. apiVersion, kind, uid?'
                           type: string
                       type: object
+                      x-kubernetes-map-type: atomic
                     type: array
                   nodeSelector:
                     additionalProperties:
@@ -7938,6 +7974,7 @@ spec:
                                 TODO: Add other useful fields. apiVersion, kind, uid?'
                               type: string
                           type: object
+                          x-kubernetes-map-type: atomic
                         type: array
                       nodeSelector:
                         additionalProperties:
@@ -8052,6 +8089,7 @@ spec:
                                 TODO: Add other useful fields. apiVersion, kind, uid?'
                               type: string
                           type: object
+                          x-kubernetes-map-type: atomic
                         type: array
                       nodeSelector:
                         additionalProperties:
@@ -8166,6 +8204,7 @@ spec:
                             TODO: Add other useful fields. apiVersion, kind, uid?'
                           type: string
                       type: object
+                      x-kubernetes-map-type: atomic
                     type: array
                   nodeSelector:
                     additionalProperties:
@@ -8337,6 +8376,7 @@ spec:
                             TODO: Add other useful fields. apiVersion, kind, uid?'
                           type: string
                       type: object
+                      x-kubernetes-map-type: atomic
                     type: array
                   metrics:
                     properties:
@@ -8480,6 +8520,7 @@ spec:
                             TODO: Add other useful fields. apiVersion, kind, uid?'
                           type: string
                       type: object
+                      x-kubernetes-map-type: atomic
                     type: array
                   nodeSelector:
                     additionalProperties:
@@ -8599,6 +8640,7 @@ spec:
                             TODO: Add other useful fields. apiVersion, kind, uid?'
                           type: string
                       type: object
+                      x-kubernetes-map-type: atomic
                     type: array
                   nodeSelector:
                     additionalProperties:
@@ -8923,6 +8965,7 @@ spec:
                                     uid?'
                                   type: string
                               type: object
+                              x-kubernetes-map-type: atomic
                             type: array
                           operatorVersion:
                             type: string
@@ -9021,6 +9064,7 @@ spec:
                             TODO: Add other useful fields. apiVersion, kind, uid?'
                           type: string
                       type: object
+                      x-kubernetes-map-type: atomic
                     type: array
                   nodeSelector:
                     additionalProperties:
@@ -9136,6 +9180,7 @@ spec:
                             TODO: Add other useful fields. apiVersion, kind, uid?'
                           type: string
                       type: object
+                      x-kubernetes-map-type: atomic
                     type: array
                   metrics:
                     properties:
@@ -9257,6 +9302,8 @@ spec:
                           type: string
                       type: object
                     type: array
+                required:
+                - tokenIssuer
                 type: object
               database:
                 description: Database configuration for in-cluster database service
@@ -9352,6 +9399,7 @@ spec:
                                     uid?'
                                   type: string
                               type: object
+                              x-kubernetes-map-type: atomic
                             type: array
                           operatorVersion:
                             type: string
@@ -9436,6 +9484,7 @@ spec:
                             TODO: Add other useful fields. apiVersion, kind, uid?'
                           type: string
                       type: object
+                      x-kubernetes-map-type: atomic
                     type: array
                   nodeSelector:
                     additionalProperties:
@@ -9634,6 +9683,7 @@ spec:
                             TODO: Add other useful fields. apiVersion, kind, uid?'
                           type: string
                       type: object
+                      x-kubernetes-map-type: atomic
                     type: array
                   repository:
                     description: The default repository for the images of the components.
@@ -9676,6 +9726,7 @@ spec:
                             TODO: Add other useful fields. apiVersion, kind, uid?'
                           type: string
                       type: object
+                      x-kubernetes-map-type: atomic
                     type: array
                   metrics:
                     properties:
@@ -9837,6 +9888,7 @@ spec:
                                 TODO: Add other useful fields. apiVersion, kind, uid?'
                               type: string
                           type: object
+                          x-kubernetes-map-type: atomic
                         type: array
                       nodeSelector:
                         additionalProperties:
@@ -9951,6 +10003,7 @@ spec:
                                 TODO: Add other useful fields. apiVersion, kind, uid?'
                               type: string
                           type: object
+                          x-kubernetes-map-type: atomic
                         type: array
                       nodeSelector:
                         additionalProperties:
@@ -10065,6 +10118,7 @@ spec:
                             TODO: Add other useful fields. apiVersion, kind, uid?'
                           type: string
                       type: object
+                      x-kubernetes-map-type: atomic
                     type: array
                   nodeSelector:
                     additionalProperties:
@@ -10206,6 +10260,7 @@ spec:
                             TODO: Add other useful fields. apiVersion, kind, uid?'
                           type: string
                       type: object
+                      x-kubernetes-map-type: atomic
                     type: array
                   metrics:
                     properties:
@@ -10349,6 +10404,7 @@ spec:
                             TODO: Add other useful fields. apiVersion, kind, uid?'
                           type: string
                       type: object
+                      x-kubernetes-map-type: atomic
                     type: array
                   nodeSelector:
                     additionalProperties:
@@ -10551,6 +10607,7 @@ spec:
                                     uid?'
                                   type: string
                               type: object
+                              x-kubernetes-map-type: atomic
                             type: array
                           mc:
                             description: MinIOClientSpec the spec for the mc
@@ -10578,6 +10635,7 @@ spec:
                                         kind, uid?'
                                       type: string
                                   type: object
+                                  x-kubernetes-map-type: atomic
                                 type: array
                             type: object
                           operatorVersion:
@@ -10735,6 +10793,7 @@ spec:
                                     - kind
                                     - name
                                     type: object
+                                    x-kubernetes-map-type: atomic
                                   dataSourceRef:
                                     description: 'Specifies the object from which
                                       to populate the volume with data, if a non-empty
@@ -10753,12 +10812,12 @@ spec:
                                       is empty and the other is non-empty. There are
                                       two important differences between DataSource
                                       and DataSourceRef: * While DataSource only allows
-                                      two specific types of objects, DataSourceRef   allows
-                                      any non-core object, as well as PersistentVolumeClaim
+                                      two specific types of objects, DataSourceRef
+                                      allows any non-core object, as well as PersistentVolumeClaim
                                       objects. * While DataSource ignores disallowed
-                                      values (dropping them), DataSourceRef   preserves
+                                      values (dropping them), DataSourceRef preserves
                                       all values, and generates an error if a disallowed
-                                      value is   specified. (Alpha) Using this field
+                                      value is specified. (Alpha) Using this field
                                       requires the AnyVolumeDataSource feature gate
                                       to be enabled.'
                                     properties:
@@ -10781,6 +10840,7 @@ spec:
                                     - kind
                                     - name
                                     type: object
+                                    x-kubernetes-map-type: atomic
                                   resources:
                                     description: 'Resources represents the minimum
                                       resources the volume should have. If RecoverVolumeExpansionFailure
@@ -10867,6 +10927,7 @@ spec:
                                           "value". The requirements are ANDed.
                                         type: object
                                     type: object
+                                    x-kubernetes-map-type: atomic
                                   storageClassName:
                                     description: 'Name of the StorageClass required
                                       by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1'
@@ -11324,6 +11385,7 @@ spec:
                             TODO: Add other useful fields. apiVersion, kind, uid?'
                           type: string
                       type: object
+                      x-kubernetes-map-type: atomic
                     type: array
                   nodeSelector:
                     additionalProperties:
@@ -11554,18 +11616,12 @@ spec:
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.6.2
+    controller-gen.kubebuilder.io/version: v0.9.2
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
     goharbor.io/operator-version: v1.3.0
@@ -12028,19 +12084,13 @@ spec:
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
     cert-manager.io/inject-ca-from: harbor-operator-ns/serving-cert
-    controller-gen.kubebuilder.io/version: v0.6.2
+    controller-gen.kubebuilder.io/version: v0.9.2
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
     goharbor.io/operator-version: v1.3.0
@@ -12144,6 +12194,7 @@ spec:
                             TODO: Add other useful fields. apiVersion, kind, uid?'
                           type: string
                       type: object
+                      x-kubernetes-map-type: atomic
                     type: array
                   nodeSelector:
                     additionalProperties:
@@ -12259,6 +12310,7 @@ spec:
                             TODO: Add other useful fields. apiVersion, kind, uid?'
                           type: string
                       type: object
+                      x-kubernetes-map-type: atomic
                     type: array
                   metrics:
                     properties:
@@ -12473,6 +12525,7 @@ spec:
                             TODO: Add other useful fields. apiVersion, kind, uid?'
                           type: string
                       type: object
+                      x-kubernetes-map-type: atomic
                     type: array
                   nodeSelector:
                     additionalProperties:
@@ -12877,6 +12930,7 @@ spec:
                             TODO: Add other useful fields. apiVersion, kind, uid?'
                           type: string
                       type: object
+                      x-kubernetes-map-type: atomic
                     type: array
                   repository:
                     description: The default repository for the images of the components.
@@ -12919,6 +12973,7 @@ spec:
                             TODO: Add other useful fields. apiVersion, kind, uid?'
                           type: string
                       type: object
+                      x-kubernetes-map-type: atomic
                     type: array
                   nodeSelector:
                     additionalProperties:
@@ -13052,6 +13107,7 @@ spec:
                                 TODO: Add other useful fields. apiVersion, kind, uid?'
                               type: string
                           type: object
+                          x-kubernetes-map-type: atomic
                         type: array
                       nodeSelector:
                         additionalProperties:
@@ -13166,6 +13222,7 @@ spec:
                                 TODO: Add other useful fields. apiVersion, kind, uid?'
                               type: string
                           type: object
+                          x-kubernetes-map-type: atomic
                         type: array
                       nodeSelector:
                         additionalProperties:
@@ -13280,6 +13337,7 @@ spec:
                             TODO: Add other useful fields. apiVersion, kind, uid?'
                           type: string
                       type: object
+                      x-kubernetes-map-type: atomic
                     type: array
                   nodeSelector:
                     additionalProperties:
@@ -13451,6 +13509,7 @@ spec:
                             TODO: Add other useful fields. apiVersion, kind, uid?'
                           type: string
                       type: object
+                      x-kubernetes-map-type: atomic
                     type: array
                   metrics:
                     properties:
@@ -13594,6 +13653,7 @@ spec:
                             TODO: Add other useful fields. apiVersion, kind, uid?'
                           type: string
                       type: object
+                      x-kubernetes-map-type: atomic
                     type: array
                   nodeSelector:
                     additionalProperties:
@@ -13713,6 +13773,7 @@ spec:
                             TODO: Add other useful fields. apiVersion, kind, uid?'
                           type: string
                       type: object
+                      x-kubernetes-map-type: atomic
                     type: array
                   nodeSelector:
                     additionalProperties:
@@ -13997,6 +14058,7 @@ spec:
                             TODO: Add other useful fields. apiVersion, kind, uid?'
                           type: string
                       type: object
+                      x-kubernetes-map-type: atomic
                     type: array
                   nodeSelector:
                     additionalProperties:
@@ -14112,6 +14174,7 @@ spec:
                             TODO: Add other useful fields. apiVersion, kind, uid?'
                           type: string
                       type: object
+                      x-kubernetes-map-type: atomic
                     type: array
                   metrics:
                     properties:
@@ -14233,6 +14296,8 @@ spec:
                           type: string
                       type: object
                     type: array
+                required:
+                - tokenIssuer
                 type: object
               database:
                 properties:
@@ -14324,6 +14389,7 @@ spec:
                             TODO: Add other useful fields. apiVersion, kind, uid?'
                           type: string
                       type: object
+                      x-kubernetes-map-type: atomic
                     type: array
                   nodeSelector:
                     additionalProperties:
@@ -14777,6 +14843,7 @@ spec:
                             TODO: Add other useful fields. apiVersion, kind, uid?'
                           type: string
                       type: object
+                      x-kubernetes-map-type: atomic
                     type: array
                   repository:
                     description: The default repository for the images of the components.
@@ -14819,6 +14886,7 @@ spec:
                             TODO: Add other useful fields. apiVersion, kind, uid?'
                           type: string
                       type: object
+                      x-kubernetes-map-type: atomic
                     type: array
                   metrics:
                     properties:
@@ -14980,6 +15048,7 @@ spec:
                                 TODO: Add other useful fields. apiVersion, kind, uid?'
                               type: string
                           type: object
+                          x-kubernetes-map-type: atomic
                         type: array
                       nodeSelector:
                         additionalProperties:
@@ -15094,6 +15163,7 @@ spec:
                                 TODO: Add other useful fields. apiVersion, kind, uid?'
                               type: string
                           type: object
+                          x-kubernetes-map-type: atomic
                         type: array
                       nodeSelector:
                         additionalProperties:
@@ -15208,6 +15278,7 @@ spec:
                             TODO: Add other useful fields. apiVersion, kind, uid?'
                           type: string
                       type: object
+                      x-kubernetes-map-type: atomic
                     type: array
                   nodeSelector:
                     additionalProperties:
@@ -15377,6 +15448,7 @@ spec:
                             TODO: Add other useful fields. apiVersion, kind, uid?'
                           type: string
                       type: object
+                      x-kubernetes-map-type: atomic
                     type: array
                   metrics:
                     properties:
@@ -15520,6 +15592,7 @@ spec:
                             TODO: Add other useful fields. apiVersion, kind, uid?'
                           type: string
                       type: object
+                      x-kubernetes-map-type: atomic
                     type: array
                   nodeSelector:
                     additionalProperties:
@@ -15729,6 +15802,7 @@ spec:
                             TODO: Add other useful fields. apiVersion, kind, uid?'
                           type: string
                       type: object
+                      x-kubernetes-map-type: atomic
                     type: array
                   nodeSelector:
                     additionalProperties:
@@ -15948,18 +16022,12 @@ spec:
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.6.2
+    controller-gen.kubebuilder.io/version: v0.9.2
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
     goharbor.io/operator-version: v1.3.0
@@ -16085,6 +16153,7 @@ spec:
                       are ANDed.
                     type: object
                 type: object
+                x-kubernetes-map-type: atomic
               rules:
                 description: Rules configures the container image rewrite rules for
                   transparent proxy caching with Harbor.
@@ -16121,19 +16190,13 @@ spec:
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
     cert-manager.io/inject-ca-from: harbor-operator-ns/serving-cert
-    controller-gen.kubebuilder.io/version: v0.6.2
+    controller-gen.kubebuilder.io/version: v0.9.2
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
     goharbor.io/operator-version: v1.3.0
@@ -16230,6 +16293,7 @@ spec:
                         TODO: Add other useful fields. apiVersion, kind, uid?'
                       type: string
                   type: object
+                  x-kubernetes-map-type: atomic
                 type: array
               jobLoggers:
                 default:
@@ -16405,6 +16469,7 @@ spec:
                                         kind, uid?'
                                       type: string
                                   type: object
+                                  x-kubernetes-map-type: atomic
                                 user:
                                   description: 'Optional: User is the rados user name,
                                     default is admin More info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it'
@@ -16439,6 +16504,7 @@ spec:
                                         kind, uid?'
                                       type: string
                                   type: object
+                                  x-kubernetes-map-type: atomic
                                 volumeID:
                                   description: 'volume id used to identify the volume
                                     in cinder. More info: https://examples.k8s.io/mysql-cinder-pd/README.md'
@@ -16516,6 +16582,7 @@ spec:
                                     keys must be defined
                                   type: boolean
                               type: object
+                              x-kubernetes-map-type: atomic
                             csi:
                               description: CSI (Container Storage Interface) represents
                                 ephemeral storage that is handled by certain external
@@ -16549,6 +16616,7 @@ spec:
                                         kind, uid?'
                                       type: string
                                   type: object
+                                  x-kubernetes-map-type: atomic
                                 readOnly:
                                   description: Specifies a read-only configuration
                                     for the volume. Defaults to false (read/write).
@@ -16607,6 +16675,7 @@ spec:
                                         required:
                                         - fieldPath
                                         type: object
+                                        x-kubernetes-map-type: atomic
                                       mode:
                                         description: 'Optional: mode bits used to
                                           set permissions on this file, must be an
@@ -16652,6 +16721,7 @@ spec:
                                         required:
                                         - resource
                                         type: object
+                                        x-kubernetes-map-type: atomic
                                     required:
                                     - path
                                     type: object
@@ -16690,13 +16760,12 @@ spec:
                                 when the pod is removed. \n Use this if: a) the volume
                                 is only needed while the pod runs, b) features of
                                 normal volumes like restoring from snapshot or capacity
-                                \   tracking are needed, c) the storage driver is
-                                specified through a storage class, and d) the storage
-                                driver supports dynamic volume provisioning through
-                                \   a PersistentVolumeClaim (see EphemeralVolumeSource
-                                for more    information on the connection between
-                                this volume type    and PersistentVolumeClaim). \n
-                                Use PersistentVolumeClaim or one of the vendor-specific
+                                tracking are needed, c) the storage driver is specified
+                                through a storage class, and d) the storage driver
+                                supports dynamic volume provisioning through a PersistentVolumeClaim
+                                (see EphemeralVolumeSource for more information on
+                                the connection between this volume type and PersistentVolumeClaim).
+                                \n Use PersistentVolumeClaim or one of the vendor-specific
                                 APIs for volumes that persist for longer than the
                                 lifecycle of an individual pod. \n Use CSI for light-weight
                                 local ephemeral volumes if the CSI driver is meant
@@ -16783,6 +16852,7 @@ spec:
                                           - kind
                                           - name
                                           type: object
+                                          x-kubernetes-map-type: atomic
                                         dataSourceRef:
                                           description: 'Specifies the object from
                                             which to populate the volume with data,
@@ -16804,14 +16874,15 @@ spec:
                                             are two important differences between
                                             DataSource and DataSourceRef: * While
                                             DataSource only allows two specific types
-                                            of objects, DataSourceRef   allows any
-                                            non-core object, as well as PersistentVolumeClaim
+                                            of objects, DataSourceRef allows any non-core
+                                            object, as well as PersistentVolumeClaim
                                             objects. * While DataSource ignores disallowed
-                                            values (dropping them), DataSourceRef   preserves
-                                            all values, and generates an error if
-                                            a disallowed value is   specified. (Alpha)
-                                            Using this field requires the AnyVolumeDataSource
-                                            feature gate to be enabled.'
+                                            values (dropping them), DataSourceRef
+                                            preserves all values, and generates an
+                                            error if a disallowed value is specified.
+                                            (Alpha) Using this field requires the
+                                            AnyVolumeDataSource feature gate to be
+                                            enabled.'
                                           properties:
                                             apiGroup:
                                               description: APIGroup is the group for
@@ -16833,6 +16904,7 @@ spec:
                                           - kind
                                           - name
                                           type: object
+                                          x-kubernetes-map-type: atomic
                                         resources:
                                           description: 'Resources represents the minimum
                                             resources the volume should have. If RecoverVolumeExpansionFailure
@@ -16925,6 +16997,7 @@ spec:
                                                 ANDed.
                                               type: object
                                           type: object
+                                          x-kubernetes-map-type: atomic
                                         storageClassName:
                                           description: 'Name of the StorageClass required
                                             by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1'
@@ -17021,6 +17094,7 @@ spec:
                                         kind, uid?'
                                       type: string
                                   type: object
+                                  x-kubernetes-map-type: atomic
                               required:
                               - driver
                               type: object
@@ -17207,6 +17281,7 @@ spec:
                                         kind, uid?'
                                       type: string
                                   type: object
+                                  x-kubernetes-map-type: atomic
                                 targetPortal:
                                   description: iSCSI Target Portal. The Portal is
                                     either an IP or ip_addr:port if the port is other
@@ -17383,6 +17458,7 @@ spec:
                                               or its keys must be defined
                                             type: boolean
                                         type: object
+                                        x-kubernetes-map-type: atomic
                                       downwardAPI:
                                         description: information about the downwardAPI
                                           data to project
@@ -17414,6 +17490,7 @@ spec:
                                                   required:
                                                   - fieldPath
                                                   type: object
+                                                  x-kubernetes-map-type: atomic
                                                 mode:
                                                   description: 'Optional: mode bits
                                                     used to set permissions on this
@@ -17469,6 +17546,7 @@ spec:
                                                   required:
                                                   - resource
                                                   type: object
+                                                  x-kubernetes-map-type: atomic
                                               required:
                                               - path
                                               type: object
@@ -17540,6 +17618,7 @@ spec:
                                               or its key must be defined
                                             type: boolean
                                         type: object
+                                        x-kubernetes-map-type: atomic
                                       serviceAccountToken:
                                         description: information about the serviceAccountToken
                                           data to project
@@ -17664,6 +17743,7 @@ spec:
                                         kind, uid?'
                                       type: string
                                   type: object
+                                  x-kubernetes-map-type: atomic
                                 user:
                                   description: 'The rados user name. Default is admin.
                                     More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it'
@@ -17707,6 +17787,7 @@ spec:
                                         kind, uid?'
                                       type: string
                                   type: object
+                                  x-kubernetes-map-type: atomic
                                 sslEnabled:
                                   description: Flag to enable/disable SSL communication
                                     with Gateway, default false
@@ -17829,6 +17910,7 @@ spec:
                                         kind, uid?'
                                       type: string
                                   type: object
+                                  x-kubernetes-map-type: atomic
                                 volumeName:
                                   description: VolumeName is the human-readable name
                                     of the StorageOS volume.  Volume names are only
@@ -18057,6 +18139,7 @@ spec:
                                         kind, uid?'
                                       type: string
                                   type: object
+                                  x-kubernetes-map-type: atomic
                                 user:
                                   description: 'Optional: User is the rados user name,
                                     default is admin More info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it'
@@ -18091,6 +18174,7 @@ spec:
                                         kind, uid?'
                                       type: string
                                   type: object
+                                  x-kubernetes-map-type: atomic
                                 volumeID:
                                   description: 'volume id used to identify the volume
                                     in cinder. More info: https://examples.k8s.io/mysql-cinder-pd/README.md'
@@ -18168,6 +18252,7 @@ spec:
                                     keys must be defined
                                   type: boolean
                               type: object
+                              x-kubernetes-map-type: atomic
                             csi:
                               description: CSI (Container Storage Interface) represents
                                 ephemeral storage that is handled by certain external
@@ -18201,6 +18286,7 @@ spec:
                                         kind, uid?'
                                       type: string
                                   type: object
+                                  x-kubernetes-map-type: atomic
                                 readOnly:
                                   description: Specifies a read-only configuration
                                     for the volume. Defaults to false (read/write).
@@ -18259,6 +18345,7 @@ spec:
                                         required:
                                         - fieldPath
                                         type: object
+                                        x-kubernetes-map-type: atomic
                                       mode:
                                         description: 'Optional: mode bits used to
                                           set permissions on this file, must be an
@@ -18304,6 +18391,7 @@ spec:
                                         required:
                                         - resource
                                         type: object
+                                        x-kubernetes-map-type: atomic
                                     required:
                                     - path
                                     type: object
@@ -18342,13 +18430,12 @@ spec:
                                 when the pod is removed. \n Use this if: a) the volume
                                 is only needed while the pod runs, b) features of
                                 normal volumes like restoring from snapshot or capacity
-                                \   tracking are needed, c) the storage driver is
-                                specified through a storage class, and d) the storage
-                                driver supports dynamic volume provisioning through
-                                \   a PersistentVolumeClaim (see EphemeralVolumeSource
-                                for more    information on the connection between
-                                this volume type    and PersistentVolumeClaim). \n
-                                Use PersistentVolumeClaim or one of the vendor-specific
+                                tracking are needed, c) the storage driver is specified
+                                through a storage class, and d) the storage driver
+                                supports dynamic volume provisioning through a PersistentVolumeClaim
+                                (see EphemeralVolumeSource for more information on
+                                the connection between this volume type and PersistentVolumeClaim).
+                                \n Use PersistentVolumeClaim or one of the vendor-specific
                                 APIs for volumes that persist for longer than the
                                 lifecycle of an individual pod. \n Use CSI for light-weight
                                 local ephemeral volumes if the CSI driver is meant
@@ -18435,6 +18522,7 @@ spec:
                                           - kind
                                           - name
                                           type: object
+                                          x-kubernetes-map-type: atomic
                                         dataSourceRef:
                                           description: 'Specifies the object from
                                             which to populate the volume with data,
@@ -18456,14 +18544,15 @@ spec:
                                             are two important differences between
                                             DataSource and DataSourceRef: * While
                                             DataSource only allows two specific types
-                                            of objects, DataSourceRef   allows any
-                                            non-core object, as well as PersistentVolumeClaim
+                                            of objects, DataSourceRef allows any non-core
+                                            object, as well as PersistentVolumeClaim
                                             objects. * While DataSource ignores disallowed
-                                            values (dropping them), DataSourceRef   preserves
-                                            all values, and generates an error if
-                                            a disallowed value is   specified. (Alpha)
-                                            Using this field requires the AnyVolumeDataSource
-                                            feature gate to be enabled.'
+                                            values (dropping them), DataSourceRef
+                                            preserves all values, and generates an
+                                            error if a disallowed value is specified.
+                                            (Alpha) Using this field requires the
+                                            AnyVolumeDataSource feature gate to be
+                                            enabled.'
                                           properties:
                                             apiGroup:
                                               description: APIGroup is the group for
@@ -18485,6 +18574,7 @@ spec:
                                           - kind
                                           - name
                                           type: object
+                                          x-kubernetes-map-type: atomic
                                         resources:
                                           description: 'Resources represents the minimum
                                             resources the volume should have. If RecoverVolumeExpansionFailure
@@ -18577,6 +18667,7 @@ spec:
                                                 ANDed.
                                               type: object
                                           type: object
+                                          x-kubernetes-map-type: atomic
                                         storageClassName:
                                           description: 'Name of the StorageClass required
                                             by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1'
@@ -18673,6 +18764,7 @@ spec:
                                         kind, uid?'
                                       type: string
                                   type: object
+                                  x-kubernetes-map-type: atomic
                               required:
                               - driver
                               type: object
@@ -18859,6 +18951,7 @@ spec:
                                         kind, uid?'
                                       type: string
                                   type: object
+                                  x-kubernetes-map-type: atomic
                                 targetPortal:
                                   description: iSCSI Target Portal. The Portal is
                                     either an IP or ip_addr:port if the port is other
@@ -19035,6 +19128,7 @@ spec:
                                               or its keys must be defined
                                             type: boolean
                                         type: object
+                                        x-kubernetes-map-type: atomic
                                       downwardAPI:
                                         description: information about the downwardAPI
                                           data to project
@@ -19066,6 +19160,7 @@ spec:
                                                   required:
                                                   - fieldPath
                                                   type: object
+                                                  x-kubernetes-map-type: atomic
                                                 mode:
                                                   description: 'Optional: mode bits
                                                     used to set permissions on this
@@ -19121,6 +19216,7 @@ spec:
                                                   required:
                                                   - resource
                                                   type: object
+                                                  x-kubernetes-map-type: atomic
                                               required:
                                               - path
                                               type: object
@@ -19192,6 +19288,7 @@ spec:
                                               or its key must be defined
                                             type: boolean
                                         type: object
+                                        x-kubernetes-map-type: atomic
                                       serviceAccountToken:
                                         description: information about the serviceAccountToken
                                           data to project
@@ -19316,6 +19413,7 @@ spec:
                                         kind, uid?'
                                       type: string
                                   type: object
+                                  x-kubernetes-map-type: atomic
                                 user:
                                   description: 'The rados user name. Default is admin.
                                     More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it'
@@ -19359,6 +19457,7 @@ spec:
                                         kind, uid?'
                                       type: string
                                   type: object
+                                  x-kubernetes-map-type: atomic
                                 sslEnabled:
                                   description: Flag to enable/disable SSL communication
                                     with Gateway, default false
@@ -19481,6 +19580,7 @@ spec:
                                         kind, uid?'
                                       type: string
                                   type: object
+                                  x-kubernetes-map-type: atomic
                                 volumeName:
                                   description: VolumeName is the human-readable name
                                     of the StorageOS volume.  Volume names are only
@@ -19883,6 +19983,7 @@ spec:
                         TODO: Add other useful fields. apiVersion, kind, uid?'
                       type: string
                   type: object
+                  x-kubernetes-map-type: atomic
                 type: array
               jobLoggers:
                 default:
@@ -20058,6 +20159,7 @@ spec:
                                         kind, uid?'
                                       type: string
                                   type: object
+                                  x-kubernetes-map-type: atomic
                                 user:
                                   description: 'Optional: User is the rados user name,
                                     default is admin More info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it'
@@ -20092,6 +20194,7 @@ spec:
                                         kind, uid?'
                                       type: string
                                   type: object
+                                  x-kubernetes-map-type: atomic
                                 volumeID:
                                   description: 'volume id used to identify the volume
                                     in cinder. More info: https://examples.k8s.io/mysql-cinder-pd/README.md'
@@ -20169,6 +20272,7 @@ spec:
                                     keys must be defined
                                   type: boolean
                               type: object
+                              x-kubernetes-map-type: atomic
                             csi:
                               description: CSI (Container Storage Interface) represents
                                 ephemeral storage that is handled by certain external
@@ -20202,6 +20306,7 @@ spec:
                                         kind, uid?'
                                       type: string
                                   type: object
+                                  x-kubernetes-map-type: atomic
                                 readOnly:
                                   description: Specifies a read-only configuration
                                     for the volume. Defaults to false (read/write).
@@ -20260,6 +20365,7 @@ spec:
                                         required:
                                         - fieldPath
                                         type: object
+                                        x-kubernetes-map-type: atomic
                                       mode:
                                         description: 'Optional: mode bits used to
                                           set permissions on this file, must be an
@@ -20305,6 +20411,7 @@ spec:
                                         required:
                                         - resource
                                         type: object
+                                        x-kubernetes-map-type: atomic
                                     required:
                                     - path
                                     type: object
@@ -20343,13 +20450,12 @@ spec:
                                 when the pod is removed. \n Use this if: a) the volume
                                 is only needed while the pod runs, b) features of
                                 normal volumes like restoring from snapshot or capacity
-                                \   tracking are needed, c) the storage driver is
-                                specified through a storage class, and d) the storage
-                                driver supports dynamic volume provisioning through
-                                \   a PersistentVolumeClaim (see EphemeralVolumeSource
-                                for more    information on the connection between
-                                this volume type    and PersistentVolumeClaim). \n
-                                Use PersistentVolumeClaim or one of the vendor-specific
+                                tracking are needed, c) the storage driver is specified
+                                through a storage class, and d) the storage driver
+                                supports dynamic volume provisioning through a PersistentVolumeClaim
+                                (see EphemeralVolumeSource for more information on
+                                the connection between this volume type and PersistentVolumeClaim).
+                                \n Use PersistentVolumeClaim or one of the vendor-specific
                                 APIs for volumes that persist for longer than the
                                 lifecycle of an individual pod. \n Use CSI for light-weight
                                 local ephemeral volumes if the CSI driver is meant
@@ -20436,6 +20542,7 @@ spec:
                                           - kind
                                           - name
                                           type: object
+                                          x-kubernetes-map-type: atomic
                                         dataSourceRef:
                                           description: 'Specifies the object from
                                             which to populate the volume with data,
@@ -20457,14 +20564,15 @@ spec:
                                             are two important differences between
                                             DataSource and DataSourceRef: * While
                                             DataSource only allows two specific types
-                                            of objects, DataSourceRef   allows any
-                                            non-core object, as well as PersistentVolumeClaim
+                                            of objects, DataSourceRef allows any non-core
+                                            object, as well as PersistentVolumeClaim
                                             objects. * While DataSource ignores disallowed
-                                            values (dropping them), DataSourceRef   preserves
-                                            all values, and generates an error if
-                                            a disallowed value is   specified. (Alpha)
-                                            Using this field requires the AnyVolumeDataSource
-                                            feature gate to be enabled.'
+                                            values (dropping them), DataSourceRef
+                                            preserves all values, and generates an
+                                            error if a disallowed value is specified.
+                                            (Alpha) Using this field requires the
+                                            AnyVolumeDataSource feature gate to be
+                                            enabled.'
                                           properties:
                                             apiGroup:
                                               description: APIGroup is the group for
@@ -20486,6 +20594,7 @@ spec:
                                           - kind
                                           - name
                                           type: object
+                                          x-kubernetes-map-type: atomic
                                         resources:
                                           description: 'Resources represents the minimum
                                             resources the volume should have. If RecoverVolumeExpansionFailure
@@ -20578,6 +20687,7 @@ spec:
                                                 ANDed.
                                               type: object
                                           type: object
+                                          x-kubernetes-map-type: atomic
                                         storageClassName:
                                           description: 'Name of the StorageClass required
                                             by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1'
@@ -20674,6 +20784,7 @@ spec:
                                         kind, uid?'
                                       type: string
                                   type: object
+                                  x-kubernetes-map-type: atomic
                               required:
                               - driver
                               type: object
@@ -20860,6 +20971,7 @@ spec:
                                         kind, uid?'
                                       type: string
                                   type: object
+                                  x-kubernetes-map-type: atomic
                                 targetPortal:
                                   description: iSCSI Target Portal. The Portal is
                                     either an IP or ip_addr:port if the port is other
@@ -21036,6 +21148,7 @@ spec:
                                               or its keys must be defined
                                             type: boolean
                                         type: object
+                                        x-kubernetes-map-type: atomic
                                       downwardAPI:
                                         description: information about the downwardAPI
                                           data to project
@@ -21067,6 +21180,7 @@ spec:
                                                   required:
                                                   - fieldPath
                                                   type: object
+                                                  x-kubernetes-map-type: atomic
                                                 mode:
                                                   description: 'Optional: mode bits
                                                     used to set permissions on this
@@ -21122,6 +21236,7 @@ spec:
                                                   required:
                                                   - resource
                                                   type: object
+                                                  x-kubernetes-map-type: atomic
                                               required:
                                               - path
                                               type: object
@@ -21193,6 +21308,7 @@ spec:
                                               or its key must be defined
                                             type: boolean
                                         type: object
+                                        x-kubernetes-map-type: atomic
                                       serviceAccountToken:
                                         description: information about the serviceAccountToken
                                           data to project
@@ -21317,6 +21433,7 @@ spec:
                                         kind, uid?'
                                       type: string
                                   type: object
+                                  x-kubernetes-map-type: atomic
                                 user:
                                   description: 'The rados user name. Default is admin.
                                     More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it'
@@ -21360,6 +21477,7 @@ spec:
                                         kind, uid?'
                                       type: string
                                   type: object
+                                  x-kubernetes-map-type: atomic
                                 sslEnabled:
                                   description: Flag to enable/disable SSL communication
                                     with Gateway, default false
@@ -21482,6 +21600,7 @@ spec:
                                         kind, uid?'
                                       type: string
                                   type: object
+                                  x-kubernetes-map-type: atomic
                                 volumeName:
                                   description: VolumeName is the human-readable name
                                     of the StorageOS volume.  Volume names are only
@@ -21710,6 +21829,7 @@ spec:
                                         kind, uid?'
                                       type: string
                                   type: object
+                                  x-kubernetes-map-type: atomic
                                 user:
                                   description: 'Optional: User is the rados user name,
                                     default is admin More info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it'
@@ -21744,6 +21864,7 @@ spec:
                                         kind, uid?'
                                       type: string
                                   type: object
+                                  x-kubernetes-map-type: atomic
                                 volumeID:
                                   description: 'volume id used to identify the volume
                                     in cinder. More info: https://examples.k8s.io/mysql-cinder-pd/README.md'
@@ -21821,6 +21942,7 @@ spec:
                                     keys must be defined
                                   type: boolean
                               type: object
+                              x-kubernetes-map-type: atomic
                             csi:
                               description: CSI (Container Storage Interface) represents
                                 ephemeral storage that is handled by certain external
@@ -21854,6 +21976,7 @@ spec:
                                         kind, uid?'
                                       type: string
                                   type: object
+                                  x-kubernetes-map-type: atomic
                                 readOnly:
                                   description: Specifies a read-only configuration
                                     for the volume. Defaults to false (read/write).
@@ -21912,6 +22035,7 @@ spec:
                                         required:
                                         - fieldPath
                                         type: object
+                                        x-kubernetes-map-type: atomic
                                       mode:
                                         description: 'Optional: mode bits used to
                                           set permissions on this file, must be an
@@ -21957,6 +22081,7 @@ spec:
                                         required:
                                         - resource
                                         type: object
+                                        x-kubernetes-map-type: atomic
                                     required:
                                     - path
                                     type: object
@@ -21995,13 +22120,12 @@ spec:
                                 when the pod is removed. \n Use this if: a) the volume
                                 is only needed while the pod runs, b) features of
                                 normal volumes like restoring from snapshot or capacity
-                                \   tracking are needed, c) the storage driver is
-                                specified through a storage class, and d) the storage
-                                driver supports dynamic volume provisioning through
-                                \   a PersistentVolumeClaim (see EphemeralVolumeSource
-                                for more    information on the connection between
-                                this volume type    and PersistentVolumeClaim). \n
-                                Use PersistentVolumeClaim or one of the vendor-specific
+                                tracking are needed, c) the storage driver is specified
+                                through a storage class, and d) the storage driver
+                                supports dynamic volume provisioning through a PersistentVolumeClaim
+                                (see EphemeralVolumeSource for more information on
+                                the connection between this volume type and PersistentVolumeClaim).
+                                \n Use PersistentVolumeClaim or one of the vendor-specific
                                 APIs for volumes that persist for longer than the
                                 lifecycle of an individual pod. \n Use CSI for light-weight
                                 local ephemeral volumes if the CSI driver is meant
@@ -22088,6 +22212,7 @@ spec:
                                           - kind
                                           - name
                                           type: object
+                                          x-kubernetes-map-type: atomic
                                         dataSourceRef:
                                           description: 'Specifies the object from
                                             which to populate the volume with data,
@@ -22109,14 +22234,15 @@ spec:
                                             are two important differences between
                                             DataSource and DataSourceRef: * While
                                             DataSource only allows two specific types
-                                            of objects, DataSourceRef   allows any
-                                            non-core object, as well as PersistentVolumeClaim
+                                            of objects, DataSourceRef allows any non-core
+                                            object, as well as PersistentVolumeClaim
                                             objects. * While DataSource ignores disallowed
-                                            values (dropping them), DataSourceRef   preserves
-                                            all values, and generates an error if
-                                            a disallowed value is   specified. (Alpha)
-                                            Using this field requires the AnyVolumeDataSource
-                                            feature gate to be enabled.'
+                                            values (dropping them), DataSourceRef
+                                            preserves all values, and generates an
+                                            error if a disallowed value is specified.
+                                            (Alpha) Using this field requires the
+                                            AnyVolumeDataSource feature gate to be
+                                            enabled.'
                                           properties:
                                             apiGroup:
                                               description: APIGroup is the group for
@@ -22138,6 +22264,7 @@ spec:
                                           - kind
                                           - name
                                           type: object
+                                          x-kubernetes-map-type: atomic
                                         resources:
                                           description: 'Resources represents the minimum
                                             resources the volume should have. If RecoverVolumeExpansionFailure
@@ -22230,6 +22357,7 @@ spec:
                                                 ANDed.
                                               type: object
                                           type: object
+                                          x-kubernetes-map-type: atomic
                                         storageClassName:
                                           description: 'Name of the StorageClass required
                                             by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1'
@@ -22326,6 +22454,7 @@ spec:
                                         kind, uid?'
                                       type: string
                                   type: object
+                                  x-kubernetes-map-type: atomic
                               required:
                               - driver
                               type: object
@@ -22512,6 +22641,7 @@ spec:
                                         kind, uid?'
                                       type: string
                                   type: object
+                                  x-kubernetes-map-type: atomic
                                 targetPortal:
                                   description: iSCSI Target Portal. The Portal is
                                     either an IP or ip_addr:port if the port is other
@@ -22688,6 +22818,7 @@ spec:
                                               or its keys must be defined
                                             type: boolean
                                         type: object
+                                        x-kubernetes-map-type: atomic
                                       downwardAPI:
                                         description: information about the downwardAPI
                                           data to project
@@ -22719,6 +22850,7 @@ spec:
                                                   required:
                                                   - fieldPath
                                                   type: object
+                                                  x-kubernetes-map-type: atomic
                                                 mode:
                                                   description: 'Optional: mode bits
                                                     used to set permissions on this
@@ -22774,6 +22906,7 @@ spec:
                                                   required:
                                                   - resource
                                                   type: object
+                                                  x-kubernetes-map-type: atomic
                                               required:
                                               - path
                                               type: object
@@ -22845,6 +22978,7 @@ spec:
                                               or its key must be defined
                                             type: boolean
                                         type: object
+                                        x-kubernetes-map-type: atomic
                                       serviceAccountToken:
                                         description: information about the serviceAccountToken
                                           data to project
@@ -22969,6 +23103,7 @@ spec:
                                         kind, uid?'
                                       type: string
                                   type: object
+                                  x-kubernetes-map-type: atomic
                                 user:
                                   description: 'The rados user name. Default is admin.
                                     More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it'
@@ -23012,6 +23147,7 @@ spec:
                                         kind, uid?'
                                       type: string
                                   type: object
+                                  x-kubernetes-map-type: atomic
                                 sslEnabled:
                                   description: Flag to enable/disable SSL communication
                                     with Gateway, default false
@@ -23134,6 +23270,7 @@ spec:
                                         kind, uid?'
                                       type: string
                                   type: object
+                                  x-kubernetes-map-type: atomic
                                 volumeName:
                                   description: VolumeName is the human-readable name
                                     of the StorageOS volume.  Volume names are only
@@ -23582,19 +23719,13 @@ spec:
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
     cert-manager.io/inject-ca-from: harbor-operator-ns/serving-cert
-    controller-gen.kubebuilder.io/version: v0.6.2
+    controller-gen.kubebuilder.io/version: v0.9.2
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
     goharbor.io/operator-version: v1.3.0
@@ -23700,6 +23831,7 @@ spec:
                         TODO: Add other useful fields. apiVersion, kind, uid?'
                       type: string
                   type: object
+                  x-kubernetes-map-type: atomic
                 type: array
               logging:
                 properties:
@@ -24031,6 +24163,7 @@ spec:
                         TODO: Add other useful fields. apiVersion, kind, uid?'
                       type: string
                   type: object
+                  x-kubernetes-map-type: atomic
                 type: array
               logging:
                 properties:
@@ -24293,19 +24426,13 @@ spec:
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
     cert-manager.io/inject-ca-from: harbor-operator-ns/serving-cert
-    controller-gen.kubebuilder.io/version: v0.6.2
+    controller-gen.kubebuilder.io/version: v0.9.2
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
     goharbor.io/operator-version: v1.3.0
@@ -24394,6 +24521,7 @@ spec:
                         TODO: Add other useful fields. apiVersion, kind, uid?'
                       type: string
                   type: object
+                  x-kubernetes-map-type: atomic
                 type: array
               logging:
                 properties:
@@ -24681,6 +24809,7 @@ spec:
                         TODO: Add other useful fields. apiVersion, kind, uid?'
                       type: string
                   type: object
+                  x-kubernetes-map-type: atomic
                 type: array
               logging:
                 properties:
@@ -24916,19 +25045,13 @@ spec:
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
     cert-manager.io/inject-ca-from: harbor-operator-ns/serving-cert
-    controller-gen.kubebuilder.io/version: v0.6.2
+    controller-gen.kubebuilder.io/version: v0.9.2
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
     goharbor.io/operator-version: v1.3.0
@@ -25009,6 +25132,7 @@ spec:
                         TODO: Add other useful fields. apiVersion, kind, uid?'
                       type: string
                   type: object
+                  x-kubernetes-map-type: atomic
                 type: array
               maxConnections:
                 default: 1024
@@ -25222,6 +25346,7 @@ spec:
                         TODO: Add other useful fields. apiVersion, kind, uid?'
                       type: string
                   type: object
+                  x-kubernetes-map-type: atomic
                 type: array
               maxConnections:
                 default: 1024
@@ -25392,18 +25517,12 @@ spec:
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.6.2
+    controller-gen.kubebuilder.io/version: v0.9.2
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
     goharbor.io/operator-version: v1.3.0
@@ -25498,12 +25617,6 @@ spec:
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
@@ -28547,7 +28660,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     cert-manager.io/inject-ca-from: harbor-operator-ns/serving-cert
-    controller-gen.kubebuilder.io/version: v0.6.2
+    controller-gen.kubebuilder.io/version: v0.9.2
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
     goharbor.io/operator-version: v1.3.0
@@ -28881,6 +28994,7 @@ spec:
                         TODO: Add other useful fields. apiVersion, kind, uid?'
                       type: string
                   type: object
+                  x-kubernetes-map-type: atomic
                 type: array
               log:
                 default:
@@ -29334,6 +29448,7 @@ spec:
                                           kind, uid?'
                                         type: string
                                     type: object
+                                    x-kubernetes-map-type: atomic
                                   user:
                                     description: 'Optional: User is the rados user
                                       name, default is admin More info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it'
@@ -29369,6 +29484,7 @@ spec:
                                           kind, uid?'
                                         type: string
                                     type: object
+                                    x-kubernetes-map-type: atomic
                                   volumeID:
                                     description: 'volume id used to identify the volume
                                       in cinder. More info: https://examples.k8s.io/mysql-cinder-pd/README.md'
@@ -29449,6 +29565,7 @@ spec:
                                       its keys must be defined
                                     type: boolean
                                 type: object
+                                x-kubernetes-map-type: atomic
                               csi:
                                 description: CSI (Container Storage Interface) represents
                                   ephemeral storage that is handled by certain external
@@ -29483,6 +29600,7 @@ spec:
                                           kind, uid?'
                                         type: string
                                     type: object
+                                    x-kubernetes-map-type: atomic
                                   readOnly:
                                     description: Specifies a read-only configuration
                                       for the volume. Defaults to false (read/write).
@@ -29542,6 +29660,7 @@ spec:
                                           required:
                                           - fieldPath
                                           type: object
+                                          x-kubernetes-map-type: atomic
                                         mode:
                                           description: 'Optional: mode bits used to
                                             set permissions on this file, must be
@@ -29590,6 +29709,7 @@ spec:
                                           required:
                                           - resource
                                           type: object
+                                          x-kubernetes-map-type: atomic
                                       required:
                                       - path
                                       type: object
@@ -29629,20 +29749,19 @@ spec:
                                   when the pod is removed. \n Use this if: a) the
                                   volume is only needed while the pod runs, b) features
                                   of normal volumes like restoring from snapshot or
-                                  capacity    tracking are needed, c) the storage
-                                  driver is specified through a storage class, and
-                                  d) the storage driver supports dynamic volume provisioning
-                                  through    a PersistentVolumeClaim (see EphemeralVolumeSource
-                                  for more    information on the connection between
-                                  this volume type    and PersistentVolumeClaim).
-                                  \n Use PersistentVolumeClaim or one of the vendor-specific
-                                  APIs for volumes that persist for longer than the
-                                  lifecycle of an individual pod. \n Use CSI for light-weight
-                                  local ephemeral volumes if the CSI driver is meant
-                                  to be used that way - see the documentation of the
-                                  driver for more information. \n A pod can use both
-                                  types of ephemeral volumes and persistent volumes
-                                  at the same time."
+                                  capacity tracking are needed, c) the storage driver
+                                  is specified through a storage class, and d) the
+                                  storage driver supports dynamic volume provisioning
+                                  through a PersistentVolumeClaim (see EphemeralVolumeSource
+                                  for more information on the connection between this
+                                  volume type and PersistentVolumeClaim). \n Use PersistentVolumeClaim
+                                  or one of the vendor-specific APIs for volumes that
+                                  persist for longer than the lifecycle of an individual
+                                  pod. \n Use CSI for light-weight local ephemeral
+                                  volumes if the CSI driver is meant to be used that
+                                  way - see the documentation of the driver for more
+                                  information. \n A pod can use both types of ephemeral
+                                  volumes and persistent volumes at the same time."
                                 properties:
                                   volumeClaimTemplate:
                                     description: "Will be used to create a stand-alone
@@ -29723,6 +29842,7 @@ spec:
                                             - kind
                                             - name
                                             type: object
+                                            x-kubernetes-map-type: atomic
                                           dataSourceRef:
                                             description: 'Specifies the object from
                                               which to populate the volume with data,
@@ -29744,14 +29864,15 @@ spec:
                                               is non-empty. There are two important
                                               differences between DataSource and DataSourceRef:
                                               * While DataSource only allows two specific
-                                              types of objects, DataSourceRef   allows
+                                              types of objects, DataSourceRef allows
                                               any non-core object, as well as PersistentVolumeClaim
                                               objects. * While DataSource ignores
-                                              disallowed values (dropping them), DataSourceRef   preserves
-                                              all values, and generates an error if
-                                              a disallowed value is   specified. (Alpha)
-                                              Using this field requires the AnyVolumeDataSource
-                                              feature gate to be enabled.'
+                                              disallowed values (dropping them), DataSourceRef
+                                              preserves all values, and generates
+                                              an error if a disallowed value is specified.
+                                              (Alpha) Using this field requires the
+                                              AnyVolumeDataSource feature gate to
+                                              be enabled.'
                                             properties:
                                               apiGroup:
                                                 description: APIGroup is the group
@@ -29773,6 +29894,7 @@ spec:
                                             - kind
                                             - name
                                             type: object
+                                            x-kubernetes-map-type: atomic
                                           resources:
                                             description: 'Resources represents the
                                               minimum resources the volume should
@@ -29868,6 +29990,7 @@ spec:
                                                   ANDed.
                                                 type: object
                                             type: object
+                                            x-kubernetes-map-type: atomic
                                           storageClassName:
                                             description: 'Name of the StorageClass
                                               required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1'
@@ -29965,6 +30088,7 @@ spec:
                                           kind, uid?'
                                         type: string
                                     type: object
+                                    x-kubernetes-map-type: atomic
                                 required:
                                 - driver
                                 type: object
@@ -30155,6 +30279,7 @@ spec:
                                           kind, uid?'
                                         type: string
                                     type: object
+                                    x-kubernetes-map-type: atomic
                                   targetPortal:
                                     description: iSCSI Target Portal. The Portal is
                                       either an IP or ip_addr:port if the port is
@@ -30333,6 +30458,7 @@ spec:
                                                 or its keys must be defined
                                               type: boolean
                                           type: object
+                                          x-kubernetes-map-type: atomic
                                         downwardAPI:
                                           description: information about the downwardAPI
                                             data to project
@@ -30365,6 +30491,7 @@ spec:
                                                     required:
                                                     - fieldPath
                                                     type: object
+                                                    x-kubernetes-map-type: atomic
                                                   mode:
                                                     description: 'Optional: mode bits
                                                       used to set permissions on this
@@ -30420,6 +30547,7 @@ spec:
                                                     required:
                                                     - resource
                                                     type: object
+                                                    x-kubernetes-map-type: atomic
                                                 required:
                                                 - path
                                                 type: object
@@ -30492,6 +30620,7 @@ spec:
                                                 or its key must be defined
                                               type: boolean
                                           type: object
+                                          x-kubernetes-map-type: atomic
                                         serviceAccountToken:
                                           description: information about the serviceAccountToken
                                             data to project
@@ -30618,6 +30747,7 @@ spec:
                                           kind, uid?'
                                         type: string
                                     type: object
+                                    x-kubernetes-map-type: atomic
                                   user:
                                     description: 'The rados user name. Default is
                                       admin. More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it'
@@ -30661,6 +30791,7 @@ spec:
                                           kind, uid?'
                                         type: string
                                     type: object
+                                    x-kubernetes-map-type: atomic
                                   sslEnabled:
                                     description: Flag to enable/disable SSL communication
                                       with Gateway, default false
@@ -30785,6 +30916,7 @@ spec:
                                           kind, uid?'
                                         type: string
                                     type: object
+                                    x-kubernetes-map-type: atomic
                                   volumeName:
                                     description: VolumeName is the human-readable
                                       name of the StorageOS volume.  Volume names
@@ -31470,6 +31602,7 @@ spec:
                         TODO: Add other useful fields. apiVersion, kind, uid?'
                       type: string
                   type: object
+                  x-kubernetes-map-type: atomic
                 type: array
               log:
                 default:
@@ -31951,6 +32084,7 @@ spec:
                                           kind, uid?'
                                         type: string
                                     type: object
+                                    x-kubernetes-map-type: atomic
                                   user:
                                     description: 'Optional: User is the rados user
                                       name, default is admin More info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it'
@@ -31986,6 +32120,7 @@ spec:
                                           kind, uid?'
                                         type: string
                                     type: object
+                                    x-kubernetes-map-type: atomic
                                   volumeID:
                                     description: 'volume id used to identify the volume
                                       in cinder. More info: https://examples.k8s.io/mysql-cinder-pd/README.md'
@@ -32066,6 +32201,7 @@ spec:
                                       its keys must be defined
                                     type: boolean
                                 type: object
+                                x-kubernetes-map-type: atomic
                               csi:
                                 description: CSI (Container Storage Interface) represents
                                   ephemeral storage that is handled by certain external
@@ -32100,6 +32236,7 @@ spec:
                                           kind, uid?'
                                         type: string
                                     type: object
+                                    x-kubernetes-map-type: atomic
                                   readOnly:
                                     description: Specifies a read-only configuration
                                       for the volume. Defaults to false (read/write).
@@ -32159,6 +32296,7 @@ spec:
                                           required:
                                           - fieldPath
                                           type: object
+                                          x-kubernetes-map-type: atomic
                                         mode:
                                           description: 'Optional: mode bits used to
                                             set permissions on this file, must be
@@ -32207,6 +32345,7 @@ spec:
                                           required:
                                           - resource
                                           type: object
+                                          x-kubernetes-map-type: atomic
                                       required:
                                       - path
                                       type: object
@@ -32246,20 +32385,19 @@ spec:
                                   when the pod is removed. \n Use this if: a) the
                                   volume is only needed while the pod runs, b) features
                                   of normal volumes like restoring from snapshot or
-                                  capacity    tracking are needed, c) the storage
-                                  driver is specified through a storage class, and
-                                  d) the storage driver supports dynamic volume provisioning
-                                  through    a PersistentVolumeClaim (see EphemeralVolumeSource
-                                  for more    information on the connection between
-                                  this volume type    and PersistentVolumeClaim).
-                                  \n Use PersistentVolumeClaim or one of the vendor-specific
-                                  APIs for volumes that persist for longer than the
-                                  lifecycle of an individual pod. \n Use CSI for light-weight
-                                  local ephemeral volumes if the CSI driver is meant
-                                  to be used that way - see the documentation of the
-                                  driver for more information. \n A pod can use both
-                                  types of ephemeral volumes and persistent volumes
-                                  at the same time."
+                                  capacity tracking are needed, c) the storage driver
+                                  is specified through a storage class, and d) the
+                                  storage driver supports dynamic volume provisioning
+                                  through a PersistentVolumeClaim (see EphemeralVolumeSource
+                                  for more information on the connection between this
+                                  volume type and PersistentVolumeClaim). \n Use PersistentVolumeClaim
+                                  or one of the vendor-specific APIs for volumes that
+                                  persist for longer than the lifecycle of an individual
+                                  pod. \n Use CSI for light-weight local ephemeral
+                                  volumes if the CSI driver is meant to be used that
+                                  way - see the documentation of the driver for more
+                                  information. \n A pod can use both types of ephemeral
+                                  volumes and persistent volumes at the same time."
                                 properties:
                                   volumeClaimTemplate:
                                     description: "Will be used to create a stand-alone
@@ -32340,6 +32478,7 @@ spec:
                                             - kind
                                             - name
                                             type: object
+                                            x-kubernetes-map-type: atomic
                                           dataSourceRef:
                                             description: 'Specifies the object from
                                               which to populate the volume with data,
@@ -32361,14 +32500,15 @@ spec:
                                               is non-empty. There are two important
                                               differences between DataSource and DataSourceRef:
                                               * While DataSource only allows two specific
-                                              types of objects, DataSourceRef   allows
+                                              types of objects, DataSourceRef allows
                                               any non-core object, as well as PersistentVolumeClaim
                                               objects. * While DataSource ignores
-                                              disallowed values (dropping them), DataSourceRef   preserves
-                                              all values, and generates an error if
-                                              a disallowed value is   specified. (Alpha)
-                                              Using this field requires the AnyVolumeDataSource
-                                              feature gate to be enabled.'
+                                              disallowed values (dropping them), DataSourceRef
+                                              preserves all values, and generates
+                                              an error if a disallowed value is specified.
+                                              (Alpha) Using this field requires the
+                                              AnyVolumeDataSource feature gate to
+                                              be enabled.'
                                             properties:
                                               apiGroup:
                                                 description: APIGroup is the group
@@ -32390,6 +32530,7 @@ spec:
                                             - kind
                                             - name
                                             type: object
+                                            x-kubernetes-map-type: atomic
                                           resources:
                                             description: 'Resources represents the
                                               minimum resources the volume should
@@ -32485,6 +32626,7 @@ spec:
                                                   ANDed.
                                                 type: object
                                             type: object
+                                            x-kubernetes-map-type: atomic
                                           storageClassName:
                                             description: 'Name of the StorageClass
                                               required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1'
@@ -32582,6 +32724,7 @@ spec:
                                           kind, uid?'
                                         type: string
                                     type: object
+                                    x-kubernetes-map-type: atomic
                                 required:
                                 - driver
                                 type: object
@@ -32772,6 +32915,7 @@ spec:
                                           kind, uid?'
                                         type: string
                                     type: object
+                                    x-kubernetes-map-type: atomic
                                   targetPortal:
                                     description: iSCSI Target Portal. The Portal is
                                       either an IP or ip_addr:port if the port is
@@ -32950,6 +33094,7 @@ spec:
                                                 or its keys must be defined
                                               type: boolean
                                           type: object
+                                          x-kubernetes-map-type: atomic
                                         downwardAPI:
                                           description: information about the downwardAPI
                                             data to project
@@ -32982,6 +33127,7 @@ spec:
                                                     required:
                                                     - fieldPath
                                                     type: object
+                                                    x-kubernetes-map-type: atomic
                                                   mode:
                                                     description: 'Optional: mode bits
                                                       used to set permissions on this
@@ -33037,6 +33183,7 @@ spec:
                                                     required:
                                                     - resource
                                                     type: object
+                                                    x-kubernetes-map-type: atomic
                                                 required:
                                                 - path
                                                 type: object
@@ -33109,6 +33256,7 @@ spec:
                                                 or its key must be defined
                                               type: boolean
                                           type: object
+                                          x-kubernetes-map-type: atomic
                                         serviceAccountToken:
                                           description: information about the serviceAccountToken
                                             data to project
@@ -33235,6 +33383,7 @@ spec:
                                           kind, uid?'
                                         type: string
                                     type: object
+                                    x-kubernetes-map-type: atomic
                                   user:
                                     description: 'The rados user name. Default is
                                       admin. More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it'
@@ -33278,6 +33427,7 @@ spec:
                                           kind, uid?'
                                         type: string
                                     type: object
+                                    x-kubernetes-map-type: atomic
                                   sslEnabled:
                                     description: Flag to enable/disable SSL communication
                                       with Gateway, default false
@@ -33402,6 +33552,7 @@ spec:
                                           kind, uid?'
                                         type: string
                                     type: object
+                                    x-kubernetes-map-type: atomic
                                   volumeName:
                                     description: VolumeName is the human-readable
                                       name of the StorageOS volume.  Volume names
@@ -33897,19 +34048,13 @@ spec:
         specReplicasPath: .spec.replicas
         statusReplicasPath: .status.replicas
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
     cert-manager.io/inject-ca-from: harbor-operator-ns/serving-cert
-    controller-gen.kubebuilder.io/version: v0.6.2
+    controller-gen.kubebuilder.io/version: v0.9.2
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
     goharbor.io/operator-version: v1.3.0
@@ -33999,6 +34144,7 @@ spec:
                         TODO: Add other useful fields. apiVersion, kind, uid?'
                       type: string
                   type: object
+                  x-kubernetes-map-type: atomic
                 type: array
               log:
                 properties:
@@ -34232,6 +34378,7 @@ spec:
                         TODO: Add other useful fields. apiVersion, kind, uid?'
                       type: string
                   type: object
+                  x-kubernetes-map-type: atomic
                 type: array
               log:
                 properties:
@@ -34412,12 +34559,6 @@ spec:
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
@@ -43299,7 +43440,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     cert-manager.io/inject-ca-from: harbor-operator-ns/serving-cert
-    controller-gen.kubebuilder.io/version: v0.6.2
+    controller-gen.kubebuilder.io/version: v0.9.2
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: cluster
     goharbor.io/operator-version: v1.3.0
@@ -43384,6 +43525,7 @@ spec:
                         TODO: Add other useful fields. apiVersion, kind, uid?'
                       type: string
                   type: object
+                  x-kubernetes-map-type: atomic
                 type: array
               log:
                 default:
@@ -43773,6 +43915,7 @@ spec:
                                       uid?'
                                     type: string
                                 type: object
+                                x-kubernetes-map-type: atomic
                               user:
                                 description: 'Optional: User is the rados user name,
                                   default is admin More info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it'
@@ -43807,6 +43950,7 @@ spec:
                                       uid?'
                                     type: string
                                 type: object
+                                x-kubernetes-map-type: atomic
                               volumeID:
                                 description: 'volume id used to identify the volume
                                   in cinder. More info: https://examples.k8s.io/mysql-cinder-pd/README.md'
@@ -43882,6 +44026,7 @@ spec:
                                   keys must be defined
                                 type: boolean
                             type: object
+                            x-kubernetes-map-type: atomic
                           csi:
                             description: CSI (Container Storage Interface) represents
                               ephemeral storage that is handled by certain external
@@ -43914,6 +44059,7 @@ spec:
                                       uid?'
                                     type: string
                                 type: object
+                                x-kubernetes-map-type: atomic
                               readOnly:
                                 description: Specifies a read-only configuration for
                                   the volume. Defaults to false (read/write).
@@ -43969,6 +44115,7 @@ spec:
                                       required:
                                       - fieldPath
                                       type: object
+                                      x-kubernetes-map-type: atomic
                                     mode:
                                       description: 'Optional: mode bits used to set
                                         permissions on this file, must be an octal
@@ -44014,6 +44161,7 @@ spec:
                                       required:
                                       - resource
                                       type: object
+                                      x-kubernetes-map-type: atomic
                                   required:
                                   - path
                                   type: object
@@ -44051,12 +44199,12 @@ spec:
                               before the pod starts, and deleted when the pod is removed.
                               \n Use this if: a) the volume is only needed while the
                               pod runs, b) features of normal volumes like restoring
-                              from snapshot or capacity    tracking are needed, c)
-                              the storage driver is specified through a storage class,
+                              from snapshot or capacity tracking are needed, c) the
+                              storage driver is specified through a storage class,
                               and d) the storage driver supports dynamic volume provisioning
-                              through    a PersistentVolumeClaim (see EphemeralVolumeSource
-                              for more    information on the connection between this
-                              volume type    and PersistentVolumeClaim). \n Use PersistentVolumeClaim
+                              through a PersistentVolumeClaim (see EphemeralVolumeSource
+                              for more information on the connection between this
+                              volume type and PersistentVolumeClaim). \n Use PersistentVolumeClaim
                               or one of the vendor-specific APIs for volumes that
                               persist for longer than the lifecycle of an individual
                               pod. \n Use CSI for light-weight local ephemeral volumes
@@ -44141,6 +44289,7 @@ spec:
                                         - kind
                                         - name
                                         type: object
+                                        x-kubernetes-map-type: atomic
                                       dataSourceRef:
                                         description: 'Specifies the object from which
                                           to populate the volume with data, if a non-empty
@@ -44160,13 +44309,13 @@ spec:
                                           the other is non-empty. There are two important
                                           differences between DataSource and DataSourceRef:
                                           * While DataSource only allows two specific
-                                          types of objects, DataSourceRef   allows
-                                          any non-core object, as well as PersistentVolumeClaim
+                                          types of objects, DataSourceRef allows any
+                                          non-core object, as well as PersistentVolumeClaim
                                           objects. * While DataSource ignores disallowed
-                                          values (dropping them), DataSourceRef   preserves
+                                          values (dropping them), DataSourceRef preserves
                                           all values, and generates an error if a
-                                          disallowed value is   specified. (Alpha)
-                                          Using this field requires the AnyVolumeDataSource
+                                          disallowed value is specified. (Alpha) Using
+                                          this field requires the AnyVolumeDataSource
                                           feature gate to be enabled.'
                                         properties:
                                           apiGroup:
@@ -44189,6 +44338,7 @@ spec:
                                         - kind
                                         - name
                                         type: object
+                                        x-kubernetes-map-type: atomic
                                       resources:
                                         description: 'Resources represents the minimum
                                           resources the volume should have. If RecoverVolumeExpansionFailure
@@ -44276,6 +44426,7 @@ spec:
                                               only "value". The requirements are ANDed.
                                             type: object
                                         type: object
+                                        x-kubernetes-map-type: atomic
                                       storageClassName:
                                         description: 'Name of the StorageClass required
                                           by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1'
@@ -44369,6 +44520,7 @@ spec:
                                       uid?'
                                     type: string
                                 type: object
+                                x-kubernetes-map-type: atomic
                             required:
                             - driver
                             type: object
@@ -44549,6 +44701,7 @@ spec:
                                       uid?'
                                     type: string
                                 type: object
+                                x-kubernetes-map-type: atomic
                               targetPortal:
                                 description: iSCSI Target Portal. The Portal is either
                                   an IP or ip_addr:port if the port is other than
@@ -44721,6 +44874,7 @@ spec:
                                             or its keys must be defined
                                           type: boolean
                                       type: object
+                                      x-kubernetes-map-type: atomic
                                     downwardAPI:
                                       description: information about the downwardAPI
                                         data to project
@@ -44751,6 +44905,7 @@ spec:
                                                 required:
                                                 - fieldPath
                                                 type: object
+                                                x-kubernetes-map-type: atomic
                                               mode:
                                                 description: 'Optional: mode bits
                                                   used to set permissions on this
@@ -44804,6 +44959,7 @@ spec:
                                                 required:
                                                 - resource
                                                 type: object
+                                                x-kubernetes-map-type: atomic
                                             required:
                                             - path
                                             type: object
@@ -44872,6 +45028,7 @@ spec:
                                             or its key must be defined
                                           type: boolean
                                       type: object
+                                      x-kubernetes-map-type: atomic
                                     serviceAccountToken:
                                       description: information about the serviceAccountToken
                                         data to project
@@ -44994,6 +45151,7 @@ spec:
                                       uid?'
                                     type: string
                                 type: object
+                                x-kubernetes-map-type: atomic
                               user:
                                 description: 'The rados user name. Default is admin.
                                   More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it'
@@ -45034,6 +45192,7 @@ spec:
                                       uid?'
                                     type: string
                                 type: object
+                                x-kubernetes-map-type: atomic
                               sslEnabled:
                                 description: Flag to enable/disable SSL communication
                                   with Gateway, default false
@@ -45154,6 +45313,7 @@ spec:
                                       uid?'
                                     type: string
                                 type: object
+                                x-kubernetes-map-type: atomic
                               volumeName:
                                 description: VolumeName is the human-readable name
                                   of the StorageOS volume.  Volume names are only
@@ -45334,6 +45494,7 @@ spec:
                                       uid?'
                                     type: string
                                 type: object
+                                x-kubernetes-map-type: atomic
                               user:
                                 description: 'Optional: User is the rados user name,
                                   default is admin More info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it'
@@ -45368,6 +45529,7 @@ spec:
                                       uid?'
                                     type: string
                                 type: object
+                                x-kubernetes-map-type: atomic
                               volumeID:
                                 description: 'volume id used to identify the volume
                                   in cinder. More info: https://examples.k8s.io/mysql-cinder-pd/README.md'
@@ -45443,6 +45605,7 @@ spec:
                                   keys must be defined
                                 type: boolean
                             type: object
+                            x-kubernetes-map-type: atomic
                           csi:
                             description: CSI (Container Storage Interface) represents
                               ephemeral storage that is handled by certain external
@@ -45475,6 +45638,7 @@ spec:
                                       uid?'
                                     type: string
                                 type: object
+                                x-kubernetes-map-type: atomic
                               readOnly:
                                 description: Specifies a read-only configuration for
                                   the volume. Defaults to false (read/write).
@@ -45530,6 +45694,7 @@ spec:
                                       required:
                                       - fieldPath
                                       type: object
+                                      x-kubernetes-map-type: atomic
                                     mode:
                                       description: 'Optional: mode bits used to set
                                         permissions on this file, must be an octal
@@ -45575,6 +45740,7 @@ spec:
                                       required:
                                       - resource
                                       type: object
+                                      x-kubernetes-map-type: atomic
                                   required:
                                   - path
                                   type: object
@@ -45612,12 +45778,12 @@ spec:
                               before the pod starts, and deleted when the pod is removed.
                               \n Use this if: a) the volume is only needed while the
                               pod runs, b) features of normal volumes like restoring
-                              from snapshot or capacity    tracking are needed, c)
-                              the storage driver is specified through a storage class,
+                              from snapshot or capacity tracking are needed, c) the
+                              storage driver is specified through a storage class,
                               and d) the storage driver supports dynamic volume provisioning
-                              through    a PersistentVolumeClaim (see EphemeralVolumeSource
-                              for more    information on the connection between this
-                              volume type    and PersistentVolumeClaim). \n Use PersistentVolumeClaim
+                              through a PersistentVolumeClaim (see EphemeralVolumeSource
+                              for more information on the connection between this
+                              volume type and PersistentVolumeClaim). \n Use PersistentVolumeClaim
                               or one of the vendor-specific APIs for volumes that
                               persist for longer than the lifecycle of an individual
                               pod. \n Use CSI for light-weight local ephemeral volumes
@@ -45702,6 +45868,7 @@ spec:
                                         - kind
                                         - name
                                         type: object
+                                        x-kubernetes-map-type: atomic
                                       dataSourceRef:
                                         description: 'Specifies the object from which
                                           to populate the volume with data, if a non-empty
@@ -45721,13 +45888,13 @@ spec:
                                           the other is non-empty. There are two important
                                           differences between DataSource and DataSourceRef:
                                           * While DataSource only allows two specific
-                                          types of objects, DataSourceRef   allows
-                                          any non-core object, as well as PersistentVolumeClaim
+                                          types of objects, DataSourceRef allows any
+                                          non-core object, as well as PersistentVolumeClaim
                                           objects. * While DataSource ignores disallowed
-                                          values (dropping them), DataSourceRef   preserves
+                                          values (dropping them), DataSourceRef preserves
                                           all values, and generates an error if a
-                                          disallowed value is   specified. (Alpha)
-                                          Using this field requires the AnyVolumeDataSource
+                                          disallowed value is specified. (Alpha) Using
+                                          this field requires the AnyVolumeDataSource
                                           feature gate to be enabled.'
                                         properties:
                                           apiGroup:
@@ -45750,6 +45917,7 @@ spec:
                                         - kind
                                         - name
                                         type: object
+                                        x-kubernetes-map-type: atomic
                                       resources:
                                         description: 'Resources represents the minimum
                                           resources the volume should have. If RecoverVolumeExpansionFailure
@@ -45837,6 +46005,7 @@ spec:
                                               only "value". The requirements are ANDed.
                                             type: object
                                         type: object
+                                        x-kubernetes-map-type: atomic
                                       storageClassName:
                                         description: 'Name of the StorageClass required
                                           by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1'
@@ -45930,6 +46099,7 @@ spec:
                                       uid?'
                                     type: string
                                 type: object
+                                x-kubernetes-map-type: atomic
                             required:
                             - driver
                             type: object
@@ -46110,6 +46280,7 @@ spec:
                                       uid?'
                                     type: string
                                 type: object
+                                x-kubernetes-map-type: atomic
                               targetPortal:
                                 description: iSCSI Target Portal. The Portal is either
                                   an IP or ip_addr:port if the port is other than
@@ -46282,6 +46453,7 @@ spec:
                                             or its keys must be defined
                                           type: boolean
                                       type: object
+                                      x-kubernetes-map-type: atomic
                                     downwardAPI:
                                       description: information about the downwardAPI
                                         data to project
@@ -46312,6 +46484,7 @@ spec:
                                                 required:
                                                 - fieldPath
                                                 type: object
+                                                x-kubernetes-map-type: atomic
                                               mode:
                                                 description: 'Optional: mode bits
                                                   used to set permissions on this
@@ -46365,6 +46538,7 @@ spec:
                                                 required:
                                                 - resource
                                                 type: object
+                                                x-kubernetes-map-type: atomic
                                             required:
                                             - path
                                             type: object
@@ -46433,6 +46607,7 @@ spec:
                                             or its key must be defined
                                           type: boolean
                                       type: object
+                                      x-kubernetes-map-type: atomic
                                     serviceAccountToken:
                                       description: information about the serviceAccountToken
                                         data to project
@@ -46555,6 +46730,7 @@ spec:
                                       uid?'
                                     type: string
                                 type: object
+                                x-kubernetes-map-type: atomic
                               user:
                                 description: 'The rados user name. Default is admin.
                                   More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it'
@@ -46595,6 +46771,7 @@ spec:
                                       uid?'
                                     type: string
                                 type: object
+                                x-kubernetes-map-type: atomic
                               sslEnabled:
                                 description: Flag to enable/disable SSL communication
                                   with Gateway, default false
@@ -46715,6 +46892,7 @@ spec:
                                       uid?'
                                     type: string
                                 type: object
+                                x-kubernetes-map-type: atomic
                               volumeName:
                                 description: VolumeName is the human-readable name
                                   of the StorageOS volume.  Volume names are only
@@ -46948,6 +47126,7 @@ spec:
                         TODO: Add other useful fields. apiVersion, kind, uid?'
                       type: string
                   type: object
+                  x-kubernetes-map-type: atomic
                 type: array
               log:
                 default:
@@ -47350,6 +47529,7 @@ spec:
                                       uid?'
                                     type: string
                                 type: object
+                                x-kubernetes-map-type: atomic
                               user:
                                 description: 'Optional: User is the rados user name,
                                   default is admin More info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it'
@@ -47384,6 +47564,7 @@ spec:
                                       uid?'
                                     type: string
                                 type: object
+                                x-kubernetes-map-type: atomic
                               volumeID:
                                 description: 'volume id used to identify the volume
                                   in cinder. More info: https://examples.k8s.io/mysql-cinder-pd/README.md'
@@ -47459,6 +47640,7 @@ spec:
                                   keys must be defined
                                 type: boolean
                             type: object
+                            x-kubernetes-map-type: atomic
                           csi:
                             description: CSI (Container Storage Interface) represents
                               ephemeral storage that is handled by certain external
@@ -47491,6 +47673,7 @@ spec:
                                       uid?'
                                     type: string
                                 type: object
+                                x-kubernetes-map-type: atomic
                               readOnly:
                                 description: Specifies a read-only configuration for
                                   the volume. Defaults to false (read/write).
@@ -47546,6 +47729,7 @@ spec:
                                       required:
                                       - fieldPath
                                       type: object
+                                      x-kubernetes-map-type: atomic
                                     mode:
                                       description: 'Optional: mode bits used to set
                                         permissions on this file, must be an octal
@@ -47591,6 +47775,7 @@ spec:
                                       required:
                                       - resource
                                       type: object
+                                      x-kubernetes-map-type: atomic
                                   required:
                                   - path
                                   type: object
@@ -47628,12 +47813,12 @@ spec:
                               before the pod starts, and deleted when the pod is removed.
                               \n Use this if: a) the volume is only needed while the
                               pod runs, b) features of normal volumes like restoring
-                              from snapshot or capacity    tracking are needed, c)
-                              the storage driver is specified through a storage class,
+                              from snapshot or capacity tracking are needed, c) the
+                              storage driver is specified through a storage class,
                               and d) the storage driver supports dynamic volume provisioning
-                              through    a PersistentVolumeClaim (see EphemeralVolumeSource
-                              for more    information on the connection between this
-                              volume type    and PersistentVolumeClaim). \n Use PersistentVolumeClaim
+                              through a PersistentVolumeClaim (see EphemeralVolumeSource
+                              for more information on the connection between this
+                              volume type and PersistentVolumeClaim). \n Use PersistentVolumeClaim
                               or one of the vendor-specific APIs for volumes that
                               persist for longer than the lifecycle of an individual
                               pod. \n Use CSI for light-weight local ephemeral volumes
@@ -47718,6 +47903,7 @@ spec:
                                         - kind
                                         - name
                                         type: object
+                                        x-kubernetes-map-type: atomic
                                       dataSourceRef:
                                         description: 'Specifies the object from which
                                           to populate the volume with data, if a non-empty
@@ -47737,13 +47923,13 @@ spec:
                                           the other is non-empty. There are two important
                                           differences between DataSource and DataSourceRef:
                                           * While DataSource only allows two specific
-                                          types of objects, DataSourceRef   allows
-                                          any non-core object, as well as PersistentVolumeClaim
+                                          types of objects, DataSourceRef allows any
+                                          non-core object, as well as PersistentVolumeClaim
                                           objects. * While DataSource ignores disallowed
-                                          values (dropping them), DataSourceRef   preserves
+                                          values (dropping them), DataSourceRef preserves
                                           all values, and generates an error if a
-                                          disallowed value is   specified. (Alpha)
-                                          Using this field requires the AnyVolumeDataSource
+                                          disallowed value is specified. (Alpha) Using
+                                          this field requires the AnyVolumeDataSource
                                           feature gate to be enabled.'
                                         properties:
                                           apiGroup:
@@ -47766,6 +47952,7 @@ spec:
                                         - kind
                                         - name
                                         type: object
+                                        x-kubernetes-map-type: atomic
                                       resources:
                                         description: 'Resources represents the minimum
                                           resources the volume should have. If RecoverVolumeExpansionFailure
@@ -47853,6 +48040,7 @@ spec:
                                               only "value". The requirements are ANDed.
                                             type: object
                                         type: object
+                                        x-kubernetes-map-type: atomic
                                       storageClassName:
                                         description: 'Name of the StorageClass required
                                           by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1'
@@ -47946,6 +48134,7 @@ spec:
                                       uid?'
                                     type: string
                                 type: object
+                                x-kubernetes-map-type: atomic
                             required:
                             - driver
                             type: object
@@ -48126,6 +48315,7 @@ spec:
                                       uid?'
                                     type: string
                                 type: object
+                                x-kubernetes-map-type: atomic
                               targetPortal:
                                 description: iSCSI Target Portal. The Portal is either
                                   an IP or ip_addr:port if the port is other than
@@ -48298,6 +48488,7 @@ spec:
                                             or its keys must be defined
                                           type: boolean
                                       type: object
+                                      x-kubernetes-map-type: atomic
                                     downwardAPI:
                                       description: information about the downwardAPI
                                         data to project
@@ -48328,6 +48519,7 @@ spec:
                                                 required:
                                                 - fieldPath
                                                 type: object
+                                                x-kubernetes-map-type: atomic
                                               mode:
                                                 description: 'Optional: mode bits
                                                   used to set permissions on this
@@ -48381,6 +48573,7 @@ spec:
                                                 required:
                                                 - resource
                                                 type: object
+                                                x-kubernetes-map-type: atomic
                                             required:
                                             - path
                                             type: object
@@ -48449,6 +48642,7 @@ spec:
                                             or its key must be defined
                                           type: boolean
                                       type: object
+                                      x-kubernetes-map-type: atomic
                                     serviceAccountToken:
                                       description: information about the serviceAccountToken
                                         data to project
@@ -48571,6 +48765,7 @@ spec:
                                       uid?'
                                     type: string
                                 type: object
+                                x-kubernetes-map-type: atomic
                               user:
                                 description: 'The rados user name. Default is admin.
                                   More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it'
@@ -48611,6 +48806,7 @@ spec:
                                       uid?'
                                     type: string
                                 type: object
+                                x-kubernetes-map-type: atomic
                               sslEnabled:
                                 description: Flag to enable/disable SSL communication
                                   with Gateway, default false
@@ -48731,6 +48927,7 @@ spec:
                                       uid?'
                                     type: string
                                 type: object
+                                x-kubernetes-map-type: atomic
                               volumeName:
                                 description: VolumeName is the human-readable name
                                   of the StorageOS volume.  Volume names are only
@@ -48911,6 +49108,7 @@ spec:
                                       uid?'
                                     type: string
                                 type: object
+                                x-kubernetes-map-type: atomic
                               user:
                                 description: 'Optional: User is the rados user name,
                                   default is admin More info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it'
@@ -48945,6 +49143,7 @@ spec:
                                       uid?'
                                     type: string
                                 type: object
+                                x-kubernetes-map-type: atomic
                               volumeID:
                                 description: 'volume id used to identify the volume
                                   in cinder. More info: https://examples.k8s.io/mysql-cinder-pd/README.md'
@@ -49020,6 +49219,7 @@ spec:
                                   keys must be defined
                                 type: boolean
                             type: object
+                            x-kubernetes-map-type: atomic
                           csi:
                             description: CSI (Container Storage Interface) represents
                               ephemeral storage that is handled by certain external
@@ -49052,6 +49252,7 @@ spec:
                                       uid?'
                                     type: string
                                 type: object
+                                x-kubernetes-map-type: atomic
                               readOnly:
                                 description: Specifies a read-only configuration for
                                   the volume. Defaults to false (read/write).
@@ -49107,6 +49308,7 @@ spec:
                                       required:
                                       - fieldPath
                                       type: object
+                                      x-kubernetes-map-type: atomic
                                     mode:
                                       description: 'Optional: mode bits used to set
                                         permissions on this file, must be an octal
@@ -49152,6 +49354,7 @@ spec:
                                       required:
                                       - resource
                                       type: object
+                                      x-kubernetes-map-type: atomic
                                   required:
                                   - path
                                   type: object
@@ -49189,12 +49392,12 @@ spec:
                               before the pod starts, and deleted when the pod is removed.
                               \n Use this if: a) the volume is only needed while the
                               pod runs, b) features of normal volumes like restoring
-                              from snapshot or capacity    tracking are needed, c)
-                              the storage driver is specified through a storage class,
+                              from snapshot or capacity tracking are needed, c) the
+                              storage driver is specified through a storage class,
                               and d) the storage driver supports dynamic volume provisioning
-                              through    a PersistentVolumeClaim (see EphemeralVolumeSource
-                              for more    information on the connection between this
-                              volume type    and PersistentVolumeClaim). \n Use PersistentVolumeClaim
+                              through a PersistentVolumeClaim (see EphemeralVolumeSource
+                              for more information on the connection between this
+                              volume type and PersistentVolumeClaim). \n Use PersistentVolumeClaim
                               or one of the vendor-specific APIs for volumes that
                               persist for longer than the lifecycle of an individual
                               pod. \n Use CSI for light-weight local ephemeral volumes
@@ -49279,6 +49482,7 @@ spec:
                                         - kind
                                         - name
                                         type: object
+                                        x-kubernetes-map-type: atomic
                                       dataSourceRef:
                                         description: 'Specifies the object from which
                                           to populate the volume with data, if a non-empty
@@ -49298,13 +49502,13 @@ spec:
                                           the other is non-empty. There are two important
                                           differences between DataSource and DataSourceRef:
                                           * While DataSource only allows two specific
-                                          types of objects, DataSourceRef   allows
-                                          any non-core object, as well as PersistentVolumeClaim
+                                          types of objects, DataSourceRef allows any
+                                          non-core object, as well as PersistentVolumeClaim
                                           objects. * While DataSource ignores disallowed
-                                          values (dropping them), DataSourceRef   preserves
+                                          values (dropping them), DataSourceRef preserves
                                           all values, and generates an error if a
-                                          disallowed value is   specified. (Alpha)
-                                          Using this field requires the AnyVolumeDataSource
+                                          disallowed value is specified. (Alpha) Using
+                                          this field requires the AnyVolumeDataSource
                                           feature gate to be enabled.'
                                         properties:
                                           apiGroup:
@@ -49327,6 +49531,7 @@ spec:
                                         - kind
                                         - name
                                         type: object
+                                        x-kubernetes-map-type: atomic
                                       resources:
                                         description: 'Resources represents the minimum
                                           resources the volume should have. If RecoverVolumeExpansionFailure
@@ -49414,6 +49619,7 @@ spec:
                                               only "value". The requirements are ANDed.
                                             type: object
                                         type: object
+                                        x-kubernetes-map-type: atomic
                                       storageClassName:
                                         description: 'Name of the StorageClass required
                                           by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1'
@@ -49507,6 +49713,7 @@ spec:
                                       uid?'
                                     type: string
                                 type: object
+                                x-kubernetes-map-type: atomic
                             required:
                             - driver
                             type: object
@@ -49687,6 +49894,7 @@ spec:
                                       uid?'
                                     type: string
                                 type: object
+                                x-kubernetes-map-type: atomic
                               targetPortal:
                                 description: iSCSI Target Portal. The Portal is either
                                   an IP or ip_addr:port if the port is other than
@@ -49859,6 +50067,7 @@ spec:
                                             or its keys must be defined
                                           type: boolean
                                       type: object
+                                      x-kubernetes-map-type: atomic
                                     downwardAPI:
                                       description: information about the downwardAPI
                                         data to project
@@ -49889,6 +50098,7 @@ spec:
                                                 required:
                                                 - fieldPath
                                                 type: object
+                                                x-kubernetes-map-type: atomic
                                               mode:
                                                 description: 'Optional: mode bits
                                                   used to set permissions on this
@@ -49942,6 +50152,7 @@ spec:
                                                 required:
                                                 - resource
                                                 type: object
+                                                x-kubernetes-map-type: atomic
                                             required:
                                             - path
                                             type: object
@@ -50010,6 +50221,7 @@ spec:
                                             or its key must be defined
                                           type: boolean
                                       type: object
+                                      x-kubernetes-map-type: atomic
                                     serviceAccountToken:
                                       description: information about the serviceAccountToken
                                         data to project
@@ -50132,6 +50344,7 @@ spec:
                                       uid?'
                                     type: string
                                 type: object
+                                x-kubernetes-map-type: atomic
                               user:
                                 description: 'The rados user name. Default is admin.
                                   More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it'
@@ -50172,6 +50385,7 @@ spec:
                                       uid?'
                                     type: string
                                 type: object
+                                x-kubernetes-map-type: atomic
                               sslEnabled:
                                 description: Flag to enable/disable SSL communication
                                   with Gateway, default false
@@ -50292,6 +50506,7 @@ spec:
                                       uid?'
                                     type: string
                                 type: object
+                                x-kubernetes-map-type: atomic
                               volumeName:
                                 description: VolumeName is the human-readable name
                                   of the StorageOS volume.  Volume names are only
@@ -50470,12 +50685,6 @@ spec:
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 ---
 apiVersion: v1
 kind: ServiceAccount
