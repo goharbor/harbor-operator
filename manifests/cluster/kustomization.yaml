@@ -15,8 +15,8 @@ commonAnnotations:
 resources:
   - ../../config/default # harbor operator
   - patch/namespace.yaml
-  - https://raw.githubusercontent.com/spotahome/redis-operator/master/example/operator/all-redis-operator-resources.yaml?ref=v1.1.1 # redis operator
-  - https://raw.githubusercontent.com/spotahome/redis-operator/master/manifests/databases.spotahome.com_redisfailovers.yaml?ref=v1.1.1 # redis operator crd
+  - https://raw.githubusercontent.com/spotahome/redis-operator/v1.1.1/example/operator/all-redis-operator-resources.yaml # redis operator
+  - https://raw.githubusercontent.com/spotahome/redis-operator/v1.1.1/manifests/databases.spotahome.com_redisfailovers.yaml # redis operator crd
   - github.com/zalando/postgres-operator/manifests?ref=v1.6.3 # postgresql operator
   - github.com/minio/operator?ref=v4.4.28 # minIO storage operator
 
