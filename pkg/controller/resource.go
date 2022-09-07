@@ -39,7 +39,7 @@ func (c *Controller) Changed(ctx context.Context, depManager *checksum.Dependenc
 
 	result := resource.DeepCopyObject()
 
-	// nolint:nestif
+	//nolint:nestif
 	if result, ok := result.(resources.Resource); ok {
 		err := c.Client.Get(ctx, objectKey, result)
 		if err != nil {
@@ -72,7 +72,7 @@ func (c *Controller) Changed(ctx context.Context, depManager *checksum.Dependenc
 	return false, nil
 }
 
-func (c *Controller) ProcessFunc(ctx context.Context, resource runtime.Object, dependencies ...graph.Resource) func(context.Context, graph.Resource) error { // nolint:funlen,gocognit
+func (c *Controller) ProcessFunc(ctx context.Context, resource runtime.Object, dependencies ...graph.Resource) func(context.Context, graph.Resource) error { //nolint:funlen,gocognit
 	depManager := checksum.New(c.Scheme)
 
 	depManager.Add(ctx, owner.Get(ctx), true)

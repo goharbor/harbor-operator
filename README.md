@@ -66,7 +66,7 @@ Versions of the underlying components are listed below:
 
 |  Components   | Harbor      | MinIO operator | PostgreSQL operator | Redis operator |
 |---------------|-------------|----------------|---------------------|----------------|
-|  Versions     | 2.5.x `[1]` | 4.4.22         | 1.6.3               | 1.1.1          |
+|  Versions     | 2.5.x `[1]` | 4.4.28         | 1.6.3               | 1.1.1          |
 
 NOTES:
 
@@ -78,17 +78,17 @@ NOTES:
 
 Harbor operator supports two extra Kubernetes versions besides the current latest version (`n-2` pattern):
 
-|    Versions   |        1.20        |        1.21        |         1.22        |         1.23        |
-|---------------|--------------------|--------------------|---------------------|---------------------|
-| Compatibility | :heavy_check_mark: | :heavy_check_mark: |  :heavy_check_mark: |  :heavy_check_mark: |
+|    Versions   |        1.21        |        1.22        |        1.23        |         1.24        |
+|---------------|--------------------|--------------------|--------------------|---------------------|
+| Compatibility | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |  :heavy_check_mark: |
 
 ### Cert manager versions
 
 Harbor operator relies on cert manager to manage kinds of certificates used by Harbor cluster components. Table shown below lists the compatibilities of cert manager versions:
 
-|    Versions   |         1.4[.4]    |           1.5[.3]    |           1.6[.1]    |
-|---------------|--------------------|----------------------|----------------------|
-| Compatibility | :heavy_check_mark: |  :heavy_check_mark:  |  :heavy_check_mark:  |
+|    Versions   |         1.6[.3]    |           1.7[.3]    |           1.8[.2]    |           1.9[.1]    |
+|---------------|--------------------|----------------------|----------------------|----------------------|
+| Compatibility | :heavy_check_mark: |  :heavy_check_mark:  |  :heavy_check_mark:  |  :heavy_check_mark:  |
 
 ### Ingress controller types
 

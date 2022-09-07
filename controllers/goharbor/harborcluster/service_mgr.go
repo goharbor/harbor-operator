@@ -78,7 +78,7 @@ func (s *ServiceManager) Use(ctrl lcm.Controller) *ServiceManager {
 }
 
 // Apply changes.
-func (s *ServiceManager) Apply() error { // nolint:funlen
+func (s *ServiceManager) Apply() error { //nolint:funlen
 	if err := s.validate(); err != nil {
 		return err
 	}

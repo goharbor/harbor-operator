@@ -58,7 +58,7 @@ const (
 	httpPort  = 8080
 )
 
-func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1.Registry) (*appsv1.Deployment, error) { // nolint:funlen
+func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1.Registry) (*appsv1.Deployment, error) { //nolint:funlen
 	getImageOptions := []image.Option{
 		image.WithImageFromSpec(registry.Spec.Image),
 		image.WithHarborVersion(version.GetVersion(registry.Annotations)),
@@ -342,7 +342,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1.Reg
 	return deploy, nil
 }
 
-func (r *Reconciler) attachRegistryCtlContainer(ctx context.Context, registry *goharborv1.Registry, deploy *appsv1.Deployment) error { // nolint:funlen
+func (r *Reconciler) attachRegistryCtlContainer(ctx context.Context, registry *goharborv1.Registry, deploy *appsv1.Deployment) error { //nolint:funlen
 	registryCtl, err := r.GetRegistryCtl(ctx, registry)
 	if err != nil {
 		return errors.Wrap(err, "can not get registryctl from registry")

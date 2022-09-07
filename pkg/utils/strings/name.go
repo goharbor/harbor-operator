@@ -16,7 +16,7 @@ const (
 	baseBitSize            = 64
 )
 
-var seededRand = rand.New(rand.NewSource(time.Now().UnixNano())) // nolint:gosec
+var seededRand = rand.New(rand.NewSource(time.Now().UnixNano())) //nolint:gosec
 
 func NormalizeName(name string, suffixes ...string) string {
 	if len(suffixes) > 0 {

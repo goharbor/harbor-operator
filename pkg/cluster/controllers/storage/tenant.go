@@ -38,7 +38,7 @@ func (m *MinIOController) provisionMinIOProperties(ctx context.Context, harborcl
 	return minioReadyStatus(properties), nil
 }
 
-func (m *MinIOController) getMinIOProperties(ctx context.Context, harborcluster *goharborv1.HarborCluster, minioInstance *miniov2.Tenant) (*goharborv1.HarborStorageImageChartStorageSpec, error) { // nolint:funlen
+func (m *MinIOController) getMinIOProperties(ctx context.Context, harborcluster *goharborv1.HarborCluster, minioInstance *miniov2.Tenant) (*goharborv1.HarborStorageImageChartStorageSpec, error) { //nolint:funlen
 	accessKey, secretKey, err := m.getCredsFromSecret(ctx, harborcluster)
 	if err != nil {
 		return nil, err
@@ -203,7 +203,7 @@ func (m *MinIOController) createTenant(ctx context.Context, harborcluster *gohar
 	return minioUnknownStatus(), nil
 }
 
-func (m *MinIOController) generateMinIOCR(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*miniov2.Tenant, error) { // nolint:funlen
+func (m *MinIOController) generateMinIOCR(ctx context.Context, harborcluster *goharborv1.HarborCluster) (*miniov2.Tenant, error) { //nolint:funlen
 	image, err := m.getImage(ctx, harborcluster)
 	if err != nil {
 		return nil, err

@@ -47,8 +47,6 @@ type S3Features struct {
 // The following parameters are specific to the `minio.min.io/v2` MinIO CRD API `spec` definition added as part of the MinIO Operator v4.0.0. +
 //
 // For more complete documentation on this object, see the https://docs.min.io/minio/k8s/reference/minio-operator-reference.html#minio-operator-yaml-reference[MinIO Kubernetes Documentation].
-//
-//
 type TenantSpec struct {
 	// *Optional* +
 	//
@@ -605,7 +603,7 @@ type LogConfig struct {
 	//
 	// Object specification for configuring the backing PostgreSQL database for the LogSearch API. +
 	// +optional
-	Db *LogDbConfig `json:"db,omitempty"` // nolint:stylecheck
+	Db *LogDbConfig `json:"db,omitempty"` //nolint:stylecheck
 	// *Required* +
 	//
 	// Object specification for configuring LogSearch API.
@@ -713,7 +711,7 @@ type PrometheusConfig struct {
 }
 
 // LogDbConfig (`db`) defines the configuration of the PostgreSQL StatefulSet deployed to support the MinIO LogSearch API.
-type LogDbConfig struct { // nolint: stylecheck
+type LogDbConfig struct { //nolint: stylecheck
 	// *Optional* +
 	//
 	// The Docker image to use for deploying PostgreSQL. Defaults to {postgres-image}. +
