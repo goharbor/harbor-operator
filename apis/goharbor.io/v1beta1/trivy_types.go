@@ -246,6 +246,6 @@ type TrivyStorageVolumeSpec struct {
 	Prefix string `json:"prefix,omitempty"`
 }
 
-func init() { // nolint:gochecknoinits
+func init() { //nolint:gochecknoinits
 	SchemeBuilder.Register(&Trivy{}, &TrivyList{})
 }

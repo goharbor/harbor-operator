@@ -14,7 +14,7 @@ func (r *Reconciler) NewEmpty(_ context.Context) resources.Resource {
 	return &goharborv1.Harbor{}
 }
 
-func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resource) error { // nolint:funlen
+func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resource) error { //nolint:funlen
 	harbor, ok := resource.(*goharborv1.Harbor)
 	if !ok {
 		return serrors.UnrecoverrableError(errors.Errorf("%+v", resource), serrors.OperatorReason, "unable to add resource")

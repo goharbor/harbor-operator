@@ -103,7 +103,7 @@ func RegisterTag(component, tag string, harborVersions ...string) {
 	knownComponents.Register(component, tagKind, tag, harborVersions...)
 }
 
-func init() { // nolint:gochecknoinits
+func init() { //nolint:gochecknoinits
 	// Register the harbor components
 	harborComponentImageNames := map[string]string{
 		"chartmuseum":  "chartmuseum-photon",
@@ -133,9 +133,9 @@ func init() { // nolint:gochecknoinits
 
 	RegisterRepository("cluster-minio", "minio", "*") // the minio repository of dockerhub
 	RegisterImageName("cluster-minio", "minio", "*")
-	RegisterTag("cluster-minio", "RELEASE.2021-10-27T16-29-42Z", "~2.2.0", "~2.3.0", "~2.4.0", "~2.5.0")
+	RegisterTag("cluster-minio", "RELEASE.2022-08-26T19-53-15Z", "~2.2.0", "~2.3.0", "~2.4.0", "~2.5.0")
 
 	RegisterRepository("cluster-minio-init", "minio", "*") // the minio repository of dockerhub
 	RegisterImageName("cluster-minio-init", "mc", "*")
-	RegisterTag("cluster-minio-init", "RELEASE.2021-10-07T04-19-58Z", "~2.2.0", "~2.3.0", "~2.4.0", "~2.5.0")
+	RegisterTag("cluster-minio-init", "RELEASE.2022-08-23T05-45-20Z", "~2.2.0", "~2.3.0", "~2.4.0", "~2.5.0")
 }

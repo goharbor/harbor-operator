@@ -310,7 +310,7 @@ func (r *Reconciler) GetCSRFSecret(ctx context.Context, harbor *goharborv1.Harbo
 	}, nil
 }
 
-func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1.Harbor) (*goharborv1.Core, error) { // nolint:funlen
+func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1.Harbor) (*goharborv1.Core, error) { //nolint:funlen
 	name := r.NormalizeName(ctx, harbor.GetName())
 	namespace := harbor.GetNamespace()
 

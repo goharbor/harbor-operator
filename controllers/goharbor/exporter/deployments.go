@@ -47,7 +47,7 @@ var (
 	jobserviceRedisNamespace   = "harbor_job_service_namespace"
 )
 
-func (r *Reconciler) GetDeployment(ctx context.Context, exporter *goharborv1.Exporter) (*appsv1.Deployment, error) { // nolint:funlen
+func (r *Reconciler) GetDeployment(ctx context.Context, exporter *goharborv1.Exporter) (*appsv1.Deployment, error) { //nolint:funlen
 	getImageOptions := []image.Option{
 		image.WithImageFromSpec(exporter.Spec.Image),
 		image.WithHarborVersion(version.GetVersion(exporter.Annotations)),

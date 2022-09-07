@@ -102,7 +102,7 @@ const (
 	DefaultJobServiceLogSweeper = 14 * time.Hour
 )
 
-func (r *Reconciler) GetJobService(ctx context.Context, harbor *goharborv1.Harbor) (*goharborv1.JobService, error) { // nolint:funlen
+func (r *Reconciler) GetJobService(ctx context.Context, harbor *goharborv1.Harbor) (*goharborv1.JobService, error) { //nolint:funlen
 	name := r.NormalizeName(ctx, harbor.GetName())
 	namespace := harbor.GetNamespace()
 

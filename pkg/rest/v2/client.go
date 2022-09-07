@@ -36,7 +36,7 @@ type Client struct {
 func New() *Client {
 	// Initialize with default settings
 	return &Client{
-		timeout: 30 * time.Second, // nolint:gomnd
+		timeout: 30 * time.Second, //nolint:gomnd
 		context: context.Background(),
 		log:     ctrl.Log.WithName("v2").WithName("client"),
 	}

@@ -106,6 +106,6 @@ type NotaryServerAuthTokenSpec struct {
 	AutoRedirect *bool `json:"autoredirect,omitempty"`
 }
 
-func init() { // nolint:gochecknoinits
+func init() { //nolint:gochecknoinits
 	SchemeBuilder.Register(&NotaryServer{}, &NotaryServerList{})
 }

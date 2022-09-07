@@ -401,6 +401,6 @@ type ChartMuseumCacheSpec struct {
 	Redis *harbormetav1.RedisConnection `json:"redis,omitempty"`
 }
 
-func init() { // nolint:gochecknoinits
+func init() { //nolint:gochecknoinits
 	SchemeBuilder.Register(&ChartMuseum{}, &ChartMuseumList{})
 }

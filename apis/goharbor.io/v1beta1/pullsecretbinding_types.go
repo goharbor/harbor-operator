@@ -80,6 +80,6 @@ type PullSecretBindingList struct {
 	Items           []PullSecretBinding `json:"items"`
 }
 
-func init() { // nolint:gochecknoinits
+func init() { //nolint:gochecknoinits
 	SchemeBuilder.Register(&PullSecretBinding{}, &PullSecretBindingList{})
 }

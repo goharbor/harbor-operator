@@ -56,7 +56,7 @@ func UpdateCondition(ctx context.Context, conditions []interface{}, conditionTyp
 	case 0:
 	case 1:
 		reason = reasons[0]
-	case 2: // nolint:gomnd
+	case 2: //nolint:gomnd
 		reason = reasons[0]
 		message = reasons[1]
 	default:
