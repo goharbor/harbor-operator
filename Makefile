@@ -506,7 +506,7 @@ clean:
 
 # find or download controller-gen
 # download controller-gen if necessary
-CONTROLLER_GEN_VERSION := 0.6.2
+CONTROLLER_GEN_VERSION := 0.9.2
 CONTROLLER_GEN := $(BIN)/controller-gen
 
 .PHONY: controller-gen
