@@ -9302,6 +9302,8 @@ spec:
                           type: string
                       type: object
                     type: array
+                required:
+                - tokenIssuer
                 type: object
               database:
                 description: Database configuration for in-cluster database service
@@ -14294,6 +14296,8 @@ spec:
                           type: string
                       type: object
                     type: array
+                required:
+                - tokenIssuer
                 type: object
               database:
                 properties:
