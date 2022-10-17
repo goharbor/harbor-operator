@@ -289,6 +289,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1.J
 			Replicas: jobservice.Spec.Replicas,
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
+					Annotations: jobservice.Spec.ComponentSpec.TemplateAnnotations,
 					Labels: map[string]string{
 						r.Label("name"):      name,
 						r.Label("namespace"): namespace,

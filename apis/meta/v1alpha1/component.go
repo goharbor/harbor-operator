@@ -67,6 +67,10 @@ type ImageSpec struct {
 }
 
 type ComponentSpec struct {
+	// +kubebuilder:validation:Optional
+	// Custom annotations to be added into the pods
+	TemplateAnnotations map[string]string `json:"templateAnnotations,omitempty"`
+
 	ImageSpec `json:",inline"`
 
 	// +kubebuilder:validation:Optional
