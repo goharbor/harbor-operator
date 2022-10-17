@@ -175,6 +175,8 @@ metadata:
   labels:
     sample: "true"
   name: sample
+  annotations:
+    custom: "This is the HarborCluster Annotation"
 spec:
   database:
     kind: PostgreSQL
@@ -226,7 +228,9 @@ spec:
     enabled: true
   notary:
     migrationEnabled: true
-  portal: {}
+  portal:
+    templateAnnotations:
+       foo: "bar"
   registry: {}
   trivy:
     skipUpdate: false

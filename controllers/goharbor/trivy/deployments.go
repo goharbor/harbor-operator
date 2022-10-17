@@ -209,6 +209,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, trivy *goharborv1.Trivy)
 			Replicas: trivy.Spec.Replicas,
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
+					Annotations: trivy.Spec.ComponentSpec.TemplateAnnotations,
 					Labels: map[string]string{
 						r.Label("name"):      name,
 						r.Label("namespace"): namespace,
