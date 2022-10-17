@@ -194,6 +194,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, exporter *goharborv1.Exp
 			Replicas: exporter.Spec.Replicas,
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
+					Annotations: exporter.Spec.ComponentSpec.TemplateAnnotations,
 					Labels: map[string]string{
 						r.Label("name"):      name,
 						r.Label("namespace"): namespace,

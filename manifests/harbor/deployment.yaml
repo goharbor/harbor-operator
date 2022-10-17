@@ -2086,6 +2086,11 @@ spec:
                 description: 'ServiceAccountName is the name of the ServiceAccount
                   to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                 type: string
+              templateAnnotations:
+                additionalProperties:
+                  type: string
+                description: Custom annotations to be added into the pods
+                type: object
               tolerations:
                 description: If specified, the pod's tolerations.
                 items:
@@ -4277,6 +4282,11 @@ spec:
                 description: 'ServiceAccountName is the name of the ServiceAccount
                   to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                 type: string
+              templateAnnotations:
+                additionalProperties:
+                  type: string
+                description: Custom annotations to be added into the pods
+                type: object
               tolerations:
                 description: If specified, the pod's tolerations.
                 items:
@@ -4848,6 +4858,11 @@ spec:
                 description: 'ServiceAccountName is the name of the ServiceAccount
                   to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                 type: string
+              templateAnnotations:
+                additionalProperties:
+                  type: string
+                description: Custom annotations to be added into the pods
+                type: object
               tolerations:
                 description: If specified, the pod's tolerations.
                 items:
@@ -5402,6 +5417,11 @@ spec:
                 description: 'ServiceAccountName is the name of the ServiceAccount
                   to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                 type: string
+              templateAnnotations:
+                additionalProperties:
+                  type: string
+                description: Custom annotations to be added into the pods
+                type: object
               tolerations:
                 description: If specified, the pod's tolerations.
                 items:
@@ -5843,6 +5863,11 @@ spec:
                 description: 'ServiceAccountName is the name of the ServiceAccount
                   to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                 type: string
+              templateAnnotations:
+                additionalProperties:
+                  type: string
+                description: Custom annotations to be added into the pods
+                type: object
               tls:
                 properties:
                   certificateRef:
@@ -6222,6 +6247,11 @@ spec:
                 description: 'ServiceAccountName is the name of the ServiceAccount
                   to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                 type: string
+              templateAnnotations:
+                additionalProperties:
+                  type: string
+                description: Custom annotations to be added into the pods
+                type: object
               tls:
                 properties:
                   certificateRef:
@@ -6484,6 +6514,11 @@ spec:
                     description: 'ServiceAccountName is the name of the ServiceAccount
                       to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                     type: string
+                  templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    description: Custom annotations to be added into the pods
+                    type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
                     items:
@@ -6617,6 +6652,11 @@ spec:
                     description: 'ServiceAccountName is the name of the ServiceAccount
                       to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                     type: string
+                  templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    description: Custom annotations to be added into the pods
+                    type: object
                   tokenIssuer:
                     description: ObjectReference is a reference to an object with
                       a given name, kind and group.
@@ -6826,6 +6866,11 @@ spec:
                     description: 'ServiceAccountName is the name of the ServiceAccount
                       to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                     type: string
+                  templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    description: Custom annotations to be added into the pods
+                    type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
                     items:
@@ -7888,6 +7933,11 @@ spec:
                     description: 'ServiceAccountName is the name of the ServiceAccount
                       to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                     type: string
+                  templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    description: Custom annotations to be added into the pods
+                    type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
                     items:
@@ -8023,6 +8073,11 @@ spec:
                         description: 'ServiceAccountName is the name of the ServiceAccount
                           to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                         type: string
+                      templateAnnotations:
+                        additionalProperties:
+                          type: string
+                        description: Custom annotations to be added into the pods
+                        type: object
                       tolerations:
                         description: If specified, the pod's tolerations.
                         items:
@@ -8138,6 +8193,11 @@ spec:
                         description: 'ServiceAccountName is the name of the ServiceAccount
                           to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                         type: string
+                      templateAnnotations:
+                        additionalProperties:
+                          type: string
+                        description: Custom annotations to be added into the pods
+                        type: object
                       tolerations:
                         description: If specified, the pod's tolerations.
                         items:
@@ -8252,6 +8312,11 @@ spec:
                     description: 'ServiceAccountName is the name of the ServiceAccount
                       to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                     type: string
+                  templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    description: Custom annotations to be added into the pods
+                    type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
                     items:
@@ -8456,6 +8521,11 @@ spec:
                       - name
                       type: object
                     type: array
+                  templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    description: Custom annotations to be added into the pods
+                    type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
                     items:
@@ -8568,6 +8638,11 @@ spec:
                     description: 'ServiceAccountName is the name of the ServiceAccount
                       to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                     type: string
+                  templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    description: Custom annotations to be added into the pods
+                    type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
                     items:
@@ -8733,6 +8808,11 @@ spec:
                         required:
                         - claimName
                         type: object
+                    type: object
+                  templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    description: Custom annotations to be added into the pods
                     type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
@@ -9112,6 +9192,11 @@ spec:
                     description: 'ServiceAccountName is the name of the ServiceAccount
                       to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                     type: string
+                  templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    description: Custom annotations to be added into the pods
+                    type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
                     items:
@@ -9245,6 +9330,11 @@ spec:
                     description: 'ServiceAccountName is the name of the ServiceAccount
                       to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                     type: string
+                  templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    description: Custom annotations to be added into the pods
+                    type: object
                   tokenIssuer:
                     description: ObjectReference is a reference to an object with
                       a given name, kind and group.
@@ -9543,6 +9633,11 @@ spec:
                     description: 'ServiceAccountName is the name of the ServiceAccount
                       to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                     type: string
+                  templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    description: Custom annotations to be added into the pods
+                    type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
                     items:
@@ -9791,6 +9886,11 @@ spec:
                     description: 'ServiceAccountName is the name of the ServiceAccount
                       to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                     type: string
+                  templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    description: Custom annotations to be added into the pods
+                    type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
                     items:
@@ -9937,6 +10037,11 @@ spec:
                         description: 'ServiceAccountName is the name of the ServiceAccount
                           to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                         type: string
+                      templateAnnotations:
+                        additionalProperties:
+                          type: string
+                        description: Custom annotations to be added into the pods
+                        type: object
                       tolerations:
                         description: If specified, the pod's tolerations.
                         items:
@@ -10052,6 +10157,11 @@ spec:
                         description: 'ServiceAccountName is the name of the ServiceAccount
                           to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                         type: string
+                      templateAnnotations:
+                        additionalProperties:
+                          type: string
+                        description: Custom annotations to be added into the pods
+                        type: object
                       tolerations:
                         description: If specified, the pod's tolerations.
                         items:
@@ -10166,6 +10276,11 @@ spec:
                     description: 'ServiceAccountName is the name of the ServiceAccount
                       to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                     type: string
+                  templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    description: Custom annotations to be added into the pods
+                    type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
                     items:
@@ -10340,6 +10455,11 @@ spec:
                       - name
                       type: object
                     type: array
+                  templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    description: Custom annotations to be added into the pods
+                    type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
                     items:
@@ -10452,6 +10572,11 @@ spec:
                     description: 'ServiceAccountName is the name of the ServiceAccount
                       to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                     type: string
+                  templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    description: Custom annotations to be added into the pods
+                    type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
                     items:
@@ -11486,6 +11611,11 @@ spec:
                         - claimName
                         type: object
                     type: object
+                  templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    description: Custom annotations to be added into the pods
+                    type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
                     items:
@@ -12242,6 +12372,11 @@ spec:
                     description: 'ServiceAccountName is the name of the ServiceAccount
                       to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                     type: string
+                  templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    description: Custom annotations to be added into the pods
+                    type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
                     items:
@@ -12375,6 +12510,11 @@ spec:
                     description: 'ServiceAccountName is the name of the ServiceAccount
                       to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                     type: string
+                  templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    description: Custom annotations to be added into the pods
+                    type: object
                   tokenIssuer:
                     description: ObjectReference is a reference to an object with
                       a given name, kind and group.
@@ -12584,6 +12724,11 @@ spec:
                     description: 'ServiceAccountName is the name of the ServiceAccount
                       to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                     type: string
+                  templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    description: Custom annotations to be added into the pods
+                    type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
                     items:
@@ -13021,6 +13166,11 @@ spec:
                     description: 'ServiceAccountName is the name of the ServiceAccount
                       to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                     type: string
+                  templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    description: Custom annotations to be added into the pods
+                    type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
                     items:
@@ -13156,6 +13306,11 @@ spec:
                         description: 'ServiceAccountName is the name of the ServiceAccount
                           to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                         type: string
+                      templateAnnotations:
+                        additionalProperties:
+                          type: string
+                        description: Custom annotations to be added into the pods
+                        type: object
                       tolerations:
                         description: If specified, the pod's tolerations.
                         items:
@@ -13271,6 +13426,11 @@ spec:
                         description: 'ServiceAccountName is the name of the ServiceAccount
                           to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                         type: string
+                      templateAnnotations:
+                        additionalProperties:
+                          type: string
+                        description: Custom annotations to be added into the pods
+                        type: object
                       tolerations:
                         description: If specified, the pod's tolerations.
                         items:
@@ -13385,6 +13545,11 @@ spec:
                     description: 'ServiceAccountName is the name of the ServiceAccount
                       to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                     type: string
+                  templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    description: Custom annotations to be added into the pods
+                    type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
                     items:
@@ -13589,6 +13754,11 @@ spec:
                       - name
                       type: object
                     type: array
+                  templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    description: Custom annotations to be added into the pods
+                    type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
                     items:
@@ -13701,6 +13871,11 @@ spec:
                     description: 'ServiceAccountName is the name of the ServiceAccount
                       to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                     type: string
+                  templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    description: Custom annotations to be added into the pods
+                    type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
                     items:
@@ -13866,6 +14041,11 @@ spec:
                         required:
                         - claimName
                         type: object
+                    type: object
+                  templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    description: Custom annotations to be added into the pods
                     type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
@@ -14106,6 +14286,11 @@ spec:
                     description: 'ServiceAccountName is the name of the ServiceAccount
                       to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                     type: string
+                  templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    description: Custom annotations to be added into the pods
+                    type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
                     items:
@@ -14239,6 +14424,11 @@ spec:
                     description: 'ServiceAccountName is the name of the ServiceAccount
                       to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                     type: string
+                  templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    description: Custom annotations to be added into the pods
+                    type: object
                   tokenIssuer:
                     description: ObjectReference is a reference to an object with
                       a given name, kind and group.
@@ -14448,6 +14638,11 @@ spec:
                     description: 'ServiceAccountName is the name of the ServiceAccount
                       to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                     type: string
+                  templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    description: Custom annotations to be added into the pods
+                    type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
                     items:
@@ -14951,6 +15146,11 @@ spec:
                     description: 'ServiceAccountName is the name of the ServiceAccount
                       to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                     type: string
+                  templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    description: Custom annotations to be added into the pods
+                    type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
                     items:
@@ -15097,6 +15297,11 @@ spec:
                         description: 'ServiceAccountName is the name of the ServiceAccount
                           to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                         type: string
+                      templateAnnotations:
+                        additionalProperties:
+                          type: string
+                        description: Custom annotations to be added into the pods
+                        type: object
                       tolerations:
                         description: If specified, the pod's tolerations.
                         items:
@@ -15212,6 +15417,11 @@ spec:
                         description: 'ServiceAccountName is the name of the ServiceAccount
                           to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                         type: string
+                      templateAnnotations:
+                        additionalProperties:
+                          type: string
+                        description: Custom annotations to be added into the pods
+                        type: object
                       tolerations:
                         description: If specified, the pod's tolerations.
                         items:
@@ -15326,6 +15536,11 @@ spec:
                     description: 'ServiceAccountName is the name of the ServiceAccount
                       to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                     type: string
+                  templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    description: Custom annotations to be added into the pods
+                    type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
                     items:
@@ -15528,6 +15743,11 @@ spec:
                       - name
                       type: object
                     type: array
+                  templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    description: Custom annotations to be added into the pods
+                    type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
                     items:
@@ -15640,6 +15860,11 @@ spec:
                     description: 'ServiceAccountName is the name of the ServiceAccount
                       to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                     type: string
+                  templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    description: Custom annotations to be added into the pods
+                    type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
                     items:
@@ -15902,6 +16127,11 @@ spec:
                         required:
                         - claimName
                         type: object
+                    type: object
+                  templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    description: Custom annotations to be added into the pods
                     type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
@@ -19731,6 +19961,11 @@ spec:
                 description: 'ServiceAccountName is the name of the ServiceAccount
                   to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                 type: string
+              templateAnnotations:
+                additionalProperties:
+                  type: string
+                description: Custom annotations to be added into the pods
+                type: object
               tls:
                 properties:
                   certificateRef:
@@ -23448,6 +23683,11 @@ spec:
                 description: 'ServiceAccountName is the name of the ServiceAccount
                   to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                 type: string
+              templateAnnotations:
+                additionalProperties:
+                  type: string
+                description: Custom annotations to be added into the pods
+                type: object
               tls:
                 properties:
                   certificateRef:
@@ -23950,6 +24190,11 @@ spec:
                 required:
                 - postgres
                 type: object
+              templateAnnotations:
+                additionalProperties:
+                  type: string
+                description: Custom annotations to be added into the pods
+                type: object
               tls:
                 properties:
                   certificateRef:
@@ -24291,6 +24536,11 @@ spec:
                     type: object
                 required:
                 - postgres
+                type: object
+              templateAnnotations:
+                additionalProperties:
+                  type: string
+                description: Custom annotations to be added into the pods
                 type: object
               tls:
                 properties:
@@ -24644,6 +24894,11 @@ spec:
                 - aliasesRef
                 - postgres
                 type: object
+              templateAnnotations:
+                additionalProperties:
+                  type: string
+                description: Custom annotations to be added into the pods
+                type: object
               tolerations:
                 description: If specified, the pod's tolerations.
                 items:
@@ -24942,6 +25197,11 @@ spec:
                 - aliasesRef
                 - postgres
                 type: object
+              templateAnnotations:
+                additionalProperties:
+                  type: string
+                description: Custom annotations to be added into the pods
+                type: object
               tolerations:
                 description: If specified, the pod's tolerations.
                 items:
@@ -25186,6 +25446,11 @@ spec:
                 description: 'ServiceAccountName is the name of the ServiceAccount
                   to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                 type: string
+              templateAnnotations:
+                additionalProperties:
+                  type: string
+                description: Custom annotations to be added into the pods
+                type: object
               tls:
                 properties:
                   certificateRef:
@@ -25411,6 +25676,11 @@ spec:
                 description: 'ServiceAccountName is the name of the ServiceAccount
                   to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                 type: string
+              templateAnnotations:
+                additionalProperties:
+                  type: string
+                description: Custom annotations to be added into the pods
+                type: object
               tls:
                 properties:
                   certificateRef:
@@ -28135,6 +28405,11 @@ spec:
                 required:
                 - driver
                 type: object
+              templateAnnotations:
+                additionalProperties:
+                  type: string
+                description: Custom annotations to be added into the pods
+                type: object
               tolerations:
                 description: If specified, the pod's tolerations.
                 items:
@@ -30796,6 +31071,11 @@ spec:
                 required:
                 - driver
                 type: object
+              templateAnnotations:
+                additionalProperties:
+                  type: string
+                description: Custom annotations to be added into the pods
+                type: object
               tolerations:
                 description: If specified, the pod's tolerations.
                 items:
@@ -31170,6 +31450,11 @@ spec:
                 description: 'ServiceAccountName is the name of the ServiceAccount
                   to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                 type: string
+              templateAnnotations:
+                additionalProperties:
+                  type: string
+                description: Custom annotations to be added into the pods
+                type: object
               tls:
                 properties:
                   certificateRef:
@@ -31414,6 +31699,11 @@ spec:
                 description: 'ServiceAccountName is the name of the ServiceAccount
                   to use to run this component. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                 type: string
+              templateAnnotations:
+                additionalProperties:
+                  type: string
+                description: Custom annotations to be added into the pods
+                type: object
               tls:
                 properties:
                   certificateRef:
@@ -35028,6 +35318,11 @@ spec:
                 - cache
                 - reports
                 type: object
+              templateAnnotations:
+                additionalProperties:
+                  type: string
+                description: Custom annotations to be added into the pods
+                type: object
               tolerations:
                 description: If specified, the pod's tolerations.
                 items:
@@ -38641,6 +38936,11 @@ spec:
                 required:
                 - cache
                 - reports
+                type: object
+              templateAnnotations:
+                additionalProperties:
+                  type: string
+                description: Custom annotations to be added into the pods
                 type: object
               timeout:
                 default: 5m0s
