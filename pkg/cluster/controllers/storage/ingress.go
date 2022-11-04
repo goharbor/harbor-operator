@@ -31,8 +31,8 @@ func (m *MinIOController) applyIngress(ctx context.Context, harborcluster *gohar
 		m.Log.Info("Redirect of MinIO is not enabled")
 
 		return m.cleanupIngress(ctx, harborcluster)
-	} else if redirect.Expose == nil {
-		err := errors.New("Expose should be defined when redirect enabled")
+	} else if redirect.Expose == nil || redirect.Expose.Ingress == nil {
+		err := errors.New("Expose.Ingress should be defined when redirect enabled")
 
 		return minioNotReadyStatus(UpdateIngressError, err.Error()), err
 	}
