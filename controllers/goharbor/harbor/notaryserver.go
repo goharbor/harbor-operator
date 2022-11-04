@@ -195,7 +195,9 @@ func (r *Reconciler) GetNotaryServer(ctx context.Context, harbor *goharborv1.Har
 		harbormetav1.NetworkPoliciesAnnotationName: harbormetav1.NetworkPoliciesAnnotationDisabled,
 	}
 
-	annotation[harbormetav1.IngressControllerAnnotationName] = string(harbor.Spec.Expose.Core.Ingress.Controller)
+	if harbor.Spec.Expose.Core.Ingress != nil {
+		annotation[harbormetav1.IngressControllerAnnotationName] = string(harbor.Spec.Expose.Core.Ingress.Controller)
+	}
 
 	return &goharborv1.NotaryServer{
 		ObjectMeta: metav1.ObjectMeta{

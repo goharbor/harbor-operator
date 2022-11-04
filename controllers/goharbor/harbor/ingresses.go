@@ -32,6 +32,10 @@ func (r *Reconciler) AddCoreIngress(ctx context.Context, harbor *goharborv1.Harb
 }
 
 func (r *Reconciler) GetCoreIngress(ctx context.Context, harbor *goharborv1.Harbor) (*netv1.Ingress, error) {
+	if harbor.Spec.Expose.Core.Ingress == nil {
+		return nil, nil
+	}
+
 	var tls []netv1.IngressTLS
 
 	if harbor.Spec.Expose.Core.TLS.Enabled() {
@@ -113,7 +117,7 @@ func (r *Reconciler) GetNotaryServerIngress(ctx context.Context, harbor *goharbo
 		return nil, nil
 	}
 
-	if harbor.Spec.Expose.Notary == nil {
+	if harbor.Spec.Expose.Notary.Ingress == nil {
 		return nil, nil
 	}
 
