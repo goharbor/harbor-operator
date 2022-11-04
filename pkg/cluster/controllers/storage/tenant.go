@@ -82,8 +82,8 @@ func (m *MinIOController) getMinIOProperties(ctx context.Context, harborcluster 
 	if redirect != nil && redirect.Enable {
 		storageSpec.Redirect.Disable = false
 
-		if redirect.Expose == nil {
-			return nil, errors.New("Expose should be defined when redirect enabled")
+		if redirect.Expose == nil || redirect.Expose.Ingress == nil {
+			return nil, errors.New("Expose.Ingress should be defined when redirect enabled")
 		}
 
 		tls = redirect.Expose.TLS
