@@ -356,6 +356,7 @@ func Convert_v1alpha3_HarborExposeSpec_To_v1beta1_HarborExposeSpec(src *HarborEx
 
 func Convert_v1alpha3_HarborExposeComponentSpec_To_v1beta1_HarborExposeComponentSpec(src *HarborExposeComponentSpec, dst *v1beta1.HarborExposeComponentSpec) { //nolint
 	if src.Ingress != nil {
+		dst.Ingress = &v1beta1.HarborExposeIngressSpec{}
 		Convert_v1alpha3_HarborExposeIngressSpec_To_v1beta1_HarborExposeIngressSpec(src.Ingress, dst.Ingress)
 	}
 
@@ -754,9 +755,11 @@ func Convert_v1beta1_HarborExposeSpec_To_v1alpha3_HarborExposeSpec(src *v1beta1.
 	}
 }
 
-func Convert_v1beta1_HarborExposeComponentSpec_To_v1alpha3_HarborExposeComponentSpec(src *v1beta1.HarborExposeComponentSpec, dst *HarborExposeComponentSpec) { //nolint
-	dst.Ingress = &HarborExposeIngressSpec{}
-	Convert_v1beta1_HarborExposeIngressSpec_To_v1alpha3_HarborExposeIngressSpec(src.Ingress, dst.Ingress)
+func Convert_v1beta1_HarborExposeComponentSpec_To_v1alpha3_HarborExposeComponentSpec(src *v1beta1.HarborExposeComponentSpec, dst *HarborExposeComponentSpec) { // nolint
+	if src.Ingress != nil {
+		dst.Ingress = &HarborExposeIngressSpec{}
+		Convert_v1beta1_HarborExposeIngressSpec_To_v1alpha3_HarborExposeIngressSpec(src.Ingress, dst.Ingress)
+	}
 
 	if src.TLS != nil {
 		dst.TLS = src.TLS
