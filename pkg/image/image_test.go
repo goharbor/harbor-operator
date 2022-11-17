@@ -134,7 +134,7 @@ var _ = Describe("Get image", func() {
 		It("Should pass", func() {
 			image, err := getImage(ctx, "cluster-postgresql")
 			Expect(err).ToNot(HaveOccurred())
-			Expect(image).To(Equal("registry.opensource.zalan.do/acid/spilo-12:1.6-p3"))
+			Expect(image).To(Equal("registry.opensource.zalan.do/acid/spilo-14:2.1-p7"))
 		})
 	})
 
@@ -142,7 +142,7 @@ var _ = Describe("Get image", func() {
 		It("Should pass", func() {
 			image, err := getImage(ctx, "cluster-postgresql", WithRepository("ghcr.io/goharbor"))
 			Expect(err).ToNot(HaveOccurred())
-			Expect(image).To(Equal("ghcr.io/goharbor/spilo-12:1.6-p3"))
+			Expect(image).To(Equal("ghcr.io/goharbor/spilo-14:2.1-p7"))
 		})
 	})
 })
