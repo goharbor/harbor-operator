@@ -63761,7 +63761,7 @@ data:
   debug_logging: "true"
   default_cpu_request: 250m
   default_memory_request: 500Mi
-  docker_image: registry.opensource.zalan.do/acid/spilo-14:2.1-p7
+  docker_image: registry.opensource.zalan.do/acid/spilo-13:2.1-p1
   enable_ebs_gp3_migration: "false"
   enable_master_load_balancer: "false"
   enable_pgversion_env_var: "true"
