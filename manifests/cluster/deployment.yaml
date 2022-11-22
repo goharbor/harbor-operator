@@ -63756,7 +63756,7 @@ data:
   cluster_history_entries: "1000"
   cluster_labels: application:spilo
   cluster_name_label: cluster-name
-  connection_pooler_image: registry.opensource.zalan.do/acid/pgbouncer:master-16
+  connection_pooler_image: registry.opensource.zalan.do/acid/pgbouncer:master-18
   db_hosted_zone: db.example.com
   debug_logging: "true"
   default_cpu_request: 250m
@@ -63770,7 +63770,7 @@ data:
   enable_team_member_deprecation: "false"
   enable_teams_api: "false"
   external_traffic_policy: Cluster
-  logical_backup_docker_image: registry.opensource.zalan.do/acid/logical-backup:v1.6.3
+  logical_backup_docker_image: registry.opensource.zalan.do/acid/logical-backup:v1.7.0
   logical_backup_job_prefix: logical-backup-
   logical_backup_provider: s3
   logical_backup_s3_bucket: my-bucket-url
@@ -64061,7 +64061,7 @@ spec:
       - env:
         - name: CONFIG_MAP_NAME
           value: postgres-operator
-        image: ghcr.io/goharbor/postgres-operator:v1.6.3
+        image: ghcr.io/goharbor/postgres-operator:v1.7.0
         imagePullPolicy: IfNotPresent
         name: postgres-operator
         resources:
