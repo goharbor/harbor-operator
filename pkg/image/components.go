@@ -129,7 +129,7 @@ func init() { //nolint:gochecknoinits
 
 	RegisterRepository("cluster-postgresql", "registry.opensource.zalan.do/acid", "*")
 	RegisterImageName("cluster-postgresql", "spilo-13", "*")
-	RegisterTag("cluster-postgresql", "2.1-p1", "~2.2.0", "~2.3.0", "~2.4.0", "~2.5.0")
+	RegisterTag("cluster-postgresql", "2.1-p1", "~2.2.0", "~2.3.0", "~2.4.0", "~2.5.0", "~2.6.0")
 
 	RegisterRepository("cluster-minio", "minio", "*") // the minio repository of dockerhub
 	RegisterImageName("cluster-minio", "minio", "*")
