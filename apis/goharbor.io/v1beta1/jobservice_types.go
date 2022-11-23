@@ -85,6 +85,23 @@ type JobServiceSpec struct {
 
 	// +kubebuilder:validation:Optional
 	Trace *harbormetav1.TraceSpec `json:"trace,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	Storage *JobServiceStorageSpec `json:"storage,omitempty"`
+}
+
+type JobServiceStorageSpec struct {
+	// +kubebuilder:validation:Required
+	ScanDataExports JobServiceStorageVolumeSpec `json:"scanDataExports"`
+}
+
+type JobServiceStorageVolumeSpec struct {
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default={"emptyDir":{"sizeLimit":"1Gi"}}
+	VolumeSource corev1.VolumeSource `json:"volumeSource,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	Prefix string `json:"prefix,omitempty"`
 }
 
 type JobServiceTokenSpec struct {

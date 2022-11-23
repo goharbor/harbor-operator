@@ -27,6 +27,10 @@ spec:
     url: http://example-harbor-registry
   resources: {}
   secretRef: example-harbor-jobservice-secret
+  storage:
+    scanDataExports:
+      volumeSource:
+        emptyDir: {}
   tokenService:
     url: http://example-harbor-core/service/token
   workerPool:

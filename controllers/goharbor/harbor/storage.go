@@ -50,6 +50,24 @@ func (r *Reconciler) ChartMuseumStorage(ctx context.Context, harbor *goharborv1.
 	}
 }
 
+func (r *Reconciler) JobServiceScanDataExportsStorage(ctx context.Context, harbor *goharborv1.Harbor) goharborv1.JobServiceStorageVolumeSpec {
+	if harbor.Spec.JobService.Storage != nil && harbor.Spec.JobService.Storage.ScanDataExportsPersistentVolume != nil {
+		pvc := &harbor.Spec.JobService.Storage.ScanDataExportsPersistentVolume.PersistentVolumeClaimVolumeSource
+
+		return goharborv1.JobServiceStorageVolumeSpec{
+			VolumeSource: corev1.VolumeSource{
+				PersistentVolumeClaim: pvc,
+			},
+		}
+	}
+
+	return goharborv1.JobServiceStorageVolumeSpec{
+		VolumeSource: corev1.VolumeSource{
+			EmptyDir: &corev1.EmptyDirVolumeSource{},
+		},
+	}
+}
+
 func (r *Reconciler) TrivyReportsStorage(ctx context.Context, harbor *goharborv1.Harbor) goharborv1.TrivyStorageVolumeSpec {
 	if harbor.Spec.Trivy.Storage.ReportsPersistentVolume != nil {
 		pvc := &harbor.Spec.Trivy.Storage.ReportsPersistentVolume.PersistentVolumeClaimVolumeSource

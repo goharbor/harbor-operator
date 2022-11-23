@@ -30,6 +30,7 @@ config/webhook/manifests.yaml
 charts/index.yaml
 charts/*.tgz
 charts/harbor-operator/charts/*.tgz
+charts/postgres-operator/
 
 ## Mac file
 .DS_Store

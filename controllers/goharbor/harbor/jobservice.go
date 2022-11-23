@@ -182,6 +182,9 @@ func (r *Reconciler) GetJobService(ctx context.Context, harbor *goharborv1.Harbo
 			Metrics:              harbor.Spec.JobService.Metrics,
 			Network:              harbor.Spec.Network,
 			Trace:                harbor.Spec.Trace,
+			Storage: &goharborv1.JobServiceStorageSpec{
+				ScanDataExports: r.JobServiceScanDataExportsStorage(ctx, harbor),
+			},
 		},
 	}, nil
 }

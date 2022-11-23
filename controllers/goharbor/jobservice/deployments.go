@@ -22,6 +22,8 @@ import (
 
 const (
 	ConfigVolumeName                      = "config"
+	ScanDataExportsVolumeName             = "job-scandata-exports"
+	ScanDataExportsVolumePath             = "/var/scandata_exports"
 	LogsVolumeName                        = "logs"
 	ConfigPath                            = "/etc/jobservice"
 	HealthPath                            = "/api/v1/stats"
@@ -125,6 +127,17 @@ func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1.J
 		Name:  "INTERNAL_TLS_ENABLED",
 		Value: strconv.FormatBool(jobservice.Spec.TLS.Enabled()),
 	})
+
+	if jobservice.Spec.Storage == nil {
+		jobservice.Spec.Storage = &goharborv1.JobServiceStorageSpec{
+			ScanDataExports: goharborv1.JobServiceStorageVolumeSpec{
+				VolumeSource: corev1.VolumeSource{
+					EmptyDir: &corev1.EmptyDirVolumeSource{},
+				},
+			},
+		}
+	}
+
 	volumes := []corev1.Volume{{
 		Name: ConfigVolumeName,
 		VolumeSource: corev1.VolumeSource{
@@ -139,6 +152,9 @@ func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1.J
 		VolumeSource: corev1.VolumeSource{
 			EmptyDir: &corev1.EmptyDirVolumeSource{},
 		},
+	}, {
+		Name:         ScanDataExportsVolumeName,
+		VolumeSource: jobservice.Spec.Storage.ScanDataExports.VolumeSource,
 	}}
 	volumeMounts := []corev1.VolumeMount{{
 		MountPath: ConfigPath,
@@ -146,6 +162,10 @@ func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1.J
 	}, {
 		MountPath: logsDirectory,
 		Name:      LogsVolumeName,
+	}, {
+		Name:      ScanDataExportsVolumeName,
+		MountPath: ScanDataExportsVolumePath,
+		ReadOnly:  false,
 	}}
 
 	// inject s3 cert if need.

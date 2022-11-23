@@ -125,17 +125,17 @@ func init() { //nolint:gochecknoinits
 	// Register the cluster service components
 	RegisterRepository("cluster-redis", "", "*") // the - repository of dockerhub
 	RegisterImageName("cluster-redis", "redis", "*")
-	RegisterTag("cluster-redis", "5.0-alpine", "~2.2.0", "~2.3.0", "~2.4.0", "~2.5.0")
+	RegisterTag("cluster-redis", "5.0-alpine", "~2.2.0", "~2.3.0", "~2.4.0", "~2.5.0", "~2.6.0")
 
 	RegisterRepository("cluster-postgresql", "registry.opensource.zalan.do/acid", "*")
 	RegisterImageName("cluster-postgresql", "spilo-12", "*")
-	RegisterTag("cluster-postgresql", "1.6-p3", "~2.2.0", "~2.3.0", "~2.4.0", "~2.5.0")
+	RegisterTag("cluster-postgresql", "1.6-p3", "~2.2.0", "~2.3.0", "~2.4.0", "~2.5.0", "~2.6.0")
 
 	RegisterRepository("cluster-minio", "minio", "*") // the minio repository of dockerhub
 	RegisterImageName("cluster-minio", "minio", "*")
-	RegisterTag("cluster-minio", "RELEASE.2022-08-26T19-53-15Z", "~2.2.0", "~2.3.0", "~2.4.0", "~2.5.0")
+	RegisterTag("cluster-minio", "RELEASE.2022-08-26T19-53-15Z", "~2.2.0", "~2.3.0", "~2.4.0", "~2.5.0", "~2.6.0")
 
 	RegisterRepository("cluster-minio-init", "minio", "*") // the minio repository of dockerhub
 	RegisterImageName("cluster-minio-init", "mc", "*")
-	RegisterTag("cluster-minio-init", "RELEASE.2022-08-23T05-45-20Z", "~2.2.0", "~2.3.0", "~2.4.0", "~2.5.0")
+	RegisterTag("cluster-minio-init", "RELEASE.2022-08-23T05-45-20Z", "~2.2.0", "~2.3.0", "~2.4.0", "~2.5.0", "~2.6.0")
 }

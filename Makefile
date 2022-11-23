@@ -118,16 +118,39 @@ release-test: goreleaser
 CHART_RELEASE_NAME ?= harbor-operator
 CHART_HARBOR_CLASS ?=
 
-helm-install: helm helm-generate
+helm-minio-operator: helm
+	$(MAKE) kube-namespace
+	$(HELM) repo add minio https://operator.min.io/
+	$(HELM) repo update
+	$(HELM) upgrade --namespace "$(NAMESPACE)" --install minio-operator minio/operator --version 4.4.28
+
+helm-redis-operator: helm
+	$(MAKE) kube-namespace
+	$(HELM) repo add spotahome https://spotahome.github.io/redis-operator
+	$(HELM) repo update
+	$(HELM) upgrade --namespace "$(NAMESPACE)" --install redis-operator spotahome/redis-operator --version 3.1.4
+
+$(CHARTS_DIRECTORY)/postgres-operator/values.yaml:
+	mkdir -p $(CHARTS_DIRECTORY)/postgres-operator
+	echo "configKubernetes:" > '$@'
+	echo '  secret_name_template: "{username}.{cluster}.credentials"' >> '$@'
+
+helm-postgres-operator: helm $(CHARTS_DIRECTORY)/postgres-operator/values.yaml
+	$(MAKE) kube-namespace
+	$(HELM) repo add zalando https://opensource.zalando.com/postgres-operator/charts/postgres-operator
+	$(HELM) repo update
+	$(HELM) upgrade --namespace "$(NAMESPACE)" --install postgres-operator zalando/postgres-operator --version 1.6.3 -f $(CHARTS_DIRECTORY)/postgres-operator/values.yaml
+
+helm-install: helm helm-generate helm-minio-operator helm-redis-operator helm-postgres-operator
 	$(MAKE) kube-namespace
 	$(HELM) upgrade --namespace "$(NAMESPACE)" --install $(CHART_RELEASE_NAME) $(CHARTS_DIRECTORY)/harbor-operator-$(RELEASE_VERSION).tgz \
 		--set-string image.repository="$$(echo $(IMG) | sed 's/:.*//')" \
 		--set-string image.tag="$$(echo $(IMG) | sed 's/.*://')" \
 		--set-string harborClass='$(CHART_HARBOR_CLASS)' \
 		--set installCRDs=true \
-		--set minio-operator.enabled=true \
-		--set postgres-operator.enabled=true \
-		--set redis-operator.enabled=true 
+		--set minio-operator.enabled=false \
+		--set postgres-operator.enabled=false \
+		--set redis-operator.enabled=false
 
 CLUSTER_NAME := harbor-operator
 
@@ -372,7 +395,7 @@ $(CHART_HARBOR_OPERATOR)/README.md: helm-docs $(CHART_HARBOR_OPERATOR)/README.md
 # Install CRDs into a cluster
 .PHONY: install
 install: go-generate
-	kubectl apply -f config/crd/bases
+	kubectl apply --server-side=true --force-conflicts -f config/crd/bases
 
 # Uninstall CRDs from a cluster
 .PHONY: uninstall
@@ -466,7 +489,7 @@ certmanager: helm jetstack
 		--version v1.4.3 \
 		--set installCRDs=true
 	kubectl wait --namespace $(CERTMANAGER_NAMESPACE) --for=condition=ready pod --timeout="60s" --all
-	
+
 
 .PHONY: jetstack
 jetstack:
