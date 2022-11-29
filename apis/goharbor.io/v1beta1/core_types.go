@@ -2,6 +2,7 @@ package v1beta1
 
 import (
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -84,6 +85,18 @@ type CoreSpec struct {
 
 	// +kubebuilder:validation:Optional
 	Trace *harbormetav1.TraceSpec `json:"trace,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Affinity is the configuration of the pod affinity.
+	Affinity *corev1.Affinity `json:"affinity,omitempty"`
+}
+
+func (c *Core) SetAffinity(affinity *corev1.Affinity) {
+	c.Spec.Affinity = affinity
+}
+
+func (c *Core) GetAffinity() *corev1.Affinity {
+	return c.Spec.Affinity
 }
 
 type CoreRedisSpec struct {

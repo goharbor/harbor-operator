@@ -12,6 +12,5 @@ func (r *Reconciler) NewEmpty(_ context.Context) resources.Resource {
 }
 
 func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resource) error {
-
 	return nil
 }

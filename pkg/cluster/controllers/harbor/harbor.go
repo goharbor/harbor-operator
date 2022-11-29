@@ -140,6 +140,7 @@ func (harbor *Controller) getHarborCR(ctx context.Context, harborcluster *goharb
 			Proxy:       spec.Proxy,
 			Network:     harborcluster.Spec.Network,
 			Trace:       harborcluster.Spec.Trace,
+			Affinity:    spec.Affinity,
 		},
 	}
 

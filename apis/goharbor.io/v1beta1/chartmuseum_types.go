@@ -64,6 +64,18 @@ type ChartMuseumSpec struct {
 
 	// +kubebuilder:validation:Optional
 	Network *harbormetav1.Network `json:"network,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Affinity is the configuration of the pod affinity.
+	Affinity *corev1.Affinity `json:"affinity,omitempty"`
+}
+
+func (c *ChartMuseum) SetAffinity(affinity *corev1.Affinity) {
+	c.Spec.Affinity = affinity
+}
+
+func (c *ChartMuseum) GetAffinity() *corev1.Affinity {
+	return c.Spec.Affinity
 }
 
 type ChartMuseumServerSpec struct {

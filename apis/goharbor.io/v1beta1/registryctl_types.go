@@ -2,6 +2,7 @@ package v1beta1
 
 import (
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -65,6 +66,18 @@ type RegistryControllerSpec struct {
 
 	// +kubebuilder:validation:Optional
 	Network *harbormetav1.Network `json:"network,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Affinity is the configuration of the pod affinity.
+	Affinity *corev1.Affinity `json:"affinity,omitempty"`
+}
+
+func (r *RegistryController) SetAffinity(affinity *corev1.Affinity) {
+	r.Spec.Affinity = affinity
+}
+
+func (r *RegistryController) GetAffinity() *corev1.Affinity {
+	return r.Spec.Affinity
 }
 
 type RegistryControllerAuthenticationSpec struct {

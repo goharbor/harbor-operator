@@ -77,6 +77,18 @@ type TrivySpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=false
 	OfflineScan bool `json:"offlineScan"`
+
+	// +kubebuilder:validation:Optional
+	// Affinity is the configuration of the pod affinity.
+	Affinity *corev1.Affinity `json:"affinity,omitempty"`
+}
+
+func (t *Trivy) SetAffinity(affinity *corev1.Affinity) {
+	t.Spec.Affinity = affinity
+}
+
+func (t *Trivy) GetAffinity() *corev1.Affinity {
+	return t.Spec.Affinity
 }
 
 type TrivyUpdateSpec struct {

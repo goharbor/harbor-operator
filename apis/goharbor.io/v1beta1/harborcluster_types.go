@@ -92,6 +92,18 @@ type EmbeddedHarborSpec struct {
 	// +kubebuilder:validation:Pattern="[0-9]+\\.[0-9]+\\.[0-9]+"
 	// The version of the harbor, eg 2.1.2
 	Version string `json:"version"`
+
+	// +kubebuilder:validation:Optional
+	// Affinity is the configuration of the pod affinity.
+	Affinity *corev1.Affinity `json:"affinity,omitempty"`
+}
+
+func (harborcluster *HarborCluster) SetAffinity(affinity *corev1.Affinity) {
+	harborcluster.Spec.Affinity = affinity
+}
+
+func (harborcluster *HarborCluster) GetAffinity() *corev1.Affinity {
+	return harborcluster.Spec.Affinity
 }
 
 type EmbeddedHarborComponentsSpec struct {
