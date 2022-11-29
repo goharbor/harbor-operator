@@ -17,7 +17,7 @@ func AddVersionAnnotations(annotations map[string]string) map[string]string {
 }
 
 func GetVersion() string {
-	return "2.5.0"
+	return "2.6.0"
 }
 
 func GetGVK(ctx context.Context, object runtime.Object) schema.GroupVersionKind {

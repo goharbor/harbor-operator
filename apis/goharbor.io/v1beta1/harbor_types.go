@@ -388,6 +388,9 @@ type JobServiceComponentSpec struct {
 
 	// +kubebuilder:validation:Optional
 	Metrics *harbormetav1.MetricsSpec `json:"metrics,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	Storage *HarborStorageJobServiceStorageSpec `json:"storage,omitempty"`
 }
 
 type RegistryComponentSpec struct {
@@ -506,6 +509,13 @@ type HarborStorageImageChartStorageSpec struct {
 	// An implementation of the storagedriver.StorageDriver interface which uses Google Cloud for object storage.
 	// See https://docs.docker.com/registry/storage-drivers/gcs/
 	Gcs *HarborStorageImageChartStorageGcsSpec `json:"gcs,omitempty"`
+}
+
+type HarborStorageJobServiceStorageSpec struct {
+	// +kubebuilder:validation:Optional
+	// ScanDataExportsPersistentVolume specify the persistent volume used to store data exports.
+	// If empty, empty dir will be used.
+	ScanDataExportsPersistentVolume *HarborStoragePersistentVolumeSpec `json:"scanDataExportsPersistentVolume,omitempty"`
 }
 
 type HarborStorageTrivyStorageSpec struct {
