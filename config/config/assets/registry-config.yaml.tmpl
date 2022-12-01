@@ -145,6 +145,31 @@ storage:
     realm: {{ .Spec.Storage.Driver.Azure.BaseURL | quote }}
   {{- end }}
 
+  {{- if .Spec.Storage.Driver.Oss }}
+  oss:
+    accesskeyid: {{ .Spec.Storage.Driver.Oss.AccessKeyID | quote }}
+    bucket: {{ .Spec.Storage.Driver.Oss.Bucket | quote }}
+    region: {{ .Spec.Storage.Driver.Oss.Region | quote }}
+    {{- if .Spec.Storage.Driver.Oss.Endpoint }}
+    endpoint: {{ .Spec.Storage.Driver.Oss.Bucket }}.{{ .Spec.Storage.Driver.Oss.Endpoint }}
+    {{- end }}
+    {{- if .Spec.Storage.Driver.Oss.Internal }}
+    internal: {{ .Spec.Storage.Driver.Oss.Internal }}
+    {{- end }}
+    {{- if .Spec.Storage.Driver.Oss.Encrypt }}
+    encrypt: {{ .Spec.Storage.Driver.Oss.Encrypt }}
+    {{- end }}
+    {{- if .Spec.Storage.Driver.Oss.Secure }}
+    secure: {{ .Spec.Storage.Driver.Oss.Secure }}
+    {{- end }}
+    {{- if .Spec.Storage.Driver.Oss.ChunkSize }}
+    chunksize: {{ .Spec.Storage.Driver.Oss.ChunkSize }}
+    {{- end }}
+    {{- if .Spec.Storage.Driver.Oss.PathPrefix }}
+    rootdirectory: {{ .Spec.Storage.Driver.Oss.PathPrefix | quote }}
+    {{- end }}
+  {{- end }}
+
   {{- if .Spec.Storage.Driver.Gcs }}
   gcs:
     bucket: {{ .Spec.Storage.Driver.Gcs.Bucket | quote }}

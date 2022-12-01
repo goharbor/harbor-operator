@@ -509,6 +509,11 @@ type HarborStorageImageChartStorageSpec struct {
 	// An implementation of the storagedriver.StorageDriver interface which uses Google Cloud for object storage.
 	// See https://docs.docker.com/registry/storage-drivers/gcs/
 	Gcs *HarborStorageImageChartStorageGcsSpec `json:"gcs,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// An implementation of the storagedriver.StorageDriver interface which uses Alibaba Cloud for object storage.
+	// See https://docs.docker.com/registry/storage-drivers/oss/
+	Oss *HarborStorageImageChartStorageOssSpec `json:"oss,omitempty"`
 }
 
 type HarborStorageJobServiceStorageSpec struct {
@@ -536,6 +541,7 @@ const (
 	FileSystemDriverName = "filesystem"
 	AzureDriverName      = "azure"
 	GcsDriverName        = "gcs"
+	OssDriverName        = "oss"
 )
 
 func (r *HarborStorageImageChartStorageSpec) ProviderName() string {
@@ -553,6 +559,10 @@ func (r *HarborStorageImageChartStorageSpec) ProviderName() string {
 
 	if r.Gcs != nil {
 		return GcsDriverName
+	}
+
+	if r.Oss != nil {
+		return OssDriverName
 	}
 
 	return FileSystemDriverName
@@ -585,6 +595,10 @@ func (r *HarborStorageImageChartStorageSpec) Validate() error {
 		found++
 	}
 
+	if r.Oss != nil {
+		found++
+	}
+
 	switch found {
 	case 0:
 		return ErrNoStorageConfiguration
@@ -614,6 +628,36 @@ type HarborStorageRegistryPersistentVolumeSpec struct {
 
 type HarborStorageImageChartStorageAzureSpec struct {
 	RegistryStorageDriverAzureSpec `json:",inline"`
+}
+
+type HarborStorageImageChartStorageOssSpec struct {
+	RegistryStorageDriverOssSpec `json:",inline"`
+}
+
+func (r *HarborStorageImageChartStorageOssSpec) ChartMuseum() *ChartMuseumChartStorageDriverOssSpec {
+	return &ChartMuseumChartStorageDriverOssSpec{
+		Endpoint:        r.getEndpoint(),
+		AccessKeyID:     r.AccessKeyID,
+		AccessSecretRef: r.AccessSecretRef,
+		Bucket:          r.Bucket,
+		PathPrefix:      r.PathPrefix,
+	}
+}
+
+func (r *HarborStorageImageChartStorageOssSpec) Registry() *RegistryStorageDriverOssSpec {
+	return &r.RegistryStorageDriverOssSpec
+}
+
+func (r *HarborStorageImageChartStorageOssSpec) getEndpoint() string {
+	if r.Endpoint != "" {
+		return r.Endpoint
+	}
+
+	if r.Internal {
+		return fmt.Sprintf("%s-internal.aliyuncs.com", r.Region)
+	}
+
+	return fmt.Sprintf("%s.aliyuncs.com", r.Region)
 }
 
 type HarborStorageImageChartStorageGcsSpec struct {

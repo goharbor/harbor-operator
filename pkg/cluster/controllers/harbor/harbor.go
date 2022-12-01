@@ -159,6 +159,10 @@ func (harbor *Controller) getHarborCR(ctx context.Context, harborcluster *goharb
 		harborCR.Spec.ImageChartStorage.Azure = harborcluster.Spec.Storage.Spec.Azure.HarborStorageImageChartStorageAzureSpec.DeepCopy()
 	}
 
+	if harborcluster.Spec.Storage.Spec.Oss != nil {
+		harborCR.Spec.ImageChartStorage.Oss = harborcluster.Spec.Storage.Spec.Oss.HarborStorageImageChartStorageOssSpec.DeepCopy()
+	}
+
 	if harborcluster.Spec.Storage.Spec.Gcs != nil {
 		harborCR.Spec.ImageChartStorage.Gcs = harborcluster.Spec.Storage.Spec.Gcs.HarborStorageImageChartStorageGcsSpec.DeepCopy()
 	}

@@ -617,6 +617,11 @@ type RegistryStorageDriverSpec struct {
 	// An implementation of the storagedriver.StorageDriver interface which uses Google Cloud for object storage.
 	// https://docs.docker.com/registry/storage-drivers/gcs/
 	Gcs *RegistryStorageDriverGcsSpec `json:"gcs,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// An implementation of the storagedriver.StorageDriver interface which uses Alibaba Cloud for object storage.
+	// https://docs.docker.com/registry/storage-drivers/oss/
+	Oss *RegistryStorageDriverOssSpec `json:"oss,omitempty"`
 }
 
 func (r *RegistryStorageDriverSpec) Validate() error {
@@ -643,6 +648,10 @@ func (r *RegistryStorageDriverSpec) Validate() error {
 	}
 
 	if r.Gcs != nil {
+		found++
+	}
+
+	if r.Oss != nil {
 		found++
 	}
 
@@ -684,6 +693,45 @@ type RegistryStorageDriverAzureSpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=/azure/harbor/charts
 	PathPrefix string `json:"pathPrefix,omitempty"`
+}
+
+type RegistryStorageDriverOssSpec struct {
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Pattern="oss-.*"
+	Region string `json:"region"`
+
+	// +kubebuilder:validation:Required
+	AccessKeyID string `json:"accessKeyID"`
+
+	// +kubebuilder:validation:Required
+	AccessSecretRef string `json:"accessSecretRef"`
+
+	// +kubebuilder:validation:Required
+	Bucket string `json:"bucket"`
+
+	// +kubebuilder:validation:Optional
+	PathPrefix string `json:"pathPrefix,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	Endpoint string `json:"endpoint,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=false
+	Internal bool `json:"internal,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=false
+	// Specifies whether the registry stores the image in encrypted format or not. A boolean value.
+	Encrypt bool `json:"encrypt,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=true
+	Secure *bool `json:"secure,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Minimum=5242880
+	// The Oss API requires multipart upload chunks to be at least 5MB.
+	ChunkSize int64 `json:"chunksize,omitempty"`
 }
 
 type RegistryStorageDriverGcsSpec struct {
