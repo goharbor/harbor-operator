@@ -4126,6 +4126,24 @@ spec:
                         - authenticationURL
                         - container
                         type: object
+                      oss:
+                        properties:
+                          accessKeyID:
+                            type: string
+                          accessSecretRef:
+                            type: string
+                          bucket:
+                            type: string
+                          endpoint:
+                            type: string
+                          pathPrefix:
+                            type: string
+                        required:
+                        - accessKeyID
+                        - accessSecretRef
+                        - bucket
+                        - endpoint
+                        type: object
                     type: object
                   url:
                     description: The absolute url for .tgz files in index.yaml
@@ -10650,6 +10668,7 @@ spec:
                     - FileSystem
                     - Azure
                     - Gcs
+                    - Oss
                     type: string
                   spec:
                     description: the spec of Storage.
@@ -11191,6 +11210,44 @@ spec:
                         - operatorVersion
                         - replicas
                         - volumesPerServer
+                        type: object
+                      oss:
+                        properties:
+                          accessKeyID:
+                            type: string
+                          accessSecretRef:
+                            type: string
+                          bucket:
+                            type: string
+                          chunksize:
+                            description: The Oss API requires multipart upload chunks
+                              to be at least 5MB.
+                            format: int64
+                            minimum: 5242880
+                            type: integer
+                          encrypt:
+                            default: false
+                            description: Specifies whether the registry stores the
+                              image in encrypted format or not. A boolean value.
+                            type: boolean
+                          endpoint:
+                            type: string
+                          internal:
+                            default: false
+                            type: boolean
+                          pathPrefix:
+                            type: string
+                          region:
+                            pattern: oss-.*
+                            type: string
+                          secure:
+                            default: true
+                            type: boolean
+                        required:
+                        - accessKeyID
+                        - accessSecretRef
+                        - bucket
+                        - region
                         type: object
                       redirect:
                         description: Determine if the redirection of minio storage
@@ -14854,6 +14911,46 @@ spec:
                         type: string
                       pathPrefix:
                         type: string
+                    type: object
+                  oss:
+                    description: An implementation of the storagedriver.StorageDriver
+                      interface which uses Alibaba Cloud for object storage. See https://docs.docker.com/registry/storage-drivers/oss/
+                    properties:
+                      accessKeyID:
+                        type: string
+                      accessSecretRef:
+                        type: string
+                      bucket:
+                        type: string
+                      chunksize:
+                        description: The Oss API requires multipart upload chunks
+                          to be at least 5MB.
+                        format: int64
+                        minimum: 5242880
+                        type: integer
+                      encrypt:
+                        default: false
+                        description: Specifies whether the registry stores the image
+                          in encrypted format or not. A boolean value.
+                        type: boolean
+                      endpoint:
+                        type: string
+                      internal:
+                        default: false
+                        type: boolean
+                      pathPrefix:
+                        type: string
+                      region:
+                        pattern: oss-.*
+                        type: string
+                      secure:
+                        default: true
+                        type: boolean
+                    required:
+                    - accessKeyID
+                    - accessSecretRef
+                    - bucket
+                    - region
                     type: object
                   redirect:
                     properties:
@@ -44880,6 +44977,46 @@ spec:
                           is only suitable for testing. Never use this driver in production.
                           See: https://docs.docker.com/registry/storage-drivers/inmemory/'
                         type: object
+                      oss:
+                        description: An implementation of the storagedriver.StorageDriver
+                          interface which uses Alibaba Cloud for object storage. https://docs.docker.com/registry/storage-drivers/oss/
+                        properties:
+                          accessKeyID:
+                            type: string
+                          accessSecretRef:
+                            type: string
+                          bucket:
+                            type: string
+                          chunksize:
+                            description: The Oss API requires multipart upload chunks
+                              to be at least 5MB.
+                            format: int64
+                            minimum: 5242880
+                            type: integer
+                          encrypt:
+                            default: false
+                            description: Specifies whether the registry stores the
+                              image in encrypted format or not. A boolean value.
+                            type: boolean
+                          endpoint:
+                            type: string
+                          internal:
+                            default: false
+                            type: boolean
+                          pathPrefix:
+                            type: string
+                          region:
+                            pattern: oss-.*
+                            type: string
+                          secure:
+                            default: true
+                            type: boolean
+                        required:
+                        - accessKeyID
+                        - accessSecretRef
+                        - bucket
+                        - region
+                        type: object
                       s3:
                         description: 'An implementation of the storagedriver.StorageDriver
                           interface which uses Amazon S3 or S3 compatible services
@@ -63617,11 +63754,22 @@ data:
     | quote }}\n    {{- end }}\n  {{- end }}\n\n  {{- if .Spec.Storage.Driver.Azure
     }}\n  azure:\n    accountname: {{ .Spec.Storage.Driver.Azure.AccountName | quote
     }}\n    container: {{ .Spec.Storage.Driver.Azure.Container | quote }}\n    realm:
-    {{ .Spec.Storage.Driver.Azure.BaseURL | quote }}\n  {{- end }}\n\n  {{- if .Spec.Storage.Driver.Gcs
-    }}\n  gcs:\n    bucket: {{ .Spec.Storage.Driver.Gcs.Bucket | quote }}\n    keyfile:
-    /etc/gcs/gcs-key.json\n    {{- if .Spec.Storage.Driver.Gcs.PathPrefix }}\n    rootdirectory:
-    {{ .Spec.Storage.Driver.Gcs.PathPrefix | quote }}\n    {{- end }}\n    {{- if
-    .Spec.Storage.Driver.Gcs.ChunkSize }}\n    chunksize: {{ .Spec.Storage.Driver.Gcs.ChunkSize
+    {{ .Spec.Storage.Driver.Azure.BaseURL | quote }}\n  {{- end }}\n\n  {{- if .Spec.Storage.Driver.Oss
+    }}\n  oss:\n    accesskeyid: {{ .Spec.Storage.Driver.Oss.AccessKeyID | quote }}\n
+    \   bucket: {{ .Spec.Storage.Driver.Oss.Bucket | quote }}\n    region: {{ .Spec.Storage.Driver.Oss.Region
+    | quote }}\n    {{- if .Spec.Storage.Driver.Oss.Endpoint }}\n    endpoint: {{
+    .Spec.Storage.Driver.Oss.Bucket }}.{{ .Spec.Storage.Driver.Oss.Endpoint }}\n    {{-
+    end }}\n    {{- if .Spec.Storage.Driver.Oss.Internal }}\n    internal: {{ .Spec.Storage.Driver.Oss.Internal
+    }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Oss.Encrypt }}\n    encrypt:
+    {{ .Spec.Storage.Driver.Oss.Encrypt }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Oss.Secure
+    }}\n    secure: {{ .Spec.Storage.Driver.Oss.Secure }}\n    {{- end }}\n    {{-
+    if .Spec.Storage.Driver.Oss.ChunkSize }}\n    chunksize: {{ .Spec.Storage.Driver.Oss.ChunkSize
+    }}\n    {{- end }}\n    {{- if .Spec.Storage.Driver.Oss.PathPrefix }}\n    rootdirectory:
+    {{ .Spec.Storage.Driver.Oss.PathPrefix | quote }}\n    {{- end }}\n  {{- end }}\n\n
+    \ {{- if .Spec.Storage.Driver.Gcs }}\n  gcs:\n    bucket: {{ .Spec.Storage.Driver.Gcs.Bucket
+    | quote }}\n    keyfile: /etc/gcs/gcs-key.json\n    {{- if .Spec.Storage.Driver.Gcs.PathPrefix
+    }}\n    rootdirectory: {{ .Spec.Storage.Driver.Gcs.PathPrefix | quote }}\n    {{-
+    end }}\n    {{- if .Spec.Storage.Driver.Gcs.ChunkSize }}\n    chunksize: {{ .Spec.Storage.Driver.Gcs.ChunkSize
     | quote }}\n    {{- end }}\n  {{- end }}\n\n  {{- if .Spec.Storage.Driver.Swift
     }}\n  swift:\n    username: {{ .Spec.Storage.Driver.Swift.Username | quote }}\n
     \   # password: setted through environment variable\n    authurl: {{ .Spec.Storage.Driver.Swift.AuthURL

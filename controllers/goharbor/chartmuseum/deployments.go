@@ -124,6 +124,40 @@ func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1.
 		})
 	}
 
+	// refer https://github.com/helm/chartmuseum/blob/main/README.md and https://github.com/helm/chartmuseum/blob/main/pkg/config/vars.go
+	if chartMuseum.Spec.Chart.Storage.Oss != nil { //nolint:dupl
+		envs = append(envs, corev1.EnvVar{
+			Name:  "STORAGE",
+			Value: "alibaba",
+		}, corev1.EnvVar{
+			Name:  "STORAGE_ALIBABA_BUCKET",
+			Value: chartMuseum.Spec.Chart.Storage.Oss.Bucket,
+		}, corev1.EnvVar{
+			Name:  "STORAGE_ALIBABA_ENDPOINT",
+			Value: chartMuseum.Spec.Chart.Storage.Oss.Endpoint,
+		}, corev1.EnvVar{
+			Name:  "ALIBABA_CLOUD_ACCESS_KEY_ID",
+			Value: chartMuseum.Spec.Chart.Storage.Oss.AccessKeyID,
+		}, corev1.EnvVar{
+			Name:  "STORAGE_ALIBABA_PREFIX",
+			Value: getChartFolder(chartMuseum.Spec.Chart.Storage.Oss.PathPrefix),
+		})
+
+		if chartMuseum.Spec.Chart.Storage.Oss.AccessSecretRef != "" {
+			envs = append(envs, corev1.EnvVar{
+				Name: "ALIBABA_CLOUD_ACCESS_KEY_SECRET",
+				ValueFrom: &corev1.EnvVarSource{
+					SecretKeyRef: &corev1.SecretKeySelector{
+						LocalObjectReference: corev1.LocalObjectReference{
+							Name: chartMuseum.Spec.Chart.Storage.Oss.AccessSecretRef,
+						},
+						Key: harbormetav1.SharedSecretKey,
+					},
+				},
+			})
+		}
+	}
+
 	if chartMuseum.Spec.Chart.Storage.Gcs != nil {
 		envs = append(envs, corev1.EnvVar{
 			Name:  "STORAGE",
@@ -161,7 +195,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, chartMuseum *goharborv1.
 		})
 	}
 
-	if chartMuseum.Spec.Chart.Storage.Azure != nil {
+	if chartMuseum.Spec.Chart.Storage.Azure != nil { //nolint:dupl
 		envs = append(envs, corev1.EnvVar{
 			Name:  "STORAGE",
 			Value: "microsoft",

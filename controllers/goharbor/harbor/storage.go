@@ -32,6 +32,12 @@ func (r *Reconciler) ChartMuseumStorage(ctx context.Context, harbor *goharborv1.
 		}
 	}
 
+	if harbor.Spec.ImageChartStorage.Oss != nil {
+		return goharborv1.ChartMuseumChartStorageDriverSpec{
+			Oss: harbor.Spec.ImageChartStorage.Oss.ChartMuseum(),
+		}
+	}
+
 	prefix := ""
 	pvc := &harbor.Spec.ImageChartStorage.FileSystem.RegistryPersistentVolume.PersistentVolumeClaimVolumeSource
 
@@ -120,6 +126,12 @@ func (r *Reconciler) RegistryStorage(ctx context.Context, harbor *goharborv1.Har
 	if harbor.Spec.ImageChartStorage.Azure != nil {
 		return goharborv1.RegistryStorageDriverSpec{
 			Azure: harbor.Spec.ImageChartStorage.Azure.Registry(),
+		}
+	}
+
+	if harbor.Spec.ImageChartStorage.Oss != nil {
+		return goharborv1.RegistryStorageDriverSpec{
+			Oss: harbor.Spec.ImageChartStorage.Oss.Registry(),
 		}
 	}
 
