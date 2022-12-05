@@ -14,34 +14,73 @@ jobs:
       with:
         go-version: 1.18
     - uses: actions/checkout@v2
-    - name: Build manager
-      run: |
-        mkdir ./target
-        echo -n "dev_${GITHUB_REF##refs/*/}" > ./target/TAG_NAME
-        make dist/harbor-operator_linux_amd64/manager GIT_COMMIT=${{ github.sha }} RELEASE_VERSION=`cat ./target/TAG_NAME`
-    - name: Docker Build & Push to Docker Hub
-      uses: opspresso/action-docker@master
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v1
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2.0.0
       with:
-        args: --docker
-      env:
-        BUILD_PATH: dist/harbor-operator_linux_amd64
-        DOCKERFILE: Dockerfile
-        USERNAME: '${{ secrets.DOCKER_USER }}'
-        PASSWORD: '${{ secrets.DOCKER_TOKEN }}'
-        IMAGE_NAME: goharbor/harbor-operator
-        LATEST: 'false'
-    - name: Docker Build & Push to GHCR
-      uses: opspresso/action-docker@master
+        driver-opts: image=moby/buildkit:master
+
+    - name: Login to DockerHub
+      uses: docker/login-action@v1
       with:
-        args: --docker
-      env:
-        BUILD_PATH: dist/harbor-operator_linux_amd64
-        DOCKERFILE: Dockerfile
-        USERNAME: harbor
-        PASSWORD: '${{ secrets.GHCR_TOKEN }}'
-        REGISTRY: ghcr.io
-        IMAGE_NAME: goharbor/harbor-operator
-        LATEST: 'false'
+        username: '${{ secrets.DOCKER_USER }}'
+        password: '${{ secrets.DOCKER_TOKEN }}'
+    - name: Build and push to DockerHub
+      uses: docker/build-push-action@v3
+      with:
+        push: true
+        platforms: |
+          linux/amd64
+          linux/arm64
+        file: Dockerfile-multi-arch
+        tags: goharbor/harbor-operator:dev
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: harbor
+        password: '${{ secrets.GHCR_TOKEN }}'
+    - name: Build and push go ghcr
+      uses: docker/build-push-action@v3
+      with:
+        push: true
+        platforms: |
+          linux/amd64
+          linux/arm64
+        file: Dockerfile-multi-arch
+        tags: goharbor/harbor-operator:dev
+
+#    - name: Build manager
+#      run: |
+#        mkdir ./target
+#        echo -n "dev_${GITHUB_REF##refs/*/}" > ./target/TAG_NAME
+#        make dist/harbor-operator_linux_amd64/manager GIT_COMMIT=${{ github.sha }} RELEASE_VERSION=`cat ./target/TAG_NAME`
+#    - name: Docker Build & Push to Docker Hub
+#      uses: opspresso/action-docker@master
+#      with:
+#        args: --docker
+#      env:
+#        BUILD_PATH: dist/harbor-operator_linux_amd64
+#        DOCKERFILE: Dockerfile
+#        USERNAME: '${{ secrets.DOCKER_USER }}'
+#        PASSWORD: '${{ secrets.DOCKER_TOKEN }}'
+#        IMAGE_NAME: goharbor/harbor-operator
+#        LATEST: 'false'
+#    - name: Docker Build & Push to GHCR
+#      uses: opspresso/action-docker@master
+#      with:
+#        args: --docker
+#      env:
+#        BUILD_PATH: dist/harbor-operator_linux_amd64
+#        DOCKERFILE: Dockerfile
+#        USERNAME: harbor
+#        PASSWORD: '${{ secrets.GHCR_TOKEN }}'
+#        REGISTRY: ghcr.io
+#        IMAGE_NAME: goharbor/harbor-operator
+#        LATEST: 'false'
 
   charts:
     runs-on: ubuntu-latest

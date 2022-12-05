@@ -1,0 +1,15 @@
+FROM golang:1.18.3 as build
+WORKDIR /workspace
+ENV GO111MODULE=on \
+    GOPROXY=https://goproxy.cn,direct
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=$(go env GOARCH) go build -o manager *.go
+
+# Use distroless as minimal base image to package the manager binary
+# Refer to https://github.com/GoogleContainerTools/distroless for more details
+FROM gcr.io/distroless/static:nonroot
+WORKDIR /
+COPY --from=build /workspace/manager .
+USER nonroot:nonroot
+
+ENTRYPOINT ["/manager"]

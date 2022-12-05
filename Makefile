@@ -191,6 +191,14 @@ docker-build: dist/harbor-operator_linux_amd64/manager
 		-f Dockerfile \
 		-t "$(IMG)"
 
+.PHONY: docker-build-multi-arch
+docker-build-multi-arch:
+	docker buildx build \
+			--platform=linux/arm64,linux/amd64 \
+			-t "$(IMG)" \
+			-f Dockerfile-multi-arch .
+			--push
+
 # Push the docker image
 .PHONY: docker-push
 docker-push:
