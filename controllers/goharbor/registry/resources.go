@@ -38,20 +38,14 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrap(err, "cleanup registryctl resources error")
 	}
 
-	service, err := r.GetService(ctx, registry)
-	if err != nil {
-		return errors.Wrap(err, "cannot get service")
-	}
+	service := r.GetService(ctx, registry)
 
 	_, err = r.Controller.AddServiceToManage(ctx, service)
 	if err != nil {
 		return errors.Wrapf(err, "cannot add service %s", service.GetName())
 	}
 
-	ctlService, err := r.GetCtlService(ctx, registryCtl)
-	if err != nil {
-		return errors.Wrap(err, "cannot get ctlService")
-	}
+	ctlService := r.GetCtlService(ctx, registryCtl)
 
 	_, err = r.Controller.AddServiceToManage(ctx, ctlService)
 	if err != nil {

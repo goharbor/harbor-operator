@@ -34,26 +34,26 @@ func (r *Reconciler) CleanUpRegistryCtlResources(ctx context.Context, registryCt
 	key := client.ObjectKey{Namespace: namespace, Name: name}
 
 	// clean registrycontroller deployment
-	if err = r.DeleteResourceIfExist(ctx, key, &appsv1.Deployment{}); err != nil {
+	if err = r.deleteResourceIfExist(ctx, key, &appsv1.Deployment{}); err != nil {
 		return fmt.Errorf("clean registryctl deployment error: %w", err)
 	}
 
 	// clean registrycontroller networkpolicy
-	if err = r.DeleteResourceIfExist(ctx, client.ObjectKey{Namespace: namespace, Name: name + "-ingress"}, &netv1.NetworkPolicy{}); err != nil {
+	if err = r.deleteResourceIfExist(ctx, client.ObjectKey{Namespace: namespace, Name: name + "-ingress"}, &netv1.NetworkPolicy{}); err != nil {
 		return fmt.Errorf("clean registryctl networkpolicy error: %w", err)
 	}
 
 	svc := &corev1.Service{}
-	if err = r.Client.Get(ctx, key, svc); err == nil && owneredByRegistryCtl(svc, registryCtl) {
-		err = r.DeleteResourceIfExist(ctx, key, svc)
+	if err = r.Client.Get(ctx, key, svc); err == nil && ownedByRegistryCtl(svc, registryCtl) {
+		err = r.deleteResourceIfExist(ctx, key, svc)
 		if err != nil {
 			return fmt.Errorf("clean registryctl service error: %w", err)
 		}
 	}
 
 	cm := &corev1.ConfigMap{}
-	if err = r.Client.Get(ctx, key, cm); err == nil && owneredByRegistryCtl(svc, registryCtl) {
-		err = r.DeleteResourceIfExist(ctx, key, cm)
+	if err = r.Client.Get(ctx, key, cm); err == nil && ownedByRegistryCtl(svc, registryCtl) {
+		err = r.deleteResourceIfExist(ctx, key, cm)
 		if err != nil {
 			return fmt.Errorf("clean registryctl configmap error: %w", err)
 		}
@@ -62,8 +62,8 @@ func (r *Reconciler) CleanUpRegistryCtlResources(ctx context.Context, registryCt
 	return nil
 }
 
-// DeleteResourceIfExist deletes existed resources.
-func (r *Reconciler) DeleteResourceIfExist(ctx context.Context, key client.ObjectKey, obj client.Object) error {
+// deleteResourceIfExist deletes existed resources.
+func (r *Reconciler) deleteResourceIfExist(ctx context.Context, key client.ObjectKey, obj client.Object) error {
 	err := r.Client.Get(ctx, key, obj)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -76,9 +76,9 @@ func (r *Reconciler) DeleteResourceIfExist(ctx context.Context, key client.Objec
 	return r.Client.Delete(ctx, obj)
 }
 
-// owneredByRegistryCtl checks the resource whether ownered by
+// ownedByRegistryCtl checks the resource whether owned by
 // registrycontroller.
-func owneredByRegistryCtl(obj client.Object, registryCtl *goharborv1.RegistryController) bool {
+func ownedByRegistryCtl(obj client.Object, registryCtl *goharborv1.RegistryController) bool {
 	owners := obj.GetOwnerReferences()
 	for _, o := range owners {
 		if o.Kind == registryCtl.Kind && o.Name == registryCtl.Name && o.UID == registryCtl.UID {

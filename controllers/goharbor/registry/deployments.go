@@ -54,8 +54,9 @@ var (
 const (
 	apiPort = 5000 // https://github.com/docker/distribution/blob/749f6afb4572201e3c37325d0ffedb6f32be8950/contrib/compose/docker-compose.yml#L15
 	// registry controller port.
-	httpsPort = 8443
-	httpPort  = 8080
+	httpsPort              = 8443
+	httpPort               = 8080
+	registryContainerIndex = 0
 )
 
 func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1.Registry) (*appsv1.Deployment, error) { //nolint:funlen
@@ -474,8 +475,6 @@ func (r *Reconciler) attachRegistryCtlContainer(ctx context.Context, registry *g
 	return nil
 }
 
-const registryContainerIndex = 0
-
 func (r *Reconciler) ApplyFilesystemStorageEnvs(ctx context.Context, registry *goharborv1.Registry, deploy *appsv1.Deployment) error {
 	regContainer := &deploy.Spec.Template.Spec.Containers[registryContainerIndex]
 
@@ -607,8 +606,6 @@ func (r *Reconciler) ApplyInMemoryStorageEnvs(ctx context.Context, registry *goh
 	return nil
 }
 
-var errNoStorageDriverFound = errors.New("no storage driver found")
-
 func (r *Reconciler) ApplyStorageConfiguration(ctx context.Context, registry *goharborv1.Registry, deploy *appsv1.Deployment) error {
 	if registry.Spec.Storage.Driver.S3 != nil {
 		return r.ApplyS3StorageEnvs(ctx, registry, deploy)
@@ -638,5 +635,5 @@ func (r *Reconciler) ApplyStorageConfiguration(ctx context.Context, registry *go
 		return r.ApplyInMemoryStorageEnvs(ctx, registry, deploy)
 	}
 
-	return serrors.UnrecoverrableError(errNoStorageDriverFound, serrors.InvalidSpecReason, "unable to configure storage")
+	return serrors.UnrecoverrableError(errors.Errorf("no storage driver found"), serrors.InvalidSpecReason, "unable to configure storage")
 }
