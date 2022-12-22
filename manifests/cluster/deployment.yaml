@@ -9745,6 +9745,10 @@ spec:
                                       https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
                                     type: object
                                 type: object
+                              serviceAccountName:
+                                description: ServiceAccountName is the service account
+                                  name of the redis server.
+                                type: string
                               storage:
                                 description: Storage is the size of the redis storage.
                                 type: string
