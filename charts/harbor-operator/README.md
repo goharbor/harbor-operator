@@ -36,6 +36,7 @@ Deploy Harbor Operator
 | fullnameOverride | string | `""` |  |
 | harborClass | string | `""` | Class name of the Harbor operator |
 | image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the controller. |
+| image.registry | string | `"docker.io"` | The image registry whose default is docker.io. |
 | image.repository | string | `"goharbor/harbor-operator"` | The image repository whose default is the chart appVersion. |
 | image.tag | string | `"dev_master"` | The image tag whose default is the chart appVersion. |
 | imagePullSecrets | list | `[]` | Reference to one or more secrets to be used when pulling images <https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/> For example: `[   {"name":"image-pull-secret"} ]` |

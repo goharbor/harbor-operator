@@ -7,7 +7,7 @@ generatorOptions:
 
 images:
 - name: goharbor/harbor-operator:dev
-  newName: '{{.Values.image.repository}}'
+  newName: '{{.Values.image.registry}}/{{.Values.image.repository}}'
   newTag: '{{.Values.image.tag|default .Chart.AppVersion}}'
 
 patches:
