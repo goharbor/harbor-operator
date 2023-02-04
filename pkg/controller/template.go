@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"text/template"
 
 	"github.com/Masterminds/sprig"
@@ -48,7 +47,7 @@ func (c *Controller) GetTemplatedConfig(ctx context.Context, templateConfig stri
 		errTemplate = t.Execute(writer, owner)
 	}()
 
-	configContent, err := ioutil.ReadAll(reader)
+	configContent, err := io.ReadAll(reader)
 
 	if errTemplate != nil {
 		if errors.As(err, &template.ExecError{}) {

@@ -2,7 +2,7 @@ package harbor_test
 
 import (
 	"context"
-	"io/ioutil"
+	"os"
 	"strings"
 	"testing"
 
@@ -24,7 +24,7 @@ func TestHarbor(t *testing.T) {
 }
 
 func fileString(filePath string) string {
-	content, err := ioutil.ReadFile(filePath)
+	content, err := os.ReadFile(filePath)
 	Expect(err).NotTo(HaveOccurred())
 
 	return strings.TrimSpace(string(content))
