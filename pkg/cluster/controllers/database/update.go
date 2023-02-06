@@ -35,6 +35,8 @@ func (p *PostgreSQLController) Update(ctx context.Context, harborcluster *goharb
 		FromUnstructured(expectUnstructuredCR.UnstructuredContent(), &expectCR); err != nil {
 		return databaseNotReadyStatus(DefaultUnstructuredConverterError, err.Error()), err
 	}
+	
+	expectCR.SetOwnerReferences(actualCR.GetOwnerReferences())
 
 	if !common.Equals(ctx, p.Scheme, harborcluster, &actualCR) {
 		p.Log.Info(
