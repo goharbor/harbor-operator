@@ -25515,6 +25515,9 @@ spec:
                 required:
                 - provider
                 type: object
+              updateStrategyType:
+                default: RollingUpdate
+                type: string
               workerPool:
                 description: Configurations of worker pool
                 properties:
@@ -32915,6 +32918,9 @@ spec:
                 required:
                 - provider
                 type: object
+              updateStrategyType:
+                default: RollingUpdate
+                type: string
               validation:
                 properties:
                   disabled:
