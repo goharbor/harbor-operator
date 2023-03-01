@@ -201,11 +201,13 @@ jobs:
 
     - name: install harbor-operator
       run: |
+        make kustomize
+
         cd manifests/cluster
         kustomize edit add secret github-token --disableNameSuffixHash --from-literal=GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
         kustomize edit add patch --path patch/github-token.yaml
         kustomize edit set image goharbor/harbor-operator=${dockerImage}
-        kustomize build | kubectl create -f -
+        ../../bin/kustomize build --reorder legacy | kubectl create -f -
 
         if ! time kubectl -n ${operatorNamespace} wait --for=condition=Available deployment --all --timeout 300s; then
           kubectl get all -n ${operatorNamespace}
@@ -369,7 +371,7 @@ jobs:
 
       - uses: azure/setup-kubectl@v1
         with:
-          version: 'latest'
+          version: 'v1.25.4'
 
       - name: Cache go mod
         uses: actions/cache@v2
@@ -416,11 +418,13 @@ jobs:
 
       - name: install harbor-operator
         run: |
+          make kustomize
+
           cd manifests/cluster
           kustomize edit add secret github-token --disableNameSuffixHash --from-literal=GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
           kustomize edit add patch --path patch/github-token.yaml
           kustomize edit set image goharbor/harbor-operator=${dockerImage}
-          kustomize build | kubectl create -f -
+          ../../bin/kustomize build --reorder legacy | kubectl create -f -
 
           if ! time kubectl -n ${operatorNamespace} wait --for=condition=Available deployment --all --timeout 300s; then
             kubectl get all -n ${operatorNamespace}
