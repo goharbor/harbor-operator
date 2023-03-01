@@ -45,7 +45,7 @@ const (
 	SecretTypePostgresql corev1.SecretType = "goharbor.io/postgresql"
 
 	// PostgresqlPasswordKey is the password to connect to postgresql.
-	PostgresqlPasswordKey = "postgresql-password" //nolint:gosec
+	PostgresqlPasswordKey = "postgres-password"
 )
 
 const (
