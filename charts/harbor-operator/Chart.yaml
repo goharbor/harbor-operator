@@ -33,7 +33,7 @@ dependencies:
   tags:
     - cache
 - name: postgres-operator
-  version: 1.6.3
+  version: 1.7.0
   condition: postgres-operator.enabled
   repository: https://opensource.zalando.com/postgres-operator/charts/postgres-operator
   tags:
