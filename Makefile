@@ -209,10 +209,17 @@ go.sum: go.mod $(GONOGENERATED_SOURCES)
 
 # Build the docker image
 .PHONY: docker-build
-docker-build: dist/harbor-operator_linux_amd64/manager
-	docker build dist/harbor-operator_linux_amd64 \
-		-f Dockerfile \
-		-t "$(IMG)"
+docker-build:
+	docker build -f Dockerfile -t "$(IMG)" .
+
+.PHONY: docker-build-multi-arch
+docker-build-multi-arch:
+	docker buildx build \
+    		--platform linux/arm64,linux/amd64 \
+    		--push \
+    		-f Dockerfile \
+    		-t "$(IMG)" \
+    		.
 
 # Push the docker image
 .PHONY: docker-push

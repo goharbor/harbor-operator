@@ -21,7 +21,9 @@ jobs:
       with:
         go-version: 1.18
     - uses: actions/checkout@v2
-    - run: make docker-build
+    - run: |
+        docker buildx create --use
+        make docker-build
 
   docker-lint:
     runs-on: ubuntu-latest
@@ -196,6 +198,7 @@ jobs:
 
     - name: build harbor-operator
       run: |
+        docker buildx create --use
         make generate docker-build IMG=${dockerImage} GIT_COMMIT=${{ github.sha }}
         kind load docker-image ${dockerImage} --name harbor
 
