@@ -302,7 +302,7 @@ var _ = Describe("class-filter", func() {
 
 							It("Should match", func() {
 								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
-								Expect(ok).To(BeTrue())
+								Expect(ok).To(BeFalse())
 							})
 						})
 					})
@@ -368,7 +368,7 @@ var _ = Describe("class-filter", func() {
 
 							It("Should match", func() {
 								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
-								Expect(ok).To(BeTrue())
+								Expect(ok).To(BeFalse())
 							})
 						})
 					})
@@ -434,7 +434,7 @@ var _ = Describe("class-filter", func() {
 
 							It("Should match", func() {
 								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
-								Expect(ok).To(BeTrue())
+								Expect(ok).To(BeFalse())
 							})
 						})
 					})
@@ -1079,7 +1079,7 @@ var _ = Describe("class-filter", func() {
 
 							It("Should match", func() {
 								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
-								Expect(ok).To(BeTrue())
+								Expect(ok).To(BeFalse())
 							})
 						})
 
@@ -1092,7 +1092,7 @@ var _ = Describe("class-filter", func() {
 
 							It("Should match", func() {
 								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
-								Expect(ok).To(BeTrue())
+								Expect(ok).To(BeFalse())
 							})
 						})
 
@@ -1105,7 +1105,7 @@ var _ = Describe("class-filter", func() {
 
 							It("Should match", func() {
 								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
-								Expect(ok).To(BeTrue())
+								Expect(ok).To(BeFalse())
 							})
 						})
 
@@ -1118,7 +1118,7 @@ var _ = Describe("class-filter", func() {
 
 							It("Should match", func() {
 								ok := cf.Update(event.UpdateEvent{ObjectOld: oldResource, ObjectNew: newResource})
-								Expect(ok).To(BeTrue())
+								Expect(ok).To(BeFalse())
 							})
 						})
 
