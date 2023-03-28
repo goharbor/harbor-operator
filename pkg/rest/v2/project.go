@@ -2,6 +2,7 @@ package v2
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 
@@ -141,7 +142,11 @@ func (c *Client) CreateProject(hp *goharborv1beta1.HarborProject) (int32, error)
 		c.log.Error(err, "location", res.Location)
 	}
 
-	return int32(rid), nil
+	if rid > 0 && rid <= math.MaxInt32 {
+		return int32(rid), nil
+	}
+
+	return -1, errors.New("out of bounds project ID")
 }
 
 func (c *Client) UpdateProject(projectName string, hp *goharborv1beta1.HarborProject) error {
