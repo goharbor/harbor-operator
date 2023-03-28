@@ -96,6 +96,28 @@ webhooks:
   sideEffects: None
 - admissionReviewVersions:
   - v1beta1
+  - v1
+  clientConfig:
+    service:
+      name: {{ include "chart.fullname" . | quote }}
+      namespace: {{ .Release.Namespace | quote }}
+      path: /validate-goharbor-io-v1beta1-harborproject
+      port: {{ .Values.service.port }}
+  failurePolicy: Fail
+  name: vharborproject.kb.io
+  rules:
+  - apiGroups:
+    - goharbor.io
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - harborprojects
+  sideEffects: None
+- admissionReviewVersions:
+  - v1beta1
   clientConfig:
     service:
       name: {{ include "chart.fullname" . | quote }}

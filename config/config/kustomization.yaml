@@ -26,6 +26,7 @@ configMapGenerator:
   - controllers/harbor-ctrl.yaml
   - controllers/harborcluster-ctrl.yaml
   - controllers/harborconfiguration-ctrl.yaml
+  - controllers/harborproject-ctrl.yaml
   - controllers/jobservice-ctrl.yaml
   - controllers/notaryserver-ctrl.yaml
   - controllers/notarysigner-ctrl.yaml
