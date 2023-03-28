@@ -3,6 +3,7 @@
 Harbor Operator is capable of managing the projects of a Harbor instance.
 
 The following operations involving projects are currently supported:
+
 * Create, update and delete projects
 * Manage group and user memberships of projects
 * Update a projects storage quota
@@ -31,4 +32,3 @@ Harbor projects can be managed by deploying a `HarborProject` resource to your K
   * `severity`: If an image's vulnerablilities are higher than the severity defined here, the image can't be pulled. Can be either `none`, `low`, `medium`, `high` or `critical`.
 * `projectName`: The name of the harbor project. Has to match harbor's naming rules.
 * `storageQuota`: The project's storage quota in human-readable format, like in Kubernetes memory requests/limits (Ti, Gi, Mi, Ki). The Harbor's default value is used if empty.
-
