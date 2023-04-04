@@ -283,6 +283,7 @@ func (r *Reconciler) GetRegistry(ctx context.Context, harbor *goharborv1.Harbor)
 			Proxy:                harbor.GetComponentProxySpec(harbormetav1.RegistryComponent),
 			Network:              harbor.Spec.Network,
 			Trace:                harbor.Spec.Trace,
+			UpdateStrategyType:   harbor.Spec.UpdateStrategyType,
 		},
 	}, nil
 }
