@@ -182,18 +182,27 @@ func (c *Client) DeleteProject(name string) error {
 		return errors.New("nil harbor client")
 	}
 
-	// Get ID first
-	p, err := c.GetProjectByName(name)
+	exists, err := c.ProjectExists(name)
 	if err != nil {
 		return fmt.Errorf("delete project error: %w", err)
 	}
 
+	if !exists {
+		return nil
+	}
+
+	// Get ID first
+	p, err := c.GetProjectByName(name)
+	if err != nil {
+		return fmt.Errorf("error while deleting project \"%s\" (%d): %w", name, p.ProjectID, err)
+	}
+
 	params := project.NewDeleteProjectParamsWithContext(c.context).
 		WithTimeout(c.timeout).
-		WithProjectNameOrID(string(p.ProjectID))
+		WithProjectNameOrID(strconv.FormatInt(int64(p.ProjectID), 10))
 
 	if _, err = c.harborClient.Client.Project.DeleteProject(c.context, params); err != nil {
-		return err
+		return fmt.Errorf("error while deleting project \"%s\" (%d): %w", name, p.ProjectID, err)
 	}
 
 	return nil
