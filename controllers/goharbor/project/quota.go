@@ -1,6 +1,8 @@
 package project
 
 import (
+	"strings"
+
 	"github.com/go-logr/logr"
 	"github.com/goharbor/go-client/pkg/sdk/v2.0/models"
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
@@ -32,6 +34,11 @@ func (r *Reconciler) reconcileQuota(hp *goharborv1.HarborProject, log logr.Logge
 	} else {
 		quota, err := r.Harbor.GetQuotaByID(hp.Status.QuotaID)
 		if err != nil {
+			// reset cached quota ID if its not found
+			if strings.Contains(err.Error(), "getQuotaNotFound") {
+				hp.Status.QuotaID = 0
+			}
+
 			err = errors.Wrapf(err, "error getting quota of harbor project")
 			hp.Status.Reason = errorStatus
 
