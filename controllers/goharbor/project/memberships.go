@@ -79,10 +79,7 @@ func (r *Reconciler) reconcileMembership(hp *goharborv1.HarborProject, log logr.
 	log.Info("Start reconcile", "current members", currentMembershipsCnt, "desired members", desiredMembershipsCnt)
 
 	// find differences between current and desired members.
-	differences, err := findDifferences(currentMemberships, desiredMemberships, log)
-	if err != nil {
-		return err
-	}
+	differences := findDifferences(currentMemberships, desiredMemberships, log)
 
 	err = r.updateMemberships(hp, differences, log)
 	if err != nil {
@@ -105,7 +102,7 @@ func (r *Reconciler) reconcileMembership(hp *goharborv1.HarborProject, log logr.
 	return nil
 }
 
-func findDifferences(currentMemberships []*models.ProjectMemberEntity, desiredMemberships []models.ProjectMember, log logr.Logger) (*memberDifferences, error) {
+func findDifferences(currentMemberships []*models.ProjectMemberEntity, desiredMemberships []models.ProjectMember, log logr.Logger) *memberDifferences {
 	differences := memberDifferences{
 		update: []memberUpdate{},
 		create: []*models.ProjectMember{},
@@ -156,7 +153,7 @@ func findDifferences(currentMemberships []*models.ProjectMemberEntity, desiredMe
 
 	log.Info("finished planning project member reconcile.", "create", len(differences.create), "update", len(differences.update), "delete", len(differences.delete))
 
-	return &differences, nil
+	return &differences
 }
 
 func (r *Reconciler) updateMemberships(p *goharborv1.HarborProject, differences *memberDifferences, log logr.Logger) error {

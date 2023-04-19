@@ -19,7 +19,7 @@ func (r *Reconciler) reconcileQuota(hp *goharborv1.HarborProject, log logr.Logge
 
 	var projectQuota *models.Quota
 
-	if hp.Status.QuotaID == 0 {
+	if hp.Status.QuotaID == 0 { //nolint:nestif
 		// QuotaID in custom resource still undefined. Get Quota via ProjectID
 		quota, err := r.Harbor.GetQuotaByProjectID(hp.Status.ProjectID)
 		if err != nil {

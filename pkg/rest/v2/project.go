@@ -19,6 +19,7 @@ import (
 
 const (
 	paginationSize int64 = 25
+	baseInt10      int   = 10
 )
 
 // EnsureProject ensures the specified project is on the harbor server
@@ -199,7 +200,7 @@ func (c *Client) DeleteProject(name string) error {
 
 	params := project.NewDeleteProjectParamsWithContext(c.context).
 		WithTimeout(c.timeout).
-		WithProjectNameOrID(strconv.FormatInt(int64(p.ProjectID), 10))
+		WithProjectNameOrID(strconv.FormatInt(int64(p.ProjectID), baseInt10))
 
 	if _, err = c.harborClient.Client.Project.DeleteProject(c.context, params); err != nil {
 		return fmt.Errorf("error while deleting project \"%s\" (%d): %w", name, p.ProjectID, err)
