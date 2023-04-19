@@ -120,24 +120,19 @@ func findDifferences(currentMemberships []*models.ProjectMemberEntity, desiredMe
 		return currentMemberships[i].EntityName < currentMemberships[j].EntityName
 	})
 	sort.Slice(desiredMemberships, func(i, j int) bool {
-		iName, _ := getProjectMemberName(&desiredMemberships[i])
-		jName, _ := getProjectMemberName(&desiredMemberships[j])
-
-		return iName < jName
+		return getProjectMemberName(&desiredMemberships[i]) < getProjectMemberName(&desiredMemberships[j])
 	})
 
 	// search all currentMembers in desiredMembers. If found, mark for update if necessary, if not mark for deletion.
 	for _, currentMember := range currentMemberships {
 		idx := sort.Search(desiredMembershipsCnt, func(i int) bool {
-			desiredMemberName, _ := getProjectMemberName(&desiredMemberships[i])
-
-			return desiredMemberName >= currentMember.EntityName
+			return getProjectMemberName(&desiredMemberships[i]) >= currentMember.EntityName
 		})
 		if idx < desiredMembershipsCnt && areMembersEqual(currentMember, &desiredMemberships[idx]) && currentMember.RoleID != desiredMemberships[idx].RoleID {
 			log.Info("found matching members with differences, mark for update", "member", currentMember.EntityName)
 
 			differences.update = append(differences.update, memberUpdate{desired: &desiredMemberships[idx], current: currentMember})
-		} else if idx == desiredMembershipsCnt {
+		} else if idx == desiredMembershipsCnt || getProjectMemberName(&desiredMemberships[idx]) != currentMember.EntityName {
 			log.Info("currentMember was not found in desiredMemberships, mark for deletion.", "member", currentMember.EntityName)
 
 			differences.delete = append(differences.delete, currentMember)
@@ -146,16 +141,13 @@ func findDifferences(currentMemberships []*models.ProjectMemberEntity, desiredMe
 
 	// search all desiredMembers in currentMembers. If not found, mark for creation.
 	for i := range desiredMemberships {
-		desiredMemberName, err := getProjectMemberName(&desiredMemberships[i])
-		if err != nil {
-			return nil, err
-		}
+		desiredMemberName := getProjectMemberName(&desiredMemberships[i])
 
 		idx := sort.Search(currentMembershipsCnt, func(i int) bool {
 			return currentMemberships[i].EntityName >= desiredMemberName
 		})
 
-		if idx == currentMembershipsCnt {
+		if idx == currentMembershipsCnt || currentMemberships[idx].EntityName != desiredMemberName {
 			log.Info("desiredMember was not found in currentMemberships, mark for creation.", "member", desiredMemberName)
 
 			differences.create = append(differences.create, &desiredMemberships[i])
@@ -180,14 +172,11 @@ func (r *Reconciler) updateMemberships(p *goharborv1.HarborProject, differences 
 
 	// create all members marked for creation
 	for _, createMember := range differences.create {
-		name, err := getProjectMemberName(createMember)
-		if err != nil {
-			return err
-		}
+		name := getProjectMemberName(createMember)
 
 		log.Info("create project member", "member", name)
 
-		err = r.Harbor.CreateProjectMember(p.Spec.ProjectName, createMember)
+		err := r.Harbor.CreateProjectMember(p.Spec.ProjectName, createMember)
 		if err != nil {
 			return err
 		}
@@ -211,17 +200,15 @@ func areMembersEqual(harborMember *models.ProjectMemberEntity, k8sMember *models
 		harborMember.EntityType == "u" && k8sMember.MemberUser != nil && k8sMember.MemberUser.Username == harborMember.EntityName
 }
 
-func getProjectMemberName(member *models.ProjectMember) (name string, err error) {
+func getProjectMemberName(member *models.ProjectMember) (name string) {
 	switch {
 	case member.MemberGroup != nil:
-		name = member.MemberGroup.GroupName
+		return member.MemberGroup.GroupName
 	case member.MemberUser != nil:
-		name = member.MemberUser.Username
+		return member.MemberUser.Username
 	default:
-		return "", errors.Errorf("member does not contain user or group")
+		return ""
 	}
-
-	return
 }
 
 func createDesiredMemberships(definedMemberships []*goharborv1.HarborProjectMember) ([]models.ProjectMember, error) {
