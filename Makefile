@@ -195,7 +195,7 @@ config/rbac: controller-gen $(GO4CONTROLLERGEN_SOURCES)
 	touch "$@"
 
 config/crd/bases: controller-gen $(GO4CONTROLLERGEN_SOURCES)
-	$(CONTROLLER_GEN) crd:crdVersions="v1" output:artifacts:config="$@" paths="./..."
+	$(CONTROLLER_GEN) crd:crdVersions="v1",maxDescLen=0 output:artifacts:config="$@" paths="./..."
 	touch "$@"
 
 .PHONY: generate
