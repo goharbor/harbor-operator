@@ -7,7 +7,7 @@ import (
 
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	. "github.com/goharbor/harbor-operator/pkg/image"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
