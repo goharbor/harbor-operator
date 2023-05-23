@@ -305,7 +305,7 @@ $(CHARTS_DIRECTORY)/harbor-operator-$(RELEASE_VERSION).tgz: $(CHART_HARBOR_OPERA
 		--app-version $(RELEASE_VERSION) \
 		--destination $(CHARTS_DIRECTORY)
 
-$(CHART_HARBOR_OPERATOR)/crds/crds.yaml: kustomize config/crd/bases
+$(CHART_HARBOR_OPERATOR)/crds/crds.yaml: kustomize config/helm/crds/bases
 	$(KUSTOMIZE) build config/helm/crds/ | \
 	sed "s/'\({{[^}}]*}}\)'/\1/g" > '$@'
 
