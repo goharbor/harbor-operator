@@ -8,9 +8,6 @@ image:
   # image.tag -- The image tag whose default is the chart appVersion.
   tag: "dev_master"
 
-# installCRDs -- If true, CRD resources will be installed as part of the Helm chart. If enabled, when uninstalling CRD resources will be deleted causing all installed custom resources to be DELETED
-installCRDs: false
-
 nameOverride: ""
 fullnameOverride: ""
 
