@@ -2,21 +2,10 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    cert-manager.io/inject-ca-from: '{{.Release.Namespace}}/{{. | include "chart.fullname"}}-serving-cert'
     controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
   name: chartmuseums.goharbor.io
 spec:
-  conversion:
-    strategy: Webhook
-    webhook:
-      clientConfig:
-        caBundle: Cg==
-        service:
-          name: {{ include "chart.fullname" . | quote }}
-          namespace: {{ .Release.Namespace }}
-          path: /convert
-      conversionReviewVersions:
-      - v1
   group: goharbor.io
   names:
     categories:
@@ -4400,21 +4389,10 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    cert-manager.io/inject-ca-from: '{{.Release.Namespace}}/{{. | include "chart.fullname"}}-serving-cert'
     controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
   name: cores.goharbor.io
 spec:
-  conversion:
-    strategy: Webhook
-    webhook:
-      clientConfig:
-        caBundle: Cg==
-        service:
-          name: {{ include "chart.fullname" . | quote }}
-          namespace: {{ .Release.Namespace }}
-          path: /convert
-      conversionReviewVersions:
-      - v1
   group: goharbor.io
   names:
     categories:
@@ -5627,21 +5605,10 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    cert-manager.io/inject-ca-from: '{{.Release.Namespace}}/{{. | include "chart.fullname"}}-serving-cert'
     controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
   name: exporters.goharbor.io
 spec:
-  conversion:
-    strategy: Webhook
-    webhook:
-      clientConfig:
-        caBundle: Cg==
-        service:
-          name: {{ include "chart.fullname" . | quote }}
-          namespace: {{ .Release.Namespace }}
-          path: /convert
-      conversionReviewVersions:
-      - v1
   group: goharbor.io
   names:
     categories:
@@ -6366,21 +6333,10 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    cert-manager.io/inject-ca-from: '{{.Release.Namespace}}/{{. | include "chart.fullname"}}-serving-cert'
     controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
   name: harborclusters.goharbor.io
 spec:
-  conversion:
-    strategy: Webhook
-    webhook:
-      clientConfig:
-        caBundle: Cg==
-        service:
-          name: {{ include "chart.fullname" . | quote }}
-          namespace: {{ .Release.Namespace }}
-          path: /convert
-      conversionReviewVersions:
-      - v1
   group: goharbor.io
   names:
     kind: HarborCluster
@@ -11801,7 +11757,6 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    cert-manager.io/inject-ca-from: '{{.Release.Namespace}}/{{. | include "chart.fullname"}}-serving-cert'
     controller-gen.kubebuilder.io/version: v0.9.2
   creationTimestamp: null
   name: harborconfigurations.goharbor.io
@@ -12267,21 +12222,10 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    cert-manager.io/inject-ca-from: '{{.Release.Namespace}}/{{. | include "chart.fullname"}}-serving-cert'
     controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
   name: harbors.goharbor.io
 spec:
-  conversion:
-    strategy: Webhook
-    webhook:
-      clientConfig:
-        caBundle: Cg==
-        service:
-          name: {{ include "chart.fullname" . | quote }}
-          namespace: {{ .Release.Namespace }}
-          path: /convert
-      conversionReviewVersions:
-      - v1
   group: goharbor.io
   names:
     categories:
@@ -16360,7 +16304,6 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    cert-manager.io/inject-ca-from: '{{.Release.Namespace}}/{{. | include "chart.fullname"}}-serving-cert'
     controller-gen.kubebuilder.io/version: v0.9.2
   creationTimestamp: null
   name: harborserverconfigurations.goharbor.io
@@ -16526,21 +16469,10 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    cert-manager.io/inject-ca-from: '{{.Release.Namespace}}/{{. | include "chart.fullname"}}-serving-cert'
     controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
   name: jobservices.goharbor.io
 spec:
-  conversion:
-    strategy: Webhook
-    webhook:
-      clientConfig:
-        caBundle: Cg==
-        service:
-          name: {{ include "chart.fullname" . | quote }}
-          namespace: {{ .Release.Namespace }}
-          path: /convert
-      conversionReviewVersions:
-      - v1
   group: goharbor.io
   names:
     categories:
@@ -25649,21 +25581,10 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    cert-manager.io/inject-ca-from: '{{.Release.Namespace}}/{{. | include "chart.fullname"}}-serving-cert'
     controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
   name: notaryservers.goharbor.io
 spec:
-  conversion:
-    strategy: Webhook
-    webhook:
-      clientConfig:
-        caBundle: Cg==
-        service:
-          name: {{ include "chart.fullname" . | quote }}
-          namespace: {{ .Release.Namespace }}
-          path: /convert
-      conversionReviewVersions:
-      - v1
   group: goharbor.io
   names:
     categories:
@@ -26363,21 +26284,10 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    cert-manager.io/inject-ca-from: '{{.Release.Namespace}}/{{. | include "chart.fullname"}}-serving-cert'
     controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
   name: notarysigners.goharbor.io
 spec:
-  conversion:
-    strategy: Webhook
-    webhook:
-      clientConfig:
-        caBundle: Cg==
-        service:
-          name: {{ include "chart.fullname" . | quote }}
-          namespace: {{ .Release.Namespace }}
-          path: /convert
-      conversionReviewVersions:
-      - v1
   group: goharbor.io
   names:
     categories:
@@ -26989,21 +26899,10 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    cert-manager.io/inject-ca-from: '{{.Release.Namespace}}/{{. | include "chart.fullname"}}-serving-cert'
     controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
   name: portals.goharbor.io
 spec:
-  conversion:
-    strategy: Webhook
-    webhook:
-      clientConfig:
-        caBundle: Cg==
-        service:
-          name: {{ include "chart.fullname" . | quote }}
-          namespace: {{ .Release.Namespace }}
-          path: /convert
-      conversionReviewVersions:
-      - v1
   group: goharbor.io
   names:
     categories:
@@ -27468,7 +27367,6 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    cert-manager.io/inject-ca-from: '{{.Release.Namespace}}/{{. | include "chart.fullname"}}-serving-cert'
     controller-gen.kubebuilder.io/version: v0.9.2
   creationTimestamp: null
   name: pullsecretbindings.goharbor.io
@@ -27566,21 +27464,10 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    cert-manager.io/inject-ca-from: '{{.Release.Namespace}}/{{. | include "chart.fullname"}}-serving-cert'
     controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
   name: registries.goharbor.io
 spec:
-  conversion:
-    strategy: Webhook
-    webhook:
-      clientConfig:
-        caBundle: Cg==
-        service:
-          name: {{ include "chart.fullname" . | quote }}
-          namespace: {{ .Release.Namespace }}
-          path: /convert
-      conversionReviewVersions:
-      - v1
   group: goharbor.io
   names:
     categories:
@@ -33010,21 +32897,10 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    cert-manager.io/inject-ca-from: '{{.Release.Namespace}}/{{. | include "chart.fullname"}}-serving-cert'
     controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
   name: registrycontrollers.goharbor.io
 spec:
-  conversion:
-    strategy: Webhook
-    webhook:
-      clientConfig:
-        caBundle: Cg==
-        service:
-          name: {{ include "chart.fullname" . | quote }}
-          namespace: {{ .Release.Namespace }}
-          path: /convert
-      conversionReviewVersions:
-      - v1
   group: goharbor.io
   names:
     categories:
@@ -33528,21 +33404,10 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    cert-manager.io/inject-ca-from: '{{.Release.Namespace}}/{{. | include "chart.fullname"}}-serving-cert'
     controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
   name: trivies.goharbor.io
 spec:
-  conversion:
-    strategy: Webhook
-    webhook:
-      clientConfig:
-        caBundle: Cg==
-        service:
-          name: {{ include "chart.fullname" . | quote }}
-          namespace: {{ .Release.Namespace }}
-          path: /convert
-      conversionReviewVersions:
-      - v1
   group: goharbor.io
   names:
     categories:

@@ -197,6 +197,10 @@ config/crd/bases: controller-gen $(GO4CONTROLLERGEN_SOURCES)
 	$(CONTROLLER_GEN) crd:crdVersions="v1" output:artifacts:config="$@" paths="./..."
 	touch "$@"
 
+config/helm/crds/bases: controller-gen $(GO4CONTROLLERGEN_SOURCES)
+	$(CONTROLLER_GEN) crd:crdVersions="v1" output:artifacts:config="$@" paths="./..."
+	touch "$@"
+
 .PHONY: generate
 generate: go-generate helm-generate deployment-generate
 
@@ -303,7 +307,7 @@ $(CHARTS_DIRECTORY)/harbor-operator-$(RELEASE_VERSION).tgz: $(CHART_HARBOR_OPERA
 
 $(CHART_HARBOR_OPERATOR)/crds/crds.yaml: kustomize config/crd/bases
 	$(KUSTOMIZE) build config/helm/crds/ | \
-	sed "s/'\({{[^}}]*}}\)'/\1/g">> '$@'
+	sed "s/'\({{[^}}]*}}\)'/\1/g" > '$@'
 
 $(CHART_HARBOR_OPERATOR)/assets:
 	rm -f '$@'
