@@ -628,6 +628,10 @@ jobs:
       - name: install harbor-operator
         run: |
           set -ex
+          make kustomize
+
+          kustomize config/helm/crds | kubectl create -f -
+
           make helm-install NAMESPACE="${operatorNamespace}" IMG=${dockerImage}
           kubectl -n "${operatorNamespace}" wait --for=condition=Available deployment --all --timeout 300s
 
