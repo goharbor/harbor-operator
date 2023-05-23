@@ -40,7 +40,6 @@ Deploy Harbor Operator
 | image.repository | string | `"goharbor/harbor-operator"` | The image repository whose default is the chart appVersion. |
 | image.tag | string | `"dev_master"` | The image tag whose default is the chart appVersion. |
 | imagePullSecrets | list | `[]` | Reference to one or more secrets to be used when pulling images <https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/> For example: `[   {"name":"image-pull-secret"} ]` |
-| installCRDs | bool | `false` | If true, CRD resources will be installed as part of the Helm chart. If enabled, when uninstalling CRD resources will be deleted causing all installed custom resources to be DELETED |
 | leaderElection.namespace | string | `"kube-system"` | The namespace used to store the ConfigMap for leader election |
 | logLevel | int | `4` | Set the verbosity of controller. Range of 0 - 6 with 6 being the most verbose. Info level is 4. |
 | minio-operator.enabled | bool | `false` | Whether to enabled [MinIO Operator](https://github.com/minio/operator) |
