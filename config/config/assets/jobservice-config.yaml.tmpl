@@ -16,7 +16,7 @@ port: 8080
 
 worker_pool:
   backend: "redis"
-
+  workers: {{ .Spec.WorkerPool.WorkerCount }}
   redis_pool:
 {{- if .Spec.WorkerPool.Redis.PasswordRef }}
     redis_url: {{ "redis-password" | secretData .Spec.WorkerPool.Redis.PasswordRef | .Spec.WorkerPool.Redis.GetDSN }}
