@@ -630,7 +630,7 @@ jobs:
           set -ex
           make kustomize
 
-          kustomize build config/helm/crds | kubectl create -f -
+          kustomize build --reorder legacy config/helm/crds | kubectl create -f -
 
           make helm-install NAMESPACE="${operatorNamespace}" IMG=${dockerImage}
           kubectl -n "${operatorNamespace}" wait --for=condition=Available deployment --all --timeout 300s
