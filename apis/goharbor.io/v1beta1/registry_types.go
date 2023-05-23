@@ -2,6 +2,7 @@ package v1beta1
 
 import (
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -54,6 +55,10 @@ type RegistrySpec struct {
 
 	// +kubebuilder:validation:Optional
 	Trace *harbormetav1.TraceSpec `json:"trace,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default="RollingUpdate"
+	UpdateStrategyType appsv1.DeploymentStrategyType `json:"updateStrategyType,omitempty"`
 }
 
 func (r *RegistrySpec) Default() {
