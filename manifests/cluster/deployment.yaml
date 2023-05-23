@@ -25544,6 +25544,9 @@ spec:
                 required:
                 - provider
                 type: object
+              updateStrategyType:
+                default: RollingUpdate
+                type: string
               workerPool:
                 description: Configurations of worker pool
                 properties:
@@ -45358,6 +45361,9 @@ spec:
                 required:
                 - provider
                 type: object
+              updateStrategyType:
+                default: RollingUpdate
+                type: string
               validation:
                 properties:
                   disabled:
@@ -63490,7 +63496,7 @@ data:
 
     worker_pool:
       backend: "redis"
-
+      workers: {{ .Spec.WorkerPool.WorkerCount }}
       redis_pool:
     {{- if .Spec.WorkerPool.Redis.PasswordRef }}
         redis_url: {{ "redis-password" | secretData .Spec.WorkerPool.Redis.PasswordRef | .Spec.WorkerPool.Redis.GetDSN }}

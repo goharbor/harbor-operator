@@ -21,7 +21,9 @@ jobs:
       with:
         go-version: 1.18
     - uses: actions/checkout@v2
-    - run: make docker-build
+    - run: |
+        docker buildx create --use
+        make docker-build
 
   docker-lint:
     runs-on: ubuntu-latest
@@ -157,7 +159,7 @@ jobs:
       with:
         go-version: 1.18
 
-    - uses: azure/setup-kubectl@v1
+    - uses: azure/setup-kubectl@v3
       with:
         version: 'latest'
 
@@ -196,16 +198,19 @@ jobs:
 
     - name: build harbor-operator
       run: |
+        docker buildx create --use
         make generate docker-build IMG=${dockerImage} GIT_COMMIT=${{ github.sha }}
         kind load docker-image ${dockerImage} --name harbor
 
     - name: install harbor-operator
       run: |
+        make kustomize
+
         cd manifests/cluster
         kustomize edit add secret github-token --disableNameSuffixHash --from-literal=GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
         kustomize edit add patch --path patch/github-token.yaml
         kustomize edit set image goharbor/harbor-operator=${dockerImage}
-        kustomize build | kubectl create -f -
+        ../../bin/kustomize build --reorder legacy | kubectl create -f -
 
         if ! time kubectl -n ${operatorNamespace} wait --for=condition=Available deployment --all --timeout 300s; then
           kubectl get all -n ${operatorNamespace}
@@ -367,9 +372,9 @@ jobs:
         with:
           go-version: 1.18
 
-      - uses: azure/setup-kubectl@v1
+      - uses: azure/setup-kubectl@v3
         with:
-          version: 'latest'
+          version: 'v1.25.4'
 
       - name: Cache go mod
         uses: actions/cache@v2
@@ -416,11 +421,13 @@ jobs:
 
       - name: install harbor-operator
         run: |
+          make kustomize
+
           cd manifests/cluster
           kustomize edit add secret github-token --disableNameSuffixHash --from-literal=GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
           kustomize edit add patch --path patch/github-token.yaml
           kustomize edit set image goharbor/harbor-operator=${dockerImage}
-          kustomize build | kubectl create -f -
+          ../../bin/kustomize build --reorder legacy | kubectl create -f -
 
           if ! time kubectl -n ${operatorNamespace} wait --for=condition=Available deployment --all --timeout 300s; then
             kubectl get all -n ${operatorNamespace}
@@ -576,7 +583,7 @@ jobs:
         with:
           go-version: 1.18
 
-      - uses: azure/setup-kubectl@v1
+      - uses: azure/setup-kubectl@v3
         with:
           version: 'latest'
 

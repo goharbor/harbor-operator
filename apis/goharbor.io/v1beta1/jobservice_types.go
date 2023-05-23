@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -88,6 +89,10 @@ type JobServiceSpec struct {
 
 	// +kubebuilder:validation:Optional
 	Storage *JobServiceStorageSpec `json:"storage,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default="RollingUpdate"
+	UpdateStrategyType appsv1.DeploymentStrategyType `json:"updateStrategyType,omitempty"`
 }
 
 type JobServiceStorageSpec struct {

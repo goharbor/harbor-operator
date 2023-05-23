@@ -185,6 +185,7 @@ func (r *Reconciler) GetJobService(ctx context.Context, harbor *goharborv1.Harbo
 			Storage: &goharborv1.JobServiceStorageSpec{
 				ScanDataExports: r.JobServiceScanDataExportsStorage(ctx, harbor),
 			},
+			UpdateStrategyType: harbor.Spec.UpdateStrategyType,
 		},
 	}, nil
 }

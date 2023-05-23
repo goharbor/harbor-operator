@@ -139,7 +139,7 @@ helm-postgres-operator: helm $(CHARTS_DIRECTORY)/postgres-operator/values.yaml
 	$(MAKE) kube-namespace
 	$(HELM) repo add zalando https://opensource.zalando.com/postgres-operator/charts/postgres-operator
 	$(HELM) repo update
-	$(HELM) upgrade --namespace "$(NAMESPACE)" --install postgres-operator zalando/postgres-operator --version 1.6.3 -f $(CHARTS_DIRECTORY)/postgres-operator/values.yaml
+	$(HELM) upgrade --namespace "$(NAMESPACE)" --install postgres-operator zalando/postgres-operator --version 1.7.0 -f $(CHARTS_DIRECTORY)/postgres-operator/values.yaml
 
 helm-install: helm helm-generate helm-minio-operator helm-redis-operator helm-postgres-operator
 	$(MAKE) kube-namespace
@@ -209,10 +209,17 @@ go.sum: go.mod $(GONOGENERATED_SOURCES)
 
 # Build the docker image
 .PHONY: docker-build
-docker-build: dist/harbor-operator_linux_amd64/manager
-	docker build dist/harbor-operator_linux_amd64 \
-		-f Dockerfile \
-		-t "$(IMG)"
+docker-build:
+	docker build -f Dockerfile -t "$(IMG)" .
+
+.PHONY: docker-build-multi-arch
+docker-build-multi-arch:
+	docker buildx build \
+    		--platform linux/arm64,linux/amd64 \
+    		--push \
+    		-f Dockerfile \
+    		-t "$(IMG)" \
+    		.
 
 # Push the docker image
 .PHONY: docker-push
@@ -451,16 +458,17 @@ install-dependencies: certmanager postgresql redis ingress
 .PHONY: redis
 redis: helm sample-redis
 	$(HELM) repo add bitnami https://charts.bitnami.com/bitnami
-	$(HELM) upgrade --install harbor-redis bitnami/redis --version 15.7.0 \
+	$(HELM) upgrade --install harbor-redis bitnami/redis --version 16.13.2 \
 		--set-string auth.existingSecret=harbor-redis \
 		--set-string auth.existingSecretPasswordKey=redis-password
 
 .PHONY: postgresql
 postgresql: helm sample-database
 	$(HELM) repo add bitnami https://charts.bitnami.com/bitnami
-	$(HELM) upgrade --install harbor-database bitnami/postgresql --version 10.14.3 \
-		--set-string initdbScriptsConfigMap=harbor-init-db \
-		--set-string existingSecret=harbor-database-password
+	$(HELM) upgrade --install harbor-database bitnami/postgresql --version 11.6.26 \
+		--set-string primary.initdb.scriptsConfigMap=harbor-init-db \
+		--set-string auth.existingSecret=harbor-database-password \
+		--set-string primary.extendedConfiguration="password_encryption=md5"
 
 .PHONY: kube-namespace
 kube-namespace:
@@ -554,8 +562,8 @@ $(CONTROLLER_GEN):
 
 # find or download markdownlint
 # download markdownlint if necessary
-MARKDOWNLINT_VERSION := 0.32.2
-MARKDOWNLINT := $(BIN)/markdownlint
+MARKDOWNLINT_VERSION := 0.33.0
+MARKDOWNLINT := npx markdownlint
 
 .PHONY: markdownlint
 markdownlint:
@@ -568,7 +576,6 @@ $(MARKDOWNLINT):
 	$(MAKE) $(BIN)
 	# https://github.com/igorshubovych/markdownlint-cli#installation
 	npm install markdownlint-cli@$(MARKDOWNLINT_VERSION) --no-save
-	ln -s "$$(npm bin)/markdownlint" $(MARKDOWNLINT)
 
 # find or download golangci-lint
 # download golangci-lint if necessary
