@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	. "github.com/goharbor/harbor-operator/pkg/resources/statuscheck"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"sigs.k8s.io/kustomize/kstatus/status"
 

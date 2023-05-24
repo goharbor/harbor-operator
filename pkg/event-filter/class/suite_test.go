@@ -5,11 +5,10 @@ import (
 	"testing"
 
 	. "github.com/goharbor/harbor-operator/pkg/event-filter/class"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
-	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
 
@@ -20,11 +19,11 @@ func TestSuite(t *testing.T) {
 	t.Parallel()
 	RegisterFailHandler(Fail)
 
-	RunSpecsWithDefaultAndCustomReporters(t, "EventFilter", []Reporter{printer.NewlineReporter{}})
+	RunSpecs(t, "Event Filter Class Suite")
 }
 
-func setupTest(ctx context.Context) (*Filter, context.Context) {
+func setupTest(ctx context.Context) *Filter {
 	logger.Set(&ctx, zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
 
-	return &Filter{}, ctx
+	return &Filter{}
 }

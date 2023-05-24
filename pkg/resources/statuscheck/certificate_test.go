@@ -5,7 +5,7 @@ import (
 	"time"
 
 	. "github.com/goharbor/harbor-operator/pkg/resources/statuscheck"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	"github.com/goharbor/harbor-operator/pkg/scheme"

@@ -5,7 +5,7 @@ import (
 	"sync/atomic"
 
 	. "github.com/goharbor/harbor-operator/pkg/graph"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	// +kubebuilder:scaffold:imports

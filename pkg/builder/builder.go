@@ -53,7 +53,10 @@ type Builder struct {
 }
 
 func (blder *Builder) WithLogger(log logr.Logger) *Builder {
-	blder.blder.WithLogger(log)
+	blder.blder.WithLogConstructor(func(req *reconcile.Request) logr.Logger {
+		return log
+	})
+
 	blder.log = log
 
 	return blder
