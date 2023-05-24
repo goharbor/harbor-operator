@@ -120,7 +120,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (res ctrl.
 		if ferr != nil && bd.Status.Status != "error" {
 			bd.Status.Status = "error"
 			bd.Status.Message = ferr.Error()
-			if err := r.Status().Update(ctx, bd, &client.UpdateOptions{}); err != nil {
+			if err := r.Status().Update(ctx, bd); err != nil {
 				log.Error(err, "defer update status error", "cause", err)
 			}
 		}
@@ -170,7 +170,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (res ctrl.
 	// TODO: add conditions
 	if bd.Status.Status != "ready" {
 		bd.Status.Status = "ready"
-		if err := r.Status().Update(ctx, bd, &client.UpdateOptions{}); err != nil {
+		if err := r.Status().Update(ctx, bd); err != nil {
 			if apierr.IsConflict(err) {
 				log.Error(err, "failed to update status")
 			} else {

@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
-	"github.com/onsi/ginkgo"
+	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -43,10 +43,8 @@ func (pods Pods) Logs(ctx context.Context) map[string][]byte {
 }
 
 func LogsAll(ctx *context.Context, name func() types.NamespacedName) interface{} {
-	return func(done ginkgo.Done) {
-		defer close(done)
-
-		if !ginkgo.CurrentGinkgoTestDescription().Failed {
+	return func() {
+		if !ginkgo.CurrentSpecReport().Failed() {
 			return
 		}
 

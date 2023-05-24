@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	. "github.com/goharbor/harbor-operator/pkg/event-filter/class"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
@@ -22,7 +22,7 @@ var _ = Describe("class-filter", func() {
 		var cf *Filter
 
 		BeforeEach(func() {
-			cf, _ = setupTest(context.TODO())
+			cf = setupTest(context.TODO())
 		})
 
 		Describe("Creation event", func() {
@@ -513,7 +513,7 @@ var _ = Describe("class-filter", func() {
 		var cf *Filter
 
 		BeforeEach(func() {
-			cf, _ = setupTest(context.TODO())
+			cf = setupTest(context.TODO())
 			cf.ClassName = "harbor-class-name"
 		})
 
