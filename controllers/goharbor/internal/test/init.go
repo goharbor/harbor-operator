@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"math/rand"
 
-	"github.com/onsi/ginkgo"
+	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -72,7 +72,7 @@ func InitNamespace(ctxFactory func() context.Context) *corev1.Namespace {
 	})
 
 	ginkgo.AfterEach(func() {
-		if ginkgo.CurrentGinkgoTestDescription().Failed && keepNamespaceOnFailure {
+		if ginkgo.CurrentSpecReport().Failed() && keepNamespaceOnFailure {
 			fmt.Fprintf(ginkgo.GinkgoWriter, "keeping namespace %s\n", ns.GetName())
 
 			return
