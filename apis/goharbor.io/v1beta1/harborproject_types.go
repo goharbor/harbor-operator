@@ -16,6 +16,7 @@ import (
 // +resource:path=harborproject
 // +kubebuilder:subresource:status
 // +kubebuilder:resource:categories="goharbor",shortName="hp"
+// +kubebuilder:printcolumn:name="ProjectName",type=string,JSONPath=`.spec.projectName`,description="Project name in Harbor"
 // +kubebuilder:printcolumn:name="HarborServerConfig",type=string,JSONPath=`.spec.harborServerConfig`,description="HarborServerConfiguration name"
 // +kubebuilder:printcolumn:name="Status",type=string,JSONPath=`.status.status`,description="HarborProject status"
 // +kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`,description="Timestamp representing the server time when this object was created. It is not guaranteed to be set in happens-before order across separate operations. Clients may not set this value. It is represented in RFC3339 form and is in UTC."

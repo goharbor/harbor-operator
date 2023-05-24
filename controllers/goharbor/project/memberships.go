@@ -24,18 +24,18 @@ type memberDifferences struct {
 }
 
 const (
-	harborAPIProjectAdmin int = 1
-	harborAPIDeveloper    int = 2
-	harborAPIGuest        int = 3
-	harborAPIMaintainer   int = 4
+	harborAPIProjectAdminRole int = 1
+	harborAPIDeveloperRole    int = 2
+	harborAPIGuestRole        int = 3
+	harborAPIMaintainerRole   int = 4
 )
 
 // map string role mappings from CRD to int for Harbor API.
 var memberRoleMapping = map[string]int{
-	"projectAdmin": harborAPIProjectAdmin,
-	"developer":    harborAPIDeveloper,
-	"guest":        harborAPIGuest,
-	"maintainer":   harborAPIMaintainer,
+	"projectAdmin": harborAPIProjectAdminRole,
+	"developer":    harborAPIDeveloperRole,
+	"guest":        harborAPIGuestRole,
+	"maintainer":   harborAPIMaintainerRole,
 }
 
 func (r *Reconciler) reconcileMembership(hp *goharborv1.HarborProject, log logr.Logger) (err error) { //nolint:funlen
@@ -120,7 +120,7 @@ func findDifferences(currentMemberships []*models.ProjectMemberEntity, desiredMe
 		return getProjectMemberName(&desiredMemberships[i]) < getProjectMemberName(&desiredMemberships[j])
 	})
 
-	// search all currentMembers in desiredMembers. If found, mark for update if necessary, if not mark for deletion.
+	// search all currentMembers in desiredMembers. If found, mark for update or deletion if necessary.
 	for _, currentMember := range currentMemberships {
 		idx := sort.Search(desiredMembershipsCnt, func(i int) bool {
 			return getProjectMemberName(&desiredMemberships[i]) >= currentMember.EntityName
@@ -230,7 +230,8 @@ func createDesiredMemberships(definedMemberships []*goharborv1.HarborProjectMemb
 	return desiredMembers, nil
 }
 
-// marshal all objects into json and hash it.
+// marshal all current and desired memberships into json and hash them.
+// this hash is used to efficiently find differences later on.
 func generateHash(currentMemberships []*models.ProjectMemberEntity, desiredMemberships []*goharborv1.HarborProjectMember) (string, error) {
 	type membershipComp struct {
 		CurrentMemberships []*models.ProjectMemberEntity

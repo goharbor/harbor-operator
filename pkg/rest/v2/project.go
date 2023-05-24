@@ -39,10 +39,8 @@ func (c *Client) EnsureProject(name string) (int64, error) {
 		return int64(p.ProjectID), nil
 	}
 
-	if err != nil {
-		if !strings.Contains(err.Error(), "no project with name") {
-			return 0, errors.Errorf("error when getting project %s: %s", name, err)
-		}
+	if !strings.Contains(err.Error(), "no project with name") {
+		return 0, errors.Errorf("error when getting project %s: %s", name, err)
 	}
 
 	fmt.Println("creating project since target project doesn't exist")
@@ -330,7 +328,7 @@ func (c *Client) GetProjectRequest(hp *goharborv1beta1.HarborProject) (*models.P
 		hp.Spec.HarborProjectMetadata = &goharborv1beta1.HarborProjectMetadata{}
 	}
 
-	model := &models.ProjectReq{
+	projectReq := &models.ProjectReq{
 		ProjectName:  hp.Spec.ProjectName,
 		CVEAllowlist: &models.CVEAllowlist{},
 		Metadata: &models.ProjectMetadata{
@@ -339,23 +337,22 @@ func (c *Client) GetProjectRequest(hp *goharborv1beta1.HarborProject) (*models.P
 			EnableContentTrustCosign: utilstring.Bool2Str(hp.Spec.HarborProjectMetadata.EnableContentTrustCosign),
 			PreventVul:               utilstring.Bool2Str(hp.Spec.HarborProjectMetadata.PreventVulnerable),
 			Public:                   *utilstring.Bool2Str(hp.Spec.HarborProjectMetadata.Public),
+			Severity:                 &hp.Spec.HarborProjectMetadata.Severity,
 		},
 	}
 
 	// create objects for Harbor API from CVE List in Custom Resource
 	for _, cve := range hp.Spec.CveAllowList {
-		model.CVEAllowlist.Items = append(model.CVEAllowlist.Items, &models.CVEAllowlistItem{CVEID: cve})
+		projectReq.CVEAllowlist.Items = append(projectReq.CVEAllowlist.Items, &models.CVEAllowlistItem{CVEID: cve})
 	}
 
 	// if ReuseSysCveAllowlist is not explicitly set, set it depending on if project cve allow list is configured
 	if hp.Spec.HarborProjectMetadata.ReuseSysCveAllowlist == nil {
 		reuse := len(hp.Spec.CveAllowList) == 0
-		model.Metadata.ReuseSysCVEAllowlist = utilstring.Bool2Str(&reuse)
+		projectReq.Metadata.ReuseSysCVEAllowlist = utilstring.Bool2Str(&reuse)
 	} else {
-		model.Metadata.ReuseSysCVEAllowlist = utilstring.Bool2Str(hp.Spec.HarborProjectMetadata.ReuseSysCveAllowlist)
+		projectReq.Metadata.ReuseSysCVEAllowlist = utilstring.Bool2Str(hp.Spec.HarborProjectMetadata.ReuseSysCveAllowlist)
 	}
-
-	model.Metadata.Severity = &hp.Spec.HarborProjectMetadata.Severity
 
 	// if set, parse human readable storage quota (e.g. "10Gi") into byte int64 for Harbor API
 	if hp.Spec.StorageQuota != "" {
@@ -365,8 +362,8 @@ func (c *Client) GetProjectRequest(hp *goharborv1beta1.HarborProject) (*models.P
 		}
 
 		value := parsedQuota.Value()
-		model.StorageLimit = &value
+		projectReq.StorageLimit = &value
 	}
 
-	return model, nil
+	return projectReq, nil
 }
