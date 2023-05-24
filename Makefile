@@ -209,10 +209,17 @@ go.sum: go.mod $(GONOGENERATED_SOURCES)
 
 # Build the docker image
 .PHONY: docker-build
-docker-build: dist/harbor-operator_linux_amd64/manager
-	docker build dist/harbor-operator_linux_amd64 \
-		-f Dockerfile \
-		-t "$(IMG)"
+docker-build:
+	docker build -f Dockerfile -t "$(IMG)" .
+
+.PHONY: docker-build-multi-arch
+docker-build-multi-arch:
+	docker buildx build \
+    		--platform linux/arm64,linux/amd64 \
+    		--push \
+    		-f Dockerfile \
+    		-t "$(IMG)" \
+    		.
 
 # Push the docker image
 .PHONY: docker-push
@@ -281,7 +288,7 @@ CHART_TEMPLATE_PATH := $(CHART_HARBOR_OPERATOR)/templates
 
 CRD_GROUP := goharbor.io
 
-$(CHARTS_DIRECTORY)/harbor-operator-$(RELEASE_VERSION).tgz: $(CHART_HARBOR_OPERATOR)/README.md $(CHART_HARBOR_OPERATOR)/templates/crds.yaml \
+$(CHARTS_DIRECTORY)/harbor-operator-$(RELEASE_VERSION).tgz: $(CHART_HARBOR_OPERATOR)/README.md \
 	$(CHART_HARBOR_OPERATOR)/assets $(wildcard $(CHART_HARBOR_OPERATOR)/assets/*) \
 	$(CHART_HARBOR_OPERATOR)/Chart.lock \
 	$(CHART_TEMPLATE_PATH)/role.yaml $(CHART_TEMPLATE_PATH)/clusterrole.yaml \
@@ -294,13 +301,6 @@ $(CHARTS_DIRECTORY)/harbor-operator-$(RELEASE_VERSION).tgz: $(CHART_HARBOR_OPERA
 		--version $(RELEASE_VERSION) \
 		--app-version $(RELEASE_VERSION) \
 		--destination $(CHARTS_DIRECTORY)
-
-$(CHART_HARBOR_OPERATOR)/templates/crds.yaml: kustomize config/crd/bases
-	echo '{{- /* $(DO_NOT_EDIT) */ -}}' > '$@'
-	echo '{{- if .Values.installCRDs }}' >> '$@'
-	$(KUSTOMIZE) build config/helm/crds/ | \
-	sed "s/'\({{[^}}]*}}\)'/\1/g">> '$@'
-	echo '{{- end -}}' >> '$@'
 
 $(CHART_HARBOR_OPERATOR)/assets:
 	rm -f '$@'

@@ -3,11 +3,8 @@ package common_test
 import (
 	"testing"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	// +kubebuilder:scaffold:imports
-	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to
@@ -17,5 +14,5 @@ func TestSuite(t *testing.T) {
 	t.Parallel()
 	RegisterFailHandler(Fail)
 
-	RunSpecsWithDefaultAndCustomReporters(t, "Controller", []Reporter{printer.NewlineReporter{}})
+	RunSpecs(t, "Common Suite")
 }

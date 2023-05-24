@@ -53,7 +53,6 @@ Harbor deployment stack is controlled by a custom Harbor resource `HarborCluster
 
 ## Release plans
 
-* [Release 1.3](https://github.com/goharbor/harbor-operator/projects/9)
 * [Release 1.4](https://github.com/goharbor/harbor-operator/projects/12)
 
 ## Getting started
@@ -103,9 +102,9 @@ Harbor operator exposes the frontend service with ingress (CRD version: `v1beta1
 
 **NOTES:**
 
-  :heavy_check_mark: : support
-  :heavy_multiplication_x: : not support
-  :o: : not verified (probably support)
+  :heavy_check_mark: : supported
+  :heavy_multiplication_x: : not supported
+  :o: : not verified (probably supported)
 
 ## Documentation
 
@@ -133,9 +132,10 @@ Special thanks to the [contributors](./MAINTAINERS) who did significant contribu
 
 ## Community
 
-* **Slack:** channel `#harbor-operator-dev` at [CNCF Workspace](https://slack.cncf.io)
-* **Mail group:** send mail to Harbor dev mail group: harbor-dev@lists.cncf.io
-* **Twitter:** [@project_harbor](https://twitter.com/project_harbor)
+* **Twitter:** [@project_harbor](https://twitter.com/project_harbor)  
+* **User Group:** Join Harbor user email group: [harbor-users@lists.cncf.io](https://lists.cncf.io/g/harbor-users) to get update of Harbor's news, features, releases, or to provide suggestion and feedback.  
+* **Developer Group:** Join Harbor developer group: [harbor-dev@lists.cncf.io](https://lists.cncf.io/g/harbor-dev) for discussion on Harbor development and contribution.
+* **Slack:** Join Harbor's community for discussion and ask questions: [Cloud Native Computing Foundation](https://slack.cncf.io/), channel: [#harbor-operator-dev](https://cloud-native.slack.com/messages/harbor-operator-dev/)
 * **Community meeting:** attend [bi-weekly community meeting](https://github.com/goharbor/community/blob/master/MEETING_SCHEDULE.md) for Q&A
 
 ## Additional references

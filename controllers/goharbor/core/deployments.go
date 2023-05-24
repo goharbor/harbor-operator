@@ -65,6 +65,7 @@ func getDefaultAllowedRegistryTypesForProxyCache() string {
 		registry.RegistryTypeHarbor,
 		registry.RegistryTypeAzureAcr,
 		registry.RegistryTypeAwsEcr,
+		registry.RegistryTypeGithubCR,
 		registry.RegistryTypeGoogleGcr,
 		registry.RegistryTypeQuay,
 		registry.RegistryTypeDockerRegistry,

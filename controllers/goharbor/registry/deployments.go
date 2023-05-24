@@ -330,6 +330,10 @@ func (r *Reconciler) GetDeployment(ctx context.Context, registry *goharborv1.Reg
 		},
 	}
 
+	if len(registry.Spec.UpdateStrategyType) > 0 {
+		deploy.Spec.Strategy.Type = registry.Spec.UpdateStrategyType
+	}
+
 	if err = r.ApplyStorageConfiguration(ctx, registry, deploy); err != nil {
 		return nil, errors.Wrap(err, "cannot apply storage configuration")
 	}

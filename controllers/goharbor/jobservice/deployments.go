@@ -348,6 +348,10 @@ func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1.J
 		},
 	}
 
+	if len(jobservice.Spec.UpdateStrategyType) > 0 {
+		deploy.Spec.Strategy.Type = jobservice.Spec.UpdateStrategyType
+	}
+
 	jobservice.Spec.ComponentSpec.ApplyToDeployment(deploy)
 
 	return deploy, nil
