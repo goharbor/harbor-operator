@@ -13247,6 +13247,10 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
+    - description: Project name in Harbor
+      jsonPath: .spec.projectName
+      name: ProjectName
+      type: string
     - description: HarborServerConfiguration name
       jsonPath: .spec.harborServerConfig
       name: HarborServerConfig
@@ -66070,7 +66074,7 @@ data:
     - key: max-reconcile
       priority: 200
       value: "1"
-  harborproject-ctrl.yaml: |-
+  harborproject-ctrl.yaml: |
     - key: max-reconcile
       priority: 200
       value: "1"

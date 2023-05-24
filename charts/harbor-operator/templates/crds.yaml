@@ -12287,6 +12287,10 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
+    - description: Project name in Harbor
+      jsonPath: .spec.projectName
+      name: ProjectName
+      type: string
     - description: HarborServerConfiguration name
       jsonPath: .spec.harborServerConfig
       name: HarborServerConfig
