@@ -42,6 +42,18 @@ data:
       value: {{ . | quote }}
     {{- end}}
 
+  harborproject-ctrl.yaml: |-
+    {{- with .Values.controllers.harborProject.maxReconcile }}
+    - key: max-reconcile
+      priority: 200
+      value: {{ . | quote }}
+    {{- end}}
+    {{- with .Values.controllers.harborProject.requeueAfterMinutes }}
+    - key: requeue-after-minutes
+      priority: 200
+      value: {{ . | quote }}
+    {{- end}}
+
   core-ctrl.yaml: |-
     {{- with .Values.controllers.core.maxReconcile }}
     - key: max-reconcile
