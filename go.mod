@@ -10,7 +10,7 @@ require (
 	github.com/go-logr/logr v1.2.4
 	github.com/go-openapi/runtime v0.21.0
 	github.com/go-redis/redis v6.15.9+incompatible
-	github.com/goharbor/go-client v0.25.0
+	github.com/goharbor/go-client v0.26.2
 	github.com/goharbor/harbor/src v0.0.0-20220526154154-b0506782b47d
 	github.com/jaegertracing/jaeger-lib v2.2.0+incompatible
 	github.com/jetstack/cert-manager v1.1.0

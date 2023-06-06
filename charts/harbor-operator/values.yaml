@@ -80,6 +80,12 @@ controllers:
     # controllers.harborConfiguration.maxReconcile -- Max parallel reconciliation for HarborConfiguration controller
     maxReconcile: 1
 
+  harborProject:
+    # controllers.harborProject.maxReconcile -- Max parallel reconciliation for HarborProject controller
+    maxReconcile: 1
+    # controllers.harborProject.requeueAfterMinutes -- How often to reconcile HarborProjects
+    requeueAfterMinutes: 5
+
   core:
     # controllers.core.maxReconcile -- Max parallel reconciliation for Core controller
     maxReconcile: 1

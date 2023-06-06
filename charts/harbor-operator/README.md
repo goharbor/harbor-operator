@@ -24,6 +24,8 @@ Deploy Harbor Operator
 | controllers.core.maxReconcile | int | `1` | Max parallel reconciliation for Core controller |
 | controllers.harbor.maxReconcile | int | `1` | Max parallel reconciliation for Harbor controller |
 | controllers.harborConfiguration.maxReconcile | int | `1` | Max parallel reconciliation for HarborConfiguration controller |
+| controllers.harborProject.maxReconcile | int | `1` | Max parallel reconciliation for HarborProject controller |
+| controllers.harborProject.requeueAfterMinutes | int | `5` | How often to reconcile HarborProjects |
 | controllers.harborcluster.maxReconcile | int | `1` | Max parallel reconciliation for HarborCluster controller |
 | controllers.jobservice.maxReconcile | int | `1` | Max parallel reconciliation for JobService controller |
 | controllers.notaryserver.maxReconcile | int | `1` | Max parallel reconciliation for NotaryServer controller |

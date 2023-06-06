@@ -45,7 +45,6 @@ Harbor deployment stack is controlled by a custom Harbor resource `HarborCluster
   * Certification auto injection
   * Manage Harbor resources with the declaration way
     * Robot account
-    * Project
     * and more
 * [Auto-scaling](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) for each component.
 * Backup/restore data (registry layer, chartmuseum data, databases content).
@@ -115,6 +114,7 @@ Harbor operator exposes the frontend service with ingress (CRD version: `v1beta1
 * [Customize storage, database and cache services](./docs/installation/customize-storage-db-redis.md)
 * [Customize images](./docs/customize-images.md)
 * [Day2 configurations](docs/day2/day2-configurations.md)
+* [Day2 manage Harbor projects](docs/day2/day2-harborprojects.md)
 * [Upgrade Harbor cluster](./docs/LCM/upgrade-cluster.md)
 * [Delete Harbor cluster](./docs/LCM/cluster-deletion.md)
 * [Backup data](./docs/LCM/backup-data.md)

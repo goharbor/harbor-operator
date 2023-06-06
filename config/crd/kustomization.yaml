@@ -15,6 +15,7 @@ resources:
   - bases/goharbor.io_trivies.yaml
   - bases/goharbor.io_harborclusters.yaml
   - bases/goharbor.io_harborconfigurations.yaml
+  - bases/goharbor.io_harborprojects.yaml
   - bases/goharbor.io_harborserverconfigurations.yaml
   - bases/goharbor.io_pullsecretbindings.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
