@@ -4,6 +4,7 @@
 [![CodeQL](https://github.com/goharbor/harbor-operator/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/goharbor/harbor-operator/actions/workflows/codeql-analysis.yml)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/bb3adb454b424e66ae3b9bdf2ab2fce1)](https://www.codacy.com/gh/goharbor/harbor-operator/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=goharbor/harbor-operator&amp;utm_campaign=Badge_Grade)
 [![Go Reference](https://pkg.go.dev/badge/github.com/goharbor/harbor-operator.svg)](https://pkg.go.dev/github.com/goharbor/harbor-operator)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fgoharbor%2Fharbor-operator.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fgoharbor%2Fharbor-operator?ref=badge_shield)
 
 > **ATTENTIONS:** THE `MASTER` BRANCH MAY BE IN AN UNSTABLE OR EVEN BROKEN STATE DURING DEVELOPMENT.
 
@@ -163,3 +164,6 @@ OVHcloud uses the operator at scale to operate part of its private registry serv
 ## License
 
 See [LICENSE](https://github.com/goharbor/harbor-operator/blob/master/LICENSE) for licensing details.
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fgoharbor%2Fharbor-operator.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fgoharbor%2Fharbor-operator?ref=badge_large)
