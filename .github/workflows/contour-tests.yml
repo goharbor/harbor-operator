@@ -1,0 +1,225 @@
+name: Contour Tests
+
+on:
+  push:
+    branches:
+    - '**'
+  pull_request:
+    branches:
+    - master
+    - release-*
+    - feature/*
+
+jobs:
+  harbor-contour:
+    runs-on: ubuntu-latest
+    name: contour K8S v${{ matrix.k8sVersion }} (CM v${{ matrix.certManager }} ${{ matrix.samples }})
+    env:
+      USE_EXISTING_CLUSTER: true
+      operatorNamespace: harbor-operator-ns
+      dockerImage: harbor-operator:dev_test
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # https://github.com/jetstack/cert-manager/tags
+        certManager:
+          - "1.8.2"
+
+        # https://github.com/projectcontour/contour/tags
+        contour:
+          - "1.22.0"
+
+        k8sVersion:
+          - "1.21.12"
+          - "1.23.6"
+          - "1.24.0"
+
+        samples:
+          - "full_stack.yaml"
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-go@v2
+        with:
+          go-version: 1.18
+
+      - uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.25.4'
+
+      - name: Cache go mod
+        uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Prepare memory storage for etcd of kind cluster
+        run: |
+          # Use memory storage for etcd of the kind cluster, see https://github.com/kubernetes-sigs/kind/issues/845 for more info
+          mkdir -p /tmp/lib/etcd
+          sudo mount -t tmpfs tmpfs /tmp/lib/etcd
+
+      - name: Install Kubernetes v${{ matrix.k8sVersion }}
+        uses: helm/kind-action@v1.3.0
+        with:
+          version: v0.14.0
+          node_image: kindest/node:v${{ matrix.k8sVersion }}
+          cluster_name: harbor
+          config: .github/kind.yaml
+
+      - name: Install CertManager v${{ matrix.certManager }}
+        run: |
+          kubectl apply -f "https://github.com/jetstack/cert-manager/releases/download/v${{ matrix.certManager }}/cert-manager.yaml"
+          sleep 5
+          time kubectl -n cert-manager wait --for=condition=Available deployment --all --timeout 300s
+
+      - name: Install Contour
+        run: |
+          kubectl apply -f https://github.com/projectcontour/contour/raw/v${{ matrix.contour }}/examples/render/contour.yaml
+          sleep 5
+          kubectl patch daemonsets -n projectcontour envoy -p '{"spec":{"template":{"spec":{"nodeSelector":{"ingress-ready":"true"},"tolerations":[{"key":"node-role.kubernetes.io/master","operator":"Equal","effect":"NoSchedule"}, {"key":"node-role.kubernetes.io/control-plane","operator":"Equal","effect":"NoSchedule"}]}}}}'
+          sleep 5
+          kubectl get all -n projectcontour
+          time kubectl wait --namespace projectcontour --for=condition=ready pod --selector=app=envoy --timeout=100s || kubectl get all -n projectcontour
+          time kubectl wait --namespace projectcontour --for=condition=ready pod --selector=app=envoy --timeout=100s
+
+      - name: build harbor-operator
+        run: |
+          make manifests docker-build IMG=${dockerImage} GIT_COMMIT=${{ github.sha }}
+          kind load docker-image ${dockerImage} --name harbor
+
+      - name: install harbor-operator
+        run: |
+          make kustomize
+
+          cd manifests/cluster
+          kustomize edit add secret github-token --disableNameSuffixHash --from-literal=GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+          kustomize edit add patch --path patch/github-token.yaml
+          kustomize edit set image goharbor/harbor-operator=${dockerImage}
+          ../../bin/kustomize build --reorder legacy | kubectl create -f -
+
+          if ! time kubectl -n ${operatorNamespace} wait --for=condition=Available deployment --all --timeout 300s; then
+            kubectl get all -n ${operatorNamespace}
+            exit 1
+          fi
+
+      - name: install harbor
+        run: |
+          set -ex
+          IP=`hostname -I | awk '{print $1}'`
+          echo "IP=$IP" >> $GITHUB_ENV
+          CORE_HOST=core.$IP.nip.io
+          NOTARY_HOST=notary.$IP.nip.io
+          MINIO_HOST=minio.$IP.nip.io
+          echo "CORE_HOST=$CORE_HOST" >> $GITHUB_ENV
+          echo "NOTARY_HOST=$NOTARY_HOST" >> $GITHUB_ENV
+          echo "MINIO_HOST=$MINIO_HOST" >> $GITHUB_ENV
+          samplefile=${{ matrix.samples }}
+          sed -i "s/core.harbor.domain/$CORE_HOST/g" manifests/samples/$samplefile
+          sed -i "s/notary.harbor.domain/$NOTARY_HOST/g" manifests/samples/$samplefile
+          sed -i "s/minio.harbor.domain/$MINIO_HOST/g" manifests/samples/$samplefile
+          sed -i "s/controller: default/controller: contour/g" manifests/samples/$samplefile
+          sed -i "s/logLevel: info/logLevel: debug/g" manifests/samples/$samplefile
+
+          kubectl apply -f manifests/samples/$samplefile
+          for i in $(seq 1 7);do
+            sleep 30
+            echo $i
+            kubectl -n cluster-sample-ns get all
+          done
+
+          function wait-for-condition () {
+            time kubectl -n cluster-sample-ns wait --for=condition=$1 harborcluster harborcluster-sample --timeout $2
+          }
+
+          if ! wait-for-condition InProgress=False 600s && ! wait-for-condition Failed=False 60s; then
+            echo install harbor failed
+            kubectl describe harborcluster -n cluster-sample-ns
+            kubectl describe harbor -n cluster-sample-ns
+            kubectl get all -n cluster-sample-ns
+
+            for n in $(kubectl -n cluster-sample-ns get po |grep -v Running|grep -v NAME|awk '{print $1}');do
+              echo describe $n
+              kubectl -n cluster-sample-ns describe pod $n
+              echo show log $n
+              kubectl -n cluster-sample-ns logs --tail 100 $n || true
+            done
+            kubectl logs -l control-plane=harbor-operator -n ${operatorNamespace} --tail 100
+            free -h
+            exit 1
+          else
+            kubectl -n cluster-sample-ns get all -o wide
+            kubectl get harbor -n cluster-sample-ns -o wide
+            kubectl get harborcluster -n cluster-sample-ns -o wide
+          fi
+          free -h
+          df -h
+
+      - name: test harbor
+        run: |
+          set -ex
+          free -h
+          df -h
+          curl https://$CORE_HOST/api/v2.0/systeminfo -i -k -f
+          sudo mkdir -p /etc/docker/certs.d/$CORE_HOST
+          kubectl -n cluster-sample-ns get secret sample-public-certificate -o jsonpath='{.data.ca\.crt}' \
+            | base64 --decode \
+            | sudo tee /etc/docker/certs.d/$CORE_HOST/harbor_ca.crt
+          # docker login, create image, docker push, docker pull
+          docker login $CORE_HOST -u admin -p Harbor12345 || (kubectl -n cluster-sample-ns get po;kubectl -n cluster-sample-ns logs -l goharbor.io/operator-controller=core;exit 1)
+          docker run busybox dd if=/dev/urandom of=test count=10 bs=1MB
+          DOCKERID=`docker ps -l -q`
+          docker commit $DOCKERID $CORE_HOST/library/busybox:test
+          docker push $CORE_HOST/library/busybox:test
+          docker pull $CORE_HOST/library/busybox:test
+
+      - name: apidb test
+        run: bash .github/scripts/apidb_test.sh
+        env:
+          DOCKER_USER: ${{ secrets.DOCKER_USER }}
+          DOCKER_PWD: ${{ secrets.DOCKER_TOKEN }}
+          CORE_DEPLOYMENT: harborcluster-sample-harbor-harbor-core
+          NAMESPACE: cluster-sample-ns
+
+      - name: fetch harbor logs
+        if: ${{ failure() }}
+        run: |
+          df -h
+          free -m
+          mkdir -p /tmp/harbor
+          for name in core jobservice registry registryctl trivy chartmuseum notaryserver notarysigner portal; do \
+            kubectl -n cluster-sample-ns logs -l "goharbor.io/operator-controller=$name" --all-containers > /tmp/harbor/$name.log ; \
+          done
+          kubectl -n cluster-sample-ns logs -l "application=spilo" --all-containers > /tmp/harbor/db.log
+          kubectl -n cluster-sample-ns logs -l "app.kubernetes.io/component=redis" --all-containers > /tmp/harbor/redis.log
+          ls -l /tmp/harbor
+
+      - uses: actions/upload-artifact@v2
+        if: ${{ failure() }}
+        with:
+          name: contour_harbor_v${{ matrix.k8sVersion }}_v${{ matrix.certManager }}_${{ matrix.samples }}
+          path: /tmp/harbor
+
+      - name: fetch logs
+        if: ${{ failure() }}
+        run: |
+          mkdir  -p /tmp/logs
+          kind export logs --name harbor /tmp/logs
+          ls -l /tmp/logs
+
+      - uses: actions/upload-artifact@v2
+        if: ${{ failure() }}
+        with:
+          name: contour_kind_v${{ matrix.k8sVersion }}_v${{ matrix.certManager }}_${{ matrix.samples }}
+          path: /tmp/logs
+
+      - name: Get logs for debug
+        if: ${{ failure() }}
+        run: |
+          set -x
+          kubectl get all -n "${operatorNamespace}" -o wide
+          kubectl logs -n "${operatorNamespace}" -l 'control-plane=harbor-operator' --all-containers --tail=1000
