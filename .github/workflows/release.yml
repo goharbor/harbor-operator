@@ -9,10 +9,10 @@ jobs:
   goreleaser:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - # required for the changelog to work correctly
       run: git fetch --prune --unshallow
-    - uses: actions/setup-go@v2
+    - uses: actions/setup-go@v4
       with:
         go-version: 1.18
     - name: prepare changelog
@@ -43,10 +43,10 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-go@v2
+      - uses: actions/setup-go@v4
         with:
           go-version: 1.18
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
       - name: Set up Docker Buildx
