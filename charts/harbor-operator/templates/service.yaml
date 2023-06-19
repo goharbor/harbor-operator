@@ -12,5 +12,6 @@ spec:
       targetPort: webhook-server
       protocol: TCP
       name: https
+      nodePort: {{ .Values.service.nodePort }}
   selector:
     {{- include "chart.selectorLabels" . | nindent 4 }}

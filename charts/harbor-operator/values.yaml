@@ -187,6 +187,8 @@ service:
   type: ClusterIP
   # service.port -- Expose port for WebHook controller
   port: 443
+  # service.nodePort -- Expose node port for WebHook controller
+  nodePort:
 
 # harborClass -- Class name of the Harbor operator
 harborClass: ""
