@@ -4,8 +4,8 @@ import (
 	"context"
 	"strconv"
 
-	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
-	"github.com/goharbor/harbor-operator/pkg/graph"
+	goharborv1 "github.com/plotly/harbor-operator/apis/goharbor.io/v1beta1"
+	"github.com/plotly/harbor-operator/pkg/graph"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

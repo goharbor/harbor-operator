@@ -3,9 +3,9 @@ package scheme
 import (
 	"context"
 
-	goharborv1alpha3 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1alpha3"
-	goharborv1beta1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
-	minio "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/apis/minio.min.io/v2"
+	goharborv1alpha3 "github.com/plotly/harbor-operator/apis/goharbor.io/v1alpha3"
+	goharborv1beta1 "github.com/plotly/harbor-operator/apis/goharbor.io/v1beta1"
+	minio "github.com/plotly/harbor-operator/pkg/cluster/controllers/storage/minio/apis/minio.min.io/v2"
 	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1"
 	"github.com/pkg/errors"
 	redisfailoverv1 "github.com/spotahome/redis-operator/api/redisfailover/v1"

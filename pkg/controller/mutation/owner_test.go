@@ -3,12 +3,12 @@ package mutation_test
 import (
 	"context"
 
-	. "github.com/goharbor/harbor-operator/pkg/controller/mutation"
+	. "github.com/plotly/harbor-operator/pkg/controller/mutation"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/goharbor/harbor-operator/pkg/resources"
-	"github.com/goharbor/harbor-operator/pkg/scheme"
+	"github.com/plotly/harbor-operator/pkg/resources"
+	"github.com/plotly/harbor-operator/pkg/scheme"
 	"github.com/onsi/gomega/gstruct"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

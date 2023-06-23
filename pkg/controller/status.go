@@ -3,10 +3,10 @@ package controller
 import (
 	"context"
 
-	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
-	"github.com/goharbor/harbor-operator/pkg/factories/logger"
-	"github.com/goharbor/harbor-operator/pkg/resources"
-	sstatus "github.com/goharbor/harbor-operator/pkg/status"
+	serrors "github.com/plotly/harbor-operator/pkg/controller/errors"
+	"github.com/plotly/harbor-operator/pkg/factories/logger"
+	"github.com/plotly/harbor-operator/pkg/resources"
+	sstatus "github.com/plotly/harbor-operator/pkg/status"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"

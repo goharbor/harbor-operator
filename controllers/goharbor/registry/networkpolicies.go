@@ -3,9 +3,9 @@ package registry
 import (
 	"context"
 
-	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
-	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
-	"github.com/goharbor/harbor-operator/pkg/graph"
+	goharborv1 "github.com/plotly/harbor-operator/apis/goharbor.io/v1beta1"
+	harbormetav1 "github.com/plotly/harbor-operator/apis/meta/v1alpha1"
+	"github.com/plotly/harbor-operator/pkg/graph"
 	"github.com/pkg/errors"
 	netv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

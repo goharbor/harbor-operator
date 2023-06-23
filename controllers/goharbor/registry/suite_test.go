@@ -7,9 +7,9 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
-	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/controllers"
-	"github.com/goharbor/harbor-operator/controllers/goharbor/registry"
+	"github.com/plotly/harbor-operator/controllers/goharbor/internal/test"
+	"github.com/plotly/harbor-operator/controllers/goharbor/internal/test/controllers"
+	"github.com/plotly/harbor-operator/controllers/goharbor/registry"
 )
 
 var (

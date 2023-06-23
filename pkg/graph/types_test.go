@@ -1,7 +1,7 @@
 package graph_test
 
 import (
-	. "github.com/goharbor/harbor-operator/pkg/graph"
+	. "github.com/plotly/harbor-operator/pkg/graph"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 

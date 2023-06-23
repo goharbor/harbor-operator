@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/goharbor/harbor-operator/pkg/config/harbor"
+	"github.com/plotly/harbor-operator/pkg/config/harbor"
 	"github.com/goharbor/harbor/src/common"
 	corev1 "k8s.io/api/core/v1"
 )

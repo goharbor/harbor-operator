@@ -6,12 +6,12 @@ import (
 	"os"
 	"sync/atomic"
 
-	. "github.com/goharbor/harbor-operator/pkg/tracing"
+	. "github.com/plotly/harbor-operator/pkg/tracing"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/goharbor/harbor-operator/pkg/factories/application"
-	"github.com/goharbor/harbor-operator/pkg/factories/logger"
+	"github.com/plotly/harbor-operator/pkg/factories/application"
+	"github.com/plotly/harbor-operator/pkg/factories/logger"
 	"github.com/opentracing/opentracing-go"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )

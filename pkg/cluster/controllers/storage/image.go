@@ -17,9 +17,9 @@ package storage
 import (
 	"context"
 
-	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
-	"github.com/goharbor/harbor-operator/pkg/config"
-	"github.com/goharbor/harbor-operator/pkg/image"
+	goharborv1 "github.com/plotly/harbor-operator/apis/goharbor.io/v1beta1"
+	"github.com/plotly/harbor-operator/pkg/config"
+	"github.com/plotly/harbor-operator/pkg/image"
 	corev1 "k8s.io/api/core/v1"
 )
 

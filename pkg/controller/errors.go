@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/goharbor/harbor-operator/pkg/factories/logger"
+	"github.com/plotly/harbor-operator/pkg/factories/logger"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"

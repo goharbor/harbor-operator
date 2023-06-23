@@ -3,16 +3,16 @@ package controller_test
 import (
 	"context"
 
-	"github.com/goharbor/harbor-operator/controllers"
-	. "github.com/goharbor/harbor-operator/pkg/controller"
-	"github.com/goharbor/harbor-operator/pkg/scheme"
+	"github.com/plotly/harbor-operator/controllers"
+	. "github.com/plotly/harbor-operator/pkg/controller"
+	"github.com/plotly/harbor-operator/pkg/scheme"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/goharbor/harbor-operator/pkg/factories/application"
-	"github.com/goharbor/harbor-operator/pkg/factories/owner"
-	"github.com/goharbor/harbor-operator/pkg/graph"
-	"github.com/goharbor/harbor-operator/pkg/resources"
+	"github.com/plotly/harbor-operator/pkg/factories/application"
+	"github.com/plotly/harbor-operator/pkg/factories/owner"
+	"github.com/plotly/harbor-operator/pkg/graph"
+	"github.com/plotly/harbor-operator/pkg/resources"
 	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"

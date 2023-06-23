@@ -6,8 +6,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/goharbor/harbor-operator/pkg/factories/logger"
-	"github.com/goharbor/harbor-operator/pkg/version"
+	"github.com/plotly/harbor-operator/pkg/factories/logger"
+	"github.com/plotly/harbor-operator/pkg/version"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )

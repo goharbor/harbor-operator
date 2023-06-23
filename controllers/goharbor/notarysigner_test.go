@@ -5,11 +5,11 @@ import (
 
 	. "github.com/onsi/gomega"
 
-	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
-	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
-	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
-	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/certificate"
-	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/postgresql"
+	goharborv1 "github.com/plotly/harbor-operator/apis/goharbor.io/v1beta1"
+	harbormetav1 "github.com/plotly/harbor-operator/apis/meta/v1alpha1"
+	"github.com/plotly/harbor-operator/controllers/goharbor/internal/test"
+	"github.com/plotly/harbor-operator/controllers/goharbor/internal/test/certificate"
+	"github.com/plotly/harbor-operator/controllers/goharbor/internal/test/postgresql"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"

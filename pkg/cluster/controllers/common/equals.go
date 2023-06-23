@@ -3,8 +3,8 @@ package common
 import (
 	"context"
 
-	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
-	"github.com/goharbor/harbor-operator/pkg/resources/checksum"
+	"github.com/plotly/harbor-operator/apis/goharbor.io/v1beta1"
+	"github.com/plotly/harbor-operator/pkg/resources/checksum"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 

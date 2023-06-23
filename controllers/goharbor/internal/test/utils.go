@@ -3,7 +3,7 @@ package test
 import (
 	"context"
 
-	"github.com/goharbor/harbor-operator/pkg/version"
+	"github.com/plotly/harbor-operator/pkg/version"
 	"github.com/onsi/gomega"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"

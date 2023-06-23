@@ -3,7 +3,7 @@ package mutation
 import (
 	"context"
 
-	"github.com/goharbor/harbor-operator/pkg/resources"
+	"github.com/plotly/harbor-operator/pkg/resources"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 

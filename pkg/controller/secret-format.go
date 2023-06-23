@@ -3,8 +3,8 @@ package controller
 import (
 	"context"
 
-	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
-	"github.com/goharbor/harbor-operator/pkg/graph"
+	harbormetav1 "github.com/plotly/harbor-operator/apis/meta/v1alpha1"
+	"github.com/plotly/harbor-operator/pkg/graph"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"

@@ -3,10 +3,10 @@ package controller
 import (
 	"context"
 
-	sgraph "github.com/goharbor/harbor-operator/pkg/controller/internal/graph"
-	"github.com/goharbor/harbor-operator/pkg/factories/application"
-	"github.com/goharbor/harbor-operator/pkg/factories/logger"
-	"github.com/goharbor/harbor-operator/pkg/graph"
+	sgraph "github.com/plotly/harbor-operator/pkg/controller/internal/graph"
+	"github.com/plotly/harbor-operator/pkg/factories/application"
+	"github.com/plotly/harbor-operator/pkg/factories/logger"
+	"github.com/plotly/harbor-operator/pkg/graph"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 

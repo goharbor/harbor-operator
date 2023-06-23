@@ -4,7 +4,7 @@ import (
 	"context"
 	"sync"
 
-	"github.com/goharbor/harbor-operator/pkg/factories/logger"
+	"github.com/plotly/harbor-operator/pkg/factories/logger"
 	"github.com/opentracing/opentracing-go"
 	"golang.org/x/sync/errgroup"
 )

@@ -3,7 +3,7 @@ package rule_test
 import (
 	"testing"
 
-	"github.com/goharbor/harbor-operator/pkg/rule"
+	"github.com/plotly/harbor-operator/pkg/rule"
 	"github.com/stretchr/testify/require"
 )
 

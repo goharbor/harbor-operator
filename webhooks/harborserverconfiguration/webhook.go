@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/go-logr/logr"
-	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
+	goharborv1 "github.com/plotly/harbor-operator/apis/goharbor.io/v1beta1"
 	"github.com/umisama/go-regexpcache"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"

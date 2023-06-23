@@ -9,8 +9,8 @@ import (
 	"github.com/goharbor/go-client/pkg/sdk/v2.0/client/health"
 	"github.com/goharbor/go-client/pkg/sdk/v2.0/client/robotv1"
 	"github.com/goharbor/go-client/pkg/sdk/v2.0/models"
-	"github.com/goharbor/harbor-operator/pkg/rest/model"
-	utilstring "github.com/goharbor/harbor-operator/pkg/utils/strings"
+	"github.com/plotly/harbor-operator/pkg/rest/model"
+	utilstring "github.com/plotly/harbor-operator/pkg/utils/strings"
 	"github.com/pkg/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
 )

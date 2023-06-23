@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/goharbor/harbor-operator/pkg/factories/application"
+	"github.com/plotly/harbor-operator/pkg/factories/application"
 	"github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime/serializer"

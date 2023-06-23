@@ -3,7 +3,7 @@ package jobservice
 import (
 	"context"
 
-	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
+	goharborv1 "github.com/plotly/harbor-operator/apis/goharbor.io/v1beta1"
 	"github.com/sethvargo/go-password/password"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/goharbor/harbor-operator/pkg/config"
-	"github.com/goharbor/harbor-operator/pkg/factories/logger"
+	"github.com/plotly/harbor-operator/pkg/config"
+	"github.com/plotly/harbor-operator/pkg/factories/logger"
 	nettracing "github.com/opentracing-contrib/go-stdlib/nethttp"
 	"github.com/ovh/configstore"
 	"github.com/pkg/errors"

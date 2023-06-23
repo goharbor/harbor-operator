@@ -3,7 +3,7 @@ package v1beta1
 import (
 	"strconv"
 
-	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	harbormetav1 "github.com/plotly/harbor-operator/apis/meta/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 

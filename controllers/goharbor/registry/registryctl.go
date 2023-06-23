@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
-	"github.com/goharbor/harbor-operator/pkg/utils/strings"
+	goharborv1 "github.com/plotly/harbor-operator/apis/goharbor.io/v1beta1"
+	"github.com/plotly/harbor-operator/pkg/utils/strings"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"

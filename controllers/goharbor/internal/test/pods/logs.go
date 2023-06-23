@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
+	"github.com/plotly/harbor-operator/controllers/goharbor/internal/test"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"

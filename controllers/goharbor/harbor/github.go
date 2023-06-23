@@ -1,7 +1,7 @@
 package harbor
 
 import (
-	"github.com/goharbor/harbor-operator/pkg/config"
+	"github.com/plotly/harbor-operator/pkg/config"
 	"github.com/ovh/configstore"
 )
 

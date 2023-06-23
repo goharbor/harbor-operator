@@ -3,7 +3,7 @@ package controller
 import (
 	"context"
 
-	"github.com/goharbor/harbor-operator/pkg/factories/logger"
+	"github.com/plotly/harbor-operator/pkg/factories/logger"
 	"github.com/opentracing/opentracing-go"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"

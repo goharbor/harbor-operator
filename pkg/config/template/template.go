@@ -5,7 +5,7 @@ import (
 	"os"
 	"path"
 
-	"github.com/goharbor/harbor-operator/pkg/config"
+	"github.com/plotly/harbor-operator/pkg/config"
 	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"

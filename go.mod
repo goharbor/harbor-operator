@@ -1,4 +1,4 @@
-module github.com/goharbor/harbor-operator
+module github.com/plotly/harbor-operator
 
 go 1.18
 

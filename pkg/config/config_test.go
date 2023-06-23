@@ -1,7 +1,7 @@
 package config_test
 
 import (
-	. "github.com/goharbor/harbor-operator/pkg/config"
+	. "github.com/plotly/harbor-operator/pkg/config"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/ovh/configstore"

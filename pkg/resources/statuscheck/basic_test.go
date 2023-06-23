@@ -4,14 +4,14 @@ import (
 	"context"
 	"fmt"
 
-	. "github.com/goharbor/harbor-operator/pkg/resources/statuscheck"
+	. "github.com/plotly/harbor-operator/pkg/resources/statuscheck"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"sigs.k8s.io/kustomize/kstatus/status"
 
-	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
-	"github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
-	"github.com/goharbor/harbor-operator/pkg/scheme"
+	goharborv1 "github.com/plotly/harbor-operator/apis/goharbor.io/v1beta1"
+	"github.com/plotly/harbor-operator/apis/meta/v1alpha1"
+	"github.com/plotly/harbor-operator/pkg/scheme"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 )

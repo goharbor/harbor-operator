@@ -3,8 +3,8 @@ package controller
 import (
 	"context"
 
-	"github.com/goharbor/harbor-operator/pkg/config"
-	"github.com/goharbor/harbor-operator/pkg/utils/strings"
+	"github.com/plotly/harbor-operator/pkg/config"
+	"github.com/plotly/harbor-operator/pkg/utils/strings"
 )
 
 func (c *Controller) NormalizeName(ctx context.Context, name string, suffixes ...string) string {
