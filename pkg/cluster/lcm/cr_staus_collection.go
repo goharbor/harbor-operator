@@ -17,7 +17,7 @@ package lcm
 import (
 	"sync"
 
-	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
+	goharborv1 "github.com/plotly/harbor-operator/apis/goharbor.io/v1beta1"
 )
 
 // CRStatusCollection is designed for collecting CRStatus of each dependant components.

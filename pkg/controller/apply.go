@@ -3,9 +3,9 @@ package controller
 import (
 	"context"
 
-	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
-	"github.com/goharbor/harbor-operator/pkg/factories/application"
-	"github.com/goharbor/harbor-operator/pkg/factories/logger"
+	serrors "github.com/plotly/harbor-operator/pkg/controller/errors"
+	"github.com/plotly/harbor-operator/pkg/factories/application"
+	"github.com/plotly/harbor-operator/pkg/factories/logger"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"

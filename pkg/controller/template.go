@@ -7,9 +7,9 @@ import (
 	"text/template"
 
 	"github.com/Masterminds/sprig"
-	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
-	resources "github.com/goharbor/harbor-operator/pkg/resources"
-	template2 "github.com/goharbor/harbor-operator/pkg/template"
+	serrors "github.com/plotly/harbor-operator/pkg/controller/errors"
+	resources "github.com/plotly/harbor-operator/pkg/resources"
+	template2 "github.com/plotly/harbor-operator/pkg/template"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 )

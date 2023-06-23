@@ -6,8 +6,8 @@ import (
 	"sync"
 
 	kit_log "github.com/go-kit/kit/log"
-	"github.com/goharbor/harbor-operator/pkg/factories/application"
-	"github.com/goharbor/harbor-operator/pkg/factories/logger"
+	"github.com/plotly/harbor-operator/pkg/factories/application"
+	"github.com/plotly/harbor-operator/pkg/factories/logger"
 	jaeger_kit "github.com/jaegertracing/jaeger-lib/client/log/go-kit"
 	"github.com/opentracing/opentracing-go"
 	"github.com/ovh/configstore"

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
-	"github.com/goharbor/harbor-operator/pkg/resources/statuscheck"
+	"github.com/plotly/harbor-operator/controllers/goharbor/internal/test"
+	"github.com/plotly/harbor-operator/pkg/resources/statuscheck"
 	"github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"

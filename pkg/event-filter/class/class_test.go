@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	. "github.com/goharbor/harbor-operator/pkg/event-filter/class"
+	. "github.com/plotly/harbor-operator/pkg/event-filter/class"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
+	goharborv1 "github.com/plotly/harbor-operator/apis/goharbor.io/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/event"

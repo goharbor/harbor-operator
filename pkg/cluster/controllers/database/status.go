@@ -1,8 +1,8 @@
 package database
 
 import (
-	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
-	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
+	goharborv1 "github.com/plotly/harbor-operator/apis/goharbor.io/v1beta1"
+	"github.com/plotly/harbor-operator/pkg/cluster/lcm"
 	corev1 "k8s.io/api/core/v1"
 )
 

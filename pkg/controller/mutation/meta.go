@@ -3,7 +3,7 @@ package mutation
 import (
 	"context"
 
-	"github.com/goharbor/harbor-operator/pkg/resources"
+	"github.com/plotly/harbor-operator/pkg/resources"
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

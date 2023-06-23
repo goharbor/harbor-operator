@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strconv"
 
-	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
-	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/database/api"
-	"github.com/goharbor/harbor-operator/pkg/config"
+	goharborv1 "github.com/plotly/harbor-operator/apis/goharbor.io/v1beta1"
+	"github.com/plotly/harbor-operator/pkg/cluster/controllers/database/api"
+	"github.com/plotly/harbor-operator/pkg/config"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"

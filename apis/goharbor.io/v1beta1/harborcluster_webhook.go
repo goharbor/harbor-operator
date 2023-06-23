@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/goharbor/harbor-operator/pkg/version"
+	"github.com/plotly/harbor-operator/pkg/version"
 	"github.com/pkg/errors"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	runtime "k8s.io/apimachinery/pkg/runtime"

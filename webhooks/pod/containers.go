@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/containers/image/v5/docker/reference"
-	"github.com/goharbor/harbor-operator/pkg/rule"
+	"github.com/plotly/harbor-operator/pkg/rule"
 	"github.com/umisama/go-regexpcache"
 )
 

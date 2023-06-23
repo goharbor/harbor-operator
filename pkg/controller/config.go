@@ -3,7 +3,7 @@ package controller
 import (
 	"context"
 
-	"github.com/goharbor/harbor-operator/pkg/config"
+	"github.com/plotly/harbor-operator/pkg/config"
 )
 
 func (c *Controller) StringConfig(ctx context.Context, key string, defaultValue string) (string, error) {

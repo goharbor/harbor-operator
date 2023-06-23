@@ -3,10 +3,10 @@ package harbor
 import (
 	"context"
 
-	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
-	"github.com/goharbor/harbor-operator/controllers"
-	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
-	"github.com/goharbor/harbor-operator/pkg/resources"
+	goharborv1 "github.com/plotly/harbor-operator/apis/goharbor.io/v1beta1"
+	"github.com/plotly/harbor-operator/controllers"
+	serrors "github.com/plotly/harbor-operator/pkg/controller/errors"
+	"github.com/plotly/harbor-operator/pkg/resources"
 	"github.com/pkg/errors"
 )
 

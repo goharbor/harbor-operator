@@ -5,9 +5,9 @@ import (
 	"crypto/sha256"
 	"fmt"
 
-	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
-	conftemplate "github.com/goharbor/harbor-operator/pkg/config/template"
-	"github.com/goharbor/harbor-operator/pkg/resources/checksum"
+	goharborv1 "github.com/plotly/harbor-operator/apis/goharbor.io/v1beta1"
+	conftemplate "github.com/plotly/harbor-operator/pkg/config/template"
+	"github.com/plotly/harbor-operator/pkg/resources/checksum"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
