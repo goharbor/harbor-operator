@@ -3,11 +3,11 @@ package notarysigner
 import (
 	"context"
 
-	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
-	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
-	serrors "github.com/goharbor/harbor-operator/pkg/controller/errors"
-	"github.com/goharbor/harbor-operator/pkg/graph"
-	"github.com/goharbor/harbor-operator/pkg/resources"
+	goharborv1 "github.com/plotly/harbor-operator/apis/goharbor.io/v1beta1"
+	harbormetav1 "github.com/plotly/harbor-operator/apis/meta/v1alpha1"
+	serrors "github.com/plotly/harbor-operator/pkg/controller/errors"
+	"github.com/plotly/harbor-operator/pkg/graph"
+	"github.com/plotly/harbor-operator/pkg/resources"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

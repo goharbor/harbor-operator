@@ -7,9 +7,9 @@ import (
 	"net/url"
 	"strconv"
 
-	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
-	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test"
-	"github.com/goharbor/harbor-operator/controllers/goharbor/internal/test/postgresql"
+	harbormetav1 "github.com/plotly/harbor-operator/apis/meta/v1alpha1"
+	"github.com/plotly/harbor-operator/controllers/goharbor/internal/test"
+	"github.com/plotly/harbor-operator/controllers/goharbor/internal/test/postgresql"
 	"github.com/goharbor/harbor/src/common"
 	"github.com/goharbor/harbor/src/lib/config/metadata"
 	"github.com/goharbor/harbor/src/lib/config/models"

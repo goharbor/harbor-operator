@@ -1,7 +1,7 @@
 package v1alpha1
 
 import (
-	"github.com/goharbor/harbor-operator/pkg/image"
+	"github.com/plotly/harbor-operator/pkg/image"
 	corev1 "k8s.io/api/core/v1"
 )
 

@@ -1,7 +1,7 @@
 package v1alpha3
 
 import (
-	"github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
+	"github.com/plotly/harbor-operator/apis/goharbor.io/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/conversion"
 )

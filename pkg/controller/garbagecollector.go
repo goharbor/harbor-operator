@@ -3,8 +3,8 @@ package controller
 import (
 	"context"
 
-	sgraph "github.com/goharbor/harbor-operator/pkg/controller/internal/graph"
-	"github.com/goharbor/harbor-operator/pkg/graph"
+	sgraph "github.com/plotly/harbor-operator/pkg/controller/internal/graph"
+	"github.com/plotly/harbor-operator/pkg/graph"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"

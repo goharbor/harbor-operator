@@ -3,7 +3,7 @@ package lcm_test
 import (
 	"testing"
 
-	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
+	"github.com/plotly/harbor-operator/pkg/cluster/lcm"
 )
 
 func TestProperties_Add(t *testing.T) {

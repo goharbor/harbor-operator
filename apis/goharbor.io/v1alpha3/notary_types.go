@@ -1,7 +1,7 @@
 package v1alpha3
 
 import (
-	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	harbormetav1 "github.com/plotly/harbor-operator/apis/meta/v1alpha1"
 )
 
 type NotaryLoggingSpec struct {

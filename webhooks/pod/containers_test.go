@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/containers/image/v5/docker/reference"
-	"github.com/goharbor/harbor-operator/webhooks/pod"
+	"github.com/plotly/harbor-operator/webhooks/pod"
 	"github.com/stretchr/testify/require"
 )
 

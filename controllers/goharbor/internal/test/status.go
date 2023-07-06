@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/goharbor/harbor-operator/pkg/resources/statuscheck"
+	"github.com/plotly/harbor-operator/pkg/resources/statuscheck"
 	"github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"

@@ -3,10 +3,10 @@ package setup
 import (
 	"context"
 
-	"github.com/goharbor/harbor-operator/pkg/factories/application"
-	"github.com/goharbor/harbor-operator/pkg/factories/logger"
-	"github.com/goharbor/harbor-operator/webhooks/harborserverconfiguration"
-	"github.com/goharbor/harbor-operator/webhooks/pod"
+	"github.com/plotly/harbor-operator/pkg/factories/application"
+	"github.com/plotly/harbor-operator/pkg/factories/logger"
+	"github.com/plotly/harbor-operator/webhooks/harborserverconfiguration"
+	"github.com/plotly/harbor-operator/webhooks/pod"
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
 	kauthn "k8s.io/api/authorization/v1"

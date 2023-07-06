@@ -3,7 +3,7 @@ package namespace
 import (
 	"context"
 
-	"github.com/goharbor/harbor-operator/pkg/resources"
+	"github.com/plotly/harbor-operator/pkg/resources"
 	corev1 "k8s.io/api/core/v1"
 )
 

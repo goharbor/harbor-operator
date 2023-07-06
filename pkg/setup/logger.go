@@ -3,7 +3,7 @@ package setup
 import (
 	"context"
 
-	"github.com/goharbor/harbor-operator/pkg/config"
+	"github.com/plotly/harbor-operator/pkg/config"
 	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"

@@ -4,8 +4,8 @@ import (
 	"context"
 	"net/url"
 
-	"github.com/goharbor/harbor-operator/pkg/version"
 	"github.com/pkg/errors"
+	"github.com/plotly/harbor-operator/pkg/version"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"

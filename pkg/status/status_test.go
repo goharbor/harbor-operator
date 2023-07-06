@@ -3,8 +3,8 @@ package common_test
 import (
 	"context"
 
-	. "github.com/goharbor/harbor-operator/pkg/status"
-	. "github.com/onsi/ginkgo"
+	. "github.com/plotly/harbor-operator/pkg/status"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	// +kubebuilder:scaffold:imports

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"math"
 
-	"github.com/goharbor/harbor-operator/pkg/config"
+	"github.com/plotly/harbor-operator/pkg/config"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/kustomize/kstatus/status"

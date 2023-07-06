@@ -3,7 +3,7 @@ package graph
 import (
 	"context"
 
-	"github.com/goharbor/harbor-operator/pkg/graph"
+	"github.com/plotly/harbor-operator/pkg/graph"
 )
 
 var graphKey = "graph"

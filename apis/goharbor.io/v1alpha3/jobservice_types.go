@@ -3,7 +3,7 @@ package v1alpha3
 import (
 	"errors"
 
-	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
+	harbormetav1 "github.com/plotly/harbor-operator/apis/meta/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

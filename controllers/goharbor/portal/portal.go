@@ -3,11 +3,11 @@ package portal
 import (
 	"context"
 
-	"github.com/goharbor/harbor-operator/controllers"
-	"github.com/goharbor/harbor-operator/pkg/config"
-	"github.com/goharbor/harbor-operator/pkg/config/template"
-	commonCtrl "github.com/goharbor/harbor-operator/pkg/controller"
-	"github.com/goharbor/harbor-operator/pkg/event-filter/class"
+	"github.com/plotly/harbor-operator/controllers"
+	"github.com/plotly/harbor-operator/pkg/config"
+	"github.com/plotly/harbor-operator/pkg/config/template"
+	commonCtrl "github.com/plotly/harbor-operator/pkg/controller"
+	"github.com/plotly/harbor-operator/pkg/event-filter/class"
 	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"

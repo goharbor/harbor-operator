@@ -2,15 +2,15 @@ package harbor_test
 
 import (
 	"context"
-	"io/ioutil"
+	"os"
 	"strings"
 	"testing"
 
-	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
-	"github.com/goharbor/harbor-operator/controllers"
-	"github.com/goharbor/harbor-operator/controllers/goharbor/harbor"
-	"github.com/goharbor/harbor-operator/pkg/config"
-	. "github.com/onsi/ginkgo"
+	goharborv1 "github.com/plotly/harbor-operator/apis/goharbor.io/v1beta1"
+	"github.com/plotly/harbor-operator/controllers"
+	"github.com/plotly/harbor-operator/controllers/goharbor/harbor"
+	"github.com/plotly/harbor-operator/pkg/config"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
@@ -24,7 +24,7 @@ func TestHarbor(t *testing.T) {
 }
 
 func fileString(filePath string) string {
-	content, err := ioutil.ReadFile(filePath)
+	content, err := os.ReadFile(filePath)
 	Expect(err).NotTo(HaveOccurred())
 
 	return strings.TrimSpace(string(content))

@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
-	"github.com/goharbor/harbor-operator/controllers"
-	"github.com/goharbor/harbor-operator/pkg/config"
+	goharborv1 "github.com/plotly/harbor-operator/apis/goharbor.io/v1beta1"
+	"github.com/plotly/harbor-operator/controllers"
+	"github.com/plotly/harbor-operator/pkg/config"
 	"github.com/ovh/configstore"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 )

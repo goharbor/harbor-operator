@@ -3,12 +3,12 @@ package storage
 import (
 	"context"
 
-	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
-	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
-	"github.com/goharbor/harbor-operator/pkg/cluster/controllers/common"
-	miniov2 "github.com/goharbor/harbor-operator/pkg/cluster/controllers/storage/minio/apis/minio.min.io/v2"
-	"github.com/goharbor/harbor-operator/pkg/cluster/lcm"
-	"github.com/goharbor/harbor-operator/pkg/resources/checksum"
+	goharborv1 "github.com/plotly/harbor-operator/apis/goharbor.io/v1beta1"
+	harbormetav1 "github.com/plotly/harbor-operator/apis/meta/v1alpha1"
+	"github.com/plotly/harbor-operator/pkg/cluster/controllers/common"
+	miniov2 "github.com/plotly/harbor-operator/pkg/cluster/controllers/storage/minio/apis/minio.min.io/v2"
+	"github.com/plotly/harbor-operator/pkg/cluster/lcm"
+	"github.com/plotly/harbor-operator/pkg/resources/checksum"
 	"github.com/pkg/errors"
 	netv1 "k8s.io/api/networking/v1"
 	k8serror "k8s.io/apimachinery/pkg/api/errors"
