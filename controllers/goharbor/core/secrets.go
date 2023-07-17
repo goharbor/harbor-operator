@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 	"fmt"
+	"net/url"
 
 	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
 	harbormetav1 "github.com/goharbor/harbor-operator/apis/meta/v1alpha1"
@@ -41,8 +42,8 @@ func (r *Reconciler) GetSecret(ctx context.Context, core *goharborv1.Core) (*cor
 
 		redisPassword = string(password)
 	}
-
-	coreCacheDSN := core.Spec.Redis.GetDSNStringWithRawPassword(redisPassword)
+	// support redis password contains special character by using url.QueryEscape
+	coreCacheDSN := core.Spec.Redis.GetDSNStringWithRawPassword(url.QueryEscape(redisPassword))
 
 	var registryPassword string
 
@@ -64,8 +65,8 @@ func (r *Reconciler) GetSecret(ctx context.Context, core *goharborv1.Core) (*cor
 
 		registryPassword = string(password)
 	}
-
-	registryCacheDSN := core.Spec.Components.Registry.Redis.GetDSNStringWithRawPassword(registryPassword)
+	// support redis password contains special character by using url.QueryEscape
+	registryCacheDSN := core.Spec.Components.Registry.Redis.GetDSNStringWithRawPassword(url.QueryEscape(registryPassword))
 
 	return &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
