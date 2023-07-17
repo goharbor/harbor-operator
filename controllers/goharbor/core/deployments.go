@@ -486,7 +486,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1.Core) (
 						Name:  controllers.Core.String(),
 						Image: image,
 						Ports: containerPorts,
-						// https://github.com/goharbor/harbor/blob/master/make/photon/prepare/templates/core/env.jinja
+						// https://github.com/goharbor/harbor/blob/main/make/photon/prepare/templates/core/env.jinja
 						Env: envs,
 						LivenessProbe: &corev1.Probe{
 							ProbeHandler: corev1.ProbeHandler{
