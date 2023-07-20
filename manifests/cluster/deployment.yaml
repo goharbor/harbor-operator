@@ -2191,6 +2191,11 @@ spec:
                   type: string
                 description: Custom annotations to be added into the pods
                 type: object
+              templateLabels:
+                additionalProperties:
+                  type: string
+                description: Custom Labels to be added into the pods
+                type: object
               tolerations:
                 description: If specified, the pod's tolerations.
                 items:
@@ -4505,6 +4510,11 @@ spec:
                   type: string
                 description: Custom annotations to be added into the pods
                 type: object
+              templateLabels:
+                additionalProperties:
+                  type: string
+                description: Custom Labels to be added into the pods
+                type: object
               tolerations:
                 description: If specified, the pod's tolerations.
                 items:
@@ -5101,6 +5111,11 @@ spec:
                   type: string
                 description: Custom annotations to be added into the pods
                 type: object
+              templateLabels:
+                additionalProperties:
+                  type: string
+                description: Custom Labels to be added into the pods
+                type: object
               tolerations:
                 description: If specified, the pod's tolerations.
                 items:
@@ -5680,6 +5695,11 @@ spec:
                   type: string
                 description: Custom annotations to be added into the pods
                 type: object
+              templateLabels:
+                additionalProperties:
+                  type: string
+                description: Custom Labels to be added into the pods
+                type: object
               tolerations:
                 description: If specified, the pod's tolerations.
                 items:
@@ -6146,6 +6166,11 @@ spec:
                   type: string
                 description: Custom annotations to be added into the pods
                 type: object
+              templateLabels:
+                additionalProperties:
+                  type: string
+                description: Custom Labels to be added into the pods
+                type: object
               tls:
                 properties:
                   certificateRef:
@@ -6550,6 +6575,11 @@ spec:
                   type: string
                 description: Custom annotations to be added into the pods
                 type: object
+              templateLabels:
+                additionalProperties:
+                  type: string
+                description: Custom Labels to be added into the pods
+                type: object
               tls:
                 properties:
                   certificateRef:
@@ -6838,6 +6868,11 @@ spec:
                       type: string
                     description: Custom annotations to be added into the pods
                     type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    description: Custom Labels to be added into the pods
+                    type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
                     items:
@@ -6996,6 +7031,11 @@ spec:
                     additionalProperties:
                       type: string
                     description: Custom annotations to be added into the pods
+                    type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    description: Custom Labels to be added into the pods
                     type: object
                   tokenIssuer:
                     description: ObjectReference is a reference to an object with
@@ -7231,6 +7271,11 @@ spec:
                     additionalProperties:
                       type: string
                     description: Custom annotations to be added into the pods
+                    type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
@@ -8435,6 +8480,11 @@ spec:
                       type: string
                     description: Custom annotations to be added into the pods
                     type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    description: Custom Labels to be added into the pods
+                    type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
                     items:
@@ -8597,6 +8647,11 @@ spec:
                           type: string
                         description: Custom annotations to be added into the pods
                         type: object
+                      templateLabels:
+                        additionalProperties:
+                          type: string
+                        description: Custom Labels to be added into the pods
+                        type: object
                       tolerations:
                         description: If specified, the pod's tolerations.
                         items:
@@ -8739,6 +8794,11 @@ spec:
                           type: string
                         description: Custom annotations to be added into the pods
                         type: object
+                      templateLabels:
+                        additionalProperties:
+                          type: string
+                        description: Custom Labels to be added into the pods
+                        type: object
                       tolerations:
                         description: If specified, the pod's tolerations.
                         items:
@@ -8878,6 +8938,11 @@ spec:
                     additionalProperties:
                       type: string
                     description: Custom annotations to be added into the pods
+                    type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
@@ -9109,6 +9174,11 @@ spec:
                       type: string
                     description: Custom annotations to be added into the pods
                     type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    description: Custom Labels to be added into the pods
+                    type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
                     items:
@@ -9246,6 +9316,11 @@ spec:
                     additionalProperties:
                       type: string
                     description: Custom annotations to be added into the pods
+                    type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
@@ -9438,6 +9513,11 @@ spec:
                     additionalProperties:
                       type: string
                     description: Custom annotations to be added into the pods
+                    type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
@@ -9870,6 +9950,11 @@ spec:
                       type: string
                     description: Custom annotations to be added into the pods
                     type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    description: Custom Labels to be added into the pods
+                    type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
                     items:
@@ -10028,6 +10113,11 @@ spec:
                     additionalProperties:
                       type: string
                     description: Custom annotations to be added into the pods
+                    type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    description: Custom Labels to be added into the pods
                     type: object
                   tokenIssuer:
                     description: ObjectReference is a reference to an object with
@@ -10376,6 +10466,11 @@ spec:
                       type: string
                     description: Custom annotations to be added into the pods
                     type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    description: Custom Labels to be added into the pods
+                    type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
                     items:
@@ -10668,6 +10763,11 @@ spec:
                       type: string
                     description: Custom annotations to be added into the pods
                     type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    description: Custom Labels to be added into the pods
+                    type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
                     items:
@@ -10841,6 +10941,11 @@ spec:
                           type: string
                         description: Custom annotations to be added into the pods
                         type: object
+                      templateLabels:
+                        additionalProperties:
+                          type: string
+                        description: Custom Labels to be added into the pods
+                        type: object
                       tolerations:
                         description: If specified, the pod's tolerations.
                         items:
@@ -10983,6 +11088,11 @@ spec:
                           type: string
                         description: Custom annotations to be added into the pods
                         type: object
+                      templateLabels:
+                        additionalProperties:
+                          type: string
+                        description: Custom Labels to be added into the pods
+                        type: object
                       tolerations:
                         description: If specified, the pod's tolerations.
                         items:
@@ -11122,6 +11232,11 @@ spec:
                     additionalProperties:
                       type: string
                     description: Custom annotations to be added into the pods
+                    type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
@@ -11323,6 +11438,11 @@ spec:
                       type: string
                     description: Custom annotations to be added into the pods
                     type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    description: Custom Labels to be added into the pods
+                    type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
                     items:
@@ -11460,6 +11580,11 @@ spec:
                     additionalProperties:
                       type: string
                     description: Custom annotations to be added into the pods
+                    type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
@@ -12628,6 +12753,11 @@ spec:
                       type: string
                     description: Custom annotations to be added into the pods
                     type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    description: Custom Labels to be added into the pods
+                    type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
                     items:
@@ -13605,6 +13735,11 @@ spec:
                       type: string
                     description: Custom annotations to be added into the pods
                     type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    description: Custom Labels to be added into the pods
+                    type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
                     items:
@@ -13763,6 +13898,11 @@ spec:
                     additionalProperties:
                       type: string
                     description: Custom annotations to be added into the pods
+                    type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    description: Custom Labels to be added into the pods
                     type: object
                   tokenIssuer:
                     description: ObjectReference is a reference to an object with
@@ -13998,6 +14138,11 @@ spec:
                     additionalProperties:
                       type: string
                     description: Custom annotations to be added into the pods
+                    type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
@@ -14462,6 +14607,11 @@ spec:
                       type: string
                     description: Custom annotations to be added into the pods
                     type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    description: Custom Labels to be added into the pods
+                    type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
                     items:
@@ -14624,6 +14774,11 @@ spec:
                           type: string
                         description: Custom annotations to be added into the pods
                         type: object
+                      templateLabels:
+                        additionalProperties:
+                          type: string
+                        description: Custom Labels to be added into the pods
+                        type: object
                       tolerations:
                         description: If specified, the pod's tolerations.
                         items:
@@ -14766,6 +14921,11 @@ spec:
                           type: string
                         description: Custom annotations to be added into the pods
                         type: object
+                      templateLabels:
+                        additionalProperties:
+                          type: string
+                        description: Custom Labels to be added into the pods
+                        type: object
                       tolerations:
                         description: If specified, the pod's tolerations.
                         items:
@@ -14905,6 +15065,11 @@ spec:
                     additionalProperties:
                       type: string
                     description: Custom annotations to be added into the pods
+                    type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
@@ -15136,6 +15301,11 @@ spec:
                       type: string
                     description: Custom annotations to be added into the pods
                     type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    description: Custom Labels to be added into the pods
+                    type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
                     items:
@@ -15273,6 +15443,11 @@ spec:
                     additionalProperties:
                       type: string
                     description: Custom annotations to be added into the pods
+                    type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
@@ -15465,6 +15640,11 @@ spec:
                     additionalProperties:
                       type: string
                     description: Custom annotations to be added into the pods
+                    type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
@@ -15731,6 +15911,11 @@ spec:
                       type: string
                     description: Custom annotations to be added into the pods
                     type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    description: Custom Labels to be added into the pods
+                    type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
                     items:
@@ -15889,6 +16074,11 @@ spec:
                     additionalProperties:
                       type: string
                     description: Custom annotations to be added into the pods
+                    type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    description: Custom Labels to be added into the pods
                     type: object
                   tokenIssuer:
                     description: ObjectReference is a reference to an object with
@@ -16124,6 +16314,11 @@ spec:
                     additionalProperties:
                       type: string
                     description: Custom annotations to be added into the pods
+                    type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
@@ -16712,6 +16907,11 @@ spec:
                       type: string
                     description: Custom annotations to be added into the pods
                     type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    description: Custom Labels to be added into the pods
+                    type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
                     items:
@@ -16885,6 +17085,11 @@ spec:
                           type: string
                         description: Custom annotations to be added into the pods
                         type: object
+                      templateLabels:
+                        additionalProperties:
+                          type: string
+                        description: Custom Labels to be added into the pods
+                        type: object
                       tolerations:
                         description: If specified, the pod's tolerations.
                         items:
@@ -17027,6 +17232,11 @@ spec:
                           type: string
                         description: Custom annotations to be added into the pods
                         type: object
+                      templateLabels:
+                        additionalProperties:
+                          type: string
+                        description: Custom Labels to be added into the pods
+                        type: object
                       tolerations:
                         description: If specified, the pod's tolerations.
                         items:
@@ -17166,6 +17376,11 @@ spec:
                     additionalProperties:
                       type: string
                     description: Custom annotations to be added into the pods
+                    type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
@@ -17395,6 +17610,11 @@ spec:
                       type: string
                     description: Custom annotations to be added into the pods
                     type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    description: Custom Labels to be added into the pods
+                    type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
                     items:
@@ -17532,6 +17752,11 @@ spec:
                     additionalProperties:
                       type: string
                     description: Custom annotations to be added into the pods
+                    type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
@@ -17821,6 +18046,11 @@ spec:
                     additionalProperties:
                       type: string
                     description: Custom annotations to be added into the pods
+                    type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     description: If specified, the pod's tolerations.
@@ -21816,6 +22046,11 @@ spec:
                 additionalProperties:
                   type: string
                 description: Custom annotations to be added into the pods
+                type: object
+              templateLabels:
+                additionalProperties:
+                  type: string
+                description: Custom Labels to be added into the pods
                 type: object
               tls:
                 properties:
@@ -27366,6 +27601,11 @@ spec:
                   type: string
                 description: Custom annotations to be added into the pods
                 type: object
+              templateLabels:
+                additionalProperties:
+                  type: string
+                description: Custom Labels to be added into the pods
+                type: object
               tls:
                 properties:
                   certificateRef:
@@ -27896,6 +28136,11 @@ spec:
                   type: string
                 description: Custom annotations to be added into the pods
                 type: object
+              templateLabels:
+                additionalProperties:
+                  type: string
+                description: Custom Labels to be added into the pods
+                type: object
               tls:
                 properties:
                   certificateRef:
@@ -28262,6 +28507,11 @@ spec:
                 additionalProperties:
                   type: string
                 description: Custom annotations to be added into the pods
+                type: object
+              templateLabels:
+                additionalProperties:
+                  type: string
+                description: Custom Labels to be added into the pods
                 type: object
               tls:
                 properties:
@@ -28640,6 +28890,11 @@ spec:
                   type: string
                 description: Custom annotations to be added into the pods
                 type: object
+              templateLabels:
+                additionalProperties:
+                  type: string
+                description: Custom Labels to be added into the pods
+                type: object
               tolerations:
                 description: If specified, the pod's tolerations.
                 items:
@@ -28963,6 +29218,11 @@ spec:
                   type: string
                 description: Custom annotations to be added into the pods
                 type: object
+              templateLabels:
+                additionalProperties:
+                  type: string
+                description: Custom Labels to be added into the pods
+                type: object
               tolerations:
                 description: If specified, the pod's tolerations.
                 items:
@@ -29232,6 +29492,11 @@ spec:
                   type: string
                 description: Custom annotations to be added into the pods
                 type: object
+              templateLabels:
+                additionalProperties:
+                  type: string
+                description: Custom Labels to be added into the pods
+                type: object
               tls:
                 properties:
                   certificateRef:
@@ -29481,6 +29746,11 @@ spec:
                 additionalProperties:
                   type: string
                 description: Custom annotations to be added into the pods
+                type: object
+              templateLabels:
+                additionalProperties:
+                  type: string
+                description: Custom Labels to be added into the pods
                 type: object
               tls:
                 properties:
@@ -44711,6 +44981,11 @@ spec:
                   type: string
                 description: Custom annotations to be added into the pods
                 type: object
+              templateLabels:
+                additionalProperties:
+                  type: string
+                description: Custom Labels to be added into the pods
+                type: object
               tolerations:
                 description: If specified, the pod's tolerations.
                 items:
@@ -47517,6 +47792,11 @@ spec:
                   type: string
                 description: Custom annotations to be added into the pods
                 type: object
+              templateLabels:
+                additionalProperties:
+                  type: string
+                description: Custom Labels to be added into the pods
+                type: object
               tolerations:
                 description: If specified, the pod's tolerations.
                 items:
@@ -47919,6 +48199,11 @@ spec:
                   type: string
                 description: Custom annotations to be added into the pods
                 type: object
+              templateLabels:
+                additionalProperties:
+                  type: string
+                description: Custom Labels to be added into the pods
+                type: object
               tls:
                 properties:
                   certificateRef:
@@ -48187,6 +48472,11 @@ spec:
                 additionalProperties:
                   type: string
                 description: Custom annotations to be added into the pods
+                type: object
+              templateLabels:
+                additionalProperties:
+                  type: string
+                description: Custom Labels to be added into the pods
                 type: object
               tls:
                 properties:
@@ -60864,6 +61154,11 @@ spec:
                   type: string
                 description: Custom annotations to be added into the pods
                 type: object
+              templateLabels:
+                additionalProperties:
+                  type: string
+                description: Custom Labels to be added into the pods
+                type: object
               tolerations:
                 description: If specified, the pod's tolerations.
                 items:
@@ -64664,6 +64959,11 @@ spec:
                 additionalProperties:
                   type: string
                 description: Custom annotations to be added into the pods
+                type: object
+              templateLabels:
+                additionalProperties:
+                  type: string
+                description: Custom Labels to be added into the pods
                 type: object
               timeout:
                 default: 5m0s
