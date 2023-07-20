@@ -26,6 +26,13 @@ func (in *ComponentSpec) DeepCopyInto(out *ComponentSpec) {
 		*out = new(int32)
 		**out = **in
 	}
+	if in.CustomLabels != nil {
+		in, out := &in.CustomLabels, &out.CustomLabels
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	if in.NodeSelector != nil {
 		in, out := &in.NodeSelector, &out.NodeSelector
 		*out = make(map[string]string, len(*in))

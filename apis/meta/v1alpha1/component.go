@@ -86,6 +86,10 @@ type ComponentSpec struct {
 	ServiceAccountName string `json:"serviceAccountName,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// CustomLabels is a custom labels which merges with other labels on deployment.
+	CustomLabels map[string]string `json:"customLabels,omitempty"`
+
+	// +kubebuilder:validation:Optional
 	// NodeSelector is a selector which must be true for the component to fit on a node.
 	// Selector which must match a node's labels for the pod to be scheduled on that node.
 	// More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
@@ -119,6 +123,20 @@ func (c *ComponentSpec) ApplyToDeployment(deploy *appsv1.Deployment) {
 	deploy.Spec.Template.Spec.ImagePullSecrets = c.ImagePullSecrets
 	deploy.Spec.Template.Spec.NodeSelector = c.NodeSelector
 	deploy.Spec.Template.Spec.Tolerations = c.Tolerations
+	deploy.Spec.Template.Labels = mergeLabels(deploy.Spec.Template.Labels, c.CustomLabels)
+}
+
+// mergeLabels merges all labels together and returns a new label.
+func mergeLabels(allLabels ...map[string]string) map[string]string {
+	lb := make(map[string]string)
+
+	for _, label := range allLabels {
+		for k, v := range label {
+			lb[k] = v
+		}
+	}
+
+	return lb
 }
 
 // ComponentStatus represents the current status of the resource.

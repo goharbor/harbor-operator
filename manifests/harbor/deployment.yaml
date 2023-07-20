@@ -2028,6 +2028,12 @@ spec:
                 required:
                 - storage
                 type: object
+              customLabels:
+                additionalProperties:
+                  type: string
+                description: CustomLabels is a custom labels which merges with other
+                  labels on deployment.
+                type: object
               disable:
                 description: Disable some features
                 properties:
@@ -4332,6 +4338,12 @@ spec:
                 required:
                 - storage
                 type: object
+              customLabels:
+                additionalProperties:
+                  type: string
+                description: CustomLabels is a custom labels which merges with other
+                  labels on deployment.
+                type: object
               disable:
                 description: Disable some features
                 properties:
@@ -4840,6 +4852,12 @@ spec:
               csrfKeyRef:
                 pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
                 type: string
+              customLabels:
+                additionalProperties:
+                  type: string
+                description: CustomLabels is a custom labels which merges with other
+                  labels on deployment.
+                type: object
               database:
                 properties:
                   database:
@@ -5409,6 +5427,12 @@ spec:
               csrfKeyRef:
                 pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
                 type: string
+              customLabels:
+                additionalProperties:
+                  type: string
+                description: CustomLabels is a custom labels which merges with other
+                  labels on deployment.
+                type: object
               database:
                 properties:
                   database:
@@ -5968,6 +5992,12 @@ spec:
                 required:
                 - url
                 type: object
+              customLabels:
+                additionalProperties:
+                  type: string
+                description: CustomLabels is a custom labels which merges with other
+                  labels on deployment.
+                type: object
               database:
                 properties:
                   database:
@@ -6312,6 +6342,12 @@ spec:
                     type: string
                 required:
                 - url
+                type: object
+              customLabels:
+                additionalProperties:
+                  type: string
+                description: CustomLabels is a custom labels which merges with other
+                  labels on deployment.
                 type: object
               database:
                 properties:
@@ -6744,6 +6780,12 @@ spec:
                     items:
                       type: string
                     type: array
+                  customLabels:
+                    additionalProperties:
+                      type: string
+                    description: CustomLabels is a custom labels which merges with
+                      other labels on deployment.
+                    type: object
                   image:
                     description: Image name for the component.
                     type: string
@@ -6886,6 +6928,12 @@ spec:
                     items:
                       type: string
                     type: array
+                  customLabels:
+                    additionalProperties:
+                      type: string
+                    description: CustomLabels is a custom labels which merges with
+                      other labels on deployment.
+                    type: object
                   image:
                     description: Image name for the component.
                     type: string
@@ -7126,6 +7174,12 @@ spec:
                           and core.
                         pattern: ([0-9]+h)?([0-9]+m)?([0-9]+s)?
                         type: string
+                    type: object
+                  customLabels:
+                    additionalProperties:
+                      type: string
+                    description: CustomLabels is a custom labels which merges with
+                      other labels on deployment.
                     type: object
                   image:
                     description: Image name for the component.
@@ -8341,6 +8395,12 @@ spec:
                     items:
                       type: string
                     type: array
+                  customLabels:
+                    additionalProperties:
+                      type: string
+                    description: CustomLabels is a custom labels which merges with
+                      other labels on deployment.
+                    type: object
                   image:
                     description: Image name for the component.
                     type: string
@@ -8500,6 +8560,12 @@ spec:
                     type: boolean
                   server:
                     properties:
+                      customLabels:
+                        additionalProperties:
+                          type: string
+                        description: CustomLabels is a custom labels which merges
+                          with other labels on deployment.
+                        type: object
                       image:
                         description: Image name for the component.
                         type: string
@@ -8642,6 +8708,12 @@ spec:
                     type: object
                   signer:
                     properties:
+                      customLabels:
+                        additionalProperties:
+                          type: string
+                        description: CustomLabels is a custom labels which merges
+                          with other labels on deployment.
+                        type: object
                       image:
                         description: Image name for the component.
                         type: string
@@ -8785,6 +8857,12 @@ spec:
                 type: object
               portal:
                 properties:
+                  customLabels:
+                    additionalProperties:
+                      type: string
+                    description: CustomLabels is a custom labels which merges with
+                      other labels on deployment.
+                    type: object
                   image:
                     description: Image name for the component.
                     type: string
@@ -8983,6 +9061,12 @@ spec:
                     items:
                       type: string
                     type: array
+                  customLabels:
+                    additionalProperties:
+                      type: string
+                    description: CustomLabels is a custom labels which merges with
+                      other labels on deployment.
+                    type: object
                   image:
                     description: Image name for the component.
                     type: string
@@ -9153,6 +9237,12 @@ spec:
                 type: object
               registryctl:
                 properties:
+                  customLabels:
+                    additionalProperties:
+                      type: string
+                    description: CustomLabels is a custom labels which merges with
+                      other labels on deployment.
+                    type: object
                   image:
                     description: Image name for the component.
                     type: string
@@ -9295,6 +9385,12 @@ spec:
                     items:
                       type: string
                     type: array
+                  customLabels:
+                    additionalProperties:
+                      type: string
+                    description: CustomLabels is a custom labels which merges with
+                      other labels on deployment.
+                    type: object
                   githubTokenRef:
                     description: The name of the secret containing the token to connect
                       to GitHub API.
@@ -9776,6 +9872,12 @@ spec:
                     items:
                       type: string
                     type: array
+                  customLabels:
+                    additionalProperties:
+                      type: string
+                    description: CustomLabels is a custom labels which merges with
+                      other labels on deployment.
+                    type: object
                   image:
                     description: Image name for the component.
                     type: string
@@ -9918,6 +10020,12 @@ spec:
                     items:
                       type: string
                     type: array
+                  customLabels:
+                    additionalProperties:
+                      type: string
+                    description: CustomLabels is a custom labels which merges with
+                      other labels on deployment.
+                    type: object
                   image:
                     description: Image name for the component.
                     type: string
@@ -10271,6 +10379,12 @@ spec:
                         pattern: ([0-9]+h)?([0-9]+m)?([0-9]+s)?
                         type: string
                     type: object
+                  customLabels:
+                    additionalProperties:
+                      type: string
+                    description: CustomLabels is a custom labels which merges with
+                      other labels on deployment.
+                    type: object
                   image:
                     description: Image name for the component.
                     type: string
@@ -10535,6 +10649,12 @@ spec:
                     items:
                       type: string
                     type: array
+                  customLabels:
+                    additionalProperties:
+                      type: string
+                    description: CustomLabels is a custom labels which merges with
+                      other labels on deployment.
+                    type: object
                   image:
                     description: Image name for the component.
                     type: string
@@ -10744,6 +10864,12 @@ spec:
                     type: boolean
                   server:
                     properties:
+                      customLabels:
+                        additionalProperties:
+                          type: string
+                        description: CustomLabels is a custom labels which merges
+                          with other labels on deployment.
+                        type: object
                       image:
                         description: Image name for the component.
                         type: string
@@ -10886,6 +11012,12 @@ spec:
                     type: object
                   signer:
                     properties:
+                      customLabels:
+                        additionalProperties:
+                          type: string
+                        description: CustomLabels is a custom labels which merges
+                          with other labels on deployment.
+                        type: object
                       image:
                         description: Image name for the component.
                         type: string
@@ -11029,6 +11161,12 @@ spec:
                 type: object
               portal:
                 properties:
+                  customLabels:
+                    additionalProperties:
+                      type: string
+                    description: CustomLabels is a custom labels which merges with
+                      other labels on deployment.
+                    type: object
                   image:
                     description: Image name for the component.
                     type: string
@@ -11197,6 +11335,12 @@ spec:
                     items:
                       type: string
                     type: array
+                  customLabels:
+                    additionalProperties:
+                      type: string
+                    description: CustomLabels is a custom labels which merges with
+                      other labels on deployment.
+                    type: object
                   image:
                     description: Image name for the component.
                     type: string
@@ -11367,6 +11511,12 @@ spec:
                 type: object
               registryctl:
                 properties:
+                  customLabels:
+                    additionalProperties:
+                      type: string
+                    description: CustomLabels is a custom labels which merges with
+                      other labels on deployment.
+                    type: object
                   image:
                     description: Image name for the component.
                     type: string
@@ -12477,6 +12627,12 @@ spec:
                     items:
                       type: string
                     type: array
+                  customLabels:
+                    additionalProperties:
+                      type: string
+                    description: CustomLabels is a custom labels which merges with
+                      other labels on deployment.
+                    type: object
                   githubTokenRef:
                     description: The name of the secret containing the token to connect
                       to GitHub API.
@@ -13511,6 +13667,12 @@ spec:
                     items:
                       type: string
                     type: array
+                  customLabels:
+                    additionalProperties:
+                      type: string
+                    description: CustomLabels is a custom labels which merges with
+                      other labels on deployment.
+                    type: object
                   image:
                     description: Image name for the component.
                     type: string
@@ -13653,6 +13815,12 @@ spec:
                     items:
                       type: string
                     type: array
+                  customLabels:
+                    additionalProperties:
+                      type: string
+                    description: CustomLabels is a custom labels which merges with
+                      other labels on deployment.
+                    type: object
                   image:
                     description: Image name for the component.
                     type: string
@@ -13893,6 +14061,12 @@ spec:
                           and core.
                         pattern: ([0-9]+h)?([0-9]+m)?([0-9]+s)?
                         type: string
+                    type: object
+                  customLabels:
+                    additionalProperties:
+                      type: string
+                    description: CustomLabels is a custom labels which merges with
+                      other labels on deployment.
                     type: object
                   image:
                     description: Image name for the component.
@@ -14368,6 +14542,12 @@ spec:
                     items:
                       type: string
                     type: array
+                  customLabels:
+                    additionalProperties:
+                      type: string
+                    description: CustomLabels is a custom labels which merges with
+                      other labels on deployment.
+                    type: object
                   image:
                     description: Image name for the component.
                     type: string
@@ -14527,6 +14707,12 @@ spec:
                     type: boolean
                   server:
                     properties:
+                      customLabels:
+                        additionalProperties:
+                          type: string
+                        description: CustomLabels is a custom labels which merges
+                          with other labels on deployment.
+                        type: object
                       image:
                         description: Image name for the component.
                         type: string
@@ -14669,6 +14855,12 @@ spec:
                     type: object
                   signer:
                     properties:
+                      customLabels:
+                        additionalProperties:
+                          type: string
+                        description: CustomLabels is a custom labels which merges
+                          with other labels on deployment.
+                        type: object
                       image:
                         description: Image name for the component.
                         type: string
@@ -14812,6 +15004,12 @@ spec:
                 type: object
               portal:
                 properties:
+                  customLabels:
+                    additionalProperties:
+                      type: string
+                    description: CustomLabels is a custom labels which merges with
+                      other labels on deployment.
+                    type: object
                   image:
                     description: Image name for the component.
                     type: string
@@ -15010,6 +15208,12 @@ spec:
                     items:
                       type: string
                     type: array
+                  customLabels:
+                    additionalProperties:
+                      type: string
+                    description: CustomLabels is a custom labels which merges with
+                      other labels on deployment.
+                    type: object
                   image:
                     description: Image name for the component.
                     type: string
@@ -15180,6 +15384,12 @@ spec:
                 type: object
               registryctl:
                 properties:
+                  customLabels:
+                    additionalProperties:
+                      type: string
+                    description: CustomLabels is a custom labels which merges with
+                      other labels on deployment.
+                    type: object
                   image:
                     description: Image name for the component.
                     type: string
@@ -15322,6 +15532,12 @@ spec:
                     items:
                       type: string
                     type: array
+                  customLabels:
+                    additionalProperties:
+                      type: string
+                    description: CustomLabels is a custom labels which merges with
+                      other labels on deployment.
+                    type: object
                   githubTokenRef:
                     description: The name of the secret containing the token to connect
                       to GitHub API.
@@ -15637,6 +15853,12 @@ spec:
                     items:
                       type: string
                     type: array
+                  customLabels:
+                    additionalProperties:
+                      type: string
+                    description: CustomLabels is a custom labels which merges with
+                      other labels on deployment.
+                    type: object
                   image:
                     description: Image name for the component.
                     type: string
@@ -15779,6 +16001,12 @@ spec:
                     items:
                       type: string
                     type: array
+                  customLabels:
+                    additionalProperties:
+                      type: string
+                    description: CustomLabels is a custom labels which merges with
+                      other labels on deployment.
+                    type: object
                   image:
                     description: Image name for the component.
                     type: string
@@ -16019,6 +16247,12 @@ spec:
                           and core.
                         pattern: ([0-9]+h)?([0-9]+m)?([0-9]+s)?
                         type: string
+                    type: object
+                  customLabels:
+                    additionalProperties:
+                      type: string
+                    description: CustomLabels is a custom labels which merges with
+                      other labels on deployment.
                     type: object
                   image:
                     description: Image name for the component.
@@ -16579,6 +16813,12 @@ spec:
                     items:
                       type: string
                     type: array
+                  customLabels:
+                    additionalProperties:
+                      type: string
+                    description: CustomLabels is a custom labels which merges with
+                      other labels on deployment.
+                    type: object
                   image:
                     description: Image name for the component.
                     type: string
@@ -16788,6 +17028,12 @@ spec:
                     type: boolean
                   server:
                     properties:
+                      customLabels:
+                        additionalProperties:
+                          type: string
+                        description: CustomLabels is a custom labels which merges
+                          with other labels on deployment.
+                        type: object
                       image:
                         description: Image name for the component.
                         type: string
@@ -16930,6 +17176,12 @@ spec:
                     type: object
                   signer:
                     properties:
+                      customLabels:
+                        additionalProperties:
+                          type: string
+                        description: CustomLabels is a custom labels which merges
+                          with other labels on deployment.
+                        type: object
                       image:
                         description: Image name for the component.
                         type: string
@@ -17073,6 +17325,12 @@ spec:
                 type: object
               portal:
                 properties:
+                  customLabels:
+                    additionalProperties:
+                      type: string
+                    description: CustomLabels is a custom labels which merges with
+                      other labels on deployment.
+                    type: object
                   image:
                     description: Image name for the component.
                     type: string
@@ -17269,6 +17527,12 @@ spec:
                     items:
                       type: string
                     type: array
+                  customLabels:
+                    additionalProperties:
+                      type: string
+                    description: CustomLabels is a custom labels which merges with
+                      other labels on deployment.
+                    type: object
                   image:
                     description: Image name for the component.
                     type: string
@@ -17439,6 +17703,12 @@ spec:
                 type: object
               registryctl:
                 properties:
+                  customLabels:
+                    additionalProperties:
+                      type: string
+                    description: CustomLabels is a custom labels which merges with
+                      other labels on deployment.
+                    type: object
                   image:
                     description: Image name for the component.
                     type: string
@@ -17671,6 +17941,12 @@ spec:
                     items:
                       type: string
                     type: array
+                  customLabels:
+                    additionalProperties:
+                      type: string
+                    description: CustomLabels is a custom labels which merges with
+                      other labels on deployment.
+                    type: object
                   githubTokenRef:
                     description: The name of the secret containing the token to connect
                       to GitHub API.
@@ -18191,6 +18467,12 @@ spec:
                 required:
                 - secretRef
                 - url
+                type: object
+              customLabels:
+                additionalProperties:
+                  type: string
+                description: CustomLabels is a custom labels which merges with other
+                  labels on deployment.
                 type: object
               image:
                 description: Image name for the component.
@@ -22048,6 +22330,12 @@ spec:
                 required:
                 - secretRef
                 - url
+                type: object
+              customLabels:
+                additionalProperties:
+                  type: string
+                description: CustomLabels is a custom labels which merges with other
+                  labels on deployment.
                 type: object
               image:
                 description: Image name for the component.
@@ -27732,6 +28020,12 @@ spec:
                 required:
                 - token
                 type: object
+              customLabels:
+                additionalProperties:
+                  type: string
+                description: CustomLabels is a custom labels which merges with other
+                  labels on deployment.
+                type: object
               image:
                 description: Image name for the component.
                 type: string
@@ -28088,6 +28382,12 @@ spec:
                     type: object
                 required:
                 - token
+                type: object
+              customLabels:
+                additionalProperties:
+                  type: string
+                description: CustomLabels is a custom labels which merges with other
+                  labels on deployment.
                 type: object
               image:
                 description: Image name for the component.
@@ -28472,6 +28772,12 @@ spec:
                 required:
                 - certificateRef
                 type: object
+              customLabels:
+                additionalProperties:
+                  type: string
+                description: CustomLabels is a custom labels which merges with other
+                  labels on deployment.
+                type: object
               image:
                 description: Image name for the component.
                 type: string
@@ -28784,6 +29090,12 @@ spec:
                     type: string
                 required:
                 - certificateRef
+                type: object
+              customLabels:
+                additionalProperties:
+                  type: string
+                description: CustomLabels is a custom labels which merges with other
+                  labels on deployment.
                 type: object
               image:
                 description: Image name for the component.
@@ -29133,6 +29445,12 @@ spec:
           spec:
             description: PortalSpec defines the desired state of Portal.
             properties:
+              customLabels:
+                additionalProperties:
+                  type: string
+                description: CustomLabels is a custom labels which merges with other
+                  labels on deployment.
+                type: object
               image:
                 description: Image name for the component.
                 type: string
@@ -29372,6 +29690,12 @@ spec:
           spec:
             description: PortalSpec defines the desired state of Portal.
             properties:
+              customLabels:
+                additionalProperties:
+                  type: string
+                description: CustomLabels is a custom labels which merges with other
+                  labels on deployment.
+                type: object
               image:
                 description: Image name for the component.
                 type: string
@@ -29813,6 +30137,12 @@ spec:
                         default: false
                         type: boolean
                     type: object
+                type: object
+              customLabels:
+                additionalProperties:
+                  type: string
+                description: CustomLabels is a custom labels which merges with other
+                  labels on deployment.
                 type: object
               health:
                 properties:
@@ -32526,6 +32856,12 @@ spec:
                         default: false
                         type: boolean
                     type: object
+                type: object
+              customLabels:
+                additionalProperties:
+                  type: string
+                description: CustomLabels is a custom labels which merges with other
+                  labels on deployment.
                 type: object
               health:
                 properties:
@@ -35411,6 +35747,12 @@ spec:
                     pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
                     type: string
                 type: object
+              customLabels:
+                additionalProperties:
+                  type: string
+                description: CustomLabels is a custom labels which merges with other
+                  labels on deployment.
+                type: object
               image:
                 description: Image name for the component.
                 type: string
@@ -35669,6 +36011,12 @@ spec:
                   jobServiceSecretRef:
                     pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
                     type: string
+                type: object
+              customLabels:
+                additionalProperties:
+                  type: string
+                description: CustomLabels is a custom labels which merges with other
+                  labels on deployment.
                 type: object
               image:
                 description: Image name for the component.
@@ -35967,6 +36315,12 @@ spec:
                 items:
                   type: string
                 type: array
+              customLabels:
+                additionalProperties:
+                  type: string
+                description: CustomLabels is a custom labels which merges with other
+                  labels on deployment.
+                type: object
               image:
                 description: Image name for the component.
                 type: string
@@ -39755,6 +40109,12 @@ spec:
                 items:
                   type: string
                 type: array
+              customLabels:
+                additionalProperties:
+                  type: string
+                description: CustomLabels is a custom labels which merges with other
+                  labels on deployment.
+                type: object
               image:
                 description: Image name for the component.
                 type: string
