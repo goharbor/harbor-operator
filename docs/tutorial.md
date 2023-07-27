@@ -279,7 +279,7 @@ status:
     operator:
       controllerGitCommit: 35056b427665e9ee6331e7b3ddede8c26b86dbc5
       controllerName: harborcluster
-      controllerVersion: dev_master
+      controllerVersion: dev
     revision: 1642500151584677122
     status: healthy
 ```
