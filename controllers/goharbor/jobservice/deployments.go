@@ -329,7 +329,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, jobservice *goharborv1.J
 						Image: image,
 						Ports: containerPorts,
 
-						// https://github.com/goharbor/harbor/blob/master/make/photon/prepare/templates/jobservice/env.jinja
+						// https://github.com/goharbor/harbor/blob/main/make/photon/prepare/templates/jobservice/env.jinja
 						Env: envs,
 						LivenessProbe: &corev1.Probe{
 							ProbeHandler: corev1.ProbeHandler{

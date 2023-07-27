@@ -5,7 +5,7 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/bb3adb454b424e66ae3b9bdf2ab2fce1)](https://www.codacy.com/gh/goharbor/harbor-operator/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=goharbor/harbor-operator&amp;utm_campaign=Badge_Grade)
 [![Go Reference](https://pkg.go.dev/badge/github.com/goharbor/harbor-operator.svg)](https://pkg.go.dev/github.com/goharbor/harbor-operator)
 
-> **ATTENTIONS:** THE `MASTER` BRANCH MAY BE IN AN UNSTABLE OR EVEN BROKEN STATE DURING DEVELOPMENT.
+> **ATTENTIONS:** THE `main` BRANCH MAY BE IN AN UNSTABLE OR EVEN BROKEN STATE DURING DEVELOPMENT.
 
 [Harbor](https://github.com/goharbor/harbor/) is a CNCF hosted open source trusted cloud-native registry project that stores, signs, and scans content. Harbor is composed on numerous stateful and stateless components and dependencies that may be deployed, updated, healed, backuped or scaled respecting some constraints.
 
@@ -126,7 +126,7 @@ Harbor operator exposes the frontend service with ingress (CRD version: `v1beta1
 
 ## Contributions
 
-Harbor operator project is developed and maintained by the [Harbor operator workgroup](https://github.com/goharbor/community/blob/master/workgroups/wg-operator/README.md). If you're willing to join the group and do contributions to operator project, welcome to [contact us](#community). Follow the [Development guide](https://github.com/goharbor/harbor-operator/blob/master/docs/development.md) to start on the project.
+Harbor operator project is developed and maintained by the [Harbor operator workgroup](https://github.com/goharbor/community/blob/main/workgroups/wg-operator/README.md). If you're willing to join the group and do contributions to operator project, welcome to [contact us](#community). Follow the [Development guide](https://github.com/goharbor/harbor-operator/blob/main/docs/development.md) to start on the project.
 
 Special thanks to the [contributors](./MAINTAINERS) who did significant contributions ([see feature area](./docs/feature-areas.md)).
 
@@ -136,7 +136,7 @@ Special thanks to the [contributors](./MAINTAINERS) who did significant contribu
 * **User Group:** Join Harbor user email group: [harbor-users@lists.cncf.io](https://lists.cncf.io/g/harbor-users) to get update of Harbor's news, features, releases, or to provide suggestion and feedback.  
 * **Developer Group:** Join Harbor developer group: [harbor-dev@lists.cncf.io](https://lists.cncf.io/g/harbor-dev) for discussion on Harbor development and contribution.
 * **Slack:** Join Harbor's community for discussion and ask questions: [Cloud Native Computing Foundation](https://slack.cncf.io/), channel: [#harbor-operator-dev](https://cloud-native.slack.com/messages/harbor-operator-dev/)
-* **Community meeting:** attend [bi-weekly community meeting](https://github.com/goharbor/community/blob/master/MEETING_SCHEDULE.md) for Q&A
+* **Community meeting:** attend [bi-weekly community meeting](https://github.com/goharbor/community/blob/main/MEETING_SCHEDULE.md) for Q&A
 
 ## Additional references
 
@@ -150,7 +150,7 @@ Special thanks to the [contributors](./MAINTAINERS) who did significant contribu
 
 ## Related links
 
-* Contribute: <https://github.com/goharbor/harbor-operator/blob/master/CONTRIBUTING>
+* Contribute: <https://github.com/goharbor/harbor-operator/blob/main/CONTRIBUTING>
 * Report bugs: <https://github.com/goharbor/harbor-operator/issues>
 * Get latest version: <https://hub.docker.com/r/goharbor/harbor-operator>
 
@@ -162,4 +162,4 @@ OVHcloud uses the operator at scale to operate part of its private registry serv
 
 ## License
 
-See [LICENSE](https://github.com/goharbor/harbor-operator/blob/master/LICENSE) for licensing details.
+See [LICENSE](https://github.com/goharbor/harbor-operator/blob/main/LICENSE) for licensing details.

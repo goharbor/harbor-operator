@@ -18,7 +18,7 @@ The installation guide documented here help you deploy Harbor operator stack wit
 Directly apply the all-in-one deployment manifest to your Kubernetes cluster:
 
 ```shell
-kubectl apply -f https://raw.githubusercontent.com/goharbor/harbor-operator/master/manifests/cluster/deployment.yaml
+kubectl apply -f https://raw.githubusercontent.com/goharbor/harbor-operator/main/manifests/cluster/deployment.yaml
 ```
 
 >NOTES: Here we use the deployment manifest in the `main` branch as an example, for deploying the released versions, you can get the deployment manifest in the GitHub release page or find it in the corresponding code branch such as `release-1.3.0`.
@@ -81,7 +81,7 @@ kubectl apply -f customized_deployment.yaml
 Delete the harbor operator stack by the deployment manifest:
 
 ```shell
-kubectl delete -f https://raw.githubusercontent.com/goharbor/harbor-operator/master/manifests/cluster/deployment.yaml
+kubectl delete -f https://raw.githubusercontent.com/goharbor/harbor-operator/main/manifests/cluster/deployment.yaml
 ```
 
 Or delete the harbor operator stack by the kustomization template:
