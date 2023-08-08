@@ -10025,6 +10025,16 @@ spec:
                       type: object
                       x-kubernetes-map-type: atomic
                     type: array
+                  maxIdleConnections:
+                    default: 50
+                    format: int32
+                    minimum: 0
+                    type: integer
+                  maxOpenConnections:
+                    default: 1000
+                    format: int32
+                    minimum: 0
+                    type: integer
                   metrics:
                     properties:
                       enabled:
@@ -15986,6 +15996,16 @@ spec:
                       type: object
                       x-kubernetes-map-type: atomic
                     type: array
+                  maxIdleConnections:
+                    default: 50
+                    format: int32
+                    minimum: 0
+                    type: integer
+                  maxOpenConnections:
+                    default: 1000
+                    format: int32
+                    minimum: 0
+                    type: integer
                   metrics:
                     properties:
                       enabled:
