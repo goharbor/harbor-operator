@@ -32,3 +32,90 @@ Harbor projects can be managed by deploying a `HarborProject` resource to your K
   * `severity`: If an image's vulnerablilities are higher than the severity defined here, the image can't be pulled. Can be either `none`, `low`, `medium`, `high` or `critical`.
 * `projectName`: The name of the harbor project. Has to match harbor's naming rules.
 * `storageQuota`: The project's storage quota in human-readable format, like in Kubernetes memory requests/limits (Ti, Gi, Mi, Ki). The Harbor's default value is used if empty.
+
+## Examples
+
+### Metadata
+
+```yaml
+apiVersion: goharbor.io/v1beta1
+kind: HarborProject
+metadata:
+  name: metadata-enabled
+spec:
+  harborServerConfig: harborcluster
+  metadata:
+    autoScan: true
+    enableContentTrust: true
+    enableContentTrustCosign: true
+    preventVulnerable: true
+    public: true
+    reuseSysCveAllowlist: true
+    severity: "critical"
+  projectName: metadata-enabled
+  storageQuota: 10Gi
+```
+
+### Users and groups
+
+```yaml
+apiVersion: goharbor.io/v1beta1
+kind: HarborProject
+metadata:
+  name: users-and-groups
+spec:
+  harborServerConfig: harborcluster
+  memberships:
+    - name: admin
+      role: projectAdmin
+      type: user
+    - name: testgroupA
+      role: maintainer
+      type: group
+    - name: testgroupB
+      role: developer
+      type: group
+    - name: testgroupC
+      role: guest
+      type: group
+  projectName: users-and-groups
+  storageQuota: 10Gi
+```
+
+### CVE allowlist
+
+```yaml
+apiVersion: goharbor.io/v1beta1
+kind: HarborProject
+metadata:
+  name: cve-allowlist
+spec:
+  cveAllowList:
+  - CVE-2021-3121
+  - CVE-2021-43816
+  - CVE-2022-31836
+  - CVE-2023-25173
+  harborServerConfig: harborcluster
+  metadata:
+    reuseSysCveAllowlist: false
+  projectName: cve-allowlist
+  storageQuota: 10Gi
+```
+
+```yaml
+apiVersion: goharbor.io/v1beta1
+kind: HarborProject
+metadata:
+  name: cve-allowlist-syscve
+spec:
+  cveAllowList:
+  - CVE-2021-3121
+  - CVE-2021-43816
+  - CVE-2022-31836
+  - CVE-2023-25173
+  harborServerConfig: harborcluster
+  metadata:
+    reuseSysCveAllowlist: true # will overwrite project cveAllowlist if set
+  projectName: cve-allowlist-syscve
+  storageQuota: 10Gi
+```
