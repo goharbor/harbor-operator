@@ -9,7 +9,6 @@ import (
 	harborClient "github.com/goharbor/harbor-operator/pkg/rest"
 	"github.com/pkg/errors"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -49,8 +48,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (res ctrl.
 			hp.Status.Status = goharborv1beta1.HarborProjectStatusReady
 			hp.Status.Reason = ""
 			hp.Status.Message = ""
-			now := metav1.Now()
-			hp.Status.LastApplyTime = &now
 		}
 
 		log.Info("Reconcile end", "result", res, "error", err, "updateStatusError", r.Client.Status().Update(ctx, hp))
