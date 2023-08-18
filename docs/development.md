@@ -7,7 +7,7 @@ git clone https://github.com/goharbor/harbor-operator.git
 cd harbor-operator
 ```
 
-You developped a new cool feature? Fixed an annoying bug? We would be happy to hear from you!
+You developed a new cool feature? Fixed an annoying bug? We would be happy to hear from you!
 
 Have a look in [CONTRIBUTING.md](https://github.com/goharbor/harbor-operator/blob/main/CONTRIBUTING.md)
 
