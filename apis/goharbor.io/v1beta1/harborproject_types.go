@@ -137,6 +137,9 @@ type HarborProjectStatus struct {
 	// Message provides human-readable message.
 	// +kubebuilder:validation:Optional
 	Message string `json:"message,omitempty"`
+	// LastApplyTime represents the last apply configuration time.
+	// +kubebuilder:validation:Optional
+	LastApplyTime *metav1.Time `json:"lastApplyTime,omitempty"`
 }
 
 // +kubebuilder:object:root=true

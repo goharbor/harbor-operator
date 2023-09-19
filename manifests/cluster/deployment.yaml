@@ -13528,6 +13528,11 @@ spec:
           status:
             description: HarborProjectStatus defines the status of HarborProject.
             properties:
+              lastApplyTime:
+                description: LastApplyTime represents the last apply configuration
+                  time.
+                format: date-time
+                type: string
               membershipHash:
                 description: MembershipHash provides a way to quickly notice changes
                   in project membership.
