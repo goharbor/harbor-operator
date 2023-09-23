@@ -736,3 +736,11 @@ $(HELM_DOCS):
 	# https://github.com/norwoodj/helm-docs/tree/master#installation
 	curl -sL "https://github.com/norwoodj/helm-docs/releases/download/v$(HELM_DOCS_VERSION)/helm-docs_$(HELM_DOCS_VERSION)_$$(uname -s)_x86_64.tar.gz" \
 		| tar -xzC '$(BIN)' helm-docs
+
+.PHONY: localtest-start
+localtest-start:
+	@sh scripts/harbor_operator_kind.sh start
+
+.PHONY: localtest-clean
+localtest-clean:
+	@sh scripts/harbor_operator_kind.sh clean
