@@ -6,6 +6,7 @@ import (
 	"strings"
 	"sync"
 
+	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
 	"github.com/goharbor/harbor-operator/pkg/factories/logger"
 	"github.com/goharbor/harbor-operator/pkg/version"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -62,6 +63,11 @@ func GetStaticID(name string) string {
 func (d *Dependencies) ComputeChecksum(resource metav1.Object, onlySpec bool) string {
 	if !onlySpec {
 		return resource.GetResourceVersion()
+	}
+
+	annotations := resource.GetAnnotations()
+	if value, ok := annotations[goharborv1.HarborClassAnnotation]; ok {
+		return fmt.Sprintf("%d-%s", resource.GetGeneration(), value)
 	}
 
 	return fmt.Sprintf("%d", resource.GetGeneration())

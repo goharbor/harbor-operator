@@ -22,7 +22,7 @@ func (cf *Filter) Delete(e event.DeleteEvent) bool {
 
 // Update returns true if the Update event should be processed.
 func (cf *Filter) Update(e event.UpdateEvent) bool {
-	return cf.HarborClassAnnotationMatch(e.ObjectOld) || cf.HarborClassAnnotationMatch(e.ObjectNew)
+	return cf.HarborClassAnnotationMatch(e.ObjectNew)
 }
 
 // Generic returns true if the Generic event should be processed.
