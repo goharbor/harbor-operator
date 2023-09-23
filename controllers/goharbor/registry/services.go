@@ -11,7 +11,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-func (r *Reconciler) GetService(ctx context.Context, registry *goharborv1.Registry) (*corev1.Service, error) {
+func (r *Reconciler) GetService(ctx context.Context, registry *goharborv1.Registry) *corev1.Service {
 	name := r.NormalizeName(ctx, registry.GetName())
 	namespace := registry.GetNamespace()
 
@@ -52,10 +52,10 @@ func (r *Reconciler) GetService(ctx context.Context, registry *goharborv1.Regist
 				r.Label("namespace"): namespace,
 			},
 		},
-	}, nil
+	}
 }
 
-func (r *Reconciler) GetCtlService(ctx context.Context, registryCtl *goharborv1.RegistryController) (*corev1.Service, error) {
+func (r *Reconciler) GetCtlService(ctx context.Context, registryCtl *goharborv1.RegistryController) *corev1.Service {
 	name := r.NormalizeName(ctx, registryCtl.GetName())
 	namespace := registryCtl.GetNamespace()
 
@@ -89,5 +89,5 @@ func (r *Reconciler) GetCtlService(ctx context.Context, registryCtl *goharborv1.
 				r.Label("namespace"): namespace,
 			},
 		},
-	}, nil
+	}
 }
