@@ -38,7 +38,9 @@ func populateContext(ctx context.Context, mgr manager.Manager) (context.Context,
 
 	preferredResources, err := discoveryClient.ServerPreferredResources()
 	if err != nil {
-		return ctx, err
+		if !discovery.IsGroupDiscoveryFailedError(err) {
+			return ctx, err
+		}
 	}
 
 	resources := discovery.FilteredBy(discovery.ResourcePredicateFunc(func(groupVersion string, r *metav1.APIResource) bool {
