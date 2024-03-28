@@ -530,7 +530,7 @@ clean:
 
 # find or download controller-gen
 # download controller-gen if necessary
-CONTROLLER_GEN_VERSION := 0.9.2
+CONTROLLER_GEN_VERSION := 0.14.0
 CONTROLLER_GEN := $(BIN)/controller-gen
 
 .PHONY: controller-gen
@@ -661,7 +661,7 @@ $(GORELEASER):
 
 # find or download stringer
 # download stringer if necessary
-STRINGER_VERSION := v0.11.0
+STRINGER_VERSION := v0.19.0
 STRINGER := $(BIN)/stringer
 
 .PHONY: stringer

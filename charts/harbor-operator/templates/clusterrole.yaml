@@ -3,7 +3,6 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  creationTimestamp: null
   name: '{{ include "chart.fullname" . }}-harbor-operator-role'
 rules:
 - apiGroups:

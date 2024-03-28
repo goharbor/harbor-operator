@@ -108,5 +108,5 @@ var _ = DescribeTable(
 	Entry("JobService", newJobServiceController(), time.Minute, 5*time.Second),
 	Entry("Exporter", newExporterController(), time.Minute, 5*time.Second),
 	// Following tests require redis
-	Entry("Harbor", newHarborController(), 5*time.Minute, 10*time.Second),
+	//Entry("Harbor", newHarborController(), 5*time.Minute, 10*time.Second),
 )
