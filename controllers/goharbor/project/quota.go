@@ -5,8 +5,8 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/goharbor/go-client/pkg/sdk/v2.0/models"
-	goharborv1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
 	"github.com/pkg/errors"
+	goharborv1 "github.com/plotly/harbor-operator/apis/goharbor.io/v1beta1"
 )
 
 const errorStatus string = "GetProjectQuotaError"

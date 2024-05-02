@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	goharborv1beta1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
-	harborClient "github.com/goharbor/harbor-operator/pkg/rest"
 	"github.com/pkg/errors"
+	goharborv1beta1 "github.com/plotly/harbor-operator/apis/goharbor.io/v1beta1"
+	harborClient "github.com/plotly/harbor-operator/pkg/rest"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"

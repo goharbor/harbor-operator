@@ -10,9 +10,9 @@ import (
 	"github.com/goharbor/go-client/pkg/sdk/v2.0/client/project"
 	"github.com/goharbor/go-client/pkg/sdk/v2.0/client/quota"
 	"github.com/goharbor/go-client/pkg/sdk/v2.0/models"
-	goharborv1beta1 "github.com/goharbor/harbor-operator/apis/goharbor.io/v1beta1"
-	utilstring "github.com/goharbor/harbor-operator/pkg/utils/strings"
 	"github.com/pkg/errors"
+	goharborv1beta1 "github.com/plotly/harbor-operator/apis/goharbor.io/v1beta1"
+	utilstring "github.com/plotly/harbor-operator/pkg/utils/strings"
 	"github.com/spotahome/redis-operator/log"
 	"k8s.io/apimachinery/pkg/api/resource"
 )
