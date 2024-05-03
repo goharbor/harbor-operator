@@ -1055,7 +1055,6 @@ spec:
               templateLabels:
                 additionalProperties:
                   type: string
-                description: Custom Labels to be added into the pods
                 type: object
               tolerations:
                 items:
@@ -2191,7 +2190,6 @@ spec:
               templateLabels:
                 additionalProperties:
                   type: string
-                description: Custom Labels to be added into the pods
                 type: object
               tolerations:
                 items:
@@ -2675,7 +2673,6 @@ spec:
               templateLabels:
                 additionalProperties:
                   type: string
-                description: Custom Labels to be added into the pods
                 type: object
               tolerations:
                 items:
@@ -3139,7 +3136,6 @@ spec:
               templateLabels:
                 additionalProperties:
                   type: string
-                description: Custom Labels to be added into the pods
                 type: object
               tolerations:
                 items:
@@ -3488,7 +3484,6 @@ spec:
               templateLabels:
                 additionalProperties:
                   type: string
-                description: Custom Labels to be added into the pods
                 type: object
               tls:
                 properties:
@@ -3781,7 +3776,6 @@ spec:
               templateLabels:
                 additionalProperties:
                   type: string
-                description: Custom Labels to be added into the pods
                 type: object
               tls:
                 properties:
@@ -3993,7 +3987,6 @@ spec:
                   templateLabels:
                     additionalProperties:
                       type: string
-                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     items:
@@ -4097,7 +4090,6 @@ spec:
                   templateLabels:
                     additionalProperties:
                       type: string
-                    description: Custom Labels to be added into the pods
                     type: object
                   tokenIssuer:
                     properties:
@@ -4251,7 +4243,6 @@ spec:
                   templateLabels:
                     additionalProperties:
                       type: string
-                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     items:
@@ -4993,7 +4984,6 @@ spec:
                   templateLabels:
                     additionalProperties:
                       type: string
-                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     items:
@@ -5097,7 +5087,6 @@ spec:
                       templateLabels:
                         additionalProperties:
                           type: string
-                        description: Custom Labels to be added into the pods
                         type: object
                       tolerations:
                         items:
@@ -5182,7 +5171,6 @@ spec:
                       templateLabels:
                         additionalProperties:
                           type: string
-                        description: Custom Labels to be added into the pods
                         type: object
                       tolerations:
                         items:
@@ -5268,7 +5256,6 @@ spec:
                   templateLabels:
                     additionalProperties:
                       type: string
-                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     items:
@@ -5434,7 +5421,6 @@ spec:
                   templateLabels:
                     additionalProperties:
                       type: string
-                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     items:
@@ -5519,7 +5505,6 @@ spec:
                   templateLabels:
                     additionalProperties:
                       type: string
-                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     items:
@@ -5638,7 +5623,6 @@ spec:
                   templateLabels:
                     additionalProperties:
                       type: string
-                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     items:
@@ -5845,8 +5829,6 @@ spec:
                                     type: object
                                 type: object
                               serviceAccountName:
-                                description: ServiceAccountName is the service account
-                                  name of the redis server.
                                 type: string
                               storage:
                                 type: string
@@ -5934,7 +5916,6 @@ spec:
                   templateLabels:
                     additionalProperties:
                       type: string
-                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     items:
@@ -6048,7 +6029,6 @@ spec:
                   templateLabels:
                     additionalProperties:
                       type: string
-                    description: Custom Labels to be added into the pods
                     type: object
                   tokenIssuer:
                     properties:
@@ -6282,7 +6262,6 @@ spec:
                   templateLabels:
                     additionalProperties:
                       type: string
-                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     items:
@@ -6498,7 +6477,6 @@ spec:
                   templateLabels:
                     additionalProperties:
                       type: string
-                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     items:
@@ -6609,7 +6587,6 @@ spec:
                       templateLabels:
                         additionalProperties:
                           type: string
-                        description: Custom Labels to be added into the pods
                         type: object
                       tolerations:
                         items:
@@ -6694,7 +6671,6 @@ spec:
                       templateLabels:
                         additionalProperties:
                           type: string
-                        description: Custom Labels to be added into the pods
                         type: object
                       tolerations:
                         items:
@@ -6780,7 +6756,6 @@ spec:
                   templateLabels:
                     additionalProperties:
                       type: string
-                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     items:
@@ -6925,7 +6900,6 @@ spec:
                   templateLabels:
                     additionalProperties:
                       type: string
-                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     items:
@@ -7010,7 +6984,6 @@ spec:
                   templateLabels:
                     additionalProperties:
                       type: string
-                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     items:
@@ -7728,7 +7701,6 @@ spec:
                   templateLabels:
                     additionalProperties:
                       type: string
-                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     items:
@@ -8121,11 +8093,10 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.9.2
+    controller-gen.kubebuilder.io/version: v0.14.0
     goharbor.io/deploy-engine: Kustomization
     goharbor.io/deploy-mode: harbor
     goharbor.io/operator-version: v1.3.0
-  creationTimestamp: null
   name: harborprojects.goharbor.io
 spec:
   group: goharbor.io
@@ -8163,7 +8134,6 @@ spec:
     name: v1beta1
     schema:
       openAPIV3Schema:
-        description: HarborProject is the Schema for the harbors projects.
         properties:
           apiVersion:
             type: string
@@ -8172,30 +8142,19 @@ spec:
           metadata:
             type: object
           spec:
-            description: HarborProjectSpec defines the spec of HarborProject.
             properties:
               cveAllowList:
-                description: The CVE allowlist for the project.
                 items:
                   type: string
                 type: array
               harborServerConfig:
-                description: HarborServerConfig contains the name of a HarborServerConfig
-                  resource describing the harbor instance to manage.
                 type: string
               memberships:
-                description: Group or user memberships of the project.
                 items:
-                  description: HarborProjectMember is a member of a HarborProject.
-                    Can be a user or group.
                   properties:
                     name:
-                      description: Name of the member. Has to match with a existing
-                        user or group
                       type: string
                     role:
-                      description: Role of the member in the Project. This controls
-                        the member's permissions on the project.
                       enum:
                       - projectAdmin
                       - developer
@@ -8203,7 +8162,6 @@ spec:
                       - maintainer
                       type: string
                     type:
-                      description: Type of the member, group or user
                       enum:
                       - group
                       - user
@@ -8215,35 +8173,20 @@ spec:
                   type: object
                 type: array
               metadata:
-                description: HarborProjectMetadata related configurations.
                 properties:
                   autoScan:
-                    description: Whether to scan images automatically after pushing.
                     type: boolean
                   enableContentTrust:
-                    description: Whether content trust is enabled or not. If enabled,
-                      user can't pull unsigned images from this project.
                     type: boolean
                   enableContentTrustCosign:
-                    description: Whether cosign content trust is enabled or not. Similar
-                      to enableContentTrust, but using cosign.
                     type: boolean
                   preventVulnerable:
-                    description: Whether to prevent vulnerable images from running.
                     type: boolean
                   public:
-                    description: The flag to indicate whether the project should be
-                      public or not.
                     type: boolean
                   reuseSysCveAllowlist:
-                    description: Whether this project reuses the system level CVE
-                      allowlist for itself. If this is set to `true`, the actual allowlist
-                      associated with this project will be ignored.
                     type: boolean
                   severity:
-                    description: If an image's vulnerablilities are higher than the
-                      severity defined here, the image can't be pulled. Can be either
-                      `none`, `low`, `medium`, `high` or `critical`.
                     enum:
                     - none
                     - low
@@ -8253,16 +8196,11 @@ spec:
                     type: string
                 type: object
               projectName:
-                description: The name of the harbor project. Has to match harbor's
-                  naming rules.
                 maxLength: 255
                 minLength: 1
                 pattern: ^[a-z0-9]+(?:[._-][a-z0-9]+)*$
                 type: string
               storageQuota:
-                description: The project's storage quota in human-readable format,
-                  like in Kubernetes memory requests/limits (Ti, Gi, Mi, Ki). The
-                  Harbor's default value is used if empty.
                 pattern: ^[1-9][0-9]*(Ti|Gi|Mi|Ki)$
                 type: string
             required:
@@ -8270,30 +8208,23 @@ spec:
             - projectName
             type: object
           status:
-            description: HarborProjectStatus defines the status of HarborProject.
             properties:
               lastApplyTime:
                 format: date-time
                 type: string
               membershipHash:
-                description: MembershipHash provides a way to quickly notice changes
-                  in project membership.
                 type: string
               message:
                 type: string
               projectID:
-                description: ProjectID represents ID of the managed project.
                 format: int32
                 type: integer
               quotaID:
-                description: QuotaID is the ID of the project's quota. Used to be
-                  able to update it.
                 format: int64
                 type: integer
               reason:
                 type: string
               status:
-                description: Status represents harbor project status.
                 type: string
             type: object
         type: object
@@ -8445,7 +8376,6 @@ spec:
                   templateLabels:
                     additionalProperties:
                       type: string
-                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     items:
@@ -8549,7 +8479,6 @@ spec:
                   templateLabels:
                     additionalProperties:
                       type: string
-                    description: Custom Labels to be added into the pods
                     type: object
                   tokenIssuer:
                     properties:
@@ -8703,7 +8632,6 @@ spec:
                   templateLabels:
                     additionalProperties:
                       type: string
-                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     items:
@@ -9020,7 +8948,6 @@ spec:
                   templateLabels:
                     additionalProperties:
                       type: string
-                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     items:
@@ -9124,7 +9051,6 @@ spec:
                       templateLabels:
                         additionalProperties:
                           type: string
-                        description: Custom Labels to be added into the pods
                         type: object
                       tolerations:
                         items:
@@ -9209,7 +9135,6 @@ spec:
                       templateLabels:
                         additionalProperties:
                           type: string
-                        description: Custom Labels to be added into the pods
                         type: object
                       tolerations:
                         items:
@@ -9295,7 +9220,6 @@ spec:
                   templateLabels:
                     additionalProperties:
                       type: string
-                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     items:
@@ -9461,7 +9385,6 @@ spec:
                   templateLabels:
                     additionalProperties:
                       type: string
-                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     items:
@@ -9546,7 +9469,6 @@ spec:
                   templateLabels:
                     additionalProperties:
                       type: string
-                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     items:
@@ -9665,7 +9587,6 @@ spec:
                   templateLabels:
                     additionalProperties:
                       type: string
-                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     items:
@@ -9852,7 +9773,6 @@ spec:
                   templateLabels:
                     additionalProperties:
                       type: string
-                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     items:
@@ -9966,7 +9886,6 @@ spec:
                   templateLabels:
                     additionalProperties:
                       type: string
-                    description: Custom Labels to be added into the pods
                     type: object
                   tokenIssuer:
                     properties:
@@ -10122,7 +10041,6 @@ spec:
                   templateLabels:
                     additionalProperties:
                       type: string
-                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     items:
@@ -10541,7 +10459,6 @@ spec:
                   templateLabels:
                     additionalProperties:
                       type: string
-                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     items:
@@ -10652,7 +10569,6 @@ spec:
                       templateLabels:
                         additionalProperties:
                           type: string
-                        description: Custom Labels to be added into the pods
                         type: object
                       tolerations:
                         items:
@@ -10737,7 +10653,6 @@ spec:
                       templateLabels:
                         additionalProperties:
                           type: string
-                        description: Custom Labels to be added into the pods
                         type: object
                       tolerations:
                         items:
@@ -10823,7 +10738,6 @@ spec:
                   templateLabels:
                     additionalProperties:
                       type: string
-                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     items:
@@ -10989,7 +10903,6 @@ spec:
                   templateLabels:
                     additionalProperties:
                       type: string
-                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     items:
@@ -11074,7 +10987,6 @@ spec:
                   templateLabels:
                     additionalProperties:
                       type: string
-                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     items:
@@ -11263,7 +11175,6 @@ spec:
                   templateLabels:
                     additionalProperties:
                       type: string
-                    description: Custom Labels to be added into the pods
                     type: object
                   tolerations:
                     items:
@@ -13164,7 +13075,6 @@ spec:
               templateLabels:
                 additionalProperties:
                   type: string
-                description: Custom Labels to be added into the pods
                 type: object
               tls:
                 properties:
@@ -15704,7 +15614,6 @@ spec:
               templateLabels:
                 additionalProperties:
                   type: string
-                description: Custom Labels to be added into the pods
                 type: object
               tls:
                 properties:
@@ -16105,7 +16014,6 @@ spec:
               templateLabels:
                 additionalProperties:
                   type: string
-                description: Custom Labels to be added into the pods
                 type: object
               tls:
                 properties:
@@ -16377,7 +16285,6 @@ spec:
               templateLabels:
                 additionalProperties:
                   type: string
-                description: Custom Labels to be added into the pods
                 type: object
               tls:
                 properties:
@@ -16662,7 +16569,6 @@ spec:
               templateLabels:
                 additionalProperties:
                   type: string
-                description: Custom Labels to be added into the pods
                 type: object
               tolerations:
                 items:
@@ -16890,7 +16796,6 @@ spec:
               templateLabels:
                 additionalProperties:
                   type: string
-                description: Custom Labels to be added into the pods
                 type: object
               tolerations:
                 items:
@@ -17085,7 +16990,6 @@ spec:
               templateLabels:
                 additionalProperties:
                   type: string
-                description: Custom Labels to be added into the pods
                 type: object
               tls:
                 properties:
@@ -17257,7 +17161,6 @@ spec:
               templateLabels:
                 additionalProperties:
                   type: string
-                description: Custom Labels to be added into the pods
                 type: object
               tls:
                 properties:
@@ -18827,7 +18730,6 @@ spec:
               templateLabels:
                 additionalProperties:
                   type: string
-                description: Custom Labels to be added into the pods
                 type: object
               tolerations:
                 items:
@@ -20379,7 +20281,6 @@ spec:
               templateLabels:
                 additionalProperties:
                   type: string
-                description: Custom Labels to be added into the pods
                 type: object
               tolerations:
                 items:
@@ -20686,7 +20587,6 @@ spec:
               templateLabels:
                 additionalProperties:
                   type: string
-                description: Custom Labels to be added into the pods
                 type: object
               tls:
                 properties:
@@ -20880,7 +20780,6 @@ spec:
               templateLabels:
                 additionalProperties:
                   type: string
-                description: Custom Labels to be added into the pods
                 type: object
               tls:
                 properties:
@@ -22678,7 +22577,6 @@ spec:
               templateLabels:
                 additionalProperties:
                   type: string
-                description: Custom Labels to be added into the pods
                 type: object
               tolerations:
                 items:
@@ -24465,7 +24363,6 @@ spec:
               templateLabels:
                 additionalProperties:
                   type: string
-                description: Custom Labels to be added into the pods
                 type: object
               timeout:
                 default: 5m0s
