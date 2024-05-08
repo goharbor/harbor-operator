@@ -3,4 +3,4 @@
   export NS={{ .Release.Namespace }}
   kubectl get po $POD_NAME -n $NS
 
-2. Apply CRD to create harbor instance, referring to the document: https://github.com/goharbor/harbor-operator/blob/master/docs/CRD/custom-resource-definition.md
+2. Apply CRD to create harbor instance, referring to the document: https://github.com/goharbor/harbor-operator/blob/main/docs/CRD/custom-resource-definition.md

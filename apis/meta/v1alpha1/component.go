@@ -71,6 +71,10 @@ type ComponentSpec struct {
 	// Custom annotations to be added into the pods
 	TemplateAnnotations map[string]string `json:"templateAnnotations,omitempty"`
 
+	// +kubebuilder:validation:Optional
+	// Custom Labels to be added into the pods
+	TemplateLabels map[string]string `json:"templateLabels,omitempty"`
+
 	ImageSpec `json:",inline"`
 
 	// +kubebuilder:validation:Optional
@@ -114,6 +118,10 @@ func (c *ComponentSpec) ApplyToDeployment(deploy *appsv1.Deployment) {
 		}
 
 		deploy.Spec.Template.Spec.Containers[i].Resources = c.Resources
+	}
+
+	for k, v := range c.TemplateLabels {
+		deploy.Spec.Template.Labels[k] = v
 	}
 
 	deploy.Spec.Template.Spec.ImagePullSecrets = c.ImagePullSecrets

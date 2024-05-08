@@ -107,9 +107,10 @@ func (rm *redisResourceManager) GetCacheCR(ctx context.Context, harborcluster *g
 						Spec:     pvc.Spec,
 					},
 				},
-				Image:            image,
-				ImagePullPolicy:  rm.getImagePullPolicy(ctx, harborcluster),
-				ImagePullSecrets: rm.getImagePullSecrets(ctx, harborcluster),
+				Image:              image,
+				ImagePullPolicy:    rm.getImagePullPolicy(ctx, harborcluster),
+				ImagePullSecrets:   rm.getImagePullSecrets(ctx, harborcluster),
+				ServiceAccountName: rm.getServiceAccountName(ctx, harborcluster),
 			},
 			Sentinel: redisOp.SentinelSettings{
 				Replicas:         int32(rm.GetClusterServerReplica()),
@@ -241,4 +242,12 @@ func (rm *redisResourceManager) getImagePullSecrets(_ context.Context, harborclu
 	}
 
 	return nil
+}
+
+func (rm *redisResourceManager) getServiceAccountName(_ context.Context, harborcluster *goharborv1.HarborCluster) string {
+	if rm.cluster.Spec.Cache.Spec.RedisFailover != nil && rm.cluster.Spec.Cache.Spec.RedisFailover.Server != nil {
+		return harborcluster.Spec.Cache.Spec.RedisFailover.Server.ServiceAccountName
+	}
+
+	return ""
 }

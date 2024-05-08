@@ -19,6 +19,7 @@ import (
 	"github.com/plotly/harbor-operator/controllers/goharbor/notaryserver"
 	"github.com/plotly/harbor-operator/controllers/goharbor/notarysigner"
 	"github.com/plotly/harbor-operator/controllers/goharbor/portal"
+	"github.com/plotly/harbor-operator/controllers/goharbor/project"
 	"github.com/plotly/harbor-operator/controllers/goharbor/pullsecretbinding"
 	"github.com/plotly/harbor-operator/controllers/goharbor/registry"
 	"github.com/plotly/harbor-operator/controllers/goharbor/trivy"
@@ -53,6 +54,7 @@ var controllersBuilder = map[controllers.Controller]func(context.Context, *confi
 	controllers.HarborServerConfiguration: harborserverconfiguration.New,
 	controllers.PullSecretBinding:         pullsecretbinding.New,
 	controllers.Namespace:                 namespace.New,
+	controllers.HarborProject:             project.New,
 }
 
 type ControllerFactory func(context.Context, string, string, *configstore.Store) (commonCtrl.Reconciler, error)

@@ -179,6 +179,10 @@ type RedisServer struct {
 	// +kubebuilder:validation:Optional
 	// Storage is the size of the redis storage.
 	Storage string `json:"storage,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// ServiceAccountName is the service account name of the redis server.
+	ServiceAccountName string `json:"serviceAccountName,omitempty"`
 }
 
 type Database struct {

@@ -36,6 +36,8 @@ func (p *PostgreSQLController) Update(ctx context.Context, harborcluster *goharb
 		return databaseNotReadyStatus(DefaultUnstructuredConverterError, err.Error()), err
 	}
 
+	expectCR.SetOwnerReferences(actualCR.GetOwnerReferences())
+
 	if !common.Equals(ctx, p.Scheme, harborcluster, &actualCR) {
 		p.Log.Info(
 			"Update Database resource",

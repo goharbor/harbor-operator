@@ -275,8 +275,8 @@ func (r *Reconciler) getJobServiceRedisURL(ctx context.Context, exporter *goharb
 	if redisPassword == "" {
 		logger.Get(ctx).Info("redis password secret of jobservice not found", "secret", exporter.Spec.JobService.Redis.PasswordRef)
 	}
-
-	return exporter.Spec.JobService.Redis.GetDSNStringWithRawPassword(redisPassword), nil
+	// support redis password contains special character by using url.QueryEscape
+	return exporter.Spec.JobService.Redis.GetDSNStringWithRawPassword(url.QueryEscape(redisPassword)), nil
 }
 
 func (r *Reconciler) getValueFromSecret(ctx context.Context, namespace, name, key string) (string, error) {

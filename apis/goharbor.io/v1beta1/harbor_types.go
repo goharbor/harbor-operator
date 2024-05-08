@@ -374,6 +374,16 @@ type CoreComponentSpec struct {
 
 	// +kubebuilder:validation:Optional
 	Metrics *harbormetav1.MetricsSpec `json:"metrics,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Minimum=0
+	// +kubebuilder:default=50
+	MaxIdleConnections *int32 `json:"maxIdleConnections,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Minimum=0
+	// +kubebuilder:default=1000
+	MaxOpenConnections *int32 `json:"maxOpenConnections,omitempty"`
 }
 
 type JobServiceComponentSpec struct {

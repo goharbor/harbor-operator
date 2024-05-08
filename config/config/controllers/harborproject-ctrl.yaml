@@ -1,0 +1,6 @@
+- key: max-reconcile
+  priority: 200
+  value: "1"
+- key: requeue-after-minutes
+  priority: 200
+  value: "5"

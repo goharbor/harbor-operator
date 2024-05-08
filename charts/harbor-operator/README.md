@@ -24,6 +24,8 @@ Deploy Harbor Operator
 | controllers.core.maxReconcile | int | `1` | Max parallel reconciliation for Core controller |
 | controllers.harbor.maxReconcile | int | `1` | Max parallel reconciliation for Harbor controller |
 | controllers.harborConfiguration.maxReconcile | int | `1` | Max parallel reconciliation for HarborConfiguration controller |
+| controllers.harborProject.maxReconcile | int | `1` | Max parallel reconciliation for HarborProject controller |
+| controllers.harborProject.requeueAfterMinutes | int | `5` | How often to reconcile HarborProjects |
 | controllers.harborcluster.maxReconcile | int | `1` | Max parallel reconciliation for HarborCluster controller |
 | controllers.jobservice.maxReconcile | int | `1` | Max parallel reconciliation for JobService controller |
 | controllers.notaryserver.maxReconcile | int | `1` | Max parallel reconciliation for NotaryServer controller |
@@ -36,8 +38,9 @@ Deploy Harbor Operator
 | fullnameOverride | string | `""` |  |
 | harborClass | string | `""` | Class name of the Harbor operator |
 | image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the controller. |
+| image.registry | string | `"docker.io"` | The image registry whose default is docker.io. |
 | image.repository | string | `"goharbor/harbor-operator"` | The image repository whose default is the chart appVersion. |
-| image.tag | string | `"dev_master"` | The image tag whose default is the chart appVersion. |
+| image.tag | string | `"dev"` | The image tag whose default is the chart appVersion. |
 | imagePullSecrets | list | `[]` | Reference to one or more secrets to be used when pulling images <https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/> For example: `[   {"name":"image-pull-secret"} ]` |
 | installCRDs | bool | `false` | If true, CRD resources will be installed as part of the Helm chart. If enabled, when uninstalling CRD resources will be deleted causing all installed custom resources to be DELETED |
 | leaderElection.namespace | string | `"kube-system"` | The namespace used to store the ConfigMap for leader election |

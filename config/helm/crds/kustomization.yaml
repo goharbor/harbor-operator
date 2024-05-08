@@ -1,12 +1,12 @@
-namePrefix: '{{ include "chart.fullname" . }}-'
+namePrefix: 'harbor-operator-'
 
-namespace: '{{ .Release.Namespace }}'
+namespace: 'harbor-operator-ns'
 
 generatorOptions:
   disableNameSuffixHash: true
 
 commonAnnotations:
-  cert-manager.io/inject-ca-from: '{{.Release.Namespace}}/{{. | include "chart.fullname"}}-serving-cert'
+  cert-manager.io/inject-ca-from: 'harbor-operator-ns/harbor-operator-serving-cert'
 
 patchesStrategicMerge:
 - patches/chartmuseums_service.yaml

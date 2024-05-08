@@ -122,7 +122,7 @@ func (r *Reconciler) AddRegistryInternalCertificate(ctx context.Context, harbor 
 }
 
 const (
-	// https://github.com/goharbor/harbor/blob/master/make/photon/prepare/utils/configs.py#L14
+	// https://github.com/goharbor/harbor/blob/main/make/photon/prepare/utils/configs.py#L14
 	RegistryAuthenticationUsername = "harbor_registry_user"
 
 	RegistryAuthenticationPasswordLength      = 32

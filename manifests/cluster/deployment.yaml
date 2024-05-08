@@ -1052,6 +1052,10 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
+              templateLabels:
+                additionalProperties:
+                  type: string
+                type: object
               tolerations:
                 items:
                   properties:
@@ -2183,6 +2187,10 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
+              templateLabels:
+                additionalProperties:
+                  type: string
+                type: object
               tolerations:
                 items:
                   properties:
@@ -2662,6 +2670,10 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
+              templateLabels:
+                additionalProperties:
+                  type: string
+                type: object
               tolerations:
                 items:
                   properties:
@@ -3121,6 +3133,10 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
+              templateLabels:
+                additionalProperties:
+                  type: string
+                type: object
               tolerations:
                 items:
                   properties:
@@ -3465,6 +3481,10 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
+              templateLabels:
+                additionalProperties:
+                  type: string
+                type: object
               tls:
                 properties:
                   certificateRef:
@@ -3753,6 +3773,10 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
+              templateLabels:
+                additionalProperties:
+                  type: string
+                type: object
               tls:
                 properties:
                   certificateRef:
@@ -3960,6 +3984,10 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    type: object
                   tolerations:
                     items:
                       properties:
@@ -4056,6 +4084,10 @@ spec:
                   serviceAccountName:
                     type: string
                   templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  templateLabels:
                     additionalProperties:
                       type: string
                     type: object
@@ -4205,6 +4237,10 @@ spec:
                   serviceAccountName:
                     type: string
                   templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  templateLabels:
                     additionalProperties:
                       type: string
                     type: object
@@ -4945,6 +4981,10 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    type: object
                   tolerations:
                     items:
                       properties:
@@ -5044,6 +5084,10 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
+                      templateLabels:
+                        additionalProperties:
+                          type: string
+                        type: object
                       tolerations:
                         items:
                           properties:
@@ -5121,6 +5165,10 @@ spec:
                       serviceAccountName:
                         type: string
                       templateAnnotations:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      templateLabels:
                         additionalProperties:
                           type: string
                         type: object
@@ -5202,6 +5250,10 @@ spec:
                   serviceAccountName:
                     type: string
                   templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  templateLabels:
                     additionalProperties:
                       type: string
                     type: object
@@ -5366,6 +5418,10 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    type: object
                   tolerations:
                     items:
                       properties:
@@ -5443,6 +5499,10 @@ spec:
                   serviceAccountName:
                     type: string
                   templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  templateLabels:
                     additionalProperties:
                       type: string
                     type: object
@@ -5557,6 +5617,10 @@ spec:
                         type: object
                     type: object
                   templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  templateLabels:
                     additionalProperties:
                       type: string
                     type: object
@@ -5764,6 +5828,8 @@ spec:
                                       x-kubernetes-int-or-string: true
                                     type: object
                                 type: object
+                              serviceAccountName:
+                                type: string
                               storage:
                                 type: string
                               storageClassName:
@@ -5847,6 +5913,10 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    type: object
                   tolerations:
                     items:
                       properties:
@@ -5886,6 +5956,16 @@ spec:
                       type: object
                       x-kubernetes-map-type: atomic
                     type: array
+                  maxIdleConnections:
+                    default: 50
+                    format: int32
+                    minimum: 0
+                    type: integer
+                  maxOpenConnections:
+                    default: 1000
+                    format: int32
+                    minimum: 0
+                    type: integer
                   metrics:
                     properties:
                       enabled:
@@ -5943,6 +6023,10 @@ spec:
                   serviceAccountName:
                     type: string
                   templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  templateLabels:
                     additionalProperties:
                       type: string
                     type: object
@@ -6175,6 +6259,10 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    type: object
                   tolerations:
                     items:
                       properties:
@@ -6386,6 +6474,10 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    type: object
                   tolerations:
                     items:
                       properties:
@@ -6492,6 +6584,10 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
+                      templateLabels:
+                        additionalProperties:
+                          type: string
+                        type: object
                       tolerations:
                         items:
                           properties:
@@ -6569,6 +6665,10 @@ spec:
                       serviceAccountName:
                         type: string
                       templateAnnotations:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      templateLabels:
                         additionalProperties:
                           type: string
                         type: object
@@ -6650,6 +6750,10 @@ spec:
                   serviceAccountName:
                     type: string
                   templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  templateLabels:
                     additionalProperties:
                       type: string
                     type: object
@@ -6793,6 +6897,10 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    type: object
                   tolerations:
                     items:
                       properties:
@@ -6870,6 +6978,10 @@ spec:
                   serviceAccountName:
                     type: string
                   templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  templateLabels:
                     additionalProperties:
                       type: string
                     type: object
@@ -7586,6 +7698,10 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    type: object
                   tolerations:
                     items:
                       properties:
@@ -7977,6 +8093,150 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
+    controller-gen.kubebuilder.io/version: v0.14.0
+    goharbor.io/deploy-engine: Kustomization
+    goharbor.io/deploy-mode: cluster
+    goharbor.io/operator-version: v1.3.0
+  name: harborprojects.goharbor.io
+spec:
+  group: goharbor.io
+  names:
+    categories:
+    - goharbor
+    kind: HarborProject
+    listKind: HarborProjectList
+    plural: harborprojects
+    shortNames:
+    - hp
+    singular: harborproject
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: Project name in Harbor
+      jsonPath: .spec.projectName
+      name: ProjectName
+      type: string
+    - description: HarborServerConfiguration name
+      jsonPath: .spec.harborServerConfig
+      name: HarborServerConfig
+      type: string
+    - description: HarborProject status
+      jsonPath: .status.status
+      name: Status
+      type: string
+    - description: Timestamp representing the server time when this object was created.
+        It is not guaranteed to be set in happens-before order across separate operations.
+        Clients may not set this value. It is represented in RFC3339 form and is in
+        UTC.
+      jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              cveAllowList:
+                items:
+                  type: string
+                type: array
+              harborServerConfig:
+                type: string
+              memberships:
+                items:
+                  properties:
+                    name:
+                      type: string
+                    role:
+                      enum:
+                      - projectAdmin
+                      - developer
+                      - guest
+                      - maintainer
+                      type: string
+                    type:
+                      enum:
+                      - group
+                      - user
+                      type: string
+                  required:
+                  - name
+                  - role
+                  - type
+                  type: object
+                type: array
+              metadata:
+                properties:
+                  autoScan:
+                    type: boolean
+                  enableContentTrust:
+                    type: boolean
+                  enableContentTrustCosign:
+                    type: boolean
+                  preventVulnerable:
+                    type: boolean
+                  public:
+                    type: boolean
+                  reuseSysCveAllowlist:
+                    type: boolean
+                  severity:
+                    enum:
+                    - none
+                    - low
+                    - medium
+                    - high
+                    - critical
+                    type: string
+                type: object
+              projectName:
+                maxLength: 255
+                minLength: 1
+                pattern: ^[a-z0-9]+(?:[._-][a-z0-9]+)*$
+                type: string
+              storageQuota:
+                pattern: ^[1-9][0-9]*(Ti|Gi|Mi|Ki)$
+                type: string
+            required:
+            - harborServerConfig
+            - projectName
+            type: object
+          status:
+            properties:
+              lastApplyTime:
+                format: date-time
+                type: string
+              membershipHash:
+                type: string
+              message:
+                type: string
+              projectID:
+                format: int32
+                type: integer
+              quotaID:
+                format: int64
+                type: integer
+              reason:
+                type: string
+              status:
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
     cert-manager.io/inject-ca-from: harbor-operator-ns/serving-cert
     controller-gen.kubebuilder.io/version: v0.14.0
     goharbor.io/deploy-engine: Kustomization
@@ -8113,6 +8373,10 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    type: object
                   tolerations:
                     items:
                       properties:
@@ -8209,6 +8473,10 @@ spec:
                   serviceAccountName:
                     type: string
                   templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  templateLabels:
                     additionalProperties:
                       type: string
                     type: object
@@ -8358,6 +8626,10 @@ spec:
                   serviceAccountName:
                     type: string
                   templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  templateLabels:
                     additionalProperties:
                       type: string
                     type: object
@@ -8673,6 +8945,10 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    type: object
                   tolerations:
                     items:
                       properties:
@@ -8772,6 +9048,10 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
+                      templateLabels:
+                        additionalProperties:
+                          type: string
+                        type: object
                       tolerations:
                         items:
                           properties:
@@ -8849,6 +9129,10 @@ spec:
                       serviceAccountName:
                         type: string
                       templateAnnotations:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      templateLabels:
                         additionalProperties:
                           type: string
                         type: object
@@ -8930,6 +9214,10 @@ spec:
                   serviceAccountName:
                     type: string
                   templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  templateLabels:
                     additionalProperties:
                       type: string
                     type: object
@@ -9094,6 +9382,10 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    type: object
                   tolerations:
                     items:
                       properties:
@@ -9171,6 +9463,10 @@ spec:
                   serviceAccountName:
                     type: string
                   templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  templateLabels:
                     additionalProperties:
                       type: string
                     type: object
@@ -9285,6 +9581,10 @@ spec:
                         type: object
                     type: object
                   templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  templateLabels:
                     additionalProperties:
                       type: string
                     type: object
@@ -9470,6 +9770,10 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    type: object
                   tolerations:
                     items:
                       properties:
@@ -9509,6 +9813,16 @@ spec:
                       type: object
                       x-kubernetes-map-type: atomic
                     type: array
+                  maxIdleConnections:
+                    default: 50
+                    format: int32
+                    minimum: 0
+                    type: integer
+                  maxOpenConnections:
+                    default: 1000
+                    format: int32
+                    minimum: 0
+                    type: integer
                   metrics:
                     properties:
                       enabled:
@@ -9566,6 +9880,10 @@ spec:
                   serviceAccountName:
                     type: string
                   templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  templateLabels:
                     additionalProperties:
                       type: string
                     type: object
@@ -9717,6 +10035,10 @@ spec:
                   serviceAccountName:
                     type: string
                   templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  templateLabels:
                     additionalProperties:
                       type: string
                     type: object
@@ -10134,6 +10456,10 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    type: object
                   tolerations:
                     items:
                       properties:
@@ -10240,6 +10566,10 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
+                      templateLabels:
+                        additionalProperties:
+                          type: string
+                        type: object
                       tolerations:
                         items:
                           properties:
@@ -10317,6 +10647,10 @@ spec:
                       serviceAccountName:
                         type: string
                       templateAnnotations:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      templateLabels:
                         additionalProperties:
                           type: string
                         type: object
@@ -10398,6 +10732,10 @@ spec:
                   serviceAccountName:
                     type: string
                   templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  templateLabels:
                     additionalProperties:
                       type: string
                     type: object
@@ -10562,6 +10900,10 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
+                  templateLabels:
+                    additionalProperties:
+                      type: string
+                    type: object
                   tolerations:
                     items:
                       properties:
@@ -10639,6 +10981,10 @@ spec:
                   serviceAccountName:
                     type: string
                   templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  templateLabels:
                     additionalProperties:
                       type: string
                     type: object
@@ -10823,6 +11169,10 @@ spec:
                         type: object
                     type: object
                   templateAnnotations:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  templateLabels:
                     additionalProperties:
                       type: string
                     type: object
@@ -12719,6 +13069,10 @@ spec:
               serviceAccountName:
                 type: string
               templateAnnotations:
+                additionalProperties:
+                  type: string
+                type: object
+              templateLabels:
                 additionalProperties:
                   type: string
                 type: object
@@ -15257,6 +15611,10 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
+              templateLabels:
+                additionalProperties:
+                  type: string
+                type: object
               tls:
                 properties:
                   certificateRef:
@@ -15653,6 +16011,10 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
+              templateLabels:
+                additionalProperties:
+                  type: string
+                type: object
               tls:
                 properties:
                   certificateRef:
@@ -15917,6 +16279,10 @@ spec:
                 - postgres
                 type: object
               templateAnnotations:
+                additionalProperties:
+                  type: string
+                type: object
+              templateLabels:
                 additionalProperties:
                   type: string
                 type: object
@@ -16200,6 +16566,10 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
+              templateLabels:
+                additionalProperties:
+                  type: string
+                type: object
               tolerations:
                 items:
                   properties:
@@ -16423,6 +16793,10 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
+              templateLabels:
+                additionalProperties:
+                  type: string
+                type: object
               tolerations:
                 items:
                   properties:
@@ -16613,6 +16987,10 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
+              templateLabels:
+                additionalProperties:
+                  type: string
+                type: object
               tls:
                 properties:
                   certificateRef:
@@ -16777,6 +17155,10 @@ spec:
               serviceAccountName:
                 type: string
               templateAnnotations:
+                additionalProperties:
+                  type: string
+                type: object
+              templateLabels:
                 additionalProperties:
                   type: string
                 type: object
@@ -30745,6 +31127,10 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
+              templateLabels:
+                additionalProperties:
+                  type: string
+                type: object
               tolerations:
                 items:
                   properties:
@@ -32292,6 +32678,10 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
+              templateLabels:
+                additionalProperties:
+                  type: string
+                type: object
               tolerations:
                 items:
                   properties:
@@ -32594,6 +32984,10 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
+              templateLabels:
+                additionalProperties:
+                  type: string
+                type: object
               tls:
                 properties:
                   certificateRef:
@@ -32780,6 +33174,10 @@ spec:
               serviceAccountName:
                 type: string
               templateAnnotations:
+                additionalProperties:
+                  type: string
+                type: object
+              templateLabels:
                 additionalProperties:
                   type: string
                 type: object
@@ -43451,6 +43849,10 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
+              templateLabels:
+                additionalProperties:
+                  type: string
+                type: object
               tolerations:
                 items:
                   properties:
@@ -45233,6 +45635,10 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
+              templateLabels:
+                additionalProperties:
+                  type: string
+                type: object
               timeout:
                 default: 5m0s
                 type: string
@@ -45780,6 +46186,42 @@ rules:
   - goharbor.io
   resources:
   - harborconfigurations/status
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - goharbor.io
+  resources:
+  - harborprojects
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - goharbor.io
+  resources:
+  - harborprojects/finalizers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - goharbor.io
+  resources:
+  - harborprojects/status
   verbs:
   - create
   - delete
@@ -46564,6 +47006,13 @@ data:
     - key: max-reconcile
       priority: 200
       value: "1"
+  harborproject-ctrl.yaml: |
+    - key: max-reconcile
+      priority: 200
+      value: "1"
+    - key: requeue-after-minutes
+      priority: 200
+      value: "5"
   jobservice-ctrl.yaml: |
     - key: max-reconcile
       priority: 200
@@ -46690,8 +47139,8 @@ data:
     httpport = 8080
   jobservice-config.yaml.tmpl: |
     {{/*
-      https://github.com/goharbor/harbor/blob/master/make/photon/prepare/templates/jobservice/config.yml.jinja
-      https://github.com/goharbor/harbor/blob/master/src/jobservice/config/config.go#L63
+      https://github.com/goharbor/harbor/blob/main/make/photon/prepare/templates/jobservice/config.yml.jinja
+      https://github.com/goharbor/harbor/blob/main/src/jobservice/config/config.go#L63
     */}}
     {{- if .Spec.TLS.Enabled }}
     protocol: "https"
@@ -47287,7 +47736,7 @@ spec:
               fieldPath: metadata.namespace
         - name: CONFIGURATION_FROM
           value: env,file:/etc/harbor-operator/config.yaml
-        image: ghcr.io/goharbor/harbor-operator:dev_master
+        image: ghcr.io/goharbor/harbor-operator:dev
         livenessProbe:
           httpGet:
             path: /healthz
@@ -47627,6 +48076,27 @@ webhooks:
     - UPDATE
     resources:
     - harborclusters
+  sideEffects: None
+- admissionReviewVersions:
+  - v1beta1
+  - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: harbor-operator-ns
+      path: /validate-goharbor-io-v1beta1-harborproject
+  failurePolicy: Fail
+  name: vharborproject.kb.io
+  rules:
+  - apiGroups:
+    - goharbor.io
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - harborprojects
   sideEffects: None
 - admissionReviewVersions:
   - v1beta1

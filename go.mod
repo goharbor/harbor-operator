@@ -10,7 +10,7 @@ require (
 	github.com/go-logr/logr v1.2.4
 	github.com/go-openapi/runtime v0.21.0
 	github.com/go-redis/redis v6.15.9+incompatible
-	github.com/goharbor/go-client v0.25.0
+	github.com/goharbor/go-client v0.26.2
 	github.com/goharbor/harbor/src v0.0.0-20220526154154-b0506782b47d
 	github.com/jaegertracing/jaeger-lib v2.2.0+incompatible
 	github.com/jetstack/cert-manager v1.1.0
@@ -55,7 +55,7 @@ require (
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/docker/distribution v2.8.2-beta.1+incompatible // indirect
+	github.com/docker/distribution v2.8.2+incompatible // indirect
 	github.com/docker/go v0.0.0-20160303222718-d30aec9fd63c // indirect
 	github.com/emicklei/go-restful/v3 v3.9.0 // indirect
 	github.com/evanphx/json-patch/v5 v5.6.0 // indirect
