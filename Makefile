@@ -573,7 +573,7 @@ $(MARKDOWNLINT):
 # find or download golangci-lint
 # download golangci-lint if necessary
 GOLANGCI_LINT := $(BIN)/golangci-lint
-GOLANGCI_LINT_VERSION := 1.49.0
+GOLANGCI_LINT_VERSION := 1.60.3
 
 .PHONY: golangci-lint
 golangci-lint:
