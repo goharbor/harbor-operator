@@ -20,6 +20,13 @@ func (in *ComponentSpec) DeepCopyInto(out *ComponentSpec) {
 			(*out)[key] = val
 		}
 	}
+	if in.TemplateLabels != nil {
+		in, out := &in.TemplateLabels, &out.TemplateLabels
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	in.ImageSpec.DeepCopyInto(&out.ImageSpec)
 	if in.Replicas != nil {
 		in, out := &in.Replicas, &out.Replicas

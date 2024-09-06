@@ -138,6 +138,10 @@ func setupValidHarbor(ctx context.Context, ns string) (Resource, client.ObjectKe
 		Host:   "the.dns",
 	}
 
+	var maxIdleConnections int32 = 50
+
+	var maxOpenConnections int32 = 100
+
 	harbor := &goharborv1.Harbor{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
@@ -168,6 +172,8 @@ func setupValidHarbor(ctx context.Context, ns string) (Resource, client.ObjectKe
 					TokenIssuer: cmmeta.ObjectReference{
 						Name: tokenIssuerName,
 					},
+					MaxIdleConnections: &maxIdleConnections,
+					MaxOpenConnections: &maxOpenConnections,
 				},
 				Database: &goharborv1.HarborDatabaseSpec{
 					PostgresCredentials: database.PostgresCredentials,

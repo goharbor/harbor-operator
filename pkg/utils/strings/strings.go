@@ -23,3 +23,12 @@ func RemoveString(slice []string, s string) (result []string) {
 
 	return
 }
+
+func Bool2Str(boolean *bool) *string {
+	str := "false"
+	if boolean != nil && *boolean {
+		str = "true"
+	}
+
+	return &str
+}

@@ -6,7 +6,7 @@ image:
   # image.pullPolicy -- The image pull policy for the controller.
   pullPolicy: IfNotPresent
   # image.tag -- The image tag whose default is the chart appVersion.
-  tag: "dev_master"
+  tag: "dev"
 
 # installCRDs -- If true, CRD resources will be installed as part of the Helm chart. If enabled, when uninstalling CRD resources will be deleted causing all installed custom resources to be DELETED
 installCRDs: false
@@ -79,6 +79,12 @@ controllers:
   harborConfiguration:
     # controllers.harborConfiguration.maxReconcile -- Max parallel reconciliation for HarborConfiguration controller
     maxReconcile: 1
+
+  harborProject:
+    # controllers.harborProject.maxReconcile -- Max parallel reconciliation for HarborProject controller
+    maxReconcile: 1
+    # controllers.harborProject.requeueAfterMinutes -- How often to reconcile HarborProjects
+    requeueAfterMinutes: 5
 
   core:
     # controllers.core.maxReconcile -- Max parallel reconciliation for Core controller

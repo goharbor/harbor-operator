@@ -69,6 +69,9 @@ resources:
   kind: HarborCluster
   version: v1beta1
 - group: goharbor
+  kind: HarborProject
+  version: v1beta1
+- group: goharbor
   kind: HarborServerConfiguration
   version: v1alpha1
 - group: goharbor

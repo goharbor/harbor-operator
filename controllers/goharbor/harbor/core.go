@@ -454,6 +454,8 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1.Harbor) (*g
 			CSRFKeyRef: csrfRef,
 			Database: goharborv1.CoreDatabaseSpec{
 				PostgresConnectionWithParameters: *storage,
+				MaxIdleConnections:               harbor.Spec.Core.MaxIdleConnections,
+				MaxOpenConnections:               harbor.Spec.Core.MaxOpenConnections,
 				EncryptionKeyRef:                 encryptionKeyRef,
 			},
 			ExternalEndpoint: harbor.Spec.ExternalURL,

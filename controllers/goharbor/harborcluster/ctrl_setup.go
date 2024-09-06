@@ -69,6 +69,7 @@ type Reconciler struct {
 // +kubebuilder:rbac:groups=goharbor.io,resources=harbors/finalizers,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=goharbor.io,resources=harborclusters/finalizers,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=goharbor.io,resources=harborconfigurations/finalizers,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=goharbor.io,resources=harborprojects/finalizers,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=goharbor.io,resources=chartmuseums/finalizers;cores/finalizers;exporters/finalizers;jobservices/finalizers;notaryservers/finalizers;notarysigners/finalizers;portals/finalizers;registries/finalizers;registrycontrollers/finalizers;trivies/finalizers,verbs=get;list;watch;create;update;patch;delete
 
 func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) error {

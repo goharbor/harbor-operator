@@ -103,7 +103,7 @@ kustomize build | kubectl delete -f -
 Deploy the Harbor operator with the deployment manifest:
 
 ```shell
-kubectl apply -f https://raw.githubusercontent.com/goharbor/harbor-operator/master/manifests/harbor/deployment.yaml
+kubectl apply -f https://raw.githubusercontent.com/goharbor/harbor-operator/main/manifests/harbor/deployment.yaml
 ```
 
 Check the Harbor operator status (by default it's deployed into the `harbor-operator-ns` namespace):
@@ -122,7 +122,7 @@ harbor-operator-76c44d8ddd-z7rgx   1/1     Running   0          80s
 For deleting the Harbor operator, call
 
 ```shell
-kubectl delete -f https://raw.githubusercontent.com/goharbor/harbor-operator/master/manifests/harbor/deployment.yaml
+kubectl delete -f https://raw.githubusercontent.com/goharbor/harbor-operator/main/manifests/harbor/deployment.yaml
 ```
 
 Of course, you can clone the codebase into your computer and then customize and deploy with the kustomization template:

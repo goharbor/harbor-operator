@@ -202,7 +202,7 @@ func (r *Reconciler) validateProject(projectName string) (string, error) {
 		err  error
 	)
 
-	if proj, err = r.Harbor.GetProject(projectName); err != nil {
+	if proj, err = r.Harbor.GetProjectByName(projectName); err != nil {
 		return "", err
 	}
 

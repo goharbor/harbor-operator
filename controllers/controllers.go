@@ -25,6 +25,7 @@ const (
 	HarborCluster                               // harborcluster
 	HarborConfigurationCm                       // harborconfigurationcm
 	HarborConfiguration                         // harborconfiguration
+	HarborProject                               // harborproject
 	HarborServerConfiguration                   // harborserverconfiguration
 	PullSecretBinding                           // pullsecretbinding
 	Namespace                                   // namespace

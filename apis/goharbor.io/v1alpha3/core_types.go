@@ -38,7 +38,7 @@ type CoreList struct {
 type CoreSpec struct {
 	harbormetav1.ComponentSpec `json:",inline"`
 
-	// https://github.com/goharbor/harbor/blob/master/src/lib/config/metadata/metadatalist.go#L62
+	// https://github.com/goharbor/harbor/blob/main/src/lib/config/metadata/metadatalist.go#L62
 	CoreConfig `json:",inline"`
 
 	CertificateInjection `json:",inline"`

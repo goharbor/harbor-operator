@@ -116,7 +116,7 @@ you can check the additional references listed below.
 
 Besides, you can also enable the operators of the dependent services in `charts/harbor-operator/values.yaml` to deploy full stack Harbor more efficient.
 
-* Find the configuration items of the dependent operators charts from [here](https://github.com/goharbor/harbor-operator/blob/master/charts/harbor-operator/values.yaml#L252)
+* Find the configuration items of the dependent operators charts from [here](https://github.com/goharbor/harbor-operator/blob/main/charts/harbor-operator/values.yaml#L252)
 
 ## What's next
 
