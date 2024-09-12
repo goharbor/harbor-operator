@@ -29,7 +29,6 @@ linters:
   - godot
   - goerr113
   - gofmt
-  - gofumpt
   - goheader
   - goimports
   - gomnd
@@ -58,6 +57,7 @@ linters:
   - varcheck
   - whitespace
   disable:
+  - gofumpt
   - wsl
   - govet
   - gosec
