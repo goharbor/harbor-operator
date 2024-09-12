@@ -661,7 +661,7 @@ $(GORELEASER):
 
 # find or download stringer
 # download stringer if necessary
-STRINGER_VERSION := v0.11.0
+STRINGER_VERSION := v0.25.0
 STRINGER := $(BIN)/stringer
 
 .PHONY: stringer
