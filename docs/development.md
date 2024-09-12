@@ -15,7 +15,7 @@ Have a look in [CONTRIBUTING.md](https://github.com/goharbor/harbor-operator/blo
 
 ### Packages
 
-- [Go 1.18+](https://golang.org/)
+- [Go 1.22+](https://golang.org/)
 - [Helm](https://helm.sh/)
 - [Docker](https://docker.com) & [Docker Compose](https://docs.docker.com/compose/install/)
 - [OpenSSL](https://www.openssl.org/)

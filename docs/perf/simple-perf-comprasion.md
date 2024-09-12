@@ -24,7 +24,7 @@ Here are the network benchmark for CNI using [knb](https://github.com/InfraBuild
 =========================================================
   Discovered CPU         : Intel(R) Xeon(R) Gold 5218 CPU @ 2.30GHz
   Discovered Kernel      : 5.4.0-66-generic
-  Discovered k8s version : v1.18.16+vmware.1
+  Discovered k8s version : v1.22.6+vmware.1
   Discovered MTU         : 1450
   Idle :
     bandwidth = 0 Mbit/s

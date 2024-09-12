@@ -139,7 +139,7 @@ helm-postgres-operator: helm $(CHARTS_DIRECTORY)/postgres-operator/values.yaml
 	$(MAKE) kube-namespace
 	$(HELM) repo add zalando https://opensource.zalando.com/postgres-operator/charts/postgres-operator
 	$(HELM) repo update
-	$(HELM) upgrade --namespace "$(NAMESPACE)" --install postgres-operator zalando/postgres-operator --version 1.7.0 -f $(CHARTS_DIRECTORY)/postgres-operator/values.yaml
+	$(HELM) upgrade --namespace "$(NAMESPACE)" --install postgres-operator zalando/postgres-operator --version 1.9.0 -f $(CHARTS_DIRECTORY)/postgres-operator/values.yaml
 
 helm-install: helm helm-generate helm-minio-operator helm-redis-operator helm-postgres-operator
 	$(MAKE) kube-namespace
@@ -530,7 +530,7 @@ clean:
 
 # find or download controller-gen
 # download controller-gen if necessary
-CONTROLLER_GEN_VERSION := 0.9.2
+CONTROLLER_GEN_VERSION := 0.16.2
 CONTROLLER_GEN := $(BIN)/controller-gen
 
 .PHONY: controller-gen
@@ -573,7 +573,7 @@ $(MARKDOWNLINT):
 # find or download golangci-lint
 # download golangci-lint if necessary
 GOLANGCI_LINT := $(BIN)/golangci-lint
-GOLANGCI_LINT_VERSION := 1.49.0
+GOLANGCI_LINT_VERSION := 1.60.3
 
 .PHONY: golangci-lint
 golangci-lint:
@@ -661,7 +661,7 @@ $(GORELEASER):
 
 # find or download stringer
 # download stringer if necessary
-STRINGER_VERSION := v0.11.0
+STRINGER_VERSION := v0.25.0
 STRINGER := $(BIN)/stringer
 
 .PHONY: stringer

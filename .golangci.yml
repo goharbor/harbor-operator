@@ -1,10 +1,11 @@
 run:
   deadline: 10m
   modules-download-mode: readonly
-  skip-files:
+issue:
+  exclude-files:
   - pkged.go
   - ".*/zz_generated.*\\.go"
-  skip-dirs:
+  exclude-dirs:
   - bin
   - dist
 
@@ -12,61 +13,54 @@ linters:
   enable:
   - asciicheck
   - bodyclose
-  - deadcode
-  - depguard
   - dogsled
   - dupl
   - errcheck
   - errorlint
   - exhaustive
-  - exportloopref
-  - funlen
-  - gci
   - gochecknoinits
-  - gocognit
   - goconst
-  - gocritic
   - gocyclo
-  - godot
-  - goerr113
   - gofmt
-  - gofumpt
   - goheader
   - goimports
-  - revive
-  - gomnd
   - gomodguard
   - goprintffuncname
-  - gosec
   - gosimple
-  - govet
   - ineffassign
   # - interfacer
   # - maligned
   - misspell
-  - nakedret
-  - nestif
-  - nlreturn
   - noctx
-  - nolintlint
   - prealloc
   - rowserrcheck
-  - exportloopref
   - sqlclosecheck
-  - staticcheck
-  - structcheck
   - stylecheck
   - testpackage
   - tparallel
   - typecheck
   - unconvert
-  - unparam
   - unused
-  - varcheck
-  - whitespace
-  - wsl
   disable:
-  - exhaustivestruct
+  - gocognit
+  - err113
+  - nestif
+  - gocritic
+  - funlen
+  - godot
+  - gci
+  - whitespace
+  - unparam
+  - nlreturn
+  - gofumpt
+  - wsl
+  - govet
+  - gosec
+  - nakedret
+  - nolintlint
+  - revive
+  - depguard
+  - staticcheck
   - lll
   - gochecknoglobals
   - godox

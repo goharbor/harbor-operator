@@ -6,7 +6,7 @@
 
 ## Prerequisites
 
-1. `kubectl` with a proper version(v1.18.6+) is [installed](https://kubernetes.io/docs/tasks/tools/).
+1. `kubectl` with a proper version(v1.22.6+) is [installed](https://kubernetes.io/docs/tasks/tools/).
 1. `kustomize` (optional)with a proper version(v3.8.7+) is [installed](https://kubectl.docs.kubernetes.io/installation/kustomize/).
 1. `git` (optional) is [installed](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git).
 
