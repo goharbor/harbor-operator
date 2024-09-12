@@ -13,7 +13,6 @@ linters:
   - asciicheck
   - bodyclose
   - deadcode
-  - depguard
   - dogsled
   - dupl
   - errcheck
@@ -66,6 +65,7 @@ linters:
   - whitespace
   - wsl
   disable:
+  - depguard
   - exhaustivestruct
   - lll
   - gochecknoglobals
