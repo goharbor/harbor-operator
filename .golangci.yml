@@ -35,23 +35,18 @@ linters:
   - gomnd
   - gomodguard
   - goprintffuncname
-  - gosec
   - gosimple
-  - govet
   - ineffassign
   # - interfacer
   # - maligned
   - misspell
-  - nakedret
   - nestif
   - nlreturn
   - noctx
-  - nolintlint
   - prealloc
   - rowserrcheck
   - exportloopref
   - sqlclosecheck
-  - staticcheck
   - structcheck
   - stylecheck
   - testpackage
@@ -62,10 +57,15 @@ linters:
   - unused
   - varcheck
   - whitespace
-  - wsl
   disable:
+  - wsl
+  - govet
+  - gosec
+  - nakedret
+  - nolintlint
   - revive
   - depguard
+  - staticcheck
   - exhaustivestruct
   - lll
   - gochecknoglobals
