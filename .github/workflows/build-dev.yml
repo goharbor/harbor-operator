@@ -59,7 +59,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Package charts
       run: make helm-generate
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v4
       with:
         name: charts
         path: charts/*.tgz
