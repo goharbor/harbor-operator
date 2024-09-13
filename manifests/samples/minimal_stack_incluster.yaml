@@ -83,6 +83,7 @@ spec:
   internalTLS:
     enabled: true
   portal: {}
+  jobservice: {}
   registry:
     metrics:
       enabled: true

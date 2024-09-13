@@ -116,7 +116,7 @@ jobs:
           kind export logs --name harbor /tmp/logs
           ls -l /tmp/logs
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         if: ${{ failure() }}
         with:
           name: kind_go-tests

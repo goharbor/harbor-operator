@@ -34,4 +34,8 @@ df -h
 
 rm -rf $DOCKER_DATA_DIR
 
+mkdir -p /tmp/harbor
+# copy the e2e test reports and logs
+cp `pwd`/harbor/output.xml `pwd`/harbor/log.html `pwd`/harbor/report.html /tmp/harbor
+
 exit $rc
