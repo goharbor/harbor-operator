@@ -231,6 +231,7 @@ spec:
   portal:
     templateAnnotations:
        foo: "bar"
+  jobservice: {}
   registry: {}
   trivy:
     skipUpdate: false
