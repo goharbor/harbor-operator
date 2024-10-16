@@ -29,9 +29,9 @@ bearer.auth: 1
 
 {{- if .Spec.Cache.Redis }}
 {{- if .Spec.Cache.Redis.SentinelMasterSet }}
-cache: redis_sentinel
+cache.store: redis_sentinel
 {{- else }}
-cache: redis
+cache.store: redis
 {{- end }}
 cache.redis:
   {{- if .Spec.Cache.Redis.SentinelMasterSet }}
