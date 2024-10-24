@@ -39,18 +39,18 @@ jobs:
           - "full_stack.yaml"
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-go@v2
+      - uses: actions/setup-go@v5
         with:
-          go-version: 1.18
+          go-version: 1.23
 
-      - uses: azure/setup-kubectl@v3
+      - uses: azure/setup-kubectl@v4
         with:
           version: 'v1.25.4'
 
       - name: Cache go mod
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
@@ -64,9 +64,8 @@ jobs:
           sudo mount -t tmpfs tmpfs /tmp/lib/etcd
 
       - name: Install Kubernetes v${{ matrix.k8sVersion }}
-        uses: helm/kind-action@v1.3.0
+        uses: helm/kind-action@v1.10.0
         with:
-          version: v0.14.0
           node_image: kindest/node:v${{ matrix.k8sVersion }}
           cluster_name: harbor
           config: .github/kind.yaml
@@ -113,14 +112,11 @@ jobs:
           IP=`hostname -I | awk '{print $1}'`
           echo "IP=$IP" >> $GITHUB_ENV
           CORE_HOST=core.$IP.nip.io
-          NOTARY_HOST=notary.$IP.nip.io
           MINIO_HOST=minio.$IP.nip.io
           echo "CORE_HOST=$CORE_HOST" >> $GITHUB_ENV
-          echo "NOTARY_HOST=$NOTARY_HOST" >> $GITHUB_ENV
           echo "MINIO_HOST=$MINIO_HOST" >> $GITHUB_ENV
           samplefile=${{ matrix.samples }}
           sed -i "s/core.harbor.domain/$CORE_HOST/g" manifests/samples/$samplefile
-          sed -i "s/notary.harbor.domain/$NOTARY_HOST/g" manifests/samples/$samplefile
           sed -i "s/minio.harbor.domain/$MINIO_HOST/g" manifests/samples/$samplefile
           sed -i "s/controller: default/controller: contour/g" manifests/samples/$samplefile
           sed -i "s/logLevel: info/logLevel: debug/g" manifests/samples/$samplefile
@@ -191,14 +187,14 @@ jobs:
           df -h
           free -m
           mkdir -p /tmp/harbor
-          for name in core jobservice registry registryctl trivy chartmuseum notaryserver notarysigner portal; do \
+          for name in core jobservice registry registryctl trivy portal; do \
             kubectl -n cluster-sample-ns logs -l "goharbor.io/operator-controller=$name" --all-containers > /tmp/harbor/$name.log ; \
           done
           kubectl -n cluster-sample-ns logs -l "application=spilo" --all-containers > /tmp/harbor/db.log
           kubectl -n cluster-sample-ns logs -l "app.kubernetes.io/component=redis" --all-containers > /tmp/harbor/redis.log
           ls -l /tmp/harbor
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         if: ${{ failure() }}
         with:
           name: contour_harbor_v${{ matrix.k8sVersion }}_v${{ matrix.certManager }}_${{ matrix.samples }}
@@ -211,7 +207,7 @@ jobs:
           kind export logs --name harbor /tmp/logs
           ls -l /tmp/logs
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         if: ${{ failure() }}
         with:
           name: contour_kind_v${{ matrix.k8sVersion }}_v${{ matrix.certManager }}_${{ matrix.samples }}

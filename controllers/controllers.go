@@ -16,10 +16,7 @@ const (
 	Portal                                      // portal
 	Registry                                    // registry
 	RegistryController                          // registryctl
-	ChartMuseum                                 // chartmuseum
 	Exporter                                    // exporter
-	NotaryServer                                // notaryserver
-	NotarySigner                                // notarysigner
 	Trivy                                       // trivy
 	Harbor                                      // harbor
 	HarborCluster                               // harborcluster

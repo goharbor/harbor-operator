@@ -2,13 +2,10 @@
 # since it depends on service name and namespace that are out of this kustomize package.
 # It should be run by config/default
 resources:
-  - bases/goharbor.io_chartmuseums.yaml
   - bases/goharbor.io_cores.yaml
   - bases/goharbor.io_exporters.yaml
   - bases/goharbor.io_harbors.yaml
   - bases/goharbor.io_jobservices.yaml
-  - bases/goharbor.io_notaryservers.yaml
-  - bases/goharbor.io_notarysigners.yaml
   - bases/goharbor.io_portals.yaml
   - bases/goharbor.io_registries.yaml
   - bases/goharbor.io_registrycontrollers.yaml
@@ -23,13 +20,10 @@ resources:
 patchesStrategicMerge:
   # [WEBHOOK] To enable webhook, uncomment all the sections with [WEBHOOK] prefix.
   # patches here are for enabling the conversion webhook for each CRD
-  - patches/webhook_in_chartmuseums.yaml
   - patches/webhook_in_cores.yaml
   - patches/webhook_in_exporters.yaml
   - patches/webhook_in_harbors.yaml
   - patches/webhook_in_jobservices.yaml
-  - patches/webhook_in_notaryservers.yaml
-  - patches/webhook_in_notarysigners.yaml
   - patches/webhook_in_portals.yaml
   - patches/webhook_in_registries.yaml
   - patches/webhook_in_registrycontrollers.yaml
@@ -39,13 +33,10 @@ patchesStrategicMerge:
 
   # [CERTMANAGER] To enable webhook, uncomment all the sections with [CERTMANAGER] prefix.
   # patches here are for enabling the CA injection for each CRD
-  - patches/cainjection_in_chartmuseums.yaml
   - patches/cainjection_in_cores.yaml
   - patches/cainjection_in_exporters.yaml
   - patches/cainjection_in_harbors.yaml
   - patches/cainjection_in_jobservices.yaml
-  - patches/cainjection_in_notaryservers.yaml
-  - patches/cainjection_in_notarysigners.yaml
   - patches/cainjection_in_portals.yaml
   - patches/cainjection_in_registries.yaml
   - patches/cainjection_in_registrycontrollers.yaml

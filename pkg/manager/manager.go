@@ -5,19 +5,19 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/plotly/harbor-operator/pkg/config"
-	"github.com/plotly/harbor-operator/pkg/factories/logger"
 	nettracing "github.com/opentracing-contrib/go-stdlib/nethttp"
 	"github.com/ovh/configstore"
 	"github.com/pkg/errors"
+	"github.com/plotly/harbor-operator/pkg/config"
+	"github.com/plotly/harbor-operator/pkg/factories/logger"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/transport"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+	"sigs.k8s.io/controller-runtime/pkg/metrics/server"
 )
 
 const (
-	WebHookPort = 9443
 	MetricsPort = 8080
 	ProbePort   = 5000
 
@@ -26,9 +26,10 @@ const (
 
 func New(ctx context.Context, scheme *runtime.Scheme) (manager.Manager, error) {
 	mgrConfig := ctrl.Options{
-		MetricsBindAddress:     fmt.Sprintf(":%d", MetricsPort),
+		Metrics: server.Options{
+			BindAddress: fmt.Sprintf(":%d", MetricsPort),
+		},
 		LeaderElection:         false,
-		Port:                   WebHookPort,
 		HealthProbeBindAddress: fmt.Sprintf(":%d", ProbePort),
 		Scheme:                 scheme,
 	}
@@ -57,8 +58,7 @@ func New(ctx context.Context, scheme *runtime.Scheme) (manager.Manager, error) {
 
 	logger.Get(ctx).Info(
 		"Manager initialized",
-		"Webhook.Port", mgrConfig.Port,
-		"Metrics.Address", mgrConfig.MetricsBindAddress,
+		"Metrics.Address", mgrConfig.Metrics.BindAddress,
 		"Probe.Address", mgrConfig.HealthProbeBindAddress,
 		"LeaderElection.Enabled", mgrConfig.LeaderElection,
 		"LeaderElection.Namespace", mgrConfig.LeaderElectionNamespace,

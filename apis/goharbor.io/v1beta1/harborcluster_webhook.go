@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/plotly/harbor-operator/pkg/version"
 	"github.com/pkg/errors"
+	"github.com/plotly/harbor-operator/pkg/version"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -13,6 +13,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
 func (harborcluster *HarborCluster) SetupWebhookWithManager(_ context.Context, mgr ctrl.Manager) error {
@@ -107,30 +108,30 @@ func (harborcluster *HarborCluster) Default() { //nolint:funlen
 
 var _ webhook.Validator = &HarborCluster{}
 
-func (harborcluster *HarborCluster) ValidateCreate() error {
+func (harborcluster *HarborCluster) ValidateCreate() (admission.Warnings, error) {
 	clog.Info("validate creation", "name", harborcluster.Name, "namespace", harborcluster.Namespace)
 
 	return harborcluster.validate(harborcluster)
 }
 
-func (harborcluster *HarborCluster) ValidateUpdate(old runtime.Object) error {
+func (harborcluster *HarborCluster) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
 	clog.Info("validate updating", "name", harborcluster.Name, "namespace", harborcluster.Namespace)
 
 	obj, ok := old.(*HarborCluster)
 	if !ok {
-		return errors.Errorf("failed type assertion on kind: %s", old.GetObjectKind().GroupVersionKind().String())
+		return nil, errors.Errorf("failed type assertion on kind: %s", old.GetObjectKind().GroupVersionKind().String())
 	}
 
 	return harborcluster.validate(obj)
 }
 
-func (harborcluster *HarborCluster) ValidateDelete() error {
+func (harborcluster *HarborCluster) ValidateDelete() (admission.Warnings, error) {
 	clog.Info("validate deletion", "name", harborcluster.Name, "namespace", harborcluster.Namespace)
 
-	return nil
+	return nil, nil
 }
 
-func (harborcluster *HarborCluster) validate(old *HarborCluster) error {
+func (harborcluster *HarborCluster) validate(old *HarborCluster) (admission.Warnings, error) {
 	var allErrs field.ErrorList
 
 	if err := harborcluster.Spec.Network.Validate(nil); err != nil {
@@ -183,10 +184,10 @@ func (harborcluster *HarborCluster) validate(old *HarborCluster) error {
 	}
 
 	if len(allErrs) == 0 {
-		return nil
+		return nil, nil
 	}
 
-	return apierrors.NewInvalid(schema.GroupKind{Group: GroupVersion.Group, Kind: "HarborCluster"}, harborcluster.Name, allErrs)
+	return nil, apierrors.NewInvalid(schema.GroupKind{Group: GroupVersion.Group, Kind: "HarborCluster"}, harborcluster.Name, allErrs)
 }
 
 func (harborcluster *HarborCluster) validateStorage() *field.Error { //nolint:funlen,gocognit

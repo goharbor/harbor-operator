@@ -8,11 +8,8 @@ configMapGenerator:
 - name: config-template
   behavior: create
   files:
-  - assets/chartmuseum-config.yaml.tmpl
   - assets/core-config.conf.tmpl
   - assets/jobservice-config.yaml.tmpl
-  - assets/notaryserver-config.json.tmpl
-  - assets/notarysigner-config.json.tmpl
   - assets/portal-config.conf.tmpl
   - assets/registry-config.yaml.tmpl
   - assets/registryctl-config.yaml.tmpl
@@ -21,15 +18,12 @@ configMapGenerator:
   behavior: create
   files:
   - controllers/core-ctrl.yaml
-  - controllers/chartmuseum-ctrl.yaml
   - controllers/exporter-ctrl.yaml
   - controllers/harbor-ctrl.yaml
   - controllers/harborcluster-ctrl.yaml
   - controllers/harborconfiguration-ctrl.yaml
   - controllers/harborproject-ctrl.yaml
   - controllers/jobservice-ctrl.yaml
-  - controllers/notaryserver-ctrl.yaml
-  - controllers/notarysigner-ctrl.yaml
   - controllers/portal-ctrl.yaml
   - controllers/registry-ctrl.yaml
   - controllers/registryctl-ctrl.yaml

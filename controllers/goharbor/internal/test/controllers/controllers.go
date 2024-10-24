@@ -4,21 +4,18 @@ import (
 	"context"
 	"path"
 
+	"github.com/onsi/gomega"
+	"github.com/ovh/configstore"
 	"github.com/plotly/harbor-operator/controllers"
-	"github.com/plotly/harbor-operator/controllers/goharbor/chartmuseum"
 	"github.com/plotly/harbor-operator/controllers/goharbor/core"
 	"github.com/plotly/harbor-operator/controllers/goharbor/internal/test"
 	"github.com/plotly/harbor-operator/controllers/goharbor/jobservice"
-	"github.com/plotly/harbor-operator/controllers/goharbor/notaryserver"
-	"github.com/plotly/harbor-operator/controllers/goharbor/notarysigner"
 	"github.com/plotly/harbor-operator/controllers/goharbor/portal"
 	"github.com/plotly/harbor-operator/controllers/goharbor/registry"
 	"github.com/plotly/harbor-operator/controllers/goharbor/trivy"
 	"github.com/plotly/harbor-operator/pkg/config"
 	"github.com/plotly/harbor-operator/pkg/controller"
 	"github.com/plotly/harbor-operator/pkg/setup"
-	"github.com/onsi/gomega"
-	"github.com/ovh/configstore"
 )
 
 const configDirectory = "../../../config/config"
@@ -27,20 +24,8 @@ func NewCore(ctx context.Context, className string) *core.Reconciler {
 	return New(ctx, controllers.Core, className, core.New).(*core.Reconciler)
 }
 
-func NewChartMuseum(ctx context.Context, className string) *chartmuseum.Reconciler {
-	return New(ctx, controllers.ChartMuseum, className, chartmuseum.New).(*chartmuseum.Reconciler)
-}
-
 func NewTrivy(ctx context.Context, className string) *trivy.Reconciler {
 	return New(ctx, controllers.Trivy, className, trivy.New).(*trivy.Reconciler)
-}
-
-func NewNotaryServer(ctx context.Context, className string) *notaryserver.Reconciler {
-	return New(ctx, controllers.NotaryServer, className, notaryserver.New).(*notaryserver.Reconciler)
-}
-
-func NewNotarySigner(ctx context.Context, className string) *notarysigner.Reconciler {
-	return New(ctx, controllers.NotarySigner, className, notarysigner.New).(*notarysigner.Reconciler)
 }
 
 func NewJobService(ctx context.Context, className string) *jobservice.Reconciler {

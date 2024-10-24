@@ -23,7 +23,7 @@ spec:
 
 ### Top level general fields
 
-`expose`(required): Expose the access endpoints of Harbor core services as well as notary service (optional).
+`expose`(required): Expose the access endpoints of Harbor core services.
 
 ```yaml
 spec:
@@ -48,8 +48,6 @@ spec:
           key: value
         # Set the ingress class name. If it is not set, the system default one will be picked up.
         ingressClassName: ingressClass # Optional
-    # Expose notary service when it is configured
-    notary: # Optional
       ## Totally same with above [expose.core] part, skipped here.
 
   # ... Skipped fields
@@ -307,12 +305,8 @@ spec:
   jobservice: {}
   registry: {}
   registryctl: {}
-  chartmuseum: {}
   trivy: {}
   exporter: {}
-  notary:
-    server: {}
-    signer: {}
   
  # ... Skipped fields
 ```
@@ -392,28 +386,6 @@ spec:
   # ... Skipped fields
 ```
 
-Extra configurations for Harbor component `chartmuseum`.
-
-```yaml
-spec:
-  # ... Skipped fields
-
-  chartmuseum:
-    # ... Skipped common component spec here
-
-    # Extra configurations
-
-    # Certificates need to be injected into chartmuseum
-    certificateRefs: # Optional
-      - cert1
-      - cert2
-    # Harbor defaults ChartMuseum to returning relative URLs,
-    # If you want using absolute URL you should enable it.
-    absoluteUrl: false # Optional, default = false
-  
-  # ... Skipped fields
-```
-
 Extra configurations for Harbor component `trivy`.
 
 ```yaml
@@ -425,10 +397,6 @@ spec:
 
     # Extra configurations
 
-    # Certificates need to be injected into chartmuseum
-    certificateRefs: # Optional
-      - cert1
-      - cert2
     # The name of the secret containing the token to connect to GitHub API.
     githubTokenRef: github-token # Optional
     # The flag to enable or disable Trivy DB downloads from GitHub
@@ -447,24 +415,6 @@ spec:
       # CachePersistentVolume specify the persistent volume used to store Trivy cache.
       # Same configurations with ReportsPersistentVolume.
       cachePersistentVolume: {} # Optional, if it is not set, then empty dir will be used.
-  
-  # ... Skipped fields
-```
-
-Extra configurations for Harbor component `notary`.
-
-```yaml
-spec:
-  # ... Skipped fields
-
-  notary:
-    server: {} # Skipped common component spec here ...
-    signer: {} # Skipped common component spec here ...
-
-    # Extra configurations
-
-    # Inject migration configuration to notary resources
-    migrationEnabled: true # Optional, default = true
   
   # ... Skipped fields
 ```

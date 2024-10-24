@@ -3,6 +3,8 @@ package harborcluster
 import (
 	"context"
 
+	"github.com/ovh/configstore"
+	"github.com/pkg/errors"
 	goharborv1 "github.com/plotly/harbor-operator/apis/goharbor.io/v1beta1"
 	"github.com/plotly/harbor-operator/controllers"
 	"github.com/plotly/harbor-operator/pkg/builder"
@@ -16,8 +18,6 @@ import (
 	"github.com/plotly/harbor-operator/pkg/config"
 	commonCtrl "github.com/plotly/harbor-operator/pkg/controller"
 	"github.com/plotly/harbor-operator/pkg/utils/strings"
-	"github.com/ovh/configstore"
-	"github.com/pkg/errors"
 	redisOp "github.com/spotahome/redis-operator/api/redisfailover/v1"
 	postgresv1 "github.com/zalando/postgres-operator/pkg/apis/acid.zalan.do/v1"
 	batchv1 "k8s.io/api/batch/v1"
@@ -70,7 +70,7 @@ type Reconciler struct {
 // +kubebuilder:rbac:groups=goharbor.io,resources=harborclusters/finalizers,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=goharbor.io,resources=harborconfigurations/finalizers,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=goharbor.io,resources=harborprojects/finalizers,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=goharbor.io,resources=chartmuseums/finalizers;cores/finalizers;exporters/finalizers;jobservices/finalizers;notaryservers/finalizers;notarysigners/finalizers;portals/finalizers;registries/finalizers;registrycontrollers/finalizers;trivies/finalizers,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=goharbor.io,resources=cores/finalizers;exporters/finalizers;jobservices/finalizers;portals/finalizers;registries/finalizers;registrycontrollers/finalizers;trivies/finalizers,verbs=get;list;watch;create;update;patch;delete
 
 func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) error {
 	concurrentReconcile, err := config.GetInt(r.ConfigStore, config.ReconciliationKey, config.DefaultConcurrentReconcile)

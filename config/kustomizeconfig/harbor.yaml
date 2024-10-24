@@ -8,9 +8,6 @@ nameReference:
     path: spec/adminInitialPasswordRef
   - kind: Harbor
     group: goharbor.io
-    path: spec/chartmuseum/imagePullSecrets/items/name
-  - kind: Harbor
-    group: goharbor.io
     path: spec/core/imagePullSecrets/items/name
   - kind: Harbor
     group: goharbor.io
@@ -18,9 +15,6 @@ nameReference:
   - kind: Harbor
     group: goharbor.io
     path: spec/expose/core/tls/certificateRef
-  - kind: Harbor
-    group: goharbor.io
-    path: spec/expose/notary/tls/certificateRef
   - kind: Harbor
     group: goharbor.io
     path: spec/harborAdminPasswordRef
@@ -36,12 +30,6 @@ nameReference:
   - kind: Harbor
     group: goharbor.io
     path: spec/jobservice/imagePullSecrets/items/name
-  - kind: Harbor
-    group: goharbor.io
-    path: spec/notary/server/imagePullSecrets/items/name
-  - kind: Harbor
-    group: goharbor.io
-    path: spec/notary/signer/imagePullSecrets/items/name
   - kind: Harbor
     group: goharbor.io
     path: spec/portal/imagePullSecrets/items/name
@@ -86,19 +74,10 @@ nameReference:
   fieldSpecs:
   - kind: Harbor
     group: goharbor.io
-    path: spec/chartmuseum/serviceAccountName
-  - kind: Harbor
-    group: goharbor.io
     path: spec/core/serviceAccountName
   - kind: Harbor
     group: goharbor.io
     path: spec/jobservice/serviceAccountName
-  - kind: Harbor
-    group: goharbor.io
-    path: spec/notary/server/serviceAccountName
-  - kind: Harbor
-    group: goharbor.io
-    path: spec/notary/signer/serviceAccountName
   - kind: Harbor
     group: goharbor.io
     path: spec/portal/serviceAccountName

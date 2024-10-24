@@ -6,11 +6,11 @@ import (
 	"os"
 	"strings"
 
+	"github.com/pkg/errors"
 	goharborv1 "github.com/plotly/harbor-operator/apis/goharbor.io/v1beta1"
 	harbormetav1 "github.com/plotly/harbor-operator/apis/meta/v1alpha1"
 	"github.com/plotly/harbor-operator/pkg/cluster/controllers/database/api"
 	"github.com/plotly/harbor-operator/pkg/cluster/lcm"
-	"github.com/pkg/errors"
 	acidzalando "github.com/zalando/postgres-operator/pkg/apis/acid.zalan.do"
 	acidzalandov1 "github.com/zalando/postgres-operator/pkg/apis/acid.zalan.do/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -25,11 +25,9 @@ import (
 )
 
 const (
-	CoreDatabase         = "core"
-	NotaryServerDatabase = "notaryserver"
-	NotarySignerDatabase = "notarysigner"
-	DefaultDatabaseUser  = "harbor"
-	PsqlRunningStatus    = "Running"
+	CoreDatabase        = "core"
+	DefaultDatabaseUser = "harbor"
+	PsqlRunningStatus   = "Running"
 )
 
 // Readiness reconcile will check postgre sql cluster if that has available.

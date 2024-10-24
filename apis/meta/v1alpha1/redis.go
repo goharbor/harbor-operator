@@ -10,11 +10,10 @@ import (
 type ComponentWithRedis Component
 
 const (
-	CoreRedis        = ComponentWithRedis(CoreComponent)
-	JobServiceRedis  = ComponentWithRedis(JobServiceComponent)
-	RegistryRedis    = ComponentWithRedis(RegistryComponent)
-	ChartMuseumRedis = ComponentWithRedis(ChartMuseumComponent)
-	TrivyRedis       = ComponentWithRedis(TrivyComponent)
+	CoreRedis       = ComponentWithRedis(CoreComponent)
+	JobServiceRedis = ComponentWithRedis(JobServiceComponent)
+	RegistryRedis   = ComponentWithRedis(RegistryComponent)
+	TrivyRedis      = ComponentWithRedis(TrivyComponent)
 )
 
 type RedisHostSpec struct {
@@ -112,20 +111,18 @@ func (c *RedisConnection) GetDSNStringWithRawPassword(password string) string {
 }
 
 const (
-	coreRedisDatabaseIndex        = 0
-	registryRedisDatabaseIndex    = 1
-	jobServiceRedisDatabaseIndex  = 2
-	chartMuseumRedisDatabaseIndex = 3
-	trivyRedisDatabaseIndex       = 5
+	coreRedisDatabaseIndex       = 0
+	registryRedisDatabaseIndex   = 1
+	jobServiceRedisDatabaseIndex = 2
+	trivyRedisDatabaseIndex      = 5
 )
 
 func (r ComponentWithRedis) Index() int32 {
 	return map[ComponentWithRedis]int32{
-		CoreRedis:        coreRedisDatabaseIndex,
-		JobServiceRedis:  jobServiceRedisDatabaseIndex,
-		RegistryRedis:    registryRedisDatabaseIndex,
-		ChartMuseumRedis: chartMuseumRedisDatabaseIndex,
-		TrivyRedis:       trivyRedisDatabaseIndex,
+		CoreRedis:       coreRedisDatabaseIndex,
+		JobServiceRedis: jobServiceRedisDatabaseIndex,
+		RegistryRedis:   registryRedisDatabaseIndex,
+		TrivyRedis:      trivyRedisDatabaseIndex,
 	}[r]
 }
 

@@ -6,8 +6,9 @@ import (
 	"os"
 	"path"
 
+	"github.com/ovh/configstore"
+	"github.com/pkg/errors"
 	"github.com/plotly/harbor-operator/controllers"
-	"github.com/plotly/harbor-operator/controllers/goharbor/chartmuseum"
 	"github.com/plotly/harbor-operator/controllers/goharbor/configuration"
 	"github.com/plotly/harbor-operator/controllers/goharbor/core"
 	"github.com/plotly/harbor-operator/controllers/goharbor/exporter"
@@ -16,8 +17,6 @@ import (
 	"github.com/plotly/harbor-operator/controllers/goharbor/harborserverconfiguration"
 	"github.com/plotly/harbor-operator/controllers/goharbor/jobservice"
 	"github.com/plotly/harbor-operator/controllers/goharbor/namespace"
-	"github.com/plotly/harbor-operator/controllers/goharbor/notaryserver"
-	"github.com/plotly/harbor-operator/controllers/goharbor/notarysigner"
 	"github.com/plotly/harbor-operator/controllers/goharbor/portal"
 	"github.com/plotly/harbor-operator/controllers/goharbor/project"
 	"github.com/plotly/harbor-operator/controllers/goharbor/pullsecretbinding"
@@ -26,8 +25,6 @@ import (
 	"github.com/plotly/harbor-operator/pkg/config"
 	commonCtrl "github.com/plotly/harbor-operator/pkg/controller"
 	"github.com/plotly/harbor-operator/pkg/factories/logger"
-	"github.com/ovh/configstore"
-	"github.com/pkg/errors"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
 
@@ -41,10 +38,7 @@ var controllersBuilder = map[controllers.Controller]func(context.Context, *confi
 	controllers.Harbor:        harbor.New,
 	controllers.JobService:    jobservice.New,
 	controllers.Registry:      registry.New,
-	controllers.NotaryServer:  notaryserver.New,
-	controllers.NotarySigner:  notarysigner.New,
 	controllers.Portal:        portal.New,
-	controllers.ChartMuseum:   chartmuseum.New,
 	controllers.Trivy:         trivy.New,
 	controllers.HarborCluster: harborcluster.New,
 	// old configmap controller is planned to be removed at v1.3,

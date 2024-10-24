@@ -1,4 +1,4 @@
-FROM golang:1.18.3 as build
+FROM golang:1.23 as build
 WORKDIR /workspace
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=$(go env GOARCH) go build -o manager main.go

@@ -356,7 +356,6 @@ spec:
   secretName: sample-public-certificate
   dnsNames:
     - core.harbor.domain
-    - notary.harbor.domain
     - minio.harbor.domain
   issuerRef:
     name: selfsigned-issuer
@@ -380,11 +379,6 @@ spec:
         host: core.harbor.domain
       tls:
         certificateRef: sample-public-certificate
-    notary:
-      ingress:
-        host: notary.harbor.domain
-      tls:
-        certificateRef: sample-public-certificate
   internalTLS:
     enabled: true
   portal: {}
@@ -399,13 +393,10 @@ spec:
       kind: Issuer
     metrics:
       enabled: false
-  chartmuseum: {}
   exporter: {}
   trivy:
     skipUpdate: false
     storage: {}
-  notary:
-    migrationEnabled: true
   inClusterDatabase:
     kind: PostgresSQL
     postgresSqlSpec:
@@ -496,7 +487,6 @@ spec:
   secretName: sample-public-certificate
   dnsNames:
     - core.harbor.domain
-    - notary.harbor.domain
   issuerRef:
     name: selfsigned-issuer
     kind: Issuer
@@ -532,11 +522,6 @@ spec:
         host: core.harbor.domain
       tls:
         certificateRef: sample-public-certificate
-    notary:
-      ingress:
-        host: notary.harbor.domain
-      tls:
-        certificateRef: sample-public-certificate
   internalTLS:
     enabled: true
   portal: {}
@@ -551,13 +536,10 @@ spec:
       kind: Issuer
     metrics:
       enabled: false
-  chartmuseum: {}
   exporter: {}
   trivy:
     skipUpdate: false
     storage: {}
-  notary:
-    migrationEnabled: true
   imageChartStorage:
     filesystem:
       registryPersistentVolume:

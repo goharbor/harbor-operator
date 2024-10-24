@@ -11,6 +11,7 @@ import (
 	"github.com/umisama/go-regexpcache"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	mgr "sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
@@ -19,16 +20,18 @@ import (
 type Validator struct {
 	Client  client.Client
 	Log     logr.Logger
-	decoder *admission.Decoder
+	decoder admission.Decoder
 }
 
 var (
-	_ admission.Handler         = (*Validator)(nil)
-	_ admission.DecoderInjector = (*Validator)(nil)
+	_ admission.Handler = (*Validator)(nil)
 )
 
 func (h *Validator) Handle(ctx context.Context, req admission.Request) admission.Response {
 	hsc := &goharborv1.HarborServerConfiguration{}
+
+	var mgr mgr.Manager
+	h.decoder = admission.NewDecoder(mgr.GetScheme())
 
 	err := h.decoder.Decode(req, hsc)
 	if err != nil {
@@ -57,12 +60,6 @@ func (h *Validator) Handle(ctx context.Context, req admission.Request) admission
 	}
 
 	return admission.Allowed("")
-}
-
-func (h *Validator) InjectDecoder(decoder *admission.Decoder) error {
-	h.decoder = decoder
-
-	return nil
 }
 
 func (h *Validator) SetupWebhookWithManager(mgr ctrl.Manager) error {

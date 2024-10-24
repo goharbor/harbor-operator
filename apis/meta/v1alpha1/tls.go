@@ -8,13 +8,11 @@ type ComponentWithTLS Component
 
 const (
 	CoreTLS               = ComponentWithTLS(CoreComponent)
-	ChartMuseumTLS        = ComponentWithTLS(ChartMuseumComponent)
 	ExporterTLS           = ComponentWithTLS(ExporterComponent)
 	JobServiceTLS         = ComponentWithTLS(JobServiceComponent)
 	PortalTLS             = ComponentWithTLS(PortalComponent)
 	RegistryTLS           = ComponentWithTLS(RegistryComponent)
 	RegistryControllerTLS = ComponentWithTLS(RegistryControllerComponent)
-	NotaryServerTLS       = ComponentWithTLS(NotaryServerComponent)
 	TrivyTLS              = ComponentWithTLS(TrivyComponent)
 )
 

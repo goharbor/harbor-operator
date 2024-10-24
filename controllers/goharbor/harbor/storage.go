@@ -7,55 +7,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-func (r *Reconciler) ChartMuseumStorage(ctx context.Context, harbor *goharborv1.Harbor) goharborv1.ChartMuseumChartStorageDriverSpec {
-	if harbor.Spec.ImageChartStorage.S3 != nil {
-		return goharborv1.ChartMuseumChartStorageDriverSpec{
-			Amazon: harbor.Spec.ImageChartStorage.S3.ChartMuseum(),
-		}
-	}
-
-	if harbor.Spec.ImageChartStorage.Swift != nil {
-		return goharborv1.ChartMuseumChartStorageDriverSpec{
-			OpenStack: harbor.Spec.ImageChartStorage.Swift.ChartMuseum(),
-		}
-	}
-
-	if harbor.Spec.ImageChartStorage.Azure != nil {
-		return goharborv1.ChartMuseumChartStorageDriverSpec{
-			Azure: harbor.Spec.ImageChartStorage.Azure.ChartMuseum(),
-		}
-	}
-
-	if harbor.Spec.ImageChartStorage.Gcs != nil {
-		return goharborv1.ChartMuseumChartStorageDriverSpec{
-			Gcs: harbor.Spec.ImageChartStorage.Gcs.ChartMuseum(),
-		}
-	}
-
-	if harbor.Spec.ImageChartStorage.Oss != nil {
-		return goharborv1.ChartMuseumChartStorageDriverSpec{
-			Oss: harbor.Spec.ImageChartStorage.Oss.ChartMuseum(),
-		}
-	}
-
-	prefix := ""
-	pvc := &harbor.Spec.ImageChartStorage.FileSystem.RegistryPersistentVolume.PersistentVolumeClaimVolumeSource
-
-	if harbor.Spec.ImageChartStorage.FileSystem.ChartPersistentVolume != nil {
-		pvc = &harbor.Spec.ImageChartStorage.FileSystem.ChartPersistentVolume.PersistentVolumeClaimVolumeSource
-		prefix = harbor.Spec.ImageChartStorage.FileSystem.ChartPersistentVolume.Prefix
-	}
-
-	return goharborv1.ChartMuseumChartStorageDriverSpec{
-		FileSystem: &goharborv1.ChartMuseumChartStorageDriverFilesystemSpec{
-			VolumeSource: corev1.VolumeSource{
-				PersistentVolumeClaim: pvc,
-			},
-			Prefix: prefix,
-		},
-	}
-}
-
 func (r *Reconciler) JobServiceScanDataExportsStorage(ctx context.Context, harbor *goharborv1.Harbor) goharborv1.JobServiceStorageVolumeSpec {
 	if harbor.Spec.JobService.Storage != nil && harbor.Spec.JobService.Storage.ScanDataExportsPersistentVolume != nil {
 		pvc := &harbor.Spec.JobService.Storage.ScanDataExportsPersistentVolume.PersistentVolumeClaimVolumeSource

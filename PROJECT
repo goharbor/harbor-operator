@@ -15,12 +15,6 @@ resources:
   kind: RegistryController
   version: v1alpha3
 - group: goharbor
-  kind: NotaryServer
-  version: v1alpha3
-- group: goharbor
-  kind: NotarySigner
-  version: v1alpha3
-- group: goharbor
   kind: Clair
   version: v1alpha3
 - group: goharbor
@@ -46,12 +40,6 @@ resources:
   version: v1beta1
 - group: goharbor
   kind: RegistryController
-  version: v1beta1
-- group: goharbor
-  kind: NotaryServer
-  version: v1beta1
-- group: goharbor
-  kind: NotarySigner
   version: v1beta1
 - group: goharbor
   kind: Clair

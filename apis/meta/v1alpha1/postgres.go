@@ -13,9 +13,7 @@ import (
 type DatabaseName string
 
 const (
-	CoreDatabase         = "core"
-	NotaryServerDatabase = "notaryserver"
-	NotarySignerDatabase = "notarysigner"
+	CoreDatabase = "core"
 )
 
 type ErrPostgresNoHost bool

@@ -3,11 +3,11 @@ package harbor
 import (
 	"context"
 
+	"github.com/pkg/errors"
 	goharborv1 "github.com/plotly/harbor-operator/apis/goharbor.io/v1beta1"
 	"github.com/plotly/harbor-operator/controllers"
 	serrors "github.com/plotly/harbor-operator/pkg/controller/errors"
 	"github.com/plotly/harbor-operator/pkg/resources"
-	"github.com/pkg/errors"
 )
 
 func (r *Reconciler) NewEmpty(_ context.Context) resources.Resource {
@@ -40,21 +40,6 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrapf(err, "add %s configuration", controllers.JobService)
 	}
 
-	chartMuseumCertificate, err := r.AddChartMuseumConfigurations(ctx, harbor, internalTLSIssuer)
-	if err != nil {
-		return errors.Wrapf(err, "add %s configuration", controllers.ChartMuseum)
-	}
-
-	notaryCertIssuer, notarySignerCertificate, encryptionKey, err := r.AddNotarySignerConfigurations(ctx, harbor)
-	if err != nil {
-		return errors.Wrapf(err, "add %s configuration", controllers.NotarySigner)
-	}
-
-	notaryAuthCert, notaryServerCertificate, err := r.AddNotaryServerConfigurations(ctx, harbor, internalTLSIssuer, notaryCertIssuer)
-	if err != nil {
-		return errors.Wrapf(err, "add %s configuration", controllers.NotaryServer)
-	}
-
 	trivyCertificate, trivyUpdateSecret, err := r.AddTrivyConfigurations(ctx, harbor, internalTLSIssuer)
 	if err != nil {
 		return errors.Wrapf(err, "add %s configuration", controllers.Trivy)
@@ -85,11 +70,6 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrapf(err, "add %s", controllers.Portal)
 	}
 
-	_, err = r.AddChartMuseum(ctx, harbor, chartMuseumCertificate, coreSecret)
-	if err != nil {
-		return errors.Wrapf(err, "add %s", controllers.ChartMuseum)
-	}
-
 	exporterCertificate, err := r.AddExporterConfigurations(ctx, harbor, internalTLSIssuer)
 	if err != nil {
 		return errors.Wrapf(err, "add %s configuration", controllers.Exporter)
@@ -100,16 +80,6 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 		return errors.Wrapf(err, "add %s", controllers.Exporter)
 	}
 
-	notaryServer, err := r.AddNotaryServer(ctx, harbor, notaryServerCertificate, notaryAuthCert)
-	if err != nil {
-		return errors.Wrapf(err, "add %s", controllers.NotaryServer)
-	}
-
-	_, err = r.AddNotarySigner(ctx, harbor, notarySignerCertificate, encryptionKey)
-	if err != nil {
-		return errors.Wrapf(err, "add %s", controllers.NotarySigner)
-	}
-
 	_, err = r.AddTrivy(ctx, harbor, trivyCertificate, trivyUpdateSecret)
 	if err != nil {
 		return errors.Wrapf(err, "add %s", controllers.Trivy)
@@ -118,11 +88,6 @@ func (r *Reconciler) AddResources(ctx context.Context, resource resources.Resour
 	_, err = r.AddCoreIngress(ctx, harbor, core, portal)
 	if err != nil {
 		return errors.Wrapf(err, "add %s ingress", controllers.Core)
-	}
-
-	_, err = r.AddNotaryIngress(ctx, harbor, notaryServer)
-	if err != nil {
-		return errors.Wrapf(err, "add %s ingress", controllers.NotaryServer)
 	}
 
 	err = r.AddNetworkPolicies(ctx, harbor)

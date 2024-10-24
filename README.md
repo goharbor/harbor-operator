@@ -24,7 +24,7 @@ Harbor deployment stack is controlled by a custom Harbor resource `HarborCluster
 
 * Provides strong flexibility to deploy different stacks of Harbor cluster (identified by `HarborCluster` CR)
   * **Minimal stack:** only required Harbor components `Core`, `Registry`, `Registry Controller`, `Job Service` and `Portal` are provisioned.
-  * **Standard stack:** the optional Harbor components `Notary`, `Trivy`, `ChartMuseum` and `Metrics Exporter` can be selected to enable.
+  * **Standard stack:** the optional Harbor components `Trivy`, and `Metrics Exporter` can be selected to enable.
   * **Full stack:** both the Harbor components (required+optional) and also the related dependent services including the database (PostgreSQL), cache (Redis) and storage (MinIO) can be deployed into the Kubernetes cluster together with a scalable and high-available way.
 * Supports configuring either external or in-cluster deployed dependent services
 * Supports a variety of backend storage configurations
@@ -54,7 +54,7 @@ Harbor deployment stack is controlled by a custom Harbor resource `HarborCluster
     * Robot account
     * and more
 * [Auto-scaling](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) for each component.
-* Backup/restore data (registry layer, chartmuseum data, databases content).
+* Backup/restore data (registry layer, databases content).
 * Support services exposed with LoadBalancer
 
 ## Release plans

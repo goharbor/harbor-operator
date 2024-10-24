@@ -4,14 +4,14 @@ import (
 	"context"
 	"net/url"
 
+	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1"
+	"github.com/ovh/configstore"
+	"github.com/pkg/errors"
 	goharborv1 "github.com/plotly/harbor-operator/apis/goharbor.io/v1beta1"
 	"github.com/plotly/harbor-operator/controllers"
 	"github.com/plotly/harbor-operator/pkg/config"
 	commonCtrl "github.com/plotly/harbor-operator/pkg/controller"
 	"github.com/plotly/harbor-operator/pkg/event-filter/class"
-	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1"
-	"github.com/ovh/configstore"
-	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -25,7 +25,7 @@ type Reconciler struct {
 
 // +kubebuilder:rbac:groups=goharbor.io,resources=harbors,verbs=get;list;watch
 // +kubebuilder:rbac:groups=goharbor.io,resources=harbors/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=goharbor.io,resources=chartmuseums;cores;exporters;jobservices;notaryservers;notarysigners;portals;registries;registrycontrollers;trivies,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=goharbor.io,resources=cores;exporters;jobservices;portals;registries;registrycontrollers;trivies,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=networking.k8s.io,resources=ingresses,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=networking.k8s.io,resources=networkpolicies,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=cert-manager.io,resources=issuers;certificates,verbs=get;list;watch;create;update;patch;delete
@@ -51,15 +51,12 @@ func (r *Reconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) err
 			ClassName: className,
 		}).
 		For(r.NewEmpty(ctx)).
-		Owns(&goharborv1.ChartMuseum{}).
 		Owns(&goharborv1.Core{}).
 		Owns(&goharborv1.Exporter{}).
 		Owns(&goharborv1.JobService{}).
 		Owns(&goharborv1.Portal{}).
 		Owns(&goharborv1.Registry{}).
 		Owns(&goharborv1.RegistryController{}).
-		Owns(&goharborv1.NotaryServer{}).
-		Owns(&goharborv1.NotarySigner{}).
 		Owns(&corev1.Secret{}).
 		Owns(&certv1.Issuer{}).
 		Owns(&certv1.Certificate{}).

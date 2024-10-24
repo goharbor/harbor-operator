@@ -85,8 +85,6 @@ func Convert_v1alpha3_HarborSpec_To_v1beta1_HarborSpec(src *HarborSpec, dst *v1b
 		}
 	}
 
-	Convert_v1alpha3_HarborExposeSpec_To_v1beta1_HarborExposeSpec(&src.Expose, &dst.Expose)
-
 	Convert_v1alpha3_HarborComponentSpec_To_v1beta1_EmbeddedHarborComponentsSpec(&src.HarborComponentsSpec, &dst.EmbeddedHarborComponentsSpec)
 }
 
@@ -96,16 +94,6 @@ func Convert_v1alpha3_HarborComponentSpec_To_v1beta1_EmbeddedHarborComponentsSpe
 	Convert_v1alpha3_RegistryComponentSpec_To_v1beta1_RegistryComponentSpec(&src.Registry, &dst.Registry)
 
 	Convert_v1alpha3_JobServiceComponentSpec_To_v1beta1_JobServiceComponentSpec(&src.JobService, &dst.JobService)
-
-	if src.ChartMuseum != nil {
-		dst.ChartMuseum = &v1beta1.ChartMuseumComponentSpec{}
-		Convert_v1alpha3_ChartMuseumComponentSpec_To_v1beta1_ChartMuseumComponentSpec(src.ChartMuseum, dst.ChartMuseum)
-	}
-
-	if src.Notary != nil {
-		dst.Notary = &v1beta1.NotaryComponentSpec{}
-		Convert_v1alpha3_NotaryComponentSpec_To_v1beta1_NotaryComponentSpec(src.Notary, dst.Notary)
-	}
 
 	if src.Trivy != nil {
 		dst.Trivy = &v1beta1.TrivyComponentSpec{}
@@ -154,14 +142,6 @@ func Convert_v1alpha3_JobServiceComponentSpec_To_v1beta1_JobServiceComponentSpec
 	}
 }
 
-func Convert_v1alpha3_ChartMuseumComponentSpec_To_v1beta1_ChartMuseumComponentSpec(src *ChartMuseumComponentSpec, dst *v1beta1.ChartMuseumComponentSpec) { //nolint
-	dst.AbsoluteURL = src.AbsoluteURL
-	dst.ComponentSpec = src.ComponentSpec
-	dst.CertificateInjection = v1beta1.CertificateInjection{
-		CertificateRefs: src.CertificateInjection.CertificateRefs,
-	}
-}
-
 func Convert_v1alpha3_ExporterComponentSpec_To_v1beta1_ExporterComponentSpec(src *ExporterComponentSpec, dst *v1beta1.ExporterComponentSpec) { //nolint
 	dst.ComponentSpec = src.ComponentSpec
 	dst.Port = src.Port
@@ -198,12 +178,6 @@ func Convert_v1alpha3_HarborStorageTrivyStorageSpec_To_v1beta1_HarborStorageTriv
 		dst.CachePersistentVolume.Prefix = src.CachePersistentVolume.Prefix
 		dst.CachePersistentVolume.PersistentVolumeClaimVolumeSource = src.CachePersistentVolume.PersistentVolumeClaimVolumeSource
 	}
-}
-
-func Convert_v1alpha3_NotaryComponentSpec_To_v1beta1_NotaryComponentSpec(src *NotaryComponentSpec, dst *v1beta1.NotaryComponentSpec) { //nolint
-	dst.Server = src.Server
-	dst.Signer = src.Signer
-	dst.MigrationEnabled = src.MigrationEnabled
 }
 
 func Convert_v1alpha3_Cache_To_v1beta1_Cache(src *Cache, dst *v1beta1.Cache) { //nolint
@@ -342,15 +316,6 @@ func Convert_v1alpha3_MinIOSpec_to_v1beta1_MinIOSpec(src *MinIOSpec, dst *v1beta
 
 	if src.MinIOClientSpec != nil {
 		dst.MinIOClientSpec = &v1beta1.MinIOClientSpec{ImageSpec: src.MinIOClientSpec.ImageSpec}
-	}
-}
-
-func Convert_v1alpha3_HarborExposeSpec_To_v1beta1_HarborExposeSpec(src *HarborExposeSpec, dst *v1beta1.HarborExposeSpec) { //nolint
-	Convert_v1alpha3_HarborExposeComponentSpec_To_v1beta1_HarborExposeComponentSpec(&src.Core, &dst.Core)
-
-	if src.Notary != nil {
-		dst.Notary = &v1beta1.HarborExposeComponentSpec{}
-		Convert_v1alpha3_HarborExposeComponentSpec_To_v1beta1_HarborExposeComponentSpec(src.Notary, dst.Notary)
 	}
 }
 
@@ -548,8 +513,6 @@ func Convert_v1beta1_EmbeddedHarborSpec_To_v1alpha3_HarborSpec(src *v1beta1.Embe
 		}
 	}
 
-	Convert_v1beta1_HarborExposeSpec_To_v1alpha3_HarborExposeSpec(&src.Expose, &dst.Expose)
-
 	Convert_v1beta1_EmbeddedHarborComponentsSpec_To_v1alpha3_HarborComponentSpec(&src.EmbeddedHarborComponentsSpec, &dst.HarborComponentsSpec)
 }
 
@@ -559,16 +522,6 @@ func Convert_v1beta1_EmbeddedHarborComponentsSpec_To_v1alpha3_HarborComponentSpe
 	Convert_v1beta1_RegistryComponentSpec_To_v1alpha3_RegistryComponentSpec(&src.Registry, &dst.Registry)
 
 	Convert_v1beta1_JobServiceComponentSpec_To_v1alpha3_JobServiceComponentSpec(&src.JobService, &dst.JobService)
-
-	if src.ChartMuseum != nil {
-		dst.ChartMuseum = &ChartMuseumComponentSpec{}
-		Convert_v1beta1_ChartMuseumComponentSpec_To_v1alpha3_ChartMuseumComponentSpec(src.ChartMuseum, dst.ChartMuseum)
-	}
-
-	if src.Notary != nil {
-		dst.Notary = &NotaryComponentSpec{}
-		Convert_v1beta1_NotaryComponentSpec_To_v1alpha3_NotaryComponentSpec(src.Notary, dst.Notary)
-	}
 
 	if src.Trivy != nil {
 		dst.Trivy = &TrivyComponentSpec{}
@@ -611,12 +564,6 @@ func Convert_v1beta1_JobServiceComponentSpec_To_v1alpha3_JobServiceComponentSpec
 	dst.CertificateInjection = CertificateInjection{CertificateRefs: src.CertificateInjection.CertificateRefs}
 }
 
-func Convert_v1beta1_ChartMuseumComponentSpec_To_v1alpha3_ChartMuseumComponentSpec(src *v1beta1.ChartMuseumComponentSpec, dst *ChartMuseumComponentSpec) { //nolint
-	dst.AbsoluteURL = src.AbsoluteURL
-	dst.ComponentSpec = src.ComponentSpec
-	dst.CertificateInjection = CertificateInjection{CertificateRefs: src.CertificateInjection.CertificateRefs}
-}
-
 func Convert_v1beta1_ExporterComponentSpec_To_v1alpha3_ExporterComponentSpec(src *v1beta1.ExporterComponentSpec, dst *ExporterComponentSpec) { //nolint
 	dst.ComponentSpec = src.ComponentSpec
 	dst.Port = src.Port
@@ -653,12 +600,6 @@ func Convert_v1beta1_HarborStorageTrivyStorageSpec_To_v1alpha3_HarborStorageTriv
 		dst.CachePersistentVolume.Prefix = src.CachePersistentVolume.Prefix
 		dst.CachePersistentVolume.PersistentVolumeClaimVolumeSource = src.CachePersistentVolume.PersistentVolumeClaimVolumeSource
 	}
-}
-
-func Convert_v1beta1_NotaryComponentSpec_To_v1alpha3_NotaryComponentSpec(src *v1beta1.NotaryComponentSpec, dst *NotaryComponentSpec) { //nolint
-	dst.Server = src.Server
-	dst.Signer = src.Signer
-	dst.MigrationEnabled = src.MigrationEnabled
 }
 
 func Convert_v1beta1_ExternalRedisSpec_To_v1alpha3_ExternalRedisSpec(src *v1beta1.ExternalRedisSpec, dst *ExternalRedisSpec) { //nolint
@@ -743,15 +684,6 @@ func Convert_v1beta1_MinIOSpec_To_v1alpha3_MinIOSpec(src *v1beta1.MinIOSpec, dst
 
 	if src.MinIOClientSpec != nil {
 		dst.MinIOClientSpec = &MinIOClientSpec{ImageSpec: src.MinIOClientSpec.ImageSpec}
-	}
-}
-
-func Convert_v1beta1_HarborExposeSpec_To_v1alpha3_HarborExposeSpec(src *v1beta1.HarborExposeSpec, dst *HarborExposeSpec) { //nolint
-	Convert_v1beta1_HarborExposeComponentSpec_To_v1alpha3_HarborExposeComponentSpec(&src.Core, &dst.Core)
-
-	if src.Notary != nil {
-		dst.Notary = &HarborExposeComponentSpec{}
-		Convert_v1beta1_HarborExposeComponentSpec_To_v1alpha3_HarborExposeComponentSpec(src.Notary, dst.Notary)
 	}
 }
 

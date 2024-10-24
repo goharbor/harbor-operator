@@ -13,24 +13,21 @@ func _() {
 	_ = x[Portal-2]
 	_ = x[Registry-3]
 	_ = x[RegistryController-4]
-	_ = x[ChartMuseum-5]
-	_ = x[Exporter-6]
-	_ = x[NotaryServer-7]
-	_ = x[NotarySigner-8]
-	_ = x[Trivy-9]
-	_ = x[Harbor-10]
-	_ = x[HarborCluster-11]
-	_ = x[HarborConfigurationCm-12]
-	_ = x[HarborConfiguration-13]
-	_ = x[HarborProject-14]
-	_ = x[HarborServerConfiguration-15]
-	_ = x[PullSecretBinding-16]
-	_ = x[Namespace-17]
+	_ = x[Exporter-5]
+	_ = x[Trivy-6]
+	_ = x[Harbor-7]
+	_ = x[HarborCluster-8]
+	_ = x[HarborConfigurationCm-9]
+	_ = x[HarborConfiguration-10]
+	_ = x[HarborProject-11]
+	_ = x[HarborServerConfiguration-12]
+	_ = x[PullSecretBinding-13]
+	_ = x[Namespace-14]
 }
 
-const _Controller_name = "corejobserviceportalregistryregistryctlchartmuseumexporternotaryservernotarysignertrivyharborharborclusterharborconfigurationcmharborconfigurationharborprojectharborserverconfigurationpullsecretbindingnamespace"
+const _Controller_name = "corejobserviceportalregistryregistryctlexportertrivyharborharborclusterharborconfigurationcmharborconfigurationharborprojectharborserverconfigurationpullsecretbindingnamespace"
 
-var _Controller_index = [...]uint8{0, 4, 14, 20, 28, 39, 50, 58, 70, 82, 87, 93, 106, 127, 146, 159, 184, 201, 210}
+var _Controller_index = [...]uint8{0, 4, 14, 20, 28, 39, 47, 52, 58, 71, 92, 111, 124, 149, 166}
 
 func (i Controller) String() string {
 	if i < 0 || i >= Controller(len(_Controller_index)-1) {

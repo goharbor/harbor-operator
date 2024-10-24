@@ -10,6 +10,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
 // log is for logging in this package.
@@ -26,27 +27,27 @@ func (jobservice *JobService) SetupWebhookWithManager(_ context.Context, mgr ctr
 var _ webhook.Validator = &JobService{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type.
-func (jobservice *JobService) ValidateCreate() error {
+func (jobservice *JobService) ValidateCreate() (admission.Warnings, error) {
 	jobservicelog.Info("validate create", "name", jobservice.Name)
 
 	return jobservice.Validate()
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type.
-func (jobservice *JobService) ValidateUpdate(old runtime.Object) error {
+func (jobservice *JobService) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
 	jobservicelog.Info("validate update", "name", jobservice.Name)
 
 	return jobservice.Validate()
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type.
-func (jobservice *JobService) ValidateDelete() error {
+func (jobservice *JobService) ValidateDelete() (admission.Warnings, error) {
 	jobservicelog.Info("validate delete", "name", jobservice.Name)
 
-	return nil
+	return nil, nil
 }
 
-func (jobservice *JobService) Validate() error {
+func (jobservice *JobService) Validate() (admission.Warnings, error) {
 	var allErrs field.ErrorList
 
 	err := jobservice.Spec.JobLoggers.Validate()
@@ -60,8 +61,8 @@ func (jobservice *JobService) Validate() error {
 	}
 
 	if len(allErrs) == 0 {
-		return nil
+		return nil, nil
 	}
 
-	return apierrors.NewInvalid(schema.GroupKind{Group: GroupVersion.Group, Kind: "JobService"}, jobservice.Name, allErrs)
+	return nil, apierrors.NewInvalid(schema.GroupKind{Group: GroupVersion.Group, Kind: "JobService"}, jobservice.Name, allErrs)
 }

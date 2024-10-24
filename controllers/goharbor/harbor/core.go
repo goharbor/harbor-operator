@@ -5,13 +5,13 @@ import (
 	"net/url"
 	"time"
 
+	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1"
+	"github.com/pkg/errors"
 	goharborv1 "github.com/plotly/harbor-operator/apis/goharbor.io/v1beta1"
 	harbormetav1 "github.com/plotly/harbor-operator/apis/meta/v1alpha1"
 	"github.com/plotly/harbor-operator/controllers"
 	"github.com/plotly/harbor-operator/pkg/graph"
 	"github.com/plotly/harbor-operator/pkg/version"
-	certv1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1"
-	"github.com/pkg/errors"
 	"github.com/sethvargo/go-password/password"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -216,7 +216,7 @@ func (r *Reconciler) GetCoreSecret(ctx context.Context, harbor *goharborv1.Harbo
 		Type:      harbormetav1.SecretTypeSingle,
 		StringData: map[string]string{
 			harbormetav1.SharedSecretKey: secret,
-			corev1.BasicAuthUsernameKey:  ChartMuseumAuthenticationUsername,
+			corev1.BasicAuthUsernameKey:  RegistryAuthenticationUsername,
 			corev1.BasicAuthPasswordKey:  secret,
 		},
 	}, nil
@@ -332,18 +332,6 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1.Harbor) (*g
 		Host:   r.NormalizeName(ctx, harbor.GetName(), controllers.Portal.String()),
 	}).String()
 
-	var chartmuseum *goharborv1.CoreComponentsChartRepositorySpec
-
-	if harbor.Spec.ChartMuseum != nil {
-		chartmuseumURL := (&url.URL{
-			Scheme: harbor.Spec.InternalTLS.GetScheme(),
-			Host:   r.NormalizeName(ctx, harbor.GetName(), controllers.ChartMuseum.String()),
-		}).String()
-		chartmuseum = &goharborv1.CoreComponentsChartRepositorySpec{
-			URL: chartmuseumURL,
-		}
-	}
-
 	var trivy *goharborv1.CoreComponentsTrivySpec
 
 	if harbor.Spec.Trivy != nil {
@@ -354,18 +342,6 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1.Harbor) (*g
 		trivy = &goharborv1.CoreComponentsTrivySpec{
 			AdapterURL: trivyURL,
 			URL:        trivyURL,
-		}
-	}
-
-	var notary *goharborv1.CoreComponentsNotaryServerSpec
-
-	if harbor.Spec.Notary != nil {
-		notaryURL := (&url.URL{
-			Scheme: harbor.Spec.InternalTLS.GetScheme(),
-			Host:   r.NormalizeName(ctx, harbor.GetName(), controllers.NotaryServer.String()),
-		}).String()
-		notary = &goharborv1.CoreComponentsNotaryServerSpec{
-			URL: notaryURL,
 		}
 	}
 
@@ -437,14 +413,12 @@ func (r *Reconciler) GetCore(ctx context.Context, harbor *goharborv1.Harbor) (*g
 				Portal: goharborv1.CoreComponentPortalSpec{
 					URL: portalURL,
 				},
-				ChartRepository: chartmuseum,
 				TokenService: goharborv1.CoreComponentsTokenServiceSpec{
 					URL:            tokenServiceURL,
 					CertificateRef: tokenCertificateRef,
 				},
-				NotaryServer: notary,
-				Trivy:        trivy,
-				TLS:          tls,
+				Trivy: trivy,
+				TLS:   tls,
 			},
 			CoreConfig: goharborv1.CoreConfig{
 				AdminInitialPasswordRef: r.getAdminPasswordRef(ctx, harbor),

@@ -3,9 +3,7 @@ package model
 import (
 	gruntime "github.com/go-openapi/runtime"
 	hc "github.com/goharbor/go-client/pkg/harbor"
-	assistclient "github.com/goharbor/go-client/pkg/sdk/assist/client"
 	v2client "github.com/goharbor/go-client/pkg/sdk/v2.0/client"
-	legacyclient "github.com/goharbor/go-client/pkg/sdk/v2.0/legacy/client"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 )
@@ -47,16 +45,6 @@ func NewHarborServer(url, username, password string, insecure bool) *HarborServe
 		Password:  password,
 		Insecure:  insecure,
 	}
-}
-
-// HarborAssistClient keeps Harbor client.
-type HarborAssistClient struct {
-	Client *assistclient.HarborAPI
-}
-
-// HarborLegacyClient keeps Harbor client.
-type HarborLegacyClient struct {
-	Client *legacyclient.HarborAPI
 }
 
 // HarborClientV2 keeps Harbor client v2.

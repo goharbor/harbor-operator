@@ -14,7 +14,7 @@ A top level CR `HarborCluster` is introduced to hold the whole component stack o
 
 Regarding the related dependent services required by running Harbor cluster, if the user has corresponding pre-deployed services and is willing to use , these pre-deployed services can be configured into the `HarborCluster` CR instead of provisioning in-cluster services by the operator itself. Choosing which way totally depends on the user's actual case.
 
-CRDs are created for each Harbor components, including the mandatory ones `protal`, `core`, `jobservice`, `registry` and `registry controller` as well as the optional ones `trivy`, `notary` and `metrics exporter`. Those component CRs are owned by the `Harbor` CR. The `Harbor` controller is responsible for reconciling `Harbor` to make sure the related component CRs are correctly created, updated and even deleted.
+CRDs are created for each Harbor components, including the mandatory ones `protal`, `core`, `jobservice`, `registry` and `registry controller` as well as the optional ones `trivy` and `metrics exporter`. Those component CRs are owned by the `Harbor` CR. The `Harbor` controller is responsible for reconciling `Harbor` to make sure the related component CRs are correctly created, updated and even deleted.
 
 Each component CR has its own controller that will reconcile the component CR to make sure the related Kubernetes resources aer correctly handled according to the component spec.
 

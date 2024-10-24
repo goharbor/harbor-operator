@@ -106,16 +106,13 @@ func RegisterTag(component, tag string, harborVersions ...string) {
 func init() { //nolint:gochecknoinits
 	// Register the harbor components
 	harborComponentImageNames := map[string]string{
-		"chartmuseum":  "chartmuseum-photon",
-		"core":         "harbor-core",
-		"exporter":     "harbor-exporter",
-		"jobservice":   "harbor-jobservice",
-		"notaryserver": "notary-server-photon",
-		"notarysigner": "notary-signer-photon",
-		"portal":       "harbor-portal",
-		"registry":     "registry-photon",
-		"registryctl":  "harbor-registryctl",
-		"trivy":        "trivy-adapter-photon",
+		"core":        "harbor-core",
+		"exporter":    "harbor-exporter",
+		"jobservice":  "harbor-jobservice",
+		"portal":      "harbor-portal",
+		"registry":    "registry-photon",
+		"registryctl": "harbor-registryctl",
+		"trivy":       "trivy-adapter-photon",
 	}
 	for component, imageName := range harborComponentImageNames {
 		RegisterRepository(component, "goharbor", "*") // the goharbor repository of dockerhub

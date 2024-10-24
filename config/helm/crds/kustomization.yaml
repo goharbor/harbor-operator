@@ -9,12 +9,9 @@ commonAnnotations:
   cert-manager.io/inject-ca-from: 'harbor-operator-ns/harbor-operator-serving-cert'
 
 patchesStrategicMerge:
-- patches/chartmuseums_service.yaml
 - patches/cores_service.yaml
 - patches/harbors_service.yaml
 - patches/jobservices_service.yaml
-- patches/notarysigners_service.yaml
-- patches/notaryservers_service.yaml
 - patches/portals_service.yaml
 - patches/registries_service.yaml
 - patches/registrycontrollers_service.yaml

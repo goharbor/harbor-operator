@@ -178,38 +178,6 @@ func (l HarborLogLevel) JobService() JobServiceLogLevel {
 
 // +kubebuilder:validation:Type=string
 // +kubebuilder:validation:Enum={"debug","info","warning","error","fatal","panic"}
-// NotaryLogLevel is the log level for NotaryServer and NotarySigner.
-type NotaryLogLevel string
-
-const (
-	NotaryDebug   NotaryLogLevel = "debug"
-	NotaryInfo    NotaryLogLevel = "info"
-	NotaryWarning NotaryLogLevel = "warning"
-	NotaryError   NotaryLogLevel = "error"
-	NotaryFatal   NotaryLogLevel = "fatal"
-	NotaryPanic   NotaryLogLevel = "panic"
-)
-
-// Notary get the log level for Notary component.
-func (l HarborLogLevel) Notary() NotaryLogLevel {
-	switch l {
-	default:
-		return NotaryInfo
-	case HarborDebug:
-		return NotaryDebug
-	case HarborInfo:
-		return NotaryInfo
-	case HarborWarning:
-		return NotaryWarning
-	case HarborError:
-		return NotaryError
-	case HarborFatal:
-		return NotaryFatal
-	}
-}
-
-// +kubebuilder:validation:Type=string
-// +kubebuilder:validation:Enum={"debug","info","warning","error","fatal","panic"}
 // TrivyLogLevel is the log level for Trivy.
 type TrivyLogLevel string
 

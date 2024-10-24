@@ -11,7 +11,5 @@ bases:
 - ../harborcluster-minimal
 
 patchesStrategicMerge:
-- harbor_chartmuseum_patch.yaml
-- harbor_notary_patch.yaml
 - harbor_portal_patch.yaml
 - harbor_trivy_patch.yaml

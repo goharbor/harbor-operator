@@ -9,6 +9,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/goharbor/harbor/src/common"
+	registry "github.com/goharbor/harbor/src/pkg/reg/model"
+	"github.com/pkg/errors"
 	goharborv1 "github.com/plotly/harbor-operator/apis/goharbor.io/v1beta1"
 	harbormetav1 "github.com/plotly/harbor-operator/apis/meta/v1alpha1"
 	"github.com/plotly/harbor-operator/controllers"
@@ -16,9 +19,6 @@ import (
 	serrors "github.com/plotly/harbor-operator/pkg/controller/errors"
 	"github.com/plotly/harbor-operator/pkg/image"
 	"github.com/plotly/harbor-operator/pkg/version"
-	"github.com/goharbor/harbor/src/common"
-	registry "github.com/goharbor/harbor/src/pkg/reg/model"
-	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -205,9 +205,7 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1.Core) (
 				},
 			},
 		}),
-		common.WithChartMuseum: harbor.Value(strconv.FormatBool(core.Spec.Components.ChartRepository != nil)),
-		common.WithNotary:      harbor.Value(strconv.FormatBool(core.Spec.Components.NotaryServer != nil)),
-		common.WithTrivy:       harbor.Value(strconv.FormatBool(core.Spec.Components.Trivy != nil)),
+		common.WithTrivy: harbor.Value(strconv.FormatBool(core.Spec.Components.Trivy != nil)),
 	})
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot configure environment variables")
@@ -350,18 +348,6 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1.Core) (
 		})
 	}
 
-	if core.Spec.Components.ChartRepository != nil {
-		urlConfig, err := harbor.EnvVar(common.ChartRepoURL, harbor.Value(core.Spec.Components.ChartRepository.URL))
-		if err != nil {
-			return nil, errors.Wrap(err, "cannot configure chartmuseum")
-		}
-
-		envs = append(envs, urlConfig, corev1.EnvVar{
-			Name:  "CHART_CACHE_DRIVER",
-			Value: core.Spec.Components.ChartRepository.CacheDriver,
-		})
-	}
-
 	if core.Spec.Components.Trivy != nil {
 		adapterURL, err := harbor.EnvVar(common.TrivyAdapterURL, harbor.Value(core.Spec.Components.Trivy.AdapterURL))
 		if err != nil {
@@ -369,13 +355,6 @@ func (r *Reconciler) GetDeployment(ctx context.Context, core *goharborv1.Core) (
 		}
 
 		envs = append(envs, adapterURL)
-	}
-
-	if core.Spec.Components.NotaryServer != nil {
-		envs = append(envs, corev1.EnvVar{
-			Name:  "NOTARY_URL",
-			Value: core.Spec.Components.NotaryServer.URL,
-		})
 	}
 
 	if core.Spec.Components.TLS.Enabled() {

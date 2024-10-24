@@ -8,14 +8,15 @@ import (
 	"strings"
 
 	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
 	goharborv1 "github.com/plotly/harbor-operator/apis/goharbor.io/v1beta1"
 	"github.com/plotly/harbor-operator/pkg/rule"
 	"github.com/plotly/harbor-operator/pkg/utils/consts"
-	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	apierr "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	mgr "sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
@@ -25,12 +26,15 @@ import (
 type ImagePathRewriter struct {
 	Client  client.Client
 	Log     logr.Logger
-	decoder *admission.Decoder
+	decoder admission.Decoder
 }
 
 // Handle the admission webhook for mutating the image path of deploying pods.
 func (ipr *ImagePathRewriter) Handle(ctx context.Context, req admission.Request) admission.Response { //nolint:funlen,gocognit
 	pod := &corev1.Pod{}
+
+	var mgr mgr.Manager
+	ipr.decoder = admission.NewDecoder(mgr.GetScheme())
 
 	err := ipr.decoder.Decode(req, pod)
 	if err != nil {
@@ -216,14 +220,6 @@ func (ipr *ImagePathRewriter) lookupDefaultHarborServerConfig(ctx context.Contex
 	}
 
 	return nil, nil
-}
-
-// A decoder will be automatically injected.
-// InjectDecoder injects the decoder.
-func (ipr *ImagePathRewriter) InjectDecoder(d *admission.Decoder) error {
-	ipr.decoder = d
-
-	return nil
 }
 
 func (ipr *ImagePathRewriter) getPodNamespace(ctx context.Context, ns string) (*corev1.Namespace, error) {

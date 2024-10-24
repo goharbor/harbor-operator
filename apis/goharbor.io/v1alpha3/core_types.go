@@ -119,9 +119,6 @@ type CoreComponentsSpec struct {
 
 	// +kubebuilder:validation:Optional
 	ChartRepository *CoreComponentsChartRepositorySpec `json:"chartRepository,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	NotaryServer *CoreComponentsNotaryServerSpec `json:"notaryServer,omitempty"`
 }
 
 type CoreComponentPortalSpec struct {
@@ -232,12 +229,6 @@ type CoreComponentsTrivySpec struct {
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Pattern="https?://.+"
 	AdapterURL string `json:"adapterURL"`
-}
-
-type CoreComponentsNotaryServerSpec struct {
-	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Pattern="https?://.+"
-	URL string `json:"url"`
 }
 
 type CoreConfig struct {

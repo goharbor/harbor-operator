@@ -28,13 +28,6 @@ data:
       value: {{ . | quote }}
     {{- end}}
 
-  chartmuseum-ctrl.yaml: |-
-    {{- with .Values.controllers.chartmuseum.maxReconcile }}
-    - key: max-reconcile
-      priority: 200
-      value: {{ . | quote }}
-    {{- end}}
-
   harborconfiguration-ctrl.yaml: |-
     {{- with .Values.controllers.harborConfiguration.maxReconcile }}
     - key: max-reconcile
@@ -77,20 +70,6 @@ data:
 
   jobservice-ctrl.yaml: |-
     {{- with .Values.controllers.jobservice.maxReconcile }}
-    - key: max-reconcile
-      priority: 200
-      value: {{ . | quote }}
-    {{- end}}
-
-  notaryserver-ctrl.yaml: |-
-    {{- with .Values.controllers.notaryserver.maxReconcile }}
-    - key: max-reconcile
-      priority: 200
-      value: {{ . | quote }}
-    {{- end}}
-
-  notarysigner-ctrl.yaml: |-
-    {{- with .Values.controllers.notarysigner.maxReconcile }}
     - key: max-reconcile
       priority: 200
       value: {{ . | quote }}

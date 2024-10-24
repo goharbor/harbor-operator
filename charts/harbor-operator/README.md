@@ -17,7 +17,6 @@ Deploy Harbor Operator
 | autoscaling.minReplicas | int | `1` | Minimum conroller replicas |
 | autoscaling.targetCPUUtilizationPercentage | int | `80` | CPU usage target for autoscaling |
 | autoscaling.targetMemoryUtilizationPercentage | int | No target | Memory usage target for autoscaling |
-| controllers.chartmuseum.maxReconcile | int | `1` | Max parallel reconciliation for ChartMuseum controller |
 | controllers.common.classname | string | `""` | Harbor class handled by the operator. An empty class means watch all resources |
 | controllers.common.networkPolicies | bool | `false` | Whether the operator should manage network policies |
 | controllers.common.watchChildren | bool | `true` | Whether the operator should watch children |
@@ -28,8 +27,6 @@ Deploy Harbor Operator
 | controllers.harborProject.requeueAfterMinutes | int | `5` | How often to reconcile HarborProjects |
 | controllers.harborcluster.maxReconcile | int | `1` | Max parallel reconciliation for HarborCluster controller |
 | controllers.jobservice.maxReconcile | int | `1` | Max parallel reconciliation for JobService controller |
-| controllers.notaryserver.maxReconcile | int | `1` | Max parallel reconciliation for NotaryServer controller |
-| controllers.notarysigner.maxReconcile | int | `1` | Max parallel reconciliation for NotarySigner controller |
 | controllers.portal.maxReconcile | int | `1` | Max parallel reconciliation for Portal controller |
 | controllers.registry.maxReconcile | int | `1` | Max parallel reconciliation for Registry controller |
 | controllers.registryctl.maxReconcile | int | `1` | Max parallel reconciliation for RegistryCtl controller |

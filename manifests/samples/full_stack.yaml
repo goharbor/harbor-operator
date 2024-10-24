@@ -54,7 +54,6 @@ spec:
   secretName: sample-public-certificate
   dnsNames:
     - core.harbor.domain
-    - notary.harbor.domain
     - minio.harbor.domain
   issuerRef:
     name: selfsigned-issuer
@@ -84,12 +83,6 @@ spec:
         controller: default
       tls:
         certificateRef: sample-public-certificate
-    notary:
-      ingress:
-        host: notary.harbor.domain
-        controller: default
-      tls:
-        certificateRef: sample-public-certificate
   internalTLS:
     enabled: true
   portal: {}
@@ -102,13 +95,10 @@ spec:
       kind: Issuer
     metrics:
       enabled: true
-  chartmuseum: {}
   exporter: {}
   trivy:
     skipUpdate: false
     storage: {}
-  notary:
-    migrationEnabled: true
   database:
     kind: Zlando/PostgreSQL
     spec:

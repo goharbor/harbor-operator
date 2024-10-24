@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/pkg/errors"
 	goharborv1 "github.com/plotly/harbor-operator/apis/goharbor.io/v1beta1"
 	"github.com/plotly/harbor-operator/pkg/cluster/controllers/database/api"
 	"github.com/plotly/harbor-operator/pkg/config"
-	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
@@ -29,11 +29,6 @@ var postgresqlVersions = map[string]string{
 func (p *PostgreSQLController) GetDatabases(harborcluster *goharborv1.HarborCluster) map[string]string {
 	databases := map[string]string{
 		CoreDatabase: DefaultDatabaseUser,
-	}
-
-	if harborcluster.Spec.Notary != nil {
-		databases[NotaryServerDatabase] = DefaultDatabaseUser
-		databases[NotarySignerDatabase] = DefaultDatabaseUser
 	}
 
 	return databases

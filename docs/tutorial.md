@@ -113,7 +113,6 @@ spec:
   secretName: sample-public-certificate
   dnsNames:
     - core.10.10.10.100.nip.io
-    - notary.10.10.10.100.nip.io
     - minio.10.10.10.100.nip.io
   issuerRef:
     name: selfsigned-issuer
@@ -143,12 +142,6 @@ spec:
         controller: default
       tls:
         certificateRef: sample-public-certificate
-    notary:
-      ingress:
-        host: notary.10.10.10.100.nip.io
-        controller: default
-      tls:
-        certificateRef: sample-public-certificate
   internalTLS:
     enabled: true
   portal: {}
@@ -161,13 +154,10 @@ spec:
       kind: Issuer
     metrics:
       enabled: true
-  chartmuseum: {}
   exporter: {}
   trivy:
     skipUpdate: false
     storage: {}
-  notary:
-    migrationEnabled: true
   database:
     kind: Zlando/PostgreSQL
     spec:
@@ -294,12 +284,9 @@ A few of resources info like the following data are output:
 
 ```log
 NAME                                                                  READY   STATUS      RESTARTS   AGE
-pod/harborcluster-sample-harbor-harbor-chartmuseum-5b68bd46b8-lq9g9   1/1     Running     0          105s
 pod/harborcluster-sample-harbor-harbor-core-7849f9c844-vf4w7          1/1     Running     0          105s
 pod/harborcluster-sample-harbor-harbor-exporter-dd5c99bc9-br9sk       1/1     Running     0          98s
 pod/harborcluster-sample-harbor-harbor-jobservice-668dd85cc4-2q9bf    1/1     Running     0          98s
-pod/harborcluster-sample-harbor-harbor-notaryserver-77779bf8bf8t5tv   1/1     Running     0          108s
-pod/harborcluster-sample-harbor-harbor-notarysigner-5c88dc99d8d5s64   1/1     Running     0          113s
 pod/harborcluster-sample-harbor-harbor-portal-64465c4954-52zxc        1/1     Running     0          109s
 pod/harborcluster-sample-harbor-harbor-registry-756dbcf5bb-zcrfn      2/2     Running     0          104s
 pod/harborcluster-sample-harbor-harbor-trivy-599ff5c789-hcblv         1/1     Running     0          108s
@@ -311,12 +298,9 @@ pod/rfr-harborcluster-sample-redis-0                                  1/1     Ru
 pod/rfs-harborcluster-sample-redis-6fddf664-9nwsc                     1/1     Running     0          3m31s
 
 NAME                                                               TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)            AGE
-service/harborcluster-sample-harbor-harbor-chartmuseum             ClusterIP   10.96.9.53      <none>        443/TCP            105s
 service/harborcluster-sample-harbor-harbor-core                    ClusterIP   10.96.175.82    <none>        443/TCP,8001/TCP   106s
 service/harborcluster-sample-harbor-harbor-exporter                ClusterIP   10.96.1.77      <none>        8001/TCP           98s
 service/harborcluster-sample-harbor-harbor-jobservice              ClusterIP   10.96.67.178    <none>        443/TCP            98s
-service/harborcluster-sample-harbor-harbor-notaryserver            ClusterIP   10.96.235.154   <none>        443/TCP            108s
-service/harborcluster-sample-harbor-harbor-notarysigner            ClusterIP   10.96.246.138   <none>        7899/TCP           113s
 service/harborcluster-sample-harbor-harbor-portal                  ClusterIP   10.96.177.105   <none>        443/TCP            109s
 service/harborcluster-sample-harbor-harbor-registry                ClusterIP   10.96.24.80     <none>        443/TCP,8001/TCP   105s
 service/harborcluster-sample-harbor-harbor-registryctl             ClusterIP   10.96.171.157   <none>        443/TCP            105s
@@ -330,24 +314,18 @@ service/postgresql-cluster-sample-ns-harborcluster-sample-repl     ClusterIP   1
 service/rfs-harborcluster-sample-redis                             ClusterIP   10.96.53.11     <none>        26379/TCP          3m31s
 
 NAME                                                              READY   UP-TO-DATE   AVAILABLE   AGE
-deployment.apps/harborcluster-sample-harbor-harbor-chartmuseum    1/1     1            1           105s
 deployment.apps/harborcluster-sample-harbor-harbor-core           1/1     1            1           105s
 deployment.apps/harborcluster-sample-harbor-harbor-exporter       1/1     1            1           98s
 deployment.apps/harborcluster-sample-harbor-harbor-jobservice     1/1     1            1           98s
-deployment.apps/harborcluster-sample-harbor-harbor-notaryserver   1/1     1            1           108s
-deployment.apps/harborcluster-sample-harbor-harbor-notarysigner   1/1     1            1           113s
 deployment.apps/harborcluster-sample-harbor-harbor-portal         1/1     1            1           109s
 deployment.apps/harborcluster-sample-harbor-harbor-registry       1/1     1            1           104s
 deployment.apps/harborcluster-sample-harbor-harbor-trivy          1/1     1            1           108s
 deployment.apps/rfs-harborcluster-sample-redis                    1/1     1            1           3m31s
 
 NAME                                                                         DESIRED   CURRENT   READY   AGE
-replicaset.apps/harborcluster-sample-harbor-harbor-chartmuseum-5b68bd46b8    1         1         1       105s
 replicaset.apps/harborcluster-sample-harbor-harbor-core-7849f9c844           1         1         1       105s
 replicaset.apps/harborcluster-sample-harbor-harbor-exporter-dd5c99bc9        1         1         1       98s
 replicaset.apps/harborcluster-sample-harbor-harbor-jobservice-668dd85cc4     1         1         1       98s
-replicaset.apps/harborcluster-sample-harbor-harbor-notaryserver-77779bf8bf   1         1         1       108s
-replicaset.apps/harborcluster-sample-harbor-harbor-notarysigner-5c88dc99d8   1         1         1       113s
 replicaset.apps/harborcluster-sample-harbor-harbor-portal-64465c4954         1         1         1       109s
 replicaset.apps/harborcluster-sample-harbor-harbor-registry-756dbcf5bb       1         1         1       104s
 replicaset.apps/harborcluster-sample-harbor-harbor-trivy-599ff5c789          1         1         1       108s

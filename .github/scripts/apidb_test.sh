@@ -24,8 +24,8 @@ DOCKER_DATA_DIR=`mktemp -d -t docker-XXXXXX`
 
 mkdir -p /var/log/harbor/
 
-docker run -i --rm --privileged -v `pwd`/harbor:/drone -v /var/log/harbor/:/var/log/harbor/ -v $DOCKER_DATA_DIR:/var/lib/docker -e NOTARY_URL=https://$NOTARY_HOST -w /drone $E2E_IMAGE make swagger_client
-docker run -i --rm --privileged -v `pwd`/harbor:/drone -v /var/log/harbor/:/var/log/harbor/ -v $DOCKER_DATA_DIR:/var/lib/docker -e NOTARY_URL=https://$NOTARY_HOST -w /drone $E2E_IMAGE $CMD
+docker run -i --rm --privileged -v `pwd`/harbor:/drone -v /var/log/harbor/:/var/log/harbor/ -v $DOCKER_DATA_DIR:/var/lib/docker -w /drone $E2E_IMAGE make swagger_client
+docker run -i --rm --privileged -v `pwd`/harbor:/drone -v /var/log/harbor/:/var/log/harbor/ -v $DOCKER_DATA_DIR:/var/lib/docker -w /drone $E2E_IMAGE $CMD
 
 rc=$?
 

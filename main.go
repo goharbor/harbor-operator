@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/go-logr/logr"
+	"github.com/ovh/configstore"
 	"github.com/plotly/harbor-operator/pkg/exit"
 	"github.com/plotly/harbor-operator/pkg/factories/application"
 	"github.com/plotly/harbor-operator/pkg/factories/logger"
@@ -11,7 +12,6 @@ import (
 	"github.com/plotly/harbor-operator/pkg/scheme"
 	"github.com/plotly/harbor-operator/pkg/setup"
 	"github.com/plotly/harbor-operator/pkg/tracing"
-	"github.com/ovh/configstore"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
 )

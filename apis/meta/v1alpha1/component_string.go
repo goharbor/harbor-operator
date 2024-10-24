@@ -13,17 +13,14 @@ func _() {
 	_ = x[PortalComponent-2]
 	_ = x[RegistryComponent-3]
 	_ = x[RegistryControllerComponent-4]
-	_ = x[ChartMuseumComponent-5]
-	_ = x[ExporterComponent-6]
-	_ = x[NotaryServerComponent-7]
-	_ = x[NotarySignerComponent-8]
-	_ = x[TrivyComponent-9]
-	_ = x[componentCount-10]
+	_ = x[ExporterComponent-5]
+	_ = x[TrivyComponent-6]
+	_ = x[componentCount-7]
 }
 
-const _Component_name = "corejobserviceportalregistryregistryctlchartmuseumexporternotaryservernotarysignertrivycomponentCount"
+const _Component_name = "corejobserviceportalregistryregistryctlexportertrivycomponentCount"
 
-var _Component_index = [...]uint8{0, 4, 14, 20, 28, 39, 50, 58, 70, 82, 87, 101}
+var _Component_index = [...]uint8{0, 4, 14, 20, 28, 39, 47, 52}
 
 func (i Component) String() string {
 	if i < 0 || i >= Component(len(_Component_index)-1) {

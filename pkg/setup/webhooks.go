@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/ovh/configstore"
 	goharborv1 "github.com/plotly/harbor-operator/apis/goharbor.io/v1beta1"
 	"github.com/plotly/harbor-operator/controllers"
 	"github.com/plotly/harbor-operator/pkg/config"
-	"github.com/ovh/configstore"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
 
@@ -16,7 +16,6 @@ const (
 )
 
 var webhooksBuilder = map[controllers.Controller][]WebHook{
-	controllers.ChartMuseum:        {&goharborv1.ChartMuseum{}},
 	controllers.Core:               {&goharborv1.Core{}},
 	controllers.Exporter:           {&goharborv1.Exporter{}},
 	controllers.Harbor:             {&goharborv1.Harbor{}},
@@ -25,8 +24,6 @@ var webhooksBuilder = map[controllers.Controller][]WebHook{
 	controllers.Portal:             {&goharborv1.Portal{}},
 	controllers.RegistryController: {&goharborv1.RegistryController{}},
 	controllers.Trivy:              {&goharborv1.Trivy{}},
-	controllers.NotaryServer:       {&goharborv1.NotaryServer{}},
-	controllers.NotarySigner:       {&goharborv1.NotarySigner{}},
 	controllers.HarborCluster:      {&goharborv1.HarborCluster{}},
 	controllers.HarborProject:      {&goharborv1.HarborProject{}},
 }

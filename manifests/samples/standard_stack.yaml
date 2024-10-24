@@ -136,7 +136,6 @@ metadata:
 spec:
   dnsNames:
   - core.harbor.domain
-  - notary.harbor.domain
   issuerRef:
     name: sample-public-certificate
   secretName: sample-public-certificate
@@ -204,7 +203,6 @@ spec:
         passwordRef: harbor-redis
         port: 6379
   version: 2.6.2
-  chartmuseum: {}
   core:
     tokenIssuer:
       kind: Issuer
@@ -216,18 +214,10 @@ spec:
         controller: default
       tls:
         certificateRef: sample-public-certificate
-    notary:
-      ingress:
-        host: notary.harbor.domain
-        controller: default
-      tls:
-        certificateRef: sample-public-certificate
   externalURL: https://core.harbor.domain
   harborAdminPasswordRef: admin-core-secret-7274ck5bh5
   internalTLS:
     enabled: true
-  notary:
-    migrationEnabled: true
   portal:
     templateAnnotations:
        foo: "bar"

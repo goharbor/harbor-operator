@@ -22,13 +22,13 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	"github.com/ovh/configstore"
 	"github.com/plotly/harbor-operator/controllers/goharbor/internal/test"
 	"github.com/plotly/harbor-operator/pkg/config"
 	"github.com/plotly/harbor-operator/pkg/factories/application"
 	"github.com/plotly/harbor-operator/pkg/factories/logger"
 	"github.com/plotly/harbor-operator/pkg/scheme"
 	"github.com/plotly/harbor-operator/pkg/setup"
-	"github.com/ovh/configstore"
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
@@ -37,6 +37,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	"sigs.k8s.io/controller-runtime/pkg/metrics/server"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to
@@ -90,8 +91,10 @@ var _ = BeforeSuite(func() {
 	Expect(k8sClient).ToNot(BeNil())
 
 	mgr, err := ctrl.NewManager(cfg, ctrl.Options{
-		MetricsBindAddress: "0",
-		Scheme:             s,
+		Metrics: server.Options{
+			BindAddress: "0",
+		},
+		Scheme: s,
 	})
 	Expect(err).NotTo(HaveOccurred(), "failed to create manager")
 

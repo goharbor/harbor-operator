@@ -6,9 +6,9 @@ import (
 	"path"
 	"strings"
 
+	cmmeta "github.com/jetstack/cert-manager/pkg/apis/meta/v1"
 	harbormetav1 "github.com/plotly/harbor-operator/apis/meta/v1alpha1"
 	"github.com/plotly/harbor-operator/pkg/image"
-	cmmeta "github.com/jetstack/cert-manager/pkg/apis/meta/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
@@ -51,24 +51,12 @@ func (h *Harbor) GetComponentSpec(ctx context.Context, component harbormetav1.Co
 
 func (h *Harbor) deepCopyComponentSpecInto(_ context.Context, component harbormetav1.Component, spec *harbormetav1.ComponentSpec) {
 	switch component {
-	case harbormetav1.ChartMuseumComponent:
-		if h.Spec.ChartMuseum != nil {
-			h.Spec.ChartMuseum.ComponentSpec.DeepCopyInto(spec)
-		}
 	case harbormetav1.CoreComponent:
 		h.Spec.Core.ComponentSpec.DeepCopyInto(spec)
 	case harbormetav1.ExporterComponent:
 		h.Spec.Exporter.ComponentSpec.DeepCopyInto(spec)
 	case harbormetav1.JobServiceComponent:
 		h.Spec.JobService.ComponentSpec.DeepCopyInto(spec)
-	case harbormetav1.NotaryServerComponent:
-		if h.Spec.Notary != nil {
-			h.Spec.Notary.Server.DeepCopyInto(spec)
-		}
-	case harbormetav1.NotarySignerComponent:
-		if h.Spec.Notary != nil {
-			h.Spec.Notary.Signer.DeepCopyInto(spec)
-		}
 	case harbormetav1.PortalComponent:
 		h.Spec.Portal.ComponentSpec.DeepCopyInto(spec)
 	case harbormetav1.RegistryComponent:
@@ -209,10 +197,6 @@ type HarborSpec struct {
 	Trace *harbormetav1.TraceSpec `json:"trace,omitempty"`
 }
 
-func (spec *HarborSpec) ValidateNotary() *field.Error {
-	return nil
-}
-
 func (spec *HarborSpec) ValidateRegistryController() *field.Error {
 	if spec.RegistryController == nil {
 		return nil
@@ -257,16 +241,10 @@ type HarborComponentsSpec struct {
 	RegistryController *harbormetav1.ComponentSpec `json:"registryctl,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	ChartMuseum *ChartMuseumComponentSpec `json:"chartmuseum,omitempty"`
-
-	// +kubebuilder:validation:Optional
 	Exporter *ExporterComponentSpec `json:"exporter,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	Trivy *TrivyComponentSpec `json:"trivy,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	Notary *NotaryComponentSpec `json:"notary,omitempty"`
 
 	// +kubebuilder:validation:Required
 	Redis *ExternalRedisSpec `json:"redis"`
@@ -299,12 +277,6 @@ func (r *HarborDatabaseSpec) GetPostgresqlConnection(component harbormetav1.Comp
 	case harbormetav1.ExporterComponent:
 		// exporter requires to access the database of core component
 		databaseName = harbormetav1.CoreDatabase
-	case harbormetav1.NotarySignerComponent:
-		sslMode = r.getSSLModeForNotary()
-		databaseName = harbormetav1.NotarySignerDatabase
-	case harbormetav1.NotaryServerComponent:
-		sslMode = r.getSSLModeForNotary()
-		databaseName = harbormetav1.NotaryServerDatabase
 	default:
 		return nil, harbormetav1.ErrUnsupportedComponent
 	}
@@ -319,32 +291,6 @@ func (r *HarborDatabaseSpec) GetPostgresqlConnection(component harbormetav1.Comp
 			harbormetav1.PostgresSSLModeKey: string(sslMode),
 		},
 	}, nil
-}
-
-func (r *HarborDatabaseSpec) getSSLModeForNotary() harbormetav1.PostgresSSLMode {
-	switch r.SSLMode { //nolint:exhaustive
-	case harbormetav1.PostgresSSLModeAllow:
-		return harbormetav1.PostgresSSLModePrefer
-	default:
-		return r.SSLMode
-	}
-}
-
-type NotaryComponentSpec struct {
-	// +kubebuilder:validation:Optional
-	Server harbormetav1.ComponentSpec `json:"server"`
-
-	// +kubebuilder:validation:Optional
-	Signer harbormetav1.ComponentSpec `json:"signer"`
-
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=true
-	// Inject migration configuration to notary resources
-	MigrationEnabled *bool `json:"migrationEnabled,omitempty"`
-}
-
-func (r *NotaryComponentSpec) IsMigrationEnabled() bool {
-	return r != nil && (r.MigrationEnabled == nil || *r.MigrationEnabled)
 }
 
 type ExternalRedisSpec struct {
@@ -417,18 +363,6 @@ type RegistryComponentSpec struct {
 
 	// +kubebuilder:validation:Optional
 	Metrics *harbormetav1.MetricsSpec `json:"metrics,omitempty"`
-}
-
-type ChartMuseumComponentSpec struct {
-	harbormetav1.ComponentSpec `json:",inline"`
-
-	CertificateInjection `json:",inline"`
-
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=false
-	// Harbor defaults ChartMuseum to returning relative urls,
-	// if you want using absolute url you should enable it
-	AbsoluteURL bool `json:"absoluteUrl"`
 }
 
 type ExporterComponentSpec struct {
@@ -644,16 +578,6 @@ type HarborStorageImageChartStorageOssSpec struct {
 	RegistryStorageDriverOssSpec `json:",inline"`
 }
 
-func (r *HarborStorageImageChartStorageOssSpec) ChartMuseum() *ChartMuseumChartStorageDriverOssSpec {
-	return &ChartMuseumChartStorageDriverOssSpec{
-		Endpoint:        r.getEndpoint(),
-		AccessKeyID:     r.AccessKeyID,
-		AccessSecretRef: r.AccessSecretRef,
-		Bucket:          r.Bucket,
-		PathPrefix:      r.PathPrefix,
-	}
-}
-
 func (r *HarborStorageImageChartStorageOssSpec) Registry() *RegistryStorageDriverOssSpec {
 	return &r.RegistryStorageDriverOssSpec
 }
@@ -674,27 +598,8 @@ type HarborStorageImageChartStorageGcsSpec struct {
 	RegistryStorageDriverGcsSpec `json:",inline"`
 }
 
-func (r *HarborStorageImageChartStorageGcsSpec) ChartMuseum() *ChartMuseumChartStorageDriverGcsSpec {
-	return &ChartMuseumChartStorageDriverGcsSpec{
-		KeyDataSecretRef: r.KeyDataRef,
-		Bucket:           r.Bucket,
-		PathPrefix:       r.PathPrefix,
-		ChunkSize:        r.ChunkSize,
-	}
-}
-
 func (r *HarborStorageImageChartStorageGcsSpec) Registry() *RegistryStorageDriverGcsSpec {
 	return &r.RegistryStorageDriverGcsSpec
-}
-
-func (r *HarborStorageImageChartStorageAzureSpec) ChartMuseum() *ChartMuseumChartStorageDriverAzureSpec {
-	return &ChartMuseumChartStorageDriverAzureSpec{
-		AccountName:   r.AccountName,
-		AccountKeyRef: r.AccountKeyRef,
-		Container:     r.Container,
-		BaseURL:       r.BaseURL,
-		PathPrefix:    r.PathPrefix,
-	}
 }
 
 func (r *HarborStorageImageChartStorageAzureSpec) Registry() *RegistryStorageDriverAzureSpec {
@@ -705,38 +610,12 @@ type HarborStorageImageChartStorageS3Spec struct {
 	RegistryStorageDriverS3Spec `json:",inline"`
 }
 
-func (r *HarborStorageImageChartStorageS3Spec) ChartMuseum() *ChartMuseumChartStorageDriverAmazonSpec {
-	return &ChartMuseumChartStorageDriverAmazonSpec{
-		AccessKeyID:     r.AccessKey,
-		AccessSecretRef: r.SecretKeyRef,
-		Bucket:          r.Bucket,
-		Endpoint:        r.RegionEndpoint,
-		Prefix:          r.RootDirectory,
-		Region:          r.Region,
-	}
-}
-
 func (r *HarborStorageImageChartStorageS3Spec) Registry() *RegistryStorageDriverS3Spec {
 	return &r.RegistryStorageDriverS3Spec
 }
 
 type HarborStorageImageChartStorageSwiftSpec struct {
 	RegistryStorageDriverSwiftSpec `json:",inline"`
-}
-
-func (r *HarborStorageImageChartStorageSwiftSpec) ChartMuseum() *ChartMuseumChartStorageDriverOpenStackSpec {
-	return &ChartMuseumChartStorageDriverOpenStackSpec{
-		AuthenticationURL: r.AuthURL,
-		Container:         r.Container,
-		Domain:            r.Domain,
-		DomainID:          r.DomainID,
-		PasswordRef:       r.PasswordRef,
-		Prefix:            r.Prefix,
-		Region:            r.Region,
-		Tenant:            r.Tenant,
-		TenantID:          r.TenantID,
-		Username:          r.Username,
-	}
 }
 
 func (r *HarborStorageImageChartStorageSwiftSpec) Registry() *RegistryStorageDriverSwiftSpec {
@@ -795,10 +674,6 @@ func (r *HarborInternalTLSSpec) GetComponentTLSSpec(certificateRef string) *harb
 type HarborExposeSpec struct {
 	// +kubebuilder:validation:Required
 	Core HarborExposeComponentSpec `json:"core"`
-
-	// +kubebuilder:validation:Optional
-	// The ingress of the notary, required when notary component enabled.
-	Notary *HarborExposeComponentSpec `json:"notary,omitempty"`
 }
 
 type HarborExposeComponentSpec struct {

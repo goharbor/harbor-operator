@@ -121,9 +121,9 @@ func (blder *Builder) Build(r reconcile.Reconciler) (controller.Controller, erro
 			tryOwnsInputs:    blder.tryOwnsInputs,
 		}
 
-		src := &source.Kind{Type: &v1.CustomResourceDefinition{}}
+		src := &v1.CustomResourceDefinition{}
 		hdler := &handler.Funcs{
-			CreateFunc: func(event.CreateEvent, workqueue.RateLimitingInterface) {
+			CreateFunc: func(context.Context, event.CreateEvent, workqueue.TypedRateLimitingInterface[reconcile.Request]) {
 				w.TryWatch()
 			},
 		}
@@ -191,16 +191,16 @@ func (w *tryWatcher) TryWatch() {
 			continue
 		}
 
-		src := &source.Kind{Type: own.object}
-		hdler := &handler.EnqueueRequestForOwner{
-			OwnerType:    w.forObject,
-			IsController: true,
-		}
+		var mgr manager.Manager
+
+		hdler := handler.TypedEnqueueRequestForOwner[client.Object](mgr.GetScheme(), mgr.GetRESTMapper(), w.forObject, handler.OnlyControllerOwner())
 
 		allPredicates := append([]predicate.Predicate(nil), w.globalPredicates...)
 		allPredicates = append(allPredicates, own.predicates...)
 
-		if err := w.ctrl.Watch(src, hdler, allPredicates...); err != nil {
+		source := source.Kind(mgr.GetCache(), own.object, hdler, allPredicates...)
+
+		if err := w.ctrl.Watch(source); err != nil {
 			w.log.Error(err, "Watch Source Failed", "crd", own.crdDependency)
 		} else {
 			w.log.Info("Watch Source Success", "crd", own.crdDependency)

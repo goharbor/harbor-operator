@@ -112,16 +112,10 @@ type EmbeddedHarborComponentsSpec struct {
 	RegistryController *harbormetav1.ComponentSpec `json:"registryctl,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	ChartMuseum *ChartMuseumComponentSpec `json:"chartmuseum,omitempty"`
-
-	// +kubebuilder:validation:Optional
 	Exporter *ExporterComponentSpec `json:"exporter,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	Trivy *TrivyComponentSpec `json:"trivy,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	Notary *NotaryComponentSpec `json:"notary,omitempty"`
 }
 
 type Cache struct {

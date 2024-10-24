@@ -131,10 +131,8 @@ func (harbor *Controller) getHarborCR(ctx context.Context, harborcluster *goharb
 				JobService:         spec.JobService,
 				Registry:           spec.Registry,
 				RegistryController: spec.RegistryController,
-				ChartMuseum:        spec.ChartMuseum,
 				Exporter:           spec.Exporter,
 				Trivy:              spec.Trivy,
-				Notary:             spec.Notary,
 			},
 			ImageSource: spec.ImageSource,
 			Proxy:       spec.Proxy,
@@ -233,7 +231,7 @@ func (harbor *Controller) getDatabaseSpec(dependencies *lcm.CRStatusCollection) 
 	return nil
 }
 
-// getStorageSecretForChartMuseum will get the secret name of chart museum storage config.
+// getStorageSpec will get the storage config.
 func (harbor *Controller) getStorageSpec(dependencies *lcm.CRStatusCollection) *goharborv1.HarborStorageImageChartStorageSpec {
 	p := harbor.getProperty(dependencies, goharborv1.ComponentStorage, lcm.StoragePropertyName)
 	if p != nil {
@@ -299,9 +297,5 @@ func injectS3CertToHarborComponents(harbor *goharborv1.Harbor) {
 	// inject cert to component trivy
 	if harbor.Spec.Trivy != nil {
 		harbor.Spec.Trivy.CertificateRefs = append(harbor.Spec.Trivy.CertificateRefs, certRef)
-	}
-	// inject cert to chartmuseum
-	if harbor.Spec.ChartMuseum != nil {
-		harbor.Spec.ChartMuseum.CertificateRefs = append(harbor.Spec.ChartMuseum.CertificateRefs, certRef)
 	}
 }

@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pkg/errors"
 	goharborv1 "github.com/plotly/harbor-operator/apis/goharbor.io/v1beta1"
 	harbormetav1 "github.com/plotly/harbor-operator/apis/meta/v1alpha1"
 	"github.com/plotly/harbor-operator/controllers"
 	"github.com/plotly/harbor-operator/pkg/graph"
-	"github.com/pkg/errors"
 	netv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -99,86 +99,6 @@ func (r *Reconciler) GetCoreIngressRules(ctx context.Context, harbor *goharborv1
 	}}, nil
 }
 
-type NotaryIngress graph.Resource
-
-func (r *Reconciler) AddNotaryIngress(ctx context.Context, harbor *goharborv1.Harbor, notary NotaryServer) (NotaryIngress, error) {
-	ingress, err := r.GetNotaryServerIngress(ctx, harbor)
-	if err != nil {
-		return nil, errors.Wrap(err, "cannot get notary ingress")
-	}
-
-	ingressRes, err := r.Controller.AddIngressToManage(ctx, ingress, notary)
-
-	return NotaryIngress(ingressRes), errors.Wrapf(err, "cannot add notary ingress")
-}
-
-func (r *Reconciler) GetNotaryServerIngress(ctx context.Context, harbor *goharborv1.Harbor) (*netv1.Ingress, error) {
-	if harbor.Spec.Notary == nil {
-		return nil, nil
-	}
-
-	if harbor.Spec.Expose.Notary.Ingress == nil {
-		return nil, nil
-	}
-
-	var tls []netv1.IngressTLS
-
-	if harbor.Spec.Expose.Notary.TLS.Enabled() {
-		tls = []netv1.IngressTLS{{
-			SecretName: harbor.Spec.Expose.Notary.TLS.CertificateRef,
-			Hosts:      []string{harbor.Spec.Expose.Notary.Ingress.Host},
-		}}
-	}
-
-	ingressRules, err := r.GetNotaryIngressRules(ctx, harbor)
-	if err != nil {
-		return nil, errors.Wrap(err, "cannot get notary ingress rules")
-	}
-
-	return &netv1.Ingress{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        r.NormalizeName(ctx, harbor.GetName(), controllers.NotaryServer.String()),
-			Namespace:   harbor.GetNamespace(),
-			Annotations: r.GetNotaryIngressAnnotations(ctx, harbor),
-		},
-		Spec: netv1.IngressSpec{
-			TLS:              tls,
-			Rules:            ingressRules,
-			IngressClassName: harbor.Spec.Expose.Notary.Ingress.IngressClassName,
-		},
-	}, nil
-}
-
-func (r *Reconciler) GetNotaryIngressRules(ctx context.Context, harbor *goharborv1.Harbor) ([]netv1.IngressRule, error) {
-	backend := netv1.IngressBackend{
-		Service: &netv1.IngressServiceBackend{
-			Name: r.NormalizeName(ctx, harbor.GetName(), controllers.NotaryServer.String()),
-			Port: netv1.ServiceBackendPort{
-				Number: harbor.Spec.InternalTLS.GetInternalPort(harbormetav1.NotaryServerTLS),
-			},
-		},
-	}
-
-	pathTypePrefix := netv1.PathTypePrefix
-
-	return []netv1.IngressRule{
-		{
-			Host: harbor.Spec.Expose.Notary.Ingress.Host,
-			IngressRuleValue: netv1.IngressRuleValue{
-				HTTP: &netv1.HTTPIngressRuleValue{
-					Paths: []netv1.HTTPIngressPath{
-						{
-							Path:     "/",
-							PathType: &pathTypePrefix,
-							Backend:  backend,
-						},
-					},
-				},
-			},
-		},
-	}, nil
-}
-
 func (r *Reconciler) GetCoreIngressAnnotations(ctx context.Context, harbor *goharborv1.Harbor) map[string]string {
 	// https://github.com/kubernetes/ingress-nginx/blob/master/internal/ingress/annotations/backendprotocol/main.go#L34
 	protocol := "HTTP"
@@ -204,37 +124,6 @@ func (r *Reconciler) GetCoreIngressAnnotations(ctx context.Context, harbor *goha
 	}
 
 	for key, value := range harbor.Spec.Expose.Core.Ingress.Annotations {
-		annotations[key] = value
-	}
-
-	return annotations
-}
-
-func (r *Reconciler) GetNotaryIngressAnnotations(ctx context.Context, harbor *goharborv1.Harbor) map[string]string {
-	// https://github.com/kubernetes/ingress-nginx/blob/master/internal/ingress/annotations/backendprotocol/main.go#L34
-	protocol := "HTTP"
-
-	if harbor.Spec.InternalTLS.IsEnabled() {
-		protocol = "HTTPS"
-	}
-
-	annotations := map[string]string{
-		"nginx.ingress.kubernetes.io/backend-protocol": protocol,
-		// resolve 413(Too Large Entity) error when push large image. It only works for NGINX ingress.
-		"nginx.ingress.kubernetes.io/proxy-body-size": "0",
-	}
-	if harbor.Spec.Expose.Core.Ingress.Controller == harbormetav1.IngressControllerNCP {
-		annotations["ncp/use-regex"] = NCPIngressValueTrue
-		if harbor.Spec.InternalTLS.IsEnabled() {
-			annotations["ncp/http-redirect"] = NCPIngressValueTrue
-		}
-	} else if harbor.Spec.Expose.Core.Ingress.Controller == harbormetav1.IngressControllerContour {
-		if harbor.Spec.InternalTLS.IsEnabled() {
-			annotations["ingress.kubernetes.io/force-ssl-redirect"] = ContourIngressValueTrue
-		}
-	}
-
-	for key, value := range harbor.Spec.Expose.Notary.Ingress.Annotations {
 		annotations[key] = value
 	}
 

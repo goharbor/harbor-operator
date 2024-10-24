@@ -72,10 +72,6 @@ controllers:
     # controllers.common.watchChildren -- Whether the operator should watch children
     watchChildren: true
 
-  chartmuseum:
-    # controllers.chartmuseum.maxReconcile -- Max parallel reconciliation for ChartMuseum controller
-    maxReconcile: 1
-
   harborConfiguration:
     # controllers.harborConfiguration.maxReconcile -- Max parallel reconciliation for HarborConfiguration controller
     maxReconcile: 1
@@ -100,14 +96,6 @@ controllers:
 
   jobservice:
     # controllers.jobservice.maxReconcile -- Max parallel reconciliation for JobService controller
-    maxReconcile: 1
-
-  notaryserver:
-    # controllers.notaryserver.maxReconcile -- Max parallel reconciliation for NotaryServer controller
-    maxReconcile: 1
-
-  notarysigner:
-    # controllers.notarysigner.maxReconcile -- Max parallel reconciliation for NotarySigner controller
     maxReconcile: 1
 
   portal:

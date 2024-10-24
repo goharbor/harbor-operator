@@ -28,8 +28,6 @@ metadata:
 data:
   init-db.sql: |
     CREATE DATABASE core WITH OWNER postgres;
-    CREATE DATABASE notaryserver WITH OWNER postgres;
-    CREATE DATABASE notarysigner WITH OWNER postgres;
 ```
 
 >NOTES: `make postgresql` can also help install a PostgreSQL instance quickly.
@@ -81,7 +79,7 @@ spec:
         prefix: prefix # Optional
 ```
 
-The thing to note here is the names of the databases `core`, `notaryserver` (only needed when enabling notary) and `notarysigner` (only needed when enabling notary) are relatively unchangeable. You can only append some prefixes to the database names by setting the optional field `prefix` in the `database` spec. For example, if the `spec.database.prefix` is "prefix", the database names will be "prefix-core", "prefix-notaryserver" and "prefix-notarysigner".
+The thing to note here is the names of the databases `core` are relatively unchangeable. You can only append some prefixes to the database names by setting the optional field `prefix` in the `database` spec. For example, if the `spec.database.prefix` is "prefix", the database names will be "prefix-core".
 
 >NOTES: You need to make sure the related databases have been created before configuring them to the deploying Harbor cluster.
 

@@ -1,77 +1,15 @@
 package v1alpha3_test
 
 import (
-	goharborv1 "github.com/plotly/harbor-operator/apis/goharbor.io/v1alpha3"
-	harbormetav1 "github.com/plotly/harbor-operator/apis/meta/v1alpha1"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	goharborv1 "github.com/plotly/harbor-operator/apis/goharbor.io/v1alpha3"
+	harbormetav1 "github.com/plotly/harbor-operator/apis/meta/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 )
 
 var _ = Describe("HarborTypes", func() {
 	Describe("HarborSpec", func() {
-		DescribeTable("ValidateNotary",
-			func(spec *goharborv1.HarborSpec, wantErr bool) {
-				err := spec.ValidateNotary()
-				if wantErr {
-					Ω(err).ShouldNot(BeNil())
-				} else {
-					Ω(err).Should(BeNil())
-				}
-			},
-			Entry("Notary is nil", &goharborv1.HarborSpec{}, false),
-			Entry("Expose notary is nil", &goharborv1.HarborSpec{
-				HarborComponentsSpec: goharborv1.HarborComponentsSpec{
-					Notary: &goharborv1.NotaryComponentSpec{},
-				},
-				Expose: goharborv1.HarborExposeSpec{},
-			}, true),
-			Entry("Expose notary ingress is nil", &goharborv1.HarborSpec{
-				HarborComponentsSpec: goharborv1.HarborComponentsSpec{
-					Notary: &goharborv1.NotaryComponentSpec{},
-				},
-				Expose: goharborv1.HarborExposeSpec{
-					Notary: &goharborv1.HarborExposeComponentSpec{},
-				},
-			}, true),
-			Entry("Expose notary ingress tls is nil", &goharborv1.HarborSpec{
-				HarborComponentsSpec: goharborv1.HarborComponentsSpec{
-					Notary: &goharborv1.NotaryComponentSpec{},
-				},
-				Expose: goharborv1.HarborExposeSpec{
-					Notary: &goharborv1.HarborExposeComponentSpec{
-						Ingress: &goharborv1.HarborExposeIngressSpec{Host: "notary.harbor.domain"},
-					},
-				},
-			}, true),
-			Entry("Expose notary ingress tls certificateRef is empty", &goharborv1.HarborSpec{
-				HarborComponentsSpec: goharborv1.HarborComponentsSpec{
-					Notary: &goharborv1.NotaryComponentSpec{},
-				},
-				Expose: goharborv1.HarborExposeSpec{
-					Notary: &goharborv1.HarborExposeComponentSpec{
-						Ingress: &goharborv1.HarborExposeIngressSpec{Host: "notary.harbor.domain"},
-						TLS: &harbormetav1.ComponentsTLSSpec{
-							CertificateRef: "",
-						},
-					},
-				},
-			}, true),
-			Entry("Valid", &goharborv1.HarborSpec{
-				HarborComponentsSpec: goharborv1.HarborComponentsSpec{
-					Notary: &goharborv1.NotaryComponentSpec{},
-				},
-				Expose: goharborv1.HarborExposeSpec{
-					Notary: &goharborv1.HarborExposeComponentSpec{
-						Ingress: &goharborv1.HarborExposeIngressSpec{Host: "notary.harbor.domain"},
-						TLS: &harbormetav1.ComponentsTLSSpec{
-							CertificateRef: "cert",
-						},
-					},
-				},
-			}, false),
-		)
-
 		DescribeTable("ValidateRegistryController",
 			func(spec *goharborv1.HarborSpec, wantErr bool) {
 				err := spec.ValidateRegistryController()

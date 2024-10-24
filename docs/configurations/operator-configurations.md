@@ -23,12 +23,6 @@ There are some settings for you to configure your Harbor operator deployment.
 - For installing by `kustomize` build, change file `config/config/*-ctrl.yaml`
 - For installing by `helm` chart, change `values.yaml` or change configure map in `charts/harbor-operator/templates/configmap.yaml`
 
-### chartmuseum-ctrl.yaml
-
-| key            | description           |
-|----------------|-----------------------|
-| max-reconcile | max parallel reconciliation. |
-
 ### core-ctrl.yaml
 
 | key            | description           |
@@ -60,18 +54,6 @@ There are some settings for you to configure your Harbor operator deployment.
 | max-reconcile | max parallel reconciliation. |
 
 ### jobservice-ctrl.yaml
-
-| key            | description           |
-|----------------|-----------------------|
-| max-reconcile | max parallel reconciliation. |
-
-### notaryserver-ctrl.yaml
-
-| key            | description           |
-|----------------|-----------------------|
-| max-reconcile | max parallel reconciliation. |
-
-### notarysigner-ctrl.yaml
 
 | key            | description           |
 |----------------|-----------------------|

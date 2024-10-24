@@ -20,10 +20,7 @@ const (
 	PortalComponent                              // portal
 	RegistryComponent                            // registry
 	RegistryControllerComponent                  // registryctl
-	ChartMuseumComponent                         // chartmuseum
 	ExporterComponent                            // exporter
-	NotaryServerComponent                        // notaryserver
-	NotarySignerComponent                        // notarysigner
 	TrivyComponent                               // trivy
 
 	componentCount

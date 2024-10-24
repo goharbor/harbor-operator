@@ -43,7 +43,6 @@ spec:
   secretName: sample-public-certificate
   dnsNames:
     - core.harbor.domain
-    - notary.harbor.domain
   issuerRef:
     name: selfsigned-issuer
     kind: Issuer

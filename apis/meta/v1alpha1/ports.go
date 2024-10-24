@@ -6,11 +6,6 @@ const (
 )
 
 const (
-	ChartMuseumHTTPPortName  = "http"
-	ChartMuseumHTTPSPortName = "https"
-)
-
-const (
 	CoreHTTPPortName    = "http"
 	CoreHTTPSPortName   = "https"
 	CoreMetricsPortName = "metrics"
@@ -34,14 +29,6 @@ const (
 const (
 	RegistryAPIPortName     = "api"
 	RegistryMetricsPortName = "metrics"
-)
-
-const (
-	NotaryServerAPIPortName = "api"
-)
-
-const (
-	NotarySignerAPIPortName = "api"
 )
 
 const (

@@ -1,7 +1,6 @@
 # the following config is for teaching kustomize how to do kustomization for new CRDs.
 configurations:
 - certificate.yaml
-- chartmuseum.yaml
 - core.yaml
 - harbor.yaml
 - harborcluster.yaml

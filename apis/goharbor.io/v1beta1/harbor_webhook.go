@@ -13,6 +13,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
 // log is for logging in this package.
@@ -29,32 +30,32 @@ func (h *Harbor) SetupWebhookWithManager(_ context.Context, mgr ctrl.Manager) er
 var _ webhook.Validator = &Harbor{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type.
-func (h *Harbor) ValidateCreate() error {
+func (h *Harbor) ValidateCreate() (admission.Warnings, error) {
 	harborlog.Info("validate create", "name", h.Name)
 
 	return h.Validate(nil)
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type.
-func (h *Harbor) ValidateUpdate(old runtime.Object) error {
+func (h *Harbor) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
 	harborlog.Info("validate update", "name", h.Name)
 
 	obj, ok := old.(*Harbor)
 	if !ok {
-		return errors.Errorf("failed type assertion on kind: %s", old.GetObjectKind().GroupVersionKind().String())
+		return nil, errors.Errorf("failed type assertion on kind: %s", old.GetObjectKind().GroupVersionKind().String())
 	}
 
 	return h.Validate(obj)
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type.
-func (h *Harbor) ValidateDelete() error {
+func (h *Harbor) ValidateDelete() (admission.Warnings, error) {
 	harborlog.Info("validate delete", "name", h.Name)
 
-	return nil
+	return nil, nil
 }
 
-func (h *Harbor) Validate(old *Harbor) error {
+func (h *Harbor) Validate(old *Harbor) (admission.Warnings, error) {
 	var allErrs field.ErrorList
 
 	if err := h.Spec.Network.Validate(nil); err != nil {
@@ -83,10 +84,6 @@ func (h *Harbor) Validate(old *Harbor) error {
 		allErrs = append(allErrs, required(field.NewPath("spec").Child("redis")))
 	}
 
-	if err := h.Spec.ValidateNotary(); err != nil {
-		allErrs = append(allErrs, err)
-	}
-
 	if err := h.Spec.ValidateRegistryController(); err != nil {
 		allErrs = append(allErrs, err)
 	}
@@ -102,8 +99,8 @@ func (h *Harbor) Validate(old *Harbor) error {
 	}
 
 	if len(allErrs) == 0 {
-		return nil
+		return nil, nil
 	}
 
-	return apierrors.NewInvalid(schema.GroupKind{Group: GroupVersion.Group, Kind: "Harbor"}, h.Name, allErrs)
+	return nil, apierrors.NewInvalid(schema.GroupKind{Group: GroupVersion.Group, Kind: "Harbor"}, h.Name, allErrs)
 }

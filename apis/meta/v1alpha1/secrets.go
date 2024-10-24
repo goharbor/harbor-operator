@@ -60,15 +60,6 @@ const (
 )
 
 const (
-	// SecretTypeNotarySignerAliases contains aliases for encryption keys.
-	// Only "default" key is required.
-	// Keys must match [a-zA-Z]([a-zA-Z0-9_]*[a-zA-Z0-9])?
-	// Passwords may be any string.
-	//
-	// Required field:
-	// - Secret.Data["default"] - The default password.
-	SecretTypeNotarySignerAliases corev1.SecretType = "goharbor.io/notary-signer-aliases"
-
 	// SharedSecretKey is the default password to use.
 	DefaultAliasSecretKey = "default"
 )

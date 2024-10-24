@@ -10,6 +10,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
 // log is for logging in this package.
@@ -26,27 +27,27 @@ func (r *Registry) SetupWebhookWithManager(_ context.Context, mgr ctrl.Manager) 
 var _ webhook.Validator = &Registry{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type.
-func (r *Registry) ValidateCreate() error {
+func (r *Registry) ValidateCreate() (admission.Warnings, error) {
 	registrylog.Info("validate create", "name", r.Name)
 
 	return r.Validate()
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type.
-func (r *Registry) ValidateUpdate(old runtime.Object) error {
+func (r *Registry) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
 	registrylog.Info("validate update", "name", r.Name)
 
 	return r.Validate()
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type.
-func (r *Registry) ValidateDelete() error {
+func (r *Registry) ValidateDelete() (admission.Warnings, error) {
 	registrylog.Info("validate delete", "name", r.Name)
 
-	return nil
+	return nil, nil
 }
 
-func (r *Registry) Validate() error {
+func (r *Registry) Validate() (admission.Warnings, error) {
 	var allErrs field.ErrorList
 
 	err := r.Spec.Storage.Driver.Validate()
@@ -55,8 +56,8 @@ func (r *Registry) Validate() error {
 	}
 
 	if len(allErrs) == 0 {
-		return nil
+		return nil, nil
 	}
 
-	return apierrors.NewInvalid(schema.GroupKind{Group: GroupVersion.Group, Kind: "Registry"}, r.Name, allErrs)
+	return nil, apierrors.NewInvalid(schema.GroupKind{Group: GroupVersion.Group, Kind: "Registry"}, r.Name, allErrs)
 }

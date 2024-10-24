@@ -6,13 +6,13 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/pkg/errors"
 	goharborv1 "github.com/plotly/harbor-operator/apis/goharbor.io/v1beta1"
 	harbormetav1 "github.com/plotly/harbor-operator/apis/meta/v1alpha1"
 	"github.com/plotly/harbor-operator/pkg/cluster/controllers/common"
 	miniov2 "github.com/plotly/harbor-operator/pkg/cluster/controllers/storage/minio/apis/minio.min.io/v2"
 	"github.com/plotly/harbor-operator/pkg/cluster/lcm"
 	"github.com/plotly/harbor-operator/pkg/resources/checksum"
-	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	k8serror "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -280,7 +280,7 @@ func (m *MinIOController) getVolumeClaimTemplate(harborcluster *goharborv1.Harbo
 		Spec: corev1.PersistentVolumeClaimSpec{
 			StorageClassName: &defaultStorageClass,
 			AccessModes:      []corev1.PersistentVolumeAccessMode{corev1.ReadWriteOnce},
-			Resources: corev1.ResourceRequirements{
+			Resources: corev1.VolumeResourceRequirements{
 				Requests: map[corev1.ResourceName]resource.Quantity{
 					corev1.ResourceStorage: resource.MustParse("10Gi"),
 				},
