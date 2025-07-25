@@ -134,7 +134,7 @@ Special thanks to the [contributors](./MAINTAINERS) who did significant contribu
 ## Community
 
 * **Slack:** channel `#harbor-operator-dev` at [CNCF Workspace](https://slack.cncf.io)
-* **Mail group:** send mail to Harbor dev mail group: harbor-dev@lists.cncf.io
+* **Mail group:** send mail to Harbor dev mail group: <harbor-dev@lists.cncf.io>
 * **Twitter:** [@project_harbor](https://twitter.com/project_harbor)
 * **Community meeting:** attend [bi-weekly community meeting](https://github.com/goharbor/community/blob/master/MEETING_SCHEDULE.md) for Q&A
 
@@ -163,3 +163,5 @@ OVHcloud uses the operator at scale to operate part of its private registry serv
 ## License
 
 See [LICENSE](https://github.com/goharbor/harbor-operator/blob/master/LICENSE) for licensing details.
+
+## TBD
