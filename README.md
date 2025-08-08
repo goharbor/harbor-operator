@@ -1,3 +1,14 @@
+# Due to low activity in maintanance this sub-project we are archiving it
+# Archived
+# If you need support or want to support the project please join community meetings
+# or chat with @OrlinVasilev to support you in this!
+
+---
+
+
+
+
+
 # Harbor Operator
 
 [![CI Pipeline](https://github.com/goharbor/harbor-operator/actions/workflows/tests.yml/badge.svg)](https://github.com/goharbor/harbor-operator/actions/workflows/tests.yml)
